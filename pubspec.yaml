@@ -13,6 +13,9 @@ environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"
 
 dependencies:
+  url_launcher: ^5.0.1
+  date_format: ^1.0.6
+  flutter_html_textview: "^0.2.6"
   flutter:
     sdk: flutter
 

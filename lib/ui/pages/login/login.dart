@@ -4,6 +4,8 @@ import '../contact_support/contact_support.dart';
 import '../privacy_notice/privacy_notice.dart';
 import '../terms_and_conditions/terms_and_conditions.dart';
 import '../sign_up/sign_up.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:date_format/date_format.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -105,8 +107,16 @@ class LoginPageState extends State<LoginPage> {
     return Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new SignUpPage()));
   }
 
-  goToContactSupport () {
-    return Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new ContactSupportPage()));
+  goToContactSupport () async {
+    String now = formatDate(new DateTime.now(), [dd, '/', mm, '/', yyyy]);
+    String linebreak = '%0D%0A';
+    String url = 'mailto:<support@neurogine.com>?subject=Request for Contact Support '+ now + ' &body=Name: '+linebreak+linebreak+'Email: '+linebreak+linebreak+'Enquiry Details:';
+    if (await canLaunch(url)) {
+    await launch(url);
+    } else {
+    throw 'Could not launch $url';
+    }
+//    return Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new ContactSupportPage()));
   }
 
   goToTermsAndConditions() {
