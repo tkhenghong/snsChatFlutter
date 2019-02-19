@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:snschat_flutter/general/functions/validations.dart';
 
 class PinEntryTextField extends StatefulWidget {
@@ -62,6 +63,9 @@ class PinEntryTextFieldState extends State<PinEntryTextField> {
       width: widget.fieldWidth,
       margin: EdgeInsets.only(right: 10.0),
       child: TextField(
+        inputFormatters: [
+          new BlacklistingTextInputFormatter(new RegExp('[\\.|\\,]')),
+        ],
         key: Key(i.toString()),
         controller: _textControllers[i],
         keyboardType: TextInputType.number,

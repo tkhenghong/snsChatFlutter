@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -55,6 +56,9 @@ class SignUpPageState extends State<SignUpPage> {
                     child: new Column(
                       children: [
                         new TextField(
+                          inputFormatters: [
+                            new BlacklistingTextInputFormatter(new RegExp('[\\.|\\,]')),
+                          ],
                           maxLength: 15,
                           decoration:
                               new InputDecoration(hintText: "Mobile Number"),
@@ -66,14 +70,14 @@ class SignUpPageState extends State<SignUpPage> {
                               FocusScope.of(context).requestFocus(nodeTwo),
                         ),
                         new TextField(
-                          textCapitalization: TextCapitalization.sentences,
+                          textCapitalization: TextCapitalization.words,
                           maxLength: 100,
                           decoration: new InputDecoration(hintText: "Name"),
                           autofocus: true,
                           textAlign: TextAlign.center,
                           keyboardType: TextInputType.text,
                           focusNode: nodeTwo,
-                          textInputAction: TextInputAction.go,
+                          textInputAction: TextInputAction.done,
                         ),
                       ],
                     ),

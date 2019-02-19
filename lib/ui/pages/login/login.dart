@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number.dart';
 import '../contact_support/contact_support.dart';
 import '../privacy_notice/privacy_notice.dart';
@@ -34,6 +35,9 @@ class LoginPageState extends State<LoginPage> {
             new Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32.0),
               child: new TextField(
+                inputFormatters: [
+                  new BlacklistingTextInputFormatter(new RegExp('[\\.|\\,]')),
+                ],
                 maxLength: 15,
                 decoration: new InputDecoration(
                     hintText: "Mobile Number"),
