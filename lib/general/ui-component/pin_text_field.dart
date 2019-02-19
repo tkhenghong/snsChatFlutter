@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:snschat_flutter/general/functions/validations.dart';
 
 class PinEntryTextField extends StatefulWidget {
   int fields;
@@ -81,14 +82,6 @@ class PinEntryTextFieldState extends State<PinEntryTextField> {
           _pin[i] = str;
           if (!isEmpty(str)) {
             FocusScope.of(context).requestFocus(_focusNodes[i + 1]);
-//            if (i + 1 == widget.fields) {
-//              FocusScope.of(context).requestFocus(_focusNodes[i + 1]);
-//            } else {
-//              clearTextFields();
-//              FocusScope.of(context).requestFocus(new FocusNode());
-//              //FocusScope.of(context).requestFocus(_focusNodes[0]);
-//              // widget.onSubmit(_pin.join());
-//            }
           } else {
             clearTextFields();
             FocusScope.of(context).requestFocus(_focusNodes[0]);;
@@ -123,7 +116,4 @@ class PinEntryTextFieldState extends State<PinEntryTextField> {
   }
 }
 
-isEmpty(Object obj) {
-  bool empty = obj.toString() == "" || obj == null;
-  return empty;
-}
+
