@@ -42,7 +42,7 @@ class LoginPageState extends State<LoginPage> {
               ),
             ),
             new RaisedButton(
-              onPressed: () => print("You have pressed this button."),
+              onPressed: () => goToVerifyPhoneNumber(),
               textColor: Colors.white,
               color: Colors.blue,
               animationDuration: Duration(milliseconds: 500),
@@ -103,8 +103,12 @@ class LoginPageState extends State<LoginPage> {
     );
   }
 
+  goToVerifyPhoneNumber () {
+    Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new PrivacyNoticePage()));
+  }
+
   goToSignUp () {
-    return Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new SignUpPage()));
+    Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new SignUpPage()));
   }
 
   goToContactSupport () async {
