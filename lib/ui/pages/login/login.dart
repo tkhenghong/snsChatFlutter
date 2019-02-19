@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number.dart';
 import '../contact_support/contact_support.dart';
 import '../privacy_notice/privacy_notice.dart';
 import '../terms_and_conditions/terms_and_conditions.dart';
@@ -18,7 +19,7 @@ class LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return new GestureDetector(
-      onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
+      onTap: () => FocusScope.of(context).requestFocus(new FocusNode()), //Focuses on nothing, means disable focus and hide keyboard
       child: new Material(
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -104,7 +105,7 @@ class LoginPageState extends State<LoginPage> {
   }
 
   goToVerifyPhoneNumber () {
-    Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new PrivacyNoticePage()));
+    Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new VerifyPhoneNumberPage()));
   }
 
   goToSignUp () {
