@@ -66,6 +66,7 @@ class SignUpPageState extends State<SignUpPage> {
                               FocusScope.of(context).requestFocus(nodeTwo),
                         ),
                         new TextField(
+                          textCapitalization: TextCapitalization.sentences,
                           maxLength: 100,
                           decoration: new InputDecoration(hintText: "Name"),
                           autofocus: true,
