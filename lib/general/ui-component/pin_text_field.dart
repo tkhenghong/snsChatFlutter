@@ -4,7 +4,7 @@ import 'package:snschat_flutter/general/functions/validations.dart';
 
 class PinEntryTextField extends StatefulWidget {
   int fields;
-  var onSubmit;
+  Function onSubmit;
   double fieldWidth;
   double fontSize;
   bool isTextObscure;
@@ -53,11 +53,13 @@ class PinEntryTextFieldState extends State<PinEntryTextField> {
     _focusNodes[i] = FocusNode();
     _textControllers[i] = TextEditingController();
 
-    _focusNodes[i].addListener(() {
-      if (_focusNodes[i].hasFocus) {
-        _textControllers[i].clear();
-      }
-    });
+
+    // Will clear when you select any pin number text field
+//    _focusNodes[i].addListener(() {
+//      if (_focusNodes[i].hasFocus) {
+//        _textControllers[i].clear();
+//      }
+//    });
 
     return Container(
       width: widget.fieldWidth,
@@ -83,20 +85,42 @@ class PinEntryTextFieldState extends State<PinEntryTextField> {
                 ? OutlineInputBorder(borderSide: BorderSide(width: 2.0))
                 : null),
         onChanged: (String str) {
+          print('str: ' + str);
           _pin[i] = str;
-          if (!isEmpty(str)) {
+          if (!isObjectEmpty(str)) {
+            print('if (!isObjectEmpty(str))');
             FocusScope.of(context).requestFocus(_focusNodes[i + 1]);
+//            print('widget.fields: ' + widget.fields.toString());
+            print('isListFilled() == true: '+ (isListFilled() == true).toString());
+          if(isListFilled() == true){
+            print('isListFilled() == true');
+            widget.onSubmit(_pin.join());
+          }
           } else {
             clearTextFields();
             FocusScope.of(context).requestFocus(_focusNodes[0]);;
           }
         },
         onSubmitted: (String str) {
-          clearTextFields();
+//          clearTextFields();
           widget.onSubmit(_pin.join());
         },
       ),
     );
+  }
+
+  bool isListFilled() {
+    print('Entered isListFilled()');
+
+    for(int i = 0; i < _pin.length; i++) {
+      print('_pin[i]: ' + _pin[i]);
+      if(_pin[i].isEmpty){
+        print('if(_pin[i].isEmpty)');
+        return false;
+      }
+    }
+    print('Leaving isListFilled()');
+    return true;
   }
 
   Widget generateTextFields(BuildContext context) {

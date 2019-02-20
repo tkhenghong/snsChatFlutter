@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/general/ui-component/pin_text_field.dart';
+import 'package:snschat_flutter/ui/pages/chat_group_list/chat_group_list.dart';
 
 class VerifyPhoneNumberPage extends StatefulWidget {
   @override
@@ -27,15 +29,15 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
               text: new TextSpan(
                   style: new TextStyle(inherit: true, color: Colors.black),
                   children: <TextSpan>[
-                new TextSpan(text: 'We have sent and SMS with a code to '),
-                new TextSpan(
-                    text: phoneNo.toString(),
-                    style: new TextStyle(
-                        inherit: true, fontWeight: FontWeight.bold)),
+                    new TextSpan(text: 'We have sent and SMS with a code to '),
+                    new TextSpan(
+                        text: phoneNo.toString(),
+                        style: new TextStyle(
+                            inherit: true, fontWeight: FontWeight.bold)),
 //                new TextSpan(text: 'Can\'t send an SMS with your code because you\'ve tried to register '),
 //                new TextSpan(text: phoneNo.toString(), style: new TextStyle(inherit: true, fontWeight: FontWeight.bold)),
 //                new TextSpan(text: ' recently. Request a call or wait before requesting an SMS. '),
-              ])),
+                  ])),
           new FlatButton(
               onPressed: () {},
               child: new Text(
@@ -48,7 +50,13 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
               new PinEntryTextField(
                   fields: 4,
                   onSubmit: (pin) {
+                    showLoading(context);
                     print('PIN number is: ' + pin);
+                    new Future.delayed(new Duration(seconds: 3), () { //Delay 3 seconds to simulate something loading
+                      print('Loaded 3 seconds.');
+                      Navigator.pop(context); //pop dialog
+                      this.goToChatGroupList();
+                    });
                   },
                   fieldWidth: 40.0,
                   fontSize: 20.0,
@@ -70,5 +78,10 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
         ],
       ),
     );
+  }
+
+  goToChatGroupList() {
+    Navigator.of(context).push(new MaterialPageRoute(
+        builder: (BuildContext context) => new ChatGroupListPage()));
   }
 }

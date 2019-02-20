@@ -1,4 +1,4 @@
-isEmpty(Object obj) {
+isObjectEmpty(Object obj) {
   bool empty = obj.toString() == "" || obj == null;
   return empty;
 }
