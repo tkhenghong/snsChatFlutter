@@ -37,6 +37,37 @@ flutter:
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
+
+#fonts:
+#- family: OpenSans
+#  fonts:
+#  - asset: fonts/OpenSans-Bold.ttf
+#    style: bold
+#  - asset: fonts/OpenSans-BoldItalic.ttf
+#    style: bolditalic
+#  - asset: fonts/OpenSans-ExtraBold.ttf
+#    style: extrabold
+#  - asset: fonts/OpenSans-ExtraBoldItalic.ttf
+#    style: extrabolditalic
+#  - asset: fonts/OpenSans-Italic.ttf
+#    style: italic
+#  - asset: fonts/OpenSans-Light.ttf
+#    style: light
+#  - asset: fonts/OpenSans-LightItalic.ttf
+#    style: lightitalic
+#  - asset: fonts/OpenSans-Regular.ttf
+#    style: regular
+#  - asset: fonts/OpenSans-SemiBold.ttf
+#    style: semibold
+#  - asset: fonts/OpenSans-SemiBoldItalic.ttf
+#    style: semibolditalic
+
+#- family: RobotoMono
+#  fonts:
+#  - asset: fonts/RobotoMono-Regular.ttf
+#  - asset: fonts/RobotoMono-Bold.ttf
+#    weight: 700
+
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
@@ -69,3 +100,5 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.io/custom-fonts/#from-packages
+assets:
+  - ui/icons/qr-icon.png

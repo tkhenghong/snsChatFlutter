@@ -15,7 +15,6 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
   @override
   Widget build(BuildContext context) {
     String phoneNo = "+6012 309 6127";
-    // TODO: implement build
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('Verify ' + phoneNo),
@@ -52,7 +51,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
                   onSubmit: (pin) {
                     showLoading(context);
                     print('PIN number is: ' + pin);
-                    new Future.delayed(new Duration(seconds: 3), () { //Delay 3 seconds to simulate something loading
+                    new Future.delayed(new Duration(seconds: 1), () { //Delay 1 second to simulate something loading
                       print('Loaded 3 seconds.');
                       Navigator.pop(context); //pop dialog
                       this.goToChatGroupList();
@@ -81,7 +80,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
   }
 
   goToChatGroupList() {
-    Navigator.of(context).push(new MaterialPageRoute(
-        builder: (BuildContext context) => new ChatGroupListPage()));
+    //Remove all pages and make chat_group_list_page be the only page
+    Navigator.of(context).pushNamedAndRemoveUntil("tabs_page", (Route<dynamic> route) => false);
   }
 }

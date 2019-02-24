@@ -109,11 +109,11 @@ class LoginPageState extends State<LoginPage> {
   }
 
   goToVerifyPhoneNumber () {
-    Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new VerifyPhoneNumberPage()));
+    Navigator.of(context).pushNamed("verify_phone_number_page");
   }
 
   goToSignUp () {
-    Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new SignUpPage()));
+    Navigator.of(context).pushNamed("sign_up_page");
   }
 
   goToContactSupport () async {
@@ -125,15 +125,14 @@ class LoginPageState extends State<LoginPage> {
     } else {
     throw 'Could not launch $url';
     }
-//    return Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new ContactSupportPage()));
   }
 
   goToTermsAndConditions() {
-    Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new TermsAndConditionsPage()));
+    Navigator.of(context).pushNamed("terms_and_conditions_page");
   }
 
   goToPrivacyNotice() {
-    Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new PrivacyNoticePage()));
+    Navigator.of(context).pushNamed("privacy_notice_page");
   }
 }
 
