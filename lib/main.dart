@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:snschat_flutter/ui/pages/chat_group_list/chat_group_list.dart';
 import 'package:snschat_flutter/ui/pages/login/login.dart';
+import 'package:snschat_flutter/ui/pages/myself/myself_page.dart';
 import 'package:snschat_flutter/ui/pages/privacy_notice/privacy_notice.dart';
 import 'package:snschat_flutter/ui/pages/scan_qr_code/scan_qr_code_page.dart';
 import 'package:snschat_flutter/ui/pages/settings/settings.dart';
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-//      title: 'SNS众聊',
+      title: 'FLutter Chat Test App',
       theme: ThemeData(
         fontFamily: 'OpenSans',
         brightness: Brightness.light,
@@ -32,7 +33,8 @@ class MyApp extends StatelessWidget {
         "tabs_page": (_) => TabsPage(),
         "chat_group_list_page": (_) => new ChatGroupListPage(),
         "scan_qr_code_page": (_) => new ScanQrCodePage(),
-        "settings_page": (_) => new SettingsPage()
+        "settings_page": (_) => new SettingsPage(),
+        "myself_page": (_) => new MyselfPage(),
       },
     );
   }

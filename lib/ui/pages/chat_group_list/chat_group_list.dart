@@ -25,11 +25,12 @@ class GroupChatListTile extends ListTile {
   // UI Layout for the list's element
   GroupChatListTile(Contact contact)
       : super(
-    title: Text(contact.name),
-    subtitle: Text(contact.email),
-    leading: CircleAvatar(child: Text(contact.name[0])),
-    onTap: () {print("List element clicked!");}
-  );
+            title: Text(contact.name),
+            subtitle: Text(contact.email),
+            leading: CircleAvatar(child: Text(contact.name[0])),
+            onTap: () {
+              print("List element clicked!");
+            });
 }
 
 class ChatGroupListPage extends StatefulWidget implements HasLayoutGroup {
@@ -45,14 +46,10 @@ class ChatGroupListPage extends StatefulWidget implements HasLayoutGroup {
 }
 
 class ChatGroupListState extends State<ChatGroupListPage> {
-
-  // buildChatListElementUILayout()
   @override
   Widget build(BuildContext context) {
     return new Material(
-      color: Colors.white,
-      child: buildChatListElementUILayout()
-    );
+        color: Colors.white, child: buildChatListElementUILayout());
   }
 
   Widget buildChatListElementUILayout() {

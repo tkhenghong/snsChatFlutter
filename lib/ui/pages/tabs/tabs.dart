@@ -5,7 +5,6 @@ import 'package:snschat_flutter/ui/pages/scan_qr_code/scan_qr_code_page.dart';
 import 'package:snschat_flutter/ui/pages/settings/settings.dart';
 
 class TabsPage extends StatefulWidget {
-
   @override
   State<StatefulWidget> createState() {
     return new TabsPageState();
@@ -46,16 +45,34 @@ class TabsPageState extends State<TabsPage> {
             },
             items: [
               new BottomNavigationBarItem(
-                icon: new Icon(Icons.chat, color: Colors.black,),
-                title: new Text("Chats", style: new TextStyle(color: Colors.black),),
+                icon: new Icon(
+                  Icons.chat,
+                  color: Colors.black,
+                ),
+                title: new Text(
+                  "Chats",
+                  style: new TextStyle(color: Colors.black),
+                ),
               ),
               new BottomNavigationBarItem(
-                icon: new Icon(Icons.code, color: Colors.black,),
-                title: new Text("Scan QR Code", style: new TextStyle(color: Colors.black),),
+                icon: new Icon(
+                  Icons.code,
+                  color: Colors.black,
+                ),
+                title: new Text(
+                  "Scan QR Code",
+                  style: new TextStyle(color: Colors.black),
+                ),
               ),
               new BottomNavigationBarItem(
-                icon: new Icon(Icons.person, color: Colors.black,),
-                title: new Text("Settings", style: new TextStyle(color: Colors.black),),
+                icon: new Icon(
+                  Icons.person,
+                  color: Colors.black,
+                ),
+                title: new Text(
+                  "Settings",
+                  style: new TextStyle(color: Colors.black),
+                ),
               ),
             ],
           )),
@@ -63,15 +80,15 @@ class TabsPageState extends State<TabsPage> {
   }
 
   Widget buildPageView(int pageNumber) {
-    switch(pageNumber) {
+    switch (pageNumber) {
       case 0:
-        return PageView(children: <Widget>[new ChatGroupListPage()]);
+        return new PageView(children: <Widget>[new ChatGroupListPage()]);
         break;
       case 1:
-        return PageView(children: <Widget>[new ScanQrCodePage()]);
+        return new PageView(children: <Widget>[new ScanQrCodePage()]);
         break;
       case 2:
-        return PageView(children: <Widget>[new MyselfPage()]);
+        return new PageView(children: <Widget>[new MyselfPage()]);
         break;
       default:
         print("No such page.");
