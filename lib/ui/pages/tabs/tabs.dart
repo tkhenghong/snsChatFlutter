@@ -13,7 +13,8 @@ class TabsPage extends StatefulWidget {
 
 class TabsPageState extends State<TabsPage> {
   int _bottomNavBarIndex = 0;
-  String tabTitle = "Chats"; // Have to put default tab name or compiler will say null error
+  String tabTitle =
+      "Chats"; // Have to put default tab name or compiler will say null error
   @override
   Widget build(BuildContext context) {
     return new Material(

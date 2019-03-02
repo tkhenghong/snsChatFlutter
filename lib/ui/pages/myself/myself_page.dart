@@ -34,6 +34,7 @@ class MyselfPageState extends State<MyselfPage> {
     PageListItem(
         title: new Text("Logout"),
         leading: new Icon(Icons.exit_to_app),
-        onTap: (context) => Navigator.pushReplacementNamed(context, "login_page")),
+        onTap: (context) =>
+            Navigator.pushReplacementNamed(context, "login_page")),
   ];
 }

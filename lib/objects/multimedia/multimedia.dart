@@ -1,4 +1,5 @@
-class Multimedia { // Image, Video, Gifs, Sticker, Recording, links
+class Multimedia {
+  // Image, Video, Gifs, Sticker, Recording, links
   String localUrl;
   String remoteUrl;
   String thumbnail;
