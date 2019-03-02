@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/general/ui-component/pin_text_field.dart';
-import 'package:snschat_flutter/ui/pages/chat_group_list/chat_group_list.dart';
+import 'package:snschat_flutter/ui/pages/chat_group_list/chat_group_list_page.dart';
 
 class VerifyPhoneNumberPage extends StatefulWidget {
   @override

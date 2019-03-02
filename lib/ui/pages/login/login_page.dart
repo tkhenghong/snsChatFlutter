@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number.dart';
-import '../contact_support/contact_support.dart';
-import '../privacy_notice/privacy_notice.dart';
-import '../terms_and_conditions/terms_and_conditions.dart';
-import '../sign_up/sign_up.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:date_format/date_format.dart';
 

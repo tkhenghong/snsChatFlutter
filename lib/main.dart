@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:snschat_flutter/ui/chat_room/chat_room_page.dart';
-import 'package:snschat_flutter/ui/pages/chat_group_list/chat_group_list.dart';
-import 'package:snschat_flutter/ui/pages/login/login.dart';
+import 'package:snschat_flutter/ui/pages/chat_group_list/chat_group_list_page.dart';
+import 'package:snschat_flutter/ui/pages/chat_room/chat_room_page.dart';
+import 'package:snschat_flutter/ui/pages/login/login_page.dart';
 import 'package:snschat_flutter/ui/pages/myself/myself_page.dart';
-import 'package:snschat_flutter/ui/pages/privacy_notice/privacy_notice.dart';
+import 'package:snschat_flutter/ui/pages/privacy_notice/privacy_notice_page.dart';
 import 'package:snschat_flutter/ui/pages/scan_qr_code/scan_qr_code_page.dart';
-import 'package:snschat_flutter/ui/pages/settings/settings.dart';
-import 'package:snschat_flutter/ui/pages/sign_up/sign_up.dart';
-import 'package:snschat_flutter/ui/pages/tabs/tabs.dart';
-import 'package:snschat_flutter/ui/pages/terms_and_conditions/terms_and_conditions.dart';
-import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number.dart';
+import 'package:snschat_flutter/ui/pages/settings/settings_page.dart';
+import 'package:snschat_flutter/ui/pages/sign_up/sign_up_page.dart';
+import 'package:snschat_flutter/ui/pages/tabs/tabs_page.dart';
+import 'package:snschat_flutter/ui/pages/terms_and_conditions/terms_and_conditions_page.dart';
+import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number_page.dart';
 
 void main() => runApp(MyApp());
 

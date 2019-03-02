@@ -4,7 +4,7 @@ class Contact {
   String id;
   String displayName;
   String realName;
-  String idName;
+  String userId;
   String mobileNo;
   String lastSeenDate;
   bool block;
@@ -14,7 +14,7 @@ class Contact {
       {this.id,
       this.displayName,
       this.realName,
-      this.idName,
+      this.userId,
       this.mobileNo,
       this.lastSeenDate,
       this.block,

@@ -18,7 +18,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     conversations.forEach((conversation) {
       listItems.add(mapConversationToPageListTile(conversation, context));
     });
-    print('chat_group_list.dart listItems.length: ' +
+    print('chat_group_list_page.dart listItems.length: ' +
         listItems.length.toString());
     return new PageListView(array: listItems, context: context);
   }
