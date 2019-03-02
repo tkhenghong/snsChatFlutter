@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 
 class PageListItem {
-  PageListItem({this.name, this.icon, this.onTap});
-
-  final String name;
-  final Icon icon;
+  final Widget title;
+  final Widget subtitle;
+  final Widget leading;
+  final Widget trailing;
   final Function onTap;
+
+  PageListItem({this.title, this.leading, this.trailing, this.subtitle, this.onTap});
 }
 
 class PageListTile extends ListTile {
   PageListTile(PageListItem item, BuildContext context)
       : super(
-            title: new Text(item.name),
-            leading: item.icon,
+            title: item.title,
+            subtitle: item.subtitle,
+            leading: item.leading,
+            trailing: item.trailing,
             onTap: () {
               item.onTap(context);
             });

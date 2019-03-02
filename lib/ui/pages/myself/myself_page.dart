@@ -16,24 +16,24 @@ class MyselfPageState extends State<MyselfPage> {
 
   List<PageListItem> listItems = [
     PageListItem(
-        name: "Settings",
-        icon: Icon(Icons.settings),
+        title: new Text("Settings"),
+        leading: new Icon(Icons.settings),
         onTap: (context) => Navigator.pushNamed(context, "settings_page")),
     PageListItem(
-        name: "About",
-        icon: Icon(Icons.info),
+        title: new Text("About"),
+        leading: new Icon(Icons.info),
         onTap: (context) => Navigator.pushNamed(context, "settings_page")),
     PageListItem(
-        name: "Help",
-        icon: Icon(Icons.help),
+        title: new Text("Help"),
+        leading: new Icon(Icons.help),
         onTap: (context) => Navigator.pushNamed(context, "settings_page")),
     PageListItem(
-        name: "Feedback",
-        icon: Icon(Icons.feedback),
+        title: new Text("Feedback"),
+        leading: new Icon(Icons.feedback),
         onTap: (context) => Navigator.pushNamed(context, "settings_page")),
     PageListItem(
-        name: "Logout",
-        icon: Icon(Icons.exit_to_app),
-        onTap: (context) => Navigator.pushNamed(context, "settings_page")),
+        title: new Text("Logout"),
+        leading: new Icon(Icons.exit_to_app),
+        onTap: (context) => Navigator.pushReplacementNamed(context, "login_page")),
   ];
 }

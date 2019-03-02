@@ -15,7 +15,13 @@ environment:
 dependencies:
   url_launcher: ^5.0.1
   date_format: ^1.0.6
-  flutter_html_textview: "^0.2.6"
+  flutter_html_textview: ^0.2.6
+  path_provider: ^0.4.0
+  barcode_scan: ^0.0.8
+  qr_flutter: ^2.0.0+51
+  #  path_provider: ^0.4.0 # A Flutter plugin for finding commonly used locations on the filesystem. Supports iOS and Android.
+  #  barcode_scan: ^0.0.8 # A Flutter plugin for scanning 2D barcodes and QR codes as a wrapper using specific iOS mikebuss/MTBBarcodeScanner and Android dm77/barcodescanner library.
+  #  qr_flutter: ^1.1.6 # QR.Flutter is a QR code generation and rendering library for Flutter.
   flutter:
     sdk: flutter
 
@@ -38,35 +44,35 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
 
-#fonts:
-#- family: OpenSans
-#  fonts:
-#  - asset: fonts/OpenSans-Bold.ttf
-#    style: bold
-#  - asset: fonts/OpenSans-BoldItalic.ttf
-#    style: bolditalic
-#  - asset: fonts/OpenSans-ExtraBold.ttf
-#    style: extrabold
-#  - asset: fonts/OpenSans-ExtraBoldItalic.ttf
-#    style: extrabolditalic
-#  - asset: fonts/OpenSans-Italic.ttf
-#    style: italic
-#  - asset: fonts/OpenSans-Light.ttf
-#    style: light
-#  - asset: fonts/OpenSans-LightItalic.ttf
-#    style: lightitalic
-#  - asset: fonts/OpenSans-Regular.ttf
-#    style: regular
-#  - asset: fonts/OpenSans-SemiBold.ttf
-#    style: semibold
-#  - asset: fonts/OpenSans-SemiBoldItalic.ttf
-#    style: semibolditalic
+  #fonts:
+  #- family: OpenSans
+  #  fonts:
+  #  - asset: fonts/OpenSans-Bold.ttf
+  #    style: bold
+  #  - asset: fonts/OpenSans-BoldItalic.ttf
+  #    style: bolditalic
+  #  - asset: fonts/OpenSans-ExtraBold.ttf
+  #    style: extrabold
+  #  - asset: fonts/OpenSans-ExtraBoldItalic.ttf
+  #    style: extrabolditalic
+  #  - asset: fonts/OpenSans-Italic.ttf
+  #    style: italic
+  #  - asset: fonts/OpenSans-Light.ttf
+  #    style: light
+  #  - asset: fonts/OpenSans-LightItalic.ttf
+  #    style: lightitalic
+  #  - asset: fonts/OpenSans-Regular.ttf
+  #    style: regular
+  #  - asset: fonts/OpenSans-SemiBold.ttf
+  #    style: semibold
+  #  - asset: fonts/OpenSans-SemiBoldItalic.ttf
+  #    style: semibolditalic
 
-#- family: RobotoMono
-#  fonts:
-#  - asset: fonts/RobotoMono-Regular.ttf
-#  - asset: fonts/RobotoMono-Bold.ttf
-#    weight: 700
+  #- family: RobotoMono
+  #  fonts:
+  #  - asset: fonts/RobotoMono-Regular.ttf
+  #  - asset: fonts/RobotoMono-Bold.ttf
+  #    weight: 700
 
   uses-material-design: true
 
@@ -101,4 +107,4 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.io/custom-fonts/#from-packages
 assets:
-  - ui/icons/qr-icon.png
+- ui/icons/qr-icon.png

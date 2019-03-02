@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:snschat_flutter/ui/chat_room/chat_room_page.dart';
 import 'package:snschat_flutter/ui/pages/chat_group_list/chat_group_list.dart';
 import 'package:snschat_flutter/ui/pages/login/login.dart';
 import 'package:snschat_flutter/ui/pages/myself/myself_page.dart';
@@ -19,13 +20,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'FLutter Chat Test App',
       theme: ThemeData(
-        fontFamily: 'OpenSans',
+//        fontFamily: 'OpenSans',
         brightness: Brightness.light,
         primaryColor: const Color(0xff26a2d4),
         primarySwatch: Colors.blue,
       ),
       home: LoginPage(),
       routes: {
+        "login_page": (_) => new LoginPage(),
         "privacy_notice_page": (_) => new PrivacyNoticePage(),
         "sign_up_page": (_) => new SignUpPage(),
         "terms_and_conditions_page": (_) => TermsAndConditionsPage(),
@@ -35,6 +37,7 @@ class MyApp extends StatelessWidget {
         "scan_qr_code_page": (_) => new ScanQrCodePage(),
         "settings_page": (_) => new SettingsPage(),
         "myself_page": (_) => new MyselfPage(),
+        "chat_room_page": (_) => new ChatRoomPage(),
       },
     );
   }

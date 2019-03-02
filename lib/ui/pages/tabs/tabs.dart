@@ -13,7 +13,7 @@ class TabsPage extends StatefulWidget {
 
 class TabsPageState extends State<TabsPage> {
   int _bottomNavBarIndex = 0;
-
+  String tabTitle = "Chats"; // Have to put default tab name or compiler will say null error
   @override
   Widget build(BuildContext context) {
     return new Material(
@@ -24,7 +24,7 @@ class TabsPageState extends State<TabsPage> {
             titleSpacing: 0.0,
             elevation: 0,
             title: new Text(
-              'Chats',
+              tabTitle,
               textAlign: TextAlign.start,
               style: new TextStyle(
                   fontWeight: FontWeight.bold,
@@ -70,7 +70,7 @@ class TabsPageState extends State<TabsPage> {
                   color: Colors.black,
                 ),
                 title: new Text(
-                  "Settings",
+                  "Myself",
                   style: new TextStyle(color: Colors.black),
                 ),
               ),
@@ -82,12 +82,15 @@ class TabsPageState extends State<TabsPage> {
   Widget buildPageView(int pageNumber) {
     switch (pageNumber) {
       case 0:
+        tabTitle = "Chats";
         return new PageView(children: <Widget>[new ChatGroupListPage()]);
         break;
       case 1:
+        tabTitle = "Scan QR Code";
         return new PageView(children: <Widget>[new ScanQrCodePage()]);
         break;
       case 2:
+        tabTitle = "Myself";
         return new PageView(children: <Widget>[new MyselfPage()]);
         break;
       default:
