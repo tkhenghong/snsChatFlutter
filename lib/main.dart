@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
 //        fontFamily: 'OpenSans',
         brightness: Brightness.light,
-        primaryColor: const Color(0xff26a2d4),
+        primaryColor: const Color(0xff000000),
         primarySwatch: Colors.blue,
       ),
       home: LoginPage(),

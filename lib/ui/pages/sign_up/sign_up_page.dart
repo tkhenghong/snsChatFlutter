@@ -22,46 +22,46 @@ class SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Material(
-        child: new GestureDetector(
+    return Material(
+        child: GestureDetector(
             // call this method here to hide soft keyboard
             onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
-            child: new Scaffold(
-              appBar: new AppBar(
+            child: Scaffold(
+              appBar: AppBar(
                 backgroundColor: Colors.transparent,
                 iconTheme: IconThemeData(color: Colors.black),
                 elevation: 0, //Set Shadow
               ),
-              body: new Column(
+              body: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  new Text(
+                  Text(
                     "Sign Up",
                     style:
                         TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
-                  new Padding(
-                      padding: new EdgeInsets.symmetric(vertical: 10.00)),
-                  new Text(
+                  Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
+                  Text(
                     "Enter your mobile number and name: ",
                     style: TextStyle(
                         fontSize: 15.0, fontWeight: FontWeight.normal),
                     textAlign: TextAlign.center,
                   ),
-                  new Padding(
-                      padding: new EdgeInsets.symmetric(vertical: 10.00)),
-                  new Padding(
+                  Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
+                  Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                    child: new Column(
+                    child: Column(
                       children: [
-                        new TextField(
+                        TextField(
+                          cursorColor: Colors.black,
+                          style: TextStyle(color: Colors.black),
                           inputFormatters: [
-                            new BlacklistingTextInputFormatter(new RegExp('[\\.|\\,]')),
+                            BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
                           ],
                           maxLength: 15,
                           decoration:
-                              new InputDecoration(hintText: "Mobile Number"),
+                              InputDecoration(hintText: "Mobile Number"),
                           autofocus: true,
                           textAlign: TextAlign.center,
                           keyboardType: TextInputType.number,
@@ -69,10 +69,12 @@ class SignUpPageState extends State<SignUpPage> {
                           onSubmitted: (value) =>
                               FocusScope.of(context).requestFocus(nodeTwo),
                         ),
-                        new TextField(
+                        TextField(
+                          cursorColor: Colors.black,
+                          style: TextStyle(color: Colors.black),
                           textCapitalization: TextCapitalization.words,
                           maxLength: 100,
-                          decoration: new InputDecoration(hintText: "Name"),
+                          decoration: InputDecoration(hintText: "Name"),
                           autofocus: true,
                           textAlign: TextAlign.center,
                           keyboardType: TextInputType.text,
@@ -82,19 +84,21 @@ class SignUpPageState extends State<SignUpPage> {
                       ],
                     ),
                   ),
-                  new RaisedButton(
+                  RaisedButton(
                     onPressed: () => print("You have pressed this button."),
                     textColor: Colors.white,
-                    color: Colors.blue,
+                    color: Colors.black,
+                    highlightColor: Colors.black54,
+                    splashColor: Colors.grey,
                     animationDuration: Duration(milliseconds: 500),
                     padding: EdgeInsets.only(
                         left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
                     shape: RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.blue, width: 1.0),
+//                        side: BorderSide(color: Colors.black, width: 1.0),
                         borderRadius: BorderRadius.circular(50.0)),
-                    child: new Text("Get Code"),
+                    child: Text("Get Code"),
                   ),
-                  new Padding(padding: new EdgeInsets.symmetric(vertical: 50.00)),
+                  Padding(padding: EdgeInsets.symmetric(vertical: 50.00)),
                 ],
               ),
             )));

@@ -14,111 +14,123 @@ class LoginPage extends StatefulWidget {
 class LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
-    return new GestureDetector(
-      onTap: () => FocusScope.of(context).requestFocus(new FocusNode()), //Focuses on nothing, means disable focus and hide keyboard
-      child: new Material(
-        child: new Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            new Padding(padding: new EdgeInsets.symmetric(vertical: 70.00)),
-            new Text(
-              "Login",
-              style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            new Padding(padding: new EdgeInsets.symmetric(vertical: 20.00)),
-            new Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: new TextField(
-                inputFormatters: [
-                  new BlacklistingTextInputFormatter(new RegExp('[\\.|\\,]')),
-                ],
-                maxLength: 15,
-                decoration: new InputDecoration(
-                    hintText: "Mobile Number"),
-                autofocus: true,
+    return GestureDetector(
+        onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
+        //Focuses on nothing, means disable focus and hide keyboard
+        child: Material(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Padding(padding: EdgeInsets.symmetric(vertical: 70.00)),
+              Text(
+                "Login",
+                style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
-                keyboardType: TextInputType.number,
               ),
-            ),
-            new RaisedButton(
-              onPressed: () => goToVerifyPhoneNumber(),
-              textColor: Colors.white,
-              color: Colors.blue,
-              animationDuration: Duration(milliseconds: 500),
-              padding: EdgeInsets.only(
-                  left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
-              shape: RoundedRectangleBorder(
-                  side: BorderSide(color: Colors.blue, width: 1.0),
-                  borderRadius: BorderRadius.circular(50.0)),
-              child: new Text("Next"),
-            ),
-            new Padding(padding: new EdgeInsets.symmetric(vertical: 10.00)),
-            new Text("Don't have account yet?"),
-            new FlatButton(
-                onPressed: () => goToSignUp(),
-                child: new Text(
-                  "Sign Up Now",
-                  style: new TextStyle(color: Colors.blue),
-                )),
-            new Padding(padding: new EdgeInsets.symmetric(vertical: 50.00)),
-            new RichText(
-                textAlign: TextAlign.center,
-                text: new TextSpan(children: [
-                  new TextSpan(
-                      text: "Contact Support",
-                      style: new TextStyle(color: Colors.blue),
-                      recognizer: new TapGestureRecognizer()..onTap = () {
-                        goToContactSupport();
-                      }
-                  )
-                ])),
-            new Padding(padding: new EdgeInsets.symmetric(vertical: 5.00)),
-            new RichText(
-                textAlign: TextAlign.center,
-                text: new TextSpan(children: [
-                  new TextSpan(
-                      text: "Terms and Conditions",
-                      style: new TextStyle(color: Colors.blue),
-                      recognizer: new TapGestureRecognizer()..onTap = () {
-                        goToTermsAndConditions();
-                      }
-                  )
-                ])),
-            new Padding(padding: new EdgeInsets.symmetric(vertical: 5.00)),
-            new RichText(
-                textAlign: TextAlign.center,
-                text: new TextSpan(children: [
-                  new TextSpan(
-                      text: "Privacy Notice",
-                      style: new TextStyle(color: Colors.blue),
-                      recognizer: new TapGestureRecognizer()..onTap = () {
-                        goToPrivacyNotice()();
-                      }
-                  )
-                ])),
-          ],
-        ),
-      )
-    );
+              Padding(padding: EdgeInsets.symmetric(vertical: 20.00)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                child: TextField(
+                  cursorColor: Colors.black,
+                  style: TextStyle(color: Colors.black),
+                  inputFormatters: [
+                    BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
+                  ],
+                  maxLength: 15,
+                  decoration: InputDecoration(hintText: "Mobile Number"),
+                  autofocus: true,
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              RaisedButton(
+                onPressed: () => goToVerifyPhoneNumber(),
+                textColor: Colors.white,
+                color: Colors.black,
+                highlightColor: Colors.black54,
+                splashColor: Colors.grey,
+                animationDuration: Duration(milliseconds: 500),
+                padding: EdgeInsets.only(
+                    left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
+                shape: RoundedRectangleBorder(
+//                  side: BorderSide(color: Colors.black, width: 1.0),
+                    borderRadius: BorderRadius.circular(50.0)),
+                child: Text("Next"),
+              ),
+              Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
+              Text("Don't have account yet?"),
+              FlatButton(
+                  onPressed: () => goToSignUp(),
+                  child: Text(
+                    "Sign Up Now",
+                    style: TextStyle(color: Colors.black),
+                  )),
+              Padding(padding: EdgeInsets.symmetric(vertical: 50.00)),
+              RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(children: [
+                    TextSpan(
+                        text: "Contact Support",
+                        style: TextStyle(color: Colors.black),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            goToContactSupport();
+                          })
+                  ])),
+              Padding(padding: EdgeInsets.symmetric(vertical: 5.00)),
+              RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(children: [
+                    TextSpan(
+                        text: "Terms and Conditions",
+                        style: TextStyle(color: Colors.black),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            goToTermsAndConditions();
+                          })
+                  ])),
+              Padding(padding: EdgeInsets.symmetric(vertical: 5.00)),
+              RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(children: [
+                    TextSpan(
+                        text: "Privacy Notice",
+                        style: TextStyle(color: Colors.black),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            goToPrivacyNotice()();
+                          })
+                  ])),
+            ],
+          ),
+        ));
   }
 
-  goToVerifyPhoneNumber () {
+  goToVerifyPhoneNumber() {
     Navigator.of(context).pushNamed("verify_phone_number_page");
   }
 
-  goToSignUp () {
+  goToSignUp() {
     Navigator.of(context).pushNamed("sign_up_page");
   }
 
-  goToContactSupport () async {
+  goToContactSupport() async {
     String now = formatDate(new DateTime.now(), [dd, '/', mm, '/', yyyy]);
     String linebreak = '%0D%0A';
-    String url = 'mailto:<support@neurogine.com>?subject=Request for Contact Support '+ now + ' &body=Name: '+linebreak+linebreak+'Email: '+linebreak+linebreak+'Enquiry Details:';
+    String url =
+        'mailto:<support@neurogine.com>?subject=Request for Contact Support ' +
+            now +
+            ' &body=Name: ' +
+            linebreak +
+            linebreak +
+            'Email: ' +
+            linebreak +
+            linebreak +
+            'Enquiry Details:';
     if (await canLaunch(url)) {
-    await launch(url);
+      await launch(url);
     } else {
-    throw 'Could not launch $url';
+      throw 'Could not launch $url';
     }
   }
 
@@ -130,5 +142,3 @@ class LoginPageState extends State<LoginPage> {
     Navigator.of(context).pushNamed("privacy_notice_page");
   }
 }
-
-

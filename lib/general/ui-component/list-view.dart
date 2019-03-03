@@ -7,7 +7,8 @@ class PageListItem {
   final Widget trailing;
   final Function onTap;
 
-  PageListItem({this.title, this.leading, this.trailing, this.subtitle, this.onTap});
+  PageListItem(
+      {this.title, this.leading, this.trailing, this.subtitle, this.onTap});
 }
 
 class PageListTile extends ListTile {

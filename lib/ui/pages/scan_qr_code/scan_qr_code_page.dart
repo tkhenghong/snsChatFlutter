@@ -24,22 +24,22 @@ class ScanQrCodePageState extends State<ScanQrCodePage> {
 
   @override
   Widget build(BuildContext context) {
-      return new Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          new RaisedButton(
-              color: Colors.blue,
-              textColor: Colors.white,
-              splashColor: Colors.blueGrey,
-              onPressed: scan,
-              child: const Text('START CAMERA SCAN')
-          ),
-          new Text(
-            barcode,
-            textAlign: TextAlign.center,
-          )
-        ],
-      );
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        RaisedButton(
+            textColor: Colors.white,
+            color: Colors.black,
+            highlightColor: Colors.black54,
+            splashColor: Colors.grey,
+            onPressed: scan,
+            child: const Text('START CAMERA SCAN')),
+        Text(
+          barcode,
+          textAlign: TextAlign.center,
+        )
+      ],
+    );
   }
 
   Future scan() async {
@@ -55,9 +55,8 @@ class ScanQrCodePageState extends State<ScanQrCodePage> {
         setState(() => this.barcode = 'Unknown error: $e');
       }
     } on FormatException {
-      setState(() =>
-      this.barcode =
-      'null (User returned using the "back"-button before scanning anything. Result)');
+      setState(() => this.barcode =
+          'null (User returned using the "back"-button before scanning anything. Result)');
     } catch (e) {
       setState(() => this.barcode = 'Unknown error: $e');
     }

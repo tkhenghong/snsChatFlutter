@@ -3,11 +3,13 @@ import 'package:snschat_flutter/general/ui-component/list-view.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
+import "package:pull_to_refresh/pull_to_refresh.dart";
+import 'package:snschat_flutter/ui/pages/chat_room/chat_room_page.dart';
 
 class ChatGroupListPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return new ChatGroupListState();
+    return ChatGroupListState();
   }
 }
 
@@ -20,18 +22,29 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     });
     print('chat_group_list_page.dart listItems.length: ' +
         listItems.length.toString());
-    return new PageListView(array: listItems, context: context);
+    return PageListView(array: listItems, context: context);
   }
 
   mapConversationToPageListTile(
       Conversation conversation, BuildContext context) {
     return PageListItem(
-        title: new Text(conversation.name),
-        subtitle: new Text(conversation.unreadMessage.lastMessage),
-        leading: CircleAvatar(child: Text(conversation.name[0])),
+        title: Text(conversation.name),
+        subtitle: Text(conversation.unreadMessage.lastMessage),
+        leading: CircleAvatar(
+          child: Text(
+            conversation.name[0],
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.black,
+        ),
         trailing: Text(conversation.unreadMessage.count.toString()),
         onTap: (BuildContext context) {
-          Navigator.of(context).pushNamed("chat_room_page");
+          print('Go to Chat Room page.');
+          print('Go to conversation.name: ' + conversation.name);
+          print('Go to conversation.description: ' + conversation.description);
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (BuildContext context) => ChatRoomPage(
+                  conversation))); //Send argument need to use the old way
         });
   }
 

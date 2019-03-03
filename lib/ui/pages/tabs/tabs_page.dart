@@ -17,17 +17,17 @@ class TabsPageState extends State<TabsPage> {
       "Chats"; // Have to put default tab name or compiler will say null error
   @override
   Widget build(BuildContext context) {
-    return new Material(
+    return Material(
       color: Colors.white,
-      child: new Scaffold(
-          appBar: new AppBar(
+      child: Scaffold(
+          appBar: AppBar(
             backgroundColor: Colors.white,
             titleSpacing: 0.0,
             elevation: 0,
-            title: new Text(
+            title: Text(
               tabTitle,
               textAlign: TextAlign.start,
-              style: new TextStyle(
+              style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 32.0,
                   color: Colors.black),
@@ -35,7 +35,7 @@ class TabsPageState extends State<TabsPage> {
           ),
           backgroundColor: Colors.white,
           body: buildPageView(_bottomNavBarIndex),
-          bottomNavigationBar: new BottomNavigationBar(
+          bottomNavigationBar: BottomNavigationBar(
             currentIndex: _bottomNavBarIndex,
             type: BottomNavigationBarType.shifting,
             onTap: (int index) {
@@ -45,34 +45,34 @@ class TabsPageState extends State<TabsPage> {
               });
             },
             items: [
-              new BottomNavigationBarItem(
-                icon: new Icon(
+              BottomNavigationBarItem(
+                icon: Icon(
                   Icons.chat,
                   color: Colors.black,
                 ),
-                title: new Text(
+                title: Text(
                   "Chats",
-                  style: new TextStyle(color: Colors.black),
+                  style: TextStyle(color: Colors.black),
                 ),
               ),
-              new BottomNavigationBarItem(
-                icon: new Icon(
+              BottomNavigationBarItem(
+                icon: Icon(
                   Icons.code,
                   color: Colors.black,
                 ),
-                title: new Text(
+                title: Text(
                   "Scan QR Code",
-                  style: new TextStyle(color: Colors.black),
+                  style: TextStyle(color: Colors.black),
                 ),
               ),
-              new BottomNavigationBarItem(
-                icon: new Icon(
+              BottomNavigationBarItem(
+                icon: Icon(
                   Icons.person,
                   color: Colors.black,
                 ),
-                title: new Text(
+                title: Text(
                   "Myself",
-                  style: new TextStyle(color: Colors.black),
+                  style: TextStyle(color: Colors.black),
                 ),
               ),
             ],
@@ -84,15 +84,15 @@ class TabsPageState extends State<TabsPage> {
     switch (pageNumber) {
       case 0:
         tabTitle = "Chats";
-        return new PageView(children: <Widget>[new ChatGroupListPage()]);
+        return PageView(children: <Widget>[ChatGroupListPage()]);
         break;
       case 1:
         tabTitle = "Scan QR Code";
-        return new PageView(children: <Widget>[new ScanQrCodePage()]);
+        return PageView(children: <Widget>[ScanQrCodePage()]);
         break;
       case 2:
         tabTitle = "Myself";
-        return new PageView(children: <Widget>[new MyselfPage()]);
+        return PageView(children: <Widget>[MyselfPage()]);
         break;
       default:
         print("No such page.");

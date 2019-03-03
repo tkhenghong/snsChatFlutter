@@ -15,43 +15,44 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
   @override
   Widget build(BuildContext context) {
     String phoneNo = "+6012 309 6127";
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('Verify ' + phoneNo),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Verify ' + phoneNo),
         centerTitle: true,
       ),
-      body: new Column(
+      body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          new Text('Verify ' + phoneNo),
-          new RichText(
-              text: new TextSpan(
-                  style: new TextStyle(inherit: true, color: Colors.black),
+          Text('Verify ' + phoneNo),
+          RichText(
+              text: TextSpan(
+                  style: TextStyle(inherit: true, color: Colors.black),
                   children: <TextSpan>[
-                    new TextSpan(text: 'We have sent and SMS with a code to '),
-                    new TextSpan(
+                    TextSpan(text: 'We have sent and SMS with a code to '),
+                    TextSpan(
                         text: phoneNo.toString(),
-                        style: new TextStyle(
+                        style: TextStyle(
                             inherit: true, fontWeight: FontWeight.bold)),
-//                new TextSpan(text: 'Can\'t send an SMS with your code because you\'ve tried to register '),
-//                new TextSpan(text: phoneNo.toString(), style: new TextStyle(inherit: true, fontWeight: FontWeight.bold)),
-//                new TextSpan(text: ' recently. Request a call or wait before requesting an SMS. '),
+// TODO: Add other types of error messages for different situations
+//                TextSpan(text: 'Can\'t send an SMS with your code because you\'ve tried to register '),
+//                TextSpan(text: phoneNo.toString(), style: TextStyle(inherit: true, fontWeight: FontWeight.bold)),
+//                TextSpan(text: ' recently. Request a call or wait before requesting an SMS. '),
                   ])),
-          new FlatButton(
+          FlatButton(
               onPressed: () {},
-              child: new Text(
+              child: Text(
                 'Wrong number?',
-                style: new TextStyle(color: Colors.blue),
+                style: TextStyle(color: Colors.black),
               )),
-          new Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              new PinEntryTextField(
+              PinEntryTextField(
                   fields: 4,
                   onSubmit: (pin) {
                     showLoading(context);
                     print('PIN number is: ' + pin);
-                    new Future.delayed(new Duration(seconds: 1), () { //Delay 1 second to simulate something loading
+                    Future.delayed(Duration(seconds: 1), () { //Delay 1 second to simulate something loading
                       print('Loaded 3 seconds.');
                       Navigator.pop(context); //pop dialog
                       this.goToChatGroupList();
@@ -63,16 +64,16 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
                   showFieldAsBox: false)
             ],
           ),
-          new Text('Enter 4-digit code'),
-//          new RaisedButton(onPressed: () {},  child: new Text('Resend SMS'),), //In case youre able to resend SMS
-          new RaisedButton(
+          Text('Enter 4-digit code'),
+//          RaisedButton(onPressed: () {},  child: Text('Resend SMS'),), //In case youre able to resend SMS
+          RaisedButton(
             onPressed: () {},
-            child: new Text('Resend SMS in 7 hours'),
+            child: Text('Resend SMS in 7 hours'),
           ),
           // In case you request a lot of times but you never retreived and entered the correct PIN
-          new RaisedButton(
+          RaisedButton(
             onPressed: () {},
-            child: new Text('Call me'),
+            child: Text('Call me'),
           ),
         ],
       ),

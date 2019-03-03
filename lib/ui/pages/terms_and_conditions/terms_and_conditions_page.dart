@@ -14,12 +14,12 @@ class TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-        appBar: new AppBar(
-          title: new Text('Terms and Conditions'),
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('Terms and Conditions'),
         ),
-        body: new SingleChildScrollView(
-          child: new HtmlTextView(data: data),
+        body: SingleChildScrollView(
+          child: HtmlTextView(data: data),
         ));
   }
 }

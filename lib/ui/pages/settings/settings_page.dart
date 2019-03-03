@@ -11,42 +11,43 @@ class SettingsPage extends StatefulWidget {
 class SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text("Settings"),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Settings"),
+        backgroundColor: Colors.black,
       ),
-      body: new PageListView(array: allSettings, context: context),
+      body: PageListView(array: allSettings, context: context),
     );
   }
 
   List<PageListItem> allSettings = [
     PageListItem(
-        title: new Text("Account"),
+        title: Text("Account"),
         leading: Icon(Icons.account_circle),
         // Change phone number, Change picture, Change cover photo, change username, change Bio, change display name
         onTap: (context) => print('Executed route')),
     PageListItem(
-        title: new Text("Theme"),
+        title: Text("Theme"),
         leading: Icon(Icons.format_paint),
         // Message text size, text font family, Auto-Night mode, Color theme (Telegram)
         onTap: (context) => print('Executed route')),
     PageListItem(
-        title: new Text("Chat"),
+        title: Text("Chat"),
         leading: Icon(Icons.chat),
         // Link open externally, Chat Animations, Save to Gallery, Send by Enter, Stickers Management, Chat Backup (Cloud/Local)
         onTap: (context) => print('Executed route')),
     PageListItem(
-        title: new Text("Notifications"),
+        title: Text("Notifications"),
         leading: Icon(Icons.notifications),
         // Notification ringtone, Vibrate type, Badge counter, In-app sounds, In-app vibrate, In-app Preview, In-chat sounds, Joined Telegram, Created Pinned Message, Background Connection
         onTap: (context) => print('Executed route')),
     PageListItem(
-        title: new Text("Privacy"),
+        title: Text("Privacy"),
         leading: Icon(Icons.lock),
         // Friend confirmation, Find Contact in storage, Blocked list, Methods of Adding me, Sync Contacts, Suggest Frequent Contacts
         onTap: (context) => print('Executed route')),
     PageListItem(
-        title: new Text("Security"),
+        title: Text("Security"),
         leading: Icon(Icons.security),
         onTap: (context) => print('Executed route')),
   ];

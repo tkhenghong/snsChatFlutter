@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -6,12 +7,10 @@ import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 
-
 class ChatRoomPage extends StatefulWidget {
+  Conversation _conversation;
 
-  Conversation conversation; //do not final
-
-  ChatRoomPage({@required this.conversation});
+  ChatRoomPage([this._conversation]); //do not final
 
   @override
   State<StatefulWidget> createState() {
@@ -22,8 +21,6 @@ class ChatRoomPage extends StatefulWidget {
 
 class ChatRoomPageState extends State<ChatRoomPage> {
   bool isShowSticker = false;
-
-
   TextEditingController textEditingController = new TextEditingController();
   ScrollController listScrollController = new ScrollController();
   FocusNode focusNode = new FocusNode();
@@ -41,20 +38,44 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   @override
+  void dispose() {
+    listScrollController.dispose();
+    textEditingController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return new Scaffold(
-        appBar: new AppBar(
-          title: new Text('Chat Room'),
-        ),
-        body: new WillPopScope( // To handle event when user press back button when sticker screen is on, dismiss sticker if keyboard is shown
-          child: new Stack(
+    print('chat_room_page.dart Reached chat room page.');
+    print('chat_room_page.dart widget.conversation.name: ' +
+        widget._conversation.name);
+    print('chat_room_page.dart widget.conversation.description: ' +
+        widget._conversation.description);
+    return Scaffold(
+        appBar: AppBar(
+          title: Row(
             children: <Widget>[
-              new Column(
+              CircleAvatar(
+                radius: 20.0,
+                backgroundColor: Colors.white,
+                child: Text(widget._conversation.name[0], style: TextStyle(color: Colors.black),),
+              ),
+              Padding(padding: EdgeInsets.symmetric(horizontal: 5.0),),
+              Text(widget._conversation.name)
+            ],
+          ),
+          backgroundColor: Colors.black,
+        ),
+        body: WillPopScope(
+          // To handle event when user press back button when sticker screen is on, dismiss sticker if keyboard is shown
+          child: Stack(
+            children: <Widget>[
+              Column(
                 children: <Widget>[
                   buildListMessage(),
                   //UI for message list
-                  (isShowSticker ? buildSticker() : new Container()),
+                  (isShowSticker ? buildSticker() : Container()),
                   // UI for stickers, gifs
                   buildInput(), // UI for text field
                 ],
@@ -63,9 +84,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             ],
           ),
           onWillPop: onBackPress,
-        )
-    );
+        ));
   }
+
 //TODO: Read message from DB
 //  readMessageListfromDB() async {
 //  }
@@ -74,11 +95,12 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     return Positioned(
       child: isLoading
           ? Container(
-        child: Center(
-          child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)),
-        ),
-        color: Colors.white.withOpacity(0.8),
-      )
+              child: Center(
+                child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)),
+              ),
+              color: Colors.white.withOpacity(0.8),
+            )
           : Container(),
     );
   }
@@ -89,10 +111,10 @@ class ChatRoomPageState extends State<ChatRoomPage> {
         children: <Widget>[
           // Button send image
           Material(
-            child: new Container(
-              margin: new EdgeInsets.symmetric(horizontal: 1.0),
-              child: new IconButton(
-                icon: new Icon(Icons.image),
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 1.0),
+              child: IconButton(
+                icon: Icon(Icons.image),
                 onPressed: getImage,
                 color: Colors.black,
               ),
@@ -100,10 +122,10 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             color: Colors.white,
           ),
           Material(
-            child: new Container(
-              margin: new EdgeInsets.symmetric(horizontal: 1.0),
-              child: new IconButton(
-                icon: new Icon(Icons.face),
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 1.0),
+              child: IconButton(
+                icon: Icon(Icons.face),
                 onPressed: getSticker,
                 color: Colors.black,
               ),
@@ -115,6 +137,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           Flexible(
             child: Container(
               child: TextField(
+                cursorColor: Colors.black,
                 style: TextStyle(color: Colors.black, fontSize: 15.0),
                 controller: textEditingController,
                 decoration: InputDecoration.collapsed(
@@ -128,12 +151,12 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
           // Button send message
           Material(
-            child: new Container(
-              margin: new EdgeInsets.symmetric(horizontal: 8.0),
-              child: new IconButton(
-                icon: new Icon(Icons.send),
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 8.0),
+              child: IconButton(
+                icon: Icon(Icons.send),
                 onPressed: () => onSendMessage(textEditingController.text, 0),
-                color: Colors.blue,
+                color: Colors.black,
               ),
             ),
             color: Colors.white,
@@ -142,52 +165,58 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       ),
       width: double.infinity,
       height: 50.0,
-      decoration: new BoxDecoration(
-          border: new Border(top: new BorderSide(color: Colors.grey, width: 0.5)), color: Colors.white),
+      decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
+          color: Colors.white),
     );
   }
 
   Widget buildListMessage() {
-    return new Flexible(
-        child: new ListView(
-          controller: listScrollController,
-          physics: AlwaysScrollableScrollPhysics(),
-          children: <Widget>[
-            new Container(
-              child: new Text(
-                "Test message", style: new TextStyle(color: Colors.white),),
-              padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-              width: 200.0,
-              decoration: BoxDecoration(
-                  color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
-              margin: EdgeInsets.only(
-                  bottom: 20.0, right: 10.0),
-            ),
-            new Container(
-              child: new Text(
-                "Test message 2", style: new TextStyle(color: Colors.white),),
-              padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-              width: 200.0,
-              decoration: BoxDecoration(
-                  color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
-              margin: EdgeInsets.only(
-                  bottom: 20.0, right: 10.0),
-            ),
-            new Container(
-              child: new Text(
-                "Test message 3", style: new TextStyle(color: Colors.white),),
-              padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-              width: 200.0,
-              decoration: BoxDecoration(
-                  color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
-              margin: EdgeInsets.only(
-                  bottom: 20.0, right: 10.0),
-            ),
-          ],
-        )
-    );
+    return Flexible(
+        child: ListView(
+      controller: listScrollController,
+      physics: AlwaysScrollableScrollPhysics(),
+      children: <Widget>[
+        Container(
+          child: Text(
+            "Test message",
+            style: TextStyle(color: Colors.white),
+          ),
+          padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+          width: 200.0,
+          decoration: BoxDecoration(
+              color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+          margin: EdgeInsets.only(bottom: 20.0, right: 10.0),
+        ),
+        Container(
+          child: Text(
+            "Test message 2",
+            style: TextStyle(color: Colors.white),
+          ),
+          padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+          width: 200.0,
+          decoration: BoxDecoration(
+              color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+          margin: EdgeInsets.only(bottom: 20.0, right: 10.0),
+        ),
+        Container(
+          child: Text(
+            "Test message 3",
+            style: TextStyle(color: Colors.white),
+          ),
+          padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+          width: 200.0,
+          decoration: BoxDecoration(
+              color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+          margin: EdgeInsets.only(bottom: 20.0, right: 10.0),
+        ),
+      ],
+    ));
   }
 
+// Image.asset(
+//          'lib/assets/balls.jpg',
+//        ),
   Widget buildSticker() {
     return Container(
       child: Column(
@@ -195,104 +224,96 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           Row(
             children: <Widget>[
               FlatButton(
-                onPressed: () => onSendMessage('mimi1', 2),
-                child: new Image.asset(
-                  'images/mimi1.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              ),
+                  onPressed: () => onSendMessage('mimi1', 2),
+                  child: Image(
+                    image: AssetImage("lib/ui/images/mimi1.gif"),
+                    width: 50.0,
+                    height: 50.0,
+                    fit: BoxFit.cover,
+                  )),
               FlatButton(
-                onPressed: () => onSendMessage('mimi2', 2),
-                child: new Image.asset(
-                  'images/mimi2.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              ),
+                  onPressed: () => onSendMessage('mimi2', 2),
+                  child: Image(
+                    image: AssetImage("lib/ui/images/mimi2.gif"),
+                    width: 50.0,
+                    height: 50.0,
+                    fit: BoxFit.cover,
+                  )),
               FlatButton(
-                onPressed: () => onSendMessage('mimi3', 2),
-                child: new Image.asset(
-                  'images/mimi3.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              )
+                  onPressed: () => onSendMessage('mimi3', 2),
+                  child: Image(
+                    image: AssetImage("lib/ui/images/mimi3.gif"),
+                    width: 50.0,
+                    height: 50.0,
+                    fit: BoxFit.cover,
+                  ))
             ],
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           ),
           Row(
             children: <Widget>[
               FlatButton(
-                onPressed: () => onSendMessage('mimi4', 2),
-                child: new Image.asset(
-                  'images/mimi4.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              ),
+                  onPressed: () => onSendMessage('mimi4', 2),
+                  child: Image(
+                    image: AssetImage("lib/ui/images/mimi4.gif"),
+                    width: 50.0,
+                    height: 50.0,
+                    fit: BoxFit.cover,
+                  )),
               FlatButton(
-                onPressed: () => onSendMessage('mimi5', 2),
-                child: new Image.asset(
-                  'images/mimi5.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              ),
+                  onPressed: () => onSendMessage('mimi5', 2),
+                  child: Image(
+                    image: AssetImage("lib/ui/images/mimi5.gif"),
+                    width: 50.0,
+                    height: 50.0,
+                    fit: BoxFit.cover,
+                  )),
               FlatButton(
-                onPressed: () => onSendMessage('mimi6', 2),
-                child: new Image.asset(
-                  'images/mimi6.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              )
+                  onPressed: () => onSendMessage('mimi6', 2),
+                  child: Image(
+                    image: AssetImage("lib/ui/images/mimi6.gif"),
+                    width: 50.0,
+                    height: 50.0,
+                    fit: BoxFit.cover,
+                  ))
             ],
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           ),
           Row(
             children: <Widget>[
               FlatButton(
-                onPressed: () => onSendMessage('mimi7', 2),
-                child: new Image.asset(
-                  'images/mimi7.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              ),
+                  onPressed: () => onSendMessage('mimi7', 2),
+                  child: Image(
+                    image: AssetImage("lib/ui/images/mimi7.gif"),
+                    width: 50.0,
+                    height: 50.0,
+                    fit: BoxFit.cover,
+                  )),
               FlatButton(
-                onPressed: () => onSendMessage('mimi8', 2),
-                child: new Image.asset(
-                  'images/mimi8.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              ),
+                  onPressed: () => onSendMessage('mimi8', 2),
+                  child: Image(
+                    image: AssetImage("lib/ui/images/mimi8.gif"),
+                    width: 50.0,
+                    height: 50.0,
+                    fit: BoxFit.cover,
+                  )),
               FlatButton(
-                onPressed: () => onSendMessage('mimi9', 2),
-                child: new Image.asset(
-                  'images/mimi9.gif',
-                  width: 50.0,
-                  height: 50.0,
-                  fit: BoxFit.cover,
-                ),
-              )
+                  onPressed: () => onSendMessage('mimi9', 2),
+                  child: Image(
+                    image: AssetImage("lib/ui/images/mimi9.gif"),
+                    width: 50.0,
+                    height: 50.0,
+                    fit: BoxFit.cover,
+                  ))
             ],
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           )
         ],
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       ),
-      decoration: new BoxDecoration(
-          border: new Border(top: new BorderSide(color: Colors.grey, width: 0.5)), color: Colors.white),
+      decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
+          color: Colors.white),
       padding: EdgeInsets.all(5.0),
       height: 180.0,
     );
@@ -303,7 +324,8 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     if (content.trim() != '') {
       textEditingController.clear();
 
-      listScrollController.animateTo(0.0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+      listScrollController.animateTo(0.0,
+          duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
       Fluttertoast.showToast(msg: 'Nothing to send');
     }
