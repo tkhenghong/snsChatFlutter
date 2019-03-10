@@ -1,10 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/general/ui-component/list-view.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
-import "package:pull_to_refresh/pull_to_refresh.dart";
-import 'package:snschat_flutter/ui/pages/chat_room/chat_room_page.dart';
+import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
 
 class ChatGroupListPage extends StatefulWidget {
   @override
@@ -14,15 +16,45 @@ class ChatGroupListPage extends StatefulWidget {
 }
 
 class ChatGroupListState extends State<ChatGroupListPage> {
+  RefreshController _refreshController;
+
+  @override
+  initState() {
+    super.initState();
+    _refreshController = new RefreshController();
+  }
+
   @override
   Widget build(BuildContext context) {
     List<PageListItem> listItems = [];
     conversations.forEach((conversation) {
       listItems.add(mapConversationToPageListTile(conversation, context));
     });
-    print('chat_group_list_page.dart listItems.length: ' +
-        listItems.length.toString());
-    return PageListView(array: listItems, context: context);
+    return new Material(
+        color: Colors.white,
+        child: new SmartRefresher(
+            controller: _refreshController,
+            // Very important, without this whole thing won't work. Check the examples in the plugins
+            onRefresh: (up) {
+              if (up) {
+                Future.delayed(Duration(seconds: 1), () {
+                  //Delay 1 second to simulate something loading
+                  _refreshController.sendBack(up, RefreshStatus.completed);
+                });
+              }
+            },
+            onOffsetChange: (result, change) {
+              print("onOffsetChange......");
+            },
+            // Unable to put PageView under child properties, so have to get manual
+            child: new ListView.builder(
+                itemCount: listItems.length,
+                physics: const AlwaysScrollableScrollPhysics(),
+                //suggestion from https://github.com/flutter/flutter/issues/22314
+                itemBuilder: (BuildContext content, int index) {
+                  PageListItem listItem = listItems[index];
+                  return new PageListTile(listItem, context);
+                })));
   }
 
   mapConversationToPageListTile(
@@ -39,9 +71,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         ),
         trailing: Text(conversation.unreadMessage.count.toString()),
         onTap: (BuildContext context) {
-          print('Go to Chat Room page.');
-          print('Go to conversation.name: ' + conversation.name);
-          print('Go to conversation.description: ' + conversation.description);
           Navigator.of(context).push(MaterialPageRoute(
               builder: (BuildContext context) => ChatRoomPage(
                   conversation))); //Send argument need to use the old way

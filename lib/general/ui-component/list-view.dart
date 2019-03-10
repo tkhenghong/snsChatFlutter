@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class PageListItem {
   final Widget title;
@@ -36,9 +39,32 @@ class PageListView extends StatefulWidget {
 }
 
 class PageListViewState extends State<PageListView> {
+  RefreshController _refreshController;
+
+  @override
+  initState() {
+    super.initState();
+    _refreshController = new RefreshController();
+  }
+
   Widget build(BuildContext context) {
-    return new Material(
-        color: Colors.white,
+    return new SmartRefresher(
+        enablePullUp: false,
+        enablePullDown: false,
+        controller: _refreshController,
+        // Very important, without this whole thing won't work. Check the examples in the plugins
+        onRefresh: (up) {
+          if (up) {
+            Future.delayed(Duration(seconds: 1), () {
+              //Delay 1 second to simulate something loading
+              _refreshController.sendBack(up, RefreshStatus.completed);
+            });
+          }
+        },
+        onOffsetChange: (result, change) {
+          print("onOffsetChange......");
+        },
+        // Unable to put PageView under child properties, so have to get manual
         child: new ListView.builder(
             itemCount: widget.array.length,
             physics: const AlwaysScrollableScrollPhysics(),

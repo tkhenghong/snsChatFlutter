@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
 
 class ChatRoomPage extends StatefulWidget {
   Conversation _conversation;
@@ -14,7 +16,6 @@ class ChatRoomPage extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return new ChatRoomPageState();
   }
 }
@@ -23,6 +24,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   bool isShowSticker = false;
   TextEditingController textEditingController = new TextEditingController();
   ScrollController listScrollController = new ScrollController();
+  RefreshController _refreshController;
   FocusNode focusNode = new FocusNode();
   bool isLoading;
   File imageFile;
@@ -30,6 +32,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   @override
   void initState() {
     super.initState();
+    _refreshController = new RefreshController();
     focusNode.addListener(onFocusChange);
     isLoading = false;
     isShowSticker = false;
@@ -46,26 +49,81 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    print('chat_room_page.dart Reached chat room page.');
-    print('chat_room_page.dart widget.conversation.name: ' +
-        widget._conversation.name);
-    print('chat_room_page.dart widget.conversation.description: ' +
-        widget._conversation.description);
-    return Scaffold(
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
+      child: Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
+          titleSpacing: 0.0,
           title: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              CircleAvatar(
-                radius: 20.0,
-                backgroundColor: Colors.white,
-                child: Text(widget._conversation.name[0], style: TextStyle(color: Colors.black),),
+              Material(
+                color: Colors.black,
+                child: InkWell(
+                  customBorder: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0)),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Row(
+                    children: <Widget>[
+                      Icon(Icons.arrow_back),
+                      Hero(
+                        tag: "group-image",
+                        child: CircleAvatar(
+                          radius: 20.0,
+                          backgroundColor: Colors.white,
+                          backgroundImage: AssetImage(
+                            "lib/ui/images/group2013.jpg",
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 5.0, vertical: 50.0),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              Padding(padding: EdgeInsets.symmetric(horizontal: 5.0),),
-              Text(widget._conversation.name)
+              Material(
+                color: Colors.black,
+                child: InkWell(
+                    customBorder: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0)),
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              ChatInfoPage(widget._conversation)));
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.only(top: 10.0, right: 250.0),
+                        ),
+                        Hero(
+                          tag: "group-name",
+                          child: Text(
+                            widget._conversation.name,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Text(
+                          "Tap here for more details",
+                          style: TextStyle(color: Colors.white, fontSize: 13.0),
+                        )
+                      ],
+                    )),
+              ),
             ],
           ),
-          backgroundColor: Colors.black,
         ),
         body: WillPopScope(
           // To handle event when user press back button when sticker screen is on, dismiss sticker if keyboard is shown
@@ -84,7 +142,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             ],
           ),
           onWillPop: onBackPress,
-        ));
+        ),
+      ),
+    );
   }
 
 //TODO: Read message from DB
@@ -138,7 +198,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             child: Container(
               child: TextField(
                 cursorColor: Colors.black,
-                style: TextStyle(color: Colors.black, fontSize: 15.0),
+                style: TextStyle(color: Colors.black, fontSize: 17.0),
                 controller: textEditingController,
                 decoration: InputDecoration.collapsed(
                   hintText: 'Type your message...',
@@ -173,44 +233,52 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
   Widget buildListMessage() {
     return Flexible(
-        child: ListView(
-      controller: listScrollController,
-      physics: AlwaysScrollableScrollPhysics(),
-      children: <Widget>[
-        Container(
-          child: Text(
-            "Test message",
-            style: TextStyle(color: Colors.white),
+        child: new SmartRefresher(
+      enablePullUp: false,
+      enablePullDown: false,
+      controller: _refreshController,
+      child: ListView(
+        controller: listScrollController,
+        physics: BouncingScrollPhysics(),
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(top: 10.0),
           ),
-          padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-          width: 200.0,
-          decoration: BoxDecoration(
-              color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
-          margin: EdgeInsets.only(bottom: 20.0, right: 10.0),
-        ),
-        Container(
-          child: Text(
-            "Test message 2",
-            style: TextStyle(color: Colors.white),
+          Container(
+            child: Text(
+              "Test message",
+              style: TextStyle(color: Colors.white),
+            ),
+            padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+            width: 200.0,
+            decoration: BoxDecoration(
+                color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+            margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
           ),
-          padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-          width: 200.0,
-          decoration: BoxDecoration(
-              color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
-          margin: EdgeInsets.only(bottom: 20.0, right: 10.0),
-        ),
-        Container(
-          child: Text(
-            "Test message 3",
-            style: TextStyle(color: Colors.white),
+          Container(
+            child: Text(
+              "Test message 2",
+              style: TextStyle(color: Colors.white),
+            ),
+            padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+            width: 200.0,
+            decoration: BoxDecoration(
+                color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+            margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
           ),
-          padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-          width: 200.0,
-          decoration: BoxDecoration(
-              color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
-          margin: EdgeInsets.only(bottom: 20.0, right: 10.0),
-        ),
-      ],
+          Container(
+            child: Text(
+              "Test message 3",
+              style: TextStyle(color: Colors.white),
+            ),
+            padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+            width: 200.0,
+            decoration: BoxDecoration(
+                color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+            margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
+          ),
+        ],
+      ),
     ));
   }
 
