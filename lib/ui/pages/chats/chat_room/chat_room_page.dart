@@ -59,32 +59,35 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Material(
-                color: Colors.black,
-                child: InkWell(
-                  customBorder: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0)),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Row(
-                    children: <Widget>[
-                      Icon(Icons.arrow_back),
-                      Hero(
-                        tag: "group-image",
-                        child: CircleAvatar(
-                          radius: 20.0,
-                          backgroundColor: Colors.white,
-                          backgroundImage: AssetImage(
-                            "lib/ui/images/group2013.jpg",
+              Tooltip(
+                message: "Back",
+                child: Material(
+                  color: Colors.black,
+                  child: InkWell(
+                    customBorder: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0)),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Row(
+                      children: <Widget>[
+                        Icon(Icons.arrow_back),
+                        Hero(
+                          tag: widget._conversation.id,
+                          child: CircleAvatar(
+                            radius: 20.0,
+                            backgroundColor: Colors.white,
+                            backgroundImage: AssetImage(
+                              "lib/ui/images/group2013.jpg",
+                            ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 5.0, vertical: 50.0),
-                      ),
-                    ],
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 5.0, vertical: 50.0),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -106,12 +109,12 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                           padding: EdgeInsets.only(top: 10.0, right: 250.0),
                         ),
                         Hero(
-                          tag: "group-name",
+                          tag: widget._conversation.name,
                           child: Text(
                             widget._conversation.name,
                             style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 20.0,
+//                                fontSize: 20.0,
                                 fontWeight: FontWeight.bold),
                           ),
                         ),
