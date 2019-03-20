@@ -58,7 +58,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   mapConversationToPageListTile(
-      Conversation conversation, BuildContext context) {
+      Conversation conversation, BuildContext context2) {
+    print("mapConversationToPageListTile()");
     return PageListItem(
         title: Hero(
           tag: conversation.name,
@@ -75,10 +76,14 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           ),
         ),
         trailing: Text(conversation.unreadMessage.count.toString()),
-        onTap: (BuildContext context) {
-          Navigator.of(context).push(MaterialPageRoute(
-              builder: (BuildContext context) => ChatRoomPage(
-                  conversation))); //Send argument need to use the old way
+        onTap: (BuildContext context, object) {
+          print('onTap() ListTile');
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: ((context) => ChatRoomPage(
+                      conversation)))); // Send argument need to use the old way
+//        Navigator.of(context).pushNamed("contacts_page");
         });
   }
 

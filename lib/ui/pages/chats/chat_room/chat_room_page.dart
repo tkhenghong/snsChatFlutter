@@ -10,7 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
 
 class ChatRoomPage extends StatefulWidget {
-  Conversation _conversation;
+  final Conversation _conversation;
 
   ChatRoomPage([this._conversation]); //do not final
 

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:date_format/date_format.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -12,8 +14,21 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
+  requestPermissions() async {
+    Map<PermissionGroup, PermissionStatus> permissions =
+        await PermissionHandler().requestPermissions([
+      PermissionGroup.contacts,
+      PermissionGroup.camera,
+      PermissionGroup.storage,
+      PermissionGroup.location,
+      PermissionGroup.microphone
+    ]);
+    return permissions;
+  }
+
   @override
   Widget build(BuildContext context) {
+    requestPermissions();
     return GestureDetector(
         onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
         //Focuses on nothing, means disable focus and hide keyboard

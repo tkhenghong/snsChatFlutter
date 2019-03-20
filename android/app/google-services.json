@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "352395986856",
+    "firebase_url": "https://pocketchat-b3e0f.firebaseio.com",
+    "project_id": "pocketchat-b3e0f",
+    "storage_bucket": "pocketchat-b3e0f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:352395986856:android:d386fdfe75ebc8a4",
+        "android_client_info": {
+          "package_name": "flutter.snschat.com.snschatflutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "352395986856-kn8u8j42ur53drr6937fai2od6i6rnmd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbV80V1U5X9EmnH0ZM1Mgdqr2wF1QSJE4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

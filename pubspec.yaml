@@ -13,17 +13,23 @@ environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"
 
 dependencies:
-  url_launcher: ^5.0.1
+  url_launcher: ^5.0.2
   date_format: ^1.0.6
-  flutter_html_textview: ^0.2.6
-  path_provider: ^0.4.1 # A Flutter plugin for finding commonly used locations on the filesystem. Supports iOS and Android.
-  barcode_scan: ^0.0.8 # A Flutter plugin for scanning 2D barcodes and QR codes as a wrapper using specific iOS mikebuss/MTBBarcodeScanner and Android dm77/barcodescanner library.
+#  flutter_html_textview: ^0.2.6 # Final decision, html textview causing lot more trouble than version solving
+  cached_network_image: ^0.7.0
+  flutter_cache_manager: ^0.3.2
+  path_provider: ^0.5.0+1 # A Flutter plugin for finding commonly used locations on the filesystem. Supports iOS and Android.
+  barcode_scan: ^1.0.0 # A Flutter plugin for scanning 2D barcodes and QR codes as a wrapper using specific iOS mikebuss/MTBBarcodeScanner and Android dm77/barcodescanner library.
   qr_flutter: ^2.0.0+51 # QR.Flutter is a QR code generation and rendering library for Flutter.
-  fluttertoast: ^2.0.7
-  image_picker: ^0.4.6
+  fluttertoast: ^3.0.3
+  image_picker: ^0.5.0+9
   pull_to_refresh: ^1.1.6
-  contacts_service: ^0.0.8
-  simple_permissions: ^0.1.6
+  contacts_service: ^0.2.4
+#  simple_permissions: ^0.1.9
+  permission_handler: ^3.0.0
+  firebase_auth: ^0.8.1+4
+  google_sign_in: ^4.0.1+1
+  firebase_core: ^0.3.1+1
 
   flutter:
     sdk: flutter

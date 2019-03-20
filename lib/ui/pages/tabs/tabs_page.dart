@@ -133,6 +133,7 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin {
                   child: Icon(icons[index], color: foregroundColor),
                   onPressed: () {
                     Navigator.of(context).pushNamed('contacts_page');
+                    _controller.reverse();
                   },
                 ),
               ),

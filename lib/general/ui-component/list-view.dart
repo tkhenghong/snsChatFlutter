@@ -9,9 +9,10 @@ class PageListItem {
   final Widget leading;
   final Widget trailing;
   final Function onTap;
+  final Object object;
 
   PageListItem(
-      {this.title, this.leading, this.trailing, this.subtitle, this.onTap});
+      {this.title, this.leading, this.trailing, this.subtitle, this.onTap, this.object});
 }
 
 class PageListTile extends ListTile {
@@ -22,7 +23,7 @@ class PageListTile extends ListTile {
             leading: item.leading,
             trailing: item.trailing,
             onTap: () {
-              item.onTap(context);
+              item.onTap(context, item.object);
             });
 }
 
