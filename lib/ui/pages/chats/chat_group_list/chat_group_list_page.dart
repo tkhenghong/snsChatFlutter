@@ -81,8 +81,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: ((context) => ChatRoomPage(
-                      conversation)))); // Send argument need to use the old way
+                  builder: ((context) => ChatRoomPage(conversation))));
+          // Send argument need to use the old way
 //        Navigator.of(context).pushNamed("contacts_page");
         });
   }

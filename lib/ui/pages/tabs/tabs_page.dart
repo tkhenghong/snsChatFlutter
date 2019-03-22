@@ -1,5 +1,8 @@
+import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_group_list/chat_group_list_page.dart';
+import 'package:snschat_flutter/ui/pages/contacts/contacts.dart';
 import 'package:snschat_flutter/ui/pages/myself/myself_page.dart';
 import 'package:snschat_flutter/ui/pages/scan_qr_code/scan_qr_code_page.dart';
 import 'dart:math' as math;
@@ -13,10 +16,12 @@ class TabsPage extends StatefulWidget {
 
 class TabsPageState extends State<TabsPage> with TickerProviderStateMixin {
   AnimationController _controller;
-  static const List<IconData> icons = const [ Icons.person_add, Icons.group_add ];
+  static const List<IconData> icons = const [Icons.person_add, Icons.group_add]; // TODO: Add Broadcast
+  static const List<ChatGroupType> chatTitles = const [ChatGroupType.Personal, ChatGroupType.Group]; // TODO: Add Broadcast
   Color backgroundColor = Colors.black;
   Color foregroundColor = Colors.white;
-
+  List<Contact> contactList = [];
+  Map<String, bool> contactCheckBoxes = {};
 
   int _bottomNavBarIndex = 0;
   String tabTitle =
@@ -29,6 +34,7 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    getContacts(); // Prepare first
     tabPages = [ChatGroupListPage(), ScanQrCodePage(), MyselfPage()];
     _controller = new AnimationController(
       vsync: this,
@@ -41,75 +47,74 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin {
     return Material(
       color: Colors.white,
       child: Scaffold(
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            titleSpacing: 0.0,
-            elevation: 0.0,
-
-            title: Text(
-              tabTitle,
-              textAlign: TextAlign.start,
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 32.0,
-                  color: Colors.black),
-            ),
-          ),
+        appBar: AppBar(
           backgroundColor: Colors.white,
-          body: PageView(
-            controller: pageViewController,
-            onPageChanged: (int index) {
+          titleSpacing: 0.0,
+          elevation: 0.0,
+          title: Text(
+            tabTitle,
+            textAlign: TextAlign.start,
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 32.0,
+                color: Colors.black),
+          ),
+        ),
+        backgroundColor: Colors.white,
+        body: PageView(
+          controller: pageViewController,
+          onPageChanged: (int index) {
+            changeTab(index);
+            setState(() {
+              _bottomNavBarIndex = index;
+            });
+          },
+          physics: BouncingScrollPhysics(),
+          children: tabPages,
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _bottomNavBarIndex,
+          type: BottomNavigationBarType.shifting,
+          onTap: (int index) {
+            setState(() {
+              _bottomNavBarIndex = index;
+              pageViewController.jumpToPage(index);
               changeTab(index);
-              setState(() {
-                _bottomNavBarIndex = index;
-              });
-            },
-            physics: BouncingScrollPhysics(),
-            children: tabPages,
-          ),
-          bottomNavigationBar: BottomNavigationBar(
-            currentIndex: _bottomNavBarIndex,
-            type: BottomNavigationBarType.shifting,
-            onTap: (int index) {
-              setState(() {
-                _bottomNavBarIndex = index;
-                pageViewController.jumpToPage(index);
-                changeTab(index);
-              });
-            },
-            items: [
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.chat,
-                  color: Colors.black,
-                ),
-                title: Text(
-                  "Chats",
-                  style: TextStyle(color: Colors.black),
-                ),
+            });
+          },
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.chat,
+                color: Colors.black,
               ),
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.code,
-                  color: Colors.black,
-                ),
-                title: Text(
-                  "Scan QR Code",
-                  style: TextStyle(color: Colors.black),
-                ),
+              title: Text(
+                "Chats",
+                style: TextStyle(color: Colors.black),
               ),
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.person,
-                  color: Colors.black,
-                ),
-                title: Text(
-                  "Myself",
-                  style: TextStyle(color: Colors.black),
-                ),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.code,
+                color: Colors.black,
               ),
-            ],
-          ),
+              title: Text(
+                "Scan QR Code",
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.person,
+                color: Colors.black,
+              ),
+              title: Text(
+                "Myself",
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+          ],
+        ),
         floatingActionButton: Column(
           mainAxisSize: MainAxisSize.min,
           children: List.generate(icons.length, (int index) {
@@ -120,11 +125,8 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin {
               child: ScaleTransition(
                 scale: CurvedAnimation(
                   parent: _controller,
-                  curve: Interval(
-                      0.0,
-                      1.0 - index / icons.length / 2.0,
-                      curve: Curves.easeOut
-                  ),
+                  curve: Interval(0.0, 1.0 - index / icons.length / 2.0,
+                      curve: Curves.easeOut),
                 ),
                 child: FloatingActionButton(
                   heroTag: null,
@@ -132,36 +134,46 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin {
                   mini: true,
                   child: Icon(icons[index], color: foregroundColor),
                   onPressed: () {
-                    Navigator.of(context).pushNamed('contacts_page');
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => ContactsPage(
+                            chatGroupType: chatTitles[index],
+                            contactCheckBoxes: contactCheckBoxes,
+                            contactList: contactList)));
                     _controller.reverse();
                   },
                 ),
               ),
             );
             return child;
-          }).toList()..add(
-            new FloatingActionButton(
-              heroTag: null,
-              backgroundColor: Colors.black,
-              child: AnimatedBuilder(
-                animation: _controller,
-                builder: (BuildContext context, Widget child) {
-                  return Transform(
-                    transform: new Matrix4.rotationZ(_controller.value * 0.5 * math.pi),
-                    alignment: FractionalOffset.center,
-                    child: Icon(_controller.isDismissed ? Icons.add_comment : Icons.close,),
-                  );
+          }).toList()
+            ..add(
+              new FloatingActionButton(
+                heroTag: null,
+                backgroundColor: Colors.black,
+                child: AnimatedBuilder(
+                  animation: _controller,
+                  builder: (BuildContext context, Widget child) {
+                    return Transform(
+                      transform: new Matrix4.rotationZ(
+                          _controller.value * 0.5 * math.pi),
+                      alignment: FractionalOffset.center,
+                      child: Icon(
+                        _controller.isDismissed
+                            ? Icons.add_comment
+                            : Icons.close,
+                      ),
+                    );
+                  },
+                ),
+                onPressed: () {
+                  if (_controller.isDismissed) {
+                    _controller.forward();
+                  } else {
+                    _controller.reverse();
+                  }
                 },
               ),
-              onPressed: () {
-                if (_controller.isDismissed) {
-                  _controller.forward();
-                } else {
-                  _controller.reverse();
-                }
-              },
             ),
-          ),
         ),
       ),
     );
@@ -182,5 +194,15 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin {
         print("No such page.");
         break;
     }
+  }
+
+  getContacts() async {
+    Iterable<Contact> contacts = await ContactsService.getContacts();
+    contactList = contacts.toList(growable: true);
+    contactList.sort((a, b) =>
+        a.displayName.compareTo(b.displayName)); //sort strings automatically
+    contactList.forEach((contact) {
+      contactCheckBoxes[contact.displayName] = false;
+    });
   }
 }
