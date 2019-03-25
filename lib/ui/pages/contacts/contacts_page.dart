@@ -8,6 +8,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
 import 'package:snschat_flutter/general/ui-component/list-view.dart';
+import 'package:snschat_flutter/ui/pages/group_name/group_name_page.dart';
 
 class ContactsPage extends StatefulWidget {
   final List<Contact> contactList;
@@ -56,35 +57,41 @@ class ContactsPageState extends State<ContactsPage> {
         appBar: new AppBar(
             title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
           children: <Widget>[
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(top: 10.0),
-                ),
-                Text(
-                  title,
-                  style: TextStyle(fontSize: 18.0),
-                ),
-                Text(
-                  "Select a contact",
-                  style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.w300),
-                )
-              ],
+            Padding(
+              padding: EdgeInsets.only(top: 10.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    title,
+                    style: TextStyle(fontSize: 18.0),
+                  ),
+                  Text(
+                    "Select a contact",
+                    style:
+                        TextStyle(fontSize: 15.0, fontWeight: FontWeight.w300),
+                  )
+                ],
+              ),
             ),
-            Expanded(
-              child: Container(
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(15.0),
+            Tooltip(
+              message: "Next",
+              child: InkWell(
+                borderRadius: BorderRadius.circular(30.0),
+                child: Padding(
+                  padding: EdgeInsets.all(15.0),
                   child: Icon(Icons.check),
-                  onTap: () {
-                    print("Next Page!");
-                  },
                 ),
-              )
+                onTap: () {
+                  print("Next Page!");
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) => GroupNamePage())));
+                },
+              ),
             ),
           ],
         )),

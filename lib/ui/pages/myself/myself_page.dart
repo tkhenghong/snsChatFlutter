@@ -18,23 +18,30 @@ class MyselfPageState extends State<MyselfPage> {
     PageListItem(
         title: Text("Settings"),
         leading: Icon(Icons.settings),
-        onTap: (context) => Navigator.pushNamed(context, "settings_page")),
+        onTap: (context, object) => goToSettingsPage(context, object)),
     PageListItem(
         title: Text("About"),
         leading: Icon(Icons.info),
-        onTap: (context) => Navigator.pushNamed(context, "settings_page")),
+        onTap: (context, object) => goToSettingsPage(context, object)),
     PageListItem(
         title: Text("Help"),
         leading: Icon(Icons.help),
-        onTap: (context) => Navigator.pushNamed(context, "settings_page")),
+        onTap: (context, object) => goToSettingsPage(context, object)),
     PageListItem(
         title: Text("Feedback"),
         leading: Icon(Icons.feedback),
-        onTap: (context) => Navigator.pushNamed(context, "settings_page")),
+        onTap: (context, object) => goToSettingsPage(context, object)),
     PageListItem(
         title: Text("Logout"),
         leading: Icon(Icons.exit_to_app),
-        onTap: (context) =>
-            Navigator.pushReplacementNamed(context, "login_page")),
+        onTap: (context, object) => logOut(context, object)),
   ];
+
+  static goToSettingsPage(BuildContext context, object) {
+    return Navigator.of(context).pushNamed("settings_page");
+  }
+
+  static logOut(BuildContext context, object) {
+    return Navigator.of(context).pushNamed("login_page");
+  }
 }
