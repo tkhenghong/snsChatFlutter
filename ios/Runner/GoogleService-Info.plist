@@ -36,5 +36,20 @@
 	<string>1:352395986856:ios:d386fdfe75ebc8a4</string>
 	<key>DATABASE_URL</key>
 	<string>https://pocketchat-b3e0f.firebaseio.com</string>
+	<!-- Google Sign-in Section -->
+    <key>CFBundleURLTypes</key>
+    <array>
+    	<dict>
+    		<key>CFBundleTypeRole</key>
+    		<string>Editor</string>
+    		<key>CFBundleURLSchemes</key>
+    		<array>
+    			<!-- TODO Replace this value: -->
+    			<!-- Copied from GoogleServices-Info.plist key REVERSED_CLIENT_ID -->
+    			<string>com.googleusercontent.apps.352395986856-mjg2vnrare86akr2phflufbt7dt582b3</string>
+    		</array>
+    	</dict>
+    </array>
+    <!-- End of the Google Sign-in Section -->
 </dict>
 </plist>

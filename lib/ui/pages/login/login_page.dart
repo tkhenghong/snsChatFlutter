@@ -5,6 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:date_format/date_format.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -14,6 +15,29 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final GoogleSignIn googleSignIn = new GoogleSignIn();
+  AuthCredential credential;
+  FirebaseUser firebaseUser;
+
+  Future<FirebaseUser> _signIn() async {
+    // An average user use his/her Google account to sign in.
+    GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
+    // Authenticate the user in Google
+    GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+
+    // Create credentials
+    credential = GoogleAuthProvider.getCredential(
+        idToken: googleSignInAuthentication.idToken,
+        accessToken: googleSignInAuthentication.accessToken
+    );
+
+    // Create the user in Firebase
+    firebaseUser = await _firebaseAuth.signInWithCredential(credential);
+    print("signed in " + firebaseUser.displayName);
+    return firebaseUser;
+  }
+
   requestPermissions() async {
     Map<PermissionGroup, PermissionStatus> permissions =
         await PermissionHandler().requestPermissions([
