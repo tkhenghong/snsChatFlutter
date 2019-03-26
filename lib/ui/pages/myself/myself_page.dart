@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:snschat_flutter/general/ui-component/list-view.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MyselfPage extends StatefulWidget {
   @override
@@ -42,6 +44,6 @@ class MyselfPageState extends State<MyselfPage> {
   }
 
   static logOut(BuildContext context, object) {
-    return Navigator.of(context).pushNamed("login_page");
+    return Navigator.of(context).pushReplacementNamed("login_page");
   }
 }

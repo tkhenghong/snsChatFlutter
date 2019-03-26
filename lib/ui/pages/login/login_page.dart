@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:date_format/date_format.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -21,20 +22,22 @@ class LoginPageState extends State<LoginPage> {
   FirebaseUser firebaseUser;
 
   Future<FirebaseUser> _signIn() async {
+    showCenterLoadingIndicator(context);
     // An average user use his/her Google account to sign in.
     GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
     // Authenticate the user in Google
-    GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+    GoogleSignInAuthentication googleSignInAuthentication =
+        await googleSignInAccount.authentication;
 
     // Create credentials
     credential = GoogleAuthProvider.getCredential(
         idToken: googleSignInAuthentication.idToken,
-        accessToken: googleSignInAuthentication.accessToken
-    );
+        accessToken: googleSignInAuthentication.accessToken);
 
     // Create the user in Firebase
     firebaseUser = await _firebaseAuth.signInWithCredential(credential);
     print("signed in " + firebaseUser.displayName);
+    Navigator.pop(context); // Kill loading screen
     return firebaseUser;
   }
 
@@ -83,7 +86,19 @@ class LoginPageState extends State<LoginPage> {
                 ),
               ),
               RaisedButton(
-                onPressed: () => goToVerifyPhoneNumber(),
+                onPressed: () {
+                  _signIn().then((FirebaseUser user) {
+                    print("user.displayName: " + user.displayName);
+                    print("user.email: " + user.email);
+                    print("user.isAnonymous: " + user.isAnonymous.toString());
+                    print("user.isEmailVerified: " +
+                        user.isEmailVerified.toString());
+                    print("user.phoneNumber: " + user.phoneNumber.toString());
+                    print("user.photoUrl: " + user.photoUrl.toString());
+                    print("user.uid: " + user.uid.toString());
+                    goToVerifyPhoneNumber();
+                  });
+                },
                 textColor: Colors.white,
                 color: Colors.black,
                 highlightColor: Colors.black54,

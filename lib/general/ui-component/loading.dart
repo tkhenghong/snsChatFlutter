@@ -24,3 +24,14 @@ void showLoading(BuildContext context) {
   );
 
 }
+
+void showCenterLoadingIndicator(BuildContext context) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      }
+  );
+}

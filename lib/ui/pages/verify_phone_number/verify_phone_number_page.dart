@@ -27,16 +27,16 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
               text: TextSpan(
                   style: TextStyle(inherit: true, color: Colors.black),
                   children: <TextSpan>[
-                    TextSpan(text: 'We have sent and SMS with a code to '),
-                    TextSpan(
-                        text: phoneNo.toString(),
-                        style: TextStyle(
-                            inherit: true, fontWeight: FontWeight.bold)),
+                TextSpan(text: 'We have sent and SMS with a code to '),
+                TextSpan(
+                    text: phoneNo.toString(),
+                    style:
+                        TextStyle(inherit: true, fontWeight: FontWeight.bold)),
 // TODO: Add other types of error messages for different situations
 //                TextSpan(text: 'Can\'t send an SMS with your code because you\'ve tried to register '),
 //                TextSpan(text: phoneNo.toString(), style: TextStyle(inherit: true, fontWeight: FontWeight.bold)),
 //                TextSpan(text: ' recently. Request a call or wait before requesting an SMS. '),
-                  ])),
+              ])),
           FlatButton(
               onPressed: () {},
               child: Text(
@@ -51,9 +51,10 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
                   onSubmit: (pin) {
                     showLoading(context);
                     print('PIN number is: ' + pin);
-                    Future.delayed(Duration(seconds: 1), () { //Delay 1 second to simulate something loading
+                    Future.delayed(Duration(seconds: 1), () {
+                      //Delay 1 second to simulate something loading
                       print('Loaded 3 seconds.');
-                      Navigator.pop(context); //pop dialog
+                      Navigator.pop(context); //pop loading dialog
                       this.goToChatGroupList();
                     });
                   },
@@ -81,6 +82,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
 
   goToChatGroupList() {
     //Remove all pages and make chat_group_list_page be the only page
-    Navigator.of(context).pushNamedAndRemoveUntil("tabs_page", (Route<dynamic> route) => false);
+    Navigator.of(context)
+        .pushNamedAndRemoveUntil("tabs_page", (Route<dynamic> route) => false);
   }
 }
