@@ -3,6 +3,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
+import 'package:snschat_flutter/state/bloc/user/UserBloc.dart';
+import 'package:snschat_flutter/state/bloc/user/UserEvents.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:date_format/date_format.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -20,6 +22,7 @@ class LoginPageState extends State<LoginPage> {
   final GoogleSignIn googleSignIn = new GoogleSignIn();
   AuthCredential credential;
   FirebaseUser firebaseUser;
+  UserBloc userBloc = UserBloc();
 
   Future<FirebaseUser> _signIn() async {
     showCenterLoadingIndicator(context);
@@ -37,6 +40,7 @@ class LoginPageState extends State<LoginPage> {
     // Create the user in Firebase
     firebaseUser = await _firebaseAuth.signInWithCredential(credential);
     print("signed in " + firebaseUser.displayName);
+    userBloc.dispatch(UserLogin(googleSignIn: googleSignIn));
     Navigator.pop(context); // Kill loading screen
     return firebaseUser;
   }
