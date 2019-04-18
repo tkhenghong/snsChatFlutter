@@ -7,8 +7,6 @@ import 'package:snschat_flutter/state/bloc/user/UserBloc.dart';
 import 'package:snschat_flutter/state/bloc/user/UserEvents.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:date_format/date_format.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -18,31 +16,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  final GoogleSignIn googleSignIn = new GoogleSignIn();
-  AuthCredential credential;
-  FirebaseUser firebaseUser;
   UserBloc userBloc = UserBloc();
 
-  Future<FirebaseUser> _signIn() async {
+  _signIn() async {
     showCenterLoadingIndicator(context);
-    // An average user use his/her Google account to sign in.
-    GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
-    // Authenticate the user in Google
-    GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount.authentication;
-
-    // Create credentials
-    credential = GoogleAuthProvider.getCredential(
-        idToken: googleSignInAuthentication.idToken,
-        accessToken: googleSignInAuthentication.accessToken);
-
-    // Create the user in Firebase
-    firebaseUser = await _firebaseAuth.signInWithCredential(credential);
-    print("signed in " + firebaseUser.displayName);
-    userBloc.dispatch(UserLogin(googleSignIn: googleSignIn));
+    userBloc.dispatch(UserLogin());
     Navigator.pop(context); // Kill loading screen
-    return firebaseUser;
   }
 
   requestPermissions() async {
@@ -91,17 +70,18 @@ class LoginPageState extends State<LoginPage> {
               ),
               RaisedButton(
                 onPressed: () {
-                  _signIn().then((FirebaseUser user) {
-                    print("user.displayName: " + user.displayName);
-                    print("user.email: " + user.email);
-                    print("user.isAnonymous: " + user.isAnonymous.toString());
-                    print("user.isEmailVerified: " +
-                        user.isEmailVerified.toString());
-                    print("user.phoneNumber: " + user.phoneNumber.toString());
-                    print("user.photoUrl: " + user.photoUrl.toString());
-                    print("user.uid: " + user.uid.toString());
+                  _signIn();
+//                      .then((FirebaseUser user) {
+//                    print("user.displayName: " + user.displayName);
+//                    print("user.email: " + user.email);
+//                    print("user.isAnonymous: " + user.isAnonymous.toString());
+//                    print("user.isEmailVerified: " +
+//                        user.isEmailVerified.toString());
+//                    print("user.phoneNumber: " + user.phoneNumber.toString());
+//                    print("user.photoUrl: " + user.photoUrl.toString());
+//                    print("user.uid: " + user.uid.toString());
                     goToVerifyPhoneNumber();
-                  });
+//                  });
                 },
                 textColor: Colors.white,
                 color: Colors.black,
