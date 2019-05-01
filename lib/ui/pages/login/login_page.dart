@@ -1,10 +1,18 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+//import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:redux/redux.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
-import 'package:snschat_flutter/state/bloc/user/UserBloc.dart';
-import 'package:snschat_flutter/state/bloc/user/UserEvents.dart';
+import 'package:snschat_flutter/state/model/model.dart';
+import 'package:snschat_flutter/state/redux/actions.dart';
+
+//import 'package:snschat_flutter/state/bloc/user/UserBloc.dart';
+//import 'package:snschat_flutter/state/bloc/user/UserEvents.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:date_format/date_format.dart';
 
@@ -16,12 +24,29 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  UserBloc userBloc = UserBloc();
+//  UserBloc userBloc = UserBloc();
+  GoogleSignIn googleSignIn = new GoogleSignIn();
+  FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  FirebaseUser firebaseUser;
 
-  _signIn() async {
+  Future<FirebaseUser> _signIn() async {
     showCenterLoadingIndicator(context);
-    userBloc.dispatch(UserLogin());
-    Navigator.pop(context); // Kill loading screen
+//    userBloc.dispatch(UserLogin(testing: "HAHAHA"));
+    // An average user use his/her Google account to sign in.
+    GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
+    // Authenticate the user in Google
+    GoogleSignInAuthentication googleSignInAuthentication =
+        await googleSignInAccount.authentication;
+
+    // Create credentials
+    AuthCredential credential = GoogleAuthProvider.getCredential(
+        idToken: googleSignInAuthentication.idToken,
+        accessToken: googleSignInAuthentication.accessToken);
+
+    // Create the user in Firebase
+    this.firebaseUser = await firebaseAuth.signInWithCredential(credential);
+    print("signed in " + firebaseUser.displayName);
+    return this.firebaseUser;
   }
 
   requestPermissions() async {
@@ -70,18 +95,17 @@ class LoginPageState extends State<LoginPage> {
               ),
               RaisedButton(
                 onPressed: () {
-                  _signIn();
-//                      .then((FirebaseUser user) {
-//                    print("user.displayName: " + user.displayName);
-//                    print("user.email: " + user.email);
-//                    print("user.isAnonymous: " + user.isAnonymous.toString());
-//                    print("user.isEmailVerified: " +
-//                        user.isEmailVerified.toString());
-//                    print("user.phoneNumber: " + user.phoneNumber.toString());
-//                    print("user.photoUrl: " + user.photoUrl.toString());
-//                    print("user.uid: " + user.uid.toString());
+                  _signIn().then((FirebaseUser user) {
+                    print("user.displayName: " + user.displayName);
+                    print("user.email: " + user.email);
+                    print("user.isAnonymous: " + user.isAnonymous.toString());
+                    print("user.isEmailVerified: " +
+                        user.isEmailVerified.toString());
+                    print("user.phoneNumber: " + user.phoneNumber.toString());
+                    print("user.photoUrl: " + user.photoUrl.toString());
+                    print("user.uid: " + user.uid.toString());
                     goToVerifyPhoneNumber();
-//                  });
+                  });
                 },
                 textColor: Colors.white,
                 color: Colors.black,
@@ -178,5 +202,40 @@ class LoginPageState extends State<LoginPage> {
 
   goToPrivacyNotice() {
     Navigator.of(context).pushNamed("privacy_notice_page");
+  }
+}
+
+// Redux
+// This class is used to control what to show to user from Redux store.
+// Almost implement like React Native actually
+class _ViewModel {
+  final User user;
+  final Function() userLogin;
+  final Function() userLogOut;
+
+  _ViewModel({
+    this.user,
+    this.userLogin,
+    this.userLogOut,
+  });
+
+  // Factory constructor
+  factory _ViewModel.create(Store<AppState> store) {
+    print('factory _ViewModel.create(Store<AppState> store)');
+    _userLogin() {
+      print('_userLogin()');
+      store.dispatch(UserLoginAction());
+    }
+
+    _userLogOut() {
+      print('_userLogOut()');
+      store.dispatch(UserLogOutAction());
+    }
+
+    return _ViewModel(
+      user: store.state.user,
+      userLogin: _userLogin,
+      userLogOut: _userLogOut,
+    );
   }
 }

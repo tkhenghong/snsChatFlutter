@@ -11,6 +11,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   GoogleSignIn googleSignIn = new GoogleSignIn();
   FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   FirebaseUser firebaseUser;
+  String testing = "None";
 
   @override
   // TODO: implement initialState
@@ -23,6 +24,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     print('UserBloc.dart mapEventToState()');
     if (event is UserLogin) {
       print('event is UserLogin');
+      testing = event.testing;
       signInUsingGoogle();
       yield UserLoggedIn();
     }
@@ -34,6 +36,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   signInUsingGoogle() async* {
+
     // An average user use his/her Google account to sign in.
     GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
     // Authenticate the user in Google

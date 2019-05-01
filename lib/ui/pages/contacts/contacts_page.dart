@@ -30,7 +30,7 @@ class ContactsPageState extends State<ContactsPage> {
   RefreshController _refreshController;
 
   @override
-  void initState() {
+  initState() {
     super.initState();
     _refreshController = new RefreshController();
   }
@@ -97,6 +97,7 @@ class ContactsPageState extends State<ContactsPage> {
             )),
         body: SmartRefresher(
           enablePullDown: false,
+          controller: _refreshController,
           child: ListView(
             children: widget.contactList.map((Contact contact) {
               return CheckboxListTile(
