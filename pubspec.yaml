@@ -15,6 +15,8 @@ environment:
 dependencies:
   bloc: ^0.11.1
   flutter_bloc: ^0.9.1
+  redux: ^3.0.0
+  flutter_redux: ^0.5.3
   equatable: ^0.2.3
   url_launcher: ^5.0.2
   date_format: ^1.0.6

@@ -93,7 +93,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         id: '65451fse56rsg23hre',
         name: 'Testing group',
         type: 'Group',
-        multimedia: Multimedia(
+        groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
           thumbnail: "thumbnail",
@@ -107,7 +107,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         id: 'tefuyjdhgverdjuygfaeriuyg',
         name: 'Testing group 2',
         type: 'Group',
-        multimedia: Multimedia(
+        groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
           thumbnail: "thumbnail",
@@ -121,7 +121,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         id: '345p98t7y34uithgf325',
         name: 'Testing group 3',
         type: 'Group',
-        multimedia: Multimedia(
+        groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
           thumbnail: "thumbnail",
@@ -135,7 +135,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         id: '5tg4p9o834huktyjf',
         name: 'Testing group 4',
         type: 'Group',
-        multimedia: Multimedia(
+        groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
           thumbnail: "thumbnail",
@@ -149,7 +149,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         id: 'er3glikuherjhklgb',
         name: 'Testing group 5',
         type: 'Group',
-        multimedia: Multimedia(
+        groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
           thumbnail: "thumbnail",
@@ -163,7 +163,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         id: '65451fsertglikuje56rsg23hre',
         name: 'Testing group 6',
         type: 'Group',
-        multimedia: Multimedia(
+        groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
           thumbnail: "thumbnail",
@@ -177,7 +177,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         id: '45t9op8iujhw54git',
         name: 'Testing group 7',
         type: 'Group',
-        multimedia: Multimedia(
+        groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
           thumbnail: "thumbnail",
@@ -191,7 +191,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         id: 'rtgyfbkuisne 98v',
         name: 'Testing group 8',
         type: 'Group',
-        multimedia: Multimedia(
+        groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
           thumbnail: "thumbnail",
@@ -205,7 +205,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         id: 't4rweg[09pompium',
         name: 'Testing group 9',
         type: 'Group',
-        multimedia: Multimedia(
+        groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
           thumbnail: "thumbnail",
@@ -219,7 +219,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         id: 'ty3pw9o8j87fct3-4q ',
         name: 'Testing group 10',
         type: 'Group',
-        multimedia: Multimedia(
+        groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
           thumbnail: "thumbnail",

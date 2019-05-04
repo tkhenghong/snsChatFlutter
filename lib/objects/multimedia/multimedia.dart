@@ -1,10 +1,13 @@
+import 'dart:typed_data';
+
 class Multimedia {
   // Image, Video, Gifs, Sticker, Recording, links
   String localUrl;
   String remoteUrl;
   String thumbnail;
+  Uint8List imageData;
 
-  Multimedia({this.localUrl, this.remoteUrl, this.thumbnail});
+  Multimedia({this.localUrl, this.remoteUrl, this.thumbnail, this.imageData});
 // KS put
 // mediaCheckPoint
 // mediaPercentage

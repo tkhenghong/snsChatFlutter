@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_group_list/chat_group_list_page.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
-import 'package:snschat_flutter/ui/pages/contacts/contacts_page.dart';
+import 'package:snschat_flutter/ui/pages/contacts/select_contacts_page.dart';
 import 'package:snschat_flutter/ui/pages/login/login_page.dart';
 import 'package:snschat_flutter/ui/pages/myself/myself_page.dart';
 import 'package:snschat_flutter/ui/pages/privacy_notice/privacy_notice_page.dart';
@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
         "myself_page": (_) => new MyselfPage(),
         "chat_room_page": (_) => new ChatRoomPage(),
         "chat_info_page": (_) => new ChatInfoPage(),
-        "contacts_page": (_) => new ContactsPage(),
+        "contacts_page": (_) => new SelectContactsPage(),
       },
     );
   }

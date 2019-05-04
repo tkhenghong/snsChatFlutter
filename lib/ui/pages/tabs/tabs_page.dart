@@ -2,7 +2,7 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_group_list/chat_group_list_page.dart';
-import 'package:snschat_flutter/ui/pages/contacts/contacts_page.dart';
+import 'package:snschat_flutter/ui/pages/contacts/select_contacts_page.dart';
 import 'package:snschat_flutter/ui/pages/myself/myself_page.dart';
 import 'package:snschat_flutter/ui/pages/scan_qr_code/scan_qr_code_page.dart';
 import 'dart:math' as math;
@@ -135,7 +135,7 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin {
                   child: Icon(icons[index], color: foregroundColor),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => ContactsPage(
+                        builder: (context) => SelectContactsPage(
                             chatGroupType: chatTitles[index],
                             contactCheckBoxes: contactCheckBoxes,
                             contactList: contactList)));

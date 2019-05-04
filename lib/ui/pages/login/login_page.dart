@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
@@ -31,21 +33,21 @@ class LoginPageState extends State<LoginPage> {
 
   Future<FirebaseUser> _signIn() async {
     showCenterLoadingIndicator(context);
-//    userBloc.dispatch(UserLogin(testing: "HAHAHA"));
-    // An average user use his/her Google account to sign in.
-    GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
-    // Authenticate the user in Google
-    GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount.authentication;
-
-    // Create credentials
-    AuthCredential credential = GoogleAuthProvider.getCredential(
-        idToken: googleSignInAuthentication.idToken,
-        accessToken: googleSignInAuthentication.accessToken);
-
-    // Create the user in Firebase
-    this.firebaseUser = await firebaseAuth.signInWithCredential(credential);
-    print("signed in " + firebaseUser.displayName);
+//    // userBloc.dispatch(UserLogin(testing: "HAHAHA"));
+//    // An average user use his/her Google account to sign in.
+//    GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
+//    // Authenticate the user in Google
+//    GoogleSignInAuthentication googleSignInAuthentication =
+//        await googleSignInAccount.authentication;
+//
+//    // Create credentials
+//    AuthCredential credential = GoogleAuthProvider.getCredential(
+//        idToken: googleSignInAuthentication.idToken,
+//        accessToken: googleSignInAuthentication.accessToken);
+//
+//    // Create the user in Firebase
+//    this.firebaseUser = await firebaseAuth.signInWithCredential(credential);
+//    print("signed in " + firebaseUser.displayName);
     return this.firebaseUser;
   }
 
@@ -96,14 +98,14 @@ class LoginPageState extends State<LoginPage> {
               RaisedButton(
                 onPressed: () {
                   _signIn().then((FirebaseUser user) {
-                    print("user.displayName: " + user.displayName);
-                    print("user.email: " + user.email);
-                    print("user.isAnonymous: " + user.isAnonymous.toString());
-                    print("user.isEmailVerified: " +
-                        user.isEmailVerified.toString());
-                    print("user.phoneNumber: " + user.phoneNumber.toString());
-                    print("user.photoUrl: " + user.photoUrl.toString());
-                    print("user.uid: " + user.uid.toString());
+//                    print("user.displayName: " + user.displayName);
+//                    print("user.email: " + user.email);
+//                    print("user.isAnonymous: " + user.isAnonymous.toString());
+//                    print("user.isEmailVerified: " +
+//                        user.isEmailVerified.toString());
+//                    print("user.phoneNumber: " + user.phoneNumber.toString());
+//                    print("user.photoUrl: " + user.photoUrl.toString());
+//                    print("user.uid: " + user.uid.toString());
                     goToVerifyPhoneNumber();
                   });
                 },

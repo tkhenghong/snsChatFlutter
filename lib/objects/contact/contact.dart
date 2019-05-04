@@ -1,6 +1,6 @@
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 
-class Contact {
+class UserContact {
   String id;
   String displayName;
   String realName;
@@ -10,7 +10,7 @@ class Contact {
   bool block;
   Multimedia photo;
 
-  Contact(
+  UserContact(
       {this.id,
       this.displayName,
       this.realName,

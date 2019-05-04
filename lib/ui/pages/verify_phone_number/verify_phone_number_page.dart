@@ -51,7 +51,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
                   onSubmit: (pin) {
                     showLoading(context);
                     print('PIN number is: ' + pin);
-                    Future.delayed(Duration(seconds: 1), () {
+                    Future.delayed(Duration(milliseconds: 100), () {
                       //Delay 1 second to simulate something loading
                       print('Loaded 3 seconds.');
                       Navigator.pop(context); //pop loading dialog
