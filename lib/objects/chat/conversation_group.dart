@@ -1,4 +1,5 @@
 // No enum in Dart native yet
+import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
 import 'package:snschat_flutter/objects/contact/contact.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
@@ -7,7 +8,7 @@ class Conversation {
   // Single conversation, group conversation & broadcast channel
   String id;
   String name;
-  String type;
+  ChatGroupType type;
   Multimedia groupPhoto;
   String description;
   bool block;

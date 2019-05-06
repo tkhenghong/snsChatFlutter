@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
 import 'package:snschat_flutter/general/ui-component/list-view.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
@@ -92,7 +93,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     Conversation(
         id: '65451fse56rsg23hre',
         name: 'Testing group',
-        type: 'Group',
+        type: ChatGroupType.Group,
         groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
@@ -106,7 +107,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     Conversation(
         id: 'tefuyjdhgverdjuygfaeriuyg',
         name: 'Testing group 2',
-        type: 'Group',
+        type: ChatGroupType.Group,
         groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
@@ -120,7 +121,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     Conversation(
         id: '345p98t7y34uithgf325',
         name: 'Testing group 3',
-        type: 'Group',
+        type: ChatGroupType.Group,
         groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
@@ -134,7 +135,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     Conversation(
         id: '5tg4p9o834huktyjf',
         name: 'Testing group 4',
-        type: 'Group',
+        type: ChatGroupType.Group,
         groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
@@ -148,7 +149,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     Conversation(
         id: 'er3glikuherjhklgb',
         name: 'Testing group 5',
-        type: 'Group',
+        type: ChatGroupType.Group,
         groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
@@ -162,7 +163,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     Conversation(
         id: '65451fsertglikuje56rsg23hre',
         name: 'Testing group 6',
-        type: 'Group',
+        type: ChatGroupType.Group,
         groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
@@ -176,7 +177,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     Conversation(
         id: '45t9op8iujhw54git',
         name: 'Testing group 7',
-        type: 'Group',
+        type: ChatGroupType.Group,
         groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
@@ -190,7 +191,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     Conversation(
         id: 'rtgyfbkuisne 98v',
         name: 'Testing group 8',
-        type: 'Group',
+        type: ChatGroupType.Group,
         groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
@@ -204,7 +205,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     Conversation(
         id: 't4rweg[09pompium',
         name: 'Testing group 9',
-        type: 'Group',
+        type: ChatGroupType.Group,
         groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",
@@ -218,7 +219,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     Conversation(
         id: 'ty3pw9o8j87fct3-4q ',
         name: 'Testing group 10',
-        type: 'Group',
+        type: ChatGroupType.Group,
         groupPhoto: Multimedia(
           localUrl: "Test local url",
           remoteUrl: "Test remote url",

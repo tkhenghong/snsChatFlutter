@@ -28,11 +28,13 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   List<Contact> selectedContacts = [];
   String title = "";
   RefreshController _refreshController;
+  ScrollController scrollController = new ScrollController();
 
   @override
   initState() {
     super.initState();
     _refreshController = new RefreshController();
+    scrollController = new ScrollController();
   }
 
   @override
@@ -98,6 +100,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           enablePullDown: false,
           controller: _refreshController,
           child: ListView(
+
+            controller: scrollController,
             children: widget.contactList.map((Contact contact) {
               return Container(
                 child: Column(
@@ -131,8 +135,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                         });
                       },
                       secondary: CircleAvatar(
-                        backgroundImage: MemoryImage(contact.avatar),
-                        child: contact.avatar == null ? Text(contact.displayName[0]): null,
+                        backgroundImage: !contact.avatar.isEmpty ? MemoryImage(contact.avatar): NetworkImage(''),
+                        child: contact.avatar.isEmpty ? Text(contact.displayName[0]): Text(''),
                         radius: 20.0,
                       ),
                     )
