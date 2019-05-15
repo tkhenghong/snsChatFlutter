@@ -54,13 +54,13 @@ class PageListViewState extends State<PageListView> {
         enablePullDown: false,
         controller: _refreshController,
         // Very important, without this whole thing won't work. Check the examples in the plugins
-        onRefresh: (up) {
-          if (up) {
-            Future.delayed(Duration(seconds: 1), () {
-              //Delay 1 second to simulate something loading
-              _refreshController.sendBack(up, RefreshStatus.completed);
-            });
-          }
+        onRefresh: () {
+          //Delay 1 second to simulate something loading
+          Future.delayed(Duration(seconds: 1), () {
+            print('Delayed 1 second.');
+            _refreshController.refreshCompleted();
+//              _refreshController.sendBack(up, RefreshStatus.completed); // Deprecated
+          });
         },
         onOffsetChange: (result, change) {
           print("onOffsetChange......");
@@ -74,5 +74,11 @@ class PageListViewState extends State<PageListView> {
               PageListItem listItem = widget.array[index];
               return new PageListTile(listItem, context);
             }));
+  }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _refreshController.dispose();
+    super.dispose();
   }
 }

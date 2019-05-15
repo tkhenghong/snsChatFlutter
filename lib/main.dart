@@ -6,7 +6,7 @@ import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_group_list/chat_group_list_page.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
-import 'package:snschat_flutter/ui/pages/contacts/select_contacts_page.dart';
+import 'package:snschat_flutter/ui/pages/select_contacts/select_contacts_page.dart';
 import 'package:snschat_flutter/ui/pages/login/login_page.dart';
 import 'package:snschat_flutter/ui/pages/myself/myself_page.dart';
 import 'package:snschat_flutter/ui/pages/privacy_notice/privacy_notice_page.dart';

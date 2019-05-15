@@ -16,7 +16,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (event is UserSignInEvent) {
       print('UserSignInEvent');
       signInUsingGoogle(event);
-
       yield currentState;
     } else if (event is UserSignOutEvent) {
       print('UserSignOutEvent');
@@ -50,7 +49,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     event.callback(); // Use callback method to signal UI change
   }
 
-  signOut(UserSignOutEvent event) async* {
+  signOut(UserSignOutEvent event) async {
     print('signOut()');
     currentState.userState.googleSignIn.signOut();
   }

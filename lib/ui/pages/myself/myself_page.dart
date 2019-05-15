@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snschat_flutter/general/ui-component/list-view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
+import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 
 class MyselfPage extends StatefulWidget {
   @override
@@ -11,8 +14,13 @@ class MyselfPage extends StatefulWidget {
 }
 
 class MyselfPageState extends State<MyselfPage> {
+  static WholeAppBloc wholeAppBloc;
+
   @override
   Widget build(BuildContext context) {
+    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
+    wholeAppBloc = _wholeAppBloc;
+
     return new PageListView(array: listItems, context: context);
   }
 
@@ -36,7 +44,9 @@ class MyselfPageState extends State<MyselfPage> {
     PageListItem(
         title: Text("Logout"),
         leading: Icon(Icons.exit_to_app),
-        onTap: (context, object) => logOut(context, object)),
+        onTap: (context, object) {
+          logOut(context, object);
+        }),
   ];
 
   static goToSettingsPage(BuildContext context, object) {
@@ -44,6 +54,7 @@ class MyselfPageState extends State<MyselfPage> {
   }
 
   static logOut(BuildContext context, object) {
+    wholeAppBloc.dispatch(UserSignOutEvent());
     return Navigator.of(context).pushReplacementNamed("login_page");
   }
 }

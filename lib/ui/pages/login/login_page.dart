@@ -23,9 +23,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  GoogleSignIn googleSignIn = new GoogleSignIn();
-  FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-  FirebaseUser firebaseUser;
   WholeAppBloc wholeAppBloc;
 
   _signIn() async {

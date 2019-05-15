@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
 import 'package:snschat_flutter/general/ui-component/select_image.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
-import 'package:snschat_flutter/objects/contact/contact.dart';
+import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
 

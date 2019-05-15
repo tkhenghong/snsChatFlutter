@@ -1,6 +1,6 @@
 // No enum in Dart native yet
 import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
-import 'package:snschat_flutter/objects/contact/contact.dart';
+import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 
