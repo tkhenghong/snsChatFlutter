@@ -14,26 +14,26 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   Stream<WholeAppState> mapEventToState(WholeAppEvent event) async* {
     print('State management center!');
     if (event is UserSignInEvent) {
-      print('UserSignInEvent');
       signInUsingGoogle(event);
       yield currentState;
     } else if (event is UserSignOutEvent) {
-      print('UserSignOutEvent');
       signOut(event);
+      yield currentState;
+    } else if (event is AddConversationEvent) {
+      addConversation(event);
       yield currentState;
     }
   }
 
   signInUsingGoogle(UserSignInEvent event) async {
-    print('signInUsingGoogle()');
     // An average user use his/her Google account to sign in.
     GoogleSignInAccount googleSignInAccount =
         await currentState.userState.googleSignIn.signIn();
     // Authenticate the user in Google
-    print('Checkpoint 1');
+
     GoogleSignInAuthentication googleSignInAuthentication =
         await googleSignInAccount.authentication;
-    print('Checkpoint 2');
+
     // Create credentials
     AuthCredential credential = GoogleAuthProvider.getCredential(
         idToken: googleSignInAuthentication.idToken,
@@ -43,14 +43,15 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     currentState.userState.firebaseUser = await currentState
         .userState.firebaseAuth
         .signInWithCredential(credential);
-    print('Checkpoint 3');
 
-    print("signed in " + currentState.userState.firebaseUser.displayName);
     event.callback(); // Use callback method to signal UI change
   }
 
   signOut(UserSignOutEvent event) async {
-    print('signOut()');
     currentState.userState.googleSignIn.signOut();
+  }
+
+  addConversation(AddConversationEvent event) async {
+    currentState.conversationList.add(event.conversation);
   }
 }

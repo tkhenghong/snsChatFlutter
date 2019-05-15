@@ -38,7 +38,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   Widget build(BuildContext context) {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
-    List<PageListItem> listItems = [];
+//    List<PageListItem> listItems = [];
     return BlocBuilder(
       bloc: wholeAppBloc,
       builder: (context, WholeAppState state) {
@@ -60,19 +60,14 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                 },
                 // Unable to put PageView under child properties, so have to get manual
                 child: new ListView.builder(
-                    itemCount: listItems.length,
+                    itemCount: state.conversationList.length,
                     physics: const AlwaysScrollableScrollPhysics(),
                     //suggestion from https://github.com/flutter/flutter/issues/22314
                     itemBuilder: (BuildContext content, int index) {
-                      print("Checkpoint 1");
-                      Conversation conversation = state.conversationList[index];
-                      print("Checkpoint 2");
-                      listItems.add(
-                          mapConversationToPageListTile(conversation, context));
-                      print("Checkpoint 3");
-                      PageListItem listItem = listItems[index];
-                      print("Checkpoint 4");
-                      return new PageListTile(listItem, context);
+                      return new PageListTile(
+                          mapConversationToPageListTile(
+                              state.conversationList[index], context),
+                          context);
                     })));
       },
     );
@@ -81,6 +76,9 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   mapConversationToPageListTile(
       Conversation conversation, BuildContext context2) {
     print("mapConversationToPageListTile()");
+
+//    FileImage(conversation.groupPhoto.imageFile) || MemoryImage(conversation.groupPhoto.imageData)
+
     return PageListItem(
         title: Hero(
           tag: conversation.name,
@@ -91,12 +89,12 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           tag: conversation.id,
           child: CircleAvatar(
             backgroundColor: Colors.white,
-            backgroundImage: AssetImage(
-              "lib/ui/images/group2013.jpg",
-            ),
+            backgroundImage: MemoryImage(conversation.groupPhoto.imageData),
           ),
         ),
-        trailing: Text(conversation.unreadMessage.count.toString()),
+        trailing: Text(conversation.unreadMessage.count.toString() == "0"
+            ? ""
+            : conversation.unreadMessage.count.toString()),
         onTap: (BuildContext context, object) {
           print('onTap() ListTile');
           // Send argument need to use the old way
@@ -106,148 +104,4 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                   builder: ((context) => ChatRoomPage(conversation))));
         });
   }
-
-// Test data: 240
-//  List<Conversation> conversations = [
-//    Conversation(
-//        id: '65451fse56rsg23hre',
-//        name: 'Testing group',
-//        type: ChatGroupType.Group,
-//        groupPhoto: Multimedia(
-//          localUrl: "Test local url",
-//          remoteUrl: "Test remote url",
-//          thumbnail: "thumbnail",
-//        ),
-//        description: 'Testing description',
-//        block: false,
-//        notificationExpireDate: 0,
-//        unreadMessage: UnreadMessage(
-//            count: 5, date: 8743895437, lastMessage: "Testing last message")),
-//    Conversation(
-//        id: 'tefuyjdhgverdjuygfaeriuyg',
-//        name: 'Testing group 2',
-//        type: ChatGroupType.Group,
-//        groupPhoto: Multimedia(
-//          localUrl: "Test local url",
-//          remoteUrl: "Test remote url",
-//          thumbnail: "thumbnail",
-//        ),
-//        description: 'Testing description',
-//        block: false,
-//        notificationExpireDate: 0,
-//        unreadMessage: UnreadMessage(
-//            count: 5, date: 8743895437, lastMessage: "Testing last message")),
-//    Conversation(
-//        id: '345p98t7y34uithgf325',
-//        name: 'Testing group 3',
-//        type: ChatGroupType.Group,
-//        groupPhoto: Multimedia(
-//          localUrl: "Test local url",
-//          remoteUrl: "Test remote url",
-//          thumbnail: "thumbnail",
-//        ),
-//        description: 'Testing description',
-//        block: false,
-//        notificationExpireDate: 0,
-//        unreadMessage: UnreadMessage(
-//            count: 5, date: 8743895437, lastMessage: "Testing last message")),
-//    Conversation(
-//        id: '5tg4p9o834huktyjf',
-//        name: 'Testing group 4',
-//        type: ChatGroupType.Group,
-//        groupPhoto: Multimedia(
-//          localUrl: "Test local url",
-//          remoteUrl: "Test remote url",
-//          thumbnail: "thumbnail",
-//        ),
-//        description: 'Testing description',
-//        block: false,
-//        notificationExpireDate: 0,
-//        unreadMessage: UnreadMessage(
-//            count: 5, date: 8743895437, lastMessage: "Testing last message")),
-//    Conversation(
-//        id: 'er3glikuherjhklgb',
-//        name: 'Testing group 5',
-//        type: ChatGroupType.Group,
-//        groupPhoto: Multimedia(
-//          localUrl: "Test local url",
-//          remoteUrl: "Test remote url",
-//          thumbnail: "thumbnail",
-//        ),
-//        description: 'Testing description',
-//        block: false,
-//        notificationExpireDate: 0,
-//        unreadMessage: UnreadMessage(
-//            count: 5, date: 8743895437, lastMessage: "Testing last message")),
-//    Conversation(
-//        id: '65451fsertglikuje56rsg23hre',
-//        name: 'Testing group 6',
-//        type: ChatGroupType.Group,
-//        groupPhoto: Multimedia(
-//          localUrl: "Test local url",
-//          remoteUrl: "Test remote url",
-//          thumbnail: "thumbnail",
-//        ),
-//        description: 'Testing description',
-//        block: false,
-//        notificationExpireDate: 0,
-//        unreadMessage: UnreadMessage(
-//            count: 5, date: 8743895437, lastMessage: "Testing last message")),
-//    Conversation(
-//        id: '45t9op8iujhw54git',
-//        name: 'Testing group 7',
-//        type: ChatGroupType.Group,
-//        groupPhoto: Multimedia(
-//          localUrl: "Test local url",
-//          remoteUrl: "Test remote url",
-//          thumbnail: "thumbnail",
-//        ),
-//        description: 'Testing description',
-//        block: false,
-//        notificationExpireDate: 0,
-//        unreadMessage: UnreadMessage(
-//            count: 5, date: 8743895437, lastMessage: "Testing last message")),
-//    Conversation(
-//        id: 'rtgyfbkuisne 98v',
-//        name: 'Testing group 8',
-//        type: ChatGroupType.Group,
-//        groupPhoto: Multimedia(
-//          localUrl: "Test local url",
-//          remoteUrl: "Test remote url",
-//          thumbnail: "thumbnail",
-//        ),
-//        description: 'Testing description',
-//        block: false,
-//        notificationExpireDate: 0,
-//        unreadMessage: UnreadMessage(
-//            count: 5, date: 8743895437, lastMessage: "Testing last message")),
-//    Conversation(
-//        id: 't4rweg[09pompium',
-//        name: 'Testing group 9',
-//        type: ChatGroupType.Group,
-//        groupPhoto: Multimedia(
-//          localUrl: "Test local url",
-//          remoteUrl: "Test remote url",
-//          thumbnail: "thumbnail",
-//        ),
-//        description: 'Testing description',
-//        block: false,
-//        notificationExpireDate: 0,
-//        unreadMessage: UnreadMessage(
-//            count: 5, date: 8743895437, lastMessage: "Testing last message")),
-//    Conversation(
-//        id: 'ty3pw9o8j87fct3-4q ',
-//        name: 'Testing group 10',
-//        type: ChatGroupType.Group,
-//        groupPhoto: Multimedia(
-//          localUrl: "Test local url",
-//          remoteUrl: "Test remote url",
-//          thumbnail: "thumbnail",
-//        ),
-//        description: 'Testing description',
-//        block: false,
-//        notificationExpireDate: 0,
-//        unreadMessage: UnreadMessage(
-//            count: 5, date: 8743895437, lastMessage: "Testing last message")),
-//  ];
 }

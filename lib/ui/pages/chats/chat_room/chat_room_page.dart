@@ -77,9 +77,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                           child: CircleAvatar(
                             radius: 20.0,
                             backgroundColor: Colors.white,
-                            backgroundImage: AssetImage(
-                              "lib/ui/images/group2013.jpg",
-                            ),
+                            backgroundImage: MemoryImage(widget._conversation.groupPhoto.imageData),
                           ),
                         ),
                         Padding(

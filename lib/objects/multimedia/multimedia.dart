@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 class Multimedia {
@@ -6,8 +7,9 @@ class Multimedia {
   String remoteUrl;
   String thumbnail;
   Uint8List imageData;
+  File imageFile;
 
-  Multimedia({this.localUrl, this.remoteUrl, this.thumbnail, this.imageData});
+  Multimedia({this.localUrl, this.remoteUrl, this.thumbnail, this.imageData, this.imageFile});
 // KS put
 // mediaCheckPoint
 // mediaPercentage

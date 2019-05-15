@@ -4,11 +4,15 @@ import 'dart:math';
 
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
 import 'package:snschat_flutter/general/ui-component/select_image.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
+import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
+import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
+import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
 
 import 'package:image_picker/image_picker.dart';
@@ -31,6 +35,7 @@ class GroupNamePageState extends State<GroupNamePage> {
 
   @override
   Widget build(BuildContext context) {
+    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     return Scaffold(
         appBar: AppBar(
             title: Row(
@@ -63,14 +68,15 @@ class GroupNamePageState extends State<GroupNamePage> {
                   child: Icon(Icons.check),
                 ),
                 onTap: () {
-                  Conversation conversation = addConversation();
-
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                      'tabs_page', (Route<dynamic> route) => false);
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: ((context) => ChatRoomPage(conversation))));
+                  addConversation().then((conversation) {
+                    _wholeAppBloc.dispatch(AddConversationEvent(conversation: conversation));
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                        'tabs_page', (Route<dynamic> route) => false);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: ((context) => ChatRoomPage(conversation))));
+                  });
                 },
               ),
             ),
@@ -182,7 +188,7 @@ class GroupNamePageState extends State<GroupNamePage> {
     return newId;
   }
 
-  Conversation addConversation() {
+  Future<Conversation> addConversation() async {
     Conversation conversation = new Conversation();
     int newId = generateNewId();
     conversation.id = newId.toString();
@@ -218,6 +224,17 @@ class GroupNamePageState extends State<GroupNamePage> {
     conversation.description = '';
     conversation.groupPhoto = Multimedia(
         imageData: null, localUrl: null, remoteUrl: null, thumbnail: null);
+    conversation.unreadMessage = UnreadMessage(
+      count: 0, date: 0, lastMessage: ""
+    );
+    conversation.groupPhoto = Multimedia(
+      remoteUrl: "",
+      localUrl: _image.path,
+      imageData: await _image.readAsBytes(),
+      imageFile: _image,
+      thumbnail: ""
+    );
+
     return conversation;
   }
 

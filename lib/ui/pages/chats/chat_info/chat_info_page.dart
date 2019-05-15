@@ -68,10 +68,11 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                     ),
                     background: Hero(
                       tag: widget._conversation.id,
-                      child: Image.asset(
-                        "lib/ui/images/group2013.jpg",
-                        fit: BoxFit.cover,
-                      ),
+                      child: Image.memory(widget._conversation.groupPhoto.imageData),
+//                      Image.asset(
+//                        "lib/ui/images/group2013.jpg",
+//                        fit: BoxFit.cover,
+//                      ),
                     )),
                 actions: <Widget>[
                   IconButton(
