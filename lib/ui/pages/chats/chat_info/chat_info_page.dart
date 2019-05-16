@@ -38,7 +38,6 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                 floating: true,
                 pinned: true,
                 titleSpacing: 0.0,
-
                 expandedHeight: 250.0,
                 flexibleSpace: FlexibleSpaceBar(
                     title: Hero(
@@ -48,31 +47,29 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             CustomDialogs customDialog = new CustomDialogs(
                                 context: context,
                                 title: "Edit Group Name",
-                                description:
-                                    "Edit the group name below. Press OK to save.",
+                                description: "Edit the group name below. Press OK to save.",
                                 value: widget._conversation.name);
-                            String groupName =
-                                await customDialog.showConfirmationDialog();
-                            print("groupName: " + groupName);
+                            String groupName = await customDialog.showConfirmationDialog();
                             if (widget._conversation.name != groupName) {
                               widget._conversation.name = groupName;
                             }
-                            print("widget._conversation.name: " +
-                                widget._conversation.name);
                           },
                           child: Text(
-                            widget._conversation.name,
-                            style:
-                                TextStyle(color: Colors.white),
-                          )),
+                              widget._conversation.name,
+                              style: TextStyle(color: Colors.white),
+                              overflow: TextOverflow.fade,
+                              softWrap: true,
+                            ),
+                          ),
                     ),
                     background: Hero(
                       tag: widget._conversation.id,
-                      child: Image.memory(widget._conversation.groupPhoto.imageData),
-//                      Image.asset(
-//                        "lib/ui/images/group2013.jpg",
-//                        fit: BoxFit.cover,
-//                      ),
+                      child: widget._conversation.groupPhoto.imageData.length != 0
+                          ? Image.memory(widget._conversation.groupPhoto.imageData)
+                          : Image.asset(
+                              'lib/ui/icons/default_group_photo.jpg',
+//                              fit: BoxFit.cover,
+                            ),
                     )),
                 actions: <Widget>[
                   IconButton(
@@ -83,8 +80,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             toastLength: Toast.LENGTH_SHORT,
                             gravity: ToastGravity.BOTTOM,
                             timeInSecForIos: 1,
-                            fontSize: 16.0
-                        );
+                            fontSize: 16.0);
                       })
                 ],
               ),
@@ -115,11 +111,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                   padding: EdgeInsets.only(top: 5.0),
                                 ),
                                 Text(
-                                  widget._conversation.description == ""
-                                      ? "Add Group description"
-                                      : widget._conversation.description,
-                                  style: TextStyle(
-                                      fontSize: 17.0, color: Colors.black54),
+                                  widget._conversation.description == "" ? "Add Group description" : widget._conversation.description,
+                                  style: TextStyle(fontSize: 17.0, color: Colors.black54),
                                 ),
                                 Padding(
                                   padding: EdgeInsets.only(bottom: 5.0),
@@ -154,12 +147,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                   padding: EdgeInsets.only(top: 5.0),
                                 ),
                                 Text(
-                                  widget._conversation.notificationExpireDate ==
-                                          0
-                                      ? "On"
-                                      : "Off",
-                                  style: TextStyle(
-                                      fontSize: 17.0, color: Colors.black54),
+                                  widget._conversation.notificationExpireDate == 0 ? "On" : "Off",
+                                  style: TextStyle(fontSize: 17.0, color: Colors.black54),
                                 ),
                                 Padding(
                                   padding: EdgeInsets.only(bottom: 5.0),
@@ -178,8 +167,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             print("Tapped.");
                           },
                           child: Padding(
-                            padding: EdgeInsets.only(
-                                left: 10.0, top: 10.0, right: 5.0),
+                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,8 +175,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 Padding(
                                     padding: EdgeInsets.only(top: 5.0),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: <Widget>[
                                         Text(
                                           "Favourites⭐",
@@ -214,8 +201,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             print("Tapped.");
                           },
                           child: Padding(
-                            padding: EdgeInsets.only(
-                                left: 10.0, top: 10.0, right: 5.0),
+                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,8 +209,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 Padding(
                                     padding: EdgeInsets.only(top: 5.0),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: <Widget>[
                                         Text(
                                           "Media",
@@ -250,8 +235,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             print("Tapped.");
                           },
                           child: Padding(
-                            padding: EdgeInsets.only(
-                                left: 10.0, top: 10.0, right: 5.0),
+                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,8 +243,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 Padding(
                                     padding: EdgeInsets.only(top: 5.0),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
                                       children: <Widget>[
                                         Icon(Icons.people),
                                         Text(
@@ -286,8 +269,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             print("Tapped.");
                           },
                           child: Padding(
-                            padding: EdgeInsets.only(
-                                left: 10.0, top: 10.0, right: 5.0),
+                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -295,16 +277,12 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 Padding(
                                     padding: EdgeInsets.only(top: 5.0),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
                                       children: <Widget>[
-                                        Icon(Icons.exit_to_app,
-                                            color: Colors.red),
+                                        Icon(Icons.exit_to_app, color: Colors.red),
                                         Text(
                                           "Exit group",
-                                          style: TextStyle(
-                                              fontSize: 17.0,
-                                              color: Colors.red),
+                                          style: TextStyle(fontSize: 17.0, color: Colors.red),
                                         ),
                                       ],
                                     )),
@@ -325,8 +303,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             print("Tapped.");
                           },
                           child: Padding(
-                            padding: EdgeInsets.only(
-                                left: 10.0, top: 10.0, right: 5.0),
+                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -334,15 +311,12 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 Padding(
                                     padding: EdgeInsets.only(top: 5.0),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
                                       children: <Widget>[
                                         Icon(Icons.report, color: Colors.red),
                                         Text(
                                           "Report group",
-                                          style: TextStyle(
-                                              fontSize: 17.0,
-                                              color: Colors.red),
+                                          style: TextStyle(fontSize: 17.0, color: Colors.red),
                                         ),
                                       ],
                                     )),

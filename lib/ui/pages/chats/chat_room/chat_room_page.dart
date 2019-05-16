@@ -64,8 +64,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                 child: Material(
                   color: Colors.black,
                   child: InkWell(
-                    customBorder: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0)),
+                    customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
                     onTap: () {
                       Navigator.of(context).pop();
                     },
@@ -77,12 +76,14 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                           child: CircleAvatar(
                             radius: 20.0,
                             backgroundColor: Colors.white,
-                            backgroundImage: MemoryImage(widget._conversation.groupPhoto.imageData),
+                            backgroundImage: widget._conversation.groupPhoto.imageData != 0
+                                ? MemoryImage(widget._conversation.groupPhoto.imageData)
+                                : NetworkImage(''),
+                            child: widget._conversation.groupPhoto.imageData.length == 0 ? Text(widget._conversation.name[0]) : Text(''),
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 5.0, vertical: 50.0),
+                          padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 50.0),
                         ),
                       ],
                     ),
@@ -92,12 +93,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               Material(
                 color: Colors.black,
                 child: InkWell(
-                    customBorder: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0)),
+                    customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
                     onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                              ChatInfoPage(widget._conversation)));
+                      Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ChatInfoPage(widget._conversation)));
                     },
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,8 +155,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       child: isLoading
           ? Container(
               child: Center(
-                child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)),
+                child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)),
               ),
               color: Colors.white.withOpacity(0.8),
             )
@@ -226,9 +223,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       ),
       width: double.infinity,
       height: 50.0,
-      decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
-          color: Colors.white),
+      decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 0.5)), color: Colors.white),
     );
   }
 
@@ -252,8 +247,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             ),
             padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
             width: 200.0,
-            decoration: BoxDecoration(
-                color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+            decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
             margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
           ),
           Container(
@@ -263,8 +257,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             ),
             padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
             width: 200.0,
-            decoration: BoxDecoration(
-                color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+            decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
             margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
           ),
           Container(
@@ -274,8 +267,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             ),
             padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
             width: 200.0,
-            decoration: BoxDecoration(
-                color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+            decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
             margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
           ),
         ],
@@ -380,9 +372,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
         ],
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       ),
-      decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
-          color: Colors.white),
+      decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 0.5)), color: Colors.white),
       padding: EdgeInsets.all(5.0),
       height: 180.0,
     );
@@ -393,8 +383,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     if (content.trim() != '') {
       textEditingController.clear();
 
-      listScrollController.animateTo(0.0,
-          duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+      listScrollController.animateTo(0.0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
       Fluttertoast.showToast(msg: 'Nothing to send');
     }

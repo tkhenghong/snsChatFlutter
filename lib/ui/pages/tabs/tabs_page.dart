@@ -1,4 +1,3 @@
-import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_group_list/chat_group_list_page.dart';
@@ -15,31 +14,37 @@ class TabsPage extends StatefulWidget {
 }
 
 class TabsPageState extends State<TabsPage> with TickerProviderStateMixin {
-  AnimationController _controller;
+  AnimationController _animationController, _animationController2;
+  Animation animation;
   static const List<IconData> icons = const [Icons.person_add, Icons.group_add]; // TODO: Add Broadcast
   static const List<ChatGroupType> chatTitles = const [ChatGroupType.Personal, ChatGroupType.Group]; // TODO: Add Broadcast
   Color backgroundColor = Colors.black;
   Color foregroundColor = Colors.white;
-  List<Contact> contactList = [];
-  Map<String, bool> contactCheckBoxes = {};
 
   int _bottomNavBarIndex = 0;
-  String tabTitle =
-      "Chats"; // Have to put default tab name or compiler will say null error
+  String tabTitle = "Chats"; // Have to put default tab name or compiler will say null error
 
-  PageController pageViewController =
-      PageController(initialPage: 0, keepPage: true);
+  PageController pageViewController = PageController(initialPage: 0, keepPage: true);
   List<Widget> tabPages;
 
   @override
   void initState() {
     super.initState();
-    getContacts(); // Prepare first
     tabPages = [ChatGroupListPage(), ScanQrCodePage(), MyselfPage()];
-    _controller = new AnimationController(
+    _animationController = new AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 200),
     );
+    _animationController2 = new AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    animation = Tween(begin: 0.0, end: 1.0).animate(_animationController2);
+    _animationController2.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _animationController2.dispose();
+    super.dispose();
   }
 
   @override
@@ -47,135 +52,127 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin {
     return Material(
       color: Colors.white,
       child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          titleSpacing: 0.0,
-          elevation: 0.0,
-          title: Text(
-            tabTitle,
-            textAlign: TextAlign.start,
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 32.0,
-                color: Colors.black),
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            titleSpacing: 0.0,
+            elevation: 0.0,
+            title: Text(
+              tabTitle,
+              textAlign: TextAlign.start,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32.0, color: Colors.black),
+            ),
           ),
-        ),
-        backgroundColor: Colors.white,
-        body: PageView(
-          controller: pageViewController,
-          onPageChanged: (int index) {
-            changeTab(index);
-            setState(() {
-              _bottomNavBarIndex = index;
-            });
-          },
-          physics: BouncingScrollPhysics(),
-          children: tabPages,
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _bottomNavBarIndex,
-          type: BottomNavigationBarType.shifting,
-          onTap: (int index) {
-            setState(() {
-              _bottomNavBarIndex = index;
-              pageViewController.jumpToPage(index);
+          backgroundColor: Colors.white,
+          body: PageView(
+            controller: pageViewController,
+            onPageChanged: (int index) {
               changeTab(index);
-            });
-          },
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.chat,
-                color: Colors.black,
-              ),
-              title: Text(
-                "Chats",
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.code,
-                color: Colors.black,
-              ),
-              title: Text(
-                "Scan QR Code",
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.person,
-                color: Colors.black,
-              ),
-              title: Text(
-                "Myself",
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-          ],
-        ),
-        floatingActionButton: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(icons.length, (int index) {
-            Widget child = new Container(
-              height: 70.0,
-              width: 56.0,
-              alignment: FractionalOffset.topCenter,
-              child: ScaleTransition(
-                scale: CurvedAnimation(
-                  parent: _controller,
-                  curve: Interval(0.0, 1.0 - index / icons.length / 2.0,
-                      curve: Curves.easeOut),
+              setState(() {
+                _bottomNavBarIndex = index;
+              });
+            },
+            physics: BouncingScrollPhysics(),
+            children: tabPages,
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _bottomNavBarIndex,
+            type: BottomNavigationBarType.shifting,
+            onTap: (int index) {
+              setState(() {
+                _bottomNavBarIndex = index;
+                pageViewController.jumpToPage(index);
+                changeTab(index);
+              });
+            },
+            items: [
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.chat,
+                  color: Colors.black,
                 ),
-                child: FloatingActionButton(
-                  heroTag: null,
-                  backgroundColor: backgroundColor,
-                  mini: true,
-                  child: Icon(icons[index], color: foregroundColor),
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => SelectContactsPage(
-                            chatGroupType: chatTitles[index],
-                            contactCheckBoxes: contactCheckBoxes,
-                            contactList: contactList)));
-                    _controller.reverse();
-                  },
+                title: Text(
+                  "Chats",
+                  style: TextStyle(color: Colors.black),
                 ),
               ),
-            );
-            return child;
-          }).toList()
-            ..add(
-              new FloatingActionButton(
-                heroTag: null,
-                backgroundColor: Colors.black,
-                child: AnimatedBuilder(
-                  animation: _controller,
-                  builder: (BuildContext context, Widget child) {
-                    return Transform(
-                      transform: new Matrix4.rotationZ(
-                          _controller.value * 0.5 * math.pi),
-                      alignment: FractionalOffset.center,
-                      child: Icon(
-                        _controller.isDismissed
-                            ? Icons.add_comment
-                            : Icons.close,
-                      ),
-                    );
-                  },
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.code,
+                  color: Colors.black,
                 ),
-                onPressed: () {
-                  if (_controller.isDismissed) {
-                    _controller.forward();
-                  } else {
-                    _controller.reverse();
-                  }
-                },
+                title: Text(
+                  "Scan QR Code",
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.person,
+                  color: Colors.black,
+                ),
+                title: Text(
+                  "Myself",
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+            ],
+          ),
+          floatingActionButton: FadeTransition(
+            opacity: animation,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(icons.length, (int index) {
+                Widget child = new Container(
+                  height: 70.0,
+                  width: 56.0,
+                  alignment: FractionalOffset.topCenter,
+                  child: ScaleTransition(
+                    scale: CurvedAnimation(
+                      parent: _animationController,
+                      curve: Interval(0.0, 1.0 - index / icons.length / 2.0, curve: Curves.easeOut),
+                    ),
+                    child: FloatingActionButton(
+                      heroTag: null,
+                      backgroundColor: backgroundColor,
+                      mini: true,
+                      child: Icon(icons[index], color: foregroundColor),
+                      onPressed: () {
+                        Navigator.of(context)
+                            .push(MaterialPageRoute(builder: (context) => SelectContactsPage(chatGroupType: chatTitles[index])));
+                        _animationController.reverse();
+                      },
+                    ),
+                  ),
+                );
+                return child;
+              }).toList()
+                ..add(
+                  new FloatingActionButton(
+                    heroTag: null,
+                    backgroundColor: Colors.black,
+                    child: AnimatedBuilder(
+                      animation: _animationController,
+                      builder: (BuildContext context, Widget child) {
+                        return Transform(
+                          transform: new Matrix4.rotationZ(_animationController.value * 0.5 * math.pi),
+                          alignment: FractionalOffset.center,
+                          child: Icon(
+                            _animationController.isDismissed ? Icons.add_comment : Icons.close,
+                          ),
+                        );
+                      },
+                    ),
+                    onPressed: () {
+                      if (_animationController.isDismissed) {
+                        _animationController.forward();
+                      } else {
+                        _animationController.reverse();
+                      }
+                    },
+                  ),
+                ),
             ),
-        ),
-      ),
+          )),
     );
   }
 
@@ -183,26 +180,19 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin {
     switch (pageNumber) {
       case 0:
         tabTitle = "Chats";
+        _animationController2.forward();
         break;
       case 1:
         tabTitle = "Scan QR Code";
+        _animationController2.reverse();
         break;
       case 2:
         tabTitle = "Myself";
+        _animationController2.reverse();
         break;
       default:
         print("No such page.");
         break;
     }
-  }
-
-  getContacts() async {
-    Iterable<Contact> contacts = await ContactsService.getContacts();
-    contactList = contacts.toList(growable: true);
-    contactList.sort((a, b) =>
-        a.displayName.compareTo(b.displayName)); //sort strings automatically
-    contactList.forEach((contact) {
-      contactCheckBoxes[contact.displayName] = false;
-    });
   }
 }

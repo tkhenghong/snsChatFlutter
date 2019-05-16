@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:contacts_service/contacts_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 
@@ -21,6 +23,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       yield currentState;
     } else if (event is AddConversationEvent) {
       addConversation(event);
+      yield currentState;
+    } else if (event is GetPhoneStorageContactsEvent) {
+      getPhoneStorageContacts(event);
+      yield currentState;
+    } else if (event is RequestPermissionsEvent) {
+      requestPermissions(event: event);
       yield currentState;
     }
   }
@@ -53,5 +61,40 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   addConversation(AddConversationEvent event) async {
     currentState.conversationList.add(event.conversation);
+  }
+
+  getPhoneStorageContacts(GetPhoneStorageContactsEvent event) async {
+    Map<PermissionGroup, PermissionStatus> permissions = await requestPermissions(event: RequestPermissionsEvent(callback: null));
+    bool contactAccessGranted = false;
+    permissions.forEach((PermissionGroup permissionGroup, PermissionStatus permissionStatus) async {
+      if(permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted) {
+        contactAccessGranted = true;
+      }
+    });
+    if(contactAccessGranted) {
+      Iterable<Contact> contacts = await ContactsService.getContacts();
+      currentState.phoneContactList = contacts.toList(growable: true);
+      currentState.phoneContactList.sort((a, b) =>
+          a.displayName.compareTo(b.displayName));
+    } else {
+      getPhoneStorageContacts(event);
+    }
+  }
+
+  Future<Map<PermissionGroup, PermissionStatus>> requestPermissions({RequestPermissionsEvent event}) async {
+    Map<PermissionGroup, PermissionStatus> permissions =
+    await PermissionHandler().requestPermissions([
+      PermissionGroup.contacts,
+      PermissionGroup.camera,
+      PermissionGroup.storage,
+      PermissionGroup.location,
+      PermissionGroup.microphone
+    ]);
+
+    if(event.callback != null) {
+      event.callback(permissions);
+    }
+
+    return permissions;
   }
 }

@@ -50,13 +50,11 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                 onRefresh: () {
                   //Delay 1 second to simulate something loading
                   Future.delayed(Duration(seconds: 1), () {
-                    print('Delayed 1 second.');
                     _refreshController.refreshCompleted();
                     // _refreshController.sendBack(up, RefreshStatus.completed); // Deprecated
                   });
                 },
                 onOffsetChange: (result, change) {
-                  print("onOffsetChange......");
                 },
                 // Unable to put PageView under child properties, so have to get manual
                 child: new ListView.builder(
@@ -75,8 +73,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   mapConversationToPageListTile(
       Conversation conversation, BuildContext context2) {
-    print("mapConversationToPageListTile()");
-
 //    FileImage(conversation.groupPhoto.imageFile) || MemoryImage(conversation.groupPhoto.imageData)
 
     return PageListItem(
@@ -89,14 +85,14 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           tag: conversation.id,
           child: CircleAvatar(
             backgroundColor: Colors.white,
-            backgroundImage: MemoryImage(conversation.groupPhoto.imageData),
+            backgroundImage: conversation.groupPhoto.imageData.length != 0 ? MemoryImage(conversation.groupPhoto.imageData) : NetworkImage(''),
+            child: conversation.groupPhoto.imageData.length == 0 ? Text(conversation.name[0]) : Text(''),
           ),
         ),
         trailing: Text(conversation.unreadMessage.count.toString() == "0"
             ? ""
             : conversation.unreadMessage.count.toString()),
         onTap: (BuildContext context, object) {
-          print('onTap() ListTile');
           // Send argument need to use the old way
           Navigator.push(
               context,

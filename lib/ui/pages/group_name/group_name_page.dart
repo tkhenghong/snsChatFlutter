@@ -53,8 +53,7 @@ class GroupNamePageState extends State<GroupNamePage> {
                   ),
                   Text(
                     "Select a contact",
-                    style:
-                        TextStyle(fontSize: 15.0, fontWeight: FontWeight.w300),
+                    style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.w300),
                   )
                 ],
               ),
@@ -68,14 +67,10 @@ class GroupNamePageState extends State<GroupNamePage> {
                   child: Icon(Icons.check),
                 ),
                 onTap: () {
-                  addConversation().then((conversation) {
+                  addGroupConversation().then((conversation) {
                     _wholeAppBloc.dispatch(AddConversationEvent(conversation: conversation));
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                        'tabs_page', (Route<dynamic> route) => false);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: ((context) => ChatRoomPage(conversation))));
+                    Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
+                    Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversation))));
                   });
                 },
               ),
@@ -97,16 +92,13 @@ class GroupNamePageState extends State<GroupNamePage> {
                           width: 65.0,
                           child: InkWell(
                             onTap: () {
-                              //TODO: Add group photo
+                              //TODO: Add group photo from gallery/ take photo
 //                              showOptionsDialog(context);
                               getImage();
                             },
                             borderRadius: BorderRadius.circular(20.0),
                             child: CircleAvatar(
-                              backgroundImage: imageExists
-                                  ? FileImage(_image)
-                                  : AssetImage(
-                                      'lib/ui/icons/default_blank_photo.png'),
+                              backgroundImage: imageExists ? FileImage(_image) : AssetImage('lib/ui/icons/default_blank_photo.png'),
                             ),
                           )),
                       Container(
@@ -119,8 +111,7 @@ class GroupNamePageState extends State<GroupNamePage> {
                             ),
                             Text(
                               "Provide a group subject and optional group icon.",
-                              style:
-                                  TextStyle(color: Colors.grey, fontSize: 12.0),
+                              style: TextStyle(color: Colors.grey, fontSize: 12.0),
                             )
                           ],
                         ),
@@ -132,8 +123,7 @@ class GroupNamePageState extends State<GroupNamePage> {
                 Container(
                   padding: EdgeInsets.only(top: 20.0, left: 20.0, bottom: 20.0),
                   child: Text(
-                    "Group Members: " +
-                        widget.selectedContacts.length.toString(),
+                    "Group Members: " + widget.selectedContacts.length.toString(),
                     style: TextStyle(color: Colors.grey, fontSize: 14.0),
                     textAlign: TextAlign.left,
                   ),
@@ -151,22 +141,14 @@ class GroupNamePageState extends State<GroupNamePage> {
                               padding: EdgeInsets.all(10.0),
                               child: Row(children: [
                                 CircleAvatar(
-                                  backgroundImage: contact.avatar.isNotEmpty
-                                      ? MemoryImage(contact.avatar)
-                                      : NetworkImage(''),
-                                  child: contact.avatar.isEmpty
-                                      ? Text(contact.displayName[0])
-                                      : Text(''),
+                                  backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
+                                  child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
                                 ),
                                 Container(
                                   padding: EdgeInsets.only(left: 5.0),
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text(contact.displayName,
-                                          overflow: TextOverflow.ellipsis)
-                                    ],
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[Text(contact.displayName, overflow: TextOverflow.ellipsis)],
                                   ),
                                 )
                               ]),
@@ -188,7 +170,8 @@ class GroupNamePageState extends State<GroupNamePage> {
     return newId;
   }
 
-  Future<Conversation> addConversation() async {
+  // TODO: Conversation Creation into BLOC, can be merged with Personal & Broadcast
+  Future<Conversation> addGroupConversation() async {
     Conversation conversation = new Conversation();
     int newId = generateNewId();
     conversation.id = newId.toString();
@@ -201,8 +184,6 @@ class GroupNamePageState extends State<GroupNamePage> {
       List<String> primaryNo = [];
       if (contact.phones.length > 0) {
         contact.phones.forEach((phoneNo) {
-          print('phoneNo.label: ' + phoneNo.label);
-          print('phoneNo.value: ' + phoneNo.value);
           primaryNo.add(phoneNo.value);
         });
       }
@@ -222,18 +203,10 @@ class GroupNamePageState extends State<GroupNamePage> {
     conversation.contacts = userContacts;
     conversation.block = false;
     conversation.description = '';
-    conversation.groupPhoto = Multimedia(
-        imageData: null, localUrl: null, remoteUrl: null, thumbnail: null);
-    conversation.unreadMessage = UnreadMessage(
-      count: 0, date: 0, lastMessage: ""
-    );
-    conversation.groupPhoto = Multimedia(
-      remoteUrl: "",
-      localUrl: _image.path,
-      imageData: await _image.readAsBytes(),
-      imageFile: _image,
-      thumbnail: ""
-    );
+    conversation.groupPhoto = Multimedia(imageData: null, localUrl: null, remoteUrl: null, thumbnail: null);
+    conversation.unreadMessage = UnreadMessage(count: 0, date: 0, lastMessage: "");
+    conversation.groupPhoto =
+        Multimedia(remoteUrl: "", localUrl: _image.path, imageData: await _image.readAsBytes(), imageFile: _image, thumbnail: "");
 
     return conversation;
   }
