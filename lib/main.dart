@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 
 import 'package:snschat_flutter/ui/pages/chats/chat_group_list/chat_group_list_page.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
