@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +15,8 @@ import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:date_format/date_format.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class LoginPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -26,9 +29,20 @@ class LoginPageState extends State<LoginPage> {
 
   _signIn() async {
     showCenterLoadingIndicator(context);
-    wholeAppBloc.dispatch(UserSignInEvent(callback: () {
+    wholeAppBloc.dispatch(UserSignInEvent(callback: () async {
       print('Callback reached.');
       goToVerifyPhoneNumber();
+      print('Continue here?');
+//      FirebaseUser firebaseUser = wholeAppBloc.currentState.userState.firebaseUser;
+//
+//      if(firebaseUser !=  null) { // Sign in successful
+//        final QuerySnapshot result =
+//            await Firestore.instance.collection('users').where('id', isEqualTo: firebaseUser.uid).getDocuments();
+//        final List<DocumentSnapshot> documents = result.documents;
+//        if(documents.length == 0) { // User never signed up before
+//          Firestore.instance.collection('users').document(firebaseUser.uid).setData({'nickname': firebaseUser.displayName, 'photoUrl': firebaseUser.photoUrl, 'id': firebaseUser.uid});
+//        }
+//      }
     }));
   }
 
@@ -36,20 +50,13 @@ class LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
-    wholeAppBloc.dispatch(RequestPermissionsEvent(callback: (permissions) {
-      print('RequestPermissionsEvent callback');
-      bool contactAccessGranted = false;
-      permissions.forEach((PermissionGroup permissionGroup, PermissionStatus permissionStatus) {
-        print('permissionGroup: ' + permissionGroup.toString());
-        print('permissionStatus: ' + permissionStatus.toString());
-        if (permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted) {
-          print("Contact access granted!");
-          contactAccessGranted = true;
+    wholeAppBloc.dispatch(CheckPermissionEvent(callback: (Map<PermissionGroup, PermissionStatus> permissionResults) {
+      permissionResults.forEach((PermissionGroup permissionGroup, PermissionStatus permissionStatus) {
+        if(permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted) {
+          print('if(permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted)');
+          wholeAppBloc.dispatch(GetPhoneStorageContactsEvent(callback: () {}));
         }
       });
-      if (contactAccessGranted) {
-        _wholeAppBloc.dispatch(GetPhoneStorageContactsEvent());
-      }
     }));
 
     return BlocBuilder(

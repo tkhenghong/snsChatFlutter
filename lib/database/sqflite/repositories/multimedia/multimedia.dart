@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
-part 'package:snschat_flutter/database/repositories/multimedia/multimedia.jorm.dart';
+part 'package:snschat_flutter/database/sqflite/repositories/multimedia/multimedia.jorm.dart';
 
 class Multimedia {
   // Image, Video, Gifs, Sticker, Recording, links

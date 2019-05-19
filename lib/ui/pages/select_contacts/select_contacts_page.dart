@@ -33,6 +33,7 @@ class SelectContactsPage extends StatefulWidget {
 class SelectContactsPageState extends State<SelectContactsPage> {
   bool isLoading = true;
   bool contactLoaded = false;
+  WholeAppBloc wholeAppBloc;
   PermissionStatus permissionStatus;
   List<Contact> selectedContacts = [];
   Map<String, bool> contactCheckBoxes = {};
@@ -47,13 +48,33 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     scrollController = new ScrollController();
   }
 
+  setupCheckBoxes() {
+    // Set up checkboxes first
+    wholeAppBloc.currentState.phoneContactList.forEach((contact) {
+      contactCheckBoxes[contact.displayName] = false;
+      contactLoaded = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
-    if (!contactLoaded) {
-      _wholeAppBloc.currentState.phoneContactList.forEach((contact) {
-        contactCheckBoxes[contact.displayName] = false;
-        contactLoaded = true;
+    wholeAppBloc = _wholeAppBloc;
+    print('_wholeAppBloc.currentState.phoneContactList.length: ' + _wholeAppBloc.currentState.phoneContactList.length.toString());
+    if (_wholeAppBloc.currentState.phoneContactList.length == 0) {
+      print('if(_wholeAppBloc.currentState.phoneContactList.length == 0)');
+      _wholeAppBloc.dispatch(GetPhoneStorageContactsEvent(callback: () {
+        // Set up checkboxes first
+        setupCheckBoxes();
+        // Rerender the page
+        setState(() {
+          isLoading = false;
+        });
+      }));
+    } else if(!contactLoaded) { // need to add _wholeAppBloc.currentState.phoneContactList.length == 0 together
+      setupCheckBoxes();
+      setState(() {
+        isLoading = false;
       });
     }
     switch (widget.chatGroupType) {
@@ -70,6 +91,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         title = "Unknown Chat";
         break;
     }
+
+    print('contactCheckBoxes.length.toString(): ' + contactCheckBoxes.length.toString());
     return new Scaffold(
         appBar: new AppBar(
             title: Row(
@@ -107,77 +130,90 @@ class SelectContactsPageState extends State<SelectContactsPage> {
             ),
           ],
         )),
-        body: BlocBuilder(
-          bloc: _wholeAppBloc,
-          builder: (context, WholeAppState state) {
-            return SmartRefresher(
-              enablePullDown: false,
-              controller: _refreshController,
-              child: ListView(
-                controller: scrollController,
-                children: state.phoneContactList.map((Contact contact) {
-                  return Container(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        needSelectMultipleContacts()
-                            ? CheckboxListTile(
-                                title: Text(
-                                  contact.displayName,
-                                  softWrap: true,
-                                ),
-                                subtitle: Text(
-                                  'Hey There! I am using PocketChat.',
-                                  softWrap: true,
-                                ),
-                                value: contactCheckBoxes[contact.displayName],
-                                onChanged: (bool value) {
-                                  if (contactIsSelected(contact)) {
-                                    selectedContacts.remove(contact);
-                                  } else {
-                                    selectedContacts.add(contact);
-                                  }
-                                  setState(() {
-                                    contactCheckBoxes[contact.displayName] = value;
-                                  });
-                                },
-                                secondary: CircleAvatar(
-                                  backgroundImage: !contact.avatar.isEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
-                                  child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
-                                  radius: 20.0,
-                                ),
-                              )
-                            : ListTile(
-                                title: Text(
-                                  contact.displayName,
-                                  softWrap: true,
-                                ),
-                                subtitle: Text(
-                                  'Hey There! I am using PocketChat.',
-                                  softWrap: true,
-                                ),
-                                onTap: () {
-                                  createPersonalConversation(contact).then((conversation) {
-                                    _wholeAppBloc.dispatch(AddConversationEvent(conversation: conversation));
-                                    Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
-                                    Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversation))));
-                                  });
-                                },
-                                leading: CircleAvatar(
-                                  backgroundImage: !contact.avatar.isEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
-                                  child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
-                                  radius: 20.0,
-                                ),
-                              )
-                      ],
+        body: isLoading
+            ? Center(
+                child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Text('Loading....'),
+                  SizedBox(
+                    height: 10.0,
+                  ),
+                  CircularProgressIndicator(),
+                ],
+              ))
+            : BlocBuilder(
+                bloc: _wholeAppBloc,
+                builder: (context, WholeAppState state) {
+                  return SmartRefresher(
+                    enablePullDown: false,
+                    controller: _refreshController,
+                    child: ListView(
+                      controller: scrollController,
+                      children: state.phoneContactList.map((Contact contact) {
+                        return Container(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              needSelectMultipleContacts()
+                                  ? CheckboxListTile(
+                                      title: Text(
+                                        contact.displayName,
+                                        softWrap: true,
+                                      ),
+                                      subtitle: Text(
+                                        'Hey There! I am using PocketChat.',
+                                        softWrap: true,
+                                      ),
+                                      value: contactCheckBoxes[contact.displayName],
+                                      onChanged: (bool value) {
+                                        if (contactIsSelected(contact)) {
+                                          selectedContacts.remove(contact);
+                                        } else {
+                                          selectedContacts.add(contact);
+                                        }
+                                        setState(() {
+                                          contactCheckBoxes[contact.displayName] = value;
+                                        });
+                                      },
+                                      secondary: CircleAvatar(
+                                        backgroundImage: !contact.avatar.isEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
+                                        child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
+                                        radius: 20.0,
+                                      ),
+                                    )
+                                  : ListTile(
+                                      title: Text(
+                                        contact.displayName,
+                                        softWrap: true,
+                                      ),
+                                      subtitle: Text(
+                                        'Hey There! I am using PocketChat.',
+                                        softWrap: true,
+                                      ),
+                                      onTap: () {
+                                        createPersonalConversation(contact).then((conversation) {
+                                          _wholeAppBloc.dispatch(AddConversationEvent(conversation: conversation));
+                                          Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
+                                          Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversation))));
+                                        });
+                                      },
+                                      leading: CircleAvatar(
+                                        backgroundImage: !contact.avatar.isEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
+                                        child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
+                                        radius: 20.0,
+                                      ),
+                                    )
+                            ],
+                          ),
+                        );
+                      }).toList(),
                     ),
                   );
-                }).toList(),
-              ),
-            );
-          },
-        ));
+                },
+              ));
   }
 
   bool contactIsSelected(Contact contact) {

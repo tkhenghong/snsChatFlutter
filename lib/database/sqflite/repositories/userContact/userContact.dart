@@ -4,7 +4,7 @@ import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
-part 'package:snschat_flutter/database/repositories/userContact/userContact.jorm.dart';
+part 'package:snschat_flutter/database/sqflite/repositories/userContact/userContact.jorm.dart';
 
 class UserContact {
   UserContact({this.id, this.displayName, this.realName, this.userId, this.mobileNo, this.lastSeenDate, this.block, this.photo});

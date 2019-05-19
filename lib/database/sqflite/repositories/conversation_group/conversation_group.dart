@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
-part 'package:snschat_flutter/database/repositories/conversation_group/conversation_group.jorm.dart';
+part 'package:snschat_flutter/database/sqflite/repositories/conversation_group/conversation_group.jorm.dart';
 
 class Conversation {
   Conversation();

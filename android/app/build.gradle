@@ -44,6 +44,8 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+        // To solve firestore problem: https://stackoverflow.com/questions/52459533/flutter-unable-to-merge-dex
     }
 
     buildTypes {
@@ -64,6 +66,8 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    compile 'com.android.support:multidex:1.0.3'
+    // To solve firestore problem: https://stackoverflow.com/questions/52459533/flutter-unable-to-merge-dex
 }
 
 apply plugin: 'com.google.gms.google-services'

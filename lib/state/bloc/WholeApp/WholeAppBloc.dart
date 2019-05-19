@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -30,29 +31,47 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     } else if (event is RequestPermissionsEvent) {
       requestPermissions(event: event);
       yield currentState;
+    } else if (event is CheckPermissionEvent) {
+      checkPermissions(event);
+      yield currentState;
+    } else if (event is UserSignUpEvent) {
+      signUpInFirestore();
+      yield currentState;
     }
   }
 
   signInUsingGoogle(UserSignInEvent event) async {
     // An average user use his/her Google account to sign in.
-    GoogleSignInAccount googleSignInAccount =
-        await currentState.userState.googleSignIn.signIn();
+    GoogleSignInAccount googleSignInAccount = await currentState.userState.googleSignIn.signIn();
     // Authenticate the user in Google
 
-    GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount.authentication;
+    GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
 
     // Create credentials
-    AuthCredential credential = GoogleAuthProvider.getCredential(
-        idToken: googleSignInAuthentication.idToken,
-        accessToken: googleSignInAuthentication.accessToken);
+    AuthCredential credential =
+        GoogleAuthProvider.getCredential(idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
 
     // Create the user in Firebase
-    currentState.userState.firebaseUser = await currentState
-        .userState.firebaseAuth
-        .signInWithCredential(credential);
+    currentState.userState.firebaseUser = await currentState.userState.firebaseAuth.signInWithCredential(credential);
 
     event.callback(); // Use callback method to signal UI change
+  }
+
+  signUpInFirestore() async {
+    FirebaseUser firebaseUser = currentState.userState.firebaseUser;
+
+    if (firebaseUser != null) {
+      // Sign in successful
+      final QuerySnapshot result = await Firestore.instance.collection('users').where('id', isEqualTo: firebaseUser.uid).getDocuments();
+      final List<DocumentSnapshot> documents = result.documents;
+      if (documents.length == 0) {
+        // User never signed up before
+        Firestore.instance
+            .collection('users')
+            .document(firebaseUser.uid)
+            .setData({'nickname': firebaseUser.displayName, 'photoUrl': firebaseUser.photoUrl, 'id': firebaseUser.uid});
+      }
+    }
   }
 
   signOut(UserSignOutEvent event) async {
@@ -64,34 +83,58 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   getPhoneStorageContacts(GetPhoneStorageContactsEvent event) async {
-    Map<PermissionGroup, PermissionStatus> permissions = await requestPermissions(event: RequestPermissionsEvent(callback: null));
+    Map<PermissionGroup, PermissionStatus> permissions = await requestContactPermission();
     bool contactAccessGranted = false;
-    permissions.forEach((PermissionGroup permissionGroup, PermissionStatus permissionStatus) async {
-      if(permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted) {
+    permissions.forEach((PermissionGroup permissionGroup, PermissionStatus permissionStatus) {
+      if (permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted) {
         contactAccessGranted = true;
       }
     });
-    if(contactAccessGranted) {
+    if (contactAccessGranted) {
+      print("contactAccessGranted!");
       Iterable<Contact> contacts = await ContactsService.getContacts();
       currentState.phoneContactList = contacts.toList(growable: true);
-      currentState.phoneContactList.sort((a, b) =>
-          a.displayName.compareTo(b.displayName));
+      currentState.phoneContactList.sort((a, b) => a.displayName.compareTo(b.displayName));
+      event.callback();
     } else {
+      print("contactAccessNotGranted?");
       getPhoneStorageContacts(event);
     }
   }
 
-  Future<Map<PermissionGroup, PermissionStatus>> requestPermissions({RequestPermissionsEvent event}) async {
-    Map<PermissionGroup, PermissionStatus> permissions =
-    await PermissionHandler().requestPermissions([
+  Future<Map<PermissionGroup, PermissionStatus>> requestContactPermission() async {
+    Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([
       PermissionGroup.contacts,
-      PermissionGroup.camera,
-      PermissionGroup.storage,
-      PermissionGroup.location,
-      PermissionGroup.microphone
     ]);
+    return permissions;
+  }
 
-    if(event.callback != null) {
+  Future<Map<PermissionGroup, PermissionStatus>> checkPermissions(CheckPermissionEvent event) async {
+    // Check statuses of all required permissions
+    PermissionStatus contactPermission = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
+    PermissionStatus cameraPermission = await PermissionHandler().checkPermissionStatus(PermissionGroup.camera);
+    PermissionStatus storagePermission = await PermissionHandler().checkPermissionStatus(PermissionGroup.storage);
+    PermissionStatus locationPermission = await PermissionHandler().checkPermissionStatus(PermissionGroup.location);
+    PermissionStatus microphonePermission = await PermissionHandler().checkPermissionStatus(PermissionGroup.microphone);
+
+    // Set PermissionGroups and PermissionStatuses
+    Map<PermissionGroup, PermissionStatus> permissionResults = {};
+
+    permissionResults[PermissionGroup.contacts] = contactPermission;
+    permissionResults[PermissionGroup.camera] = cameraPermission;
+    permissionResults[PermissionGroup.storage] = storagePermission;
+    permissionResults[PermissionGroup.location] = locationPermission;
+    permissionResults[PermissionGroup.microphone] = microphonePermission;
+
+    event.callback(permissionResults);
+    return permissionResults;
+  }
+
+  Future<Map<PermissionGroup, PermissionStatus>> requestPermissions({RequestPermissionsEvent event}) async {
+    Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions(
+        [PermissionGroup.contacts, PermissionGroup.camera, PermissionGroup.storage, PermissionGroup.location, PermissionGroup.microphone]);
+
+    if (event.callback != null) {
       event.callback(permissions);
     }
 

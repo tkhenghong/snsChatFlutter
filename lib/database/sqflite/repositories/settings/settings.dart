@@ -2,7 +2,7 @@
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
-part 'package:snschat_flutter/database/repositories/settings/settings.jorm.dart';
+part 'package:snschat_flutter/database/sqflite/repositories/settings/settings.jorm.dart';
 
 class Settings {
 

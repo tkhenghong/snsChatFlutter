@@ -6,7 +6,7 @@ import 'package:snschat_flutter/objects/settings/settings.dart';
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
-part 'package:snschat_flutter/database/repositories/user/user.jorm.dart';
+part 'package:snschat_flutter/database/sqflite/repositories/user/user.jorm.dart';
 
 class User {
   User({this.id,

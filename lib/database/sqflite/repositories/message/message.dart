@@ -5,7 +5,7 @@ import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
-part 'package:snschat_flutter/database/repositories/message/message.jorm.dart';
+part 'package:snschat_flutter/database/sqflite/repositories/message/message.jorm.dart';
 
 // system message or normal message, sticker, gifs, emojis, video, recording, photos,
 class Message {
