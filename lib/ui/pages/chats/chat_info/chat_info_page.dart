@@ -1,7 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/general/ui-component/custom_dialogs.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
+import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 
 class ChatInfoPage extends StatefulWidget {
   Conversation _conversation;
@@ -16,7 +22,8 @@ class ChatInfoPage extends StatefulWidget {
 
 class ChatInfoPageState extends State<ChatInfoPage> {
   TextEditingController textEditingController;
-
+  WholeAppBloc wholeAppBloc;
+  File imageFile;
   @override
   void initState() {
     // TODO: implement initState
@@ -27,6 +34,24 @@ class ChatInfoPageState extends State<ChatInfoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
+    wholeAppBloc = _wholeAppBloc;
+
+    Multimedia groupPhoto = wholeAppBloc.currentState.multimediaList.singleWhere((Multimedia existingMultimedia) => existingMultimedia.id == widget._conversation.groupPhotoId);
+    // Load local file first
+    imageFile = File(groupPhoto.localFullFileUrl);
+    imageFile.exists().then((fileExists) {
+      if(!fileExists) {
+        print('local file not exist!');
+        loadImageHandler(groupPhoto).then((remoteDownloadedfile) {
+          setState(() {
+            imageFile = remoteDownloadedfile;
+          });
+        });
+      }
+    });
+
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Material(
@@ -64,12 +89,14 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                     ),
                     background: Hero(
                       tag: widget._conversation.id,
-                      child: widget._conversation.groupPhoto.imageData.length != 0
-                          ? Image.memory(widget._conversation.groupPhoto.imageData)
-                          : Image.asset(
-                              'lib/ui/icons/default_group_photo.jpg',
+                      // TODO: Need to change it to Future
+//                      child: groupPhoto.localFullFileUrl.length != 0
+//                          ? Image.file(imageFile)
+//                          : Image.asset(
+//                              'lib/ui/icons/default_group_photo.jpg',
 //                              fit: BoxFit.cover,
-                            ),
+//                            ),
+                      child: Image.file(imageFile),
                     )),
                 actions: <Widget>[
                   IconButton(

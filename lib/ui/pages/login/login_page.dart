@@ -7,7 +7,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:permission_handler/permission_handler.dart';
+import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
+import 'package:snschat_flutter/objects/settings/settings.dart';
+import 'package:snschat_flutter/objects/user/user.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
@@ -29,20 +32,17 @@ class LoginPageState extends State<LoginPage> {
 
   _signIn() async {
     showCenterLoadingIndicator(context);
-    wholeAppBloc.dispatch(UserSignInEvent(callback: () async {
+    wholeAppBloc.dispatch(UserSignInEvent(callback: () {
       print('Callback reached.');
       goToVerifyPhoneNumber();
-      print('Continue here?');
-//      FirebaseUser firebaseUser = wholeAppBloc.currentState.userState.firebaseUser;
-//
-//      if(firebaseUser !=  null) { // Sign in successful
-//        final QuerySnapshot result =
-//            await Firestore.instance.collection('users').where('id', isEqualTo: firebaseUser.uid).getDocuments();
-//        final List<DocumentSnapshot> documents = result.documents;
-//        if(documents.length == 0) { // User never signed up before
-//          Firestore.instance.collection('users').document(firebaseUser.uid).setData({'nickname': firebaseUser.displayName, 'photoUrl': firebaseUser.photoUrl, 'id': firebaseUser.uid});
-//        }
-//      }
+      print('UserSignUpEvent()');
+      // TODO: Add new Settings to the Bloc State
+      Settings userSettings = Settings(id: generateNewId().toString(), notification: true);
+      wholeAppBloc.dispatch(AddSettingsEvent(callback: (Settings settings) {
+        print('returned to login page. Settings id is: ' + settings.id);
+        wholeAppBloc.dispatch(UserSignUpEvent(callback: () {}, user: User(mobileNo: "+60182262663", settingsId: settings.id)));
+      }, settings: userSettings));
+
     }));
   }
 

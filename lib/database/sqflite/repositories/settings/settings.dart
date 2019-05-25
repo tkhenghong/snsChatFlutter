@@ -2,10 +2,9 @@
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
-part 'package:snschat_flutter/database/sqflite/repositories/settings/settings.jorm.dart';
+//part 'package:snschat_flutter/database/sqflite/repositories/settings/settings.jorm.dart';
 
 class Settings {
-
   Settings({this.id, this.notification});
 
   Settings.make(this.id, this.notification);
@@ -20,7 +19,8 @@ class Settings {
 }
 
 @GenBean()
-class SettingsBean extends Bean<Settings> with _SettingsBean {
+//class SettingsBean extends Bean<Settings> with _SettingsBean {
+class SettingsBean extends Bean<Settings> {
   SettingsBean(Adapter adapter) : super(adapter);
 
   final String tableName = 'settings';
@@ -40,7 +40,4 @@ class SettingsBean extends Bean<Settings> with _SettingsBean {
     // TODO: implement toSetColumns
     return null;
   }
-
-
-
 }

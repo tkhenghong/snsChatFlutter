@@ -10,6 +10,7 @@
 .flutter-plugins
 .idea/
 .packages
+.dart_tool
 android/.gradle/
 android/app/src/main/java/io/
 android/gradle/wrapper/gradle-wrapper.jar
@@ -20,7 +21,6 @@ build/
 ios/Flutter/Generated.xcconfig
 ios/Runner/GeneratedPluginRegistrant.h
 ios/Runner/GeneratedPluginRegistrant.m
-pubspec.lock
 pocketChat.keystore.old
 pocketChat.keystore
 

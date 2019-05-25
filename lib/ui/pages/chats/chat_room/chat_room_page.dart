@@ -2,11 +2,15 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
+import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
 
 class ChatRoomPage extends StatefulWidget {
@@ -28,6 +32,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   FocusNode focusNode = new FocusNode();
   bool isLoading;
   File imageFile;
+  WholeAppBloc wholeAppBloc;
 
   @override
   void initState() {
@@ -49,6 +54,32 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
+    wholeAppBloc = _wholeAppBloc;
+    Multimedia groupPhoto;
+    wholeAppBloc.currentState.multimediaList.forEach((Multimedia existingMultimedia) {
+      if(existingMultimedia.id == widget._conversation.groupPhotoId) {
+        groupPhoto = existingMultimedia;
+      }
+    });
+    // Load local file first
+    imageFile = File(groupPhoto.localFullFileUrl);
+    imageFile.exists().then((fileExists) {
+
+      if(!fileExists) {
+        print("if(!fileExists)");
+        print('local file not exist!');
+        loadImageHandler(groupPhoto).then((remoteDownloadedfile) {
+          setState(() {
+            imageFile = remoteDownloadedfile;
+          });
+        });
+      } else {
+        print("if(fileExists)");
+      }
+    });
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Scaffold(
@@ -76,10 +107,11 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                           child: CircleAvatar(
                             radius: 20.0,
                             backgroundColor: Colors.white,
-                            backgroundImage: widget._conversation.groupPhoto.imageData != 0
-                                ? MemoryImage(widget._conversation.groupPhoto.imageData)
-                                : NetworkImage(''),
-                            child: widget._conversation.groupPhoto.imageData.length == 0 ? Text(widget._conversation.name[0]) : Text(''),
+//                            backgroundImage: widget._conversation.groupPhoto.imageData != 0
+//                                ? MemoryImage(widget._conversation.groupPhoto.imageData)
+//                                : NetworkImage(''),
+//                            child: widget._conversation.groupPhoto.imageData.length == 0 ? Text(widget._conversation.name[0]) : Text(''),
+                            backgroundImage: FileImage(imageFile),
                           ),
                         ),
                         Padding(

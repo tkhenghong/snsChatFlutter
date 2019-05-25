@@ -1,12 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
+import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/general/ui-component/list-view.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
-import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
@@ -45,7 +45,11 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         return new Material(
             color: Colors.white,
             child: new SmartRefresher(
+                // Need to add a header or else list display will not be correct
+                header: WaterDropHeader(),
                 controller: _refreshController,
+                enableOverScroll: true,
+                enablePullDown: true,
                 // Very important, without this whole thing won't work. Check the examples in the plugins
                 onRefresh: () {
                   //Delay 1 second to simulate something loading
@@ -54,50 +58,82 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                     // _refreshController.sendBack(up, RefreshStatus.completed); // Deprecated
                   });
                 },
-                onOffsetChange: (result, change) {
-                },
+                onOffsetChange: (result, change) {},
                 // Unable to put PageView under child properties, so have to get manual
                 child: new ListView.builder(
                     itemCount: state.conversationList.length,
-                    physics: const AlwaysScrollableScrollPhysics(),
+//                    physics: const AlwaysScrollableScrollPhysics(),
                     //suggestion from https://github.com/flutter/flutter/issues/22314
                     itemBuilder: (BuildContext content, int index) {
-                      return new PageListTile(
-                          mapConversationToPageListTile(
-                              state.conversationList[index], context),
-                          context);
+                      print('chat_group_list_page.dart rendering....');
+                      print('state.conversationList.length.toString(): ' + state.conversationList.length.toString());
+                      print('conversationList:');
+                      return PageListTile(mapConversationToPageListTile(state.conversationList[index], context), context);
                     })));
       },
     );
   }
 
-  mapConversationToPageListTile(
-      Conversation conversation, BuildContext context2) {
+  PageListItem mapConversationToPageListTile(Conversation conversation, BuildContext context2) {
+    print('mapConversationToPageListTile()');
+    File imageFile;
 //    FileImage(conversation.groupPhoto.imageFile) || MemoryImage(conversation.groupPhoto.imageData)
+    print("wholeAppBloc.currentState.unreadMessageList.length: " + wholeAppBloc.currentState.unreadMessageList.length.toString());
+    print("wholeAppBloc.currentState.multimediaList.length: " + wholeAppBloc.currentState.multimediaList.length.toString());
+    wholeAppBloc.currentState.unreadMessageList.forEach((UnreadMessage unreadMessage) {
+      print('Got something?');
+      print("unreadMessage.id: " + unreadMessage.id);
+      print("unreadMessage.id: " + unreadMessage.lastMessage);
+      print("unreadMessage.id: " + unreadMessage.count.toString());
+    });
+    UnreadMessage unreadMessage;
+    wholeAppBloc.currentState.unreadMessageList.forEach((UnreadMessage existingUnreadMessage) {
+      if (existingUnreadMessage.id == conversation.unreadMessageId) {
+        unreadMessage = existingUnreadMessage;
+      }
+    });
+    Multimedia groupPhoto;
+
+    wholeAppBloc.currentState.multimediaList.forEach((Multimedia existingMultimedia) {
+      if (existingMultimedia.id == conversation.groupPhotoId) {
+        groupPhoto = existingMultimedia;
+      }
+    });
+//    dynamic imageProvider = await loadImageHandler(groupPhoto);
+
+    imageFile = File(groupPhoto.localFullFileUrl);
+    imageFile.exists().then((fileExists) {
+      if (!fileExists) {
+        print('local file not exist!');
+        loadImageHandler(groupPhoto).then((remoteDownloadedfile) {
+          setState(() {
+            imageFile = remoteDownloadedfile;
+          });
+        });
+      }
+    });
 
     return PageListItem(
         title: Hero(
           tag: conversation.name,
           child: Text(conversation.name),
         ),
-        subtitle: Text(conversation.unreadMessage.lastMessage),
+//        subtitle: Text(conversation.unreadMessage.lastMessage),
+        subtitle: Text(unreadMessage.lastMessage),
         leading: Hero(
           tag: conversation.id,
           child: CircleAvatar(
             backgroundColor: Colors.white,
-            backgroundImage: conversation.groupPhoto.imageData.length != 0 ? MemoryImage(conversation.groupPhoto.imageData) : NetworkImage(''),
-            child: conversation.groupPhoto.imageData.length == 0 ? Text(conversation.name[0]) : Text(''),
+//            backgroundImage: conversation.groupPhoto.imageData.length != 0 ? MemoryImage(conversation.groupPhoto.imageData) : NetworkImage(''),
+            backgroundImage: FileImage(imageFile),
+//            child: conversation.groupPhoto.imageData.length == 0 ? Text(conversation.name[0]) : Text(''),
+            child: Text(''),
           ),
         ),
-        trailing: Text(conversation.unreadMessage.count.toString() == "0"
-            ? ""
-            : conversation.unreadMessage.count.toString()),
+        trailing: Text(unreadMessage.count.toString() == "0" ? "" : unreadMessage.count.toString()),
         onTap: (BuildContext context, object) {
           // Send argument need to use the old way
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: ((context) => ChatRoomPage(conversation))));
+          Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversation))));
         });
   }
 }

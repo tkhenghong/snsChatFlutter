@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
+import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
@@ -38,6 +39,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   List<Contact> selectedContacts = [];
   Map<String, bool> contactCheckBoxes = {};
   String title = "";
+  String subtitle = "";
   RefreshController _refreshController;
   ScrollController scrollController = new ScrollController();
 
@@ -80,15 +82,19 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     switch (widget.chatGroupType) {
       case ChatGroupType.Personal:
         title = "Create Personal Chat";
+        subtitle = "Select a contact.";
         break;
       case ChatGroupType.Group:
         title = "Create Group Chat";
+        subtitle = "Select a few contacts.";
         break;
       case ChatGroupType.Broadcast:
         title = "Broadcast";
+        subtitle = "Select a few contacts.";
         break;
       default:
         title = "Unknown Chat";
+        subtitle = "Error. Please go back and select again.";
         break;
     }
 
@@ -109,7 +115,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                     style: TextStyle(fontSize: 18.0),
                   ),
                   Text(
-                    "Select a contact",
+                    subtitle,
                     style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.w300),
                   )
                 ],
@@ -136,7 +142,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Text('Loading....'),
+                  Text('Reading contacts from storage....'),
                   SizedBox(
                     height: 10.0,
                   ),
@@ -147,8 +153,13 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                 bloc: _wholeAppBloc,
                 builder: (context, WholeAppState state) {
                   return SmartRefresher(
-                    enablePullDown: false,
+                    header: WaterDropHeader(),
+                    enableOverScroll: true,
+                    enablePullDown: true,
                     controller: _refreshController,
+                    onRefresh: () {
+                      _refreshController.refreshCompleted();
+                    },
                     child: ListView(
                       controller: scrollController,
                       children: state.phoneContactList.map((Contact contact) {
@@ -179,7 +190,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                                         });
                                       },
                                       secondary: CircleAvatar(
-                                        backgroundImage: !contact.avatar.isEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
+                                        backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
                                         child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
                                         radius: 20.0,
                                       ),
@@ -201,7 +212,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                                         });
                                       },
                                       leading: CircleAvatar(
-                                        backgroundImage: !contact.avatar.isEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
+                                        backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
                                         child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
                                         radius: 20.0,
                                       ),
@@ -227,6 +238,15 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   // TODO: Conversation Creation into BLOC, can be merged with Group & Broadcast
   Future<Conversation> createPersonalConversation(Contact contact) async {
     Conversation conversation = new Conversation();
+    Multimedia newMultiMedia = Multimedia(
+        imageDataId: "",
+        imageFileId: "",
+        localFullFileUrl: "",
+        localThumbnailUrl: null,
+        remoteThumbnailUrl: null,
+        remoteFullFileUrl: null);
+    UnreadMessage newUnreadMessage = UnreadMessage(count: 0, date: 0, lastMessage: "");
+    wholeAppBloc.dispatch(OverrideUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
     int newId = generateNewId();
     conversation.id = newId.toString();
     conversation.name = contact.displayName;
@@ -250,24 +270,17 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       realName: contact.displayName,
       mobileNo: primaryNo.length == 0 ? "" : primaryNo[0],
       // Give the first number they from a list of numbers
-      photo: Multimedia(imageData: contact.avatar),
+      photoId: newMultiMedia.id,
     ));
 
     conversation.type = ChatGroupType.Personal;
     conversation.contacts = userContacts;
     conversation.block = false;
     conversation.description = '';
-    conversation.groupPhoto = Multimedia(imageData: null, localUrl: null, remoteUrl: null, thumbnail: null);
-    conversation.unreadMessage = UnreadMessage(count: 0, date: 0, lastMessage: "");
-    conversation.groupPhoto = Multimedia(remoteUrl: "", localUrl: '', imageData: contact.avatar, imageFile: null, thumbnail: "");
+    conversation.groupPhotoId = newMultiMedia.id;
+    conversation.unreadMessageId = newUnreadMessage.id;
+    conversation.groupPhotoId = newMultiMedia.id;
 
     return conversation;
-  }
-
-  int generateNewId() {
-    var random = new Random();
-    // Formula: random.nextInt((max - min) + 1) + min;
-    int newId = random.nextInt((999999999 - 100000000) + 1) + 100000000;
-    return newId;
   }
 }

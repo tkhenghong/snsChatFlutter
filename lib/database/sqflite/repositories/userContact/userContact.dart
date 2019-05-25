@@ -4,12 +4,12 @@ import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
-part 'package:snschat_flutter/database/sqflite/repositories/userContact/userContact.jorm.dart';
+//part 'package:snschat_flutter/database/sqflite/repositories/userContact/userContact.jorm.dart';
 
 class UserContact {
-  UserContact({this.id, this.displayName, this.realName, this.userId, this.mobileNo, this.lastSeenDate, this.block, this.photo});
+  UserContact({this.id, this.displayName, this.realName, this.userId, this.mobileNo, this.lastSeenDate, this.block, this.photoId});
 
-  UserContact.make(this.id, this.displayName, this.realName, this.userId, this.mobileNo, this.lastSeenDate, this.block, this.photo);
+  UserContact.make(this.id, this.displayName, this.realName, this.userId, this.mobileNo, this.lastSeenDate, this.block, this.photoId);
 
   @PrimaryKey()
   String id;
@@ -34,11 +34,12 @@ class UserContact {
 
   // TODO: Build table relationships
   @Column(isNullable: true)
-  String photo; // Multimedia object
+  String photoId; // Multimedia object
 }
 
 @GenBean()
-class UserContactBean extends Bean<UserContact> with _UserContactBean {
+//class UserContactBean extends Bean<UserContact> with _UserContactBean {
+class UserContactBean extends Bean<UserContact> {
   UserContactBean(Adapter adapter) : super(adapter);
 
   final String tableName = 'userContact';

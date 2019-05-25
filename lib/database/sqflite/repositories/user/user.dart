@@ -6,7 +6,7 @@ import 'package:snschat_flutter/objects/settings/settings.dart';
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
-part 'package:snschat_flutter/database/sqflite/repositories/user/user.jorm.dart';
+//part 'package:snschat_flutter/database/sqflite/repositories/user/user.jorm.dart';
 
 class User {
   User({this.id,
@@ -15,9 +15,10 @@ class User {
     this.userId,
     this.mobileNo,
     this.settings,
-    this.firebaseUser,
-    this.googleSignIn,
-    this.firebaseAuth});
+    this.firebaseUserId,
+//    this.googleSignIn,
+//    this.firebaseAuth
+  });
 
   User.make(this.id,
       this.displayName,
@@ -25,9 +26,10 @@ class User {
       this.userId,
       this.mobileNo,
       this.settings,
-      this.firebaseUser,
-      this.googleSignIn,
-      this.firebaseAuth);
+      this.firebaseUserId,
+//      this.googleSignIn,
+//      this.firebaseAuth
+      );
 
   @PrimaryKey()
   String id;
@@ -48,19 +50,22 @@ class User {
   @Column(isNullable: true)
   String settings; // Settings object
 
-  // Cannot initialize anything here for flutter_bloc
   @Column(isNullable: true)
-  String googleSignIn; // = new GoogleSignIn(); // GoogleSignIn object
+  String firebaseUserId; // FirebaseUser object
 
-  @Column(isNullable: true)
-  String firebaseAuth; // = FirebaseAuth.instance; // FirebaseAuth object
+//  // Cannot initialize anything here for flutter_bloc
+//  @Column(isNullable: true)
+//  String googleSignIn; // = new GoogleSignIn(); // GoogleSignIn object
+//
+//  @Column(isNullable: true)
+//  String firebaseAuth; // = FirebaseAuth.instance; // FirebaseAuth object
 
-  @Column(isNullable: true)
-  String firebaseUser; // FirebaseUser object
+
 }
 
 @GenBean()
-class UserBean extends Bean<User> with _UserBean {
+//class UserBean extends Bean<User> with _UserBean {
+class UserBean extends Bean<User> {
   UserBean(Adapter adapter) : super(adapter);
 
   final String tableName = 'user';

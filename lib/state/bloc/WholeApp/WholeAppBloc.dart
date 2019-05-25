@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,6 +7,12 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:snschat_flutter/general/functions/repeating_functions.dart';
+import 'package:snschat_flutter/objects/chat/conversation_group.dart';
+import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
+import 'package:snschat_flutter/objects/settings/settings.dart';
+import 'package:snschat_flutter/objects/user/user.dart';
+import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 
@@ -22,9 +29,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     } else if (event is UserSignOutEvent) {
       signOut(event);
       yield currentState;
-    } else if (event is AddConversationEvent) {
-      addConversation(event);
-      yield currentState;
     } else if (event is GetPhoneStorageContactsEvent) {
       getPhoneStorageContacts(event);
       yield currentState;
@@ -35,14 +39,44 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       checkPermissions(event);
       yield currentState;
     } else if (event is UserSignUpEvent) {
-      signUpInFirestore();
+      signUpInFirestore(event.user);
+      yield currentState;
+    } else if (event is AddConversationEvent) {
+      addConversation(event);
+      yield currentState;
+    } else if (event is AddMessageEvent) {
+      addMessage(event);
+      yield currentState;
+    } else if (event is AddMultimediaEvent) {
+      addMultimedia(event);
+      yield currentState;
+    } else if (event is AddSettingsEvent) {
+      addSettings(event);
+      yield currentState;
+    } else if (event is AddUserEvent) {
+      addUser(event);
+      yield currentState;
+    } else if (event is AddUserContactEvent) {
+      addUserContact(event);
+      yield currentState;
+    } else if (event is AddContactEvent) {
+      addContact(event);
+      yield currentState;
+    } else if (event is AddFirebaseAuthEvent) {
+      addFirebaseAuth(event);
+      yield currentState;
+    } else if (event is AddGoogleSignInEvent) {
+      addGoogleSignIn(event);
+      yield currentState;
+    } else if (event is OverrideUnreadMessageEvent) {
+      overrideUnreadMessageEvent(event);
       yield currentState;
     }
   }
 
   signInUsingGoogle(UserSignInEvent event) async {
     // An average user use his/her Google account to sign in.
-    GoogleSignInAccount googleSignInAccount = await currentState.userState.googleSignIn.signIn();
+    GoogleSignInAccount googleSignInAccount = await currentState.googleSignIn.signIn();
     // Authenticate the user in Google
 
     GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
@@ -52,34 +86,44 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
         GoogleAuthProvider.getCredential(idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
 
     // Create the user in Firebase
-    currentState.userState.firebaseUser = await currentState.userState.firebaseAuth.signInWithCredential(credential);
+    currentState.userState.firebaseUser = await currentState.firebaseAuth.signInWithCredential(credential);
 
     event.callback(); // Use callback method to signal UI change
   }
 
-  signUpInFirestore() async {
+  signUpInFirestore(User user) async {
     FirebaseUser firebaseUser = currentState.userState.firebaseUser;
+    GoogleSignIn googleSignIn = currentState.googleSignIn;
+    FirebaseAuth firebaseAuth = currentState.firebaseAuth;
 
     if (firebaseUser != null) {
+      print('if (firebaseUser != null)');
       // Sign in successful
-      final QuerySnapshot result = await Firestore.instance.collection('users').where('id', isEqualTo: firebaseUser.uid).getDocuments();
+      final QuerySnapshot result = await Firestore.instance.collection('user').where('id', isEqualTo: firebaseUser.uid).getDocuments();
       final List<DocumentSnapshot> documents = result.documents;
       if (documents.length == 0) {
-        // User never signed up before
-        Firestore.instance
-            .collection('users')
-            .document(firebaseUser.uid)
-            .setData({'nickname': firebaseUser.displayName, 'photoUrl': firebaseUser.photoUrl, 'id': firebaseUser.uid});
+        Firestore.instance.collection('user').document(firebaseUser.uid).setData({
+          'id': generateNewId().toString(), // Self generated Id
+          'displayName': firebaseUser.displayName,
+          'realName': firebaseUser.displayName,
+          'userId': firebaseUser.uid,
+          'mobileNo': user.mobileNo,
+          'settingsid': user.settingsId,
+          'firebaseUser': firebaseUser.uid,
+//          'googleSignIn': googleSignInString,
+//          'firebaseAuth': firebaseAuthString,
+        });
+        print('Sign Up done.');
+      } else {
+        print('if (documents.length != 0)');
       }
+    } else {
+      print('if (firebaseUser == null)');
     }
   }
 
   signOut(UserSignOutEvent event) async {
-    currentState.userState.googleSignIn.signOut();
-  }
-
-  addConversation(AddConversationEvent event) async {
-    currentState.conversationList.add(event.conversation);
+    currentState.googleSignIn.signOut();
   }
 
   getPhoneStorageContacts(GetPhoneStorageContactsEvent event) async {
@@ -95,6 +139,10 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       Iterable<Contact> contacts = await ContactsService.getContacts();
       currentState.phoneContactList = contacts.toList(growable: true);
       currentState.phoneContactList.sort((a, b) => a.displayName.compareTo(b.displayName));
+
+      // Dart way of removing duplicates. // https://stackoverflow.com/questions/12030613/how-to-delete-duplicates-in-a-dart-list-list-distinct
+      currentState.phoneContactList = currentState.phoneContactList.toSet().toList();
+
       event.callback();
     } else {
       print("contactAccessNotGranted?");
@@ -139,5 +187,133 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
 
     return permissions;
+  }
+
+  addConversation(AddConversationEvent event) async {
+    print('addConversation()');
+
+    // Check repetition
+    bool conversationExist = false;
+
+    currentState.conversationList.forEach((Conversation existingConversation) {
+      if (existingConversation.id == event.conversation.id) {
+        conversationExist = true;
+      }
+    });
+
+    if (!conversationExist) {
+      currentState.conversationList.add(event.conversation);
+    }
+
+    print("currentState.conversationList.length.toString(): " + currentState.conversationList.length.toString());
+  }
+
+  overrideUnreadMessageEvent(OverrideUnreadMessageEvent event) async {
+    print('overrideUnreadMessageEvent()');
+    print('event.unreadMessage.id: ' + event.unreadMessage.id);
+    // Remove existing same id unreadMessage
+    currentState.unreadMessageList.removeWhere((existingunreadMessage) => existingunreadMessage.id == event.unreadMessage.id);
+    print('Checkpoint 1');
+    // Read unreadMessage
+    currentState.unreadMessageList.add(event.unreadMessage);
+    print("currentState.unreadMessageList.length.toString(): " + currentState.unreadMessageList.length.toString());
+    print('Checkpoint 2');
+  }
+
+  addMessage(AddMessageEvent event) async {
+    print("event.message.id: " + event.message.id);
+    // Check repetition
+    bool messageExist = false;
+
+    currentState.conversationList.forEach((Conversation existingMessage) {
+      if (existingMessage.id == event.message.id) {
+        messageExist = true;
+      }
+    });
+
+    if (!messageExist) {
+      currentState.messageList.add(event.message);
+    }
+    event.callback(event.message);
+  }
+
+  addMultimedia(AddMultimediaEvent event) async {
+    print("event.multimedia.id: " + event.multimedia.id);
+    bool multimediaIdExist = false;
+
+    // Check repetition
+    currentState.multimediaList.forEach((Multimedia existingMultimedia) {
+      if (existingMultimedia.id == event.multimedia.id) {
+        multimediaIdExist = true;
+      }
+    });
+
+    if (!multimediaIdExist) {
+      currentState.multimediaList.add(event.multimedia);
+    }
+
+    event.callback(event.multimedia);
+  }
+
+  addSettings(AddSettingsEvent event) async {
+    print("event.message.id: " + event.settings.id);
+    currentState.settingsState = event.settings;
+    event.callback(event.settings);
+  }
+
+  addUser(AddUserEvent event) async {
+    print("event.message.id: " + event.user.id);
+    currentState.userState = event.user;
+    event.callback(event.user);
+  }
+
+  addUserContact(AddUserContactEvent event) async {
+    print("event.userContact.id: " + event.userContact.id);
+
+    // Check repetition
+    bool userContactExist = false;
+
+    currentState.userContactList.forEach((UserContact existingUserContact) {
+      if (existingUserContact.id == event.userContact.id) {
+        userContactExist = true;
+      }
+    });
+
+    if (!userContactExist) {
+      currentState.userContactList.add(event.userContact);
+    }
+
+    event.callback(event.userContact);
+  }
+
+  addContact(AddContactEvent event) async {
+    print("event.userContact.displayName: " + event.contact.displayName);
+
+    // Check repetition
+    bool userContactExist = false;
+
+    currentState.phoneContactList.forEach((Contact existingContact) {
+      if (existingContact.displayName == event.contact.displayName) {
+        userContactExist = true;
+      }
+    });
+
+    if (!userContactExist) {
+      currentState.phoneContactList.add(event.contact);
+    }
+
+    event.callback(event.contact);
+  }
+
+  addFirebaseAuth(AddFirebaseAuthEvent event) async {
+    print("event.firebaseAuth.app.name: " + event.firebaseAuth.app.name);
+    currentState.firebaseAuth = event.firebaseAuth;
+    event.callback(event.firebaseAuth);
+  }
+
+  addGoogleSignIn(AddGoogleSignInEvent event) async {
+    print("event.googleSignIn.currentUser.displayName: " + event.googleSignIn.currentUser.displayName);
+    currentState.googleSignIn = event.googleSignIn;
+    event.callback(event.googleSignIn);
   }
 }

@@ -5,38 +5,43 @@ import 'dart:typed_data';
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
-part 'package:snschat_flutter/database/sqflite/repositories/multimedia/multimedia.jorm.dart';
+//part 'package:snschat_flutter/database/sqflite/repositories/multimedia/multimedia.jorm.dart';
 
 class Multimedia {
   // Image, Video, Gifs, Sticker, Recording, links
 
-  Multimedia({this.id, this.localUrl, this.remoteUrl, this.thumbnail, this.imageData, this.imageFile});
+  Multimedia(
+      {this.id,
+      this.localFullFileUrl,
+      this.localThumbnailUrl,
+      this.remoteThumbnailUrl,
+      this.remoteFullFileUrl,
+      this.imageDataId,
+      this.imageFileId});
 
-  Multimedia.make(this.id, this.localUrl, this.remoteUrl, this.thumbnail, this.imageData, this.imageFile);
+  Multimedia.make(this.id, this.localFullFileUrl, this.localThumbnailUrl, this.remoteThumbnailUrl, this.remoteFullFileUrl, this.imageDataId,
+      this.imageFileId);
 
   @PrimaryKey()
   String id;
 
   @Column(isNullable: true)
-  String localUrl;
+  String localFullFileUrl;
 
   @Column(isNullable: true)
-  String remoteUrl;
+  String localThumbnailUrl;
 
   @Column(isNullable: true)
-  String thumbnail;
+  String remoteThumbnailUrl;
 
   @Column(isNullable: true)
-  String imageData; // Uint8List object
+  String remoteFullFileUrl;
 
   @Column(isNullable: true)
-  String imageFile; // File object
+  String imageDataId; // Uint8List object
 
-  @override
-  String toString() {
-    return 'Multimedia{id: $id, localUrl: $localUrl, remoteUrl: $remoteUrl, thumbnail: $thumbnail, imageData: $imageData, imageFile: $imageFile}';
-  }
-
+  @Column(isNullable: true)
+  String imageFileId; // File object
 
 // KS put
 // mediaCheckPoint
@@ -46,7 +51,8 @@ class Multimedia {
 }
 
 @GenBean()
-class MultimediaBean extends Bean<Multimedia> with _MultimediaBean {
+//class MultimediaBean extends Bean<Multimedia> with _MultimediaBean {
+class MultimediaBean extends Bean<Multimedia> {
   MultimediaBean(Adapter adapter) : super(adapter);
 
   final String tableName = 'multimedia';
@@ -66,9 +72,4 @@ class MultimediaBean extends Bean<Multimedia> with _MultimediaBean {
     // TODO: implement toSetColumns
     return null;
   }
-
 }
-
-
-
-

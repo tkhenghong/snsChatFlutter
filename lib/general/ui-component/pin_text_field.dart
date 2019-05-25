@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:snschat_flutter/general/functions/validations.dart';
+import 'package:snschat_flutter/general/functions/validation_functions.dart';
 
 class PinEntryTextField extends StatefulWidget {
   int fields;

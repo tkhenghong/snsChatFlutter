@@ -5,13 +5,26 @@ import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
-part 'package:snschat_flutter/database/sqflite/repositories/message/message.jorm.dart';
+//part 'package:snschat_flutter/database/sqflite/repositories/message/message.jorm.dart';
 
 // system message or normal message, sticker, gifs, emojis, video, recording, photos,
 class Message {
-  Message({this.id, this.conversationId, this.recipient, this.type, this.status, this.message, this.multimedia});
+  Message(
+      {this.id,
+      this.conversationId,
+      this.senderId,
+      this.senderName,
+      this.senderMobileNo,
+      this.receiverId,
+      this.receiverName,
+      this.receiverMobileNo,
+      this.type,
+      this.status,
+      this.message,
+      this.multimediaId});
 
-  Message.make(this.id, this.conversationId, this.recipient, this.type, this.status, this.message, this.multimedia);
+  Message.make(this.id, this.conversationId, this.senderId, this.senderName, this.senderMobileNo, this.receiverId, this.receiverName,
+      this.receiverMobileNo, this.type, this.status, this.message, this.multimediaId);
 
   @PrimaryKey()
   String id;
@@ -19,8 +32,29 @@ class Message {
   @Column(isNullable: true)
   String conversationId;
 
+  // Remove recipient object, too complicated into db and state
+//  @Column(isNullable: true)
+//  String recipientId; // Recipient object
+
+  // Sender
   @Column(isNullable: true)
-  String recipient; // Recipient object
+  String senderId;
+
+  @Column(isNullable: true)
+  String senderName;
+
+  @Column(isNullable: true)
+  String senderMobileNo;
+
+  // Receiver
+  @Column(isNullable: true)
+  String receiverId;
+
+  @Column(isNullable: true)
+  String receiverName;
+
+  @Column(isNullable: true)
+  String receiverMobileNo;
 
   @Column(isNullable: true)
   String type;
@@ -33,17 +67,18 @@ class Message {
 
   // TODO: Build table relationships
   @Column(isNullable: true)
-  String multimedia; // Multimedia object
+  String multimediaId;
 
   @override
   String toString() {
-    return 'Message{id: $id, conversationId: $conversationId, recipient: $recipient, type: $type, status: $status, message: $message, multimedia: $multimedia}';
-  }
+    return 'Message{id: $id, conversationId: $conversationId, senderId: $senderId, senderName: $senderName, senderMobileNo: $senderMobileNo, receiverId: $receiverId, receiverName: $receiverName, receiverMobileNo: $receiverMobileNo, type: $type, status: $status, message: $message, multimediaId: $multimediaId}';
+  } // Multimedia object
 
 }
 
 @GenBean()
-class MessageBean extends Bean<Message> with _MessageBean {
+//class MessageBean extends Bean<Message> with _MessageBean {
+class MessageBean extends Bean<Message> {
   MessageBean(Adapter adapter) : super(adapter);
 
   final String tableName = 'message';

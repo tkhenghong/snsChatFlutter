@@ -6,6 +6,7 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
+import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/general/ui-component/select_image.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
@@ -30,12 +31,14 @@ class GroupNamePage extends StatefulWidget {
 
 class GroupNamePageState extends State<GroupNamePage> {
   TextEditingController textEditingController = new TextEditingController();
-  File _image;
+  File imageFile;
   bool imageExists = false;
+  WholeAppBloc wholeAppBloc;
 
   @override
   Widget build(BuildContext context) {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
+    wholeAppBloc = _wholeAppBloc;
     return Scaffold(
         appBar: AppBar(
             title: Row(
@@ -68,6 +71,7 @@ class GroupNamePageState extends State<GroupNamePage> {
                 ),
                 onTap: () {
                   addGroupConversation().then((conversation) {
+                    print("Go back to Main Page!");
                     _wholeAppBloc.dispatch(AddConversationEvent(conversation: conversation));
                     Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
                     Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversation))));
@@ -98,7 +102,7 @@ class GroupNamePageState extends State<GroupNamePage> {
                             },
                             borderRadius: BorderRadius.circular(20.0),
                             child: CircleAvatar(
-                              backgroundImage: imageExists ? FileImage(_image) : AssetImage('lib/ui/icons/default_blank_photo.png'),
+                              backgroundImage: imageExists ? FileImage(imageFile) : AssetImage('lib/ui/icons/default_blank_photo.png'),
                             ),
                           )),
                       Container(
@@ -163,13 +167,6 @@ class GroupNamePageState extends State<GroupNamePage> {
         ));
   }
 
-  int generateNewId() {
-    var random = new Random();
-    // Formula: random.nextInt((max - min) + 1) + min;
-    int newId = random.nextInt((999999999 - 100000000) + 1) + 100000000;
-    return newId;
-  }
-
   // TODO: Conversation Creation into BLOC, can be merged with Personal & Broadcast
   Future<Conversation> addGroupConversation() async {
     Conversation conversation = new Conversation();
@@ -177,6 +174,16 @@ class GroupNamePageState extends State<GroupNamePage> {
     conversation.id = newId.toString();
     conversation.name = textEditingController.text;
 
+    Multimedia newMultiMedia = Multimedia(
+        id: generateNewId().toString(),
+        imageDataId: "",
+        imageFileId: "",
+        localFullFileUrl: imageFile.path,
+        localThumbnailUrl: null,
+        remoteThumbnailUrl: null,
+        remoteFullFileUrl: null);
+    UnreadMessage newUnreadMessage = UnreadMessage(id: generateNewId().toString(), count: 0, date: 0, lastMessage: "");
+    wholeAppBloc.dispatch(OverrideUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
     // convert contact to contact (self defined)
     List<UserContact> userContacts = [];
     widget.selectedContacts.forEach((contact) {
@@ -188,6 +195,17 @@ class GroupNamePageState extends State<GroupNamePage> {
         });
       }
 
+      // Create new Multimedia object to save photo
+      if (contact.avatar.length > 0) {
+        print('if (contact.avatar.length > 0)');
+        // Multimedia newMultimedia = Multimedia(imageData: contact.avatar);
+//        wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
+      } else {
+        print('if (contact.avatar.length <= 0)');
+      }
+      // Will add a default Multimedia object to the state list and DB no matter it's empty or not, to prevent any null event happens
+      wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
+
       userContacts.add(UserContact(
         id: generateNewId().toString(),
         userId: generateNewId().toString(),
@@ -196,28 +214,30 @@ class GroupNamePageState extends State<GroupNamePage> {
         realName: contact.displayName,
         mobileNo: primaryNo.length == 0 ? "" : primaryNo[0],
         // Give the first number they from a list of numbers
-        photo: Multimedia(imageData: contact.avatar),
+        // photo: Multimedia(imageData: contact.avatar),
+        // photoId: Multimedia(imageData: contact.avatar),
+        photoId: newMultiMedia.id,
       ));
     });
     conversation.type = ChatGroupType.Group;
     conversation.contacts = userContacts;
     conversation.block = false;
     conversation.description = '';
-    conversation.groupPhoto = Multimedia(imageData: null, localUrl: null, remoteUrl: null, thumbnail: null);
-    conversation.unreadMessage = UnreadMessage(count: 0, date: 0, lastMessage: "");
-    conversation.groupPhoto =
-        Multimedia(remoteUrl: "", localUrl: _image.path, imageData: await _image.readAsBytes(), imageFile: _image, thumbnail: "");
+    conversation.groupPhotoId = newMultiMedia.id;
+    conversation.unreadMessageId = newUnreadMessage.id;
+
+    // Multimedia(remoteUrl: "", localUrl: _image.path, imageData: await _image.readAsBytes(), imageFile: _image, thumbnail: "");
 
     return conversation;
   }
 
   Future getImage() async {
-    var image = await ImagePicker.pickImage(source: ImageSource.camera);
+    File image = await ImagePicker.pickImage(source: ImageSource.camera);
     if (await image.exists()) {
       imageExists = true;
     }
     setState(() {
-      _image = image;
+      imageFile = image;
     });
   }
 }
