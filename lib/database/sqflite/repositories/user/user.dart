@@ -6,7 +6,7 @@ import 'package:snschat_flutter/objects/settings/settings.dart';
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
-//part 'package:snschat_flutter/database/sqflite/repositories/user/user.jorm.dart';
+part 'user.jorm.dart';
 
 class User {
   User({this.id,
@@ -64,25 +64,9 @@ class User {
 }
 
 @GenBean()
-//class UserBean extends Bean<User> with _UserBean {
-class UserBean extends Bean<User> {
+class UserBean extends Bean<User> with _UserBean {
+//class UserBean extends Bean<User> {
   UserBean(Adapter adapter) : super(adapter);
 
   final String tableName = 'user';
-
-  @override
-  // TODO: implement fields
-  Map<String, Field> get fields => null;
-
-  @override
-  User fromMap(Map map) {
-    // TODO: implement fromMap
-    return null;
-  }
-
-  @override
-  List<SetColumn> toSetColumns(User model, {bool update = false, Set<String> only}) {
-    // TODO: implement toSetColumns
-    return null;
-  }
 }

@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
-//part 'package:snschat_flutter/database/sqflite/repositories/multimedia/multimedia.jorm.dart';
+part 'multimedia.jorm.dart';
 
 class Multimedia {
   // Image, Video, Gifs, Sticker, Recording, links
@@ -17,10 +17,11 @@ class Multimedia {
       this.remoteThumbnailUrl,
       this.remoteFullFileUrl,
       this.imageDataId,
-      this.imageFileId});
+      this.imageFileId,
+      this.messageId});
 
   Multimedia.make(this.id, this.localFullFileUrl, this.localThumbnailUrl, this.remoteThumbnailUrl, this.remoteFullFileUrl, this.imageDataId,
-      this.imageFileId);
+      this.imageFileId, this.messageId);
 
   @PrimaryKey()
   String id;
@@ -43,6 +44,12 @@ class Multimedia {
   @Column(isNullable: true)
   String imageFileId; // File object
 
+  @Column(isNullable: true)
+  String messageId; // Message object
+
+  @Column(isNullable: true)
+  String userContactId; // Message object
+
 // KS put
 // mediaCheckPoint
 // mediaPercentage
@@ -51,25 +58,9 @@ class Multimedia {
 }
 
 @GenBean()
-//class MultimediaBean extends Bean<Multimedia> with _MultimediaBean {
-class MultimediaBean extends Bean<Multimedia> {
+class MultimediaBean extends Bean<Multimedia> with _MultimediaBean {
+//class MultimediaBean extends Bean<Multimedia> {
   MultimediaBean(Adapter adapter) : super(adapter);
 
   final String tableName = 'multimedia';
-
-  @override
-  // TODO: implement fields
-  Map<String, Field> get fields => null;
-
-  @override
-  Multimedia fromMap(Map map) {
-    // TODO: implement fromMap
-    return null;
-  }
-
-  @override
-  List<SetColumn> toSetColumns(Multimedia model, {bool update = false, Set<String> only}) {
-    // TODO: implement toSetColumns
-    return null;
-  }
 }

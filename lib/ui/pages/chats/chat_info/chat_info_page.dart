@@ -57,7 +57,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
       child: Material(
           color: Colors.white,
           child: CustomScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
+            physics: BouncingScrollPhysics(),
             slivers: <Widget>[
               SliverAppBar(
                 floating: true,

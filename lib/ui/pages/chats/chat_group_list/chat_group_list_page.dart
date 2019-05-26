@@ -61,6 +61,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                 onOffsetChange: (result, change) {},
                 // Unable to put PageView under child properties, so have to get manual
                 child: new ListView.builder(
+                    physics: BouncingScrollPhysics(),
                     itemCount: state.conversationList.length,
 //                    physics: const AlwaysScrollableScrollPhysics(),
                     //suggestion from https://github.com/flutter/flutter/issues/22314

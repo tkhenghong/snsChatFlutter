@@ -2,42 +2,32 @@
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
-//part 'package:snschat_flutter/database/sqflite/repositories/settings/settings.jorm.dart';
+part 'settings.jorm.dart';
 
 class Settings {
   Settings({this.id, this.notification});
 
   Settings.make(this.id, this.notification);
 
+  @PrimaryKey()
   String id;
+
+  @Column(isNullable: true)
+  String userId; // User object
+
+  @Column(isNullable: true)
   bool notification;
 
   @override
   String toString() {
-    return 'Settings{id: $id, notification: $notification}';
+    return 'Settings{id: $id, userId: $userId, notification: $notification}';
   }
 }
 
 @GenBean()
-//class SettingsBean extends Bean<Settings> with _SettingsBean {
-class SettingsBean extends Bean<Settings> {
+class SettingsBean extends Bean<Settings> with _SettingsBean {
+//class SettingsBean extends Bean<Settings> {
   SettingsBean(Adapter adapter) : super(adapter);
 
   final String tableName = 'settings';
-
-  @override
-  // TODO: implement fields
-  Map<String, Field> get fields => null;
-
-  @override
-  Settings fromMap(Map map) {
-    // TODO: implement fromMap
-    return null;
-  }
-
-  @override
-  List<SetColumn> toSetColumns(Settings model, {bool update = false, Set<String> only}) {
-    // TODO: implement toSetColumns
-    return null;
-  }
 }

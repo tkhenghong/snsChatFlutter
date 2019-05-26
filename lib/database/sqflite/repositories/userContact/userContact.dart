@@ -4,12 +4,12 @@ import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
-//part 'package:snschat_flutter/database/sqflite/repositories/userContact/userContact.jorm.dart';
+part 'userContact.jorm.dart';
 
 class UserContact {
-  UserContact({this.id, this.displayName, this.realName, this.userId, this.mobileNo, this.lastSeenDate, this.block, this.photoId});
+  UserContact({this.id, this.displayName, this.realName, this.userId, this.mobileNo, this.lastSeenDate, this.block});
 
-  UserContact.make(this.id, this.displayName, this.realName, this.userId, this.mobileNo, this.lastSeenDate, this.block, this.photoId);
+  UserContact.make(this.id, this.displayName, this.realName, this.userId, this.mobileNo, this.lastSeenDate, this.block);
 
   @PrimaryKey()
   String id;
@@ -32,31 +32,15 @@ class UserContact {
   @Column(isNullable: true)
   bool block;
 
-  // TODO: Build table relationships
-  @Column(isNullable: true)
-  String photoId; // Multimedia object
+//  // TODO: Build table relationships
+//  @Column(isNullable: true)
+//  String photoId; // Multimedia object
 }
 
 @GenBean()
-//class UserContactBean extends Bean<UserContact> with _UserContactBean {
-class UserContactBean extends Bean<UserContact> {
+class UserContactBean extends Bean<UserContact> with _UserContactBean {
+//class UserContactBean extends Bean<UserContact> {
   UserContactBean(Adapter adapter) : super(adapter);
 
   final String tableName = 'userContact';
-
-  @override
-  // TODO: implement fields
-  Map<String, Field> get fields => null;
-
-  @override
-  UserContact fromMap(Map map) {
-    // TODO: implement fromMap
-    return null;
-  }
-
-  @override
-  List<SetColumn> toSetColumns(UserContact model, {bool update = false, Set<String> only}) {
-    // TODO: implement toSetColumns
-    return null;
-  }
 }

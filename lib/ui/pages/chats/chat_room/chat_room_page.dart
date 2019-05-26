@@ -54,20 +54,18 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
   @override
   Widget build(BuildContext context) {
-
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
     Multimedia groupPhoto;
     wholeAppBloc.currentState.multimediaList.forEach((Multimedia existingMultimedia) {
-      if(existingMultimedia.id == widget._conversation.groupPhotoId) {
+      if (existingMultimedia.id == widget._conversation.groupPhotoId) {
         groupPhoto = existingMultimedia;
       }
     });
     // Load local file first
     imageFile = File(groupPhoto.localFullFileUrl);
     imageFile.exists().then((fileExists) {
-
-      if(!fileExists) {
+      if (!fileExists) {
         print("if(!fileExists)");
         print('local file not exist!');
         loadImageHandler(groupPhoto).then((remoteDownloadedfile) {
@@ -262,6 +260,11 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   Widget buildListMessage() {
     return Flexible(
         child: new SmartRefresher(
+      header: ClassicHeader(),
+      onRefresh: () {
+        _refreshController.refreshCompleted();
+      },
+      enableOverScroll: true,
       enablePullUp: false,
       enablePullDown: false,
       controller: _refreshController,

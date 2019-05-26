@@ -5,7 +5,7 @@ import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
-//part 'package:snschat_flutter/database/sqflite/repositories/message/message.jorm.dart';
+part 'message.jorm.dart';
 
 // system message or normal message, sticker, gifs, emojis, video, recording, photos,
 class Message {
@@ -20,11 +20,10 @@ class Message {
       this.receiverMobileNo,
       this.type,
       this.status,
-      this.message,
-      this.multimediaId});
+      this.message});
 
   Message.make(this.id, this.conversationId, this.senderId, this.senderName, this.senderMobileNo, this.receiverId, this.receiverName,
-      this.receiverMobileNo, this.type, this.status, this.message, this.multimediaId);
+      this.receiverMobileNo, this.type, this.status, this.message);
 
   @PrimaryKey()
   String id;
@@ -65,37 +64,18 @@ class Message {
   @Column(isNullable: true)
   String message;
 
-  // TODO: Build table relationships
-  @Column(isNullable: true)
-  String multimediaId;
-
   @override
   String toString() {
-    return 'Message{id: $id, conversationId: $conversationId, senderId: $senderId, senderName: $senderName, senderMobileNo: $senderMobileNo, receiverId: $receiverId, receiverName: $receiverName, receiverMobileNo: $receiverMobileNo, type: $type, status: $status, message: $message, multimediaId: $multimediaId}';
-  } // Multimedia object
+    return 'Message{id: $id, conversationId: $conversationId, senderId: $senderId, senderName: $senderName, senderMobileNo: $senderMobileNo, receiverId: $receiverId, receiverName: $receiverName, receiverMobileNo: $receiverMobileNo, type: $type, status: $status, message: $message}';
+  }
+
 
 }
 
 @GenBean()
-//class MessageBean extends Bean<Message> with _MessageBean {
-class MessageBean extends Bean<Message> {
+class MessageBean extends Bean<Message> with _MessageBean {
+//class MessageBean extends Bean<Message> {
   MessageBean(Adapter adapter) : super(adapter);
 
   final String tableName = 'message';
-
-  @override
-  // TODO: implement fields
-  Map<String, Field> get fields => null;
-
-  @override
-  Message fromMap(Map map) {
-    // TODO: implement fromMap
-    return null;
-  }
-
-  @override
-  List<SetColumn> toSetColumns(Message model, {bool update = false, Set<String> only}) {
-    // TODO: implement toSetColumns
-    return null;
-  }
 }

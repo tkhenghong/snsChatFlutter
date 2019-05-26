@@ -11,8 +11,7 @@ class PageListItem {
   final Function onTap;
   final Object object;
 
-  PageListItem(
-      {this.title, this.leading, this.trailing, this.subtitle, this.onTap, this.object});
+  PageListItem({this.title, this.leading, this.trailing, this.subtitle, this.onTap, this.object});
 }
 
 class PageListTile extends ListTile {
@@ -50,6 +49,8 @@ class PageListViewState extends State<PageListView> {
 
   Widget build(BuildContext context) {
     return new SmartRefresher(
+        header: WaterDropHeader(),
+        enableOverScroll: true,
         enablePullUp: false,
         enablePullDown: false,
         controller: _refreshController,
@@ -59,7 +60,6 @@ class PageListViewState extends State<PageListView> {
           Future.delayed(Duration(seconds: 1), () {
             print('Delayed 1 second.');
             _refreshController.refreshCompleted();
-//              _refreshController.sendBack(up, RefreshStatus.completed); // Deprecated
           });
         },
         onOffsetChange: (result, change) {
@@ -68,13 +68,14 @@ class PageListViewState extends State<PageListView> {
         // Unable to put PageView under child properties, so have to get manual
         child: new ListView.builder(
             itemCount: widget.array.length,
-            physics: const AlwaysScrollableScrollPhysics(),
+            physics: BouncingScrollPhysics(),
             //suggestion from https://github.com/flutter/flutter/issues/22314
             itemBuilder: (BuildContext content, int index) {
               PageListItem listItem = widget.array[index];
               return new PageListTile(listItem, context);
             }));
   }
+
   @override
   void dispose() {
     // TODO: implement dispose
