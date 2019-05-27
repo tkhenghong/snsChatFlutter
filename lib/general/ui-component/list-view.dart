@@ -48,32 +48,14 @@ class PageListViewState extends State<PageListView> {
   }
 
   Widget build(BuildContext context) {
-    return new SmartRefresher(
-        header: WaterDropHeader(),
-        enableOverScroll: true,
-        enablePullUp: false,
-        enablePullDown: false,
-        controller: _refreshController,
-        // Very important, without this whole thing won't work. Check the examples in the plugins
-        onRefresh: () {
-          //Delay 1 second to simulate something loading
-          Future.delayed(Duration(seconds: 1), () {
-            print('Delayed 1 second.');
-            _refreshController.refreshCompleted();
-          });
-        },
-        onOffsetChange: (result, change) {
-          print("onOffsetChange......");
-        },
-        // Unable to put PageView under child properties, so have to get manual
-        child: new ListView.builder(
-            itemCount: widget.array.length,
-            physics: BouncingScrollPhysics(),
-            //suggestion from https://github.com/flutter/flutter/issues/22314
-            itemBuilder: (BuildContext content, int index) {
-              PageListItem listItem = widget.array[index];
-              return new PageListTile(listItem, context);
-            }));
+    return new ListView.builder(
+        itemCount: widget.array.length,
+        physics: RefreshBouncePhysics(),
+        // suggestion from https://github.com/flutter/flutter/issues/22314
+        itemBuilder: (BuildContext content, int index) {
+          PageListItem listItem = widget.array[index];
+          return new PageListTile(listItem, context);
+        });
   }
 
   @override

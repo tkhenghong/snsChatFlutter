@@ -20,10 +20,11 @@ class Message {
       this.receiverMobileNo,
       this.type,
       this.status,
-      this.message});
+      this.message,
+      this.timestamp});
 
   Message.make(this.id, this.conversationId, this.senderId, this.senderName, this.senderMobileNo, this.receiverId, this.receiverName,
-      this.receiverMobileNo, this.type, this.status, this.message);
+      this.receiverMobileNo, this.type, this.status, this.message, this.timestamp);
 
   @PrimaryKey()
   String id;
@@ -64,12 +65,13 @@ class Message {
   @Column(isNullable: true)
   String message;
 
+  @Column(isNullable: true)
+  String timestamp;
+
   @override
   String toString() {
-    return 'Message{id: $id, conversationId: $conversationId, senderId: $senderId, senderName: $senderName, senderMobileNo: $senderMobileNo, receiverId: $receiverId, receiverName: $receiverName, receiverMobileNo: $receiverMobileNo, type: $type, status: $status, message: $message}';
+    return 'Message{id: $id, conversationId: $conversationId, senderId: $senderId, senderName: $senderName, senderMobileNo: $senderMobileNo, receiverId: $receiverId, receiverName: $receiverName, receiverMobileNo: $receiverMobileNo, type: $type, status: $status, message: $message, timestamp: $timestamp}';
   }
-
-
 }
 
 @GenBean()

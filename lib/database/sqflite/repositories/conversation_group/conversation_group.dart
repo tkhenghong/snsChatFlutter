@@ -3,7 +3,6 @@ import 'dart:async';
 //Jaguar ORM
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
-import 'package:snschat_flutter/database/sqflite/repositories/userContact/userContact.dart';
 
 part 'conversation_group.jorm.dart';
 
