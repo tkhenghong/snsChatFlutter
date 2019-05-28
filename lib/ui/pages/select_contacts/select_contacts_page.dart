@@ -73,7 +73,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           isLoading = false;
         });
       }));
-    } else if(!contactLoaded) { // need to add _wholeAppBloc.currentState.phoneContactList.length == 0 together
+    } else if (!contactLoaded) {
+      // need to add _wholeAppBloc.currentState.phoneContactList.length == 0 together
       setupCheckBoxes();
       setState(() {
         isLoading = false;
@@ -154,7 +155,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                 builder: (context, WholeAppState state) {
                   return SmartRefresher(
                     header: WaterDropHeader(),
-                    enableOverScroll: true,
                     enablePullDown: true,
                     controller: _refreshController,
                     onRefresh: () {
@@ -239,16 +239,18 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   Future<Conversation> createPersonalConversation(Contact contact) async {
     Conversation conversation = new Conversation();
     Multimedia newMultiMedia = Multimedia(
+        id: generateNewId().toString(),
         imageDataId: "",
         imageFileId: "",
         localFullFileUrl: "",
-        localThumbnailUrl: null,
-        remoteThumbnailUrl: null,
-        remoteFullFileUrl: null);
-    UnreadMessage newUnreadMessage = UnreadMessage(count: 0, date: 0, lastMessage: "");
+        localThumbnailUrl: "",
+        remoteThumbnailUrl: "",
+        remoteFullFileUrl: "");
+    UnreadMessage newUnreadMessage = UnreadMessage(id: generateNewId().toString(), count: 0, date: 0, lastMessage: "");
+
+    wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
     wholeAppBloc.dispatch(OverrideUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
-    int newId = generateNewId();
-    conversation.id = newId.toString();
+    conversation.id = generateNewId().toString();
     conversation.name = contact.displayName;
 
     // convert contact to contact (self defined)
@@ -279,7 +281,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     conversation.description = '';
     conversation.groupPhotoId = newMultiMedia.id;
     conversation.unreadMessageId = newUnreadMessage.id;
-    conversation.groupPhotoId = newMultiMedia.id;
+    print('newMultiMedia.id: ' + newMultiMedia.id);
 
     return conversation;
   }

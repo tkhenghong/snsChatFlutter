@@ -21,6 +21,7 @@ class Message {
   String status; // Sent, received, unread, read
   String message;
   String multimediaId; // Multimedia
+  String timestamp;
 
   Message(
       {this.id,
@@ -34,7 +35,8 @@ class Message {
       this.type,
       this.status,
       this.message,
-      this.multimediaId});
+      this.multimediaId,
+      this.timestamp});
 
   Message.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -48,22 +50,24 @@ class Message {
         type = json['type'],
         status = json['status'],
         message = json['message'],
-        multimediaId = json['multimediaId'];
+        multimediaId = json['multimediaId'],
+        timestamp = json['timestamp'];
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'conversationId': conversationId,
-    'senderId': senderId,
-    'senderName': senderName,
-    'senderMobileNo': senderMobileNo,
-    'receiverId': receiverId,
-    'receiverName': receiverName,
-    'receiverMobileNo': receiverMobileNo,
-    'type': type,
-    'status': status,
-    'message': message,
-    'multimediaId': multimediaId,
-  };
+        'id': id,
+        'conversationId': conversationId,
+        'senderId': senderId,
+        'senderName': senderName,
+        'senderMobileNo': senderMobileNo,
+        'receiverId': receiverId,
+        'receiverName': receiverName,
+        'receiverMobileNo': receiverMobileNo,
+        'type': type,
+        'status': status,
+        'message': message,
+        'multimediaId': multimediaId,
+        'timestamp': timestamp,
+      };
 }
 
 //class Recipient {

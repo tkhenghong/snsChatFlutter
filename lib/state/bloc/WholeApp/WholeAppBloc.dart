@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:jaguar_orm/jaguar_orm.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
@@ -22,8 +23,13 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   @override
   Stream<WholeAppState> mapEventToState(WholeAppEvent event) async* {
+//    CheckUserLoginEvent
     print('State management center!');
-    if (event is UserSignInEvent) {
+
+    if (event is CheckUserLoginEvent) {
+      checkUserSignIn(event);
+      yield currentState;
+    } else if (event is UserSignInEvent) {
       signInUsingGoogle(event);
       yield currentState;
     } else if (event is UserSignOutEvent) {
@@ -74,6 +80,25 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
   }
 
+  checkUserSignIn(CheckUserLoginEvent event) async {
+    print('checkUserSignIn()');
+//     Read from Google Firestore
+    if (currentState.userState.firebaseUser.uid.isEmpty) {
+      print('Checkpoint 1');
+      event.callback(false);
+      return;
+    } else {
+      print('currentState.userState.firebaseUser.uid: ' + currentState.userState.firebaseUser.uid);
+      print('currentState.userState.firebaseUser.displayName: ' + currentState.userState.firebaseUser.displayName);
+    }
+    print('Checkpoint 2');
+    final QuerySnapshot result =
+        await Firestore.instance.collection('user').where('userId', isEqualTo: currentState.userState.firebaseUser.uid).getDocuments();
+    final List<DocumentSnapshot> documents = result.documents;
+
+    documents.length == 0 ? event.callback(false) : event.callback(true);
+  }
+
   signInUsingGoogle(UserSignInEvent event) async {
     // An average user use his/her Google account to sign in.
     GoogleSignInAccount googleSignInAccount = await currentState.googleSignIn.signIn();
@@ -88,13 +113,19 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     // Create the user in Firebase
     currentState.userState.firebaseUser = await currentState.firebaseAuth.signInWithCredential(credential);
 
+//    saveUsertoLocalDb();
     event.callback(); // Use callback method to signal UI change
   }
 
+  // TODO: Save to SQLite DB later
+//  saveUsertoLocalDb() async {
+//    Find updater = new Find('user');
+//    updater.eq('wadw', 'wda');
+//    updater.
+//  }
+
   signUpInFirestore(User user) async {
     FirebaseUser firebaseUser = currentState.userState.firebaseUser;
-    GoogleSignIn googleSignIn = currentState.googleSignIn;
-    FirebaseAuth firebaseAuth = currentState.firebaseAuth;
 
     if (firebaseUser != null) {
       print('if (firebaseUser != null)');

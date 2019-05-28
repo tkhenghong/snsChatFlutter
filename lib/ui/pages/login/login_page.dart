@@ -32,17 +32,19 @@ class LoginPageState extends State<LoginPage> {
 
   _signIn() async {
     showCenterLoadingIndicator(context);
+
     wholeAppBloc.dispatch(UserSignInEvent(callback: () {
       print('Callback reached.');
       goToVerifyPhoneNumber();
       print('UserSignUpEvent()');
       // TODO: Add new Settings to the Bloc State
       Settings userSettings = Settings(id: generateNewId().toString(), notification: true);
-      wholeAppBloc.dispatch(AddSettingsEvent(callback: (Settings settings) {
-        print('returned to login page. Settings id is: ' + settings.id);
-        wholeAppBloc.dispatch(UserSignUpEvent(callback: () {}, user: User(mobileNo: "+60182262663", settingsId: settings.id)));
-      }, settings: userSettings));
-
+      wholeAppBloc.dispatch(AddSettingsEvent(
+          callback: (Settings settings) {
+            print('returned to login page. Settings id is: ' + settings.id);
+            wholeAppBloc.dispatch(UserSignUpEvent(callback: () {}, user: User(mobileNo: "+60182262663", settingsId: settings.id)));
+          },
+          settings: userSettings));
     }));
   }
 
@@ -52,7 +54,7 @@ class LoginPageState extends State<LoginPage> {
     wholeAppBloc = _wholeAppBloc;
     wholeAppBloc.dispatch(CheckPermissionEvent(callback: (Map<PermissionGroup, PermissionStatus> permissionResults) {
       permissionResults.forEach((PermissionGroup permissionGroup, PermissionStatus permissionStatus) {
-        if(permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted) {
+        if (permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted) {
           print('if(permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted)');
           wholeAppBloc.dispatch(GetPhoneStorageContactsEvent(callback: () {}));
         }

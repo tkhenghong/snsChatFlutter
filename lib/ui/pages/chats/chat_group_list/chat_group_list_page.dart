@@ -6,9 +6,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/general/ui-component/list-view.dart';
+import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
+import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
 
@@ -38,6 +40,17 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   Widget build(BuildContext context) {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
+//    showCenterLoadingIndicator(context);
+    // TODO: Should only CheckUserLoginEvent first, doing this because haven't save user to DB*
+    wholeAppBloc.dispatch(UserSignInEvent(callback: () {
+      wholeAppBloc.dispatch(CheckUserLoginEvent(callback: (bool signUp) {
+        print('CheckUserLoginEvent callback()');
+        print('signUp: ' + signUp.toString());
+        if (!signUp) {
+          Navigator.of(context).pushNamedAndRemoveUntil("login_page", (Route<dynamic> route) => false);
+        }
+      }));
+    }));
 //    List<PageListItem> listItems = [];
     return BlocBuilder(
       bloc: wholeAppBloc,
@@ -48,14 +61,11 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                 // Need to add a header or else list display will not be correct
                 header: WaterDropHeader(),
                 controller: _refreshController,
-                enableOverScroll: true,
                 enablePullDown: true,
-                // Very important, without this whole thing won't work. Check the examples in the plugins
                 onRefresh: () {
                   //Delay 1 second to simulate something loading
                   Future.delayed(Duration(seconds: 1), () {
                     _refreshController.refreshCompleted();
-                    // _refreshController.sendBack(up, RefreshStatus.completed); // Deprecated
                   });
                 },
                 onOffsetChange: (result, change) {},

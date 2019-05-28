@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:snschat_flutter/database/startup.dart';
 
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 
@@ -28,11 +29,15 @@ class BlocWrapper extends StatefulWidget {
 
 class BlocWrapperState extends State<BlocWrapper> {
   final WholeAppBloc _wholeAppBloc = WholeAppBloc();
+
   @override
   Widget build(BuildContext context) {
-    // Getting contact before when start the app asynchronously
-    // TODO: implement build
-    return BlocProvider<WholeAppBloc> (
+    // Start DB asynchronously
+//    startupDatabase().then( (_) {
+//      checkUserSignIn();
+//    });
+
+    return BlocProvider<WholeAppBloc>(
       bloc: _wholeAppBloc,
       child: MaterialApp(
         title: 'FLutter Chat Test App',
@@ -42,7 +47,7 @@ class BlocWrapperState extends State<BlocWrapper> {
           primaryColor: const Color(0xff000000),
           primarySwatch: Colors.blue,
         ),
-        home: LoginPage(),
+        home: TabsPage(),
         routes: {
           "login_page": (_) => new LoginPage(),
           "privacy_notice_page": (_) => new PrivacyNoticePage(),

@@ -10,6 +10,12 @@ import 'package:snschat_flutter/objects/userContact/userContact.dart';
 
 abstract class WholeAppEvent {}
 
+class CheckUserLoginEvent extends WholeAppEvent {
+  Function callback;
+
+  CheckUserLoginEvent({this.callback});
+}
+
 // User Events
 class UserSignInEvent extends WholeAppEvent {
   Function callback;
@@ -41,9 +47,9 @@ class RequestPermissionsEvent extends WholeAppEvent {
 
 class GetPhoneStorageContactsEvent extends WholeAppEvent {
   Function callback;
+
   GetPhoneStorageContactsEvent({this.callback});
 }
-
 
 // Conversation
 class AddConversationEvent extends WholeAppEvent {
@@ -79,7 +85,6 @@ class AddSettingsEvent extends WholeAppEvent {
 
   AddSettingsEvent({this.settings, this.callback});
 }
-
 
 // User
 
@@ -130,5 +135,6 @@ class AddGoogleSignInEvent extends WholeAppEvent {
 class OverrideUnreadMessageEvent extends WholeAppEvent {
   UnreadMessage unreadMessage;
   Function callback;
+
   OverrideUnreadMessageEvent({this.unreadMessage, this.callback});
 }

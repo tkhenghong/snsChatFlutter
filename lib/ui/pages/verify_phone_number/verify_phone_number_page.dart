@@ -24,19 +24,14 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
         children: <Widget>[
           Text('Verify ' + phoneNo),
           RichText(
-              text: TextSpan(
-                  style: TextStyle(inherit: true, color: Colors.black),
-                  children: <TextSpan>[
-                TextSpan(text: 'We have sent and SMS with a code to '),
-                TextSpan(
-                    text: phoneNo.toString(),
-                    style:
-                        TextStyle(inherit: true, fontWeight: FontWeight.bold)),
+              text: TextSpan(style: TextStyle(inherit: true, color: Colors.black), children: <TextSpan>[
+            TextSpan(text: 'We have sent and SMS with a code to '),
+            TextSpan(text: phoneNo.toString(), style: TextStyle(inherit: true, fontWeight: FontWeight.bold)),
 // TODO: Add other types of error messages for different situations
 //                TextSpan(text: 'Can\'t send an SMS with your code because you\'ve tried to register '),
 //                TextSpan(text: phoneNo.toString(), style: TextStyle(inherit: true, fontWeight: FontWeight.bold)),
 //                TextSpan(text: ' recently. Request a call or wait before requesting an SMS. '),
-              ])),
+          ])),
           FlatButton(
               onPressed: () {},
               child: Text(
@@ -82,7 +77,6 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
 
   goToChatGroupList() {
     //Remove all pages and make chat_group_list_page be the only page
-    Navigator.of(context)
-        .pushNamedAndRemoveUntil("tabs_page", (Route<dynamic> route) => false);
+    Navigator.of(context).pushNamedAndRemoveUntil("tabs_page", (Route<dynamic> route) => false);
   }
 }

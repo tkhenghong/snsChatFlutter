@@ -1,16 +1,19 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
+import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
+import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
 
 class ChatRoomPage extends StatefulWidget {
@@ -258,56 +261,72 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   Widget buildListMessage() {
-    return Flexible(
-        child: new SmartRefresher(
-      header: ClassicHeader(),
-      onRefresh: () {
-        _refreshController.refreshCompleted();
+    return StreamBuilder(
+      stream: Firestore.instance.collection("message").where("").orderBy('timestamp', descending: true).snapshots(),
+      builder: (BuildContext context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        } else {
+//              listMessage = snapshot.data.documents;
+          return Flexible(
+              child: new SmartRefresher(
+            header: ClassicHeader(),
+            onRefresh: () {
+              _refreshController.refreshCompleted();
+            },
+            controller: _refreshController,
+            child: ListView.builder(
+              controller: listScrollController,
+              itemCount: snapshot.data.documents.length,
+              reverse: true,
+              itemBuilder: (context, index) => createChatMessage(index, snapshot.data.documents[index]),
+              physics: RefreshBouncePhysics(),
+//                  children: <Widget>[
+//                    Padding(
+//                      padding: EdgeInsets.only(top: 10.0),
+//                    ),
+//                    Container(
+//                      child: Text(
+//                        "Test message",
+//                        style: TextStyle(color: Colors.white),
+//                      ),
+//                      padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+//                      width: 200.0,
+//                      decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+//                      margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
+//                    ),
+//                    Container(
+//                      child: Text(
+//                        "Test message 2",
+//                        style: TextStyle(color: Colors.white),
+//                      ),
+//                      padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+//                      width: 200.0,
+//                      decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+//                      margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
+//                    ),
+//                    Container(
+//                      child: Text(
+//                        "Test message 3",
+//                        style: TextStyle(color: Colors.white),
+//                      ),
+//                      padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+//                      width: 200.0,
+//                      decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+//                      margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
+//                    ),
+//                  ],
+            ),
+          ));
+        }
       },
-      enableOverScroll: true,
-      enablePullUp: false,
-      enablePullDown: false,
-      controller: _refreshController,
-      child: ListView(
-        controller: listScrollController,
-        physics: BouncingScrollPhysics(),
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(top: 10.0),
-          ),
-          Container(
-            child: Text(
-              "Test message",
-              style: TextStyle(color: Colors.white),
-            ),
-            padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-            width: 200.0,
-            decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
-            margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
-          ),
-          Container(
-            child: Text(
-              "Test message 2",
-              style: TextStyle(color: Colors.white),
-            ),
-            padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-            width: 200.0,
-            decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
-            margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
-          ),
-          Container(
-            child: Text(
-              "Test message 3",
-              style: TextStyle(color: Colors.white),
-            ),
-            padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-            width: 200.0,
-            decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
-            margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
-          ),
-        ],
-      ),
-    ));
+    );
+  }
+
+  Widget createChatMessage(int index, DocumentSnapshot document) {
+    return Row(
+      
+    );
   }
 
 // Image.asset(
@@ -417,6 +436,59 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     // type: 0 = text, 1 = image, 2 = sticker
     if (content.trim() != '') {
       textEditingController.clear();
+      Message newMessage;
+      Multimedia newMultimedia;
+      if (type == 0) {
+        // Text
+        newMultimedia = Multimedia(
+            id: generateNewId().toString(),
+            imageDataId: "",
+            imageFileId: "",
+            localFullFileUrl: "",
+            localThumbnailUrl: "",
+            remoteFullFileUrl: "",
+            remoteThumbnailUrl: "");
+
+        newMessage = Message(
+          id: generateNewId().toString(),
+          conversationId: widget._conversation.id,
+          message: content,
+          multimediaId: newMultimedia.id,
+          // Send to group will not need receiver
+          receiverId: "",
+          receiverMobileNo: "",
+          receiverName: "",
+
+          senderId: wholeAppBloc.currentState.userState.id,
+          senderMobileNo: wholeAppBloc.currentState.userState.mobileNo,
+          senderName: wholeAppBloc.currentState.userState.displayName,
+          status: "Sent",
+          type: "Text",
+          timestamp: DateTime.now().millisecondsSinceEpoch.toString(),
+        );
+      }
+      if (!isObjectEmpty(newMessage) && !isObjectEmpty(newMultimedia)) {
+        print('if(!isObjectEmpty(newMessage) && !isObjectEmpty(newMultimedia))');
+        wholeAppBloc.dispatch(AddMessageEvent(message: newMessage, callback: (Message message) {}));
+
+        Firestore.instance.collection('message').document(newMessage.id).setData({
+          'id': newMessage.id, // Self generated Id
+          'conversationId': newMessage.conversationId,
+          'message': newMessage.message,
+          'multimediaId': newMessage.multimediaId,
+          'receiverId': newMessage.receiverId,
+          'receiverMobileNo': newMessage.receiverMobileNo,
+          'receiverName': newMessage.receiverName,
+          'senderId': newMessage.senderId,
+          'senderMobileNo': newMessage.senderMobileNo,
+          'senderName': newMessage.senderName,
+          'status': newMessage.status,
+          'type': newMessage.type,
+          'timestamp': newMessage.timestamp,
+        });
+      } else {
+        print('if(isObjectEmpty(newMessage) || isObjectEmpty(newMultimedia))');
+      }
 
       listScrollController.animateTo(0.0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {

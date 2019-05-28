@@ -13,7 +13,7 @@ class TabsPage extends StatefulWidget {
   }
 }
 
-class TabsPageState extends State<TabsPage> with TickerProviderStateMixin {
+class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   AnimationController _animationController, _animationController2;
   Animation animation;
   static const List<IconData> icons = const [Icons.person_add, Icons.group_add]; // TODO: Add Broadcast
@@ -49,6 +49,7 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    print('Tabs Page: build? ');
     return Material(
       color: Colors.white,
       child: Scaffold(
@@ -195,4 +196,8 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin {
         break;
     }
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

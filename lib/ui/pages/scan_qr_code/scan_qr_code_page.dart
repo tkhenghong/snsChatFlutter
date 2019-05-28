@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 //import 'package:qr_flutter/qr_flutter.dart'; Not yet used
 import 'package:flutter/rendering.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class ScanQrCodePage extends StatefulWidget {
   @override
@@ -24,9 +25,17 @@ class ScanQrCodePageState extends State<ScanQrCodePage> {
 
   @override
   Widget build(BuildContext context) {
+    final bodyHeight = MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
+        QrImage(
+          data: "651uytjn1t5hn41rt53ghb1t5j4etuj5t1ed3hdu1tyj4edty56j416r5jh4r5yt",
+          size: 0.5 * bodyHeight,
+          onError: (ex) {
+            print("[QR] ERROR - $ex");
+          },
+        ),
         RaisedButton(
             textColor: Colors.white,
             color: Colors.black,
