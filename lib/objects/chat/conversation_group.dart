@@ -7,13 +7,14 @@ class Conversation {
   // Single conversation, group conversation & broadcast channel
   String id;
   String name;
-  ChatGroupType type;
+  String type;
   String groupPhotoId; // Multimedia
   String unreadMessageId; // UnreadMessage
   String description;
   bool block;
   int notificationExpireDate; // 0 means notifications not blocked, > 0 means notifications are blocked until specified time.
-  List<UserContact> contacts;
+//  List<UserContact> contacts;
+  String timestamp;
 
   Conversation(
       {this.id,
@@ -24,7 +25,7 @@ class Conversation {
       this.block,
       this.description,
       this.notificationExpireDate,
-      this.contacts});
+      this.timestamp});
 
   Conversation.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -35,7 +36,7 @@ class Conversation {
         block = json['block'],
         description = json['description'],
         notificationExpireDate = json['notificationExpireDate'],
-        contacts = json['contacts'];
+        timestamp = json['timestamp'];
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -46,7 +47,7 @@ class Conversation {
         'block': block,
         'description': description,
         'notificationExpireDate': notificationExpireDate,
-        'contacts': contacts,
+        'timestamp': timestamp,
       };
 }
 

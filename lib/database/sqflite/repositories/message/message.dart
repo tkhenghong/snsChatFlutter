@@ -21,10 +21,11 @@ class Message {
       this.type,
       this.status,
       this.message,
+      this.multimediaId,
       this.timestamp});
 
   Message.make(this.id, this.conversationId, this.senderId, this.senderName, this.senderMobileNo, this.receiverId, this.receiverName,
-      this.receiverMobileNo, this.type, this.status, this.message, this.timestamp);
+      this.receiverMobileNo, this.type, this.status, this.message, this.multimediaId, this.timestamp);
 
   @PrimaryKey()
   String id;
@@ -66,11 +67,14 @@ class Message {
   String message;
 
   @Column(isNullable: true)
+  String multimediaId;
+
+  @Column(isNullable: true)
   String timestamp;
 
   @override
   String toString() {
-    return 'Message{id: $id, conversationId: $conversationId, senderId: $senderId, senderName: $senderName, senderMobileNo: $senderMobileNo, receiverId: $receiverId, receiverName: $receiverName, receiverMobileNo: $receiverMobileNo, type: $type, status: $status, message: $message, timestamp: $timestamp}';
+    return 'Message{id: $id, conversationId: $conversationId, senderId: $senderId, senderName: $senderName, senderMobileNo: $senderMobileNo, receiverId: $receiverId, receiverName: $receiverName, receiverMobileNo: $receiverMobileNo, type: $type, status: $status, message: $message, multimediaId: $multimediaId, timestamp: $timestamp}';
   }
 }
 

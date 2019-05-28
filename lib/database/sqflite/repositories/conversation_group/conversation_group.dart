@@ -7,10 +7,19 @@ import 'package:jaguar_orm/jaguar_orm.dart';
 part 'conversation_group.jorm.dart';
 
 class Conversation {
-  Conversation({this.id, this.name, this.type, this.groupPhotoId, this.block, this.description, this.notificationExpireDate});
+  Conversation(
+      {this.id,
+      this.name,
+      this.type,
+      this.groupPhotoId,
+      this.unreadMessageId,
+      this.block,
+      this.description,
+      this.notificationExpireDate,
+      this.timestamp});
 
-  Conversation.make(
-      this.id, this.name, this.type, this.groupPhotoId, this.unreadMessageId, this.block, this.description, this.notificationExpireDate);
+  Conversation.make(this.id, this.name, this.type, this.groupPhotoId, this.unreadMessageId, this.block, this.description,
+      this.notificationExpireDate, this.timestamp);
 
   // Single conversation, group conversation & broadcast channel
   @PrimaryKey()
@@ -26,6 +35,9 @@ class Conversation {
   String groupPhotoId; // Multimedia object
 
   @Column(isNullable: true)
+  String unreadMessageId;
+
+  @Column(isNullable: true)
   String description;
 
   @Column(isNullable: true)
@@ -38,13 +50,12 @@ class Conversation {
 //  List<UserContact> contacts; // List<UserContact> object
 
   @Column(isNullable: true)
-  String unreadMessageId;
+  String timestamp;
 
   @override
   String toString() {
-    return 'Conversation{id: $id, name: $name, type: $type, groupPhotoId: $groupPhotoId, description: $description, block: $block, notificationExpireDate: $notificationExpireDate, unreadMessageId: $unreadMessageId}';
-  } // UnreadMessage object
-
+    return 'Conversation{id: $id, name: $name, type: $type, groupPhotoId: $groupPhotoId, description: $description, block: $block, notificationExpireDate: $notificationExpireDate, unreadMessageId: $unreadMessageId, timestamp: $timestamp}';
+  }
 }
 
 @GenBean()

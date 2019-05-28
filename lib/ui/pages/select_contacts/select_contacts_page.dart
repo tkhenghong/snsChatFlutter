@@ -11,7 +11,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
-import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
@@ -21,7 +20,7 @@ import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
 import 'package:snschat_flutter/ui/pages/group_name/group_name_page.dart';
 
 class SelectContactsPage extends StatefulWidget {
-  final ChatGroupType chatGroupType;
+  final String chatGroupType;
 
   SelectContactsPage({this.chatGroupType});
 
@@ -81,15 +80,15 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       });
     }
     switch (widget.chatGroupType) {
-      case ChatGroupType.Personal:
+      case "Personal":
         title = "Create Personal Chat";
         subtitle = "Select a contact.";
         break;
-      case ChatGroupType.Group:
+      case "Group":
         title = "Create Group Chat";
         subtitle = "Select a few contacts.";
         break;
-      case ChatGroupType.Broadcast:
+      case "Broadcast":
         title = "Broadcast";
         subtitle = "Select a few contacts.";
         break;
@@ -237,7 +236,22 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   // TODO: Conversation Creation into BLOC, can be merged with Group & Broadcast
   Future<Conversation> createPersonalConversation(Contact contact) async {
-    Conversation conversation = new Conversation();
+    Conversation conversation = new Conversation(
+      id: generateNewId().toString(),
+      name: contact.displayName,
+      type: "Personal",
+      block: false,
+      description: '',
+    );
+    UserContact newUserContact = UserContact(
+      id: generateNewId().toString(),
+      userId: generateNewId().toString(),
+      // TODO: Should be matching database ID? Or frontend UserId?
+      displayName: contact.displayName,
+      realName: contact.displayName,
+//      mobileNo: primaryNo.length == 0 ? "" : primaryNo[0], // Added in later code
+    );
+
     Multimedia newMultiMedia = Multimedia(
         id: generateNewId().toString(),
         imageDataId: "",
@@ -245,18 +259,15 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         localFullFileUrl: "",
         localThumbnailUrl: "",
         remoteThumbnailUrl: "",
-        remoteFullFileUrl: "");
+        remoteFullFileUrl: "",
+        userContactId: newUserContact.id,
+        messageId: "");
     UnreadMessage newUnreadMessage = UnreadMessage(id: generateNewId().toString(), count: 0, date: 0, lastMessage: "");
 
     wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
     wholeAppBloc.dispatch(OverrideUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
-    conversation.id = generateNewId().toString();
-    conversation.name = contact.displayName;
 
-    // convert contact to contact (self defined)
-    List<UserContact> userContacts = [];
-
-    //Determine how many phone number he has
+    // Determine how many phone number he has
     List<String> primaryNo = [];
     if (contact.phones.length > 0) {
       contact.phones.forEach((phoneNo) {
@@ -264,21 +275,11 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       });
     }
 
-    userContacts.add(UserContact(
-      id: generateNewId().toString(),
-      userId: generateNewId().toString(),
-      // TODO: Should be matching database ID? Or frontend UserId?
-      displayName: contact.displayName,
-      realName: contact.displayName,
-      mobileNo: primaryNo.length == 0 ? "" : primaryNo[0],
-      // Give the first number they from a list of numbers
-      photoId: newMultiMedia.id,
-    ));
+    // Add mobile no to UserContact before save to state
+    newUserContact.mobileNo = primaryNo.length == 0 ? "" : primaryNo[0];
+    // Personal chat one person only, so only dispatch once
+    wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: newUserContact));
 
-    conversation.type = ChatGroupType.Personal;
-    conversation.contacts = userContacts;
-    conversation.block = false;
-    conversation.description = '';
     conversation.groupPhotoId = newMultiMedia.id;
     conversation.unreadMessageId = newUnreadMessage.id;
     print('newMultiMedia.id: ' + newMultiMedia.id);

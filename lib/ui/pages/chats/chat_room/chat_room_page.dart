@@ -246,7 +246,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               margin: EdgeInsets.symmetric(horizontal: 8.0),
               child: IconButton(
                 icon: Icon(Icons.send),
-                onPressed: () => onSendMessage(textEditingController.text, 0),
+                onPressed: () => sendChatMessage(textEditingController.text, 0),
                 color: Colors.black,
               ),
             ),
@@ -265,7 +265,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       stream: Firestore.instance.collection("message").where("").orderBy('timestamp', descending: true).snapshots(),
       builder: (BuildContext context, snapshot) {
         if (!snapshot.hasData) {
-          return Center(child: CircularProgressIndicator());
+          return Center(child: Text("Loading messages..."));
         } else {
 //              listMessage = snapshot.data.documents;
           return Flexible(
@@ -279,13 +279,52 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               controller: listScrollController,
               itemCount: snapshot.data.documents.length,
               reverse: true,
-              itemBuilder: (context, index) => createChatMessage(index, snapshot.data.documents[index]),
               physics: RefreshBouncePhysics(),
-//                  children: <Widget>[
-//                    Padding(
-//                      padding: EdgeInsets.only(top: 10.0),
-//                    ),
-//                    Container(
+                itemBuilder: (context, index) => createChatMessage(index, snapshot.data.documents[index]),
+            ),
+          ));
+        }
+      },
+    );
+  }
+
+  Widget createChatMessage(int index, DocumentSnapshot document) {
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          child: Text(
+            document['senderName'] + document['message'] + document['timestamp'],
+            style: TextStyle(color: Colors.white),
+          ),
+          padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+          width: 200.0,
+          decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+          margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
+        ),
+      ],
+    );
+
+    // Data save into Message object Firestore
+    // Firestore.instance.collection('message').document(newMessage.id).setData({
+    //          'id': newMessage.id, // Self generated Id
+    //          'conversationId': newMessage.conversationId,
+    //          'message': newMessage.message,
+    //          'multimediaId': newMessage.multimediaId,
+    //          'receiverId': newMessage.receiverId,
+    //          'receiverMobileNo': newMessage.receiverMobileNo,
+    //          'receiverName': newMessage.receiverName,
+    //          'senderId': newMessage.senderId,
+    //          'senderMobileNo': newMessage.senderMobileNo,
+    //          'senderName': newMessage.senderName,
+    //          'status': newMessage.status,
+    //          'type': newMessage.type,
+    //          'timestamp': newMessage.timestamp,
+    //        });
+
+    // Template of Message (left):
+    //                    Container(
 //                      child: Text(
 //                        "Test message",
 //                        style: TextStyle(color: Colors.white),
@@ -295,38 +334,10 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 //                      decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
 //                      margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
 //                    ),
-//                    Container(
-//                      child: Text(
-//                        "Test message 2",
-//                        style: TextStyle(color: Colors.white),
-//                      ),
-//                      padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-//                      width: 200.0,
-//                      decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
-//                      margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
-//                    ),
-//                    Container(
-//                      child: Text(
-//                        "Test message 3",
-//                        style: TextStyle(color: Colors.white),
-//                      ),
-//                      padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-//                      width: 200.0,
-//                      decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
-//                      margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
-//                    ),
-//                  ],
-            ),
-          ));
-        }
-      },
-    );
-  }
 
-  Widget createChatMessage(int index, DocumentSnapshot document) {
-    return Row(
-      
-    );
+
+    // wholeAppBloc.currentState.userState.id
+
   }
 
 // Image.asset(
@@ -339,7 +350,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           Row(
             children: <Widget>[
               FlatButton(
-                  onPressed: () => onSendMessage('mimi1', 2),
+                  onPressed: () => sendChatMessage('mimi1', 2),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi1.gif"),
                     width: 50.0,
@@ -347,7 +358,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => onSendMessage('mimi2', 2),
+                  onPressed: () => sendChatMessage('mimi2', 2),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi2.gif"),
                     width: 50.0,
@@ -355,7 +366,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => onSendMessage('mimi3', 2),
+                  onPressed: () => sendChatMessage('mimi3', 2),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi3.gif"),
                     width: 50.0,
@@ -368,7 +379,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           Row(
             children: <Widget>[
               FlatButton(
-                  onPressed: () => onSendMessage('mimi4', 2),
+                  onPressed: () => sendChatMessage('mimi4', 2),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi4.gif"),
                     width: 50.0,
@@ -376,7 +387,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => onSendMessage('mimi5', 2),
+                  onPressed: () => sendChatMessage('mimi5', 2),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi5.gif"),
                     width: 50.0,
@@ -384,7 +395,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => onSendMessage('mimi6', 2),
+                  onPressed: () => sendChatMessage('mimi6', 2),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi6.gif"),
                     width: 50.0,
@@ -397,7 +408,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           Row(
             children: <Widget>[
               FlatButton(
-                  onPressed: () => onSendMessage('mimi7', 2),
+                  onPressed: () => sendChatMessage('mimi7', 2),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi7.gif"),
                     width: 50.0,
@@ -405,7 +416,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => onSendMessage('mimi8', 2),
+                  onPressed: () => sendChatMessage('mimi8', 2),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi8.gif"),
                     width: 50.0,
@@ -413,7 +424,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => onSendMessage('mimi9', 2),
+                  onPressed: () => sendChatMessage('mimi9', 2),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi9.gif"),
                     width: 50.0,
@@ -432,7 +443,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
-  void onSendMessage(String content, int type) {
+  void sendChatMessage(String content, int type) async {
     // type: 0 = text, 1 = image, 2 = sticker
     if (content.trim() != '') {
       textEditingController.clear();
@@ -486,6 +497,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           'type': newMessage.type,
           'timestamp': newMessage.timestamp,
         });
+        Fluttertoast.showToast(msg: 'Message test!', toastLength: Toast.LENGTH_SHORT);
       } else {
         print('if(isObjectEmpty(newMessage) || isObjectEmpty(newMultimedia))');
       }

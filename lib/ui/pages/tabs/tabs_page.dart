@@ -17,7 +17,7 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
   AnimationController _animationController, _animationController2;
   Animation animation;
   static const List<IconData> icons = const [Icons.person_add, Icons.group_add]; // TODO: Add Broadcast
-  static const List<ChatGroupType> chatTitles = const [ChatGroupType.Personal, ChatGroupType.Group]; // TODO: Add Broadcast
+  static const List<String> chatTitles = const ["Personal", "Group"]; // TODO: Add Broadcast
   Color backgroundColor = Colors.black;
   Color foregroundColor = Colors.white;
 
@@ -123,27 +123,32 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: List.generate(icons.length, (int index) {
+                // 0 = Personal, 1 = Group, 2 = Broadcast
                 Widget child = new Container(
                   height: 70.0,
                   width: 56.0,
                   alignment: FractionalOffset.topCenter,
                   child: ScaleTransition(
-                    scale: CurvedAnimation(
-                      parent: _animationController,
-                      curve: Interval(0.0, 1.0 - index / icons.length / 2.0, curve: Curves.easeOut),
-                    ),
-                    child: FloatingActionButton(
-                      heroTag: null,
-                      backgroundColor: backgroundColor,
-                      mini: true,
-                      child: Icon(icons[index], color: foregroundColor),
-                      onPressed: () {
-                        Navigator.of(context)
-                            .push(MaterialPageRoute(builder: (context) => SelectContactsPage(chatGroupType: chatTitles[index])));
-                        _animationController.reverse();
-                      },
-                    ),
-                  ),
+                      scale: CurvedAnimation(
+                        parent: _animationController,
+                        curve: Interval(0.0, 1.0 - index / icons.length / 2.0, curve: Curves.easeOut),
+                      ),
+                      child: Tooltip(
+                        message: index == 0
+                            ? "Create Personal Conversation"
+                            : index == 1 ? "Create Group Conversation" : index == 2 ? "Create Broadcast Group" : "Create Others...",
+                        child: FloatingActionButton(
+                          heroTag: null,
+                          backgroundColor: backgroundColor,
+                          mini: true,
+                          child: Icon(icons[index], color: foregroundColor),
+                          onPressed: () {
+                            Navigator.of(context)
+                                .push(MaterialPageRoute(builder: (context) => SelectContactsPage(chatGroupType: chatTitles[index])));
+                            _animationController.reverse();
+                          },
+                        ),
+                      )),
                 );
                 return child;
               }).toList()

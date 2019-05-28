@@ -9,9 +9,10 @@ class UserContact {
   String mobileNo;
   String lastSeenDate;
   bool block;
-  String photoId; // Multimedia
 
-  UserContact({this.id, this.displayName, this.realName, this.userId, this.mobileNo, this.lastSeenDate, this.block, this.photoId});
+//  String photoId; // Multimedia // Moved to Multimedia
+
+  UserContact({this.id, this.displayName, this.realName, this.userId, this.mobileNo, this.lastSeenDate, this.block});
 
   UserContact.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -20,8 +21,9 @@ class UserContact {
         userId = json['userId'],
         mobileNo = json['mobileNo'],
         lastSeenDate = json['lastSeenDate'],
-        block = json['block'],
-        photoId = json['photoId'];
+        block = json['block'];
+
+//        photoId = json['photoId'];
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -31,6 +33,6 @@ class UserContact {
         'mobileNo': mobileNo,
         'lastSeenDate': lastSeenDate,
         'block': block,
-        'photoId': photoId,
+//        'photoId': photoId,
       };
 }

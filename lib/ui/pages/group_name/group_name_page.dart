@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -169,23 +170,33 @@ class GroupNamePageState extends State<GroupNamePage> {
 
   // TODO: Conversation Creation into BLOC, can be merged with Personal & Broadcast
   Future<Conversation> addGroupConversation() async {
-    Conversation conversation = new Conversation();
-    int newId = generateNewId();
-    conversation.id = newId.toString();
-    conversation.name = textEditingController.text;
+    Conversation conversation = new Conversation(
+      id: generateNewId().toString(),
+      name: textEditingController.text,
+      type: "Group",
+      block: false,
+      description: '',
+    );
 
+    // Multimedia for group chat
     Multimedia newMultiMedia = Multimedia(
-        id: generateNewId().toString(),
-        imageDataId: "",
-        imageFileId: "",
-        localFullFileUrl: imageFile.path,
-        localThumbnailUrl: null,
-        remoteThumbnailUrl: null,
-        remoteFullFileUrl: null);
+      id: generateNewId().toString(),
+      imageDataId: "",
+      imageFileId: "",
+      localFullFileUrl: imageFile.path,
+      localThumbnailUrl: null,
+      remoteThumbnailUrl: null,
+      remoteFullFileUrl: null,
+      messageId: "",
+      userContactId: "",
+      conversationId: conversation.id,
+    );
+
     UnreadMessage newUnreadMessage = UnreadMessage(id: generateNewId().toString(), count: 0, date: 0, lastMessage: "");
     wholeAppBloc.dispatch(OverrideUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
+    wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
+
     // convert contact to contact (self defined)
-    List<UserContact> userContacts = [];
     widget.selectedContacts.forEach((contact) {
       //Determine how many phone number he has
       List<String> primaryNo = [];
@@ -198,33 +209,43 @@ class GroupNamePageState extends State<GroupNamePage> {
       // Create new Multimedia object to save photo
       if (contact.avatar.length > 0) {
         print('if (contact.avatar.length > 0)');
+        // TODO: change Uint8List object to local file object and save it to state & DB
         // Multimedia newMultimedia = Multimedia(imageData: contact.avatar);
 //        wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
       } else {
         print('if (contact.avatar.length <= 0)');
       }
-      // Will add a default Multimedia object to the state list and DB no matter it's empty or not, to prevent any null event happens
-      wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
 
-      userContacts.add(UserContact(
+      UserContact newUserContact = UserContact(
         id: generateNewId().toString(),
         userId: generateNewId().toString(),
         // TODO: Should be matching database ID? Or frontend UserId?
         displayName: contact.displayName,
         realName: contact.displayName,
         mobileNo: primaryNo.length == 0 ? "" : primaryNo[0],
+        block: false,
+        lastSeenDate: "",
         // Give the first number they from a list of numbers
         // photo: Multimedia(imageData: contact.avatar),
         // photoId: Multimedia(imageData: contact.avatar),
-        photoId: newMultiMedia.id,
-      ));
+      );
+      wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: newUserContact));
     });
-    conversation.type = ChatGroupType.Group;
-    conversation.contacts = userContacts;
-    conversation.block = false;
-    conversation.description = '';
+
     conversation.groupPhotoId = newMultiMedia.id;
     conversation.unreadMessageId = newUnreadMessage.id;
+
+    Firestore.instance.collection('conversation').document(conversation.id).setData({
+      'id': conversation.id, // Self generated Id
+      'name': conversation.name,
+      'type': conversation.type,
+      'groupPhotoId': conversation.groupPhotoId,
+      'unreadMessageId': conversation.unreadMessageId,
+      'block': conversation.block,
+      'description': conversation.description,
+      'notificationExpireDate': conversation.notificationExpireDate,
+      'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
+    });
 
     // Multimedia(remoteUrl: "", localUrl: _image.path, imageData: await _image.readAsBytes(), imageFile: _image, thumbnail: "");
 

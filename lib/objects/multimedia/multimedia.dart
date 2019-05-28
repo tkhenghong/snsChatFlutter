@@ -12,6 +12,9 @@ class Multimedia {
   String remoteFullFileUrl;
   String imageDataId; // Uint8List
   String imageFileId; // File
+  String messageId;
+  String userContactId;
+  String conversationId;
 
   Multimedia(
       {this.id,
@@ -20,7 +23,10 @@ class Multimedia {
       this.remoteThumbnailUrl,
       this.remoteFullFileUrl,
       this.imageDataId,
-      this.imageFileId});
+      this.imageFileId,
+      this.messageId,
+      this.userContactId,
+      this.conversationId});
 
   Multimedia.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -29,7 +35,10 @@ class Multimedia {
         remoteThumbnailUrl = json['remoteThumbnailUrl'],
         remoteFullFileUrl = json['remoteFullFileUrl'],
         imageDataId = json['imageDataId'],
-        imageFileId = json['imageFileId'];
+        imageFileId = json['imageFileId'],
+        messageId = json['messageId'],
+        userContactId = json['userContactId'],
+        conversationId = json['conversationId'];
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -39,6 +48,9 @@ class Multimedia {
         'remoteFullFileUrl': remoteFullFileUrl,
         'imageDataId': imageDataId,
         'imageFileId': imageFileId,
+        'messageId': messageId,
+        'userContactId': userContactId,
+        'conversationId': conversationId,
       };
 
 // KS put

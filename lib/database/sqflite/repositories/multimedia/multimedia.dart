@@ -18,10 +18,12 @@ class Multimedia {
       this.remoteFullFileUrl,
       this.imageDataId,
       this.imageFileId,
-      this.messageId});
+      this.messageId,
+      this.userContactId,
+      this.conversationId});
 
   Multimedia.make(this.id, this.localFullFileUrl, this.localThumbnailUrl, this.remoteThumbnailUrl, this.remoteFullFileUrl, this.imageDataId,
-      this.imageFileId, this.messageId);
+      this.imageFileId, this.messageId, this.userContactId, this.conversationId);
 
   @PrimaryKey()
   String id;
@@ -48,7 +50,10 @@ class Multimedia {
   String messageId; // Message object
 
   @Column(isNullable: true)
-  String userContactId; // Message object
+  String userContactId; // UserContact object
+
+  @Column(isNullable: true)
+  String conversationId; // Conversation object
 
 // KS put
 // mediaCheckPoint
