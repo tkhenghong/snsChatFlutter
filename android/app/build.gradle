@@ -68,6 +68,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     compile 'com.android.support:multidex:1.0.3'
     // To solve firestore problem: https://stackoverflow.com/questions/52459533/flutter-unable-to-merge-dex
+    implementation 'com.google.firebase:firebase-core:16.0.9'
 }
 
 apply plugin: 'com.google.gms.google-services'

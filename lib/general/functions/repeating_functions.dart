@@ -75,5 +75,10 @@ Future<File> loadImageHandler(Multimedia multimedia) async {
 
 
 Future<File> getImageFromNetwork(String url) async {
-  return await CachedNetworkImageProvider(url).cacheManager.getSingleFile(url);
+  if(url.isNotEmpty) {
+    return await CachedNetworkImageProvider(url).cacheManager.getSingleFile(url);
+  } else {
+    return File("");
+  }
+
 }

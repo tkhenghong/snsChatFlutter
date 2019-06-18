@@ -15,11 +15,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "352395986856-fometobo6vccc6229sur68c78hrskcqr.apps.googleusercontent.com",
+          "client_id": "352395986856-c63m3i32vn1akme90sra0g7s0h854ms7.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "flutter.snschat.com.snschatflutter",
-            "certificate_hash": "fdfadfc65558f4df6ceb93fcf0e6436a88877338"
+            "certificate_hash": "a127362d88965bd531c7fcf9383286d3ca3edb28"
           }
         },
         {
@@ -33,11 +33,7 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 2,
           "other_platform_oauth_client": [
             {
               "client_id": "352395986856-kn8u8j42ur53drr6937fai2od6i6rnmd.apps.googleusercontent.com",
@@ -51,9 +47,6 @@
               }
             }
           ]
-        },
-        "ads_service": {
-          "status": 2
         }
       }
     }

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
@@ -32,25 +33,67 @@ class ChatInfoPageState extends State<ChatInfoPage> {
     textEditingController.text = widget._conversation.name;
   }
 
+  // TODO: Duplicated same in Chat room page, consider create service
+  Future<Multimedia> getConversationPhoto() async {
+    Multimedia groupPhoto;
+    var multimediaDocuments = await Firestore.instance.collection("multimedia").where("conversationId", isEqualTo: widget._conversation.id).getDocuments();
+    if (multimediaDocuments.documents.length == 0) {
+      print("if (multimediaDocuments.documents.length == 0)");
+    } else {
+      print("if (multimediaDocuments.documents.length > 0)");
+      DocumentSnapshot groupPhotoSnapshot = multimediaDocuments.documents[0];
+      groupPhoto = new Multimedia(
+        id: groupPhotoSnapshot["id"].toString(),
+        conversationId: groupPhotoSnapshot["id"].toString(),
+        imageDataId: groupPhotoSnapshot["imageDataId"].toString(),
+        imageFileId: groupPhotoSnapshot["imageFileId"].toString(),
+        localFullFileUrl: groupPhotoSnapshot["localFullFileUrl"].toString(),
+        localThumbnailUrl: groupPhotoSnapshot["localThumbnailUrl"].toString(),
+        messageId: groupPhotoSnapshot["messageId"].toString(),
+        remoteFullFileUrl: groupPhotoSnapshot["remoteFullFileUrl"].toString(),
+        remoteThumbnailUrl: groupPhotoSnapshot["remoteThumbnailUrl"].toString(),
+        userContactId: groupPhotoSnapshot["userContactId"].toString(),
+      );
+    }
+    return groupPhoto;
+  }
+
   @override
   Widget build(BuildContext context) {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
-
-    Multimedia groupPhoto = wholeAppBloc.currentState.multimediaList.singleWhere((Multimedia existingMultimedia) => existingMultimedia.id == widget._conversation.groupPhotoId);
-    // Load local file first
-    imageFile = File(groupPhoto.localFullFileUrl);
-    imageFile.exists().then((fileExists) {
-      if(!fileExists) {
-        print('local file not exist!');
-        loadImageHandler(groupPhoto).then((remoteDownloadedfile) {
-          setState(() {
-            imageFile = remoteDownloadedfile;
+    print("widget._conversation.id: " + widget._conversation.id);
+    getConversationPhoto().then((Multimedia groupPhoto) {
+      // Load local file first
+      imageFile = File(groupPhoto.localFullFileUrl);
+      imageFile.exists().then((fileExists) {
+        if(!fileExists) {
+          print('chat_info_page.dart local file not exist!');
+          loadImageHandler(groupPhoto).then((remoteDownloadedfile) {
+            setState(() {
+              imageFile = remoteDownloadedfile;
+            });
           });
-        });
-      }
+        }
+      });
     });
 
+    // TODO: This is the way to read data from state
+//    Multimedia groupPhoto = wholeAppBloc.currentState.multimediaList.singleWhere((Multimedia existingMultimedia) => existingMultimedia.id == widget._conversation.groupPhotoId);
+    // Load local file first
+//    imageFile = File(groupPhoto.localFullFileUrl);
+//    imageFile.exists().then((fileExists) {
+//      if(!fileExists) {
+//        print('chat_info_page.dart local file not exist!');
+//        loadImageHandler(groupPhoto).then((remoteDownloadedfile) {
+//          setState(() {
+//            imageFile = remoteDownloadedfile;
+//          });
+//        });
+//      }
+//    });
+
+    imageFile = File("lib/ui/images/group2013.jpg");
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),

@@ -4,9 +4,9 @@ import 'package:snschat_flutter/database/sqflite/repositories/userContact/userCo
 part 'conversation_member.jorm.dart';
 
 class ConversationMember extends UserContact {
-  ConversationMember({this.id, this.conversationId}) : super();
+  ConversationMember({this.id, this.conversationId, this.name, this.contactNo}) : super();
 
-  ConversationMember.make(this.id, this.conversationId) : super();
+  ConversationMember.make(this.id, this.conversationId, this.name, this.contactNo) : super();
 
   @PrimaryKey()
   String id;
@@ -14,10 +14,18 @@ class ConversationMember extends UserContact {
   @Column(isNullable: true)
   String conversationId;
 
+  @Column(isNullable: true)
+  String name;
+
+  @Column(isNullable: true)
+  String contactNo;
+
   @override
   String toString() {
-    return 'ConversationMember{id: $id, conversationId: $conversationId}';
+    return 'ConversationMember{id: $id, conversationId: $conversationId, name: $name, contactNo: $contactNo}';
   }
+
+
 }
 
 @GenBean()

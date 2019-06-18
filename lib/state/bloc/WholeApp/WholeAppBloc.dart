@@ -100,18 +100,48 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   signInUsingGoogle(UserSignInEvent event) async {
+    print("signInUsingGoogle");
     // An average user use his/her Google account to sign in.
-    GoogleSignInAccount googleSignInAccount = await currentState.googleSignIn.signIn();
+//    currentState.googleSignIn = new GoogleSignIn();
+    GoogleSignInAccount googleSignInAccount;
+    if(!await currentState.googleSignIn.isSignedIn()) {
+      googleSignInAccount = await currentState.googleSignIn.signInSilently(suppressErrors: false);
+    }
     // Authenticate the user in Google
-
+    print("Got googleSignInAccount.");
     GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
-
+    print("Got googleSignInAuthentication.");
     // Create credentials
     AuthCredential credential =
         GoogleAuthProvider.getCredential(idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
-
+    print("Got credential.");
     // Create the user in Firebase
     currentState.userState.firebaseUser = await currentState.firebaseAuth.signInWithCredential(credential);
+    print("Saved firebaseUser.");
+    // Find the user in Firebase, if got save it to current state
+    FirebaseUser firebaseUser = currentState.userState.firebaseUser;
+    final QuerySnapshot result = await Firestore.instance.collection('user').where('firebaseUser', isEqualTo: firebaseUser.uid).getDocuments();
+    final List<DocumentSnapshot> documents = result.documents;
+
+    if (documents.length > 0) {
+      print('if (documents.length > 0)');
+      // Add user data to database
+      print('documents.length.toString(): ' + documents.length.toString());
+      if (documents[0].exists) {
+        print('if (documents[0].exists)');
+        currentState.userState.id = documents[0]['id'].toString();
+        currentState.userState.userId = documents[0]['userId'].toString();
+        currentState.userState.displayName = documents[0]['displayName'].toString();
+        currentState.userState.realName = documents[0]['realName'].toString();
+//        currentState.userState.firebaseUser = documents[0]['firebaseUser'].toString(); // Remember firebaseuser is FirebaseUser object?
+        currentState.userState.settingsId = documents[0]['settingsId'].toString();
+        currentState.userState.mobileNo = documents[0]['mobileNo'].toString();
+      }
+    } else {
+      print("No documents?");
+      print('documents.length.toString()' + documents.length.toString());
+    }
+
 
 //    saveUsertoLocalDb();
     event.callback(); // Use callback method to signal UI change
@@ -147,6 +177,19 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
         print('Sign Up done.');
       } else {
         print('if (documents.length != 0)');
+
+        // Add user data to database
+        print('documents.length.toString()' + documents.length.toString());
+        if (documents[0].exists) {
+          print('if (documents.length != 0)');
+          currentState.userState.id = documents[0]['id'];
+          currentState.userState.userId = documents[0]['userId'];
+          currentState.userState.displayName = documents[0]['displayName'];
+          currentState.userState.realName = documents[0]['realName'];
+          currentState.userState.firebaseUser = documents[0]['firebaseUser'];
+          currentState.userState.settingsId = documents[0]['settingsId'];
+          currentState.userState.mobileNo = documents[0]['mobileNo'];
+        }
       }
     } else {
       print('if (firebaseUser == null)');

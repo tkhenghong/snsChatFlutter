@@ -55,32 +55,70 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     super.dispose();
   }
 
+   Future<Multimedia> getConversationPhoto() async {
+     Multimedia groupPhoto;
+     var multimediaDocuments = await Firestore.instance.collection("multimedia").where("conversationId", isEqualTo: widget._conversation.id).getDocuments();
+     if (multimediaDocuments.documents.length == 0) {
+       print("if (multimediaDocuments.documents.length == 0)");
+     } else {
+       print("if (multimediaDocuments.documents.length > 0)");
+       DocumentSnapshot groupPhotoSnapshot = multimediaDocuments.documents[0];
+       groupPhoto = new Multimedia(
+         id: groupPhotoSnapshot["id"].toString(),
+         conversationId: groupPhotoSnapshot["id"].toString(),
+         imageDataId: groupPhotoSnapshot["imageDataId"].toString(),
+         imageFileId: groupPhotoSnapshot["imageFileId"].toString(),
+         localFullFileUrl: groupPhotoSnapshot["localFullFileUrl"].toString(),
+         localThumbnailUrl: groupPhotoSnapshot["localThumbnailUrl"].toString(),
+         messageId: groupPhotoSnapshot["messageId"].toString(),
+         remoteFullFileUrl: groupPhotoSnapshot["remoteFullFileUrl"].toString(),
+         remoteThumbnailUrl: groupPhotoSnapshot["remoteThumbnailUrl"].toString(),
+         userContactId: groupPhotoSnapshot["userContactId"].toString(),
+       );
+     }
+     return groupPhoto;
+  }
+
   @override
   Widget build(BuildContext context) {
+    print("chat_room_page.dart build()");
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
-    Multimedia groupPhoto;
-    wholeAppBloc.currentState.multimediaList.forEach((Multimedia existingMultimedia) {
-      if (existingMultimedia.id == widget._conversation.groupPhotoId) {
-        groupPhoto = existingMultimedia;
-      }
-    });
-    // Load local file first
-    imageFile = File(groupPhoto.localFullFileUrl);
-    imageFile.exists().then((fileExists) {
-      if (!fileExists) {
-        print("if(!fileExists)");
-        print('local file not exist!');
-        loadImageHandler(groupPhoto).then((remoteDownloadedfile) {
-          setState(() {
-            imageFile = remoteDownloadedfile;
+    print("widget._conversation.id: " + widget._conversation.id);
+    getConversationPhoto().then((Multimedia groupPhoto) {
+      print("Load local file first");
+      print("groupPhoto.localFullFileUrl: " + groupPhoto.localFullFileUrl);
+      imageFile = File(groupPhoto.localFullFileUrl);
+      imageFile.exists().then((fileExists) {
+        if (!fileExists) {
+          print("if(!fileExists)");
+          print('chat-room.page.dart local file not exist!');
+          loadImageHandler(groupPhoto).then((remoteDownloadedfile) {
+            print("remoteDownloadedfile.path: " + remoteDownloadedfile.path);
+            setState(() {
+              imageFile = remoteDownloadedfile;
+            });
           });
-        });
-      } else {
-        print("if(fileExists)");
-      }
+        } else {
+          print("if(fileExists)");
+        }
+      });
     });
 
+    imageFile = File("lib/ui/images/group2013.jpg");
+
+
+    // TODO: Get from the state after reading all stuffs from Firebase (online)
+//    wholeAppBloc.currentState.multimediaList.forEach((Multimedia existingMultimedia) {
+//      print("Got existing multimedia.");
+//      if (existingMultimedia.id == widget._conversation.groupPhotoId) {
+//        groupPhoto = existingMultimedia;
+//      }
+//    });
+
+
+
+    // Chat Room page UI
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Scaffold(
@@ -262,10 +300,16 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
   Widget buildListMessage() {
     return StreamBuilder(
-      stream: Firestore.instance.collection("message").where("").orderBy('timestamp', descending: true).snapshots(),
+      stream: Firestore.instance
+          .collection("message")
+          .where("conversationId", isEqualTo: widget._conversation.id)
+          .orderBy('timestamp', descending: true)
+          .snapshots(),
       builder: (BuildContext context, snapshot) {
         if (!snapshot.hasData) {
-          return Center(child: Text("Loading messages..."));
+          return Expanded(
+//            flex: 1,
+              child: Center(child: Text("Loading messages...")));
         } else {
 //              listMessage = snapshot.data.documents;
           return Flexible(
@@ -280,7 +324,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               itemCount: snapshot.data.documents.length,
               reverse: true,
               physics: RefreshBouncePhysics(),
-                itemBuilder: (context, index) => createChatMessage(index, snapshot.data.documents[index]),
+              itemBuilder: (context, index) => displayChatMessage(index, snapshot.data.documents[index]),
             ),
           ));
         }
@@ -288,15 +332,19 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
-  Widget createChatMessage(int index, DocumentSnapshot document) {
-
+  Widget displayChatMessage(int index, DocumentSnapshot document) {
+    print("Happened here?");
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Container(
-          child: Text(
-            document['senderName'] + document['message'] + document['timestamp'],
-            style: TextStyle(color: Colors.white),
+          child: Column(
+            children: <Widget>[
+              Text(
+                document['senderName'].toString() + document['message'].toString() + document['timestamp'].toString(),
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
           ),
           padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
           width: 200.0,
@@ -335,9 +383,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 //                      margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
 //                    ),
 
-
     // wholeAppBloc.currentState.userState.id
-
   }
 
 // Image.asset(
@@ -444,22 +490,32 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   void sendChatMessage(String content, int type) async {
+    print("sendChatMessage()");
     // type: 0 = text, 1 = image, 2 = sticker
     if (content.trim() != '') {
+      print("sendChatMessage()");
       textEditingController.clear();
       Message newMessage;
       Multimedia newMultimedia;
       if (type == 0) {
+        print("if (type == 0)");
         // Text
         newMultimedia = Multimedia(
             id: generateNewId().toString(),
+            conversationId: widget._conversation.id,
+            messageId: "",
+            // Add after message created
+            userContactId: "",
             imageDataId: "",
             imageFileId: "",
             localFullFileUrl: "",
             localThumbnailUrl: "",
             remoteFullFileUrl: "",
             remoteThumbnailUrl: "");
-
+//        print("wholeAppBloc.currentState.userState.id: " + wholeAppBloc.currentState.userState.id);
+//        print("wholeAppBloc.currentState.userState.mobileNo: " + wholeAppBloc.currentState.userState.mobileNo);
+//        print("wholeAppBloc.currentState.userState.displayName: " + wholeAppBloc.currentState.userState.displayName);
+        print("Checkpoint 2");
         newMessage = Message(
           id: generateNewId().toString(),
           conversationId: widget._conversation.id,
@@ -469,7 +525,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           receiverId: "",
           receiverMobileNo: "",
           receiverName: "",
-
           senderId: wholeAppBloc.currentState.userState.id,
           senderMobileNo: wholeAppBloc.currentState.userState.mobileNo,
           senderName: wholeAppBloc.currentState.userState.displayName,
@@ -477,7 +532,11 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           type: "Text",
           timestamp: DateTime.now().millisecondsSinceEpoch.toString(),
         );
+        print("Checkpoint 3");
+
+        newMultimedia.messageId = newMessage.id;
       }
+      print("Checkpoint 1");
       if (!isObjectEmpty(newMessage) && !isObjectEmpty(newMultimedia)) {
         print('if(!isObjectEmpty(newMessage) && !isObjectEmpty(newMultimedia))');
         wholeAppBloc.dispatch(AddMessageEvent(message: newMessage, callback: (Message message) {}));
@@ -490,6 +549,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           'receiverId': newMessage.receiverId,
           'receiverMobileNo': newMessage.receiverMobileNo,
           'receiverName': newMessage.receiverName,
+
           'senderId': newMessage.senderId,
           'senderMobileNo': newMessage.senderMobileNo,
           'senderName': newMessage.senderName,

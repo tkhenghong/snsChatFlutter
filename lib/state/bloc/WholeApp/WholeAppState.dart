@@ -2,6 +2,7 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
+import 'package:snschat_flutter/objects/chat/conversation_member.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
@@ -11,6 +12,7 @@ import 'package:snschat_flutter/objects/user/user.dart';
 class WholeAppState {
   List<Conversation> conversationList;
   List<UnreadMessage> unreadMessageList;
+  List<ConversationMember> conversationMemberList;
   List<Message> messageList;
   List<Multimedia> multimediaList;
   Settings settingsState;
@@ -27,6 +29,7 @@ class WholeAppState {
   factory WholeAppState.initial() {
     return WholeAppState._()
       ..conversationList = []
+      ..conversationMemberList = []
       ..unreadMessageList = []
       ..messageList = []
       ..multimediaList = []

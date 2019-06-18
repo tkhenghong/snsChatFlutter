@@ -9,6 +9,7 @@ part 'conversation_group.jorm.dart';
 class Conversation {
   Conversation(
       {this.id,
+      this.userId,
       this.name,
       this.type,
       this.groupPhotoId,
@@ -18,12 +19,15 @@ class Conversation {
       this.notificationExpireDate,
       this.timestamp});
 
-  Conversation.make(this.id, this.name, this.type, this.groupPhotoId, this.unreadMessageId, this.block, this.description,
+  Conversation.make(this.id, this.userId, this.name, this.type, this.groupPhotoId, this.unreadMessageId, this.block, this.description,
       this.notificationExpireDate, this.timestamp);
 
   // Single conversation, group conversation & broadcast channel
   @PrimaryKey()
   String id;
+
+  @Column(isNullable: true)
+  String userId;
 
   @Column(isNullable: true)
   String name;
@@ -54,7 +58,7 @@ class Conversation {
 
   @override
   String toString() {
-    return 'Conversation{id: $id, name: $name, type: $type, groupPhotoId: $groupPhotoId, description: $description, block: $block, notificationExpireDate: $notificationExpireDate, unreadMessageId: $unreadMessageId, timestamp: $timestamp}';
+    return 'Conversation{id: $id, userId: $userId, name: $name, type: $type, groupPhotoId: $groupPhotoId, unreadMessageId: $unreadMessageId, description: $description, block: $block, notificationExpireDate: $notificationExpireDate, timestamp: $timestamp}';
   }
 }
 

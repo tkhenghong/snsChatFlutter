@@ -6,6 +6,7 @@ import 'package:snschat_flutter/objects/userContact/userContact.dart';
 class Conversation {
   // Single conversation, group conversation & broadcast channel
   String id;
+  String userId;
   String name;
   String type;
   String groupPhotoId; // Multimedia
@@ -18,6 +19,7 @@ class Conversation {
 
   Conversation(
       {this.id,
+      this.userId,
       this.name,
       this.type,
       this.groupPhotoId,
@@ -29,6 +31,7 @@ class Conversation {
 
   Conversation.fromJson(Map<String, dynamic> json)
       : id = json['id'],
+        userId = json['userId'],
         name = json['name'],
         type = json['type'],
         groupPhotoId = json['groupPhotoId'],
@@ -40,6 +43,7 @@ class Conversation {
 
   Map<String, dynamic> toJson() => {
         'id': id,
+        'userId': userId,
         'name': name,
         'type': type,
         'groupPhotoId': groupPhotoId,
@@ -53,19 +57,21 @@ class Conversation {
 
 class UnreadMessage {
   String id;
+  String conversationId;
   String lastMessage;
   int date;
   int count;
 
-  UnreadMessage({this.id, this.lastMessage, this.date, this.count});
+  UnreadMessage({this.id, this.conversationId, this.lastMessage, this.date, this.count});
 
   UnreadMessage.fromJson(Map<String, dynamic> json)
       : id = json['id'],
+        conversationId = json['conversationId'],
         lastMessage = json['lastMessage'],
         date = json['date'],
         count = json['count'];
 
-  Map<String, dynamic> toJson() => {'id': id, 'lastMessage': lastMessage, 'date': date, 'count': count};
+  Map<String, dynamic> toJson() => {'id': id, 'conversationId': conversationId, 'lastMessage': lastMessage, 'date': date, 'count': count};
 }
 
 // Save the message using files as backup, normally just save the conversations' messages in Message table

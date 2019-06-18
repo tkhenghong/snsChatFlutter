@@ -2,6 +2,7 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
+import 'package:snschat_flutter/objects/chat/conversation_member.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/objects/settings/settings.dart';
@@ -57,6 +58,13 @@ class AddConversationEvent extends WholeAppEvent {
   Function callback;
 
   AddConversationEvent({this.conversation, this.callback});
+}
+
+class AddConversationMemberEvent extends WholeAppEvent {
+  ConversationMember conversationMember;
+  Function callback;
+
+  AddConversationMemberEvent({this.conversationMember, this.callback});
 }
 
 // Message

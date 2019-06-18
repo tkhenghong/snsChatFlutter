@@ -172,6 +172,7 @@ class GroupNamePageState extends State<GroupNamePage> {
   Future<Conversation> addGroupConversation() async {
     Conversation conversation = new Conversation(
       id: generateNewId().toString(),
+      userId: wholeAppBloc.currentState.userState.id,
       name: textEditingController.text,
       type: "Group",
       block: false,
@@ -191,10 +192,9 @@ class GroupNamePageState extends State<GroupNamePage> {
       userContactId: "",
       conversationId: conversation.id,
     );
+    wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
 
     UnreadMessage newUnreadMessage = UnreadMessage(id: generateNewId().toString(), count: 0, date: 0, lastMessage: "");
-    wholeAppBloc.dispatch(OverrideUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
-    wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
 
     // convert contact to contact (self defined)
     widget.selectedContacts.forEach((contact) {
@@ -209,9 +209,6 @@ class GroupNamePageState extends State<GroupNamePage> {
       // Create new Multimedia object to save photo
       if (contact.avatar.length > 0) {
         print('if (contact.avatar.length > 0)');
-        // TODO: change Uint8List object to local file object and save it to state & DB
-        // Multimedia newMultimedia = Multimedia(imageData: contact.avatar);
-//        wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
       } else {
         print('if (contact.avatar.length <= 0)');
       }
@@ -229,16 +226,34 @@ class GroupNamePageState extends State<GroupNamePage> {
         // photo: Multimedia(imageData: contact.avatar),
         // photoId: Multimedia(imageData: contact.avatar),
       );
+      Firestore.instance.collection('user_contact').document(newUserContact.id).setData({
+        'id': newUserContact.id,
+        'userId': newUserContact.userId,
+        'displayName': newUserContact.displayName,
+        'realName': newUserContact.realName,
+        'mobileNo': newUserContact.mobileNo,
+        'block': newUserContact.block,
+        'lastSeenDate': newUserContact.lastSeenDate,
+      });
       wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: newUserContact));
     });
 
     conversation.groupPhotoId = newMultiMedia.id;
     conversation.unreadMessageId = newUnreadMessage.id;
 
-    Firestore.instance.collection('conversation').document(conversation.id).setData({
+    this.uploadConversation(conversation, newUnreadMessage, newMultiMedia);
+
+    return conversation;
+  }
+
+
+  uploadConversation(Conversation conversation, UnreadMessage newUnreadMessage, Multimedia newMultiMedia) async {
+    print("uploadConversation()");
+    await Firestore.instance.collection('conversation').document(conversation.id).setData({
       'id': conversation.id, // Self generated Id
       'name': conversation.name,
       'type': conversation.type,
+      'userId': conversation.userId,
       'groupPhotoId': conversation.groupPhotoId,
       'unreadMessageId': conversation.unreadMessageId,
       'block': conversation.block,
@@ -247,9 +262,32 @@ class GroupNamePageState extends State<GroupNamePage> {
       'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
     });
 
-    // Multimedia(remoteUrl: "", localUrl: _image.path, imageData: await _image.readAsBytes(), imageFile: _image, thumbnail: "");
+    print("Upload group conversation successful.");
+    await Firestore.instance.collection('unreadMessage').document(newUnreadMessage.id).setData({
+      'id': newUnreadMessage.id,
+      'count': newUnreadMessage.count,
+      'date': newUnreadMessage.date,
+      'lastMessage': newUnreadMessage.lastMessage,
+    });
 
-    return conversation;
+    print("Upload unreadMessage success!");
+
+    wholeAppBloc.dispatch(OverrideUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
+
+    await Firestore.instance.collection('multimedia').document(newUnreadMessage.id).setData({
+      'id': newMultiMedia.id,
+      'imageDataId': newMultiMedia.imageDataId,
+      'imageFileId': newMultiMedia.imageFileId,
+      'localFullFileUrl': newMultiMedia.localFullFileUrl,
+      'localThumbnailUrl': newMultiMedia.localThumbnailUrl,
+      'remoteThumbnailUrl': newMultiMedia.remoteThumbnailUrl,
+      'remoteFullFileUrl': newMultiMedia.remoteFullFileUrl,
+      'messageId': newMultiMedia.messageId,
+      'userContactId': newMultiMedia.userContactId,
+      'conversationId': newMultiMedia.conversationId,
+    });
+
+    print("Upload multimedia success!");
   }
 
   Future getImage() async {
