@@ -6,10 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
+import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/list-view.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
+import 'package:snschat_flutter/objects/user/user.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
@@ -40,9 +42,20 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   checkUserLogin() async {
     wholeAppBloc.dispatch(CheckUserLoginEvent(callback: (bool isSignedIn) {
       if (isSignedIn) {
-        wholeAppBloc.dispatch(UserSignInEvent(callback: () {}));
+        wholeAppBloc.dispatch(UserSignInEvent(callback: (User user) {
+          print("UserSignInEvent success");
+          if (isObjectEmpty(user)) {
+            print("if(isObjectEmpty(user))");
+          } else {
+            print("if(!isObjectEmpty(user))");
+          }
+          print("user.id: " + user.id);
+          print("user.displayName: " + user.displayName);
+          print("user.mobileNo: " + user.mobileNo);
+        }));
       } else {
-        Navigator.of(context).pushNamedAndRemoveUntil("login_page", (Route<dynamic> route) => false);
+        Navigator.of(context).pushNamedAndRemoveUntil(
+            "login_page", (Route<dynamic> route) => false);
       }
     }));
   }
@@ -59,54 +72,73 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         return StreamBuilder(
           stream: Firestore.instance
               .collection("conversation")
-              .where("userId", isEqualTo: wholeAppBloc.currentState.userState.id)
+              .where("userId",
+                  isEqualTo: wholeAppBloc.currentState.userState.id)
               .orderBy('timestamp', descending: true)
               .snapshots(),
           builder: (BuildContext context, snapshot) {
             if (!snapshot.hasData) {
               return Center(child: Text("Loading messages..."));
             } else {
-              print("chat_group_list_page.dart snapshot.data.documents.length: " + snapshot.data.documents.length.toString());
-              return ListView.builder(
+              print(
+                  "chat_group_list_page.dart snapshot.data.documents.length: " +
+                      snapshot.data.documents.length.toString());
+              if (snapshot.data.documents.length > 0) {
+                return ListView.builder(
 //                        scrollDirection: Axis.vertical,
 //                        shrinkWrap: true,
-                physics: BouncingScrollPhysics(),
-                itemCount: snapshot.data.documents.length,
+                  physics: BouncingScrollPhysics(),
+                  itemCount: snapshot.data.documents.length,
 //                        reverse: true,
-                itemBuilder: (context, index) {
-                  DocumentSnapshot documentSnapshot = snapshot.data.documents[index];
-                  print("Within itemBuilder");
-                  print("index: " + index.toString());
+                  itemBuilder: (context, index) {
+                    DocumentSnapshot documentSnapshot =
+                        snapshot.data.documents[index];
+                    print("Within itemBuilder");
+                    print("index: " + index.toString());
 //                    mapConversationToPageListTile(state.conversationList[index], context);
-                  return ListTile(
-                    title: Hero(tag: documentSnapshot["name"].toString(), child: Text(documentSnapshot["name"].toString())),
-                    subtitle: Text("Test subtitle"),
-                    leading: Hero(
-                        tag: documentSnapshot["id"].toString(),
-                        child: CircleAvatar(
-                          backgroundColor: Colors.white,
-                          backgroundImage: AssetImage("lib/ui/images/group2013.jpg"),
-                          child: Text(''),
-                        )),
+                    return ListTile(
+                      title: Hero(
+                          tag: documentSnapshot["name"].toString(),
+                          child: Text(documentSnapshot["name"].toString())),
+                      subtitle: Text("Test subtitle"),
+                      leading: Hero(
+                          tag: documentSnapshot["id"].toString(),
+                          child: CircleAvatar(
+                            backgroundColor: Colors.white,
+                            backgroundImage:
+                                AssetImage("lib/ui/images/group2013.jpg"),
+                            child: Text(''),
+                          )),
 //                      trailing: Text(unreadMessage.count.toString() == "0" ? "" : unreadMessage.count.toString()),
-                    onTap: () {
-                      Conversation conversation = new Conversation(
-                          id: documentSnapshot["id"].toString(),
-                          name: documentSnapshot["name"].toString(),
-                          description: documentSnapshot["description"].toString(),
-                          type: documentSnapshot["type"].toString(),
-                          timestamp: documentSnapshot["timestamp"].toString(),
-                          block: documentSnapshot["block"] as bool,
+                      onTap: () {
+                        Conversation conversation = new Conversation(
+                            id: documentSnapshot["id"].toString(),
+                            name: documentSnapshot["name"].toString(),
+                            description:
+                                documentSnapshot["description"].toString(),
+                            type: documentSnapshot["type"].toString(),
+                            timestamp: documentSnapshot["timestamp"].toString(),
+                            block: documentSnapshot["block"] as bool,
 //                          groupPhotoId: documentSnapshot["groupPhotoId"].toString(),
-                          notificationExpireDate: documentSnapshot["notificationExpireDate"] as int,
+                            notificationExpireDate:
+                                documentSnapshot["notificationExpireDate"]
+                                    as int,
 //                          unreadMessageId: documentSnapshot["unreadMessageId"].toString(),
-                          userId: documentSnapshot["userId"].toString());
-                      Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversation))));
-                    },
-                  );
+                            userId: documentSnapshot["userId"].toString());
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: ((context) =>
+                                    ChatRoomPage(conversation))));
+                      },
+                    );
 //                    return PageListTile(mapConversationToPageListTile(state.conversationList[index], context), context);
-                },
-              );
+                  },
+                );
+              } else {
+                return Center(
+                    child: Text("No conversations. Tap \"+\" to create one!"));
+              }
             }
           },
         );
@@ -169,7 +201,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     }
     var multimediaDocuments = await Firestore.instance
         .collection("multimedia")
-        .where("conversationId", isEqualTo: wholeAppBloc.currentState.userState.id)
+        .where("conversationId",
+            isEqualTo: wholeAppBloc.currentState.userState.id)
         .getDocuments();
     if (multimediaDocuments.documents.length == 0) {
       print("if (multimediaDocuments.documents.length == 0)");
@@ -178,7 +211,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     }
   }
 
-  PageListItem mapConversationToPageListTile(Conversation conversation, BuildContext context2) {
+  PageListItem mapConversationToPageListTile(
+      Conversation conversation, BuildContext context2) {
     print('mapConversationToPageListTile()');
     getConversations();
     // var data = await Firestore.instance.collection('users').document(widget.userId).collection('Products').getDocuments();

@@ -60,20 +60,25 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
-    wholeAppBloc = _wholeAppBloc;
-    print('_wholeAppBloc.currentState.phoneContactList.length: ' + _wholeAppBloc.currentState.phoneContactList.length.toString());
-    if (_wholeAppBloc.currentState.phoneContactList.length == 0) {
+  getContacts() async {
+    print('wholeAppBloc.currentState.phoneContactList.length: ' +
+        wholeAppBloc.currentState.phoneContactList.length.toString());
+    if (wholeAppBloc.currentState.phoneContactList.length == 0) {
       print('if(_wholeAppBloc.currentState.phoneContactList.length == 0)');
-      _wholeAppBloc.dispatch(GetPhoneStorageContactsEvent(callback: () {
-        // Set up checkboxes first
-        setupCheckBoxes();
-        // Rerender the page
-        setState(() {
-          isLoading = false;
-        });
+      wholeAppBloc.dispatch(
+          GetPhoneStorageContactsEvent(callback: (bool getContactsSuccess) {
+        if (getContactsSuccess) {
+          // Set up checkboxes first
+          setupCheckBoxes();
+          // Rerender the page
+          setState(() {
+            isLoading = false;
+          });
+        } else {
+          setState(() {
+            isLoading = false;
+          });
+        }
       }));
     } else if (!contactLoaded) {
       // need to add _wholeAppBloc.currentState.phoneContactList.length == 0 together
@@ -82,9 +87,11 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         isLoading = false;
       });
     }
+  }
 
+  setConversationType(String chatGroupType) async {
     print("widget.chatGroupType: " + widget.chatGroupType);
-    switch (widget.chatGroupType) {
+    switch (chatGroupType) {
       case "Personal":
         title = "Create Personal Chat";
         subtitle = "Select a contact below.";
@@ -102,8 +109,21 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         subtitle = "Error. Please go back and select again.";
         break;
     }
+  }
 
-    print('contactCheckBoxes.length.toString(): ' + contactCheckBoxes.length.toString());
+  @override
+  Widget build(BuildContext context) {
+    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
+    wholeAppBloc = _wholeAppBloc;
+
+    if (isLoading) {
+      getContacts();
+      setConversationType(widget.chatGroupType);
+    }
+
+    print('contactCheckBoxes.length.toString(): ' +
+        contactCheckBoxes.length.toString());
+
     return new Scaffold(
         appBar: new AppBar(
             title: Row(
@@ -121,7 +141,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                   ),
                   Text(
                     subtitle,
-                    style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.w300),
+                    style:
+                        TextStyle(fontSize: 15.0, fontWeight: FontWeight.w300),
                   )
                 ],
               ),
@@ -135,7 +156,11 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                   child: Icon(Icons.check),
                 ),
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: ((context) => GroupNamePage(selectedContacts: selectedContacts))));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) => GroupNamePage(
+                              selectedContacts: selectedContacts))));
                 },
               ),
             ),
@@ -154,83 +179,134 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                   CircularProgressIndicator(),
                 ],
               ))
-            : BlocBuilder(
-                bloc: _wholeAppBloc,
-                builder: (context, WholeAppState state) {
-                  return ListView(
-                    controller: scrollController,
-                    physics: BouncingScrollPhysics(),
-                    children: state.phoneContactList.map((Contact contact) {
-                      return Container(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            needSelectMultipleContacts()
-                                ? CheckboxListTile(
-                                    title: Text(
-                                      contact.displayName,
-                                      softWrap: true,
-                                    ),
-                                    subtitle: Text(
-                                      'Hey There! I am using PocketChat.',
-                                      softWrap: true,
-                                    ),
-                                    value: contactCheckBoxes[contact.displayName],
-                                    onChanged: (bool value) {
-                                      if (contactIsSelected(contact)) {
-                                        selectedContacts.remove(contact);
-                                      } else {
-                                        selectedContacts.add(contact);
-                                      }
-                                      setState(() {
-                                        contactCheckBoxes[contact.displayName] = value;
-                                      });
-                                    },
-                                    secondary: CircleAvatar(
-                                      backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
-                                      child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
-                                      radius: 20.0,
-                                    ),
-                                  )
-                                : ListTile(
-                                    title: Text(
-                                      contact.displayName,
-                                      softWrap: true,
-                                    ),
-                                    subtitle: Text(
-                                      'Hey There! I am using PocketChat.',
-                                      softWrap: true,
-                                    ),
-                                    onTap: () {
-                                      createPersonalConversation(contact).then((conversation) {
-                                        _wholeAppBloc.dispatch(AddConversationEvent(conversation: conversation));
-                                        Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
-                                        Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversation))));
-                                      });
-                                    },
-                                    leading: CircleAvatar(
-                                      backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
-                                      child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
-                                      radius: 20.0,
-                                    ),
-                                  )
-                          ],
-                        ),
+            : wholeAppBloc.currentState.phoneContactList.length > 0
+                ? BlocBuilder(
+                    bloc: _wholeAppBloc,
+                    builder: (context, WholeAppState state) {
+                      return ListView(
+                        controller: scrollController,
+                        physics: BouncingScrollPhysics(),
+                        children: state.phoneContactList.map((Contact contact) {
+                          return Container(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                needSelectMultipleContacts()
+                                    ? CheckboxListTile(
+                                        title: Text(
+                                          contact.displayName,
+                                          softWrap: true,
+                                        ),
+                                        subtitle: Text(
+                                          'Hey There! I am using PocketChat.',
+                                          softWrap: true,
+                                        ),
+                                        value: contactCheckBoxes[
+                                            contact.displayName],
+                                        onChanged: (bool value) {
+                                          if (contactIsSelected(contact)) {
+                                            selectedContacts.remove(contact);
+                                          } else {
+                                            selectedContacts.add(contact);
+                                          }
+                                          setState(() {
+                                            contactCheckBoxes[
+                                                contact.displayName] = value;
+                                          });
+                                        },
+                                        secondary: CircleAvatar(
+                                          backgroundImage:
+                                              contact.avatar.isNotEmpty
+                                                  ? MemoryImage(contact.avatar)
+                                                  : NetworkImage(''),
+                                          child: contact.avatar.isEmpty
+                                              ? Text(contact.displayName[0])
+                                              : Text(''),
+                                          radius: 20.0,
+                                        ),
+                                      )
+                                    : ListTile(
+                                        title: Text(
+                                          contact.displayName,
+                                          softWrap: true,
+                                        ),
+                                        subtitle: Text(
+                                          'Hey There! I am using PocketChat.',
+                                          softWrap: true,
+                                        ),
+                                        onTap: () {
+                                          createPersonalConversation(contact)
+                                              .then((conversation) {
+                                            _wholeAppBloc.dispatch(
+                                                AddConversationEvent(
+                                                    conversation:
+                                                        conversation));
+                                            Navigator.of(context)
+                                                .pushNamedAndRemoveUntil(
+                                                    'tabs_page',
+                                                    (Route<dynamic> route) =>
+                                                        false);
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: ((context) =>
+                                                        ChatRoomPage(
+                                                            conversation))));
+                                          });
+                                        },
+                                        leading: CircleAvatar(
+                                          backgroundImage:
+                                              contact.avatar.isNotEmpty
+                                                  ? MemoryImage(contact.avatar)
+                                                  : NetworkImage(''),
+                                          child: contact.avatar.isEmpty
+                                              ? Text(contact.displayName[0])
+                                              : Text(''),
+                                          radius: 20.0,
+                                        ),
+                                      )
+                              ],
+                            ),
+                          );
+                        }).toList(),
                       );
-                    }).toList(),
-                  );
-                },
-              ));
+                    },
+                  )
+                : Center(
+                    child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        'Unable to read contacts from storage. Please grant contact permission first.',
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(
+                        height: 10.0,
+                      ),
+                      RaisedButton(
+                        onPressed: () {
+                          // Restart the process
+                          setState(() {
+                            isLoading = true;
+                          });
+                        },
+                        child: Text("Grant Contact Permission"),
+                      )
+                    ],
+                  )));
   }
 
   bool contactIsSelected(Contact contact) {
-    return selectedContacts.any((Contact selectedContact) => selectedContact.displayName == contact.displayName);
+    return selectedContacts.any((Contact selectedContact) =>
+        selectedContact.displayName == contact.displayName);
   }
 
   bool needSelectMultipleContacts() {
 //    return widget.chatGroupType == ChatGroupType.Group || widget.chatGroupType == ChatGroupType.Broadcast;
-    return widget.chatGroupType == "Group" || widget.chatGroupType == "Broadcast";
+    return widget.chatGroupType == "Group" ||
+        widget.chatGroupType == "Broadcast";
   }
 
   // TODO: Conversation Creation into BLOC, can be merged with Group & Broadcast
@@ -252,7 +328,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 //      mobileNo: primaryNo.length == 0 ? "" : primaryNo[0], // Added in later code
     );
 
-
     Multimedia newMultiMedia = Multimedia(
         id: generateNewId().toString(),
         imageDataId: "",
@@ -263,7 +338,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         remoteFullFileUrl: "",
         userContactId: newUserContact.id,
         messageId: "");
-    UnreadMessage newUnreadMessage = UnreadMessage(id: generateNewId().toString(), count: 0, date: 0, lastMessage: "");
+    UnreadMessage newUnreadMessage = UnreadMessage(
+        id: generateNewId().toString(), count: 0, date: 0, lastMessage: "");
 
 //    wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
 //    wholeAppBloc.dispatch(OverrideUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
@@ -283,7 +359,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     // Personal chat one person only, so only dispatch once
 //    wholeAppBloc
 //        .dispatch(AddConversationMemberEvent(callback: (ConversationMember conversationMember) {}, conversationMember: conversationMember));
-    wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: newUserContact));
+    wholeAppBloc.dispatch(AddUserContactEvent(
+        callback: (UserContact userContact) {}, userContact: newUserContact));
 
 //    conversation.groupPhotoId = newMultiMedia.id;
 //    conversation.unreadMessageId = newUnreadMessage.id;
@@ -292,10 +369,13 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     return conversation;
   }
 
-  uploadConversation(
-      Conversation conversation, UnreadMessage newUnreadMessage, Multimedia newMultiMedia) async {
+  uploadConversation(Conversation conversation, UnreadMessage newUnreadMessage,
+      Multimedia newMultiMedia) async {
     print("uploadConversation()");
-    await Firestore.instance.collection('conversation').document(conversation.id).setData({
+    await Firestore.instance
+        .collection('conversation')
+        .document(conversation.id)
+        .setData({
       'id': conversation.id, // Self generated Id
       'name': conversation.name,
       'type': conversation.type,
@@ -309,7 +389,10 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     });
 
     print("Upload group conversation successful.");
-    await Firestore.instance.collection('unreadMessage').document(newUnreadMessage.id).setData({
+    await Firestore.instance
+        .collection('unreadMessage')
+        .document(newUnreadMessage.id)
+        .setData({
       'id': newUnreadMessage.id,
       'count': newUnreadMessage.count,
       'date': newUnreadMessage.date,
@@ -318,9 +401,14 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
     print("Upload unreadMessage success!");
 
-    wholeAppBloc.dispatch(OverrideUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
+    wholeAppBloc.dispatch(OverrideUnreadMessageEvent(
+        unreadMessage: newUnreadMessage,
+        callback: (UnreadMessage unreadMessage) {}));
 
-    await Firestore.instance.collection('multimedia').document(newUnreadMessage.id).setData({
+    await Firestore.instance
+        .collection('multimedia')
+        .document(newUnreadMessage.id)
+        .setData({
       'id': newMultiMedia.id,
       'imageDataId': newMultiMedia.imageDataId,
       'imageFileId': newMultiMedia.imageFileId,
@@ -334,10 +422,10 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     });
 
     print("Upload multimedia success!");
-    wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
+    wholeAppBloc.dispatch(AddMultimediaEvent(
+        callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
 
     //TODO: Check user_contact
-
   }
 
   // Find the group member that the user added into the conversation using his/her phone number
@@ -350,12 +438,11 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         .getDocuments();
     if (conversationDocuments.documents.length > 0) {
       print("if (conversationDocuments.documents.length > 0)");
-      print("conversationDocuments.documents.length.toString(): " + conversationDocuments.documents.length.toString());
+      print("conversationDocuments.documents.length.toString(): " +
+          conversationDocuments.documents.length.toString());
       DocumentSnapshot documentSnapshot = conversationDocuments.documents[0];
       newUserContact.mobileNo = documentSnapshot["mobileNo"];
       return newUserContact;
-    } else {
-
-    }
+    } else {}
   }
 }
