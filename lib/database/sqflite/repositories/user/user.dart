@@ -12,9 +12,8 @@ class User {
   User({this.id,
     this.displayName,
     this.realName,
-    this.userId,
     this.mobileNo,
-    this.settings,
+//    this.settings,
     this.firebaseUserId,
 //    this.googleSignIn,
 //    this.firebaseAuth
@@ -23,9 +22,8 @@ class User {
   User.make(this.id,
       this.displayName,
       this.realName,
-      this.userId,
       this.mobileNo,
-      this.settings,
+//      this.settings,
       this.firebaseUserId,
 //      this.googleSignIn,
 //      this.firebaseAuth
@@ -41,14 +39,11 @@ class User {
   String realName;
 
   @Column(isNullable: true)
-  String userId;
-
-  @Column(isNullable: true)
   String mobileNo;
 
   // TODO: Build table relationships
-  @Column(isNullable: true)
-  String settings; // Settings object
+//  @Column(isNullable: true)
+//  String settings; // Settings object
 
   @Column(isNullable: true)
   String firebaseUserId; // FirebaseUser object

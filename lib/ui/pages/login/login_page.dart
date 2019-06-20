@@ -1,6 +1,3 @@
-import 'dart:async';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -18,8 +15,6 @@ import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:date_format/date_format.dart';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class LoginPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -29,23 +24,30 @@ class LoginPage extends StatefulWidget {
 
 class LoginPageState extends State<LoginPage> {
   WholeAppBloc wholeAppBloc;
+  final _formKey = GlobalKey<FormState>();
+  TextEditingController textEditingController = new TextEditingController();
 
   _signIn() async {
-    showCenterLoadingIndicator(context);
+    if (_formKey.currentState.validate()) {
+      showCenterLoadingIndicator(context);
+      wholeAppBloc.dispatch(UserSignInEvent(callback: (User user) {
+        print('Callback reached.');
+        if(user.id.isNotEmpty) {
+          goToVerifyPhoneNumber();
+        } else {
+          // TODO: Add new Settings to the Bloc State
+          Settings userSettings = Settings(id: generateNewId().toString(), notification: true, userId: user.id);
+          wholeAppBloc.dispatch(AddSettingsEvent(
+              callback: (Settings settings) {
+                print('returned to login page. Settings id is: ' + settings.id);
+                print("textEditingController.value.toString(): " + textEditingController.value.toString());
+                wholeAppBloc.dispatch(UserSignUpEvent(callback: () {}, user: User(mobileNo: textEditingController.value.text, settingsId: settings.id)));
+              },
+              settings: userSettings));
+        }
 
-    wholeAppBloc.dispatch(UserSignInEvent(callback: () {
-      print('Callback reached.');
-      goToVerifyPhoneNumber();
-      print('UserSignUpEvent()');
-      // TODO: Add new Settings to the Bloc State
-      Settings userSettings = Settings(id: generateNewId().toString(), notification: true);
-      wholeAppBloc.dispatch(AddSettingsEvent(
-          callback: (Settings settings) {
-            print('returned to login page. Settings id is: ' + settings.id);
-            wholeAppBloc.dispatch(UserSignUpEvent(callback: () {}, user: User(mobileNo: "+60182262663", settingsId: settings.id)));
-          },
-          settings: userSettings));
-    }));
+      }));
+    }
   }
 
   @override
@@ -79,19 +81,28 @@ class LoginPageState extends State<LoginPage> {
                   ),
                   Padding(padding: EdgeInsets.symmetric(vertical: 20.00)),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                    child: TextField(
-                      cursorColor: Colors.black,
-                      style: TextStyle(color: Colors.black),
-                      inputFormatters: [
-                        BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
-                      ],
-                      maxLength: 15,
-                      decoration: InputDecoration(hintText: "Mobile Number"),
-                      autofocus: true,
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
-                    ),
+                      padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                      child: Form(
+                          key: _formKey,
+                          child: TextFormField(
+                            controller: textEditingController,
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return "Please enter your phone number";
+                              }
+                            },
+                            cursorColor: Colors.black,
+                            style: TextStyle(color: Colors.black),
+                            inputFormatters: [
+                              BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
+                            ],
+                            maxLength: 15,
+                            decoration: InputDecoration(hintText: "Mobile Number"),
+                            autofocus: true,
+                            textAlign: TextAlign.center,
+                            keyboardType: TextInputType.number,
+                          ),
+                      )
                   ),
                   RaisedButton(
                     onPressed: () => _signIn(),

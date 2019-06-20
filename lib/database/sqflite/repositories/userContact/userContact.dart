@@ -1,5 +1,6 @@
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
-
+// This is the contacts of the users from their phone storage, will be linked to Conversation object
+// As Group Member
 //Jaguar ORM
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
@@ -15,13 +16,13 @@ class UserContact {
   String id;
 
   @Column(isNullable: true)
-  String displayName;
+  String displayName; // Display the name of the user from the current user's contact storage
 
   @Column(isNullable: true)
-  String realName;
+  String realName; // Display the real name of the user from User table
 
   @Column(isNullable: true)
-  String userId;
+  String userId; // Always belong to a user in the User table
 
   @Column(isNullable: true)
   String mobileNo;
@@ -31,6 +32,16 @@ class UserContact {
 
   @Column(isNullable: true)
   bool block;
+
+  // This user contact should be belong to some conversation.
+  // Worried of same user but duplication? Actually there's a possibility of unknown mobile number from
+  // phone storage, I'm thinking of add the unknown number into this table first
+  // (you must, I have removed conversation member table or called group member table),
+  // When that user signed up, that device will replace all user contact that using his mobile no in this table
+  // When the user contact is known in the User table, the conversation creator will
+  @Column(isNullable: true)
+  String conversationId;
+
 
 //  // TODO: Build table relationships
 //  @Column(isNullable: true)

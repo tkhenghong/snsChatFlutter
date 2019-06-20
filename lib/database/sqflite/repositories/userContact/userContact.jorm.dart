@@ -14,6 +14,7 @@ abstract class _UserContactBean implements Bean<UserContact> {
   final mobileNo = StrField('mobile_no');
   final lastSeenDate = StrField('last_seen_date');
   final block = BoolField('block');
+  final conversationId = StrField('conversation_id');
   Map<String, Field> _fields;
   Map<String, Field> get fields => _fields ??= {
         id.name: id,
@@ -23,6 +24,7 @@ abstract class _UserContactBean implements Bean<UserContact> {
         mobileNo.name: mobileNo,
         lastSeenDate.name: lastSeenDate,
         block.name: block,
+        conversationId.name: conversationId,
       };
   UserContact fromMap(Map map) {
     UserContact model = UserContact();
@@ -33,6 +35,7 @@ abstract class _UserContactBean implements Bean<UserContact> {
     model.mobileNo = adapter.parseValue(map['mobile_no']);
     model.lastSeenDate = adapter.parseValue(map['last_seen_date']);
     model.block = adapter.parseValue(map['block']);
+    model.conversationId = adapter.parseValue(map['conversation_id']);
 
     return model;
   }
@@ -49,6 +52,7 @@ abstract class _UserContactBean implements Bean<UserContact> {
       ret.add(mobileNo.set(model.mobileNo));
       ret.add(lastSeenDate.set(model.lastSeenDate));
       ret.add(block.set(model.block));
+      ret.add(conversationId.set(model.conversationId));
     } else if (only != null) {
       if (only.contains(id.name)) ret.add(id.set(model.id));
       if (only.contains(displayName.name))
@@ -59,6 +63,8 @@ abstract class _UserContactBean implements Bean<UserContact> {
       if (only.contains(lastSeenDate.name))
         ret.add(lastSeenDate.set(model.lastSeenDate));
       if (only.contains(block.name)) ret.add(block.set(model.block));
+      if (only.contains(conversationId.name))
+        ret.add(conversationId.set(model.conversationId));
     } else /* if (onlyNonNull) */ {
       if (model.id != null) {
         ret.add(id.set(model.id));
@@ -81,6 +87,9 @@ abstract class _UserContactBean implements Bean<UserContact> {
       if (model.block != null) {
         ret.add(block.set(model.block));
       }
+      if (model.conversationId != null) {
+        ret.add(conversationId.set(model.conversationId));
+      }
     }
 
     return ret;
@@ -95,6 +104,7 @@ abstract class _UserContactBean implements Bean<UserContact> {
     st.addStr(mobileNo.name, isNullable: true);
     st.addStr(lastSeenDate.name, isNullable: true);
     st.addBool(block.name, isNullable: true);
+    st.addStr(conversationId.name, isNullable: true);
     return adapter.createTable(st);
   }
 

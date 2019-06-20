@@ -29,12 +29,16 @@ class ChatRoomPage extends StatefulWidget {
 
 class ChatRoomPageState extends State<ChatRoomPage> {
   bool isShowSticker = false;
+  bool isLoading;
+  bool imageFound = false;
+
   TextEditingController textEditingController = new TextEditingController();
   ScrollController listScrollController = new ScrollController();
   RefreshController _refreshController;
   FocusNode focusNode = new FocusNode();
-  bool isLoading;
+
   File imageFile;
+
   WholeAppBloc wholeAppBloc;
 
   @override
@@ -86,26 +90,32 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     wholeAppBloc = _wholeAppBloc;
     print("widget._conversation.id: " + widget._conversation.id);
     getConversationPhoto().then((Multimedia groupPhoto) {
-      print("Load local file first");
-      print("groupPhoto.localFullFileUrl: " + groupPhoto.localFullFileUrl);
-      imageFile = File(groupPhoto.localFullFileUrl);
-      imageFile.exists().then((fileExists) {
-        if (!fileExists) {
-          print("if(!fileExists)");
-          print('chat-room.page.dart local file not exist!');
-          loadImageHandler(groupPhoto).then((remoteDownloadedfile) {
-            print("remoteDownloadedfile.path: " + remoteDownloadedfile.path);
-            setState(() {
-              imageFile = remoteDownloadedfile;
-            });
+      if(!isObjectEmpty(groupPhoto)) {
+        print("if(!isObjectEmpty(groupPhoto))");
+        print("groupPhoto.localFullFileUrl: " + groupPhoto.localFullFileUrl);
+        if(!isStringEmpty(groupPhoto.localFullFileUrl)) {
+          print("if(!isStringEmpty(groupPhoto.localFullFileUrl))");
+          imageFile = File(groupPhoto.localFullFileUrl);
+          imageFile.exists().then((fileExists) {
+            if (!fileExists) {
+              print("if(!fileExists)");
+              print('chat-room.page.dart local file not exist!');
+              loadImageHandler(groupPhoto).then((remoteDownloadedfile) {
+                print("remoteDownloadedfile.path: " + remoteDownloadedfile.path);
+                setState(() {
+                  imageFile = remoteDownloadedfile;
+                });
+              });
+            } else {
+              print("if(fileExists)");
+            }
           });
-        } else {
-          print("if(fileExists)");
         }
-      });
+      }
     });
 
     imageFile = File("lib/ui/images/group2013.jpg");
+
 
 
     // TODO: Get from the state after reading all stuffs from Firebase (online)
@@ -150,7 +160,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 //                                ? MemoryImage(widget._conversation.groupPhoto.imageData)
 //                                : NetworkImage(''),
 //                            child: widget._conversation.groupPhoto.imageData.length == 0 ? Text(widget._conversation.name[0]) : Text(''),
-                            backgroundImage: FileImage(imageFile),
+                            backgroundImage: imageFound ? FileImage(imageFile) : AssetImage("lib/ui/images/group2013.jpg"),
                           ),
                         ),
                         Padding(

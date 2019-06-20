@@ -14,6 +14,7 @@ import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/chat/conversation_member.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
+import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
@@ -251,12 +252,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 //      mobileNo: primaryNo.length == 0 ? "" : primaryNo[0], // Added in later code
     );
 
-    ConversationMember conversationMember = ConversationMember(
-      id: generateNewId().toString(),
-      conversationId: conversation.id,
-      name: newUserContact.displayName,
-      contactNo: newUserContact.mobileNo,
-    );
 
     Multimedia newMultiMedia = Multimedia(
         id: generateNewId().toString(),
@@ -283,30 +278,30 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
     // Add mobile no to UserContact before save to state
     newUserContact.mobileNo = primaryNo.length == 0 ? "" : primaryNo[0];
-    conversationMember.contactNo = newUserContact.mobileNo;
 
+    findUserContact(newUserContact);
     // Personal chat one person only, so only dispatch once
 //    wholeAppBloc
 //        .dispatch(AddConversationMemberEvent(callback: (ConversationMember conversationMember) {}, conversationMember: conversationMember));
     wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: newUserContact));
 
-    conversation.groupPhotoId = newMultiMedia.id;
-    conversation.unreadMessageId = newUnreadMessage.id;
+//    conversation.groupPhotoId = newMultiMedia.id;
+//    conversation.unreadMessageId = newUnreadMessage.id;
     print('newMultiMedia.id: ' + newMultiMedia.id);
-    uploadConversation(conversation, conversationMember, newUnreadMessage, newMultiMedia);
+    uploadConversation(conversation, newUnreadMessage, newMultiMedia);
     return conversation;
   }
 
   uploadConversation(
-      Conversation conversation, ConversationMember conversationMember, UnreadMessage newUnreadMessage, Multimedia newMultiMedia) async {
+      Conversation conversation, UnreadMessage newUnreadMessage, Multimedia newMultiMedia) async {
     print("uploadConversation()");
     await Firestore.instance.collection('conversation').document(conversation.id).setData({
       'id': conversation.id, // Self generated Id
       'name': conversation.name,
       'type': conversation.type,
       'userId': conversation.userId,
-      'groupPhotoId': conversation.groupPhotoId,
-      'unreadMessageId': conversation.unreadMessageId,
+//      'groupPhotoId': conversation.groupPhotoId,
+//      'unreadMessageId': conversation.unreadMessageId,
       'block': conversation.block,
       'description': conversation.description,
       'notificationExpireDate': conversation.notificationExpireDate,
@@ -341,16 +336,26 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     print("Upload multimedia success!");
     wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
 
-    await Firestore.instance.collection('conversation_member').document(conversationMember.id).setData({
-      'id': conversationMember.id,
-      'conversationId': conversationMember.conversationId,
-      'name': conversationMember.name,
-      'contactNo': conversationMember.contactNo,
-    });
-    print("Upload conversation_member success!");
-    wholeAppBloc
-        .dispatch(AddConversationMemberEvent(callback: (ConversationMember conversationMember) {}, conversationMember: conversationMember));
-
     //TODO: Check user_contact
+
+  }
+
+  // Find the group member that the user added into the conversation using his/her phone number
+  // If found, return that edited UserContact object
+  // If not found, return NOT edited UserContact object
+  Future<UserContact> findUserContact(UserContact newUserContact) async {
+    var conversationDocuments = await Firestore.instance
+        .collection("user")
+        .where("mobileNo", isEqualTo: newUserContact.mobileNo)
+        .getDocuments();
+    if (conversationDocuments.documents.length > 0) {
+      print("if (conversationDocuments.documents.length > 0)");
+      print("conversationDocuments.documents.length.toString(): " + conversationDocuments.documents.length.toString());
+      DocumentSnapshot documentSnapshot = conversationDocuments.documents[0];
+      newUserContact.mobileNo = documentSnapshot["mobileNo"];
+      return newUserContact;
+    } else {
+
+    }
   }
 }

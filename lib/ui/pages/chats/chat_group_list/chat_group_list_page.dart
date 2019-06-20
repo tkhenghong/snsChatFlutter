@@ -37,22 +37,22 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     super.dispose();
   }
 
+  checkUserLogin() async {
+    wholeAppBloc.dispatch(CheckUserLoginEvent(callback: (bool isSignedIn) {
+      if (isSignedIn) {
+        wholeAppBloc.dispatch(UserSignInEvent(callback: () {}));
+      } else {
+        Navigator.of(context).pushNamedAndRemoveUntil("login_page", (Route<dynamic> route) => false);
+      }
+    }));
+  }
+
   @override
   Widget build(BuildContext context) {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
-//    showCenterLoadingIndicator(context);
-    // TODO: Should only CheckUserLoginEvent first, doing this because haven't save user to DB*
-    wholeAppBloc.dispatch(UserSignInEvent(callback: () {
-      wholeAppBloc.dispatch(CheckUserLoginEvent(callback: (bool signUp) {
-        print('CheckUserLoginEvent callback()');
-        print('signUp: ' + signUp.toString());
-        if (!signUp) {
-          Navigator.of(context).pushNamedAndRemoveUntil("login_page", (Route<dynamic> route) => false);
-        }
-      }));
-    }));
-//    List<PageListItem> listItems = [];
+
+    checkUserLogin();
     return BlocBuilder(
       bloc: wholeAppBloc,
       builder: (context, WholeAppState state) {
@@ -97,9 +97,9 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                           type: documentSnapshot["type"].toString(),
                           timestamp: documentSnapshot["timestamp"].toString(),
                           block: documentSnapshot["block"] as bool,
-                          groupPhotoId: documentSnapshot["groupPhotoId"].toString(),
+//                          groupPhotoId: documentSnapshot["groupPhotoId"].toString(),
                           notificationExpireDate: documentSnapshot["notificationExpireDate"] as int,
-                          unreadMessageId: documentSnapshot["unreadMessageId"].toString(),
+//                          unreadMessageId: documentSnapshot["unreadMessageId"].toString(),
                           userId: documentSnapshot["userId"].toString());
                       Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversation))));
                     },

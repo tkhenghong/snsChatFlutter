@@ -18,6 +18,8 @@ abstract class _MessageBean implements Bean<Message> {
   final type = StrField('type');
   final status = StrField('status');
   final message = StrField('message');
+  final multimediaId = StrField('multimedia_id');
+  final timestamp = StrField('timestamp');
   Map<String, Field> _fields;
   Map<String, Field> get fields => _fields ??= {
         id.name: id,
@@ -31,6 +33,8 @@ abstract class _MessageBean implements Bean<Message> {
         type.name: type,
         status.name: status,
         message.name: message,
+        multimediaId.name: multimediaId,
+        timestamp.name: timestamp,
       };
   Message fromMap(Map map) {
     Message model = Message();
@@ -45,6 +49,8 @@ abstract class _MessageBean implements Bean<Message> {
     model.type = adapter.parseValue(map['type']);
     model.status = adapter.parseValue(map['status']);
     model.message = adapter.parseValue(map['message']);
+    model.multimediaId = adapter.parseValue(map['multimedia_id']);
+    model.timestamp = adapter.parseValue(map['timestamp']);
 
     return model;
   }
@@ -65,6 +71,8 @@ abstract class _MessageBean implements Bean<Message> {
       ret.add(type.set(model.type));
       ret.add(status.set(model.status));
       ret.add(message.set(model.message));
+      ret.add(multimediaId.set(model.multimediaId));
+      ret.add(timestamp.set(model.timestamp));
     } else if (only != null) {
       if (only.contains(id.name)) ret.add(id.set(model.id));
       if (only.contains(conversationId.name))
@@ -83,6 +91,10 @@ abstract class _MessageBean implements Bean<Message> {
       if (only.contains(type.name)) ret.add(type.set(model.type));
       if (only.contains(status.name)) ret.add(status.set(model.status));
       if (only.contains(message.name)) ret.add(message.set(model.message));
+      if (only.contains(multimediaId.name))
+        ret.add(multimediaId.set(model.multimediaId));
+      if (only.contains(timestamp.name))
+        ret.add(timestamp.set(model.timestamp));
     } else /* if (onlyNonNull) */ {
       if (model.id != null) {
         ret.add(id.set(model.id));
@@ -117,6 +129,12 @@ abstract class _MessageBean implements Bean<Message> {
       if (model.message != null) {
         ret.add(message.set(model.message));
       }
+      if (model.multimediaId != null) {
+        ret.add(multimediaId.set(model.multimediaId));
+      }
+      if (model.timestamp != null) {
+        ret.add(timestamp.set(model.timestamp));
+      }
     }
 
     return ret;
@@ -135,6 +153,8 @@ abstract class _MessageBean implements Bean<Message> {
     st.addStr(type.name, isNullable: true);
     st.addStr(status.name, isNullable: true);
     st.addStr(message.name, isNullable: true);
+    st.addStr(multimediaId.name, isNullable: true);
+    st.addStr(timestamp.name, isNullable: true);
     return adapter.createTable(st);
   }
 

@@ -11,6 +11,7 @@ import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/general/ui-component/select_image.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
+import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
@@ -238,8 +239,8 @@ class GroupNamePageState extends State<GroupNamePage> {
       wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: newUserContact));
     });
 
-    conversation.groupPhotoId = newMultiMedia.id;
-    conversation.unreadMessageId = newUnreadMessage.id;
+//    conversation.groupPhotoId = newMultiMedia.id;
+//    conversation.unreadMessageId = newUnreadMessage.id;
 
     this.uploadConversation(conversation, newUnreadMessage, newMultiMedia);
 
@@ -254,8 +255,8 @@ class GroupNamePageState extends State<GroupNamePage> {
       'name': conversation.name,
       'type': conversation.type,
       'userId': conversation.userId,
-      'groupPhotoId': conversation.groupPhotoId,
-      'unreadMessageId': conversation.unreadMessageId,
+//      'groupPhotoId': conversation.groupPhotoId,
+//      'unreadMessageId': conversation.unreadMessageId,
       'block': conversation.block,
       'description': conversation.description,
       'notificationExpireDate': conversation.notificationExpireDate,

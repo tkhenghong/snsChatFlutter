@@ -25,9 +25,13 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   Stream<WholeAppState> mapEventToState(WholeAppEvent event) async* {
 //    CheckUserLoginEvent
     print('State management center!');
-
+    //CheckUserSignedUpEvent
     if (event is CheckUserLoginEvent) {
       checkUserSignIn(event);
+      yield currentState;
+    }
+    if (event is CheckUserSignedUpEvent) {
+      checkUserSignedUp(event);
       yield currentState;
     } else if (event is UserSignInEvent) {
       signInUsingGoogle(event);
@@ -82,103 +86,104 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   checkUserSignIn(CheckUserLoginEvent event) async {
     print('checkUserSignIn()');
-//     Read from Google Firestore
-    if (currentState.userState.firebaseUser.uid.isEmpty) {
-      print('Checkpoint 1');
-      event.callback(false);
-      return;
-    } else {
-      print('currentState.userState.firebaseUser.uid: ' + currentState.userState.firebaseUser.uid);
-      print('currentState.userState.firebaseUser.displayName: ' + currentState.userState.firebaseUser.displayName);
-    }
-    print('Checkpoint 2');
-    final QuerySnapshot result =
-        await Firestore.instance.collection('user').where('userId', isEqualTo: currentState.userState.firebaseUser.uid).getDocuments();
-    final List<DocumentSnapshot> documents = result.documents;
 
-    documents.length == 0 ? event.callback(false) : event.callback(true);
+    bool isSignedIn = false;
+    GoogleSignInAccount googleSignInAccount;
+
+    if (!await currentState.googleSignIn.isSignedIn()) {
+      print("Not yet signed in. Go to login page...");
+      isSignedIn = false;
+      event.callback(isSignedIn);
+      return;
+//      print("Continue?");
+    } else {
+      isSignedIn = true;
+      event.callback(isSignedIn);
+//      googleSignInAccount = await currentState.googleSignIn.signInSilently(suppressErrors: false);
+    }
   }
 
-  signInUsingGoogle(UserSignInEvent event) async {
-    print("signInUsingGoogle");
-    // An average user use his/her Google account to sign in.
-//    currentState.googleSignIn = new GoogleSignIn();
+  Future<bool> checkUserSignedUp(CheckUserSignedUpEvent event) async {
+    FirebaseUser firebaseUser = currentState.firebaseUser;
+    final QuerySnapshot result = await Firestore.instance
+        .collection('user')
+        .where('firebaseUserId', isEqualTo: currentState.userState.firebaseUserId)
+        .getDocuments();
+    final List<DocumentSnapshot> documents = result.documents;
+    if (documents.length == 0) {
+      event.callback(false);
+      return false;
+    } else {
+      currentState.userState.id = documents[0]['id'].toString();
+      currentState.userState.userId = documents[0]['userId'].toString();
+      currentState.userState.displayName = documents[0]['displayName'].toString();
+      currentState.userState.realName = documents[0]['realName'].toString();
+      currentState.userState.settingsId = documents[0]['settingsId'].toString();
+      currentState.userState.mobileNo = documents[0]['mobileNo'].toString();
+      event.callback(true);
+      return true;
+    }
+  }
+
+  // Sign in using Google. If user hasn't signed up in the PocketChat, we will sign up on the spot.
+  Future<User> signInUsingGoogle(UserSignInEvent event) async {
+    bool isSignedIn = false;
+
     GoogleSignInAccount googleSignInAccount;
-    if(!await currentState.googleSignIn.isSignedIn()) {
+    if (!await currentState.googleSignIn.isSignedIn()) {
+      print("Continue?");
+    } else {
+      isSignedIn = true;
+      event.callback(currentState.userState);
       googleSignInAccount = await currentState.googleSignIn.signInSilently(suppressErrors: false);
     }
-    // Authenticate the user in Google
-    print("Got googleSignInAccount.");
+
     GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
-    print("Got googleSignInAuthentication.");
-    // Create credentials
+
     AuthCredential credential =
         GoogleAuthProvider.getCredential(idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
-    print("Got credential.");
-    // Create the user in Firebase
-    currentState.userState.firebaseUser = await currentState.firebaseAuth.signInWithCredential(credential);
-    print("Saved firebaseUser.");
-    // Find the user in Firebase, if got save it to current state
-    FirebaseUser firebaseUser = currentState.userState.firebaseUser;
-    final QuerySnapshot result = await Firestore.instance.collection('user').where('firebaseUser', isEqualTo: firebaseUser.uid).getDocuments();
-    final List<DocumentSnapshot> documents = result.documents;
 
-    if (documents.length > 0) {
-      print('if (documents.length > 0)');
-      // Add user data to database
-      print('documents.length.toString(): ' + documents.length.toString());
-      if (documents[0].exists) {
-        print('if (documents[0].exists)');
-        currentState.userState.id = documents[0]['id'].toString();
-        currentState.userState.userId = documents[0]['userId'].toString();
-        currentState.userState.displayName = documents[0]['displayName'].toString();
-        currentState.userState.realName = documents[0]['realName'].toString();
-//        currentState.userState.firebaseUser = documents[0]['firebaseUser'].toString(); // Remember firebaseuser is FirebaseUser object?
-        currentState.userState.settingsId = documents[0]['settingsId'].toString();
-        currentState.userState.mobileNo = documents[0]['mobileNo'].toString();
+    currentState.firebaseUser = await currentState.firebaseAuth.signInWithCredential(credential);
+
+    // Check User Signed Up or not
+    checkUserSignedUp(null).then((bool signedUp) {
+      if (signedUp) {
+        //  If user signed up means all good to go!
+        print("Checkpoint 1");
+        event.callback(currentState.userState);
+      } else {
+        print("Checkpoint 2");
+        signUpInFirestore(new User(id: generateNewId().toString(), mobileNo: null)).then((_) {
+          print("Checkpoint 4");
+          event.callback(currentState.userState);
+        });
       }
-    } else {
-      print("No documents?");
-      print('documents.length.toString()' + documents.length.toString());
-    }
+    });
+    print("Checkpoint 3");
 
-
-//    saveUsertoLocalDb();
-    event.callback(); // Use callback method to signal UI change
+    return currentState.userState;
   }
 
-  // TODO: Save to SQLite DB later
-//  saveUsertoLocalDb() async {
-//    Find updater = new Find('user');
-//    updater.eq('wadw', 'wda');
-//    updater.
-//  }
+  // TODO: Save to SQLite DB
 
-  signUpInFirestore(User user) async {
-    FirebaseUser firebaseUser = currentState.userState.firebaseUser;
+  Future<void> signUpInFirestore(User user) async {
+    FirebaseUser firebaseUser = currentState.firebaseUser;
 
     if (firebaseUser != null) {
-      print('if (firebaseUser != null)');
-      // Sign in successful
-      final QuerySnapshot result = await Firestore.instance.collection('user').where('id', isEqualTo: firebaseUser.uid).getDocuments();
+      final QuerySnapshot result =
+          await Firestore.instance.collection('user').where('firebaseUserId', isEqualTo: firebaseUser.uid).getDocuments();
       final List<DocumentSnapshot> documents = result.documents;
       if (documents.length == 0) {
         Firestore.instance.collection('user').document(firebaseUser.uid).setData({
           'id': generateNewId().toString(), // Self generated Id
           'displayName': firebaseUser.displayName,
           'realName': firebaseUser.displayName,
-          'userId': firebaseUser.uid,
           'mobileNo': user.mobileNo,
           'settingsid': user.settingsId,
-          'firebaseUser': firebaseUser.uid,
-//          'googleSignIn': googleSignInString,
-//          'firebaseAuth': firebaseAuthString,
+          'firebaseUserId': firebaseUser.uid,
         });
-        print('Sign Up done.');
       } else {
-        print('if (documents.length != 0)');
-
-        // Add user data to database
+        // Add user data from database to our app state
         print('documents.length.toString()' + documents.length.toString());
         if (documents[0].exists) {
           print('if (documents.length != 0)');
@@ -186,13 +191,11 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
           currentState.userState.userId = documents[0]['userId'];
           currentState.userState.displayName = documents[0]['displayName'];
           currentState.userState.realName = documents[0]['realName'];
-          currentState.userState.firebaseUser = documents[0]['firebaseUser'];
+          currentState.userState.firebaseUserId = documents[0]['firebaseUserId'];
           currentState.userState.settingsId = documents[0]['settingsId'];
           currentState.userState.mobileNo = documents[0]['mobileNo'];
         }
       }
-    } else {
-      print('if (firebaseUser == null)');
     }
   }
 
@@ -331,6 +334,11 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   addSettings(AddSettingsEvent event) async {
     print("event.message.id: " + event.settings.id);
+    await Firestore.instance.collection('settings').document(event.settings.id).setData({
+      'id': generateNewId().toString(), // Self generated Id
+      'userId': event.settings.userId,
+      'notification': event.settings.notification,
+    });
     currentState.settingsState = event.settings;
     event.callback(event.settings);
   }

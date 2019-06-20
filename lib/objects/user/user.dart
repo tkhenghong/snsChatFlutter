@@ -11,7 +11,7 @@ class User {
   String mobileNo;
   String settingsId; // Settings
   // Cannot initialize anything here for flutter_bloc
-  FirebaseUser firebaseUser;
+  String firebaseUserId;
 
   //  FirebaseAuth firebaseAuth; // = FirebaseAuth.instance;
   //  GoogleSignIn googleSignIn; // = new GoogleSignIn();
@@ -20,10 +20,9 @@ class User {
     this.id,
     this.displayName,
     this.realName,
-    this.userId,
     this.mobileNo,
     this.settingsId,
-    this.firebaseUser,
+    this.firebaseUserId,
 //      this.googleSignIn,
 //      this.firebaseAuth
   });
@@ -35,7 +34,7 @@ class User {
         userId = json['userId'],
         mobileNo = json['mobileNo'],
         settingsId = json['settingsId'],
-        firebaseUser = json['firebaseUser'];
+        firebaseUserId = json['firebaseUserId'];
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -44,6 +43,6 @@ class User {
         'userId': userId,
         'mobileNo': mobileNo,
         'settingsId': settingsId,
-        'firebaseUser': firebaseUser,
+        'firebaseUserId': firebaseUserId,
       };
 }

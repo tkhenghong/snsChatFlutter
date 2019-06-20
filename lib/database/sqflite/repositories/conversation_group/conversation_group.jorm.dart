@@ -8,35 +8,41 @@ part of 'conversation_group.dart';
 
 abstract class _ConversationBean implements Bean<Conversation> {
   final id = StrField('id');
+  final userId = StrField('user_id');
   final name = StrField('name');
   final type = StrField('type');
   final groupPhotoId = StrField('group_photo_id');
+  final unreadMessageId = StrField('unread_message_id');
   final description = StrField('description');
   final block = BoolField('block');
   final notificationExpireDate = IntField('notification_expire_date');
-  final unreadMessageId = StrField('unread_message_id');
+  final timestamp = StrField('timestamp');
   Map<String, Field> _fields;
   Map<String, Field> get fields => _fields ??= {
         id.name: id,
+        userId.name: userId,
         name.name: name,
         type.name: type,
         groupPhotoId.name: groupPhotoId,
+        unreadMessageId.name: unreadMessageId,
         description.name: description,
         block.name: block,
         notificationExpireDate.name: notificationExpireDate,
-        unreadMessageId.name: unreadMessageId,
+        timestamp.name: timestamp,
       };
   Conversation fromMap(Map map) {
     Conversation model = Conversation();
     model.id = adapter.parseValue(map['id']);
+    model.userId = adapter.parseValue(map['user_id']);
     model.name = adapter.parseValue(map['name']);
     model.type = adapter.parseValue(map['type']);
     model.groupPhotoId = adapter.parseValue(map['group_photo_id']);
+    model.unreadMessageId = adapter.parseValue(map['unread_message_id']);
     model.description = adapter.parseValue(map['description']);
     model.block = adapter.parseValue(map['block']);
     model.notificationExpireDate =
         adapter.parseValue(map['notification_expire_date']);
-    model.unreadMessageId = adapter.parseValue(map['unread_message_id']);
+    model.timestamp = adapter.parseValue(map['timestamp']);
 
     return model;
   }
@@ -47,29 +53,37 @@ abstract class _ConversationBean implements Bean<Conversation> {
 
     if (only == null && !onlyNonNull) {
       ret.add(id.set(model.id));
+      ret.add(userId.set(model.userId));
       ret.add(name.set(model.name));
       ret.add(type.set(model.type));
       ret.add(groupPhotoId.set(model.groupPhotoId));
+      ret.add(unreadMessageId.set(model.unreadMessageId));
       ret.add(description.set(model.description));
       ret.add(block.set(model.block));
       ret.add(notificationExpireDate.set(model.notificationExpireDate));
-      ret.add(unreadMessageId.set(model.unreadMessageId));
+      ret.add(timestamp.set(model.timestamp));
     } else if (only != null) {
       if (only.contains(id.name)) ret.add(id.set(model.id));
+      if (only.contains(userId.name)) ret.add(userId.set(model.userId));
       if (only.contains(name.name)) ret.add(name.set(model.name));
       if (only.contains(type.name)) ret.add(type.set(model.type));
       if (only.contains(groupPhotoId.name))
         ret.add(groupPhotoId.set(model.groupPhotoId));
+      if (only.contains(unreadMessageId.name))
+        ret.add(unreadMessageId.set(model.unreadMessageId));
       if (only.contains(description.name))
         ret.add(description.set(model.description));
       if (only.contains(block.name)) ret.add(block.set(model.block));
       if (only.contains(notificationExpireDate.name))
         ret.add(notificationExpireDate.set(model.notificationExpireDate));
-      if (only.contains(unreadMessageId.name))
-        ret.add(unreadMessageId.set(model.unreadMessageId));
+      if (only.contains(timestamp.name))
+        ret.add(timestamp.set(model.timestamp));
     } else /* if (onlyNonNull) */ {
       if (model.id != null) {
         ret.add(id.set(model.id));
+      }
+      if (model.userId != null) {
+        ret.add(userId.set(model.userId));
       }
       if (model.name != null) {
         ret.add(name.set(model.name));
@@ -80,6 +94,9 @@ abstract class _ConversationBean implements Bean<Conversation> {
       if (model.groupPhotoId != null) {
         ret.add(groupPhotoId.set(model.groupPhotoId));
       }
+      if (model.unreadMessageId != null) {
+        ret.add(unreadMessageId.set(model.unreadMessageId));
+      }
       if (model.description != null) {
         ret.add(description.set(model.description));
       }
@@ -89,8 +106,8 @@ abstract class _ConversationBean implements Bean<Conversation> {
       if (model.notificationExpireDate != null) {
         ret.add(notificationExpireDate.set(model.notificationExpireDate));
       }
-      if (model.unreadMessageId != null) {
-        ret.add(unreadMessageId.set(model.unreadMessageId));
+      if (model.timestamp != null) {
+        ret.add(timestamp.set(model.timestamp));
       }
     }
 
@@ -100,13 +117,15 @@ abstract class _ConversationBean implements Bean<Conversation> {
   Future<void> createTable({bool ifNotExists = false}) async {
     final st = Sql.create(tableName, ifNotExists: ifNotExists);
     st.addStr(id.name, primary: true, isNullable: false);
+    st.addStr(userId.name, isNullable: true);
     st.addStr(name.name, isNullable: true);
     st.addStr(type.name, isNullable: true);
     st.addStr(groupPhotoId.name, isNullable: true);
+    st.addStr(unreadMessageId.name, isNullable: true);
     st.addStr(description.name, isNullable: true);
     st.addBool(block.name, isNullable: true);
     st.addInt(notificationExpireDate.name, isNullable: true);
-    st.addStr(unreadMessageId.name, isNullable: true);
+    st.addStr(timestamp.name, isNullable: true);
     return adapter.createTable(st);
   }
 

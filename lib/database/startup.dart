@@ -26,7 +26,6 @@ Future<void> startupDatabase() async {
   await _adapter.connect();
 
   final conversationBean = new ConversationBean(_adapter);
-  final conversationMemberBean = new ConversationMemberBean(_adapter);
   final messageBean = new MessageBean(_adapter);
   final multimediaBean = new MultimediaBean(_adapter);
   final settingsBean = new SettingsBean(_adapter);
@@ -35,7 +34,6 @@ Future<void> startupDatabase() async {
   final userContactBean = new UserContactBean(_adapter);
 
   conversationBean.createTable(ifNotExists: true);
-  conversationMemberBean.createTable(ifNotExists: true);
   messageBean.createTable(ifNotExists: true);
   multimediaBean.createTable(ifNotExists: true);
   settingsBean.createTable(ifNotExists: true);

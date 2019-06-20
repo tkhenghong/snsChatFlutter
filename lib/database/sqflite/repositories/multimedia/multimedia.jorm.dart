@@ -16,6 +16,7 @@ abstract class _MultimediaBean implements Bean<Multimedia> {
   final imageFileId = StrField('image_file_id');
   final messageId = StrField('message_id');
   final userContactId = StrField('user_contact_id');
+  final conversationId = StrField('conversation_id');
   Map<String, Field> _fields;
   Map<String, Field> get fields => _fields ??= {
         id.name: id,
@@ -27,6 +28,7 @@ abstract class _MultimediaBean implements Bean<Multimedia> {
         imageFileId.name: imageFileId,
         messageId.name: messageId,
         userContactId.name: userContactId,
+        conversationId.name: conversationId,
       };
   Multimedia fromMap(Map map) {
     Multimedia model = Multimedia();
@@ -39,6 +41,7 @@ abstract class _MultimediaBean implements Bean<Multimedia> {
     model.imageFileId = adapter.parseValue(map['image_file_id']);
     model.messageId = adapter.parseValue(map['message_id']);
     model.userContactId = adapter.parseValue(map['user_contact_id']);
+    model.conversationId = adapter.parseValue(map['conversation_id']);
 
     return model;
   }
@@ -57,6 +60,7 @@ abstract class _MultimediaBean implements Bean<Multimedia> {
       ret.add(imageFileId.set(model.imageFileId));
       ret.add(messageId.set(model.messageId));
       ret.add(userContactId.set(model.userContactId));
+      ret.add(conversationId.set(model.conversationId));
     } else if (only != null) {
       if (only.contains(id.name)) ret.add(id.set(model.id));
       if (only.contains(localFullFileUrl.name))
@@ -75,6 +79,8 @@ abstract class _MultimediaBean implements Bean<Multimedia> {
         ret.add(messageId.set(model.messageId));
       if (only.contains(userContactId.name))
         ret.add(userContactId.set(model.userContactId));
+      if (only.contains(conversationId.name))
+        ret.add(conversationId.set(model.conversationId));
     } else /* if (onlyNonNull) */ {
       if (model.id != null) {
         ret.add(id.set(model.id));
@@ -103,6 +109,9 @@ abstract class _MultimediaBean implements Bean<Multimedia> {
       if (model.userContactId != null) {
         ret.add(userContactId.set(model.userContactId));
       }
+      if (model.conversationId != null) {
+        ret.add(conversationId.set(model.conversationId));
+      }
     }
 
     return ret;
@@ -119,6 +128,7 @@ abstract class _MultimediaBean implements Bean<Multimedia> {
     st.addStr(imageFileId.name, isNullable: true);
     st.addStr(messageId.name, isNullable: true);
     st.addStr(userContactId.name, isNullable: true);
+    st.addStr(conversationId.name, isNullable: true);
     return adapter.createTable(st);
   }
 

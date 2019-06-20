@@ -3,7 +3,7 @@ import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
 part 'settings.jorm.dart';
-
+// This is a table for Settings, which is used for User's customization of the app
 class Settings {
   Settings({this.id, this.notification});
 

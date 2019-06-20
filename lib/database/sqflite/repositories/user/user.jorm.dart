@@ -10,18 +10,14 @@ abstract class _UserBean implements Bean<User> {
   final id = StrField('id');
   final displayName = StrField('display_name');
   final realName = StrField('real_name');
-  final userId = StrField('user_id');
   final mobileNo = StrField('mobile_no');
-  final settings = StrField('settings');
   final firebaseUserId = StrField('firebase_user_id');
   Map<String, Field> _fields;
   Map<String, Field> get fields => _fields ??= {
         id.name: id,
         displayName.name: displayName,
         realName.name: realName,
-        userId.name: userId,
         mobileNo.name: mobileNo,
-        settings.name: settings,
         firebaseUserId.name: firebaseUserId,
       };
   User fromMap(Map map) {
@@ -29,9 +25,7 @@ abstract class _UserBean implements Bean<User> {
     model.id = adapter.parseValue(map['id']);
     model.displayName = adapter.parseValue(map['display_name']);
     model.realName = adapter.parseValue(map['real_name']);
-    model.userId = adapter.parseValue(map['user_id']);
     model.mobileNo = adapter.parseValue(map['mobile_no']);
-    model.settings = adapter.parseValue(map['settings']);
     model.firebaseUserId = adapter.parseValue(map['firebase_user_id']);
 
     return model;
@@ -45,18 +39,14 @@ abstract class _UserBean implements Bean<User> {
       ret.add(id.set(model.id));
       ret.add(displayName.set(model.displayName));
       ret.add(realName.set(model.realName));
-      ret.add(userId.set(model.userId));
       ret.add(mobileNo.set(model.mobileNo));
-      ret.add(settings.set(model.settings));
       ret.add(firebaseUserId.set(model.firebaseUserId));
     } else if (only != null) {
       if (only.contains(id.name)) ret.add(id.set(model.id));
       if (only.contains(displayName.name))
         ret.add(displayName.set(model.displayName));
       if (only.contains(realName.name)) ret.add(realName.set(model.realName));
-      if (only.contains(userId.name)) ret.add(userId.set(model.userId));
       if (only.contains(mobileNo.name)) ret.add(mobileNo.set(model.mobileNo));
-      if (only.contains(settings.name)) ret.add(settings.set(model.settings));
       if (only.contains(firebaseUserId.name))
         ret.add(firebaseUserId.set(model.firebaseUserId));
     } else /* if (onlyNonNull) */ {
@@ -69,14 +59,8 @@ abstract class _UserBean implements Bean<User> {
       if (model.realName != null) {
         ret.add(realName.set(model.realName));
       }
-      if (model.userId != null) {
-        ret.add(userId.set(model.userId));
-      }
       if (model.mobileNo != null) {
         ret.add(mobileNo.set(model.mobileNo));
-      }
-      if (model.settings != null) {
-        ret.add(settings.set(model.settings));
       }
       if (model.firebaseUserId != null) {
         ret.add(firebaseUserId.set(model.firebaseUserId));
@@ -91,9 +75,7 @@ abstract class _UserBean implements Bean<User> {
     st.addStr(id.name, primary: true, isNullable: false);
     st.addStr(displayName.name, isNullable: true);
     st.addStr(realName.name, isNullable: true);
-    st.addStr(userId.name, isNullable: true);
     st.addStr(mobileNo.name, isNullable: true);
-    st.addStr(settings.name, isNullable: true);
     st.addStr(firebaseUserId.name, isNullable: true);
     return adapter.createTable(st);
   }

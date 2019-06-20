@@ -5,7 +5,7 @@ import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
 part 'conversation_group.jorm.dart';
-
+// Conversation means Chat Header.
 class Conversation {
   Conversation(
       {this.id,
