@@ -6,9 +6,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:jaguar_orm/jaguar_orm.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
+import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/objects/settings/settings.dart';
@@ -23,14 +23,11 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   @override
   Stream<WholeAppState> mapEventToState(WholeAppEvent event) async* {
-//    CheckUserLoginEvent
     print('State management center!');
-    //CheckUserSignedUpEvent
     if (event is CheckUserLoginEvent) {
       checkUserSignIn(event);
       yield currentState;
-    }
-    if (event is CheckUserSignedUpEvent) {
+    } else if (event is CheckUserSignedUpEvent) {
       checkUserSignedUp(event);
       yield currentState;
     } else if (event is UserSignInEvent) {
@@ -49,7 +46,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       checkPermissions(event);
       yield currentState;
     } else if (event is UserSignUpEvent) {
-      signUpInFirestore(event.user);
+      signUpInFirestore(event.mobileNo);
       yield currentState;
     } else if (event is AddConversationEvent) {
       addConversation(event);
@@ -93,12 +90,15 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!await currentState.googleSignIn.isSignedIn()) {
       print("Not yet signed in. Go to login page...");
       isSignedIn = false;
-      event.callback(isSignedIn);
+      if (!isObjectEmpty(event)) {
+        event.callback(isSignedIn);
+      }
       return;
-//      print("Continue?");
     } else {
       isSignedIn = true;
-      event.callback(isSignedIn);
+      if (!isObjectEmpty(event)) {
+        event.callback(isSignedIn);
+      }
 //      googleSignInAccount = await currentState.googleSignIn.signInSilently(suppressErrors: false);
     }
   }
@@ -107,20 +107,27 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     FirebaseUser firebaseUser = currentState.firebaseUser;
     final QuerySnapshot result = await Firestore.instance
         .collection('user')
-        .where('firebaseUserId', isEqualTo: currentState.userState.firebaseUserId)
+        .where('firebaseUserId',
+            isEqualTo: currentState.userState.firebaseUserId)
         .getDocuments();
     final List<DocumentSnapshot> documents = result.documents;
     if (documents.length == 0) {
-      event.callback(false);
+      if (!isObjectEmpty(event)) {
+        event.callback(false);
+      }
+
       return false;
     } else {
       currentState.userState.id = documents[0]['id'].toString();
       currentState.userState.userId = documents[0]['userId'].toString();
-      currentState.userState.displayName = documents[0]['displayName'].toString();
+      currentState.userState.displayName =
+          documents[0]['displayName'].toString();
       currentState.userState.realName = documents[0]['realName'].toString();
       currentState.userState.settingsId = documents[0]['settingsId'].toString();
       currentState.userState.mobileNo = documents[0]['mobileNo'].toString();
-      event.callback(true);
+      if (!isObjectEmpty(event)) {
+        event.callback(true);
+      }
       return true;
     }
   }
@@ -132,30 +139,43 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     GoogleSignInAccount googleSignInAccount;
     if (!await currentState.googleSignIn.isSignedIn()) {
       print("Continue?");
+      googleSignInAccount = await currentState.googleSignIn.signIn();
     } else {
       isSignedIn = true;
-      event.callback(currentState.userState);
-      googleSignInAccount = await currentState.googleSignIn.signInSilently(suppressErrors: false);
+//      if (!isObjectEmpty(event)) {
+//        print("if (!isObjectEmpty(event))");
+//        event.callback(currentState.userState);
+//      }
+      googleSignInAccount =
+          await currentState.googleSignIn.signInSilently(suppressErrors: false);
     }
 
-    GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+    GoogleSignInAuthentication googleSignInAuthentication =
+        await googleSignInAccount.authentication;
 
-    AuthCredential credential =
-        GoogleAuthProvider.getCredential(idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
+    AuthCredential credential = GoogleAuthProvider.getCredential(
+        idToken: googleSignInAuthentication.idToken,
+        accessToken: googleSignInAuthentication.accessToken);
 
-    currentState.firebaseUser = await currentState.firebaseAuth.signInWithCredential(credential);
+    currentState.firebaseUser =
+        await currentState.firebaseAuth.signInWithCredential(credential);
 
     // Check User Signed Up or not
     checkUserSignedUp(null).then((bool signedUp) {
       if (signedUp) {
         //  If user signed up means all good to go!
         print("Checkpoint 1");
-        event.callback(currentState.userState);
+        if (!isObjectEmpty(event)) {
+          print("if (!isObjectEmpty(event))");
+          event.callback(currentState.userState);
+        }
       } else {
         print("Checkpoint 2");
-        signUpInFirestore(new User(id: generateNewId().toString(), mobileNo: null)).then((_) {
+        signUpInFirestore(event.mobileNo).then((_) {
           print("Checkpoint 4");
-          event.callback(currentState.userState);
+          if (!isObjectEmpty(event)) {
+            event.callback(currentState.userState);
+          }
         });
       }
     });
@@ -166,15 +186,32 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   // TODO: Save to SQLite DB
 
-  Future<void> signUpInFirestore(User user) async {
+  Future<void> signUpInFirestore(String mobileNo) async {
     FirebaseUser firebaseUser = currentState.firebaseUser;
+    User user = User(
+        id: generateNewId().toString(),
+        mobileNo: mobileNo,
+        // Add later
+        settingsId: "",
+        displayName: firebaseUser.displayName,
+        firebaseUserId: firebaseUser.uid,
+        realName: firebaseUser.displayName);
+    Settings settings = Settings(
+        id: generateNewId().toString(), notification: true, userId: user.id);
 
-    if (firebaseUser != null) {
-      final QuerySnapshot result =
-          await Firestore.instance.collection('user').where('firebaseUserId', isEqualTo: firebaseUser.uid).getDocuments();
+    user.settingsId = settings.id;
+
+    if (!isObjectEmpty(firebaseUser)) {
+      final QuerySnapshot result = await Firestore.instance
+          .collection('user')
+          .where('firebaseUserId', isEqualTo: firebaseUser.uid)
+          .getDocuments();
       final List<DocumentSnapshot> documents = result.documents;
       if (documents.length == 0) {
-        Firestore.instance.collection('user').document(firebaseUser.uid).setData({
+        Firestore.instance
+            .collection('user')
+            .document(firebaseUser.uid)
+            .setData({
           'id': generateNewId().toString(), // Self generated Id
           'displayName': firebaseUser.displayName,
           'realName': firebaseUser.displayName,
@@ -191,7 +228,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
           currentState.userState.userId = documents[0]['userId'];
           currentState.userState.displayName = documents[0]['displayName'];
           currentState.userState.realName = documents[0]['realName'];
-          currentState.userState.firebaseUserId = documents[0]['firebaseUserId'];
+          currentState.userState.firebaseUserId =
+              documents[0]['firebaseUserId'];
           currentState.userState.settingsId = documents[0]['settingsId'];
           currentState.userState.mobileNo = documents[0]['mobileNo'];
         }
@@ -204,10 +242,13 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   getPhoneStorageContacts(GetPhoneStorageContactsEvent event) async {
-    Map<PermissionGroup, PermissionStatus> permissions = await requestContactPermission();
+    Map<PermissionGroup, PermissionStatus> permissions =
+        await requestContactPermission();
     bool contactAccessGranted = false;
-    permissions.forEach((PermissionGroup permissionGroup, PermissionStatus permissionStatus) {
-      if (permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted) {
+    permissions.forEach(
+        (PermissionGroup permissionGroup, PermissionStatus permissionStatus) {
+      if (permissionGroup == PermissionGroup.contacts &&
+          permissionStatus == PermissionStatus.granted) {
         contactAccessGranted = true;
       }
     });
@@ -215,32 +256,46 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       print("contactAccessGranted!");
       Iterable<Contact> contacts = await ContactsService.getContacts();
       currentState.phoneContactList = contacts.toList(growable: true);
-      currentState.phoneContactList.sort((a, b) => a.displayName.compareTo(b.displayName));
+      currentState.phoneContactList
+          .sort((a, b) => a.displayName.compareTo(b.displayName));
 
       // Dart way of removing duplicates. // https://stackoverflow.com/questions/12030613/how-to-delete-duplicates-in-a-dart-list-list-distinct
-      currentState.phoneContactList = currentState.phoneContactList.toSet().toList();
-
-      event.callback();
+      currentState.phoneContactList =
+          currentState.phoneContactList.toSet().toList();
+      if (!isObjectEmpty(event)) {
+        event.callback(true);
+      }
     } else {
       print("contactAccessNotGranted?");
-      getPhoneStorageContacts(event);
+      if (!isObjectEmpty(event)) {
+        event.callback(false);
+      }
+//      getPhoneStorageContacts(event);
     }
   }
 
-  Future<Map<PermissionGroup, PermissionStatus>> requestContactPermission() async {
-    Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([
+  Future<Map<PermissionGroup, PermissionStatus>>
+      requestContactPermission() async {
+    Map<PermissionGroup, PermissionStatus> permissions =
+        await PermissionHandler().requestPermissions([
       PermissionGroup.contacts,
     ]);
     return permissions;
   }
 
-  Future<Map<PermissionGroup, PermissionStatus>> checkPermissions(CheckPermissionEvent event) async {
+  Future<Map<PermissionGroup, PermissionStatus>> checkPermissions(
+      CheckPermissionEvent event) async {
     // Check statuses of all required permissions
-    PermissionStatus contactPermission = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
-    PermissionStatus cameraPermission = await PermissionHandler().checkPermissionStatus(PermissionGroup.camera);
-    PermissionStatus storagePermission = await PermissionHandler().checkPermissionStatus(PermissionGroup.storage);
-    PermissionStatus locationPermission = await PermissionHandler().checkPermissionStatus(PermissionGroup.location);
-    PermissionStatus microphonePermission = await PermissionHandler().checkPermissionStatus(PermissionGroup.microphone);
+    PermissionStatus contactPermission = await PermissionHandler()
+        .checkPermissionStatus(PermissionGroup.contacts);
+    PermissionStatus cameraPermission =
+        await PermissionHandler().checkPermissionStatus(PermissionGroup.camera);
+    PermissionStatus storagePermission = await PermissionHandler()
+        .checkPermissionStatus(PermissionGroup.storage);
+    PermissionStatus locationPermission = await PermissionHandler()
+        .checkPermissionStatus(PermissionGroup.location);
+    PermissionStatus microphonePermission = await PermissionHandler()
+        .checkPermissionStatus(PermissionGroup.microphone);
 
     // Set PermissionGroups and PermissionStatuses
     Map<PermissionGroup, PermissionStatus> permissionResults = {};
@@ -250,19 +305,25 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     permissionResults[PermissionGroup.storage] = storagePermission;
     permissionResults[PermissionGroup.location] = locationPermission;
     permissionResults[PermissionGroup.microphone] = microphonePermission;
-
-    event.callback(permissionResults);
+    if (!isObjectEmpty(event)) {
+      event.callback(permissionResults);
+    }
     return permissionResults;
   }
 
-  Future<Map<PermissionGroup, PermissionStatus>> requestPermissions({RequestPermissionsEvent event}) async {
-    Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions(
-        [PermissionGroup.contacts, PermissionGroup.camera, PermissionGroup.storage, PermissionGroup.location, PermissionGroup.microphone]);
-
-    if (event.callback != null) {
+  Future<Map<PermissionGroup, PermissionStatus>> requestPermissions(
+      {RequestPermissionsEvent event}) async {
+    Map<PermissionGroup, PermissionStatus> permissions =
+        await PermissionHandler().requestPermissions([
+      PermissionGroup.contacts,
+      PermissionGroup.camera,
+      PermissionGroup.storage,
+      PermissionGroup.location,
+      PermissionGroup.microphone
+    ]);
+    if (!isObjectEmpty(event)) {
       event.callback(permissions);
     }
-
     return permissions;
   }
 
@@ -282,18 +343,21 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       currentState.conversationList.add(event.conversation);
     }
 
-    print("currentState.conversationList.length.toString(): " + currentState.conversationList.length.toString());
+    print("currentState.conversationList.length.toString(): " +
+        currentState.conversationList.length.toString());
   }
 
   overrideUnreadMessageEvent(OverrideUnreadMessageEvent event) async {
     print('overrideUnreadMessageEvent()');
     print('event.unreadMessage.id: ' + event.unreadMessage.id);
     // Remove existing same id unreadMessage
-    currentState.unreadMessageList.removeWhere((existingunreadMessage) => existingunreadMessage.id == event.unreadMessage.id);
+    currentState.unreadMessageList.removeWhere((existingunreadMessage) =>
+        existingunreadMessage.id == event.unreadMessage.id);
     print('Checkpoint 1');
     // Read unreadMessage
     currentState.unreadMessageList.add(event.unreadMessage);
-    print("currentState.unreadMessageList.length.toString(): " + currentState.unreadMessageList.length.toString());
+    print("currentState.unreadMessageList.length.toString(): " +
+        currentState.unreadMessageList.length.toString());
     print('Checkpoint 2');
   }
 
@@ -311,7 +375,9 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!messageExist) {
       currentState.messageList.add(event.message);
     }
-    event.callback(event.message);
+    if (!isObjectEmpty(event)) {
+      event.callback(event.message);
+    }
   }
 
   addMultimedia(AddMultimediaEvent event) async {
@@ -328,25 +394,33 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!multimediaIdExist) {
       currentState.multimediaList.add(event.multimedia);
     }
-
-    event.callback(event.multimedia);
+    if (!isObjectEmpty(event)) {
+      event.callback(event.multimedia);
+    }
   }
 
   addSettings(AddSettingsEvent event) async {
     print("event.message.id: " + event.settings.id);
-    await Firestore.instance.collection('settings').document(event.settings.id).setData({
+    await Firestore.instance
+        .collection('settings')
+        .document(event.settings.id)
+        .setData({
       'id': generateNewId().toString(), // Self generated Id
       'userId': event.settings.userId,
       'notification': event.settings.notification,
     });
     currentState.settingsState = event.settings;
-    event.callback(event.settings);
+    if (!isObjectEmpty(event)) {
+      event.callback(event.settings);
+    }
   }
 
   addUser(AddUserEvent event) async {
     print("event.message.id: " + event.user.id);
     currentState.userState = event.user;
-    event.callback(event.user);
+    if (!isObjectEmpty(event)) {
+      event.callback(event.user);
+    }
   }
 
   addUserContact(AddUserContactEvent event) async {
@@ -364,8 +438,9 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!userContactExist) {
       currentState.userContactList.add(event.userContact);
     }
-
-    event.callback(event.userContact);
+    if (!isObjectEmpty(event)) {
+      event.callback(event.userContact);
+    }
   }
 
   addContact(AddContactEvent event) async {
@@ -383,19 +458,25 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!userContactExist) {
       currentState.phoneContactList.add(event.contact);
     }
-
-    event.callback(event.contact);
+    if (!isObjectEmpty(event)) {
+      event.callback(event.contact);
+    }
   }
 
   addFirebaseAuth(AddFirebaseAuthEvent event) async {
     print("event.firebaseAuth.app.name: " + event.firebaseAuth.app.name);
     currentState.firebaseAuth = event.firebaseAuth;
-    event.callback(event.firebaseAuth);
+    if (!isObjectEmpty(event)) {
+      event.callback(event.firebaseAuth);
+    }
   }
 
   addGoogleSignIn(AddGoogleSignInEvent event) async {
-    print("event.googleSignIn.currentUser.displayName: " + event.googleSignIn.currentUser.displayName);
+    print("event.googleSignIn.currentUser.displayName: " +
+        event.googleSignIn.currentUser.displayName);
     currentState.googleSignIn = event.googleSignIn;
-    event.callback(event.googleSignIn);
+    if (!isObjectEmpty(event)) {
+      event.callback(event.googleSignIn);
+    }
   }
 }

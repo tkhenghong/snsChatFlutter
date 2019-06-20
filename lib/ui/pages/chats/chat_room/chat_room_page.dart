@@ -333,7 +333,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               controller: listScrollController,
               itemCount: snapshot.data.documents.length,
               reverse: true,
-              physics: RefreshBouncePhysics(),
+              physics: BouncingScrollPhysics(),
               itemBuilder: (context, index) => displayChatMessage(index, snapshot.data.documents[index]),
             ),
           ));
@@ -567,7 +567,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           'type': newMessage.type,
           'timestamp': newMessage.timestamp,
         });
-        Fluttertoast.showToast(msg: 'Message test!', toastLength: Toast.LENGTH_SHORT);
+        Fluttertoast.showToast(msg: 'Message sent!', toastLength: Toast.LENGTH_SHORT);
       } else {
         print('if(isObjectEmpty(newMessage) || isObjectEmpty(newMultimedia))');
       }

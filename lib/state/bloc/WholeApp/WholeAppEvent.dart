@@ -25,16 +25,18 @@ class CheckUserSignedUpEvent extends WholeAppEvent {
 
 // User Events
 class UserSignInEvent extends WholeAppEvent {
+  String mobileNo;
   Function callback;
 
-  UserSignInEvent({this.callback});
+  UserSignInEvent({this.callback, this.mobileNo});
 }
 
 class UserSignUpEvent extends WholeAppEvent {
-  User user;
+  String mobileNo;
+  String realName;
   Function callback;
 
-  UserSignUpEvent({this.callback, this.user});
+  UserSignUpEvent({this.callback, this.mobileNo, this.realName});
 }
 
 class UserSignOutEvent extends WholeAppEvent {}

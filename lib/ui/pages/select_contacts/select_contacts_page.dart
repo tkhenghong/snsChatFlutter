@@ -159,7 +159,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                 builder: (context, WholeAppState state) {
                   return ListView(
                     controller: scrollController,
-                    physics: RefreshBouncePhysics(),
+                    physics: BouncingScrollPhysics(),
                     children: state.phoneContactList.map((Contact contact) {
                       return Container(
                         child: Column(

@@ -19,6 +19,16 @@ dependencies:
   date_format: ^1.0.6
 #  flutter_html_textview: ^0.2.6 # Final decision, html textview causing lot more trouble than version solving
 
+# To add plugins:
+#  pin_entry_text_field/pin_input_text_field # Create PIN text fields easily. No need to self create PIN text fields anymore.
+#  country_icons # Get a bunch of country flags without having to get them yourself and manage them.
+#  extended_image/flutter_advanced_network_image # For load image without having to custom download and manage many situations
+#  flutter_villains # Make animation code simpler (no extends no init AnimationController everytime)
+#  map_view # Show Google Map point to some location. Can be used in send location feature in future
+#  email_validator # Validate email format
+#  thumbnails: Generate thumbnails from video
+
+
   flutter_cache_manager: ^0.3.2
   path_provider: ^0.5.0+1 # A Flutter plugin for finding commonly used locations on the filesystem. Supports iOS and Android.
   barcode_scan: ^1.0.0 # A Flutter plugin for scanning 2D barcodes and QR codes as a wrapper using specific iOS mikebuss/MTBBarcodeScanner and Android dm77/barcodescanner library.

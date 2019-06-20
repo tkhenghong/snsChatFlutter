@@ -14,7 +14,7 @@ packages:
       name: args
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.5.1"
+    version: "1.5.2"
   async:
     dependency: transitive
     description:
@@ -98,7 +98,7 @@ packages:
       name: built_value
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.5.0"
+    version: "6.6.0"
   cached_network_image:
     dependency: "direct main"
     description:
@@ -119,7 +119,7 @@ packages:
       name: cloud_firestore
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.12.3"
+    version: "0.12.5+2"
   code_builder:
     dependency: transitive
     description:
@@ -189,21 +189,21 @@ packages:
       name: equatable
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.5"
+    version: "0.2.6"
   firebase_auth:
     dependency: "direct main"
     description:
       name: firebase_auth
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.11.1+6"
+    version: "0.11.1+7"
   firebase_core:
     dependency: "direct main"
     description:
       name: firebase_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.0+3"
+    version: "0.4.0+6"
   fixnum:
     dependency: transitive
     description:
@@ -290,7 +290,7 @@ packages:
       name: http_multi_server
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.6"
+    version: "2.1.0"
   http_parser:
     dependency: transitive
     description:
@@ -339,7 +339,7 @@ packages:
       name: jaguar_query_sqflite
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.2.9"
+    version: "2.2.10"
   js:
     dependency: transitive
     description:
@@ -388,7 +388,7 @@ packages:
       name: mime
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.6+2"
+    version: "0.9.6+3"
   package_config:
     dependency: transitive
     description:
@@ -465,7 +465,7 @@ packages:
       name: pull_to_refresh
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.9"
+    version: "1.4.5"
   qr:
     dependency: transitive
     description:
@@ -479,7 +479,7 @@ packages:
       name: qr_flutter
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0+51"
+    version: "2.1.0+55"
   quiver:
     dependency: transitive
     description:
@@ -568,7 +568,7 @@ packages:
       name: synchronized
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.0+1"
   term_glyph:
     dependency: transitive
     description:
@@ -603,14 +603,14 @@ packages:
       name: url_launcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.2"
+    version: "5.0.3"
   uuid:
     dependency: transitive
     description:
       name: uuid
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "2.0.2"
   vector_math:
     dependency: transitive
     description:
@@ -638,7 +638,7 @@ packages:
       name: yaml
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.15"
+    version: "2.1.16"
 sdks:
   dart: ">=2.2.0 <3.0.0"
   flutter: ">=1.5.0 <2.0.0"

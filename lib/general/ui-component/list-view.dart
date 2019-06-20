@@ -50,7 +50,7 @@ class PageListViewState extends State<PageListView> {
   Widget build(BuildContext context) {
     return new ListView.builder(
         itemCount: widget.array.length,
-        physics: RefreshBouncePhysics(),
+        physics: BouncingScrollPhysics(),
         // suggestion from https://github.com/flutter/flutter/issues/22314
         itemBuilder: (BuildContext content, int index) {
           PageListItem listItem = widget.array[index];

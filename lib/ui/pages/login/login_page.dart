@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:permission_handler/permission_handler.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
+import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/objects/settings/settings.dart';
 import 'package:snschat_flutter/objects/user/user.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
+import 'package:snschat_flutter/ui/pages/sign_up/sign_up_page.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:date_format/date_format.dart';
@@ -31,22 +34,26 @@ class LoginPageState extends State<LoginPage> {
     if (_formKey.currentState.validate()) {
       showCenterLoadingIndicator(context);
       wholeAppBloc.dispatch(UserSignInEvent(callback: (User user) {
-        print('Callback reached.');
-        if(user.id.isNotEmpty) {
+        print("UserSignInEvent successful.");
+        print("user.id" + user.id);
+        print("user.displayName" + user.displayName);
+        print("user.mobileNo" + user.mobileNo);
+        if(!isStringEmpty(user.id)) {
           goToVerifyPhoneNumber();
         } else {
+          Fluttertoast.showToast(msg: 'Unable to login!', toastLength: Toast.LENGTH_SHORT);
           // TODO: Add new Settings to the Bloc State
-          Settings userSettings = Settings(id: generateNewId().toString(), notification: true, userId: user.id);
+
           wholeAppBloc.dispatch(AddSettingsEvent(
               callback: (Settings settings) {
                 print('returned to login page. Settings id is: ' + settings.id);
-                print("textEditingController.value.toString(): " + textEditingController.value.toString());
-                wholeAppBloc.dispatch(UserSignUpEvent(callback: () {}, user: User(mobileNo: textEditingController.value.text, settingsId: settings.id)));
-              },
-              settings: userSettings));
+                // Go to Sign Up page to sign up
+                goToSignUp();
+
+              }));
         }
 
-      }));
+      }, mobileNo: textEditingController.value.text));
     }
   }
 
@@ -173,7 +180,8 @@ class LoginPageState extends State<LoginPage> {
   }
 
   goToSignUp() {
-    Navigator.of(context).pushNamed("sign_up_page");
+//    Navigator.of(context).pushNamed("sign_up_page");
+    Navigator.push(context, MaterialPageRoute(builder: ((context) => SignUpPage(mobileNo: textEditingController.value.text))));
   }
 
   goToContactSupport() async {
