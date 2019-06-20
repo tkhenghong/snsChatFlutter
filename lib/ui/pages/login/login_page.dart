@@ -33,27 +33,23 @@ class LoginPageState extends State<LoginPage> {
   _signIn() async {
     if (_formKey.currentState.validate()) {
       showCenterLoadingIndicator(context);
-      wholeAppBloc.dispatch(UserSignInEvent(callback: (User user) {
-        print("UserSignInEvent successful.");
-        print("user.id" + user.id);
-        print("user.displayName" + user.displayName);
-        print("user.mobileNo" + user.mobileNo);
-        if(!isStringEmpty(user.id)) {
-          goToVerifyPhoneNumber();
+      wholeAppBloc.dispatch(CheckUserSignedUpEvent(callback: (bool isSignedUp) {
+        if(isSignedUp) {
+          wholeAppBloc.dispatch(UserSignInEvent(callback: (User user) {
+            print("UserSignInEvent successful.");
+            print("user.id" + user.id);
+            print("user.displayName" + user.displayName);
+            print("user.mobileNo" + user.mobileNo);
+            if(!isStringEmpty(user.id)) {
+              goToVerifyPhoneNumber();
+            }
+          }, mobileNo: textEditingController.value.text));
         } else {
-          Fluttertoast.showToast(msg: 'Unable to login!', toastLength: Toast.LENGTH_SHORT);
-          // TODO: Add new Settings to the Bloc State
-
-          wholeAppBloc.dispatch(AddSettingsEvent(
-              callback: (Settings settings) {
-                print('returned to login page. Settings id is: ' + settings.id);
-                // Go to Sign Up page to sign up
-                goToSignUp();
-
-              }));
+          Fluttertoast.showToast(msg: 'Welcome! Please sign up first!', toastLength: Toast.LENGTH_SHORT);
+          goToSignUp();
         }
+      }));
 
-      }, mobileNo: textEditingController.value.text));
     }
   }
 

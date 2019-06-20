@@ -142,10 +142,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       googleSignInAccount = await currentState.googleSignIn.signIn();
     } else {
       isSignedIn = true;
-//      if (!isObjectEmpty(event)) {
-//        print("if (!isObjectEmpty(event))");
-//        event.callback(currentState.userState);
-//      }
       googleSignInAccount =
           await currentState.googleSignIn.signInSilently(suppressErrors: false);
     }
