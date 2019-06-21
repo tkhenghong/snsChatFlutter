@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 
+@deprecated
 class PinEntryTextField extends StatefulWidget {
   int fields;
   Function onSubmit;
@@ -79,7 +80,7 @@ class PinEntryTextFieldState extends State<PinEntryTextField> {
                 : null),
         onChanged: (String str) {
           _pin[i] = str;
-          if (!isObjectEmpty(str)) {
+          if (!isStringEmpty(str)) {
             if (_pin[_pin.length - 1] != null) {
               // If last array element is non zero == finish filling
               FocusScope.of(context).requestFocus(_focusNodes[0]);

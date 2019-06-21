@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
 import 'package:snschat_flutter/database/sqflite/repositories/conversation_group/conversation_group.dart';
-import 'package:snschat_flutter/database/sqflite/repositories/conversation_member/conversation_member.dart';
 import 'package:snschat_flutter/database/sqflite/repositories/message/message.dart';
 import 'package:snschat_flutter/database/sqflite/repositories/multimedia/multimedia.dart';
 import 'package:snschat_flutter/database/sqflite/repositories/settings/settings.dart';

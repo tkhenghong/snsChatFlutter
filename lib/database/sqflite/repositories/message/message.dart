@@ -1,13 +1,10 @@
-import 'package:snschat_flutter/objects/message/message.dart';
-import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
-
 //Jaguar ORM
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
 part 'message.jorm.dart';
 
-// system message or normal message, sticker, gifs, emojis, video, recording, photos,
+// system/normal message, sticker, gifs, emojis, video, recording, photos,
 class Message {
   Message(
       {this.id,
@@ -24,18 +21,26 @@ class Message {
       this.multimediaId,
       this.timestamp});
 
-  Message.make(this.id, this.conversationId, this.senderId, this.senderName, this.senderMobileNo, this.receiverId, this.receiverName,
-      this.receiverMobileNo, this.type, this.status, this.message, this.multimediaId, this.timestamp);
+  Message.make(
+      this.id,
+      this.conversationId,
+      this.senderId,
+      this.senderName,
+      this.senderMobileNo,
+      this.receiverId,
+      this.receiverName,
+      this.receiverMobileNo,
+      this.type,
+      this.status,
+      this.message,
+      this.multimediaId,
+      this.timestamp);
 
   @PrimaryKey()
   String id;
 
   @Column(isNullable: true)
   String conversationId;
-
-  // Remove recipient object, too complicated into db and state
-//  @Column(isNullable: true)
-//  String recipientId; // Recipient object
 
   // Sender
   @Column(isNullable: true)
@@ -80,7 +85,6 @@ class Message {
 
 @GenBean()
 class MessageBean extends Bean<Message> with _MessageBean {
-//class MessageBean extends Bean<Message> {
   MessageBean(Adapter adapter) : super(adapter);
 
   final String tableName = 'message';

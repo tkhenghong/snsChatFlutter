@@ -36,16 +36,13 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   checkUserLogin() async {
     wholeAppBloc.dispatch(CheckUserLoginEvent(callback: (bool isSignedIn) {
       if (isSignedIn) {
-        wholeAppBloc.dispatch(UserSignInEvent(callback: (User user) {
+        wholeAppBloc.dispatch(UserSignInEvent(callback: (bool isSignedIn) {
           print("UserSignInEvent success");
-          if (isObjectEmpty(user)) {
-            print("if(isObjectEmpty(user))");
+          if (isSignedIn) {
+            print("sign in success");
           } else {
-            print("if(!isObjectEmpty(user))");
+            print("sign in failed");
           }
-          print("user.id: " + user.id);
-          print("user.displayName: " + user.displayName);
-          print("user.mobileNo: " + user.mobileNo);
         }));
       } else {
         Navigator.of(context).pushNamedAndRemoveUntil(

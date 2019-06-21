@@ -11,7 +11,6 @@ abstract class _ConversationBean implements Bean<Conversation> {
   final userId = StrField('user_id');
   final name = StrField('name');
   final type = StrField('type');
-  final groupPhotoId = StrField('group_photo_id');
   final unreadMessageId = StrField('unread_message_id');
   final description = StrField('description');
   final block = BoolField('block');
@@ -23,7 +22,6 @@ abstract class _ConversationBean implements Bean<Conversation> {
         userId.name: userId,
         name.name: name,
         type.name: type,
-        groupPhotoId.name: groupPhotoId,
         unreadMessageId.name: unreadMessageId,
         description.name: description,
         block.name: block,
@@ -36,7 +34,6 @@ abstract class _ConversationBean implements Bean<Conversation> {
     model.userId = adapter.parseValue(map['user_id']);
     model.name = adapter.parseValue(map['name']);
     model.type = adapter.parseValue(map['type']);
-    model.groupPhotoId = adapter.parseValue(map['group_photo_id']);
     model.unreadMessageId = adapter.parseValue(map['unread_message_id']);
     model.description = adapter.parseValue(map['description']);
     model.block = adapter.parseValue(map['block']);
@@ -56,7 +53,6 @@ abstract class _ConversationBean implements Bean<Conversation> {
       ret.add(userId.set(model.userId));
       ret.add(name.set(model.name));
       ret.add(type.set(model.type));
-      ret.add(groupPhotoId.set(model.groupPhotoId));
       ret.add(unreadMessageId.set(model.unreadMessageId));
       ret.add(description.set(model.description));
       ret.add(block.set(model.block));
@@ -67,8 +63,6 @@ abstract class _ConversationBean implements Bean<Conversation> {
       if (only.contains(userId.name)) ret.add(userId.set(model.userId));
       if (only.contains(name.name)) ret.add(name.set(model.name));
       if (only.contains(type.name)) ret.add(type.set(model.type));
-      if (only.contains(groupPhotoId.name))
-        ret.add(groupPhotoId.set(model.groupPhotoId));
       if (only.contains(unreadMessageId.name))
         ret.add(unreadMessageId.set(model.unreadMessageId));
       if (only.contains(description.name))
@@ -90,9 +84,6 @@ abstract class _ConversationBean implements Bean<Conversation> {
       }
       if (model.type != null) {
         ret.add(type.set(model.type));
-      }
-      if (model.groupPhotoId != null) {
-        ret.add(groupPhotoId.set(model.groupPhotoId));
       }
       if (model.unreadMessageId != null) {
         ret.add(unreadMessageId.set(model.unreadMessageId));
@@ -120,7 +111,6 @@ abstract class _ConversationBean implements Bean<Conversation> {
     st.addStr(userId.name, isNullable: true);
     st.addStr(name.name, isNullable: true);
     st.addStr(type.name, isNullable: true);
-    st.addStr(groupPhotoId.name, isNullable: true);
     st.addStr(unreadMessageId.name, isNullable: true);
     st.addStr(description.name, isNullable: true);
     st.addBool(block.name, isNullable: true);

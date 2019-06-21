@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
@@ -31,7 +31,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       checkUserSignedUp(event);
       yield currentState;
     } else if (event is UserSignInEvent) {
-      signInUsingGoogle(event);
+      signIn(event);
       yield currentState;
     } else if (event is UserSignOutEvent) {
       signOut(event);
@@ -46,7 +46,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       checkPermissions(event);
       yield currentState;
     } else if (event is UserSignUpEvent) {
-      signUpInFirestore(event.mobileNo);
+      signUpInFirestore(event);
       yield currentState;
     } else if (event is AddConversationEvent) {
       addConversation(event);
@@ -81,79 +81,156 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
   }
 
-  checkUserSignIn(CheckUserLoginEvent event) async {
+  Future<bool> checkUserSignIn(CheckUserLoginEvent event) async {
     print('checkUserSignIn()');
 
     bool isSignedIn = false;
-    GoogleSignInAccount googleSignInAccount;
+    isSignedIn = await currentState.googleSignIn.isSignedIn();
 
-    if (!await currentState.googleSignIn.isSignedIn()) {
+    if (!isSignedIn) {
       print("Not yet signed in. Go to login page...");
-      isSignedIn = false;
-      if (!isObjectEmpty(event)) {
-        event.callback(isSignedIn);
-      }
-      return;
     } else {
-      isSignedIn = true;
-      if (!isObjectEmpty(event)) {
-        event.callback(isSignedIn);
-      }
-//      googleSignInAccount = await currentState.googleSignIn.signInSilently(suppressErrors: false);
+      print("Signed in!");
     }
+    if (!isObjectEmpty(event)) {
+      event.callback(isSignedIn);
+    }
+
+    return isSignedIn;
   }
 
+  // Use contact mobile number to check this number is signed up or not
   Future<bool> checkUserSignedUp(CheckUserSignedUpEvent event) async {
-    FirebaseUser firebaseUser = currentState.firebaseUser;
+    print("checkUserSignedUp()");
+    bool isSignedUp = false;
     final QuerySnapshot result = await Firestore.instance
         .collection('user')
-        .where('firebaseUserId',
-            isEqualTo: currentState.userState.firebaseUserId)
+        .where('mobileNo', isEqualTo: event.mobileNo)
         .getDocuments();
     final List<DocumentSnapshot> documents = result.documents;
-    if (documents.length == 0) {
+    isSignedUp = documents.length > 0;
+    print("isSignedUp: " + isSignedUp.toString());
+    if (!isObjectEmpty(event)) {
+      event.callback(isSignedUp);
+    }
+    return isSignedUp;
+  }
+
+  // Sign in using Google.
+  // Will check user signed up or not. If not, will return false to the callback
+  Future<bool> signIn(UserSignInEvent event) async {
+    CheckUserSignedUpEvent checkUserSignedUpEvent = CheckUserSignedUpEvent(
+        callback: (bool isSignedUp) {}, mobileNo: event.mobileNo);
+
+    bool isSignedUp = await checkUserSignedUp(checkUserSignedUpEvent);
+
+    print("CheckUserSignedUpEvent success");
+
+    if (isSignedUp) {
+      print("if (isSignedUp)");
+      bool googleSignedIn = await signInUsingGoogle();
+      if(!googleSignedIn) {
+        if (!isObjectEmpty(event)) {
+          event.callback(false);
+        }
+        return false;
+      }
+
+      bool getUserSuccessful = await getUserFromFirebase();
+      print("getUserFromFirebase success");
+      if (getUserSuccessful) {
+        print("if (getUserSuccessful)");
+        if (!isObjectEmpty(event)) {
+          event.callback(true);
+        }
+        return true;
+      }
+
       if (!isObjectEmpty(event)) {
         event.callback(false);
       }
 
       return false;
     } else {
-      currentState.userState.id = documents[0]['id'].toString();
-      currentState.userState.userId = documents[0]['userId'].toString();
-      currentState.userState.displayName =
-          documents[0]['displayName'].toString();
-      currentState.userState.realName = documents[0]['realName'].toString();
-      currentState.userState.settingsId = documents[0]['settingsId'].toString();
-      currentState.userState.mobileNo = documents[0]['mobileNo'].toString();
+      print("if (!isSignedUp)");
       if (!isObjectEmpty(event)) {
-        event.callback(true);
+        print("if (!isObjectEmpty(event))");
+        event.callback(false);
       }
-      return true;
+      return false;
     }
   }
 
-  // Sign in using Google. If user hasn't signed up in the PocketChat, we will sign up on the spot.
-  Future<User> signInUsingGoogle(UserSignInEvent event) async {
-    bool isSignedIn = false;
-
+  Future<bool> signInUsingGoogle() async {
     GoogleSignInAccount googleSignInAccount;
     if (!await currentState.googleSignIn.isSignedIn()) {
-      print("Continue?");
+      print("if (!await currentState.googleSignIn.isSignedIn())");
       googleSignInAccount = await currentState.googleSignIn.signIn();
     } else {
-      isSignedIn = true;
-      googleSignInAccount =
-          await currentState.googleSignIn.signInSilently(suppressErrors: false);
+      print("if (await currentState.googleSignIn.isSignedIn())");
+      googleSignInAccount = await currentState.googleSignIn
+          .signInSilently(suppressErrors: false);
     }
 
-    if(isObjectEmpty(googleSignInAccount)) {
-      if (!isObjectEmpty(event)) {
-        print("if (!isObjectEmpty(event))");
-        event.callback(currentState.userState);
-        return currentState.userState;
+    if (isObjectEmpty(googleSignInAccount)) {
+      print("if (isObjectEmpty(googleSignInAccount))");
+      Fluttertoast.showToast(
+          msg: 'Google sign in canceled.', toastLength: Toast.LENGTH_SHORT);
+      return false;
+    }
+    print("Checkpoint 1");
+    GoogleSignInAuthentication googleSignInAuthentication =
+    await googleSignInAccount.authentication;
+
+    AuthCredential credential = GoogleAuthProvider.getCredential(
+        idToken: googleSignInAuthentication.idToken,
+        accessToken: googleSignInAuthentication.accessToken);
+
+    currentState.firebaseUser =
+    await currentState.firebaseAuth.signInWithCredential(credential);
+    return true;
+  }
+
+  Future<bool> getUserFromFirebase() async {
+    if (!isObjectEmpty(currentState.firebaseUser)) {
+      final QuerySnapshot result = await Firestore.instance
+          .collection('user')
+          .where('firebaseUserId', isEqualTo: currentState.firebaseUser.uid)
+          .getDocuments();
+      final List<DocumentSnapshot> documents = result.documents;
+      if (documents.length > 0) {
+        print("if (documents.length > 0)");
+        if (documents[0].exists &&
+            documents[0]['firebaseUserId'] == currentState.firebaseUser.uid) {
+          print(
+              "if (documents[0].exists && documents[0]['firebaseUserId'] == currentState.firebaseUser.uid)");
+          currentState.userState.id = documents[0]['id'];
+          currentState.userState.displayName = documents[0]['displayName'];
+          currentState.userState.realName = documents[0]['realName'];
+          currentState.userState.firebaseUserId =
+              documents[0]['firebaseUserId'];
+          currentState.userState.mobileNo = documents[0]['mobileNo'];
+          return true;
+        }
+      } else {
+        print("if (documents.length == 0)");
       }
     }
+    return false;
+  }
 
+  // TODO: Save to SQLite DB
+
+  Future<bool> signUpInFirestore(UserSignUpEvent event) async {
+    // Require user to connect to Google first in order to get some info from the user
+    GoogleSignInAccount googleSignInAccount =
+        await currentState.googleSignIn.signIn();
+    if (isObjectEmpty(googleSignInAccount)) {
+      if (!isObjectEmpty(event)) {
+        event.callback(false);
+      }
+      return false;
+    }
     GoogleSignInAuthentication googleSignInAuthentication =
         await googleSignInAccount.authentication;
 
@@ -164,79 +241,65 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     currentState.firebaseUser =
         await currentState.firebaseAuth.signInWithCredential(credential);
 
-    // Check User Signed Up or not
-    checkUserSignedUp(null).then((bool signedUp) {
-      if (signedUp) {
-        //  If user signed up means all good to go!
-        print("Checkpoint 1");
-        if (!isObjectEmpty(event)) {
-          event.callback(currentState.userState);
-        }
-      } else {
-        print("Checkpoint 2");
-        signUpInFirestore(event.mobileNo).then((_) {
-          print("Checkpoint 4");
-          if (!isObjectEmpty(event)) {
-            event.callback(currentState.userState);
-          }
-        });
-      }
-    });
-    print("Checkpoint 3");
-
-    return currentState.userState;
-  }
-
-  // TODO: Save to SQLite DB
-
-  Future<void> signUpInFirestore(String mobileNo) async {
     FirebaseUser firebaseUser = currentState.firebaseUser;
+
     User user = User(
         id: generateNewId().toString(),
-        mobileNo: mobileNo,
-        // Add later
-        settingsId: "",
+        mobileNo: event.mobileNo,
         displayName: firebaseUser.displayName,
         firebaseUserId: firebaseUser.uid,
-        realName: firebaseUser.displayName);
+        realName: event.realName);
+
     Settings settings = Settings(
         id: generateNewId().toString(), notification: true, userId: user.id);
 
-    user.settingsId = settings.id;
 
     if (!isObjectEmpty(firebaseUser)) {
+      print("if (!isObjectEmpty(firebaseUser))");
       final QuerySnapshot result = await Firestore.instance
           .collection('user')
           .where('firebaseUserId', isEqualTo: firebaseUser.uid)
           .getDocuments();
       final List<DocumentSnapshot> documents = result.documents;
       if (documents.length == 0) {
+        print("if (documents.length == 0)");
+        print("user.id: " + user.id);
+        print("user.mobileNo: " + user.mobileNo);
+        print("user.displayName: " + user.displayName);
+        print("user.firebaseUserId: " + user.firebaseUserId);
+        print("user.realName: " + user.realName);
+
         Firestore.instance
-            .collection('user')
-            .document(firebaseUser.uid)
+            .collection('settings')
+            .document(settings.id)
             .setData({
-          'id': generateNewId().toString(), // Self generated Id
-          'displayName': firebaseUser.displayName,
-          'realName': firebaseUser.displayName,
+          'id': settings.id,
+          'notification': settings.notification,
+          'userId': settings.userId,
+        });
+        Firestore.instance.collection('user').document(user.id).setData({
+          'id': user.id,
+          'displayName': user.displayName,
+          'realName': user.realName,
           'mobileNo': user.mobileNo,
-          'settingsid': user.settingsId,
-          'firebaseUserId': firebaseUser.uid,
+          'firebaseUserId': user.firebaseUserId,
         });
       } else {
-        // Add user data from database to our app state
+        print("if (documents.length > 0)");
+        // Add user data from database to the app state
         print('documents.length.toString()' + documents.length.toString());
         if (documents[0].exists) {
           print('if (documents.length != 0)');
           currentState.userState.id = documents[0]['id'];
-          currentState.userState.userId = documents[0]['userId'];
           currentState.userState.displayName = documents[0]['displayName'];
           currentState.userState.realName = documents[0]['realName'];
           currentState.userState.firebaseUserId =
               documents[0]['firebaseUserId'];
-          currentState.userState.settingsId = documents[0]['settingsId'];
           currentState.userState.mobileNo = documents[0]['mobileNo'];
         }
       }
+    } else {
+      print("if (isObjectEmpty(firebaseUser))");
     }
   }
 
@@ -273,7 +336,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       if (!isObjectEmpty(event)) {
         event.callback(false);
       }
-//      getPhoneStorageContacts(event);
     }
   }
 

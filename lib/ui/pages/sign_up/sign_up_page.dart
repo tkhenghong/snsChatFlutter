@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
+import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number_page.dart';
 
 class SignUpPage extends StatefulWidget {
   String mobileNo;
@@ -128,7 +130,7 @@ class SignUpPageState extends State<SignUpPage> {
                         left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(50.0)),
-                    child: Text("Get Code"),
+                    child: Text("Submit"),
                   ),
                   Padding(padding: EdgeInsets.symmetric(vertical: 50.00)),
                 ],
@@ -139,9 +141,28 @@ class SignUpPageState extends State<SignUpPage> {
   signUp() async {
     if (_formKey.currentState.validate()) {
       wholeAppBloc.dispatch(UserSignUpEvent(
-          callback: () {},
+          callback: (bool isSignedUp) {
+            if (isSignedUp) {
+              print("if (isSignedUp)");
+              goToVerifyPhoneNumber();
+            } else {
+              print("if (!isSignedUp)");
+              Fluttertoast.showToast(
+                  msg:
+                      'Unable to sign up, please contact support for assistance.',
+                  toastLength: Toast.LENGTH_SHORT);
+            }
+          },
           mobileNo: mobileNoTextController.value.text,
           realName: nameTextController.value.text));
     }
+  }
+
+  goToVerifyPhoneNumber() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: ((context) => VerifyPhoneNumberPage(
+                mobileNo: mobileNoTextController.value.text))));
   }
 }

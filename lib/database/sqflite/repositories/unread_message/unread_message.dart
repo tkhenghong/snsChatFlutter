@@ -1,12 +1,13 @@
 import 'package:jaguar_orm/jaguar_orm.dart';
 
-
 part 'unread_message.jorm.dart';
 
 class UnreadMessage {
-  UnreadMessage({this.id, this.conversationId, this.lastMessage, this.date, this.count});
+  UnreadMessage(
+      {this.id, this.conversationId, this.lastMessage, this.date, this.count});
 
-  UnreadMessage.make(this.id, this.conversationId, this.lastMessage, this.date, this.count);
+  UnreadMessage.make(
+      this.id, this.conversationId, this.lastMessage, this.date, this.count);
 
   @PrimaryKey()
   String id;
@@ -27,13 +28,10 @@ class UnreadMessage {
   String toString() {
     return 'UnreadMessage{id: $id, conversationId: $conversationId, lastMessage: $lastMessage, date: $date, count: $count}';
   }
-
-
 }
 
 @GenBean()
 class UnreadMessageBean extends Bean<UnreadMessage> with _UnreadMessageBean {
-//class ConversationBean extends Bean<Conversation> {
   UnreadMessageBean(Adapter adapter) : super(adapter);
 
   final String tableName = 'unread_message';

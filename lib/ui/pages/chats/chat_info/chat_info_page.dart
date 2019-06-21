@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
+import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/custom_dialogs.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -25,6 +27,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
   TextEditingController textEditingController;
   WholeAppBloc wholeAppBloc;
   File imageFile;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -36,7 +39,10 @@ class ChatInfoPageState extends State<ChatInfoPage> {
   // TODO: Duplicated same in Chat room page, consider create service
   Future<Multimedia> getConversationPhoto() async {
     Multimedia groupPhoto;
-    var multimediaDocuments = await Firestore.instance.collection("multimedia").where("conversationId", isEqualTo: widget._conversation.id).getDocuments();
+    var multimediaDocuments = await Firestore.instance
+        .collection("multimedia")
+        .where("conversationId", isEqualTo: widget._conversation.id)
+        .getDocuments();
     if (multimediaDocuments.documents.length == 0) {
       print("if (multimediaDocuments.documents.length == 0)");
     } else {
@@ -67,7 +73,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
       // Load local file first
       imageFile = File(groupPhoto.localFullFileUrl);
       imageFile.exists().then((fileExists) {
-        if(!fileExists) {
+        if (!fileExists) {
           print('chat_info_page.dart local file not exist!');
           loadImageHandler(groupPhoto).then((remoteDownloadedfile) {
             setState(() {
@@ -111,24 +117,26 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                     title: Hero(
                       tag: widget._conversation.name,
                       child: FlatButton(
-                          onPressed: () async {
-                            CustomDialogs customDialog = new CustomDialogs(
-                                context: context,
-                                title: "Edit Group Name",
-                                description: "Edit the group name below. Press OK to save.",
-                                value: widget._conversation.name);
-                            String groupName = await customDialog.showConfirmationDialog();
-                            if (widget._conversation.name != groupName) {
-                              widget._conversation.name = groupName;
-                            }
-                          },
-                          child: Text(
-                              widget._conversation.name,
-                              style: TextStyle(color: Colors.white),
-                              overflow: TextOverflow.fade,
-                              softWrap: true,
-                            ),
-                          ),
+                        onPressed: () async {
+                          CustomDialogs customDialog = new CustomDialogs(
+                              context: context,
+                              title: "Edit Group Name",
+                              description:
+                                  "Edit the group name below. Press OK to save.",
+                              value: widget._conversation.name);
+                          String groupName =
+                              await customDialog.showConfirmationDialog();
+                          if (widget._conversation.name != groupName) {
+                            widget._conversation.name = groupName;
+                          }
+                        },
+                        child: Text(
+                          widget._conversation.name,
+                          style: TextStyle(color: Colors.white),
+                          overflow: TextOverflow.fade,
+                          softWrap: true,
+                        ),
+                      ),
                     ),
                     background: Hero(
                       tag: widget._conversation.id,
@@ -181,8 +189,11 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                   padding: EdgeInsets.only(top: 5.0),
                                 ),
                                 Text(
-                                  widget._conversation.description == "" ? "Add Group description" : widget._conversation.description,
-                                  style: TextStyle(fontSize: 17.0, color: Colors.black54),
+                                  isStringEmpty(widget._conversation.description)
+                                      ? "Add Group description"
+                                      : widget._conversation.description,
+                                  style: TextStyle(
+                                      fontSize: 17.0, color: Colors.black54),
                                 ),
                                 Padding(
                                   padding: EdgeInsets.only(bottom: 5.0),
@@ -217,8 +228,12 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                   padding: EdgeInsets.only(top: 5.0),
                                 ),
                                 Text(
-                                  widget._conversation.notificationExpireDate == 0 ? "On" : "Off",
-                                  style: TextStyle(fontSize: 17.0, color: Colors.black54),
+                                  widget._conversation.notificationExpireDate ==
+                                          0
+                                      ? "On"
+                                      : "Off",
+                                  style: TextStyle(
+                                      fontSize: 17.0, color: Colors.black54),
                                 ),
                                 Padding(
                                   padding: EdgeInsets.only(bottom: 5.0),
@@ -237,7 +252,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             print("Tapped.");
                           },
                           child: Padding(
-                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
+                            padding: EdgeInsets.only(
+                                left: 10.0, top: 10.0, right: 5.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,7 +261,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 Padding(
                                     padding: EdgeInsets.only(top: 5.0),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: <Widget>[
                                         Text(
                                           "Favourites⭐",
@@ -271,7 +288,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             print("Tapped.");
                           },
                           child: Padding(
-                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
+                            padding: EdgeInsets.only(
+                                left: 10.0, top: 10.0, right: 5.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,7 +297,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 Padding(
                                     padding: EdgeInsets.only(top: 5.0),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: <Widget>[
                                         Text(
                                           "Media",
@@ -305,7 +324,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             print("Tapped.");
                           },
                           child: Padding(
-                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
+                            padding: EdgeInsets.only(
+                                left: 10.0, top: 10.0, right: 5.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,7 +333,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 Padding(
                                     padding: EdgeInsets.only(top: 5.0),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       children: <Widget>[
                                         Icon(Icons.people),
                                         Text(
@@ -339,7 +360,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             print("Tapped.");
                           },
                           child: Padding(
-                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
+                            padding: EdgeInsets.only(
+                                left: 10.0, top: 10.0, right: 5.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -347,12 +369,16 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 Padding(
                                     padding: EdgeInsets.only(top: 5.0),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       children: <Widget>[
-                                        Icon(Icons.exit_to_app, color: Colors.red),
+                                        Icon(Icons.exit_to_app,
+                                            color: Colors.red),
                                         Text(
                                           "Exit group",
-                                          style: TextStyle(fontSize: 17.0, color: Colors.red),
+                                          style: TextStyle(
+                                              fontSize: 17.0,
+                                              color: Colors.red),
                                         ),
                                       ],
                                     )),
@@ -373,7 +399,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             print("Tapped.");
                           },
                           child: Padding(
-                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
+                            padding: EdgeInsets.only(
+                                left: 10.0, top: 10.0, right: 5.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -381,12 +408,15 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 Padding(
                                     padding: EdgeInsets.only(top: 5.0),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       children: <Widget>[
                                         Icon(Icons.report, color: Colors.red),
                                         Text(
                                           "Report group",
-                                          style: TextStyle(fontSize: 17.0, color: Colors.red),
+                                          style: TextStyle(
+                                              fontSize: 17.0,
+                                              color: Colors.red),
                                         ),
                                       ],
                                     )),

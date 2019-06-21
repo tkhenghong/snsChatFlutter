@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_group_list/chat_group_list_page.dart';
 import 'package:snschat_flutter/ui/pages/select_contacts/select_contacts_page.dart';
 import 'package:snschat_flutter/ui/pages/myself/myself_page.dart';

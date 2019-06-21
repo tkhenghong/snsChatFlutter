@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:snschat_flutter/general/functions/validation_functions.dart';
 
 class CustomDialogs {
   final String title;
@@ -76,8 +77,7 @@ class CustomDialogs {
                             print("value: " + value);
                             print(
                                 "The value is: " + textEditingController.text);
-                            if (textEditingController.text == "") {
-                              // If value is empty
+                            if (isStringEmpty(textEditingController.text)) {
                               Navigator.of(context).pop(value);
                             } else {
                               Navigator.of(context)

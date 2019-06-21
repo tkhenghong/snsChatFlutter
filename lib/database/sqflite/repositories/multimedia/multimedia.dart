@@ -1,6 +1,3 @@
-import 'dart:io';
-import 'dart:typed_data';
-
 //Jaguar ORM
 import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
@@ -22,8 +19,17 @@ class Multimedia {
       this.userContactId,
       this.conversationId});
 
-  Multimedia.make(this.id, this.localFullFileUrl, this.localThumbnailUrl, this.remoteThumbnailUrl, this.remoteFullFileUrl, this.imageDataId,
-      this.imageFileId, this.messageId, this.userContactId, this.conversationId);
+  Multimedia.make(
+      this.id,
+      this.localFullFileUrl,
+      this.localThumbnailUrl,
+      this.remoteThumbnailUrl,
+      this.remoteFullFileUrl,
+      this.imageDataId,
+      this.imageFileId,
+      this.messageId,
+      this.userContactId,
+      this.conversationId);
 
   @PrimaryKey()
   String id;
@@ -64,7 +70,6 @@ class Multimedia {
 
 @GenBean()
 class MultimediaBean extends Bean<Multimedia> with _MultimediaBean {
-//class MultimediaBean extends Bean<Multimedia> {
   MultimediaBean(Adapter adapter) : super(adapter);
 
   final String tableName = 'multimedia';

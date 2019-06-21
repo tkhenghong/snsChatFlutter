@@ -5,11 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:permission_handler/permission_handler.dart';
-import 'package:snschat_flutter/general/functions/repeating_functions.dart';
-import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
-import 'package:snschat_flutter/objects/settings/settings.dart';
-import 'package:snschat_flutter/objects/user/user.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
@@ -35,24 +31,28 @@ class LoginPageState extends State<LoginPage> {
     if (_formKey.currentState.validate()) {
       showCenterLoadingIndicator(context);
       wholeAppBloc.dispatch(CheckUserSignedUpEvent(callback: (bool isSignedUp) {
-        if(isSignedUp) {
-          wholeAppBloc.dispatch(UserSignInEvent(callback: (User user) {
-            print("UserSignInEvent successful.");
-            print("user.id" + user.id);
-            print("user.displayName" + user.displayName);
-            print("user.mobileNo" + user.mobileNo);
-            if(!isStringEmpty(user.id)) {
-              goToVerifyPhoneNumber();
-            } else {
-              Fluttertoast.showToast(msg: 'Sorry please try again!', toastLength: Toast.LENGTH_SHORT);
-            }
-          }, mobileNo: textEditingController.value.text));
+        if (isSignedUp) {
+          wholeAppBloc.dispatch(UserSignInEvent(
+              callback: (bool signInSuccessful) {
+                if (signInSuccessful) {
+                  Navigator.pop(context);
+                  goToVerifyPhoneNumber();
+                } else {
+                  Fluttertoast.showToast(
+                      msg: 'Sorry please try again!',
+                      toastLength: Toast.LENGTH_SHORT);
+                  Navigator.pop(context);
+                }
+              },
+              mobileNo: textEditingController.value.text));
         } else {
-          Fluttertoast.showToast(msg: 'Welcome! Please sign up first!', toastLength: Toast.LENGTH_SHORT);
+          Fluttertoast.showToast(
+              msg: 'Welcome! Please sign up first!',
+              toastLength: Toast.LENGTH_SHORT);
+          Navigator.pop(context);
           goToSignUp();
         }
       }));
-
     }
   }
 
@@ -60,10 +60,14 @@ class LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
-    wholeAppBloc.dispatch(CheckPermissionEvent(callback: (Map<PermissionGroup, PermissionStatus> permissionResults) {
-      permissionResults.forEach((PermissionGroup permissionGroup, PermissionStatus permissionStatus) {
-        if (permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted) {
-          print('if(permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted)');
+    wholeAppBloc.dispatch(CheckPermissionEvent(
+        callback: (Map<PermissionGroup, PermissionStatus> permissionResults) {
+      permissionResults.forEach(
+          (PermissionGroup permissionGroup, PermissionStatus permissionStatus) {
+        if (permissionGroup == PermissionGroup.contacts &&
+            permissionStatus == PermissionStatus.granted) {
+          print(
+              'if(permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted)');
           wholeAppBloc.dispatch(GetPhoneStorageContactsEvent(callback: () {}));
         }
       });
@@ -82,34 +86,38 @@ class LoginPageState extends State<LoginPage> {
                   Padding(padding: EdgeInsets.symmetric(vertical: 70.00)),
                   Text(
                     "Login",
-                    style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
+                    style:
+                        TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   Padding(padding: EdgeInsets.symmetric(vertical: 20.00)),
                   Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 32.0),
                       child: Form(
-                          key: _formKey,
-                          child: TextFormField(
-                            controller: textEditingController,
-                            validator: (value) {
-                              if (value.isEmpty) {
-                                return "Please enter your phone number";
-                              }
-                            },
-                            cursorColor: Colors.black,
-                            style: TextStyle(color: Colors.black),
-                            inputFormatters: [
-                              BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
-                            ],
-                            maxLength: 15,
-                            decoration: InputDecoration(hintText: "Mobile Number"),
-                            autofocus: true,
-                            textAlign: TextAlign.center,
-                            keyboardType: TextInputType.number,
-                          ),
-                      )
-                  ),
+                        key: _formKey,
+                        child: TextFormField(
+                          controller: textEditingController,
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return "Please enter your phone number";
+                            }
+                            if (value.length < 8) {
+                              return "Please enter a valid phone number format";
+                            }
+                          },
+                          cursorColor: Colors.black,
+                          style: TextStyle(color: Colors.black),
+                          inputFormatters: [
+                            BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
+                          ],
+                          maxLength: 15,
+                          decoration:
+                              InputDecoration(hintText: "Mobile Number"),
+                          autofocus: true,
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.number,
+                        ),
+                      )),
                   RaisedButton(
                     onPressed: () => _signIn(),
                     textColor: Colors.white,
@@ -117,7 +125,8 @@ class LoginPageState extends State<LoginPage> {
                     highlightColor: Colors.black54,
                     splashColor: Colors.grey,
                     animationDuration: Duration(milliseconds: 500),
-                    padding: EdgeInsets.only(left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
+                    padding: EdgeInsets.only(
+                        left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
                     shape: RoundedRectangleBorder(
 //                  side: BorderSide(color: Colors.black, width: 1.0),
                         borderRadius: BorderRadius.circular(50.0)),
@@ -175,27 +184,34 @@ class LoginPageState extends State<LoginPage> {
   }
 
   goToVerifyPhoneNumber() {
-//    Navigator.of(context).pushNamed("verify_phone_number_page");
-    Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(mobileNo: textEditingController.value.text))));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: ((context) => VerifyPhoneNumberPage(
+                mobileNo: textEditingController.value.text))));
   }
 
   goToSignUp() {
-//    Navigator.of(context).pushNamed("sign_up_page");
-    Navigator.push(context, MaterialPageRoute(builder: ((context) => SignUpPage(mobileNo: textEditingController.value.text))));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: ((context) =>
+                SignUpPage(mobileNo: textEditingController.value.text))));
   }
 
   goToContactSupport() async {
     String now = formatDate(new DateTime.now(), [dd, '/', mm, '/', yyyy]);
     String linebreak = '%0D%0A';
-    String url = 'mailto:<support@neurogine.com>?subject=Request for Contact Support ' +
-        now +
-        ' &body=Name: ' +
-        linebreak +
-        linebreak +
-        'Email: ' +
-        linebreak +
-        linebreak +
-        'Enquiry Details:';
+    String url =
+        'mailto:<support@neurogine.com>?subject=Request for Contact Support ' +
+            now +
+            ' &body=Name: ' +
+            linebreak +
+            linebreak +
+            'Email: ' +
+            linebreak +
+            linebreak +
+            'Enquiry Details:';
     if (await canLaunch(url)) {
       await launch(url);
     } else {

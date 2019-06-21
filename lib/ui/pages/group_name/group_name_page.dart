@@ -1,16 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
-import 'package:snschat_flutter/general/ui-component/select_image.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
-import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
@@ -223,9 +219,6 @@ class GroupNamePageState extends State<GroupNamePage> {
         mobileNo: primaryNo.length == 0 ? "" : primaryNo[0],
         block: false,
         lastSeenDate: "",
-        // Give the first number they from a list of numbers
-        // photo: Multimedia(imageData: contact.avatar),
-        // photoId: Multimedia(imageData: contact.avatar),
       );
       Firestore.instance.collection('user_contact').document(newUserContact.id).setData({
         'id': newUserContact.id,
@@ -238,9 +231,6 @@ class GroupNamePageState extends State<GroupNamePage> {
       });
       wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: newUserContact));
     });
-
-//    conversation.groupPhotoId = newMultiMedia.id;
-//    conversation.unreadMessageId = newUnreadMessage.id;
 
     this.uploadConversation(conversation, newUnreadMessage, newMultiMedia);
 
@@ -255,8 +245,6 @@ class GroupNamePageState extends State<GroupNamePage> {
       'name': conversation.name,
       'type': conversation.type,
       'userId': conversation.userId,
-//      'groupPhotoId': conversation.groupPhotoId,
-//      'unreadMessageId': conversation.unreadMessageId,
       'block': conversation.block,
       'description': conversation.description,
       'notificationExpireDate': conversation.notificationExpireDate,

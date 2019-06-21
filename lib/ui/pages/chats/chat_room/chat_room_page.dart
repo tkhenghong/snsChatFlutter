@@ -19,7 +19,7 @@ import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
 class ChatRoomPage extends StatefulWidget {
   final Conversation _conversation;
 
-  ChatRoomPage([this._conversation]); //do not final
+  ChatRoomPage([this._conversation]);
 
   @override
   State<StatefulWidget> createState() {
@@ -59,28 +59,31 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     super.dispose();
   }
 
-   Future<Multimedia> getConversationPhoto() async {
-     Multimedia groupPhoto;
-     var multimediaDocuments = await Firestore.instance.collection("multimedia").where("conversationId", isEqualTo: widget._conversation.id).getDocuments();
-     if (multimediaDocuments.documents.length == 0) {
-       print("if (multimediaDocuments.documents.length == 0)");
-     } else {
-       print("if (multimediaDocuments.documents.length > 0)");
-       DocumentSnapshot groupPhotoSnapshot = multimediaDocuments.documents[0];
-       groupPhoto = new Multimedia(
-         id: groupPhotoSnapshot["id"].toString(),
-         conversationId: groupPhotoSnapshot["id"].toString(),
-         imageDataId: groupPhotoSnapshot["imageDataId"].toString(),
-         imageFileId: groupPhotoSnapshot["imageFileId"].toString(),
-         localFullFileUrl: groupPhotoSnapshot["localFullFileUrl"].toString(),
-         localThumbnailUrl: groupPhotoSnapshot["localThumbnailUrl"].toString(),
-         messageId: groupPhotoSnapshot["messageId"].toString(),
-         remoteFullFileUrl: groupPhotoSnapshot["remoteFullFileUrl"].toString(),
-         remoteThumbnailUrl: groupPhotoSnapshot["remoteThumbnailUrl"].toString(),
-         userContactId: groupPhotoSnapshot["userContactId"].toString(),
-       );
-     }
-     return groupPhoto;
+  Future<Multimedia> getConversationPhoto() async {
+    Multimedia groupPhoto;
+    var multimediaDocuments = await Firestore.instance
+        .collection("multimedia")
+        .where("conversationId", isEqualTo: widget._conversation.id)
+        .getDocuments();
+    if (multimediaDocuments.documents.length == 0) {
+      print("if (multimediaDocuments.documents.length == 0)");
+    } else {
+      print("if (multimediaDocuments.documents.length > 0)");
+      DocumentSnapshot groupPhotoSnapshot = multimediaDocuments.documents[0];
+      groupPhoto = new Multimedia(
+        id: groupPhotoSnapshot["id"].toString(),
+        conversationId: groupPhotoSnapshot["id"].toString(),
+        imageDataId: groupPhotoSnapshot["imageDataId"].toString(),
+        imageFileId: groupPhotoSnapshot["imageFileId"].toString(),
+        localFullFileUrl: groupPhotoSnapshot["localFullFileUrl"].toString(),
+        localThumbnailUrl: groupPhotoSnapshot["localThumbnailUrl"].toString(),
+        messageId: groupPhotoSnapshot["messageId"].toString(),
+        remoteFullFileUrl: groupPhotoSnapshot["remoteFullFileUrl"].toString(),
+        remoteThumbnailUrl: groupPhotoSnapshot["remoteThumbnailUrl"].toString(),
+        userContactId: groupPhotoSnapshot["userContactId"].toString(),
+      );
+    }
+    return groupPhoto;
   }
 
   @override
@@ -90,10 +93,10 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     wholeAppBloc = _wholeAppBloc;
     print("widget._conversation.id: " + widget._conversation.id);
     getConversationPhoto().then((Multimedia groupPhoto) {
-      if(!isObjectEmpty(groupPhoto)) {
+      if (!isObjectEmpty(groupPhoto)) {
         print("if(!isObjectEmpty(groupPhoto))");
         print("groupPhoto.localFullFileUrl: " + groupPhoto.localFullFileUrl);
-        if(!isStringEmpty(groupPhoto.localFullFileUrl)) {
+        if (!isStringEmpty(groupPhoto.localFullFileUrl)) {
           print("if(!isStringEmpty(groupPhoto.localFullFileUrl))");
           imageFile = File(groupPhoto.localFullFileUrl);
           imageFile.exists().then((fileExists) {
@@ -101,7 +104,8 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               print("if(!fileExists)");
               print('chat-room.page.dart local file not exist!');
               loadImageHandler(groupPhoto).then((remoteDownloadedfile) {
-                print("remoteDownloadedfile.path: " + remoteDownloadedfile.path);
+                print(
+                    "remoteDownloadedfile.path: " + remoteDownloadedfile.path);
                 setState(() {
                   imageFile = remoteDownloadedfile;
                 });
@@ -116,8 +120,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
     imageFile = File("lib/ui/images/group2013.jpg");
 
-
-
     // TODO: Get from the state after reading all stuffs from Firebase (online)
 //    wholeAppBloc.currentState.multimediaList.forEach((Multimedia existingMultimedia) {
 //      print("Got existing multimedia.");
@@ -125,8 +127,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 //        groupPhoto = existingMultimedia;
 //      }
 //    });
-
-
 
     // Chat Room page UI
     return GestureDetector(
@@ -144,7 +144,8 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                 child: Material(
                   color: Colors.black,
                   child: InkWell(
-                    customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                    customBorder: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0)),
                     onTap: () {
                       Navigator.of(context).pop();
                     },
@@ -160,11 +161,14 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 //                                ? MemoryImage(widget._conversation.groupPhoto.imageData)
 //                                : NetworkImage(''),
 //                            child: widget._conversation.groupPhoto.imageData.length == 0 ? Text(widget._conversation.name[0]) : Text(''),
-                            backgroundImage: imageFound ? FileImage(imageFile) : AssetImage("lib/ui/images/group2013.jpg"),
+                            backgroundImage: imageFound
+                                ? FileImage(imageFile)
+                                : AssetImage("lib/ui/images/group2013.jpg"),
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 50.0),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 5.0, vertical: 50.0),
                         ),
                       ],
                     ),
@@ -174,9 +178,12 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               Material(
                 color: Colors.black,
                 child: InkWell(
-                    customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+                    customBorder: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0)),
                     onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ChatInfoPage(widget._conversation)));
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              ChatInfoPage(widget._conversation)));
                     },
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,7 +198,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                             widget._conversation.name,
                             style: TextStyle(
                                 color: Colors.white,
-//                                fontSize: 20.0,
+                                // fontSize: 20.0,
                                 fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -211,11 +218,12 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             children: <Widget>[
               Column(
                 children: <Widget>[
-                  buildListMessage(),
                   //UI for message list
-                  (isShowSticker ? buildSticker() : Container()),
+                  buildListMessage(),
                   // UI for stickers, gifs
-                  buildInput(), // UI for text field
+                  (isShowSticker ? buildSticker() : Container()),
+                  // UI for text field
+                  buildInput(),
                 ],
               ),
               buildLoading(),
@@ -236,7 +244,8 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       child: isLoading
           ? Container(
               child: Center(
-                child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)),
+                child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)),
               ),
               color: Colors.white.withOpacity(0.8),
             )
@@ -304,7 +313,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       ),
       width: double.infinity,
       height: 50.0,
-      decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 0.5)), color: Colors.white),
+      decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
+          color: Colors.white),
     );
   }
 
@@ -321,7 +332,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 //            flex: 1,
               child: Center(child: Text("Loading messages...")));
         } else {
-//              listMessage = snapshot.data.documents;
           return Flexible(
               child: new SmartRefresher(
             header: ClassicHeader(),
@@ -334,7 +344,8 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               itemCount: snapshot.data.documents.length,
               reverse: true,
               physics: BouncingScrollPhysics(),
-              itemBuilder: (context, index) => displayChatMessage(index, snapshot.data.documents[index]),
+              itemBuilder: (context, index) =>
+                  displayChatMessage(index, snapshot.data.documents[index]),
             ),
           ));
         }
@@ -351,14 +362,17 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           child: Column(
             children: <Widget>[
               Text(
-                document['senderName'].toString() + document['message'].toString() + document['timestamp'].toString(),
+                document['senderName'].toString() +
+                    document['message'].toString() +
+                    document['timestamp'].toString(),
                 style: TextStyle(color: Colors.white),
               ),
             ],
           ),
           padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
           width: 200.0,
-          decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+          decoration: BoxDecoration(
+              color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
           margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
         ),
       ],
@@ -493,7 +507,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
         ],
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       ),
-      decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 0.5)), color: Colors.white),
+      decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
+          color: Colors.white),
       padding: EdgeInsets.all(5.0),
       height: 180.0,
     );
@@ -522,9 +538,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             localThumbnailUrl: "",
             remoteFullFileUrl: "",
             remoteThumbnailUrl: "");
-//        print("wholeAppBloc.currentState.userState.id: " + wholeAppBloc.currentState.userState.id);
-//        print("wholeAppBloc.currentState.userState.mobileNo: " + wholeAppBloc.currentState.userState.mobileNo);
-//        print("wholeAppBloc.currentState.userState.displayName: " + wholeAppBloc.currentState.userState.displayName);
         print("Checkpoint 2");
         newMessage = Message(
           id: generateNewId().toString(),
@@ -548,10 +561,15 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       }
       print("Checkpoint 1");
       if (!isObjectEmpty(newMessage) && !isObjectEmpty(newMultimedia)) {
-        print('if(!isObjectEmpty(newMessage) && !isObjectEmpty(newMultimedia))');
-        wholeAppBloc.dispatch(AddMessageEvent(message: newMessage, callback: (Message message) {}));
+        print(
+            'if(!isObjectEmpty(newMessage) && !isObjectEmpty(newMultimedia))');
+        wholeAppBloc.dispatch(AddMessageEvent(
+            message: newMessage, callback: (Message message) {}));
 
-        Firestore.instance.collection('message').document(newMessage.id).setData({
+        Firestore.instance
+            .collection('message')
+            .document(newMessage.id)
+            .setData({
           'id': newMessage.id, // Self generated Id
           'conversationId': newMessage.conversationId,
           'message': newMessage.message,
@@ -567,12 +585,14 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           'type': newMessage.type,
           'timestamp': newMessage.timestamp,
         });
-        Fluttertoast.showToast(msg: 'Message sent!', toastLength: Toast.LENGTH_SHORT);
+        Fluttertoast.showToast(
+            msg: 'Message sent!', toastLength: Toast.LENGTH_SHORT);
       } else {
         print('if(isObjectEmpty(newMessage) || isObjectEmpty(newMultimedia))');
       }
 
-      listScrollController.animateTo(0.0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+      listScrollController.animateTo(0.0,
+          duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
       Fluttertoast.showToast(msg: 'Nothing to send');
     }

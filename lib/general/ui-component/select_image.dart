@@ -22,13 +22,3 @@ showOptionsDialog(BuildContext context) {
         );
       });
 }
-
-//Future getImage(ImageSource source) async {
-//  var image = await ImagePicker.pickImage(source: ImageSource.camera);
-//  if (await image.exists()) {
-//    imageExists = true;
-//  }
-//  setState(() {
-//    _image = image;
-//  });
-//}
