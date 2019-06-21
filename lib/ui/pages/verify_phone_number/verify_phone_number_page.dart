@@ -3,6 +3,10 @@ import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/general/ui-component/pin_text_field.dart';
 
 class VerifyPhoneNumberPage extends StatefulWidget {
+  String mobileNo;
+
+  VerifyPhoneNumberPage({this.mobileNo});
+
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -13,7 +17,7 @@ class VerifyPhoneNumberPage extends StatefulWidget {
 class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
   @override
   Widget build(BuildContext context) {
-    String phoneNo = "+6012 309 6127";
+    String phoneNo = widget.mobileNo;
     return Scaffold(
       appBar: AppBar(
         title: Text('Verify ' + phoneNo),

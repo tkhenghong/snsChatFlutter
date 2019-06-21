@@ -14,6 +14,7 @@ import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 import 'package:snschat_flutter/ui/pages/sign_up/sign_up_page.dart';
+import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number_page.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:date_format/date_format.dart';
@@ -42,6 +43,8 @@ class LoginPageState extends State<LoginPage> {
             print("user.mobileNo" + user.mobileNo);
             if(!isStringEmpty(user.id)) {
               goToVerifyPhoneNumber();
+            } else {
+              Fluttertoast.showToast(msg: 'Sorry please try again!', toastLength: Toast.LENGTH_SHORT);
             }
           }, mobileNo: textEditingController.value.text));
         } else {
@@ -172,7 +175,8 @@ class LoginPageState extends State<LoginPage> {
   }
 
   goToVerifyPhoneNumber() {
-    Navigator.of(context).pushNamed("verify_phone_number_page");
+//    Navigator.of(context).pushNamed("verify_phone_number_page");
+    Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(mobileNo: textEditingController.value.text))));
   }
 
   goToSignUp() {
