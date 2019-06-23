@@ -3,6 +3,7 @@ import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 
 class UserContact {
   String id;
+  String conversationId;
   String displayName;
   String realName;
   String userId;
@@ -12,10 +13,11 @@ class UserContact {
 
 //  String photoId; // Multimedia // Moved to Multimedia
 
-  UserContact({this.id, this.displayName, this.realName, this.userId, this.mobileNo, this.lastSeenDate, this.block});
+  UserContact({this.id, this.conversationId, this.displayName, this.realName, this.userId, this.mobileNo, this.lastSeenDate, this.block});
 
   UserContact.fromJson(Map<String, dynamic> json)
       : id = json['id'],
+  conversationId = json['conversationId'],
         displayName = json['displayName'],
         realName = json['realName'],
         userId = json['userId'],
@@ -27,6 +29,7 @@ class UserContact {
 
   Map<String, dynamic> toJson() => {
         'id': id,
+    'conversationId': conversationId,
         'displayName': displayName,
         'realName': realName,
         'userId': userId,

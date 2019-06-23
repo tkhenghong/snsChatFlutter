@@ -11,14 +11,14 @@ abstract class _UserBean implements Bean<User> {
   final displayName = StrField('display_name');
   final realName = StrField('real_name');
   final mobileNo = StrField('mobile_no');
-  final firebaseUserId = StrField('firebase_user_id');
+  final googleAccountId = StrField('google_account_id');
   Map<String, Field> _fields;
   Map<String, Field> get fields => _fields ??= {
         id.name: id,
         displayName.name: displayName,
         realName.name: realName,
         mobileNo.name: mobileNo,
-        firebaseUserId.name: firebaseUserId,
+        googleAccountId.name: googleAccountId,
       };
   User fromMap(Map map) {
     User model = User();
@@ -26,7 +26,7 @@ abstract class _UserBean implements Bean<User> {
     model.displayName = adapter.parseValue(map['display_name']);
     model.realName = adapter.parseValue(map['real_name']);
     model.mobileNo = adapter.parseValue(map['mobile_no']);
-    model.firebaseUserId = adapter.parseValue(map['firebase_user_id']);
+    model.googleAccountId = adapter.parseValue(map['google_account_id']);
 
     return model;
   }
@@ -40,15 +40,15 @@ abstract class _UserBean implements Bean<User> {
       ret.add(displayName.set(model.displayName));
       ret.add(realName.set(model.realName));
       ret.add(mobileNo.set(model.mobileNo));
-      ret.add(firebaseUserId.set(model.firebaseUserId));
+      ret.add(googleAccountId.set(model.googleAccountId));
     } else if (only != null) {
       if (only.contains(id.name)) ret.add(id.set(model.id));
       if (only.contains(displayName.name))
         ret.add(displayName.set(model.displayName));
       if (only.contains(realName.name)) ret.add(realName.set(model.realName));
       if (only.contains(mobileNo.name)) ret.add(mobileNo.set(model.mobileNo));
-      if (only.contains(firebaseUserId.name))
-        ret.add(firebaseUserId.set(model.firebaseUserId));
+      if (only.contains(googleAccountId.name))
+        ret.add(googleAccountId.set(model.googleAccountId));
     } else /* if (onlyNonNull) */ {
       if (model.id != null) {
         ret.add(id.set(model.id));
@@ -62,8 +62,8 @@ abstract class _UserBean implements Bean<User> {
       if (model.mobileNo != null) {
         ret.add(mobileNo.set(model.mobileNo));
       }
-      if (model.firebaseUserId != null) {
-        ret.add(firebaseUserId.set(model.firebaseUserId));
+      if (model.googleAccountId != null) {
+        ret.add(googleAccountId.set(model.googleAccountId));
       }
     }
 
@@ -76,7 +76,7 @@ abstract class _UserBean implements Bean<User> {
     st.addStr(displayName.name, isNullable: true);
     st.addStr(realName.name, isNullable: true);
     st.addStr(mobileNo.name, isNullable: true);
-    st.addStr(firebaseUserId.name, isNullable: true);
+    st.addStr(googleAccountId.name, isNullable: true);
     return adapter.createTable(st);
   }
 

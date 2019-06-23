@@ -9,14 +9,14 @@ class User {
     this.displayName,
     this.realName,
     this.mobileNo,
-    this.firebaseUserId,
+    this.googleAccountId,
   });
 
   User.make(this.id,
       this.displayName,
       this.realName,
       this.mobileNo,
-      this.firebaseUserId,
+      this.googleAccountId,
       );
 
   @PrimaryKey()
@@ -32,7 +32,7 @@ class User {
   String mobileNo;
 
   @Column(isNullable: true)
-  String firebaseUserId; // FirebaseUser object
+  String googleAccountId; // FirebaseUser object
 
 }
 

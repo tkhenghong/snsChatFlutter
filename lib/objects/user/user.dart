@@ -4,14 +4,14 @@ class User {
   String displayName;
   String realName;
   String mobileNo;
-  String firebaseUserId;
+  String googleAccountId;
 
   User({
     this.id,
     this.displayName,
     this.realName,
     this.mobileNo,
-    this.firebaseUserId,
+    this.googleAccountId,
   });
 
   User.fromJson(Map<String, dynamic> json)
@@ -19,13 +19,13 @@ class User {
         displayName = json['displayName'],
         realName = json['realName'],
         mobileNo = json['mobileNo'],
-        firebaseUserId = json['firebaseUserId'];
+        googleAccountId = json['googleAccountId'];
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'displayName': displayName,
         'realName': realName,
         'mobileNo': mobileNo,
-        'firebaseUserId': firebaseUserId,
+        'googleAccountId': googleAccountId,
       };
 }

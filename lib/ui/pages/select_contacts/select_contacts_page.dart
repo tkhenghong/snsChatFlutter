@@ -313,7 +313,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   Future<Conversation> createPersonalConversation(Contact contact) async {
     Conversation conversation = new Conversation(
       id: generateNewId().toString(),
-      userId: wholeAppBloc.currentState.userState.id,
+      creatorUserId: wholeAppBloc.currentState.userState.id,
+      createdDate: new DateTime.now().millisecondsSinceEpoch.toString(),
       name: contact.displayName,
       type: "Personal",
       block: false,
@@ -321,7 +322,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     );
     UserContact newUserContact = UserContact(
       id: generateNewId().toString(),
-      userId: generateNewId().toString(),
+      userId: "",
       // TODO: Should be matching database ID? Or frontend UserId?
       displayName: contact.displayName,
       realName: contact.displayName,
@@ -341,9 +342,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     UnreadMessage newUnreadMessage = UnreadMessage(
         id: generateNewId().toString(), count: 0, date: 0, lastMessage: "");
 
-//    wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
-//    wholeAppBloc.dispatch(OverrideUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
-
     // Determine how many phone number he has
     List<String> primaryNo = [];
     if (contact.phones.length > 0) {
@@ -362,8 +360,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     wholeAppBloc.dispatch(AddUserContactEvent(
         callback: (UserContact userContact) {}, userContact: newUserContact));
 
-//    conversation.groupPhotoId = newMultiMedia.id;
-//    conversation.unreadMessageId = newUnreadMessage.id;
     print('newMultiMedia.id: ' + newMultiMedia.id);
     uploadConversation(conversation, newUnreadMessage, newMultiMedia);
     return conversation;
@@ -376,12 +372,11 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         .collection('conversation')
         .document(conversation.id)
         .setData({
-      'id': conversation.id, // Self generated Id
+      'id': conversation.id,
       'name': conversation.name,
       'type': conversation.type,
-      'userId': conversation.userId,
-//      'groupPhotoId': conversation.groupPhotoId,
-//      'unreadMessageId': conversation.unreadMessageId,
+      'creatorUserId': conversation.creatorUserId,
+      'createdDate' : conversation.createdDate,
       'block': conversation.block,
       'description': conversation.description,
       'notificationExpireDate': conversation.notificationExpireDate,

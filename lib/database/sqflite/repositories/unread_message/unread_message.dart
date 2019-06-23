@@ -3,14 +3,15 @@ import 'package:jaguar_orm/jaguar_orm.dart';
 part 'unread_message.jorm.dart';
 
 class UnreadMessage {
-  UnreadMessage(
-      {this.id, this.conversationId, this.lastMessage, this.date, this.count});
+  UnreadMessage({this.id, this.userId, this.conversationId, this.lastMessage, this.date, this.count});
 
-  UnreadMessage.make(
-      this.id, this.conversationId, this.lastMessage, this.date, this.count);
+  UnreadMessage.make(this.id, this.userId, this.conversationId, this.lastMessage, this.date, this.count);
 
   @PrimaryKey()
   String id;
+
+  @Column(isNullable: true)
+  String userId;
 
   @Column(isNullable: true)
   String conversationId;
@@ -26,7 +27,7 @@ class UnreadMessage {
 
   @override
   String toString() {
-    return 'UnreadMessage{id: $id, conversationId: $conversationId, lastMessage: $lastMessage, date: $date, count: $count}';
+    return 'UnreadMessage{id: $id, userId: $userId, conversationId: $conversationId, lastMessage: $lastMessage, date: $date, count: $count}';
   }
 }
 

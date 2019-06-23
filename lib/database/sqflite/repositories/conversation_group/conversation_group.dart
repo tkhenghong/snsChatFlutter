@@ -10,7 +10,8 @@ part 'conversation_group.jorm.dart';
 class Conversation {
   Conversation(
       {this.id,
-      this.userId,
+      this.creatorUserId,
+      this.createdDate,
       this.name,
       this.type,
       this.unreadMessageId,
@@ -19,23 +20,18 @@ class Conversation {
       this.notificationExpireDate,
       this.timestamp});
 
-  Conversation.make(
-      this.id,
-      this.userId,
-      this.name,
-      this.type,
-      this.unreadMessageId,
-      this.block,
-      this.description,
-      this.notificationExpireDate,
-      this.timestamp);
+  Conversation.make(this.id, this.creatorUserId, this.createdDate, this.name, this.type, this.unreadMessageId, this.block, this.description,
+      this.notificationExpireDate, this.timestamp);
 
   // Single conversation, group conversation & broadcast channel
   @PrimaryKey()
   String id;
 
   @Column(isNullable: true)
-  String userId;
+  String creatorUserId;
+
+  @Column(isNullable: true)
+  String createdDate;
 
   @Column(isNullable: true)
   String name;
@@ -61,7 +57,7 @@ class Conversation {
 
   @override
   String toString() {
-    return 'Conversation{id: $id, userId: $userId, name: $name, type: $type, unreadMessageId: $unreadMessageId, description: $description, block: $block, notificationExpireDate: $notificationExpireDate, timestamp: $timestamp}';
+    return 'Conversation{id: $id, creatorUserId: $creatorUserId, createdDate: $createdDate, name: $name, type: $type, unreadMessageId: $unreadMessageId, description: $description, block: $block, notificationExpireDate: $notificationExpireDate, timestamp: $timestamp}';
   }
 }
 

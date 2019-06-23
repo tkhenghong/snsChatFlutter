@@ -1,12 +1,10 @@
 // No enum in Dart native yet
-import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
-import 'package:snschat_flutter/general/functions/repeating_functions.dart';
-import 'package:snschat_flutter/objects/userContact/userContact.dart';
 
 class Conversation {
   // Single conversation, group conversation & broadcast channel
   String id;
-  String userId;
+  String creatorUserId;
+  String createdDate;
   String name;
   String type;
   String description;
@@ -16,7 +14,8 @@ class Conversation {
 
   Conversation(
       {this.id,
-      this.userId,
+      this.creatorUserId,
+      this.createdDate,
       this.name,
       this.type,
       this.block,
@@ -26,7 +25,8 @@ class Conversation {
 
   Conversation.fromJson(Map<String, dynamic> json)
       : id = json['id'],
-        userId = json['userId'],
+        creatorUserId = json['creatorUserId'],
+        createdDate = json['createdDate'],
         name = json['name'],
         type = json['type'],
         block = json['block'],
@@ -36,7 +36,8 @@ class Conversation {
 
   Map<String, dynamic> toJson() => {
         'id': id,
-        'userId': userId,
+        'creatorUserId': creatorUserId,
+        'createdDate': createdDate,
         'name': name,
         'type': type,
         'block': block,

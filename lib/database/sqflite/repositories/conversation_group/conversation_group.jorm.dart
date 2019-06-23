@@ -8,7 +8,8 @@ part of 'conversation_group.dart';
 
 abstract class _ConversationBean implements Bean<Conversation> {
   final id = StrField('id');
-  final userId = StrField('user_id');
+  final creatorUserId = StrField('creator_user_id');
+  final createdDate = StrField('created_date');
   final name = StrField('name');
   final type = StrField('type');
   final unreadMessageId = StrField('unread_message_id');
@@ -19,7 +20,8 @@ abstract class _ConversationBean implements Bean<Conversation> {
   Map<String, Field> _fields;
   Map<String, Field> get fields => _fields ??= {
         id.name: id,
-        userId.name: userId,
+        creatorUserId.name: creatorUserId,
+        createdDate.name: createdDate,
         name.name: name,
         type.name: type,
         unreadMessageId.name: unreadMessageId,
@@ -31,7 +33,8 @@ abstract class _ConversationBean implements Bean<Conversation> {
   Conversation fromMap(Map map) {
     Conversation model = Conversation();
     model.id = adapter.parseValue(map['id']);
-    model.userId = adapter.parseValue(map['user_id']);
+    model.creatorUserId = adapter.parseValue(map['creator_user_id']);
+    model.createdDate = adapter.parseValue(map['created_date']);
     model.name = adapter.parseValue(map['name']);
     model.type = adapter.parseValue(map['type']);
     model.unreadMessageId = adapter.parseValue(map['unread_message_id']);
@@ -50,7 +53,8 @@ abstract class _ConversationBean implements Bean<Conversation> {
 
     if (only == null && !onlyNonNull) {
       ret.add(id.set(model.id));
-      ret.add(userId.set(model.userId));
+      ret.add(creatorUserId.set(model.creatorUserId));
+      ret.add(createdDate.set(model.createdDate));
       ret.add(name.set(model.name));
       ret.add(type.set(model.type));
       ret.add(unreadMessageId.set(model.unreadMessageId));
@@ -60,7 +64,10 @@ abstract class _ConversationBean implements Bean<Conversation> {
       ret.add(timestamp.set(model.timestamp));
     } else if (only != null) {
       if (only.contains(id.name)) ret.add(id.set(model.id));
-      if (only.contains(userId.name)) ret.add(userId.set(model.userId));
+      if (only.contains(creatorUserId.name))
+        ret.add(creatorUserId.set(model.creatorUserId));
+      if (only.contains(createdDate.name))
+        ret.add(createdDate.set(model.createdDate));
       if (only.contains(name.name)) ret.add(name.set(model.name));
       if (only.contains(type.name)) ret.add(type.set(model.type));
       if (only.contains(unreadMessageId.name))
@@ -76,8 +83,11 @@ abstract class _ConversationBean implements Bean<Conversation> {
       if (model.id != null) {
         ret.add(id.set(model.id));
       }
-      if (model.userId != null) {
-        ret.add(userId.set(model.userId));
+      if (model.creatorUserId != null) {
+        ret.add(creatorUserId.set(model.creatorUserId));
+      }
+      if (model.createdDate != null) {
+        ret.add(createdDate.set(model.createdDate));
       }
       if (model.name != null) {
         ret.add(name.set(model.name));
@@ -108,7 +118,8 @@ abstract class _ConversationBean implements Bean<Conversation> {
   Future<void> createTable({bool ifNotExists = false}) async {
     final st = Sql.create(tableName, ifNotExists: ifNotExists);
     st.addStr(id.name, primary: true, isNullable: false);
-    st.addStr(userId.name, isNullable: true);
+    st.addStr(creatorUserId.name, isNullable: true);
+    st.addStr(createdDate.name, isNullable: true);
     st.addStr(name.name, isNullable: true);
     st.addStr(type.name, isNullable: true);
     st.addStr(unreadMessageId.name, isNullable: true);

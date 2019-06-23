@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
+import 'package:snschat_flutter/objects/user/user.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
@@ -68,7 +69,7 @@ class GroupNamePageState extends State<GroupNamePage> {
                   child: Icon(Icons.check),
                 ),
                 onTap: () {
-                  addGroupConversation().then((conversation) {
+                  createGroupConversation().then((conversation) {
                     print("Go back to Main Page!");
                     _wholeAppBloc.dispatch(AddConversationEvent(conversation: conversation));
                     Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
@@ -166,10 +167,12 @@ class GroupNamePageState extends State<GroupNamePage> {
   }
 
   // TODO: Conversation Creation into BLOC, can be merged with Personal & Broadcast
-  Future<Conversation> addGroupConversation() async {
+  Future<Conversation> createGroupConversation() async {
     Conversation conversation = new Conversation(
       id: generateNewId().toString(),
-      userId: wholeAppBloc.currentState.userState.id,
+      notificationExpireDate: 0,
+      creatorUserId: wholeAppBloc.currentState.userState.id,
+      createdDate: new DateTime.now().millisecondsSinceEpoch.toString(),
       name: textEditingController.text,
       type: "Group",
       block: false,
@@ -191,8 +194,26 @@ class GroupNamePageState extends State<GroupNamePage> {
     );
     wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
 
-    UnreadMessage newUnreadMessage = UnreadMessage(id: generateNewId().toString(), count: 0, date: 0, lastMessage: "");
+    UnreadMessage newUnreadMessage = UnreadMessage(
+        id: generateNewId().toString(),
+        conversationId: conversation.id,
+        count: 0,
+        date: 0,
+        lastMessage: "",
+        userId: wholeAppBloc.currentState.userState.id);
 
+    uploadConversationMembers(conversation);
+
+    // Upload yourself as UserContact as you're the one of the group member in the conversation
+    uploadSelfUserContact(conversation);
+
+    uploadConversation(conversation, newUnreadMessage, newMultiMedia);
+
+    return conversation;
+  }
+
+  uploadConversationMembers(Conversation conversation) async {
+    print("group_name_page.dart uploadConversationMembers()");
     // convert contact to contact (self defined)
     widget.selectedContacts.forEach((contact) {
       //Determine how many phone number he has
@@ -209,42 +230,80 @@ class GroupNamePageState extends State<GroupNamePage> {
       } else {
         print('if (contact.avatar.length <= 0)');
       }
-
+      // contact, primaryNo, conversation
       UserContact newUserContact = UserContact(
         id: generateNewId().toString(),
-        userId: generateNewId().toString(),
+        userId: "",
         // TODO: Should be matching database ID? Or frontend UserId?
         displayName: contact.displayName,
         realName: contact.displayName,
-        mobileNo: primaryNo.length == 0 ? "" : primaryNo[0],
+        // In case of mobile number only contact, mobile no equals to contact.displayName
+        mobileNo: primaryNo.length == 0 ? contact.displayName : primaryNo[0],
         block: false,
         lastSeenDate: "",
+        conversationId: conversation.id,
       );
-      Firestore.instance.collection('user_contact').document(newUserContact.id).setData({
-        'id': newUserContact.id,
-        'userId': newUserContact.userId,
-        'displayName': newUserContact.displayName,
-        'realName': newUserContact.realName,
-        'mobileNo': newUserContact.mobileNo,
-        'block': newUserContact.block,
-        'lastSeenDate': newUserContact.lastSeenDate,
-      });
-      wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: newUserContact));
+      uploadUserContact(newUserContact).then((UserContact userContact) {
+        wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: newUserContact));
+      }); // Should check whether success or not first by .then()
     });
-
-    this.uploadConversation(conversation, newUnreadMessage, newMultiMedia);
-
-    return conversation;
   }
 
+  Future<UserContact> uploadUserContact(UserContact newUserContact) async {
+    print("group_name_page.dart uploadUserContact()");
+    // Upload the group member's mobile no to User no. to find a match
+    QuerySnapshot userSnapshots =
+        await Firestore.instance.collection("user").where("mobileNo", isEqualTo: newUserContact.mobileNo).getDocuments();
+    List<DocumentSnapshot> userDocuments = userSnapshots.documents;
+    print("userDocuments.length: " + userDocuments.length.toString());
+    if (userDocuments.length > 0) {
+      print("if(userDocuments.length > 0)");
+      newUserContact.userId = userDocuments[0]['id'];
+    } else {
+      print("if(userDocuments.length == 0)");
+    }
+
+    Firestore.instance.collection('user_contact').document(newUserContact.id).setData({
+      'id': newUserContact.id,
+      'userId': newUserContact.userId,
+      'displayName': newUserContact.displayName,
+      'realName': newUserContact.realName,
+      'mobileNo': newUserContact.mobileNo,
+      'block': newUserContact.block,
+      'lastSeenDate': newUserContact.lastSeenDate,
+      'conversationId': newUserContact.conversationId
+    });
+
+    return newUserContact;
+  }
+
+  uploadSelfUserContact(Conversation conversation) async {
+    print("group_name_page.dart uploadSelfUserContact()");
+    User currentUser = wholeAppBloc.currentState.userState;
+    UserContact selfUserContact = UserContact(
+      id: generateNewId().toString(),
+      userId: currentUser.id,
+      // Upload self id from User table
+      displayName: currentUser.displayName,
+      realName: currentUser.realName,
+      mobileNo: currentUser.mobileNo,
+      block: false,
+      lastSeenDate: "",
+      conversationId: conversation.id,
+    );
+
+    uploadUserContact(selfUserContact); // Should check whether success or not first by .then()
+    wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: selfUserContact));
+  }
 
   uploadConversation(Conversation conversation, UnreadMessage newUnreadMessage, Multimedia newMultiMedia) async {
-    print("uploadConversation()");
+    print("group_name_page.dart uploadConversation()");
     await Firestore.instance.collection('conversation').document(conversation.id).setData({
       'id': conversation.id, // Self generated Id
       'name': conversation.name,
       'type': conversation.type,
-      'userId': conversation.userId,
+      'creatorUserId': conversation.creatorUserId,
+      'createdDate': conversation.createdDate,
       'block': conversation.block,
       'description': conversation.description,
       'notificationExpireDate': conversation.notificationExpireDate,
@@ -257,6 +316,8 @@ class GroupNamePageState extends State<GroupNamePage> {
       'count': newUnreadMessage.count,
       'date': newUnreadMessage.date,
       'lastMessage': newUnreadMessage.lastMessage,
+      'conversationId': newUnreadMessage.conversationId,
+      'userId': newUnreadMessage.userId
     });
 
     print("Upload unreadMessage success!");

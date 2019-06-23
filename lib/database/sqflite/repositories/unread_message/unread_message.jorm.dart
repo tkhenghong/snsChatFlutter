@@ -8,6 +8,7 @@ part of 'unread_message.dart';
 
 abstract class _UnreadMessageBean implements Bean<UnreadMessage> {
   final id = StrField('id');
+  final userId = StrField('user_id');
   final conversationId = StrField('conversation_id');
   final lastMessage = StrField('last_message');
   final date = IntField('date');
@@ -15,6 +16,7 @@ abstract class _UnreadMessageBean implements Bean<UnreadMessage> {
   Map<String, Field> _fields;
   Map<String, Field> get fields => _fields ??= {
         id.name: id,
+        userId.name: userId,
         conversationId.name: conversationId,
         lastMessage.name: lastMessage,
         date.name: date,
@@ -23,6 +25,7 @@ abstract class _UnreadMessageBean implements Bean<UnreadMessage> {
   UnreadMessage fromMap(Map map) {
     UnreadMessage model = UnreadMessage();
     model.id = adapter.parseValue(map['id']);
+    model.userId = adapter.parseValue(map['user_id']);
     model.conversationId = adapter.parseValue(map['conversation_id']);
     model.lastMessage = adapter.parseValue(map['last_message']);
     model.date = adapter.parseValue(map['date']);
@@ -37,12 +40,14 @@ abstract class _UnreadMessageBean implements Bean<UnreadMessage> {
 
     if (only == null && !onlyNonNull) {
       ret.add(id.set(model.id));
+      ret.add(userId.set(model.userId));
       ret.add(conversationId.set(model.conversationId));
       ret.add(lastMessage.set(model.lastMessage));
       ret.add(date.set(model.date));
       ret.add(count.set(model.count));
     } else if (only != null) {
       if (only.contains(id.name)) ret.add(id.set(model.id));
+      if (only.contains(userId.name)) ret.add(userId.set(model.userId));
       if (only.contains(conversationId.name))
         ret.add(conversationId.set(model.conversationId));
       if (only.contains(lastMessage.name))
@@ -52,6 +57,9 @@ abstract class _UnreadMessageBean implements Bean<UnreadMessage> {
     } else /* if (onlyNonNull) */ {
       if (model.id != null) {
         ret.add(id.set(model.id));
+      }
+      if (model.userId != null) {
+        ret.add(userId.set(model.userId));
       }
       if (model.conversationId != null) {
         ret.add(conversationId.set(model.conversationId));
@@ -73,6 +81,7 @@ abstract class _UnreadMessageBean implements Bean<UnreadMessage> {
   Future<void> createTable({bool ifNotExists = false}) async {
     final st = Sql.create(tableName, ifNotExists: ifNotExists);
     st.addStr(id.name, primary: true, isNullable: false);
+    st.addStr(userId.name, isNullable: true);
     st.addStr(conversationId.name, isNullable: true);
     st.addStr(lastMessage.name, isNullable: true);
     st.addInt(date.name, isNullable: true);

@@ -219,7 +219,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       print("currentState.firebaseUser.uid: " + currentState.firebaseUser.uid);
       //TODO: Change to GoogleAccount.id
       final QuerySnapshot userResult =
-          await Firestore.instance.collection('user').where('firebaseUserId', isEqualTo: currentState.firebaseUser.uid).getDocuments();
+          await Firestore.instance.collection('user').where('googleAccountId', isEqualTo: currentState.googleSignIn.currentUser.id).getDocuments();
       final List<DocumentSnapshot> userDocument = userResult.documents;
 
       print("WholeAppBloc.dart userDocument.length: " + userDocument.length.toString());
@@ -232,26 +232,26 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
         print("WholeAppBloc.dart settingsDocument.length: " + settingsDocument.length.toString());
         print("if (documents.length > 0)");
-        print("documents[0]['firebaseUserId']: " + userDocument[0]['firebaseUserId']);
+        print("documents[0]['googleAccountId']: " + userDocument[0]['googleAccountId']);
         print("currentState.firebaseUser.uid: " + currentState.firebaseUser.uid);
 
         print("WholeAppBloc.dart Validation");
         print("WholeAppBloc.dart userDocument[0].exists: " + userDocument[0].exists.toString());
-        print("WholeAppBloc.dart userDocument[0]['firebaseUserId']: " + userDocument[0]['firebaseUserId']);
+        print("WholeAppBloc.dart userDocument[0]['googleAccountId']: " + userDocument[0]['googleAccountId']);
         print("WholeAppBloc.dart currentState.firebaseUser.uid: " + currentState.firebaseUser.uid);
         print("WholeAppBloc.dart settingsDocument[0].exists: " + settingsDocument[0].exists.toString());
         print("WholeAppBloc.dart userDocument[0]['id']: " + userDocument[0]['id']);
         print("WholeAppBloc.dart userDocument[0]['mobileNo']: " + userDocument[0]['mobileNo'].toString());
 
         // If both of them exists and settings.userId matches with user.id
-        if ((userDocument[0].exists && userDocument[0]['firebaseUserId'] == currentState.firebaseUser.uid) &&
+        if ((userDocument[0].exists && userDocument[0]['googleAccountId'] == currentState.googleSignIn.currentUser.id) &&
             (settingsDocument[0].exists && settingsDocument[0]["userId"].toString() == userDocument[0]['id'].toString())) {
-          print("if (documents[0].exists && documents[0]['firebaseUserId'] == currentState.firebaseUser.uid)");
+          print("if (documents[0].exists && documents[0]['googleAccountId'] == currentState.firebaseUser.uid)");
           // User
           currentState.userState.id = userDocument[0]['id'].toString();
           currentState.userState.displayName = userDocument[0]['displayName'].toString();
           currentState.userState.realName = userDocument[0]['realName'].toString();
-          currentState.userState.firebaseUserId = userDocument[0]['firebaseUserId'].toString();
+          currentState.userState.googleAccountId = userDocument[0]['googleAccountId'].toString();
           currentState.userState.mobileNo = userDocument[0]['mobileNo'].toString();
 
           // Settings
@@ -280,12 +280,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (isSignedIn) {
       print("if(isSignedIn)");
       FirebaseUser firebaseUser = currentState.firebaseUser;
-
+      GoogleSignInAccount googleSignInAccount = currentState.googleSignIn.currentUser;
       User user = User(
           id: generateNewId().toString(),
           mobileNo: event.mobileNo,
           displayName: firebaseUser.displayName,
-          firebaseUserId: firebaseUser.uid,
+          googleAccountId: googleSignInAccount.id,
           realName: event.realName);
 
       Settings settings = Settings(id: generateNewId().toString(), notification: true, userId: user.id);
@@ -293,11 +293,11 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       if (!isObjectEmpty(firebaseUser)) {
         print("if (!isObjectEmpty(firebaseUser))");
         final QuerySnapshot duplicateGoogleAccountResult =
-            await Firestore.instance.collection('user').where('firebaseUserId', isEqualTo: firebaseUser.uid).getDocuments();
+            await Firestore.instance.collection('user').where('googleAccountId', isEqualTo: firebaseUser.uid).getDocuments();
         final List<DocumentSnapshot> duplicateGoogleAccountDocuments = duplicateGoogleAccountResult.documents;
 
         final QuerySnapshot duplicateMobileNoResult =
-            await Firestore.instance.collection('user').where('firebaseUserId', isEqualTo: firebaseUser.uid).getDocuments();
+            await Firestore.instance.collection('user').where('googleAccountId', isEqualTo: firebaseUser.uid).getDocuments();
         final List<DocumentSnapshot> duplicateMobileNoDocuments = duplicateMobileNoResult.documents;
         print("duplicateGoogleAccountDocuments.length: " + duplicateGoogleAccountDocuments.length.toString());
         print("duplicateMobileNoDocuments.length: " + duplicateMobileNoDocuments.length.toString());
@@ -306,7 +306,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
           print("user.id: " + user.id);
           print("user.mobileNo: " + user.mobileNo);
           print("user.displayName: " + user.displayName);
-          print("user.firebaseUserId: " + user.firebaseUserId);
+          print("user.googleAccountId: " + user.googleAccountId);
           print("user.realName: " + user.realName);
 
           Firestore.instance.collection('settings').document(settings.id).setData({
@@ -319,7 +319,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
             'displayName': user.displayName,
             'realName': user.realName,
             'mobileNo': user.mobileNo,
-            'firebaseUserId': user.firebaseUserId,
+            'googleAccountId': user.googleAccountId,
           });
           if (!isObjectEmpty(event)) {
             event.callback(true);
@@ -349,7 +349,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     currentState.userState = User();
     currentState.settingsState = Settings();
     currentState.firebaseUser = null;
-    currentState.googleSignIn = null;
+    currentState.googleSignIn = new GoogleSignIn();
     currentState.conversationList = [];
     currentState.phoneContactList = [];
     currentState.multimediaList = [];
