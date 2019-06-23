@@ -3,7 +3,7 @@ import 'package:jaguar_query/jaguar_query.dart';
 import 'package:jaguar_orm/jaguar_orm.dart';
 
 part 'user.jorm.dart';
-
+// One User with Firebase ID, One Mobile No. One Mobile No. only belongs one Firebase**
 class User {
   User({this.id,
     this.displayName,

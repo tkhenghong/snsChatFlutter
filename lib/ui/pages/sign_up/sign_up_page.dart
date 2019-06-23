@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number_page.dart';
@@ -140,16 +141,31 @@ class SignUpPageState extends State<SignUpPage> {
 
   signUp() async {
     if (_formKey.currentState.validate()) {
+      showCenterLoadingIndicator(context);
       wholeAppBloc.dispatch(UserSignUpEvent(
           callback: (bool isSignedUp) {
             if (isSignedUp) {
               print("if (isSignedUp)");
-              goToVerifyPhoneNumber();
+              wholeAppBloc.dispatch(UserSignInEvent(
+                  callback: (bool signInSuccessful) {
+                    if (signInSuccessful) {
+                      Navigator.pop(context); // Check this
+                      goToVerifyPhoneNumber();
+                    } else {
+                      Navigator.pop(context);
+                      Fluttertoast.showToast(
+                          msg: 'Unable to login. Please try again.',
+                          toastLength: Toast.LENGTH_SHORT);
+                      Navigator.pop(context);
+                    }
+                  },
+                  mobileNo: mobileNoTextController.value.text));
             } else {
               print("if (!isSignedUp)");
+              Navigator.pop(context);
               Fluttertoast.showToast(
                   msg:
-                      'Unable to sign up, please contact support for assistance.',
+                      'Registered Mobile No./Google Account. Please use other Mobile No./Google Account to register.',
                   toastLength: Toast.LENGTH_SHORT);
             }
           },

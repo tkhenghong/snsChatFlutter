@@ -36,19 +36,27 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   checkUserLogin() async {
     wholeAppBloc.dispatch(CheckUserLoginEvent(callback: (bool isSignedIn) {
       if (isSignedIn) {
+        print("if (isSignedIn)");
         wholeAppBloc.dispatch(UserSignInEvent(callback: (bool isSignedIn) {
           print("UserSignInEvent success");
           if (isSignedIn) {
             print("sign in success");
           } else {
             print("sign in failed");
+            goToLoginPage();
           }
-        }));
+        }));// Mobile no is not entered here
       } else {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-            "login_page", (Route<dynamic> route) => false);
+        print("if (!isSignedIn)");
+        goToLoginPage();
       }
     }));
+  }
+
+  goToLoginPage() {
+    print("goToLoginPage()");
+    Navigator.of(context).pushNamedAndRemoveUntil(
+        "login_page", (Route<dynamic> route) => false);
   }
 
   @override

@@ -25,7 +25,7 @@ class LoginPage extends StatefulWidget {
 class LoginPageState extends State<LoginPage> {
   WholeAppBloc wholeAppBloc;
   final _formKey = GlobalKey<FormState>();
-  TextEditingController textEditingController = new TextEditingController();
+  TextEditingController mobileNoTextController = new TextEditingController();
 
   _signIn() async {
     if (_formKey.currentState.validate()) {
@@ -39,12 +39,12 @@ class LoginPageState extends State<LoginPage> {
                   goToVerifyPhoneNumber();
                 } else {
                   Fluttertoast.showToast(
-                      msg: 'Sorry please try again!',
+                      msg: 'Invalid Mobile No./matching Google account. Please try again!',
                       toastLength: Toast.LENGTH_SHORT);
                   Navigator.pop(context);
                 }
               },
-              mobileNo: textEditingController.value.text));
+              mobileNo: mobileNoTextController.value.text));
         } else {
           Fluttertoast.showToast(
               msg: 'Welcome! Please sign up first!',
@@ -52,7 +52,7 @@ class LoginPageState extends State<LoginPage> {
           Navigator.pop(context);
           goToSignUp();
         }
-      }));
+      }, mobileNo: mobileNoTextController.value.text));
     }
   }
 
@@ -96,7 +96,7 @@ class LoginPageState extends State<LoginPage> {
                       child: Form(
                         key: _formKey,
                         child: TextFormField(
-                          controller: textEditingController,
+                          controller: mobileNoTextController,
                           validator: (value) {
                             if (value.isEmpty) {
                               return "Please enter your phone number";
@@ -188,7 +188,7 @@ class LoginPageState extends State<LoginPage> {
         context,
         MaterialPageRoute(
             builder: ((context) => VerifyPhoneNumberPage(
-                mobileNo: textEditingController.value.text))));
+                mobileNo: mobileNoTextController.value.text))));
   }
 
   goToSignUp() {
@@ -196,7 +196,7 @@ class LoginPageState extends State<LoginPage> {
         context,
         MaterialPageRoute(
             builder: ((context) =>
-                SignUpPage(mobileNo: textEditingController.value.text))));
+                SignUpPage(mobileNo: mobileNoTextController.value.text))));
   }
 
   goToContactSupport() async {
