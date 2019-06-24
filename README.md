@@ -2,7 +2,7 @@
 
 A real time chat application using Firebase. A real well code implementation with litle to none bugs will be made with using high performance, good looking UI materials Flutter as frontend. 
 
-Backend currently using Firebase to hold up the frontend to settle down the full logic of PocketChat app. After all current functionalities are settled down, Firebase backend will be replaced by open source enterprise solution backend framework called SRING Boot with MongoDB as NoSQL database.
+Backend currently using Firebase to hold up the frontend to settle down the full logic of PocketChat app. After all current functionalities are settled down, Firebase backend will be replaced by open source enterprise solution backend framework called SPRING Boot with MongoDB as NoSQL database.
 
 ## Things that must have between frontend & backend:
 Message broker such as RabbitMQ, Kafka to transform messages to send it to front end user.
