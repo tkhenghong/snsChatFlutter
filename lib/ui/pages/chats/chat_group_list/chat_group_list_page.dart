@@ -60,13 +60,17 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   test() async {
     print("Test()");
-    Firestore.instance.collection("user_contact").where("userId", isEqualTo: wholeAppBloc.currentState.userState.id).snapshots().listen((QuerySnapshot querySnapshot) {
-      print("Listener works!");
-      for(int i = 0; i < querySnapshot.documents.length; i++) {
-        print("snapshot.documents[i]['name'].toString(): " + querySnapshot.documents[i]['name'].toString());
-      }
-    });
-    
+    Firestore.instance
+        .collection("user_contact")
+        .where("userId", isEqualTo: wholeAppBloc.currentState.userState.id)
+        .snapshots();
+//        .listen((QuerySnapshot querySnapshot) {
+//      print("Listener works!");
+//      for (int i = 0; i < querySnapshot.documents.length; i++) {
+//        print("snapshot.documents[i]['name'].toString(): " + querySnapshot.documents[i]['name'].toString());
+//      }
+//    });
+
 //    Firestore.instance
 //        .collection("conversation")
 //        .where("userId", isEqualTo: wholeAppBloc.currentState.userState.id)
@@ -101,7 +105,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
               .where("userId", isEqualTo: wholeAppBloc.currentState.userState.id)
               .orderBy('timestamp', descending: true)
               .snapshots(),
-          builder: (BuildContext context, snapshot) {
+          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (!snapshot.hasData) {
               return Center(child: Text("Loading messages..."));
             } else {
