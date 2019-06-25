@@ -60,10 +60,24 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   test() async {
     print("Test()");
+    print("wholeAppBloc.currentState.userState.id: " + wholeAppBloc.currentState.userState.id.toString());
     Firestore.instance
         .collection("user_contact")
         .where("userId", isEqualTo: wholeAppBloc.currentState.userState.id)
-        .snapshots();
+        .snapshots().listen((QuerySnapshot querySnapshot) {
+          print("user_contact where userId equal to current userId");
+          List<DocumentSnapshot> documentSnapshot = querySnapshot.documents;
+          print("documentSnapshot.length.toString(): " + documentSnapshot.length.toString());
+          if(documentSnapshot.length > 0) {
+            print("if(documentSnapshot.length > 0)");
+            print("documentSnapshot[0]['userId']: " + documentSnapshot[0]['userId'].toString());
+            print("documentSnapshot[0]['displayName']: " + documentSnapshot[0]['displayName'].toString());
+            print("documentSnapshot[0]['mobileNo']: " + documentSnapshot[0]['mobileNo'].toString());
+            print("documentSnapshot[0]['realName']: " + documentSnapshot[0]['realName'].toString());
+          } else {
+            print("if(documentSnapshot.length <= 0)");
+          }
+    });
 //        .listen((QuerySnapshot querySnapshot) {
 //      print("Listener works!");
 //      for (int i = 0; i < querySnapshot.documents.length; i++) {

@@ -37,7 +37,7 @@ class UserContact {
   String mobileNo;
 
   @Column(isNullable: true)
-  String lastSeenDate;
+  String lastSeenDate; // TODO: Should move to User table
 
   @Column(isNullable: true)
   bool block;
