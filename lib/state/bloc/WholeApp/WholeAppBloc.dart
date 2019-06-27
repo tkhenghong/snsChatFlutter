@@ -345,6 +345,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   //  clear app's state and sign out
   signOut(UserSignOutEvent event) async {
+    currentState.firebaseAuth.signOut();
+    currentState.googleSignIn.disconnect();
     currentState.googleSignIn.signOut();
     currentState.userState = User();
     currentState.settingsState = Settings();
@@ -438,7 +440,9 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!conversationExist) {
       currentState.conversationList.add(event.conversation);
     }
-
+    if (!isObjectEmpty(event)) {
+      event.callback(event.conversation);
+    }
     print("currentState.conversationList.length.toString(): " + currentState.conversationList.length.toString());
   }
 
@@ -452,6 +456,9 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     currentState.unreadMessageList.add(event.unreadMessage);
     print("currentState.unreadMessageList.length.toString(): " + currentState.unreadMessageList.length.toString());
     print('Checkpoint 2');
+    if (!isObjectEmpty(event)) {
+      event.callback(event.unreadMessage);
+    }
   }
 
   addMessage(AddMessageEvent event) async {

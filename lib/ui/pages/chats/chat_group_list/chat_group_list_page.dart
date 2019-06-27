@@ -41,6 +41,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           print("UserSignInEvent success");
           if (isSignedIn) {
             print("sign in success");
+            test();
           } else {
             print("sign in failed");
             goToLoginPage();
@@ -64,41 +65,46 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     Firestore.instance
         .collection("user_contact")
         .where("userId", isEqualTo: wholeAppBloc.currentState.userState.id)
-        .snapshots().listen((QuerySnapshot querySnapshot) {
-          print("user_contact where userId equal to current userId");
-          List<DocumentSnapshot> documentSnapshot = querySnapshot.documents;
-          print("documentSnapshot.length.toString(): " + documentSnapshot.length.toString());
-          if(documentSnapshot.length > 0) {
-            print("if(documentSnapshot.length > 0)");
-            print("documentSnapshot[0]['userId']: " + documentSnapshot[0]['userId'].toString());
-            print("documentSnapshot[0]['displayName']: " + documentSnapshot[0]['displayName'].toString());
-            print("documentSnapshot[0]['mobileNo']: " + documentSnapshot[0]['mobileNo'].toString());
-            print("documentSnapshot[0]['realName']: " + documentSnapshot[0]['realName'].toString());
-          } else {
-            print("if(documentSnapshot.length <= 0)");
-          }
+        .snapshots()
+        .listen((QuerySnapshot querySnapshot) {
+      print("user_contact where userId equal to current userId");
+      List<DocumentSnapshot> documentSnapshot = querySnapshot.documents;
+      print("documentSnapshot.length.toString(): " + documentSnapshot.length.toString());
+      if (documentSnapshot.length > 0) {
+        print("if(documentSnapshot.length > 0)");
+        print("documentSnapshot[0]['userId']: " + documentSnapshot[0]['userId'].toString());
+        print("documentSnapshot[0]['displayName']: " + documentSnapshot[0]['displayName'].toString());
+        print("documentSnapshot[0]['mobileNo']: " + documentSnapshot[0]['mobileNo'].toString());
+        print("documentSnapshot[0]['realName']: " + documentSnapshot[0]['realName'].toString());
+        print("documentSnapshot[0]['conversationId']: " + documentSnapshot[0]['conversationId'].toString());
+        if (!isStringEmpty(documentSnapshot[0]['conversationId'].toString())) {
+          Firestore.instance
+              .collection("conversation")
+              .where("id", isEqualTo: documentSnapshot[0]['conversationId'].toString())
+              .snapshots()
+              .listen((QuerySnapshot querySnapshot2) {
+            List<DocumentSnapshot> documentSnapshot2 = querySnapshot2.documents;
+            print("documentSnapshot2.length.toString(): " + documentSnapshot2.length.toString());
+            if (documentSnapshot2.length > 0) {
+              Conversation newConversation = Conversation(
+                id: documentSnapshot2[0]['userId'].toString(),
+                block: documentSnapshot2[0]['block'],
+                createdDate: documentSnapshot2[0]['createdDate'].toString(),
+                creatorUserId: documentSnapshot2[0]['creatorUserId'].toString(),
+                description: documentSnapshot2[0]['description'].toString(),
+                name: documentSnapshot2[0]['name'].toString(),
+                notificationExpireDate: documentSnapshot2[0]['notificationExpireDate'],
+                timestamp: documentSnapshot2[0]['timestamp'].toString(),
+                type: documentSnapshot2[0]['type'].toString(),
+              );
+              wholeAppBloc.dispatch(AddConversationEvent(conversation: newConversation, callback: (Conversation conversation) {}));
+            }
+          });
+        }
+      } else {
+        print("if(documentSnapshot.length <= 0)");
+      }
     });
-//        .listen((QuerySnapshot querySnapshot) {
-//      print("Listener works!");
-//      for (int i = 0; i < querySnapshot.documents.length; i++) {
-//        print("snapshot.documents[i]['name'].toString(): " + querySnapshot.documents[i]['name'].toString());
-//      }
-//    });
-
-//    Firestore.instance
-//        .collection("conversation")
-//        .where("userId", isEqualTo: wholeAppBloc.currentState.userState.id)
-//        .orderBy('timestamp', descending: true)
-//        .snapshots().asyncMap((QuerySnapshot querySnapshot) {
-//          print("asyncMap works!");
-//          print("querySnapshot.documents.length.toString(): " + querySnapshot.documents.length.toString());
-//          return querySnapshot;
-//    }).listen((QuerySnapshot querySnapshot) {
-//      print("Listener works!");
-//      for(int i = 0; i < querySnapshot.documents.length; i++) {
-//        print("querySnapshot.documents[i]['name'].toString(): " + querySnapshot.documents[i]['name'].toString());
-//      }
-//    });
   }
 
   @override
@@ -107,64 +113,75 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     wholeAppBloc = _wholeAppBloc;
 
     checkUserLogin();
-    test();
 
     return BlocBuilder(
       bloc: wholeAppBloc,
       builder: (context, WholeAppState state) {
         return StreamBuilder(
           //TODO: This stream command is wrong
-          stream: Firestore.instance
-              .collection("conversation")
-              .where("userId", isEqualTo: wholeAppBloc.currentState.userState.id)
-              .orderBy('timestamp', descending: true)
-              .snapshots(),
+//          stream: Firestore.instance
+//              .collection("conversation")
+//              .where("userId", isEqualTo: wholeAppBloc.currentState.userState.id)
+//              .orderBy('timestamp', descending: true)
+//              .snapshots(),
+          stream:
+              Firestore.instance.collection("user_contact").where("userId", isEqualTo: wholeAppBloc.currentState.userState.id).snapshots(),
           builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (!snapshot.hasData) {
               return Center(child: Text("Loading messages..."));
             } else {
               print("chat_group_list_page.dart snapshot.data.documents.length: " + snapshot.data.documents.length.toString());
               if (snapshot.data.documents.length > 0) {
-                return ListView.builder(
+                DocumentSnapshot userDocumentSnapshot = snapshot.data.documents[0];
+                Firestore.instance
+                    .collection("conversation")
+                    .where("id", isEqualTo: userDocumentSnapshot['conversationId'].toString())
+                    .getDocuments()
+                    .then((QuerySnapshot conversationSnapshots) {
+                  List<DocumentSnapshot> conversationDocuments = conversationSnapshots.documents;
+                  if (conversationDocuments.length > 0) {
+                    return ListView.builder(
 //                        scrollDirection: Axis.vertical,
 //                        shrinkWrap: true,
-                  physics: BouncingScrollPhysics(),
-                  itemCount: snapshot.data.documents.length,
+                      physics: BouncingScrollPhysics(),
+                      itemCount: snapshot.data.documents.length,
 //                        reverse: true,
-                  itemBuilder: (context, index) {
-                    DocumentSnapshot documentSnapshot = snapshot.data.documents[index];
-                    print("Within itemBuilder");
-                    print("index: " + index.toString());
+                      itemBuilder: (context, index) {
+                        DocumentSnapshot documentSnapshot = snapshot.data.documents[index];
+                        print("Within itemBuilder");
+                        print("index: " + index.toString());
 //                    mapConversationToPageListTile(state.conversationList[index], context);
-                    return ListTile(
-                      title: Hero(tag: documentSnapshot["name"].toString(), child: Text(documentSnapshot["name"].toString())),
-                      subtitle: Text("Test subtitle"),
-                      leading: Hero(
-                          tag: documentSnapshot["id"].toString(),
-                          child: CircleAvatar(
-                            backgroundColor: Colors.white,
-                            backgroundImage: AssetImage("lib/ui/images/group2013.jpg"),
-                            child: Text(''),
-                          )),
+                        return ListTile(
+                          title: Hero(tag: documentSnapshot["name"].toString(), child: Text(documentSnapshot["name"].toString())),
+                          subtitle: Text("Test subtitle"),
+                          leading: Hero(
+                              tag: documentSnapshot["id"].toString(),
+                              child: CircleAvatar(
+                                backgroundColor: Colors.white,
+                                backgroundImage: AssetImage("lib/ui/images/group2013.jpg"),
+                                child: Text(''),
+                              )),
 //                      trailing: Text(unreadMessage.count.toString() == "0" ? "" : unreadMessage.count.toString()),
-                      onTap: () {
-                        Conversation conversation = new Conversation(
-                          id: documentSnapshot["id"].toString(),
-                          name: documentSnapshot["name"].toString(),
-                          description: documentSnapshot["description"].toString(),
-                          type: documentSnapshot["type"].toString(),
-                          timestamp: documentSnapshot["timestamp"].toString(),
-                          block: documentSnapshot["block"] as bool,
-                          notificationExpireDate: documentSnapshot["notificationExpireDate"] as int,
-                          creatorUserId: documentSnapshot["creatorUserId"].toString(),
-                          createdDate: documentSnapshot["createdDate"].toString(),
+                          onTap: () {
+                            Conversation conversation = new Conversation(
+                              id: documentSnapshot["id"].toString(),
+                              name: documentSnapshot["name"].toString(),
+                              description: documentSnapshot["description"].toString(),
+                              type: documentSnapshot["type"].toString(),
+                              timestamp: documentSnapshot["timestamp"].toString(),
+                              block: documentSnapshot["block"] as bool,
+                              notificationExpireDate: documentSnapshot["notificationExpireDate"] as int,
+                              creatorUserId: documentSnapshot["creatorUserId"].toString(),
+                              createdDate: documentSnapshot["createdDate"].toString(),
+                            );
+                            Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversation))));
+                          },
                         );
-                        Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversation))));
+//                    return PageListTile(mapConversationToPageListTile(state.conversationList[index], context), context);
                       },
                     );
-//                    return PageListTile(mapConversationToPageListTile(state.conversationList[index], context), context);
-                  },
-                );
+                  }
+                });
               } else {
                 return Center(child: Text("No conversations. Tap \"+\" to create one!"));
               }
