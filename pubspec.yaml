@@ -17,6 +17,7 @@ dependencies:
 # Required Plugins
   url_launcher: ^5.0.2
   date_format: ^1.0.6
+  intl: ^0.15.8
 #  flutter_html_textview: ^0.2.6 # Final decision, html textview causing lot more trouble than version solving
 
 # To add plugins:
