@@ -33,6 +33,7 @@ class GroupNamePageState extends State<GroupNamePage> {
   File imageFile;
   bool imageExists = false;
   WholeAppBloc wholeAppBloc;
+  List<UserContact> userContactList;
 
   @override
   Widget build(BuildContext context) {
@@ -168,6 +169,7 @@ class GroupNamePageState extends State<GroupNamePage> {
 
   // TODO: Conversation Creation into BLOC, can be merged with Personal & Broadcast
   Future<Conversation> createGroupConversation() async {
+    print("createGroupConversation()");
     Conversation conversation = new Conversation(
       id: generateNewId().toString(),
       notificationExpireDate: 0,
@@ -178,6 +180,7 @@ class GroupNamePageState extends State<GroupNamePage> {
       block: false,
       description: '',
     );
+    print("conversation: " + conversation.toString());
 
     // Multimedia for group chat
     Multimedia newMultiMedia = Multimedia(
@@ -192,6 +195,7 @@ class GroupNamePageState extends State<GroupNamePage> {
       userContactId: "",
       conversationId: conversation.id,
     );
+    print("newMultiMedia: " + newMultiMedia.toString());
     wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
 
     UnreadMessage newUnreadMessage = UnreadMessage(
@@ -202,26 +206,34 @@ class GroupNamePageState extends State<GroupNamePage> {
         lastMessage: "",
         userId: wholeAppBloc.currentState.userState.id);
 
-    uploadConversationMembers(conversation);
+    print("newUnreadMessage: " + newUnreadMessage.toString());
 
-    // Upload yourself as UserContact as you're the one of the group member in the conversation
-    uploadSelfUserContact(conversation);
-
-    uploadConversation(conversation, newUnreadMessage, newMultiMedia);
-
+    uploadConversationMembers(conversation).then((bool done) {
+      print("Upload conversation members done!");
+      // Upload yourself as UserContact as you're the one of the group members in the conversation
+      uploadSelfUserContact(conversation).then((bool done) {
+        print("Upload self user Contact done!");
+        uploadConversation(conversation, newUnreadMessage, newMultiMedia);
+      });
+    });
     return conversation;
   }
 
-  uploadConversationMembers(Conversation conversation) async {
+  Future<bool> uploadConversationMembers(Conversation conversation) async {
     print("group_name_page.dart uploadConversationMembers()");
     // convert contact to contact (self defined)
     widget.selectedContacts.forEach((contact) {
+      print("group_name_page.dart contact: " + contact.toString());
+
       //Determine how many phone number he has
       List<String> primaryNo = [];
       if (contact.phones.length > 0) {
+        print("group_name_page.dart if (contact.phones.length > 0)");
         contact.phones.forEach((phoneNo) {
           primaryNo.add(phoneNo.value);
         });
+      } else {
+        print("group_name_page.dart if (contact.phones.length <= 0)");
       }
 
       // Create new Multimedia object to save photo
@@ -238,15 +250,20 @@ class GroupNamePageState extends State<GroupNamePage> {
         displayName: contact.displayName,
         realName: contact.displayName,
         // In case of mobile number only contact, mobile no equals to contact.displayName
+        // TODO: mobile no is not saved as mobile number
         mobileNo: primaryNo.length == 0 ? contact.displayName : primaryNo[0],
         block: false,
         lastSeenDate: "",
         conversationId: conversation.id,
       );
-      uploadUserContact(newUserContact).then((UserContact userContact) {
-        wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: newUserContact));
-      }); // Should check whether success or not first by .then()
+      print("newUserContact: " + newUserContact.toString());
+//      UserContact userContact = await
+      uploadUserContact(newUserContact);
+      print("uploadUserContact success");
+      userContactList.add(newUserContact);
+      wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: newUserContact));
     });
+    return true;
   }
 
   Future<UserContact> uploadUserContact(UserContact newUserContact) async {
@@ -277,7 +294,7 @@ class GroupNamePageState extends State<GroupNamePage> {
     return newUserContact;
   }
 
-  uploadSelfUserContact(Conversation conversation) async {
+  Future<bool> uploadSelfUserContact(Conversation conversation) async {
     print("group_name_page.dart uploadSelfUserContact()");
     User currentUser = wholeAppBloc.currentState.userState;
     UserContact selfUserContact = UserContact(
@@ -291,13 +308,19 @@ class GroupNamePageState extends State<GroupNamePage> {
       lastSeenDate: "",
       conversationId: conversation.id,
     );
-
-    uploadUserContact(selfUserContact); // Should check whether success or not first by .then()
+    print("selfUserContact: " + selfUserContact.toString());
+    UserContact userContact = await uploadUserContact(selfUserContact);
+    print("uploadUserContact success");
+    userContactList.add(selfUserContact);
     wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: selfUserContact));
+    return true;
   }
 
-  uploadConversation(Conversation conversation, UnreadMessage newUnreadMessage, Multimedia newMultiMedia) async {
+  Future<bool> uploadConversation(Conversation conversation, UnreadMessage newUnreadMessage, Multimedia newMultiMedia) async {
     print("group_name_page.dart uploadConversation()");
+    List<String> userContactIds = userContactList.map((UserContact userContact) {
+      return userContact.id;
+    });
     await Firestore.instance.collection('conversation').document(conversation.id).setData({
       'id': conversation.id, // Self generated Id
       'name': conversation.name,
@@ -307,6 +330,7 @@ class GroupNamePageState extends State<GroupNamePage> {
       'block': conversation.block,
       'description': conversation.description,
       'notificationExpireDate': conversation.notificationExpireDate,
+      'groupMembersIds': userContactIds,
       'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
     });
 
@@ -338,6 +362,7 @@ class GroupNamePageState extends State<GroupNamePage> {
     });
 
     print("Upload multimedia success!");
+    return true;
   }
 
   Future getImage() async {
