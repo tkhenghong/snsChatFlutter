@@ -33,7 +33,7 @@ class GroupNamePageState extends State<GroupNamePage> {
   File imageFile;
   bool imageExists = false;
   WholeAppBloc wholeAppBloc;
-  List<UserContact> userContactList;
+  List<UserContact> userContactList = [];
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +72,7 @@ class GroupNamePageState extends State<GroupNamePage> {
                 onTap: () {
                   createGroupConversation().then((conversation) {
                     print("Go back to Main Page!");
-                    _wholeAppBloc.dispatch(AddConversationEvent(conversation: conversation));
+                    _wholeAppBloc.dispatch(AddConversationEvent(conversation: conversation, callback: (Conversation conversation) {}));
                     Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
                     Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversation))));
                   });
@@ -299,8 +299,8 @@ class GroupNamePageState extends State<GroupNamePage> {
     User currentUser = wholeAppBloc.currentState.userState;
     UserContact selfUserContact = UserContact(
       id: generateNewId().toString(),
-      userId: currentUser.id,
       // Upload self id from User table
+      userId: currentUser.id,
       displayName: currentUser.displayName,
       realName: currentUser.realName,
       mobileNo: currentUser.mobileNo,
@@ -309,7 +309,9 @@ class GroupNamePageState extends State<GroupNamePage> {
       conversationId: conversation.id,
     );
     print("selfUserContact: " + selfUserContact.toString());
-    UserContact userContact = await uploadUserContact(selfUserContact);
+
+    uploadUserContact(selfUserContact);
+
     print("uploadUserContact success");
     userContactList.add(selfUserContact);
     wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: selfUserContact));
@@ -318,9 +320,9 @@ class GroupNamePageState extends State<GroupNamePage> {
 
   Future<bool> uploadConversation(Conversation conversation, UnreadMessage newUnreadMessage, Multimedia newMultiMedia) async {
     print("group_name_page.dart uploadConversation()");
-    List<String> userContactIds = userContactList.map((UserContact userContact) {
+    conversation.memberIds = userContactList.map((UserContact userContact) {
       return userContact.id;
-    });
+    }).toList();
     await Firestore.instance.collection('conversation').document(conversation.id).setData({
       'id': conversation.id, // Self generated Id
       'name': conversation.name,
@@ -330,7 +332,7 @@ class GroupNamePageState extends State<GroupNamePage> {
       'block': conversation.block,
       'description': conversation.description,
       'notificationExpireDate': conversation.notificationExpireDate,
-      'groupMembersIds': userContactIds,
+      'memberIds': conversation.memberIds,
       'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
     });
 

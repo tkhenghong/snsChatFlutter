@@ -45,7 +45,17 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           print("UserSignInEvent success");
           if (isSignedIn) {
             print("sign in success");
-//            test();
+            print("getListDone: " + getListDone.toString());
+//            getConversations();
+            if (getListDone == false) {
+              print("if (!getListDone)");
+              getConversations().listen((bool done) {
+                print("getConversation() success!");
+                setState(() {
+                  getListDone = done;
+                });
+              });
+            }
           } else {
             print("sign in failed");
             goToLoginPage();
@@ -63,81 +73,87 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     Navigator.of(context).pushNamedAndRemoveUntil("login_page", (Route<dynamic> route) => false);
   }
 
-  Future<bool> getConversations() async {
+  Stream<bool> getConversations() async* {
     print("getConversations()");
-//    QuerySnapshot userContactSnapshot = await Firestore.instance
-//        .collection("user_contact")
-//        .where("userId", isEqualTo: wholeAppBloc.currentState.userState.id)
+//    print("wholeAppBloc.currentState.userState.id: " + wholeAppBloc.currentState.userState.id.toString());
+//    QuerySnapshot conversationSnapshot = await Firestore.instance
+//        .collection("conversation")
+//        .where("memberIds", arrayContains: wholeAppBloc.currentState.userState.id)
 //        .getDocuments();
-//    List<DocumentSnapshot> userContactDocuments = userContactSnapshot.documents;
-//    print("Got userContactDocuments.");
-//    for (int i = 0; i < userContactDocuments.length; i++) {
-//      DocumentSnapshot userContactDocument = userContactDocuments[i];
-//      QuerySnapshot conversationSnapshot = await Firestore.instance
-//          .collection("conversation")
-//          .where("id", isEqualTo: userContactDocument['conversationId'].toString())
-//          .getDocuments();
+//    List<DocumentSnapshot> conversationDocuments = conversationSnapshot.documents;
+//    print("conversationDocuments.length: " + conversationDocuments.length.toString());
+//    if (conversationDocuments.length > 0) {
+//      print("if (conversationDocuments.length > 0)");
+//      DocumentSnapshot conversationDocument = conversationDocuments[0];
 //
-//      List<DocumentSnapshot> conversationDocuments = conversationSnapshot.documents;
-//      print("conversationDocuments.length: " + conversationDocuments.length.toString());
-//      if (conversationDocuments.length > 0) {
-//        print("if (conversationDocuments.length > 0)");
-//        DocumentSnapshot conversationDocument = conversationDocuments[0];
-//
-//        Conversation conversation = new Conversation(
-//          id: conversationDocument["id"].toString(),
-//          name: conversationDocument["name"].toString(),
-//          description: conversationDocument["description"].toString(),
-//          type: conversationDocument["type"].toString(),
-//          timestamp: conversationDocument["timestamp"].toString(),
-//          block: conversationDocument["block"] as bool,
-//          notificationExpireDate: conversationDocument["notificationExpireDate"] as int,
-//          creatorUserId: conversationDocument["creatorUserId"].toString(),
-//          createdDate: conversationDocument["createdDate"].toString(),
-//        );
-//        wholeAppBloc.dispatch(AddConversationEvent(conversation: conversation, callback: (Conversation conversation) {}));
-//      } else {
-//        print("if (conversationDocuments.length <= 0)");
-//      }
+//      Conversation conversation = new Conversation(
+//        id: conversationDocument["id"].toString(),
+//        name: conversationDocument["name"].toString(),
+//        description: conversationDocument["description"].toString(),
+//        type: conversationDocument["type"].toString(),
+//        timestamp: conversationDocument["timestamp"].toString(),
+//        block: conversationDocument["block"] as bool,
+//        notificationExpireDate: conversationDocument["notificationExpireDate"] as int,
+//        creatorUserId: conversationDocument["creatorUserId"].toString(),
+//        memberIds: List.from(conversationDocument["memberIds"]),
+//        createdDate: conversationDocument["createdDate"].toString(),
+//      );
+//      wholeAppBloc.dispatch(AddConversationEvent(conversation: conversation, callback: (Conversation conversation) {}));
+//    } else {
+//      print("if (conversationDocuments.length <= 0)");
 //    }
 
+    print("wholeAppBloc.currentState.userState.id: " + wholeAppBloc.currentState.userState.id.toString());
     QuerySnapshot userContactSnapshot = await Firestore.instance
         .collection("user_contact")
         .where("userId", isEqualTo: wholeAppBloc.currentState.userState.id)
         .getDocuments();
     List<DocumentSnapshot> userContactDocuments = userContactSnapshot.documents;
+    print("userContactDocuments.length: " + userContactDocuments.length.toString());
     if (userContactDocuments.length > 0) {
-      List<String> conversationIds = userContactDocuments.map((DocumentSnapshot userContactDocument) {
-        return userContactDocument["conversationId"];
-      });
-      print("conversationIds: " + conversationIds.toString());
-      QuerySnapshot conversationSnapshot =
-          await Firestore.instance.collection("conversation").where("groupMembersIds", arrayContains: conversationIds).getDocuments();
+      print("if (userContactDocuments.length > 0)");
+      // You want to get all userContactIds that belonged to this user first
+      // And then form an array to query Conversation table
+      List<String> userContactIds = userContactDocuments.map((DocumentSnapshot userContactDocument) {
+        return userContactDocument["id"].toString();
+      }).toList();
+      print("userContactIds: " + userContactIds.toString());
+      print("userContactIds.length: " + userContactIds.length.toString());
+      for(int i = 0; i < userContactIds.length; i++) {
+        QuerySnapshot conversationSnapshot =
+        await Firestore.instance.collection("conversation").where("memberIds", arrayContains: userContactIds[i]).getDocuments();
 
-      List<DocumentSnapshot> conversationDocuments = conversationSnapshot.documents;
-      print("conversationDocuments.length: " + conversationDocuments.length.toString());
-      if (conversationDocuments.length > 0) {
-        print("if (conversationDocuments.length > 0)");
-        DocumentSnapshot conversationDocument = conversationDocuments[0];
+        List<DocumentSnapshot> conversationDocuments = conversationSnapshot.documents;
+        print("chat_group_list_page.dart conversationDocuments.length: " + conversationDocuments.length.toString());
+        if (conversationDocuments.length > 0) {
+          print("if (conversationDocuments.length > 0)");
+          DocumentSnapshot conversationDocument = conversationDocuments[0];
 
-        Conversation conversation = new Conversation(
-          id: conversationDocument["id"].toString(),
-          name: conversationDocument["name"].toString(),
-          description: conversationDocument["description"].toString(),
-          type: conversationDocument["type"].toString(),
-          timestamp: conversationDocument["timestamp"].toString(),
-          block: conversationDocument["block"] as bool,
-          notificationExpireDate: conversationDocument["notificationExpireDate"] as int,
-          creatorUserId: conversationDocument["creatorUserId"].toString(),
-          createdDate: conversationDocument["createdDate"].toString(),
-        );
-        wholeAppBloc.dispatch(AddConversationEvent(conversation: conversation, callback: (Conversation conversation) {}));
-      } else {
-        print("if (conversationDocuments.length <= 0)");
+          Conversation conversation = new Conversation(
+            id: conversationDocument["id"].toString(),
+            name: conversationDocument["name"].toString(),
+            description: conversationDocument["description"].toString(),
+            type: conversationDocument["type"].toString(),
+            timestamp: conversationDocument["timestamp"].toString(),
+            block: conversationDocument["block"] as bool,
+            notificationExpireDate: conversationDocument["notificationExpireDate"] as int,
+            creatorUserId: conversationDocument["creatorUserId"].toString(),
+            memberIds: List.from(conversationDocument["memberIds"]),
+            createdDate: conversationDocument["createdDate"].toString(),
+          );
+          wholeAppBloc.dispatch(AddConversationEvent(conversation: conversation, callback: (Conversation conversation) {}));
+
+        } else {
+          print("if (conversationDocuments.length <= 0)");
+        }
       }
+      yield true;
+    } else {
+      print("if (userContactDocuments.length <= 0)");
     }
 
-    return true;
+    print("returned true?");
+//    return false;
   }
 
   getUnreadMessage() async {}
@@ -148,16 +164,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     wholeAppBloc = _wholeAppBloc;
 
     checkUserLogin();
-    print("getListDone: " + getListDone.toString());
-    if (getListDone == false) {
-      print("if (!getListDone)");
-      getConversations().then((bool done) {
-        print("getConversation() success!");
-        setState(() {
-          getListDone = true;
-        });
-      });
-    }
     return BlocBuilder(
       bloc: wholeAppBloc,
       builder: (context, WholeAppState state) {
