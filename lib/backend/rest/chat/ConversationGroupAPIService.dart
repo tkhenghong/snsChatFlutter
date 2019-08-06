@@ -19,6 +19,7 @@ class ConversationGroupAPIService {
 
     if (httpResponseIsOK(httpResponse)) {
       var jsonResponse = convert.jsonDecode(httpResponse.body);
+      // TODO: Find the new id returned by the server
       var newConversationId = jsonResponse['id'];
       print("newConversationId: " + newConversationId);
       conversation.id = newConversationId;
@@ -33,29 +34,14 @@ class ConversationGroupAPIService {
   Future<bool> editConversation(Conversation conversation) async {
     var httpResponse =
         await http.put(REST_URL + "/conversationGroup", body: conversation);
-    if (httpResponseIsOK(httpResponse)) {
-      var jsonResponse = convert.jsonDecode(httpResponse.body);
-      var newConversationId = jsonResponse['id'];
-      print("newConversationId: " + newConversationId);
-      conversation.id = newConversationId;
-      return true;
-    }
 
-    return false;
+    return httpResponseIsOK(httpResponse);
   }
 
   Future<bool> deleteConversation(Conversation conversation) async {
     var httpResponse =
         await http.delete(REST_URL + "/conversationGroup" + conversation.id);
-    if (httpResponseIsOK(httpResponse)) {
-      var jsonResponse = convert.jsonDecode(httpResponse.body);
-      var newConversationId = jsonResponse['id'];
-      print("newConversationId: " + newConversationId);
-      conversation.id = newConversationId;
-      return true;
-    }
-
-    return false;
+    return httpResponseIsOK(httpResponse);
   }
 
   Future<Conversation> getSingleConversation(String conversationGroupId) async {

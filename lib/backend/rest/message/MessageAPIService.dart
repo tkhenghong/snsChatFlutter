@@ -5,19 +5,20 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:snschat_flutter/environments/development/variables.dart'
-as globals;
+    as globals;
 import 'package:snschat_flutter/objects/message/message.dart';
 
 import '../RestResponseUtils.dart';
+
 class MessageAPIService {
   String REST_URL = globals.REST_URL;
 
   Future<String> addMessage(Message message) async {
-    var httpResponse =
-    await http.post(REST_URL + "/message", body: message);
+    var httpResponse = await http.post(REST_URL + "/message", body: message);
 
     if (httpResponseIsOK(httpResponse)) {
       var jsonResponse = convert.jsonDecode(httpResponse.body);
+      // TODO: Find the new id returned by the server
       var newMessageId = jsonResponse['id'];
       print("newMessageId: " + newMessageId);
       newMessageId.id = newMessageId;
@@ -30,36 +31,19 @@ class MessageAPIService {
   }
 
   Future<bool> editMessage(Message message) async {
-    var httpResponse =
-    await http.put(REST_URL + "/message", body: message);
-    if (httpResponseIsOK(httpResponse)) {
-      var jsonResponse = convert.jsonDecode(httpResponse.body);
-      var newMessageId = jsonResponse['id'];
-      print("newMessageId: " + newMessageId);
-      newMessageId.id = newMessageId;
-      return true;
-    }
-
-    return false;
+    var httpResponse = await http.put(REST_URL + "/message", body: message);
+    return httpResponseIsOK(httpResponse);
   }
 
   Future<bool> deleteMessage(Message message) async {
-    var httpResponse =
-    await http.delete(REST_URL + "/message" + message.id);
-    if (httpResponseIsOK(httpResponse)) {
-      var jsonResponse = convert.jsonDecode(httpResponse.body);
-      var newMessageId = jsonResponse['id'];
-      print("newMessageId: " + newMessageId);
-      message.id = newMessageId;
-      return true;
-    }
-
-    return false;
+    var httpResponse = await http.delete(REST_URL + "/message" + message.id);
+    return httpResponseIsOK(httpResponse);
   }
 
-  Future<List<Message>> getMessagesOfAConversation(String conversationId) async {
+  Future<List<Message>> getMessagesOfAConversation(
+      String conversationId) async {
     var httpResponse =
-    await http.get(REST_URL + "/message/conversation/" + conversationId);
+        await http.get(REST_URL + "/message/conversation/" + conversationId);
 
     if (httpResponseIsOK(httpResponse)) {
       var jsonResponse = convert.jsonDecode(httpResponse.body);
@@ -72,6 +56,5 @@ class MessageAPIService {
         msg: 'Unable to get messages for this user.Please try again.',
         toastLength: Toast.LENGTH_SHORT);
     return null;
-
   }
 }
