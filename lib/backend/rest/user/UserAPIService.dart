@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'dart:convert' as convert;
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:snschat_flutter/environments/development/variables.dart'
@@ -13,7 +12,7 @@ import '../RestResponseUtils.dart';
 class UserAPIService {
   String REST_URL = globals.REST_URL;
 
-  Future<String> addUser(User user) async {
+  Future<User> addUser(User user) async {
     var httpResponse = await http.post(REST_URL + "/user", body: user);
 
     if (httpResponseIsOK(httpResponse)) {
@@ -22,11 +21,8 @@ class UserAPIService {
       var newUserId = jsonResponse['id'];
       print("newUserId: " + newUserId);
       user.id = newUserId;
-      return user.id;
+      return user;
     }
-    Fluttertoast.showToast(
-        msg: 'Unable to create a new user.Please try again.',
-        toastLength: Toast.LENGTH_SHORT);
     return null;
   }
 
@@ -49,9 +45,6 @@ class UserAPIService {
       print("user.id: " + user.id);
       return user;
     }
-    Fluttertoast.showToast(
-        msg: 'Unable to get the user.Please try again.',
-        toastLength: Toast.LENGTH_SHORT);
     return null;
   }
 }

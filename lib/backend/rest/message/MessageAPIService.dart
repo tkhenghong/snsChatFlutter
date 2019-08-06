@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'dart:convert' as convert;
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:snschat_flutter/environments/development/variables.dart'
@@ -13,7 +12,7 @@ import '../RestResponseUtils.dart';
 class MessageAPIService {
   String REST_URL = globals.REST_URL;
 
-  Future<String> addMessage(Message message) async {
+  Future<Message> addMessage(Message message) async {
     var httpResponse = await http.post(REST_URL + "/message", body: message);
 
     if (httpResponseIsOK(httpResponse)) {
@@ -22,11 +21,8 @@ class MessageAPIService {
       var newMessageId = jsonResponse['id'];
       print("newMessageId: " + newMessageId);
       newMessageId.id = newMessageId;
-      return newMessageId.id;
+      return newMessageId;
     }
-    Fluttertoast.showToast(
-        msg: 'Unable to create a new message.Please try again.',
-        toastLength: Toast.LENGTH_SHORT);
     return null;
   }
 
@@ -52,9 +48,6 @@ class MessageAPIService {
 
       return messageList;
     }
-    Fluttertoast.showToast(
-        msg: 'Unable to get messages for this user.Please try again.',
-        toastLength: Toast.LENGTH_SHORT);
     return null;
   }
 }

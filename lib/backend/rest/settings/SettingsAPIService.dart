@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'dart:convert' as convert;
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:snschat_flutter/environments/development/variables.dart'
@@ -13,7 +12,7 @@ import '../RestResponseUtils.dart';
 class SettingsAPIService {
   String REST_URL = globals.REST_URL;
 
-  Future<String> addSettings(Settings settings) async {
+  Future<Settings> addSettings(Settings settings) async {
     var httpResponse =
         await http.post(REST_URL + "/settings", body: settings);
 
@@ -23,11 +22,8 @@ class SettingsAPIService {
       var newSettingsId = jsonResponse['id'];
       print("newSettingsId: " + newSettingsId);
       settings.id = newSettingsId;
-      return settings.id;
+      return settings;
     }
-    Fluttertoast.showToast(
-        msg: 'Unable to create a new settings.Please try again.',
-        toastLength: Toast.LENGTH_SHORT);
     return null;
   }
 
@@ -53,9 +49,6 @@ class SettingsAPIService {
 
       return settings;
     }
-    Fluttertoast.showToast(
-        msg: 'Unable to get settings for this user.Please try again.',
-        toastLength: Toast.LENGTH_SHORT);
     return null;
   }
 }

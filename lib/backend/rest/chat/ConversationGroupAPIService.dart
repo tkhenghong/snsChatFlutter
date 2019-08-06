@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'dart:convert' as convert;
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:snschat_flutter/environments/development/variables.dart'
@@ -13,7 +12,7 @@ import '../RestResponseUtils.dart';
 class ConversationGroupAPIService {
   String REST_URL = globals.REST_URL;
 
-  Future<String> addConversation(Conversation conversation) async {
+  Future<Conversation> addConversation(Conversation conversation) async {
     var httpResponse =
         await http.post(REST_URL + "/conversationGroup", body: conversation);
 
@@ -23,11 +22,8 @@ class ConversationGroupAPIService {
       var newConversationId = jsonResponse['id'];
       print("newConversationId: " + newConversationId);
       conversation.id = newConversationId;
-      return conversation.id;
+      return conversation;
     }
-    Fluttertoast.showToast(
-        msg: 'Unable to create a new conversation.Please try again.',
-        toastLength: Toast.LENGTH_SHORT);
     return null;
   }
 
@@ -54,10 +50,6 @@ class ConversationGroupAPIService {
       print("conversation.id: " + conversation.id);
       return conversation;
     }
-
-    Fluttertoast.showToast(
-        msg: 'Unable to get the conversation.Please try again.',
-        toastLength: Toast.LENGTH_SHORT);
     return null;
   }
 
@@ -71,10 +63,6 @@ class ConversationGroupAPIService {
       print("conversationList.length: " + conversationList.length.toString());
       return conversationList;
     }
-
-    Fluttertoast.showToast(
-        msg: 'Unable to get the conversations for the user.Please try again.',
-        toastLength: Toast.LENGTH_SHORT);
     return null;
   }
 }

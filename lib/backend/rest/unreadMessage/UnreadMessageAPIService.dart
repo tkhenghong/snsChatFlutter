@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'dart:convert' as convert;
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:snschat_flutter/environments/development/variables.dart'
@@ -13,7 +12,7 @@ import '../RestResponseUtils.dart';
 class UnreadMessageAPIService {
   String REST_URL = globals.REST_URL;
 
-  Future<String> addUnreadMessage(UnreadMessage unreadMessage) async {
+  Future<UnreadMessage> addUnreadMessage(UnreadMessage unreadMessage) async {
     var httpResponse =
         await http.post(REST_URL + "/unreadMessage", body: unreadMessage);
 
@@ -23,11 +22,8 @@ class UnreadMessageAPIService {
       var newUnreadMessageId = jsonResponse['id'];
       print("newUnreadMessageId: " + newUnreadMessageId);
       unreadMessage.id = newUnreadMessageId;
-      return unreadMessage.id;
+      return unreadMessage;
     }
-    Fluttertoast.showToast(
-        msg: 'Unable to create a new unreadMessage.Please try again.',
-        toastLength: Toast.LENGTH_SHORT);
     return null;
   }
 
@@ -54,9 +50,6 @@ class UnreadMessageAPIService {
 
       return unreadMessageList;
     }
-    Fluttertoast.showToast(
-        msg: 'Unable to get unreadMessageList for this user.Please try again.',
-        toastLength: Toast.LENGTH_SHORT);
     return null;
   }
 }

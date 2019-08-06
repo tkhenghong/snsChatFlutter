@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'dart:convert' as convert;
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:snschat_flutter/environments/development/variables.dart'
@@ -13,7 +12,7 @@ import '../RestResponseUtils.dart';
 class MultimediaAPIService {
   String REST_URL = globals.REST_URL;
 
-  Future<String> addMultimedia(Multimedia multimedia) async {
+  Future<Multimedia> addMultimedia(Multimedia multimedia) async {
     var httpResponse =
         await http.post(REST_URL + "/multimedia", body: multimedia);
 
@@ -23,11 +22,8 @@ class MultimediaAPIService {
       var newMultimediaId = jsonResponse['id'];
       print("newMultimediaId: " + newMultimediaId);
       multimedia.id = newMultimediaId;
-      return multimedia.id;
+      return multimedia;
     }
-    Fluttertoast.showToast(
-        msg: 'Unable to create a new multimedia.Please try again.',
-        toastLength: Toast.LENGTH_SHORT);
     return null;
   }
 
@@ -53,9 +49,6 @@ class MultimediaAPIService {
 
       return multimediaList;
     }
-    Fluttertoast.showToast(
-        msg: 'Unable to get multimediaList for this user.Please try again.',
-        toastLength: Toast.LENGTH_SHORT);
     return null;
   }
 }
