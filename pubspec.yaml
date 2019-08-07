@@ -10,57 +10,61 @@ description: A new Flutter application.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  sdk: ">=2.1.0 <3.0.0"
 
 dependencies:
 
-# Required Plugins
-  url_launcher: ^5.0.2
+  # Required Plugins
+  url_launcher: ^5.1.2
   date_format: ^1.0.6
   intl: ^0.15.8
-#  flutter_html_textview: ^0.2.6 # Final decision, html textview causing lot more trouble than version solving
+  #  flutter_html_textview: ^0.2.6 # Final decision, html textview causing lot more trouble than version solving
 
-# To add plugins:
-#  pin_entry_text_field/pin_input_text_field # Create PIN text fields easily. No need to self create PIN text fields anymore.
-#  country_icons # Get a bunch of country flags without having to get them yourself and manage them.
-#  extended_image/flutter_advanced_network_image # For load image without having to custom download and manage many situations
-#  flutter_villains # Make animation code simpler (no extends no init AnimationController everytime)
-#  map_view # Show Google Map point to some location. Can be used in send location feature in future
-#  email_validator # Validate email format
-#  thumbnails: Generate thumbnails from video
+  # To add plugins:
+  #  pin_entry_text_field/pin_input_text_field # Create PIN text fields easily. No need to self create PIN text fields anymore.
+  #  country_icons # Get a bunch of country flags without having to get them yourself and manage them.
+  #  extended_image/flutter_advanced_network_image # For load image without having to custom download and manage many situations
+  #  flutter_villains # Make animation code simpler (no extends no init AnimationController everytime)
+  #  map_view # Show Google Map point to some location. Can be used in send location feature in future
+  #  email_validator # Validate email format
+  #  thumbnails: Generate thumbnails from video
 
 
-  flutter_cache_manager: ^0.3.2
-  path_provider: ^0.5.0+1 # A Flutter plugin for finding commonly used locations on the filesystem. Supports iOS and Android.
+  flutter_cache_manager: ^1.1.1
+  path_provider: ^1.2.0 # A Flutter plugin for finding commonly used locations on the filesystem. Supports iOS and Android.
   barcode_scan: ^1.0.0 # A Flutter plugin for scanning 2D barcodes and QR codes as a wrapper using specific iOS mikebuss/MTBBarcodeScanner and Android dm77/barcodescanner library.
-  qr_flutter: ^2.0.0+51 # QR.Flutter is a QR code generation and rendering library for Flutter.
-  fluttertoast: ^3.0.3
-  image_picker: ^0.5.0+9
-  pull_to_refresh: ^1.1.6
-  contacts_service: ^0.2.4
-  permission_handler: ^3.0.0
+  qr_flutter: ^2.1.0+55 # QR.Flutter is a QR code generation and rendering library for Flutter.
+  fluttertoast: ^3.1.0
+  image_picker: ^0.6.1
+  pull_to_refresh: ^1.5.3
+  contacts_service: ^0.3.0
+  permission_handler: ^3.2.1+1
 
   # Handle Image
-  cached_network_image: ^0.8.0
+  cached_network_image: ^1.1.1
 
-# State management
-  bloc: ^0.11.1
-  flutter_bloc: ^0.9.1
-  equatable: ^0.2.3
+  # State management
+  bloc: ^0.14.4
+  flutter_bloc: ^0.20.0
+  equatable: ^0.4.0
 
   #Google DB
-  firebase_core: ^0.4.0+3
-  firebase_auth: ^0.11.1+6
-  google_sign_in: ^4.0.2
-  cloud_firestore: ^0.12.3
+  firebase_core: ^0.4.0+8
+  firebase_auth: ^0.14.0
+  google_sign_in: ^4.0.6
+  cloud_firestore: ^0.12.9
 
   # Local DB
-  sqflite: ^1.1.3
-  jaguar_orm: ^2.2.0
-  jaguar_query_sqflite: ^2.2.0
+  sqflite: ^1.1.6+3
+  jaguar_orm: ^2.2.6
+  jaguar_query_sqflite: ^2.2.10
 
   # Connect to backend/Get Images, Video and etc...
   http: ^0.12.0+2
+
+  # Testings
+#  test: ^1.6.5
+
   flutter:
     sdk: flutter
 
@@ -73,9 +77,9 @@ dev_dependencies:
     sdk: flutter
 
   # General needed lib
-  build_runner: ^1.0.0
+  build_runner: 1.2.3
 
-  jaguar_orm_gen: ^2.2.0
+  jaguar_orm_gen: ^2.2.27
 #  build_runner: ^0.10.0
 
 # For information on the generic Dart part of this file, see the
