@@ -206,7 +206,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     AuthCredential credential =
         GoogleAuthProvider.getCredential(idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
 
-    currentState.firebaseUser = await currentState.firebaseAuth.signInWithCredential(credential);
+    AuthResult authResult = await currentState.firebaseAuth.signInWithCredential(credential);
+    currentState.firebaseUser = authResult.user;
     return true;
   }
 

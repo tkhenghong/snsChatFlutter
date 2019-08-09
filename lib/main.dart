@@ -38,7 +38,7 @@ class BlocWrapperState extends State<BlocWrapper> {
 //    });
 
     return BlocProvider<WholeAppBloc>(
-      bloc: _wholeAppBloc,
+      builder: (BuildContext context) => WholeAppBloc(),
       child: MaterialApp(
         title: 'FLutter Chat Test App',
         theme: ThemeData(
