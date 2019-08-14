@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'dart:convert' as convert;
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
@@ -15,9 +17,15 @@ class ConversationGroupAPIService {
     print("ConversationGroupAPIService.addConversation()");
 
     String wholeURL = REST_URL + "/conversationGroup";
+    Map<String, String> headers = new HashMap();
+    headers['Content-Type'] = "application/json";
 
+    // conversation.toJson().toString()
+    String conversationJsonString = json.encode(conversation.toJson());
+    print("conversationJsonString: " + conversationJsonString);
+    //Content-Type: application/json
     print("wholeURL: " + wholeURL);
-    var httpResponse = await http.post(REST_URL + "/conversationGroup", body: conversation);
+    var httpResponse = await http.post(REST_URL + "/conversationGroup", body: conversationJsonString, headers: headers);
 
     print("httpResponse: " + httpResponse.toString());
     if (httpResponseIsOK(httpResponse)) {

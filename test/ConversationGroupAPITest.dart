@@ -4,10 +4,9 @@ import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-
-
   test("Test Create conversation", () async {
-    ConversationGroupAPIService conversationGroupAPIService = ConversationGroupAPIService();
+    ConversationGroupAPIService conversationGroupAPIService =
+        ConversationGroupAPIService();
     print("Test start!");
     Conversation conversation = new Conversation(
       id: null,
@@ -18,7 +17,12 @@ void main() {
       timestamp: "5643484641654",
       notificationExpireDate: 254631654,
       creatorUserId: "65421654654651",
-//      memberIds: ["wadwadw56f4sef", "56s4f6r54g89e4g", "54hs564ju456dyth5jsr", "5t4s5g1erg65t4ae"],
+      memberIds: [
+        "wadwadw56f4sef",
+        "56s4f6r54g89e4g",
+        "54hs564ju456dyth5jsr",
+        "5t4s5g1erg65t4ae"
+      ],
       block: false,
     );
     print("conversation.id:" + conversation.id.toString());
@@ -28,8 +32,8 @@ void main() {
     print("conversation.createdDate:" + conversation.createdDate);
     print("conversation.timestamp:" + conversation.timestamp);
 
-
     print("Executing test now....");
-    expect(await conversationGroupAPIService.addConversation(conversation), conversation);
+    expect(await conversationGroupAPIService.addConversation(conversation),
+        conversation);
   });
 }

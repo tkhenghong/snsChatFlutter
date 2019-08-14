@@ -8,7 +8,7 @@ class Conversation {
   String name;
   String type;
   String description;
-//  List<String> memberIds;
+  List<String> memberIds;
   bool block;
   int notificationExpireDate; // 0 = unblocked, > 0 = blocked until specific time
   String timestamp;
@@ -21,7 +21,7 @@ class Conversation {
       this.type,
       this.block,
       this.description,
-//        this.memberIds,
+      this.memberIds,
       this.notificationExpireDate,
       this.timestamp});
 
@@ -33,7 +33,7 @@ class Conversation {
         type = json['type'],
         block = json['block'],
         description = json['description'],
-//        memberIds = json['memberIds'],
+        memberIds = json['memberIds'],
         notificationExpireDate = json['notificationExpireDate'],
         timestamp = json['timestamp'];
 
@@ -45,7 +45,7 @@ class Conversation {
         'type': type,
         'block': block,
         'description': description,
-//    'memberIds': memberIds,
+        'memberIds': memberIds,
         'notificationExpireDate': notificationExpireDate,
         'timestamp': timestamp,
       };
