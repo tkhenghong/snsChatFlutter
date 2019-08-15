@@ -19,21 +19,18 @@ class ConversationGroupAPIService {
     String wholeURL = REST_URL + "/conversationGroup";
     Map<String, String> headers = new HashMap();
     headers['Content-Type'] = "application/json";
-
-    // conversation.toJson().toString()
     String conversationJsonString = json.encode(conversation.toJson());
     print("conversationJsonString: " + conversationJsonString);
-    //Content-Type: application/json
     print("wholeURL: " + wholeURL);
     var httpResponse = await http.post(REST_URL + "/conversationGroup", body: conversationJsonString, headers: headers);
 
-    print("httpResponse: " + httpResponse.toString());
     if (httpResponseIsOK(httpResponse)) {
-      var jsonResponse = convert.jsonDecode(httpResponse.body);
-      // TODO: Find the new id returned by the server
-      var newConversationId = jsonResponse['id'];
-      print("newConversationId: " + newConversationId);
-      conversation.id = newConversationId;
+      String locationString = httpResponse.headers['location'];
+      print("locationString: " + locationString);
+      print("httpResponse: " + httpResponse.toString());
+      String conversationGroupId = locationString.replaceAll(wholeURL + "/", "");
+      print("conversationGroupId: " + conversationGroupId);
+      conversation.id = conversationGroupId;
       return conversation;
     }
     return null;
