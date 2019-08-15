@@ -17,14 +17,13 @@ class ConversationGroupAPIService {
     print("ConversationGroupAPIService.addConversation()");
 
     String wholeURL = REST_URL + "/conversationGroup";
-    Map<String, String> headers = new HashMap();
-    headers['Content-Type'] = "application/json";
+
     String conversationJsonString = json.encode(conversation.toJson());
     print("conversationJsonString: " + conversationJsonString);
     print("wholeURL: " + wholeURL);
-    var httpResponse = await http.post(REST_URL + "/conversationGroup", body: conversationJsonString, headers: headers);
+    var httpResponse = await http.post(REST_URL + "/conversationGroup", body: conversationJsonString, headers: createHeaders());
 
-    if (httpResponseIsOK(httpResponse)) {
+    if (httpResponseIsCreated(httpResponse)) {
       String locationString = httpResponse.headers['location'];
       print("locationString: " + locationString);
       print("httpResponse: " + httpResponse.toString());
@@ -37,7 +36,9 @@ class ConversationGroupAPIService {
   }
 
   Future<bool> editConversation(Conversation conversation) async {
-    var httpResponse = await http.put(REST_URL + "/conversationGroup", body: conversation);
+    String conversationJsonString = json.encode(conversation.toJson());
+    print("conversationJsonString: " + conversationJsonString);
+    var httpResponse = await http.put(REST_URL + "/conversationGroup", body: conversationJsonString,  headers: createHeaders());
 
     return httpResponseIsOK(httpResponse);
   }
@@ -67,5 +68,11 @@ class ConversationGroupAPIService {
       return conversationList;
     }
     return null;
+  }
+
+  Map<String, String> createHeaders() {
+    Map<String, String> headers = new HashMap();
+    headers['Content-Type'] = "application/json";
+    return headers;
   }
 }

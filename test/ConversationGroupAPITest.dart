@@ -4,11 +4,11 @@ import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test("Test Create conversation", () async {
-    ConversationGroupAPIService conversationGroupAPIService =
-        ConversationGroupAPIService();
-    print("Test start!");
-    Conversation conversation = new Conversation(
+
+  ConversationGroupAPIService conversationGroupAPIService = ConversationGroupAPIService();
+
+  Conversation createTestObject() {
+    return new Conversation(
       id: null,
       name: "Testing Group 1",
       description: "Testing description",
@@ -25,6 +25,12 @@ void main() {
       ],
       block: false,
     );
+  }
+
+  test("Test Create conversation", () async {
+
+    print("Test start!");
+    Conversation conversation = createTestObject();
     print("conversation.id:" + conversation.id.toString());
     print("conversation.name:" + conversation.name);
     print("conversation.description:" + conversation.description);
@@ -37,5 +43,19 @@ void main() {
     print("newConversation.id:" + newConversation.id.toString());
 //    expect(await conversationGroupAPIService.addConversation(conversation),
 //        conversation);
+  expect(newConversation.id, isNotEmpty);
+  });
+
+  test("Test Edit Conversation", () async {
+    Conversation conversation = createTestObject();
+    Conversation newConversation = await conversationGroupAPIService.addConversation(conversation);
+    Conversation editedConversation = newConversation;
+    editedConversation.name = "Test Group 2";
+    editedConversation.type = "Group";
+    editedConversation.description = "Edited Description";
+    bool edited = await conversationGroupAPIService.editConversation(editedConversation);
+    print("edited:" + edited.toString());
+
+    expect(edited, isTrue);
   });
 }
