@@ -14,21 +14,13 @@ class ConversationGroupAPIService {
   String REST_URL = globals.REST_URL;
 
   Future<Conversation> addConversation(Conversation conversation) async {
-    print("ConversationGroupAPIService.addConversation()");
-
     String wholeURL = REST_URL + "/conversationGroup";
-
     String conversationJsonString = json.encode(conversation.toJson());
-    print("conversationJsonString: " + conversationJsonString);
-    print("wholeURL: " + wholeURL);
     var httpResponse = await http.post(REST_URL + "/conversationGroup", body: conversationJsonString, headers: createHeaders());
 
     if (httpResponseIsCreated(httpResponse)) {
       String locationString = httpResponse.headers['location'];
-      print("locationString: " + locationString);
-      print("httpResponse: " + httpResponse.toString());
       String conversationGroupId = locationString.replaceAll(wholeURL + "/", "");
-      print("conversationGroupId: " + conversationGroupId);
       conversation.id = conversationGroupId;
       return conversation;
     }
@@ -37,23 +29,22 @@ class ConversationGroupAPIService {
 
   Future<bool> editConversation(Conversation conversation) async {
     String conversationJsonString = json.encode(conversation.toJson());
-    print("conversationJsonString: " + conversationJsonString);
     var httpResponse = await http.put(REST_URL + "/conversationGroup", body: conversationJsonString,  headers: createHeaders());
 
     return httpResponseIsOK(httpResponse);
   }
 
-  Future<bool> deleteConversation(Conversation conversation) async {
-    var httpResponse = await http.delete(REST_URL + "/conversationGroup" + conversation.id);
+  Future<bool> deleteConversation(String conversationGroupId) async {
+    var httpResponse = await http.delete(REST_URL + "/conversationGroup" + conversationGroupId);
     return httpResponseIsOK(httpResponse);
   }
 
   Future<Conversation> getSingleConversation(String conversationGroupId) async {
+
     var httpResponse = await http.get(REST_URL + "/conversationGroup/" + conversationGroupId);
 
     if (httpResponseIsOK(httpResponse)) {
-      Conversation conversation = convert.jsonDecode(httpResponse.body) as Conversation;
-      print("conversation.id: " + conversation.id);
+      Conversation conversation = new Conversation.fromJson(json.decode(httpResponse.body));
       return conversation;
     }
     return null;
@@ -64,7 +55,6 @@ class ConversationGroupAPIService {
 
     if (httpResponseIsOK(httpResponse)) {
       List<Conversation> conversationList = convert.jsonDecode(httpResponse.body) as List<Conversation>;
-      print("conversationList.length: " + conversationList.length.toString());
       return conversationList;
     }
     return null;

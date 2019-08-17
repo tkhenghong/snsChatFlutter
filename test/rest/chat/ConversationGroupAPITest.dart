@@ -4,7 +4,6 @@ import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-
   ConversationGroupAPIService conversationGroupAPIService = ConversationGroupAPIService();
 
   Conversation createTestObject() {
@@ -17,33 +16,16 @@ void main() {
       timestamp: "5643484641654",
       notificationExpireDate: 254631654,
       creatorUserId: "65421654654651",
-      memberIds: [
-        "wadwadw56f4sef",
-        "56s4f6r54g89e4g",
-        "54hs564ju456dyth5jsr",
-        "5t4s5g1erg65t4ae"
-      ],
+      memberIds: ["wadwadw56f4sef", "56s4f6r54g89e4g", "54hs564ju456dyth5jsr", "5t4s5g1erg65t4ae"],
       block: false,
     );
   }
 
   test("Test Create conversation", () async {
-
-    print("Test start!");
     Conversation conversation = createTestObject();
-    print("conversation.id:" + conversation.id.toString());
-    print("conversation.name:" + conversation.name);
-    print("conversation.description:" + conversation.description);
-    print("conversation.type:" + conversation.type);
-    print("conversation.createdDate:" + conversation.createdDate);
-    print("conversation.timestamp:" + conversation.timestamp);
-
-    print("Executing test now....");
     Conversation newConversation = await conversationGroupAPIService.addConversation(conversation);
     print("newConversation.id:" + newConversation.id.toString());
-//    expect(await conversationGroupAPIService.addConversation(conversation),
-//        conversation);
-  expect(newConversation.id, isNotEmpty);
+    expect(newConversation.id, isNotEmpty);
   });
 
   test("Test Edit Conversation", () async {
@@ -57,5 +39,21 @@ void main() {
     print("edited:" + edited.toString());
 
     expect(edited, isTrue);
+  });
+
+  test("Test Get Conversation", () async {
+    Conversation conversation = createTestObject();
+    Conversation newConversation = await conversationGroupAPIService.addConversation(conversation);
+    Conversation conversationFromServer = await conversationGroupAPIService.getSingleConversation(newConversation.id);
+    print("conversationFromServer.id == newConversation.id:" + (conversationFromServer.id == newConversation.id).toString());
+    expect(conversationFromServer.id == newConversation.id, isTrue);
+  });
+
+  test("Test Delete Conversation", () async {
+    Conversation conversation = createTestObject();
+    Conversation newConversation = await conversationGroupAPIService.addConversation(conversation);
+    bool deleted = await conversationGroupAPIService.deleteConversation(newConversation.id);
+    print("deleted:" + deleted.toString());
+    expect(deleted, isTrue);
   });
 }
