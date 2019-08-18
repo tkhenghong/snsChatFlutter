@@ -1,41 +1,39 @@
 import 'dart:async';
 
 import 'dart:convert' as convert;
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import 'package:snschat_flutter/environments/development/variables.dart'
-    as globals;
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/objects/settings/settings.dart';
 
+import '../RestRequestUtils.dart';
 import '../RestResponseUtils.dart';
 
 class SettingsAPIService {
   String REST_URL = globals.REST_URL;
 
   Future<Settings> addSettings(Settings settings) async {
-    var httpResponse =
-        await http.post(REST_URL + "/settings", body: settings);
-
-    if (httpResponseIsOK(httpResponse)) {
-      var jsonResponse = convert.jsonDecode(httpResponse.body);
-      // TODO: Find the new id returned by the server
-      var newSettingsId = jsonResponse['id'];
-      print("newSettingsId: " + newSettingsId);
-      settings.id = newSettingsId;
+    String wholeURL = REST_URL + "/settings";
+    String settingsJsonString = json.encode(settings.toJson());
+    var httpResponse = await http.post(REST_URL + "/settings", body: settingsJsonString, headers: createAcceptJSONHeader());
+    if (httpResponseIsCreated(httpResponse)) {
+      String locationString = httpResponse.headers['location'];
+      String settingsId = locationString.replaceAll(wholeURL + "/", "");
+      settings.id = settingsId;
       return settings;
     }
     return null;
   }
 
   Future<bool> editSettings(Settings settings) async {
-    var httpResponse =
-    await http.put(REST_URL + "/settings", body: settings);
+    String settingsJsonString = json.encode(settings.toJson());
+    var httpResponse = await http.put(REST_URL + "/settings", body: settingsJsonString, headers: createAcceptJSONHeader());
     return httpResponseIsOK(httpResponse);
   }
 
-  Future<bool> deleteSettings(Settings settings) async {
-    var httpResponse =
-        await http.delete(REST_URL + "/settings" + settings.id);
+  Future<bool> deleteSettings(String settingsId) async {
+    var httpResponse = await http.delete(REST_URL + "/settings/" + settingsId);
     return httpResponseIsOK(httpResponse);
   }
 

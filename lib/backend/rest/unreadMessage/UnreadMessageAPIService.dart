@@ -1,47 +1,44 @@
 import 'dart:async';
 
 import 'dart:convert' as convert;
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import 'package:snschat_flutter/environments/development/variables.dart'
-    as globals;
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
 
+import '../RestRequestUtils.dart';
 import '../RestResponseUtils.dart';
 
 class UnreadMessageAPIService {
   String REST_URL = globals.REST_URL;
 
   Future<UnreadMessage> addUnreadMessage(UnreadMessage unreadMessage) async {
-    var httpResponse =
-        await http.post(REST_URL + "/unreadMessage", body: unreadMessage);
-
-    if (httpResponseIsOK(httpResponse)) {
-      var jsonResponse = convert.jsonDecode(httpResponse.body);
-      // TODO: Find the new id returned by the server
-      var newUnreadMessageId = jsonResponse['id'];
-      print("newUnreadMessageId: " + newUnreadMessageId);
-      unreadMessage.id = newUnreadMessageId;
+    String wholeURL = REST_URL + "/unreadMessage";
+    String unreadMessageJsonString = json.encode(unreadMessage.toJson());
+    var httpResponse = await http.post(REST_URL + "/unreadMessage", body: unreadMessageJsonString, headers: createAcceptJSONHeader());
+    if (httpResponseIsCreated(httpResponse)) {
+      String locationString = httpResponse.headers['location'];
+      String unreadMessageId = locationString.replaceAll(wholeURL + "/", "");
+      unreadMessage.id = unreadMessageId;
       return unreadMessage;
     }
     return null;
   }
 
   Future<bool> editUnreadMessage(UnreadMessage unreadMessage) async {
-    var httpResponse =
-        await http.put(REST_URL + "/unreadMessage", body: unreadMessage);
+    String unreadMessageJsonString = json.encode(unreadMessage.toJson());
+    var httpResponse = await http.put(REST_URL + "/unreadMessage", body: unreadMessageJsonString, headers: createAcceptJSONHeader());
     return httpResponseIsOK(httpResponse);
   }
 
-  Future<bool> deleteUnreadMessage(UnreadMessage unreadMessage) async {
-    var httpResponse =
-        await http.delete(REST_URL + "/unreadMessage" + unreadMessage.id);
+  Future<bool> deleteUnreadMessage(String unreadMessageId) async {
+    var httpResponse = await http.delete(REST_URL + "/unreadMessage/" + unreadMessageId);
     return httpResponseIsOK(httpResponse);
   }
 
   Future<List<UnreadMessage>> getUnreadMessagesOfAUser(String userId) async {
-    var httpResponse =
-        await http.get(REST_URL + "/unreadMessage/user/" + userId);
+    var httpResponse = await http.get(REST_URL + "/unreadMessage/user/" + userId);
 
     if (httpResponseIsOK(httpResponse)) {
       var jsonResponse = convert.jsonDecode(httpResponse.body);

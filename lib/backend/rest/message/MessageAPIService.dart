@@ -4,8 +4,7 @@ import 'dart:convert' as convert;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import 'package:snschat_flutter/environments/development/variables.dart'
-    as globals;
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/objects/message/message.dart';
 
 import '../RestRequestUtils.dart';
@@ -29,7 +28,7 @@ class MessageAPIService {
 
   Future<bool> editMessage(Message message) async {
     String messageJsonString = json.encode(message.toJson());
-    var httpResponse = await http.put(REST_URL + "/message", body: messageJsonString,  headers: createAcceptJSONHeader());
+    var httpResponse = await http.put(REST_URL + "/message", body: messageJsonString, headers: createAcceptJSONHeader());
     return httpResponseIsOK(httpResponse);
   }
 
@@ -47,10 +46,8 @@ class MessageAPIService {
     return null;
   }
 
-  Future<List<Message>> getMessagesOfAConversation(
-      String conversationId) async {
-    var httpResponse =
-        await http.get(REST_URL + "/message/conversation/" + conversationId);
+  Future<List<Message>> getMessagesOfAConversation(String conversationId) async {
+    var httpResponse = await http.get(REST_URL + "/message/conversation/" + conversationId);
 
     if (httpResponseIsOK(httpResponse)) {
       var jsonResponse = convert.jsonDecode(httpResponse.body);
