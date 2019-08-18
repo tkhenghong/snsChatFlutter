@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'dart:convert' as convert;
 import 'dart:convert';
@@ -8,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 
+import '../RestRequestUtils.dart';
 import '../RestResponseUtils.dart';
 
 class ConversationGroupAPIService {
@@ -16,7 +16,7 @@ class ConversationGroupAPIService {
   Future<Conversation> addConversation(Conversation conversation) async {
     String wholeURL = REST_URL + "/conversationGroup";
     String conversationJsonString = json.encode(conversation.toJson());
-    var httpResponse = await http.post(REST_URL + "/conversationGroup", body: conversationJsonString, headers: createHeaders());
+    var httpResponse = await http.post(REST_URL + "/conversationGroup", body: conversationJsonString, headers: createAcceptJSONHeader());
 
     if (httpResponseIsCreated(httpResponse)) {
       String locationString = httpResponse.headers['location'];
@@ -29,20 +29,17 @@ class ConversationGroupAPIService {
 
   Future<bool> editConversation(Conversation conversation) async {
     String conversationJsonString = json.encode(conversation.toJson());
-    var httpResponse = await http.put(REST_URL + "/conversationGroup", body: conversationJsonString,  headers: createHeaders());
-
+    var httpResponse = await http.put(REST_URL + "/conversationGroup", body: conversationJsonString,  headers: createAcceptJSONHeader());
     return httpResponseIsOK(httpResponse);
   }
 
   Future<bool> deleteConversation(String conversationGroupId) async {
-    var httpResponse = await http.delete(REST_URL + "/conversationGroup" + conversationGroupId);
+    var httpResponse = await http.delete(REST_URL + "/conversationGroup/" + conversationGroupId);
     return httpResponseIsOK(httpResponse);
   }
 
   Future<Conversation> getSingleConversation(String conversationGroupId) async {
-
     var httpResponse = await http.get(REST_URL + "/conversationGroup/" + conversationGroupId);
-
     if (httpResponseIsOK(httpResponse)) {
       Conversation conversation = new Conversation.fromJson(json.decode(httpResponse.body));
       return conversation;
@@ -52,17 +49,10 @@ class ConversationGroupAPIService {
 
   Future<List<Conversation>> getConversationsForUser(String userId) async {
     var httpResponse = await http.get(REST_URL + "/conversationGroup/user/" + userId);
-
     if (httpResponseIsOK(httpResponse)) {
       List<Conversation> conversationList = convert.jsonDecode(httpResponse.body) as List<Conversation>;
       return conversationList;
     }
     return null;
-  }
-
-  Map<String, String> createHeaders() {
-    Map<String, String> headers = new HashMap();
-    headers['Content-Type'] = "application/json";
-    return headers;
   }
 }

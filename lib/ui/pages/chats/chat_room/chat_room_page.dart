@@ -542,7 +542,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
         newMessage = Message(
           id: generateNewId().toString(),
           conversationId: widget._conversation.id,
-          message: content,
+          messageContent: content,
           multimediaId: newMultimedia.id,
           // Send to group will not need receiver
           receiverId: "",
@@ -572,7 +572,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             .setData({
           'id': newMessage.id, // Self generated Id
           'conversationId': newMessage.conversationId,
-          'message': newMessage.message,
+          'message': newMessage.messageContent,
           'multimediaId': newMessage.multimediaId,
           'receiverId': newMessage.receiverId,
           'receiverMobileNo': newMessage.receiverMobileNo,

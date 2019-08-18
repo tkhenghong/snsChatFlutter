@@ -19,7 +19,7 @@ class Message {
 
   String type;
   String status; // Sent, received, unread, read
-  String message;
+  String messageContent;
   String multimediaId; // Multimedia
   String timestamp;
 
@@ -34,7 +34,7 @@ class Message {
       this.receiverMobileNo,
       this.type,
       this.status,
-      this.message,
+      this.messageContent,
       this.multimediaId,
       this.timestamp});
 
@@ -49,7 +49,7 @@ class Message {
         receiverMobileNo = json['receiverMobileNo'],
         type = json['type'],
         status = json['status'],
-        message = json['message'],
+        messageContent = json['message'],
         multimediaId = json['multimediaId'],
         timestamp = json['timestamp'];
 
@@ -64,7 +64,7 @@ class Message {
         'receiverMobileNo': receiverMobileNo,
         'type': type,
         'status': status,
-        'message': message,
+        'messageContent': messageContent,
         'multimediaId': multimediaId,
         'timestamp': timestamp,
       };

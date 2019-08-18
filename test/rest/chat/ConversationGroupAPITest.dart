@@ -44,7 +44,9 @@ void main() {
   test("Test Get Conversation", () async {
     Conversation conversation = createTestObject();
     Conversation newConversation = await conversationGroupAPIService.addConversation(conversation);
+    print("newConversation.id: " + newConversation.id);
     Conversation conversationFromServer = await conversationGroupAPIService.getSingleConversation(newConversation.id);
+    print("conversationFromServer.id: " + conversationFromServer.id);
     print("conversationFromServer.id == newConversation.id:" + (conversationFromServer.id == newConversation.id).toString());
     expect(conversationFromServer.id == newConversation.id, isTrue);
   });
@@ -55,5 +57,9 @@ void main() {
     bool deleted = await conversationGroupAPIService.deleteConversation(newConversation.id);
     print("deleted:" + deleted.toString());
     expect(deleted, isTrue);
+  });
+
+  test("Test Get Conversations of A User", () async {
+    // TODO
   });
 }
