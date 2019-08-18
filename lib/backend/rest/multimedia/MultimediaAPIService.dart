@@ -52,8 +52,6 @@ class MultimediaAPIService {
     if (httpResponseIsOK(httpResponse)) {
       var jsonResponse = convert.jsonDecode(httpResponse.body);
       List<Multimedia> multimediaList = convert.jsonDecode(jsonResponse);
-      print("multimediaList.length: " + multimediaList.length.toString());
-
       return multimediaList;
     }
     return null;

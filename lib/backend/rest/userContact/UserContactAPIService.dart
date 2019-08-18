@@ -14,7 +14,7 @@ class UserContactAPIService {
   String REST_URL = globals.REST_URL;
 
   Future<UserContact> addUserContact(UserContact userContact) async {
-    String wholeURL = REST_URL + "/user";
+    String wholeURL = REST_URL + "/userContact";
     String userContactJsonString = json.encode(userContact.toJson());
     var httpResponse = await http.post(REST_URL + "/userContact", body: userContactJsonString, headers: createAcceptJSONHeader());
     if (httpResponseIsCreated(httpResponse)) {
@@ -41,9 +41,7 @@ class UserContactAPIService {
     var httpResponse = await http.get(REST_URL + "/userContact/" + userContactId);
 
     if (httpResponseIsOK(httpResponse)) {
-      UserContact userContact = convert.jsonDecode(httpResponse.body);
-      // TODO: Find the new id returned by the server
-      print("userContact.id: " + userContact.id);
+      UserContact userContact = new UserContact.fromJson(json.decode(httpResponse.body));
       return userContact;
     }
     return null;

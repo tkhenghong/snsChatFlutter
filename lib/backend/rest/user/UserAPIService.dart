@@ -41,9 +41,7 @@ class UserAPIService {
     var httpResponse = await http.get(REST_URL + "/user/" + userId);
 
     if (httpResponseIsOK(httpResponse)) {
-      User user = convert.jsonDecode(httpResponse.body);
-      // TODO: Find the new id returned by the server
-      print("user.id: " + user.id);
+      User user = new User.fromJson(json.decode(httpResponse.body));
       return user;
     }
     return null;

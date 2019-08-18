@@ -37,14 +37,19 @@ class SettingsAPIService {
     return httpResponseIsOK(httpResponse);
   }
 
+  Future<Settings> getSingleSettings(String settingsId) async {
+    var httpResponse = await http.get(REST_URL + "/settings/" + settingsId);
+    if (httpResponseIsOK(httpResponse)) {
+      Settings settings = new Settings.fromJson(json.decode(httpResponse.body));
+      return settings;
+    }
+    return null;
+  }
+
   Future<Settings> getSettingsOfAUser(String userId) async {
     var httpResponse = await http.get(REST_URL + "/settings/user/" + userId);
-
     if (httpResponseIsOK(httpResponse)) {
-      var jsonResponse = convert.jsonDecode(httpResponse.body);
-      Settings settings = convert.jsonDecode(jsonResponse);
-      print("settings: " + settings.id);
-
+      Settings settings = new Settings.fromJson(json.decode(httpResponse.body));
       return settings;
     }
     return null;

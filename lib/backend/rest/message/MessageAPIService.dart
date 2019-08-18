@@ -52,8 +52,6 @@ class MessageAPIService {
     if (httpResponseIsOK(httpResponse)) {
       var jsonResponse = convert.jsonDecode(httpResponse.body);
       List<Message> messageList = convert.jsonDecode(jsonResponse);
-      print("messageList.length: " + messageList.length.toString());
-
       return messageList;
     }
     return null;

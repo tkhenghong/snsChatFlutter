@@ -37,14 +37,21 @@ class UnreadMessageAPIService {
     return httpResponseIsOK(httpResponse);
   }
 
+  Future<UnreadMessage> getSingleUnreadMessage(String messageId) async {
+    var httpResponse = await http.get(REST_URL + "/unreadMessage/" + messageId);
+    if (httpResponseIsOK(httpResponse)) {
+      UnreadMessage message = new UnreadMessage.fromJson(json.decode(httpResponse.body));
+      return message;
+    }
+    return null;
+  }
+
   Future<List<UnreadMessage>> getUnreadMessagesOfAUser(String userId) async {
     var httpResponse = await http.get(REST_URL + "/unreadMessage/user/" + userId);
 
     if (httpResponseIsOK(httpResponse)) {
       var jsonResponse = convert.jsonDecode(httpResponse.body);
       List<UnreadMessage> unreadMessageList = convert.jsonDecode(jsonResponse);
-      print("unreadMessageList.length: " + unreadMessageList.length.toString());
-
       return unreadMessageList;
     }
     return null;
