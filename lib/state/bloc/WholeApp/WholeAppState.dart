@@ -11,7 +11,7 @@ import 'package:snschat_flutter/objects/settings/settings.dart';
 import 'package:snschat_flutter/objects/user/user.dart';
 
 class WholeAppState {
-  List<Conversation> conversationList;
+  List<ConversationGroup> conversationGroupList;
   List<UnreadMessage> unreadMessageList;
   List<Message> messageList;
   List<Multimedia> multimediaList;
@@ -29,7 +29,7 @@ class WholeAppState {
   // What is double dot? https://stackoverflow.com/questions/49447736/list-use-of-double-dot-in-dart
   factory WholeAppState.initial() {
     return WholeAppState._()
-      ..conversationList = []
+      ..conversationGroupList = []
       ..unreadMessageList = []
       ..messageList = []
       ..multimediaList = []

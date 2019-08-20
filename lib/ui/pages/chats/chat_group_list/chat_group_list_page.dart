@@ -120,28 +120,28 @@ class ChatGroupListState extends State<ChatGroupListPage> {
       print("userContactIds: " + userContactIds.toString());
       print("userContactIds.length: " + userContactIds.length.toString());
       for(int i = 0; i < userContactIds.length; i++) {
-        QuerySnapshot conversationSnapshot =
+        QuerySnapshot conversationGroupSnapshot =
         await Firestore.instance.collection("conversation").where("memberIds", arrayContains: userContactIds[i]).getDocuments();
 
-        List<DocumentSnapshot> conversationDocuments = conversationSnapshot.documents;
-        print("chat_group_list_page.dart conversationDocuments.length: " + conversationDocuments.length.toString());
-        if (conversationDocuments.length > 0) {
-          print("if (conversationDocuments.length > 0)");
-          DocumentSnapshot conversationDocument = conversationDocuments[0];
+        List<DocumentSnapshot> conversationGroupDocuments = conversationGroupSnapshot.documents;
+        print("chat_group_list_page.dart conversationGroupDocuments.length: " + conversationGroupDocuments.length.toString());
+        if (conversationGroupDocuments.length > 0) {
+          print("if (conversationGroupDocuments.length > 0)");
+          DocumentSnapshot conversationGroupDocument = conversationGroupDocuments[0];
 
-          Conversation conversation = new Conversation(
-            id: conversationDocument["id"].toString(),
-            name: conversationDocument["name"].toString(),
-            description: conversationDocument["description"].toString(),
-            type: conversationDocument["type"].toString(),
-            timestamp: conversationDocument["timestamp"].toString(),
-            block: conversationDocument["block"] as bool,
-            notificationExpireDate: conversationDocument["notificationExpireDate"] as int,
-            creatorUserId: conversationDocument["creatorUserId"].toString(),
-            memberIds: List.from(conversationDocument["memberIds"]),
-            createdDate: conversationDocument["createdDate"].toString(),
+          ConversationGroup conversationGroup = new ConversationGroup(
+            id: conversationGroupDocument["id"].toString(),
+            name: conversationGroupDocument["name"].toString(),
+            description: conversationGroupDocument["description"].toString(),
+            type: conversationGroupDocument["type"].toString(),
+            timestamp: conversationGroupDocument["timestamp"].toString(),
+            block: conversationGroupDocument["block"] as bool,
+            notificationExpireDate: conversationGroupDocument["notificationExpireDate"] as int,
+            creatorUserId: conversationGroupDocument["creatorUserId"].toString(),
+            memberIds: List.from(conversationGroupDocument["memberIds"]),
+            createdDate: conversationGroupDocument["createdDate"].toString(),
           );
-          wholeAppBloc.dispatch(AddConversationEvent(conversation: conversation, callback: (Conversation conversation) {}));
+          wholeAppBloc.dispatch(AddConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
 
         } else {
           print("if (conversationDocuments.length <= 0)");
@@ -167,7 +167,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     return BlocBuilder(
       bloc: wholeAppBloc,
       builder: (context, WholeAppState state) {
-        if (!isObjectEmpty(state.conversationList) && state.conversationList.length > 0) {
+        if (!isObjectEmpty(state.conversationGroupList) && state.conversationGroupList.length > 0) {
           return SmartRefresher(
             controller: _refreshController,
             header: WaterDropHeader(),
@@ -181,10 +181,10 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
                 physics: BouncingScrollPhysics(),
-                itemCount: state.conversationList.length,
+                itemCount: state.conversationGroupList.length,
                 itemBuilder: (context, index) {
                   print("ListView.builder");
-                  return PageListTile(mapConversationToPageListTile(state.conversationList[index]), context);
+                  return PageListTile(mapConversationToPageListTile(state.conversationGroupList[index]), context);
                 }),
           );
         } else {
@@ -196,7 +196,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     );
   }
 
-  PageListItem mapConversationToPageListTile(Conversation conversation) {
+  PageListItem mapConversationToPageListTile(ConversationGroup conversation) {
     print('mapConversationToPageListTile()');
     return PageListItem(
         title: Hero(

@@ -1,6 +1,6 @@
 // No enum in Dart native yet
 
-class Conversation {
+class ConversationGroup {
   // Single conversation, group conversation & broadcast channel
   String id;
   String creatorUserId;
@@ -13,7 +13,7 @@ class Conversation {
   int notificationExpireDate; // 0 = unblocked, > 0 = blocked until specific time
   String timestamp;
 
-  Conversation(
+  ConversationGroup(
       {this.id,
       this.creatorUserId,
       this.createdDate,
@@ -25,7 +25,7 @@ class Conversation {
       this.notificationExpireDate,
       this.timestamp});
 
-  Conversation.fromJson(Map<String, dynamic> json)
+  ConversationGroup.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         creatorUserId = json['creatorUserId'],
         createdDate = json['createdDate'],

@@ -16,7 +16,7 @@ import 'package:jaguar_query_sqflite/jaguar_query_sqflite.dart';
 /// The adapter
 SqfliteAdapter _adapter;
 
-Future<void> startupDatabase() async {
+Future<void> startSQLDatabase() async {
 
   _adapter =  new SqfliteAdapter(await getDatabasesPath());
 

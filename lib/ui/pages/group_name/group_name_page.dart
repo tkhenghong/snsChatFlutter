@@ -70,11 +70,11 @@ class GroupNamePageState extends State<GroupNamePage> {
                   child: Icon(Icons.check),
                 ),
                 onTap: () {
-                  createGroupConversation().then((conversation) {
+                  createGroupConversation().then((conversationGroup) {
                     print("Go back to Main Page!");
-                    _wholeAppBloc.dispatch(AddConversationEvent(conversation: conversation, callback: (Conversation conversation) {}));
+                    _wholeAppBloc.dispatch(AddConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
                     Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
-                    Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversation))));
+                    Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
                   });
                 },
               ),
@@ -167,10 +167,10 @@ class GroupNamePageState extends State<GroupNamePage> {
         ));
   }
 
-  // TODO: Conversation Creation into BLOC, can be merged with Personal & Broadcast
-  Future<Conversation> createGroupConversation() async {
+  // TODO: Conversation Group Creation into BLOC, can be merged with Personal & Broadcast
+  Future<ConversationGroup> createGroupConversation() async {
     print("createGroupConversation()");
-    Conversation conversation = new Conversation(
+    ConversationGroup conversationGroup = new ConversationGroup(
       id: generateNewId().toString(),
       notificationExpireDate: 0,
       creatorUserId: wholeAppBloc.currentState.userState.id,
@@ -180,7 +180,7 @@ class GroupNamePageState extends State<GroupNamePage> {
       block: false,
       description: '',
     );
-    print("conversation: " + conversation.toString());
+    print("conversationGroup: " + conversationGroup.toString());
 
     // Multimedia for group chat
     Multimedia newMultiMedia = Multimedia(
@@ -193,14 +193,14 @@ class GroupNamePageState extends State<GroupNamePage> {
       remoteFullFileUrl: null,
       messageId: "",
       userContactId: "",
-      conversationId: conversation.id,
+      conversationId: conversationGroup.id,
     );
     print("newMultiMedia: " + newMultiMedia.toString());
     wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
 
     UnreadMessage newUnreadMessage = UnreadMessage(
         id: generateNewId().toString(),
-        conversationId: conversation.id,
+        conversationId: conversationGroup.id,
         count: 0,
         date: 0,
         lastMessage: "",
@@ -208,18 +208,18 @@ class GroupNamePageState extends State<GroupNamePage> {
 
     print("newUnreadMessage: " + newUnreadMessage.toString());
 
-    uploadConversationMembers(conversation).then((bool done) {
+    uploadConversationMembers(conversationGroup).then((bool done) {
       print("Upload conversation members done!");
       // Upload yourself as UserContact as you're the one of the group members in the conversation
-      uploadSelfUserContact(conversation).then((bool done) {
+      uploadSelfUserContact(conversationGroup).then((bool done) {
         print("Upload self user Contact done!");
-        uploadConversation(conversation, newUnreadMessage, newMultiMedia);
+        uploadConversation(conversationGroup, newUnreadMessage, newMultiMedia);
       });
     });
-    return conversation;
+    return conversationGroup;
   }
 
-  Future<bool> uploadConversationMembers(Conversation conversation) async {
+  Future<bool> uploadConversationMembers(ConversationGroup conversationGroup) async {
     print("group_name_page.dart uploadConversationMembers()");
     // convert contact to contact (self defined)
     widget.selectedContacts.forEach((contact) {
@@ -254,7 +254,7 @@ class GroupNamePageState extends State<GroupNamePage> {
         mobileNo: primaryNo.length == 0 ? contact.displayName : primaryNo[0],
         block: false,
         lastSeenDate: "",
-        conversationId: conversation.id,
+        conversationId: conversationGroup.id,
       );
       print("newUserContact: " + newUserContact.toString());
 //      UserContact userContact = await
@@ -294,7 +294,7 @@ class GroupNamePageState extends State<GroupNamePage> {
     return newUserContact;
   }
 
-  Future<bool> uploadSelfUserContact(Conversation conversation) async {
+  Future<bool> uploadSelfUserContact(ConversationGroup conversationGroup) async {
     print("group_name_page.dart uploadSelfUserContact()");
     User currentUser = wholeAppBloc.currentState.userState;
     UserContact selfUserContact = UserContact(
@@ -306,7 +306,7 @@ class GroupNamePageState extends State<GroupNamePage> {
       mobileNo: currentUser.mobileNo,
       block: false,
       lastSeenDate: "",
-      conversationId: conversation.id,
+      conversationId: conversationGroup.id,
     );
     print("selfUserContact: " + selfUserContact.toString());
 
@@ -318,21 +318,21 @@ class GroupNamePageState extends State<GroupNamePage> {
     return true;
   }
 
-  Future<bool> uploadConversation(Conversation conversation, UnreadMessage newUnreadMessage, Multimedia newMultiMedia) async {
+  Future<bool> uploadConversation(ConversationGroup conversationGroup, UnreadMessage newUnreadMessage, Multimedia newMultiMedia) async {
     print("group_name_page.dart uploadConversation()");
-    conversation.memberIds = userContactList.map((UserContact userContact) {
+    conversationGroup.memberIds = userContactList.map((UserContact userContact) {
       return userContact.id;
     }).toList();
-    await Firestore.instance.collection('conversation').document(conversation.id).setData({
-      'id': conversation.id, // Self generated Id
-      'name': conversation.name,
-      'type': conversation.type,
-      'creatorUserId': conversation.creatorUserId,
-      'createdDate': conversation.createdDate,
-      'block': conversation.block,
-      'description': conversation.description,
-      'notificationExpireDate': conversation.notificationExpireDate,
-      'memberIds': conversation.memberIds,
+    await Firestore.instance.collection('conversation').document(conversationGroup.id).setData({
+      'id': conversationGroup.id, // Self generated Id
+      'name': conversationGroup.name,
+      'type': conversationGroup.type,
+      'creatorUserId': conversationGroup.creatorUserId,
+      'createdDate': conversationGroup.createdDate,
+      'block': conversationGroup.block,
+      'description': conversationGroup.description,
+      'notificationExpireDate': conversationGroup.notificationExpireDate,
+      'memberIds': conversationGroup.memberIds,
       'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
     });
 

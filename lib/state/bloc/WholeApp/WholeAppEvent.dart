@@ -62,11 +62,11 @@ class GetPhoneStorageContactsEvent extends WholeAppEvent {
 }
 
 // Conversation
-class AddConversationEvent extends WholeAppEvent {
-  Conversation conversation;
+class AddConversationGroupEvent extends WholeAppEvent {
+  ConversationGroup conversationGroup;
   Function callback;
 
-  AddConversationEvent({this.conversation, this.callback});
+  AddConversationGroupEvent({this.conversationGroup, this.callback});
 }
 
 // Message

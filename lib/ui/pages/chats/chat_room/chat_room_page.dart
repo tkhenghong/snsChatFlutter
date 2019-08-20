@@ -17,9 +17,9 @@ import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
 
 class ChatRoomPage extends StatefulWidget {
-  final Conversation _conversation;
+  final ConversationGroup _conversationGroup;
 
-  ChatRoomPage([this._conversation]);
+  ChatRoomPage([this._conversationGroup]);
 
   @override
   State<StatefulWidget> createState() {
@@ -63,7 +63,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     Multimedia groupPhoto;
     var multimediaDocuments = await Firestore.instance
         .collection("multimedia")
-        .where("conversationId", isEqualTo: widget._conversation.id)
+        .where("conversationId", isEqualTo: widget._conversationGroup.id)
         .getDocuments();
     if (multimediaDocuments.documents.length == 0) {
       print("if (multimediaDocuments.documents.length == 0)");
@@ -91,7 +91,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     print("chat_room_page.dart build()");
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
-    print("widget._conversation.id: " + widget._conversation.id);
+    print("widget._conversation.id: " + widget._conversationGroup.id);
     getConversationPhoto().then((Multimedia groupPhoto) {
       if (!isObjectEmpty(groupPhoto)) {
         print("if(!isObjectEmpty(groupPhoto))");
@@ -153,7 +153,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                       children: <Widget>[
                         Icon(Icons.arrow_back),
                         Hero(
-                          tag: widget._conversation.id,
+                          tag: widget._conversationGroup.id,
                           child: CircleAvatar(
                             radius: 20.0,
                             backgroundColor: Colors.white,
@@ -183,7 +183,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     onTap: () {
                       Navigator.of(context).push(MaterialPageRoute(
                           builder: (BuildContext context) =>
-                              ChatInfoPage(widget._conversation)));
+                              ChatInfoPage(widget._conversationGroup)));
                     },
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,9 +193,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                           padding: EdgeInsets.only(top: 10.0, right: 250.0),
                         ),
                         Hero(
-                          tag: widget._conversation.name,
+                          tag: widget._conversationGroup.name,
                           child: Text(
-                            widget._conversation.name,
+                            widget._conversationGroup.name,
                             style: TextStyle(
                                 color: Colors.white,
                                 // fontSize: 20.0,
@@ -323,7 +323,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     return StreamBuilder(
       stream: Firestore.instance
           .collection("message")
-          .where("conversationId", isEqualTo: widget._conversation.id)
+          .where("conversationId", isEqualTo: widget._conversationGroup.id)
           .orderBy('timestamp', descending: true)
           .snapshots(),
       builder: (BuildContext context, snapshot) {
@@ -528,7 +528,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
         // Text
         newMultimedia = Multimedia(
             id: generateNewId().toString(),
-            conversationId: widget._conversation.id,
+            conversationId: widget._conversationGroup.id,
             messageId: "",
             // Add after message created
             userContactId: "",
@@ -541,7 +541,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
         print("Checkpoint 2");
         newMessage = Message(
           id: generateNewId().toString(),
-          conversationId: widget._conversation.id,
+          conversationId: widget._conversationGroup.id,
           messageContent: content,
           multimediaId: newMultimedia.id,
           // Send to group will not need receiver

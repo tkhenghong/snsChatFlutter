@@ -6,8 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   ConversationGroupAPIService conversationGroupAPIService = ConversationGroupAPIService();
 
-  Conversation createTestObject() {
-    return new Conversation(
+  ConversationGroup createTestObject() {
+    return new ConversationGroup(
       id: null,
       name: "Testing Group 1",
       description: "Testing description",
@@ -21,45 +21,45 @@ void main() {
     );
   }
 
-  test("Test Create conversation", () async {
-    Conversation conversation = createTestObject();
-    Conversation newConversation = await conversationGroupAPIService.addConversation(conversation);
-    print("newConversation.id:" + newConversation.id.toString());
-    expect(newConversation.id, isNotEmpty);
+  test("Test Create Conversation Group", () async {
+    ConversationGroup conversationGroup = createTestObject();
+    ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(conversationGroup);
+    print("newConversationGroup.id:" + newConversationGroup.id.toString());
+    expect(newConversationGroup.id, isNotEmpty);
   });
 
-  test("Test Edit Conversation", () async {
-    Conversation conversation = createTestObject();
-    Conversation newConversation = await conversationGroupAPIService.addConversation(conversation);
-    Conversation editedConversation = newConversation;
-    editedConversation.name = "Test Group 2";
-    editedConversation.type = "Group";
-    editedConversation.description = "Edited Description";
-    bool edited = await conversationGroupAPIService.editConversation(editedConversation);
+  test("Test Edit Conversation Group", () async {
+    ConversationGroup conversationGroup = createTestObject();
+    ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(conversationGroup);
+    ConversationGroup editedConversationGroup = newConversationGroup;
+    editedConversationGroup.name = "Test Group 2";
+    editedConversationGroup.type = "Group";
+    editedConversationGroup.description = "Edited Description";
+    bool edited = await conversationGroupAPIService.editConversationGroup(editedConversationGroup);
     print("edited:" + edited.toString());
 
     expect(edited, isTrue);
   });
 
-  test("Test Get Conversation", () async {
-    Conversation conversation = createTestObject();
-    Conversation newConversation = await conversationGroupAPIService.addConversation(conversation);
-    print("newConversation.id: " + newConversation.id);
-    Conversation conversationFromServer = await conversationGroupAPIService.getSingleConversation(newConversation.id);
-    print("conversationFromServer.id: " + conversationFromServer.id);
-    print("conversationFromServer.id == newConversation.id:" + (conversationFromServer.id == newConversation.id).toString());
-    expect(conversationFromServer.id == newConversation.id, isTrue);
+  test("Test Get Conversation Group", () async {
+    ConversationGroup conversationGroup = createTestObject();
+    ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(conversationGroup);
+    print("newConversationGroup.id: " + newConversationGroup.id);
+    ConversationGroup conversationGroupFromServer = await conversationGroupAPIService.getSingleConversationGroup(newConversationGroup.id);
+    print("conversationGroupFromServer.id: " + conversationGroupFromServer.id);
+    print("conversationGroupFromServer.id == newConversation.id:" + (conversationGroupFromServer.id == newConversationGroup.id).toString());
+    expect(conversationGroupFromServer.id == newConversationGroup.id, isTrue);
   });
 
-  test("Test Delete Conversation", () async {
-    Conversation conversation = createTestObject();
-    Conversation newConversation = await conversationGroupAPIService.addConversation(conversation);
-    bool deleted = await conversationGroupAPIService.deleteConversation(newConversation.id);
+  test("Test Delete Conversation Group", () async {
+    ConversationGroup conversationGroup = createTestObject();
+    ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(conversationGroup);
+    bool deleted = await conversationGroupAPIService.deleteConversationGroup(newConversationGroup.id);
     print("deleted:" + deleted.toString());
     expect(deleted, isTrue);
   });
 
-  test("Test Get Conversations of A User", () async {
+  test("Test Get Conversation Groups of A User", () async {
     // TODO
   });
 }

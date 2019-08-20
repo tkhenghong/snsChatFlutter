@@ -13,9 +13,9 @@ import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 
 class ChatInfoPage extends StatefulWidget {
-  Conversation _conversation;
+  ConversationGroup _conversationGroup;
 
-  ChatInfoPage([this._conversation]); //do not final
+  ChatInfoPage([this._conversationGroup]); //do not final
 
   @override
   State<StatefulWidget> createState() {
@@ -33,7 +33,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
     // TODO: implement initState
     super.initState();
     textEditingController = new TextEditingController();
-    textEditingController.text = widget._conversation.name;
+    textEditingController.text = widget._conversationGroup.name;
   }
 
   // TODO: Duplicated same in Chat room page, consider create service
@@ -41,7 +41,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
     Multimedia groupPhoto;
     var multimediaDocuments = await Firestore.instance
         .collection("multimedia")
-        .where("conversationId", isEqualTo: widget._conversation.id)
+        .where("conversationId", isEqualTo: widget._conversationGroup.id)
         .getDocuments();
     if (multimediaDocuments.documents.length == 0) {
       print("if (multimediaDocuments.documents.length == 0)");
@@ -68,7 +68,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
   Widget build(BuildContext context) {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
-    print("widget._conversation.id: " + widget._conversation.id);
+    print("widget._conversation.id: " + widget._conversationGroup.id);
     getConversationPhoto().then((Multimedia groupPhoto) {
       // Load local file first
       imageFile = File(groupPhoto.localFullFileUrl);
@@ -115,7 +115,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                 expandedHeight: 250.0,
                 flexibleSpace: FlexibleSpaceBar(
                     title: Hero(
-                      tag: widget._conversation.name,
+                      tag: widget._conversationGroup.name,
                       child: FlatButton(
                         onPressed: () async {
                           CustomDialogs customDialog = new CustomDialogs(
@@ -123,15 +123,15 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                               title: "Edit Group Name",
                               description:
                                   "Edit the group name below. Press OK to save.",
-                              value: widget._conversation.name);
+                              value: widget._conversationGroup.name);
                           String groupName =
                               await customDialog.showConfirmationDialog();
-                          if (widget._conversation.name != groupName) {
-                            widget._conversation.name = groupName;
+                          if (widget._conversationGroup.name != groupName) {
+                            widget._conversationGroup.name = groupName;
                           }
                         },
                         child: Text(
-                          widget._conversation.name,
+                          widget._conversationGroup.name,
                           style: TextStyle(color: Colors.white),
                           overflow: TextOverflow.fade,
                           softWrap: true,
@@ -139,7 +139,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                       ),
                     ),
                     background: Hero(
-                      tag: widget._conversation.id,
+                      tag: widget._conversationGroup.id,
                       // TODO: Need to change it to Future
 //                      child: groupPhoto.localFullFileUrl.length != 0
 //                          ? Image.file(imageFile)
@@ -189,9 +189,9 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                   padding: EdgeInsets.only(top: 5.0),
                                 ),
                                 Text(
-                                  isStringEmpty(widget._conversation.description)
+                                  isStringEmpty(widget._conversationGroup.description)
                                       ? "Add Group description"
-                                      : widget._conversation.description,
+                                      : widget._conversationGroup.description,
                                   style: TextStyle(
                                       fontSize: 17.0, color: Colors.black54),
                                 ),
@@ -228,7 +228,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                   padding: EdgeInsets.only(top: 5.0),
                                 ),
                                 Text(
-                                  widget._conversation.notificationExpireDate ==
+                                  widget._conversationGroup.notificationExpireDate ==
                                           0
                                       ? "On"
                                       : "Off",

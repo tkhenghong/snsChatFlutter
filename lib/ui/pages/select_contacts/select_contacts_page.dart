@@ -237,11 +237,11 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                                         ),
                                         onTap: () {
                                           createPersonalConversation(contact)
-                                              .then((conversation) {
+                                              .then((conversationGroup) {
                                             _wholeAppBloc.dispatch(
-                                                AddConversationEvent(
-                                                    conversation:
-                                                        conversation));
+                                                AddConversationGroupEvent(
+                                                    conversationGroup:
+                                                    conversationGroup));
                                             Navigator.of(context)
                                                 .pushNamedAndRemoveUntil(
                                                     'tabs_page',
@@ -252,7 +252,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                                                 MaterialPageRoute(
                                                     builder: ((context) =>
                                                         ChatRoomPage(
-                                                            conversation))));
+                                                            conversationGroup))));
                                           });
                                         },
                                         leading: CircleAvatar(
@@ -309,9 +309,9 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         widget.chatGroupType == "Broadcast";
   }
 
-  // TODO: Conversation Creation into BLOC, can be merged with Group & Broadcast
-  Future<Conversation> createPersonalConversation(Contact contact) async {
-    Conversation conversation = new Conversation(
+  // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
+  Future<ConversationGroup> createPersonalConversation(Contact contact) async {
+    ConversationGroup conversationGroup = new ConversationGroup(
       id: generateNewId().toString(),
       creatorUserId: wholeAppBloc.currentState.userState.id,
       createdDate: new DateTime.now().millisecondsSinceEpoch.toString(),
@@ -361,25 +361,25 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         callback: (UserContact userContact) {}, userContact: newUserContact));
 
     print('newMultiMedia.id: ' + newMultiMedia.id);
-    uploadConversation(conversation, newUnreadMessage, newMultiMedia);
-    return conversation;
+    uploadConversation(conversationGroup, newUnreadMessage, newMultiMedia);
+    return conversationGroup;
   }
 
-  uploadConversation(Conversation conversation, UnreadMessage newUnreadMessage,
+  uploadConversation(ConversationGroup conversationGroup, UnreadMessage newUnreadMessage,
       Multimedia newMultiMedia) async {
     print("uploadConversation()");
     await Firestore.instance
         .collection('conversation')
-        .document(conversation.id)
+        .document(conversationGroup.id)
         .setData({
-      'id': conversation.id,
-      'name': conversation.name,
-      'type': conversation.type,
-      'creatorUserId': conversation.creatorUserId,
-      'createdDate' : conversation.createdDate,
-      'block': conversation.block,
-      'description': conversation.description,
-      'notificationExpireDate': conversation.notificationExpireDate,
+      'id': conversationGroup.id,
+      'name': conversationGroup.name,
+      'type': conversationGroup.type,
+      'creatorUserId': conversationGroup.creatorUserId,
+      'createdDate' : conversationGroup.createdDate,
+      'block': conversationGroup.block,
+      'description': conversationGroup.description,
+      'notificationExpireDate': conversationGroup.notificationExpireDate,
       'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
     });
 

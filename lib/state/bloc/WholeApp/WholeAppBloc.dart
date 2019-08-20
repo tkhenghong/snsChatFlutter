@@ -7,6 +7,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:snschat_flutter/backend/rest/chat/ConversationGroupAPIService.dart';
+import 'package:snschat_flutter/backend/rest/message/MessageAPIService.dart';
+import 'package:snschat_flutter/backend/rest/multimedia/MultimediaAPIService.dart';
+import 'package:snschat_flutter/backend/rest/settings/SettingsAPIService.dart';
+import 'package:snschat_flutter/backend/rest/unreadMessage/UnreadMessageAPIService.dart';
+import 'package:snschat_flutter/backend/rest/user/UserAPIService.dart';
+import 'package:snschat_flutter/backend/rest/userContact/UserContactAPIService.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
@@ -18,6 +25,14 @@ import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 
 class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
+  ConversationGroupAPIService conversationGroupAPIService = ConversationGroupAPIService();
+  MessageAPIService messageAPIService = MessageAPIService();
+  MultimediaAPIService multimediaAPIService = MultimediaAPIService();
+  SettingsAPIService settingsAPIService = SettingsAPIService();
+  UnreadMessageAPIService unreadMessageAPIService = UnreadMessageAPIService();
+  UserAPIService userAPIService = UserAPIService();
+  UserContactAPIService userContactAPIService = UserContactAPIService();
+
   @override
   WholeAppState get initialState => WholeAppState.initial();
 
@@ -48,7 +63,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     } else if (event is UserSignUpEvent) {
       signUpInFirestore(event);
       yield currentState;
-    } else if (event is AddConversationEvent) {
+    } else if (event is AddConversationGroupEvent) {
       addConversation(event);
       yield currentState;
     } else if (event is AddMessageEvent) {
@@ -283,16 +298,22 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       FirebaseUser firebaseUser = currentState.firebaseUser;
       GoogleSignInAccount googleSignInAccount = currentState.googleSignIn.currentUser;
       User user = User(
-          id: generateNewId().toString(),
+//          id: generateNewId().toString(),
           mobileNo: event.mobileNo,
           displayName: firebaseUser.displayName,
           googleAccountId: googleSignInAccount.id,
           realName: event.realName);
 
-      Settings settings = Settings(id: generateNewId().toString(), notification: true, userId: user.id);
-
-      if (!isObjectEmpty(firebaseUser)) {
+      Settings settings = Settings(
+//          id: generateNewId().toString(),
+          notification: true, userId: user.id);
+      print("Adding User and Settings to REST");
+      // API Service
+      user = await userAPIService.addUser(user);
+      settings = await settingsAPIService.addSettings(settings);
+      if (!isObjectEmpty(firebaseUser) && user.id.isNotEmpty && settings.id.isNotEmpty) {
         print("if (!isObjectEmpty(firebaseUser))");
+        // Check if user is already signed up or not
         final QuerySnapshot duplicateGoogleAccountResult =
             await Firestore.instance.collection('user').where('googleAccountId', isEqualTo: firebaseUser.uid).getDocuments();
         final List<DocumentSnapshot> duplicateGoogleAccountDocuments = duplicateGoogleAccountResult.documents;
@@ -322,6 +343,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
             'mobileNo': user.mobileNo,
             'googleAccountId': user.googleAccountId,
           });
+
           if (!isObjectEmpty(event)) {
             event.callback(true);
           }
@@ -353,7 +375,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     currentState.settingsState = Settings();
     currentState.firebaseUser = null;
     currentState.googleSignIn = new GoogleSignIn();
-    currentState.conversationList = [];
+    currentState.conversationGroupList = [];
     currentState.phoneContactList = [];
     currentState.multimediaList = [];
     currentState.unreadMessageList = [];
@@ -426,25 +448,25 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return permissions;
   }
 
-  addConversation(AddConversationEvent event) async {
+  addConversation(AddConversationGroupEvent event) async {
     print('addConversation()');
 
     // Check repetition
     bool conversationExist = false;
 
-    currentState.conversationList.forEach((Conversation existingConversation) {
-      if (existingConversation.id == event.conversation.id) {
+    currentState.conversationGroupList.forEach((ConversationGroup existingConversation) {
+      if (existingConversation.id == event.conversationGroup.id) {
         conversationExist = true;
       }
     });
 
     if (!conversationExist) {
-      currentState.conversationList.add(event.conversation);
+      currentState.conversationGroupList.add(event.conversationGroup);
     }
     if (!isObjectEmpty(event)) {
-      event.callback(event.conversation);
+      event.callback(event.conversationGroup);
     }
-    print("currentState.conversationList.length.toString(): " + currentState.conversationList.length.toString());
+    print("currentState.conversationList.length.toString(): " + currentState.conversationGroupList.length.toString());
   }
 
   overrideUnreadMessageEvent(OverrideUnreadMessageEvent event) async {
@@ -467,7 +489,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     // Check repetition
     bool messageExist = false;
 
-    currentState.conversationList.forEach((Conversation existingMessage) {
+    currentState.conversationGroupList.forEach((ConversationGroup existingMessage) {
       if (existingMessage.id == event.message.id) {
         messageExist = true;
       }
