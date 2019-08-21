@@ -25,6 +25,7 @@ class ConversationGroup {
       this.notificationExpireDate,
       this.timestamp});
 
+  // fromMap in SembastDB tutorial
   ConversationGroup.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         creatorUserId = json['creatorUserId'],
@@ -37,6 +38,7 @@ class ConversationGroup {
         notificationExpireDate = json['notificationExpireDate'],
         timestamp = json['timestamp'];
 
+  // toMap in SembastDB Tutorial
   Map<String, dynamic> toJson() => {
         'id': id,
         'creatorUserId': creatorUserId,
