@@ -12,6 +12,7 @@ class ConversationGroup {
   bool block;
   int notificationExpireDate; // 0 = unblocked, > 0 = blocked until specific time
   String timestamp;
+  // Add groupAdmin List<String>
 
   ConversationGroup(
       {this.id,
