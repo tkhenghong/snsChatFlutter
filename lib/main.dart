@@ -18,7 +18,7 @@ import 'package:snschat_flutter/ui/pages/tabs/tabs_page.dart';
 import 'package:snschat_flutter/ui/pages/terms_and_conditions/terms_and_conditions_page.dart';
 import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number_page.dart';
 
-import 'database/sembast/startup.dart';
+import 'database/sembast/SembastDB.dart';
 
 void main() => runApp(BlocWrapper());
 
@@ -34,7 +34,7 @@ class BlocWrapperState extends State<BlocWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    startSembastDatabase();
+    print("Starting database...");
     // Start DB asynchronously
 //    startSQLDatabase().then( (_) {
 //      checkUserSignIn();

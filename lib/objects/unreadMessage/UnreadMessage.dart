@@ -3,7 +3,7 @@ class UnreadMessage {
   String conversationId;
   String userId;
   String lastMessage;
-  int date;
+  int date; // last unread message's date
   int count;
 
   UnreadMessage({this.id, this.userId, this.conversationId, this.lastMessage, this.date, this.count});
