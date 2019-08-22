@@ -1,12 +1,23 @@
+import 'package:sembast/sembast.dart';
+import 'package:snschat_flutter/objects/message/message.dart';
+
+import '../SembastDB.dart';
+
 class MessageDBService {
+  static const String MESSAGE_STORE_NAME = "message";
+
+  final _messageStore = intMapStoreFactory.store(MESSAGE_STORE_NAME);
+
+  Future<Database> get _db async => await SembastDB.instance.database;
+
   //CRUD
-  addMessage() {}
+  Future addMessage(Message message) async {}
 
-  editMessage() {}
+  Future editMessage() async {}
 
-  deleteMessage() {}
+  Future deleteMessage() async {}
 
-  getSingleMessage() {}
+  Future<Message> getSingleMessage() async {}
 
-  getAllMessages() {}
+  Future<List<Message>> getAllMessages() async {}
 }
