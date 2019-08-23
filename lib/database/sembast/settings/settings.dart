@@ -27,15 +27,22 @@ class SettingsDBService {
     await _settingsStore.delete(await _db, finder: finder);
   }
 
-  Future<Settings> getSingleSettings(Settings settings) async {
-    final finder = Finder(filter: Filter.equals("id", settings.id));
+  Future<Settings> getSingleSettings(String settingsId) async {
+    final finder = Finder(filter: Filter.equals("id", settingsId));
     final recordSnapshot = await _settingsStore.findFirst(await _db, finder: finder);
 
     return recordSnapshot.value.isNotEmpty ? Settings.fromJson(recordSnapshot.value) : null;
   }
 
+  Future<Settings> getSettingsOfAUser(String userId) async {
+    final finder = Finder(filter: Filter.equals("userId", userId));
+    final recordSnapshot = await _settingsStore.findFirst(await _db, finder: finder);
+
+    return recordSnapshot.value.isNotEmpty ? Settings.fromJson(recordSnapshot.value) : null;
+  }
+
+  // Possible usage when doing like Facebook multiple users login
   Future<List<Settings>> getAllSettings() async {
-    // Find all Conversation Groups
     final recordSnapshots = await _settingsStore.find(await _db);
     List<Settings> settingsList = recordSnapshots.map((snapshot) {
       final settings = Settings.fromJson(snapshot.value);

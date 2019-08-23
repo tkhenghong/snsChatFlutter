@@ -50,7 +50,6 @@ class MultimediaDBService {
   }
 
   Future<List<Multimedia>> getAllMultimedia() async {
-    // Find all Conversation Groups
     final recordSnapshots = await _multimediaStore.find(await _db);
     List<Multimedia> multimediaList = recordSnapshots.map((snapshot) {
       final multimedia = Multimedia.fromJson(snapshot.value);

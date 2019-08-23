@@ -27,21 +27,38 @@ class MessageDBService {
     await _messageStore.delete(await _db, finder: finder);
   }
 
-  Future<Message> getSingleMessage(Message message) async {
-    final finder = Finder(filter: Filter.equals("id", message.id));
-    final recordSnapshot = await _messageStore.findFirst(await _db, finder: finder);
+  Future<Message> getSingleMessage(String messageId) async {
+    final finder = Finder(filter: Filter.equals("id", messageId));
+    final recordSnapshot =
+        await _messageStore.findFirst(await _db, finder: finder);
 
-    return recordSnapshot.value.isNotEmpty ? Message.fromJson(recordSnapshot.value) : null;
+    return recordSnapshot.value.isNotEmpty
+        ? Message.fromJson(recordSnapshot.value)
+        : null;
   }
 
-  Future<List<Message>> getAllMessages() async {
-    // Auto sort by createdDate, but when showing in chat page, sort these conversations using last unread message's date
-    final finder = Finder(sortOrders: [SortOrder('createdDate')]);
-    // Find all Conversation Groups
+  Future<List<Message>> getMessagesOfAConversationGroup(
+      String conversationGroupId) async {
+    final finder = Finder(
+        filter: Filter.equals("conversationGroupId", conversationGroupId));
     final recordSnapshots = await _messageStore.find(await _db, finder: finder);
     List<Message> messageList = recordSnapshots.map((snapshot) {
       final message = Message.fromJson(snapshot.value);
-      print("conversationGroup.id: " + message.id);
+      print("message.id: " + message.id);
+      print("snapshot.key: " + snapshot.key.toString());
+      message.id = snapshot.key.toString();
+      return message;
+    });
+
+    return messageList;
+  }
+
+  Future<List<Message>> getAllMessages() async {
+    final finder = Finder(sortOrders: [SortOrder('createdDate')]);
+    final recordSnapshots = await _messageStore.find(await _db, finder: finder);
+    List<Message> messageList = recordSnapshots.map((snapshot) {
+      final message = Message.fromJson(snapshot.value);
+      print("message.id: " + message.id);
       print("snapshot.key: " + snapshot.key.toString());
       message.id = snapshot.key.toString();
       return message;
