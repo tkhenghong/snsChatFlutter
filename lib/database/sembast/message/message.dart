@@ -42,8 +42,7 @@ class MessageDBService {
     List<Message> messageList = recordSnapshots.map((snapshot) {
       final message = Message.fromJson(snapshot.value);
       print("conversationGroup.id: " + message.id);
-      print("snapshot.key: " +
-          snapshot.key.toString());
+      print("snapshot.key: " + snapshot.key.toString());
       message.id = snapshot.key.toString();
       return message;
     });
