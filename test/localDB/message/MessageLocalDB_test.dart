@@ -1,11 +1,13 @@
 import 'package:snschat_flutter/backend/rest/message/MessageAPIService.dart';
+import 'package:snschat_flutter/database/sembast/message/message.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
 
 void main() {
-//  MessageAPIService messageAPIService = MessageAPIService();
+  MessageAPIService messageAPIService = MessageAPIService();
+  MessageDBService messageDBService = MessageDBService();
 
   Message createTestObject() {
     return new Message(
@@ -25,44 +27,70 @@ void main() {
     );
   }
 
-  test("Test Create Message", () async {
+  test("Test Create Message Locally", () async {
     Message message = createTestObject();
+
     Message newMessage = await messageAPIService.addMessage(message);
     print("newMessage.id:" + newMessage.id.toString());
+    await messageDBService.addMessage(newMessage);
+    Message messageFromLocalDB = await messageDBService.getSingleMessage(newMessage.id);
+
     expect(newMessage.id, isNotEmpty);
+    expect(messageFromLocalDB.id, equals(newMessage.id));
   });
 
-  test("Test Edit Message", () async {
+  test("Test Edit Message Locally", () async {
     Message message = createTestObject();
+
     Message newMessage = await messageAPIService.addMessage(message);
+    await messageDBService.addMessage(newMessage);
+
     Message editedMessage = newMessage;
     editedMessage.messageContent = "Testing Message 2";
     editedMessage.type = "Video";
     editedMessage.multimediaId = "edited multimedia ID";
+
     bool edited = await messageAPIService.editMessage(editedMessage);
     print("edited:" + edited.toString());
+    await messageDBService.editMessage(editedMessage);
+    Message messageFromLocalDB = await messageDBService.getSingleMessage(newMessage.id);
 
+    expect(messageFromLocalDB.id, equals(messageFromLocalDB.id));
+    expect(messageFromLocalDB.messageContent, equals(messageFromLocalDB.messageContent));
+    expect(messageFromLocalDB.type, equals(messageFromLocalDB.type));
+    expect(messageFromLocalDB.multimediaId, equals(messageFromLocalDB.multimediaId));
     expect(edited, isTrue);
   });
 
-  test("Test Get Message", () async {
+  test("Test Get Message Locally", () async {
     Message message = createTestObject();
+
     Message newMessage = await messageAPIService.addMessage(message);
+    await messageDBService.addMessage(newMessage);
+
     Message messageFromServer = await messageAPIService.getSingleMessage(newMessage.id);
-    print("messageFromServer.id == newMessage.id:" + (messageFromServer.id == newMessage.id).toString());
-    expect(messageFromServer.id == newMessage.id, isTrue);
+    Message messageFromLocalDB = await messageDBService.getSingleMessage(message.id);
+
+    expect(messageFromServer.id, equals(newMessage.id));
+    expect(messageFromLocalDB.id, equals(messageFromServer.id));
   });
 
-  test("Test Delete Message", () async {
+  test("Test Delete Message Locally", () async {
     Message message = createTestObject();
+
     Message newMessage = await messageAPIService.addMessage(message);
-    print("newMessage.id: "  + newMessage.id);
+    print("newMessage.id: " + newMessage.id);
+    await messageDBService.addMessage(newMessage);
+
     bool deleted = await messageAPIService.deleteMessage(newMessage.id);
+    await messageDBService.deleteMessage(message.id);
     print("deleted:" + deleted.toString());
+
     expect(deleted, isTrue);
+    expect(await messageDBService.getSingleMessage(message.id), null);
   });
 
-  test("Test Get Messages from a Conversation", () async {
+  test("Test Get Messages from a Conversation Locally", () async {
     // TODO
   });
 }

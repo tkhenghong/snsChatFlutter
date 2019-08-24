@@ -4,21 +4,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:snschat_flutter/objects/user/user.dart';
 
 void main() {
-//  UserAPIService userAPIService = UserAPIService();
+  UserAPIService userAPIService = UserAPIService();
 
   User createTestObject() {
     return new User(
         id: null, mobileNo: "0182262663", displayName: "Teoh Kheng Hong", googleAccountId: "88888888", realName: "A.W.P G.H.O.S.T");
   }
 
-  test("Test Create User", () async {
+  test("Test Create User Locally", () async {
     User user = createTestObject();
     User newUser = await userAPIService.addUser(user);
     print("newUser.id:" + newUser.id.toString());
     expect(newUser.id, isNotEmpty);
   });
 
-  test("Test Edit User", () async {
+  test("Test Edit User Locally", () async {
     User user = createTestObject();
     User newUser = await userAPIService.addUser(user);
     User editedUser = newUser;
@@ -31,7 +31,7 @@ void main() {
     expect(edited, isTrue);
   });
 
-  test("Test Get User", () async {
+  test("Test Get User Locally", () async {
     User user = createTestObject();
     User newUser = await userAPIService.addUser(user);
     User userFromServer = await userAPIService.getUser(newUser.id);
@@ -39,7 +39,7 @@ void main() {
     expect(userFromServer.id == newUser.id, isTrue);
   });
 
-  test("Test Delete User", () async {
+  test("Test Delete User Locally", () async {
     User user = createTestObject();
     User newUser = await userAPIService.addUser(user);
     print("newUser.id: " + newUser.id);
@@ -48,7 +48,7 @@ void main() {
     expect(deleted, isTrue);
   });
 
-  test("Test Get Users from a Conversation", () async {
+  test("Test Get Users from a Conversation Locally", () async {
     // TODO
   });
 }

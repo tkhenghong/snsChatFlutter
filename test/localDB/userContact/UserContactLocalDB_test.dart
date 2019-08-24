@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 
 void main() {
-//  UserContactAPIService userContactAPIService = UserContactAPIService();
+  UserContactAPIService userContactAPIService = UserContactAPIService();
 
   UserContact createTestObject() {
     return new UserContact(
@@ -18,14 +18,14 @@ void main() {
         lastSeenDate: "19th August 2019");
   }
 
-  test("Test Create UserContact", () async {
+  test("Test Create UserContact Locally", () async {
     UserContact userContact = createTestObject();
     UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
     print("newUserContact.id:" + newUserContact.id.toString());
     expect(newUserContact.id, isNotEmpty);
   });
 
-  test("Test Edit UserContact", () async {
+  test("Test Edit UserContact Locally", () async {
     UserContact userContact = createTestObject();
     UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
     UserContact editedUserContact = newUserContact;
@@ -39,7 +39,7 @@ void main() {
     expect(edited, isTrue);
   });
 
-  test("Test Get UserContact", () async {
+  test("Test Get UserContact Locally", () async {
     UserContact userContact = createTestObject();
     UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
     UserContact userContactFromServer = await userContactAPIService.getUserContact(newUserContact.id);
@@ -47,7 +47,7 @@ void main() {
     expect(userContactFromServer.id == newUserContact.id, isTrue);
   });
 
-  test("Test Delete UserContact", () async {
+  test("Test Delete UserContact Locally", () async {
     UserContact userContact = createTestObject();
     UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
     print("newUserContact.id: " + newUserContact.id);
@@ -56,7 +56,7 @@ void main() {
     expect(deleted, isTrue);
   });
 
-  test("Test Get UserContacts from a Conversation", () async {
+  test("Test Get UserContacts from a Conversation Locally", () async {
     // TODO
   });
 }

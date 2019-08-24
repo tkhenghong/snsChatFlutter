@@ -1,4 +1,5 @@
 import 'package:sembast/sembast.dart';
+import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
 
 import '../SembastDB.dart';
@@ -29,41 +30,41 @@ class MessageDBService {
 
   Future<Message> getSingleMessage(String messageId) async {
     final finder = Finder(filter: Filter.equals("id", messageId));
-    final recordSnapshot =
-        await _messageStore.findFirst(await _db, finder: finder);
-
-    return recordSnapshot.value.isNotEmpty
-        ? Message.fromJson(recordSnapshot.value)
-        : null;
+    final recordSnapshot = await _messageStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? Message.fromJson(recordSnapshot.value) : null;
   }
 
-  Future<List<Message>> getMessagesOfAConversationGroup(
-      String conversationGroupId) async {
-    final finder = Finder(
-        filter: Filter.equals("conversationGroupId", conversationGroupId));
+  Future<List<Message>> getMessagesOfAConversationGroup(String conversationGroupId) async {
+    final finder = Finder(filter: Filter.equals("conversationGroupId", conversationGroupId));
     final recordSnapshots = await _messageStore.find(await _db, finder: finder);
-    List<Message> messageList = recordSnapshots.map((snapshot) {
-      final message = Message.fromJson(snapshot.value);
-      print("message.id: " + message.id);
-      print("snapshot.key: " + snapshot.key.toString());
-      message.id = snapshot.key.toString();
-      return message;
-    });
+    if (!isObjectEmpty(recordSnapshots)) {
+      List<Message> messageList = recordSnapshots.map((snapshot) {
+        final message = Message.fromJson(snapshot.value);
+        print("message.id: " + message.id);
+        print("snapshot.key: " + snapshot.key.toString());
+        message.id = snapshot.key.toString();
+        return message;
+      });
 
-    return messageList;
+      return messageList;
+    }
+    return null;
   }
 
   Future<List<Message>> getAllMessages() async {
     final finder = Finder(sortOrders: [SortOrder('createdDate')]);
     final recordSnapshots = await _messageStore.find(await _db, finder: finder);
-    List<Message> messageList = recordSnapshots.map((snapshot) {
-      final message = Message.fromJson(snapshot.value);
-      print("message.id: " + message.id);
-      print("snapshot.key: " + snapshot.key.toString());
-      message.id = snapshot.key.toString();
-      return message;
-    });
+    if (!isObjectEmpty(recordSnapshots)) {
+      List<Message> messageList = recordSnapshots.map((snapshot) {
+        final message = Message.fromJson(snapshot.value);
+        print("message.id: " + message.id);
+        print("snapshot.key: " + snapshot.key.toString());
+        message.id = snapshot.key.toString();
+        return message;
+      });
 
-    return messageList;
+      return messageList;
+    }
+    return null;
   }
 }

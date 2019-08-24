@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:snschat_flutter/objects/settings/settings.dart';
 
 void main() {
-//  SettingsAPIService settingsAPIService = SettingsAPIService();
+  SettingsAPIService settingsAPIService = SettingsAPIService();
 
   Settings createTestObject() {
     return new Settings(
@@ -14,14 +14,14 @@ void main() {
     );
   }
 
-  test("Test Create Settings", () async {
+  test("Test Create Settings Locally", () async {
     Settings settings = createTestObject();
     Settings newSettings = await settingsAPIService.addSettings(settings);
     print("newSettings.id:" + newSettings.id.toString());
     expect(newSettings.id, isNotEmpty);
   });
 
-  test("Test Edit Settings", () async {
+  test("Test Edit Settings Locally", () async {
     Settings settings = createTestObject();
     Settings newSettings = await settingsAPIService.addSettings(settings);
     Settings editedSettings = newSettings;
@@ -33,7 +33,7 @@ void main() {
     expect(edited, isTrue);
   });
 
-  test("Test Get Settings", () async {
+  test("Test Get Settings Locally", () async {
     Settings settings = createTestObject();
     Settings newSettings = await settingsAPIService.addSettings(settings);
     Settings settingsFromServer = await settingsAPIService.getSingleSettings(newSettings.id);
@@ -41,7 +41,7 @@ void main() {
     expect(settingsFromServer.id == newSettings.id, isTrue);
   });
 
-  test("Test Delete Settings", () async {
+  test("Test Delete Settings Locally", () async {
     Settings settings = createTestObject();
     Settings newSettings = await settingsAPIService.addSettings(settings);
     print("newSettings.id: "  + newSettings.id);
@@ -50,7 +50,7 @@ void main() {
     expect(deleted, isTrue);
   });
 
-  test("Test Get Settingss from a Conversation", () async {
+  test("Test Get Settingss from a Conversation Locally", () async {
     // TODO
   });
 }

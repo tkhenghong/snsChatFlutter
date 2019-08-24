@@ -1,4 +1,5 @@
 import 'package:sembast/sembast.dart';
+import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 
 import '../SembastDB.dart';
@@ -27,38 +28,42 @@ class MultimediaDBService {
     await _multimediaStore.delete(await _db, finder: finder);
   }
 
-  Future<Multimedia> getSingleMultimedia(Multimedia multimedia) async {
-    final finder = Finder(filter: Filter.equals("id", multimedia.id));
+  Future<Multimedia> getSingleMultimedia(String multimediaId) async {
+    final finder = Finder(filter: Filter.equals("id", multimediaId));
     final recordSnapshot = await _multimediaStore.findFirst(await _db, finder: finder);
-
-    return recordSnapshot.value.isNotEmpty ? Multimedia.fromJson(recordSnapshot.value) : null;
+    return !isObjectEmpty(recordSnapshot) ? Multimedia.fromJson(recordSnapshot.value) : null;
   }
 
   Future<List<Multimedia>> getMultimediaOfAConversationGroup(String conversationGroupId) async {
     final finder = Finder(filter: Filter.equals("conversationGroupId", conversationGroupId));
     final recordSnapshots = await _multimediaStore.find(await _db, finder: finder);
+    if (!isObjectEmpty(recordSnapshots)) {
+      List<Multimedia> multimediaList = recordSnapshots.map((snapshot) {
+        final multimedia = Multimedia.fromJson(snapshot.value);
+        print("multimedia.id: " + multimedia.id);
+        print("snapshot.key: " + snapshot.key.toString());
+        multimedia.id = snapshot.key.toString();
+        return multimedia;
+      });
 
-    List<Multimedia> multimediaList = recordSnapshots.map((snapshot) {
-      final multimedia = Multimedia.fromJson(snapshot.value);
-      print("multimedia.id: " + multimedia.id);
-      print("snapshot.key: " + snapshot.key.toString());
-      multimedia.id = snapshot.key.toString();
-      return multimedia;
-    });
-
-    return multimediaList;
+      return multimediaList;
+    }
+    return null;
   }
 
   Future<List<Multimedia>> getAllMultimedia() async {
     final recordSnapshots = await _multimediaStore.find(await _db);
-    List<Multimedia> multimediaList = recordSnapshots.map((snapshot) {
-      final multimedia = Multimedia.fromJson(snapshot.value);
-      print("multimedia.id: " + multimedia.id);
-      print("snapshot.key: " + snapshot.key.toString());
-      multimedia.id = snapshot.key.toString();
-      return multimedia;
-    });
+    if (!isObjectEmpty(recordSnapshots)) {
+      List<Multimedia> multimediaList = recordSnapshots.map((snapshot) {
+        final multimedia = Multimedia.fromJson(snapshot.value);
+        print("multimedia.id: " + multimedia.id);
+        print("snapshot.key: " + snapshot.key.toString());
+        multimedia.id = snapshot.key.toString();
+        return multimedia;
+      });
 
-    return multimediaList;
+      return multimediaList;
+    }
+    return null;
   }
 }

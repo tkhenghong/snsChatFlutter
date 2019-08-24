@@ -1,4 +1,5 @@
 import 'package:sembast/sembast.dart';
+import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/settings/settings.dart';
 
 import '../SembastDB.dart';
@@ -30,29 +31,30 @@ class SettingsDBService {
   Future<Settings> getSingleSettings(String settingsId) async {
     final finder = Finder(filter: Filter.equals("id", settingsId));
     final recordSnapshot = await _settingsStore.findFirst(await _db, finder: finder);
-
-    return recordSnapshot.value.isNotEmpty ? Settings.fromJson(recordSnapshot.value) : null;
+    return !isObjectEmpty(recordSnapshot) ? Settings.fromJson(recordSnapshot.value) : null;
   }
 
   Future<Settings> getSettingsOfAUser(String userId) async {
     final finder = Finder(filter: Filter.equals("userId", userId));
     final recordSnapshot = await _settingsStore.findFirst(await _db, finder: finder);
-
-    return recordSnapshot.value.isNotEmpty ? Settings.fromJson(recordSnapshot.value) : null;
+    return !isObjectEmpty(recordSnapshot) ? Settings.fromJson(recordSnapshot.value) : null;
   }
 
   // Possible usage when doing like Facebook multiple users login
   Future<List<Settings>> getAllSettings() async {
     final recordSnapshots = await _settingsStore.find(await _db);
-    List<Settings> settingsList = recordSnapshots.map((snapshot) {
-      final settings = Settings.fromJson(snapshot.value);
-      print("settings.id: " + settings.id);
-      print("snapshot.key: " +
-          snapshot.key.toString());
-      settings.id = snapshot.key.toString();
-      return settings;
-    });
+    if (!isObjectEmpty(recordSnapshots)) {
+      List<Settings> settingsList = recordSnapshots.map((snapshot) {
+        final settings = Settings.fromJson(snapshot.value);
+        print("settings.id: " + settings.id);
+        print("snapshot.key: " +
+            snapshot.key.toString());
+        settings.id = snapshot.key.toString();
+        return settings;
+      });
 
-    return settingsList;
+      return settingsList;
+    }
+    return null;
   }
 }

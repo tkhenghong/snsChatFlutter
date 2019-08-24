@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
 
 void main() {
-//  UnreadMessageAPIService unreadMessageAPIService = UnreadMessageAPIService();
+  UnreadMessageAPIService unreadMessageAPIService = UnreadMessageAPIService();
 
   UnreadMessage createTestObject() {
     return new UnreadMessage(
@@ -16,14 +16,14 @@ void main() {
         count: 99);
   }
 
-  test("Test Create UnreadMessage", () async {
+  test("Test Create UnreadMessage Locally", () async {
     UnreadMessage unreadMessage = createTestObject();
     UnreadMessage newUnreadMessage = await unreadMessageAPIService.addUnreadMessage(unreadMessage);
     print("newUnreadMessage.id:" + newUnreadMessage.id.toString());
     expect(newUnreadMessage.id, isNotEmpty);
   });
 
-  test("Test Edit UnreadMessage", () async {
+  test("Test Edit UnreadMessage Locally", () async {
     UnreadMessage unreadMessage = createTestObject();
     UnreadMessage newUnreadMessage = await unreadMessageAPIService.addUnreadMessage(unreadMessage);
     UnreadMessage editedUnreadMessage = newUnreadMessage;
@@ -37,7 +37,7 @@ void main() {
     expect(edited, isTrue);
   });
 
-  test("Test Get UnreadMessage", () async {
+  test("Test Get UnreadMessage Locally", () async {
     UnreadMessage unreadMessage = createTestObject();
     UnreadMessage newUnreadMessage = await unreadMessageAPIService.addUnreadMessage(unreadMessage);
     UnreadMessage unreadMessageFromServer = await unreadMessageAPIService.getSingleUnreadMessage(newUnreadMessage.id);
@@ -45,7 +45,7 @@ void main() {
     expect(unreadMessageFromServer.id == newUnreadMessage.id, isTrue);
   });
 
-  test("Test Delete UnreadMessage", () async {
+  test("Test Delete UnreadMessage Locally", () async {
     UnreadMessage unreadMessage = createTestObject();
     UnreadMessage newUnreadMessage = await unreadMessageAPIService.addUnreadMessage(unreadMessage);
     print("newUnreadMessage.id: " + newUnreadMessage.id);
@@ -54,7 +54,7 @@ void main() {
     expect(deleted, isTrue);
   });
 
-  test("Test Get UnreadMessages from a Conversation", () async {
+  test("Test Get UnreadMessages from a Conversation Locally", () async {
     // TODO
   });
 }

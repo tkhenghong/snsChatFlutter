@@ -9,9 +9,11 @@ class ConversationGroup {
   String type;
   String description;
   List<String> memberIds;
+  List<String> adminMemberIds;
   bool block;
   int notificationExpireDate; // 0 = unblocked, > 0 = blocked until specific time
   String timestamp;
+
   // Add groupAdmin List<String>
 
   ConversationGroup(
@@ -23,21 +25,36 @@ class ConversationGroup {
       this.block,
       this.description,
       this.memberIds,
+      this.adminMemberIds,
       this.notificationExpireDate,
       this.timestamp});
 
   // fromMap in SembastDB tutorial
-  ConversationGroup.fromJson(Map<String, dynamic> json)
-      : id = json['id'],
-        creatorUserId = json['creatorUserId'],
-        createdDate = json['createdDate'],
-        name = json['name'],
-        type = json['type'],
-        block = json['block'],
-        description = json['description'],
-        memberIds = json['memberIds'],
-        notificationExpireDate = json['notificationExpireDate'],
-        timestamp = json['timestamp'];
+  factory ConversationGroup.fromJson(Map<String, dynamic> json) {
+    ConversationGroup conversationGroup = new ConversationGroup(
+        id: json['id'],
+        creatorUserId: json['creatorUserId'],
+        createdDate: json['createdDate'],
+        name: json['name'],
+        type: json['type'],
+        block: json['block'],
+        description: json['description'],
+//        memberIds: json['memberIds'],
+//        adminMemberIds: json['adminMemberIds'],
+        notificationExpireDate: json['notificationExpireDate'],
+        timestamp: json['timestamp']);
+
+    // ****Special case: For Lists, you need to convert memberIds and adminMemberIds from List<dynamic> to List<String>****
+    var memberIdsFromJson = json['memberIds'];
+    var adminMemberIdsFromJson = json['adminMemberIds'];
+
+    List<String> memberIds = new List<String>.from(memberIdsFromJson);
+    List<String> adminMemberIds = new List<String>.from(adminMemberIdsFromJson);
+    conversationGroup.memberIds = memberIds;
+    conversationGroup.adminMemberIds = adminMemberIds;
+
+    return conversationGroup;
+  }
 
   // toMap in SembastDB Tutorial
   Map<String, dynamic> toJson() => {
@@ -49,6 +66,7 @@ class ConversationGroup {
         'block': block,
         'description': description,
         'memberIds': memberIds,
+        'adminMemberIds': adminMemberIds,
         'notificationExpireDate': notificationExpireDate,
         'timestamp': timestamp,
       };

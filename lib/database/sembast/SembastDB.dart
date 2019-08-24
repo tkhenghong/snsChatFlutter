@@ -4,12 +4,14 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 
 // Video tutorial: https://www.youtube.com/watch?v=LcaOULash7s
 // Make a class to connect your DB file in Android/iOS and make it singleton which can be instantiated only once
 class SembastDB {
   // Singleton instance: Declare this class is singleton
   static final SembastDB _singleton = SembastDB._();
+  String ENVIRONMENT = globals.ENVIRONMENT;
 
   // Create private constructor
   SembastDB._();
@@ -35,12 +37,23 @@ class SembastDB {
   Future _startSembastDatabase() async {
     print("SembastDB.dart _startSembastDatabase()");
     // https://github.com/tekartik/sembast.dart/blob/master/sembast/doc/open.md
-    // get the application documents directory
-    var dir = await getApplicationDocumentsDirectory();
-    // make sure it exists
-    await dir.create(recursive: true);
-    // build the database path
-    var dbPath = join(dir.path, 'pocketChat.db'); // join method comes from path.dart
+
+    var dbPath = "";
+    switch (ENVIRONMENT) {
+      case "DEVELOPMENT":
+        print("CASE DEVELOPMENT.");
+        dbPath = 'pocketChat.db';
+        break;
+      default:
+        // get the application documents directory
+        var dir = await getApplicationDocumentsDirectory();
+        // make sure it exists
+        await dir.create(recursive: true);
+        // build the database path
+        dbPath = join(dir.path, 'pocketChat.db'); // join method comes from path.dart
+        break;
+    }
+
     // open the database
     var db = await databaseFactoryIo.openDatabase(dbPath);
     _dbOpenCompleter.complete(db);

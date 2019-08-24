@@ -1,4 +1,5 @@
 import 'package:sembast/sembast.dart';
+import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/user/user.dart';
 
 import '../SembastDB.dart';
@@ -30,30 +31,30 @@ class UserDBService {
   Future<User> getSingleUser(String userId) async {
     final finder = Finder(filter: Filter.equals("id", userId));
     final recordSnapshot = await _userStore.findFirst(await _db, finder: finder);
-
-    return recordSnapshot.value.isNotEmpty ? User.fromJson(recordSnapshot.value) : null;
+    return !isObjectEmpty(recordSnapshot) ? User.fromJson(recordSnapshot.value) : null;
   }
 
   // Verify user is in the local DB or not when login
   Future<User> getUserByGoogleAccountId(String googleAccountId) async {
     final finder = Finder(filter: Filter.equals("googleAccountId", googleAccountId));
     final recordSnapshot = await _userStore.findFirst(await _db, finder: finder);
-
-    return recordSnapshot.value.isNotEmpty ? User.fromJson(recordSnapshot.value) : null;
+    return !isObjectEmpty(recordSnapshot) ? User.fromJson(recordSnapshot.value) : null;
   }
 
   // In future, when multiple logins needed
   Future<List<User>> getAllUsers() async {
     final recordSnapshots = await _userStore.find(await _db);
-    List<User> userList = recordSnapshots.map((snapshot) {
-      final user = User.fromJson(snapshot.value);
-      print("user.id: " + user.id);
-      print("snapshot.key: " +
-          snapshot.key.toString());
-      user.id = snapshot.key.toString();
-      return user;
-    });
+    if (!isObjectEmpty(recordSnapshots)) {
+      List<User> userList = recordSnapshots.map((snapshot) {
+        final user = User.fromJson(snapshot.value);
+        print("user.id: " + user.id);
+        print("snapshot.key: " + snapshot.key.toString());
+        user.id = snapshot.key.toString();
+        return user;
+      });
 
-    return userList;
+      return userList;
+    }
+    return null;
   }
 }

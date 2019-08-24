@@ -1,4 +1,5 @@
 import 'package:sembast/sembast.dart';
+import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
 
 import '../SembastDB.dart';
@@ -30,28 +31,28 @@ class UnreadMessageDBService {
   Future<UnreadMessage> getSingleUnreadMessage(String unreadMessageId) async {
     final finder = Finder(filter: Filter.equals("id", unreadMessageId));
     final recordSnapshot = await _unreadMessageStore.findFirst(await _db, finder: finder);
-
-    return recordSnapshot.value.isNotEmpty ? UnreadMessage.fromJson(recordSnapshot.value) : null;
+    return !isObjectEmpty(recordSnapshot) ? UnreadMessage.fromJson(recordSnapshot.value) : null;
   }
 
   Future<UnreadMessage> getUnreadMessageOfAConversationGroup(String conversationGroupId) async {
     final finder = Finder(filter: Filter.equals("conversationGroupId", conversationGroupId));
     final recordSnapshot = await _unreadMessageStore.findFirst(await _db, finder: finder);
-
-    return recordSnapshot.value.isNotEmpty ? UnreadMessage.fromJson(recordSnapshot.value) : null;
+    return !isObjectEmpty(recordSnapshot) ? UnreadMessage.fromJson(recordSnapshot.value) : null;
   }
 
   Future<List<UnreadMessage>> getAllUnreadMessage() async {
     final recordSnapshots = await _unreadMessageStore.find(await _db);
-    List<UnreadMessage> unreadMessageList = recordSnapshots.map((snapshot) {
-      final unreadMessage = UnreadMessage.fromJson(snapshot.value);
-      print("unreadMessage.id: " + unreadMessage.id);
-      print("snapshot.key: " +
-          snapshot.key.toString());
-      unreadMessage.id = snapshot.key.toString();
-      return unreadMessage;
-    });
+    if (!isObjectEmpty(recordSnapshots)) {
+      List<UnreadMessage> unreadMessageList = recordSnapshots.map((snapshot) {
+        final unreadMessage = UnreadMessage.fromJson(snapshot.value);
+        print("unreadMessage.id: " + unreadMessage.id);
+        print("snapshot.key: " + snapshot.key.toString());
+        unreadMessage.id = snapshot.key.toString();
+        return unreadMessage;
+      });
 
-    return unreadMessageList;
+      return unreadMessageList;
+    }
+    return null;
   }
 }
