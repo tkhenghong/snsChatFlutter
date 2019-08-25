@@ -93,7 +93,7 @@ void main() {
     await conversationGroupDBService.addConversationGroup(newConversationGroup);
 
     // Delete
-    bool deleted = await conversationGroupAPIService.deleteConversationGroup(newConversationGroup.id);
+    bool deleted = await conversationGroupAPIService.deleteConversationGroup(conversationGroup.id);
     await conversationGroupDBService.deleteConversationGroup(conversationGroup.id);
 
     print("deleted:" + deleted.toString());

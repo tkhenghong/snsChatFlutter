@@ -55,10 +55,10 @@ void main() {
     await messageDBService.editMessage(editedMessage);
     Message messageFromLocalDB = await messageDBService.getSingleMessage(newMessage.id);
 
-    expect(messageFromLocalDB.id, equals(messageFromLocalDB.id));
-    expect(messageFromLocalDB.messageContent, equals(messageFromLocalDB.messageContent));
-    expect(messageFromLocalDB.type, equals(messageFromLocalDB.type));
-    expect(messageFromLocalDB.multimediaId, equals(messageFromLocalDB.multimediaId));
+    expect(messageFromLocalDB.id, equals(editedMessage.id));
+    expect(messageFromLocalDB.messageContent, equals(editedMessage.messageContent));
+    expect(messageFromLocalDB.type, equals(editedMessage.type));
+    expect(messageFromLocalDB.multimediaId, equals(editedMessage.multimediaId));
     expect(edited, isTrue);
   });
 
@@ -79,10 +79,9 @@ void main() {
     Message message = createTestObject();
 
     Message newMessage = await messageAPIService.addMessage(message);
-    print("newMessage.id: " + newMessage.id);
     await messageDBService.addMessage(newMessage);
 
-    bool deleted = await messageAPIService.deleteMessage(newMessage.id);
+    bool deleted = await messageAPIService.deleteMessage(message.id);
     await messageDBService.deleteMessage(message.id);
     print("deleted:" + deleted.toString());
 

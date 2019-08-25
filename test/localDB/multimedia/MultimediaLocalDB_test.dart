@@ -53,11 +53,11 @@ void main() {
     await multimediaDBService.editMultimedia(editedMultimedia);
     Multimedia multimediaFromLocalDB = await multimediaDBService.getSingleMultimedia(newMultimedia.id);
 
-    expect(multimediaFromLocalDB.id, equals(multimediaFromLocalDB.id));
-    expect(multimediaFromLocalDB.localThumbnailUrl, equals(multimediaFromLocalDB.localThumbnailUrl));
-    expect(multimediaFromLocalDB.remoteThumbnailUrl, equals(multimediaFromLocalDB.remoteThumbnailUrl));
-    expect(multimediaFromLocalDB.remoteFullFileUrl, equals(multimediaFromLocalDB.remoteFullFileUrl));
-    expect(multimediaFromLocalDB.imageFileId, equals(multimediaFromLocalDB.imageFileId));
+    expect(multimediaFromLocalDB.id, equals(editedMultimedia.id));
+    expect(multimediaFromLocalDB.localThumbnailUrl, equals(editedMultimedia.localThumbnailUrl));
+    expect(multimediaFromLocalDB.remoteThumbnailUrl, equals(editedMultimedia.remoteThumbnailUrl));
+    expect(multimediaFromLocalDB.remoteFullFileUrl, equals(editedMultimedia.remoteFullFileUrl));
+    expect(multimediaFromLocalDB.imageFileId, equals(editedMultimedia.imageFileId));
     expect(edited, isTrue);
   });
 
@@ -69,8 +69,6 @@ void main() {
     await multimediaDBService.addMultimedia(newMultimedia);
 
     Multimedia multimediaFromServer = await multimediaAPIService.getSingleMultimedia(newMultimedia.id);
-    print("multimediaFromServer.id == newMultimedia.id:" + (multimediaFromServer.id == newMultimedia.id).toString());
-
     Multimedia multimediaFromLocalDB = await multimediaDBService.getSingleMultimedia(newMultimedia.id);
 
     expect(multimediaFromServer.id, equals(newMultimedia.id));
@@ -81,11 +79,9 @@ void main() {
     Multimedia multimedia = createTestObject();
 
     Multimedia newMultimedia = await multimediaAPIService.addMultimedia(multimedia);
-    print("newMultimedia.id: " + newMultimedia.id);
-
     await multimediaDBService.addMultimedia(newMultimedia);
 
-    bool deleted = await multimediaAPIService.deleteMultimedia(newMultimedia.id);
+    bool deleted = await multimediaAPIService.deleteMultimedia(multimedia.id);
 
     await multimediaDBService.deleteMultimedia(multimedia.id);
     print("deleted:" + deleted.toString());

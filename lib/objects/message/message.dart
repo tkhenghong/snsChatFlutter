@@ -49,7 +49,7 @@ class Message {
         receiverMobileNo = json['receiverMobileNo'],
         type = json['type'],
         status = json['status'],
-        messageContent = json['message'],
+        messageContent = json['messageContent'],
         multimediaId = json['multimediaId'],
         timestamp = json['timestamp'];
 
