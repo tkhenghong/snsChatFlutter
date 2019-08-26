@@ -16,23 +16,31 @@ class ConversationDBService {
   Future<Database> get _db async => await SembastDB.instance.database;
 
   //CRUD
-  Future addConversationGroup(ConversationGroup conversationGroup) async {
+  Future<bool> addConversationGroup(ConversationGroup conversationGroup) async {
     print("ConversationDBService.dart addConversationGroup()");
     Map<String, dynamic> convertedConversationGroup = conversationGroup.toJson();
     print("convertedConversationGroup['name'].toString(): " + convertedConversationGroup['name'].toString());
-    await _conversationGroupStore.add(await _db, conversationGroup.toJson());
+    var key = await _conversationGroupStore.add(await _db, conversationGroup.toJson());
+    print("ConversationDBService.dart key: " + key.toString());
+    return !isStringEmpty(key.toString());
   }
 
-  Future editConversationGroup(ConversationGroup conversationGroup) async {
+  Future<bool> editConversationGroup(ConversationGroup conversationGroup) async {
     final finder = Finder(filter: Filter.equals("id", conversationGroup.id));
 
-    await _conversationGroupStore.update(await _db, conversationGroup.toJson(), finder: finder);
+    var noOfUpdated = await _conversationGroupStore.update(await _db, conversationGroup.toJson(), finder: finder);
+    print("ConversationDBService.dart noOfUpdated: " + noOfUpdated.toString());
+    print("ConversationDBService.dart noOfUpdated == 1: " + (noOfUpdated == 1).toString());
+    return noOfUpdated == 1;
   }
 
   Future deleteConversationGroup(String conversationGroupId) async {
     final finder = Finder(filter: Filter.equals("id", conversationGroupId));
 
-    await _conversationGroupStore.delete(await _db, finder: finder);
+    var noOfDeleted = await _conversationGroupStore.delete(await _db, finder: finder);
+    print("ConversationDBService.dart noOfDeleted: " + noOfDeleted.toString());
+    print("ConversationDBService.dart noOfDeleted == 1: " + (noOfDeleted == 1).toString());
+    return noOfDeleted == 1;
   }
 
   Future<ConversationGroup> getSingleConversationGroup(String conversationGroupId) async {
