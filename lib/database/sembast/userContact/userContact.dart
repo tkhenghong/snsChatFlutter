@@ -12,20 +12,26 @@ class UserContactDBService {
   Future<Database> get _db async => await SembastDB.instance.database;
 
   //CRUD
-  Future addUserContact(UserContact userContact) async {
-    await _userContactStore.add(await _db, userContact.toJson());
+  Future<bool> addUserContact(UserContact userContact) async {
+    var key = await _userContactStore.add(await _db, userContact.toJson());
+
+    return !isStringEmpty(key.toString());
   }
 
-  Future editUserContact(UserContact userContact) async {
+  Future<bool> editUserContact(UserContact userContact) async {
     final finder = Finder(filter: Filter.equals("id", userContact.id));
 
-    await _userContactStore.update(await _db, userContact.toJson(), finder: finder);
+    var noOfUpdated = await _userContactStore.update(await _db, userContact.toJson(), finder: finder);
+
+    return noOfUpdated == 1;
   }
 
-  Future deleteUserContact(String userContactId) async {
+  Future<bool> deleteUserContact(String userContactId) async {
     final finder = Finder(filter: Filter.equals("id", userContactId));
 
-    await _userContactStore.delete(await _db, finder: finder);
+    var noOfDeleted = await _userContactStore.delete(await _db, finder: finder);
+
+    return noOfDeleted == 1;
   }
 
   Future<UserContact> getSingleUserContact(String userContactId) async {

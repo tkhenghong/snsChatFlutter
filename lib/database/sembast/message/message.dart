@@ -12,20 +12,26 @@ class MessageDBService {
   Future<Database> get _db async => await SembastDB.instance.database;
 
   //CRUD
-  Future addMessage(Message message) async {
-    await _messageStore.add(await _db, message.toJson());
+  Future<bool> addMessage(Message message) async {
+    var key = await _messageStore.add(await _db, message.toJson());
+
+    return !isStringEmpty(key.toString());
   }
 
-  Future editMessage(Message message) async {
+  Future<bool> editMessage(Message message) async {
     final finder = Finder(filter: Filter.equals("id", message.id));
 
-    await _messageStore.update(await _db, message.toJson(), finder: finder);
+    var noOfUpdated = await _messageStore.update(await _db, message.toJson(), finder: finder);
+
+    return noOfUpdated == 1;
   }
 
-  Future deleteMessage(String messageId) async {
+  Future<bool> deleteMessage(String messageId) async {
     final finder = Finder(filter: Filter.equals("id", messageId));
 
-    await _messageStore.delete(await _db, finder: finder);
+    var noOfDeleted = await _messageStore.delete(await _db, finder: finder);
+
+    return noOfDeleted == 1;
   }
 
   Future<Message> getSingleMessage(String messageId) async {

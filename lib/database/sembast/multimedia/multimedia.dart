@@ -12,20 +12,26 @@ class MultimediaDBService {
   Future<Database> get _db async => await SembastDB.instance.database;
 
   //CRUD
-  Future addMultimedia(Multimedia multimedia) async {
-    await _multimediaStore.add(await _db, multimedia.toJson());
+  Future<bool> addMultimedia(Multimedia multimedia) async {
+    var key = await _multimediaStore.add(await _db, multimedia.toJson());
+
+    return !isStringEmpty(key.toString());
   }
 
-  Future editMultimedia(Multimedia multimedia) async {
+  Future<bool> editMultimedia(Multimedia multimedia) async {
     final finder = Finder(filter: Filter.equals("id", multimedia.id));
 
-    await _multimediaStore.update(await _db, multimedia.toJson(), finder: finder);
+    var noOfUpdated = await _multimediaStore.update(await _db, multimedia.toJson(), finder: finder);
+
+    return noOfUpdated == 1;
   }
 
-  Future deleteMultimedia(String multimediaId) async {
+  Future<bool> deleteMultimedia(String multimediaId) async {
     final finder = Finder(filter: Filter.equals("id", multimediaId));
 
-    await _multimediaStore.delete(await _db, finder: finder);
+    var noOfDeleted = await _multimediaStore.delete(await _db, finder: finder);
+
+    return noOfDeleted == 1;
   }
 
   Future<Multimedia> getSingleMultimedia(String multimediaId) async {

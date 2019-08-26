@@ -12,20 +12,26 @@ class UnreadMessageDBService {
   Future<Database> get _db async => await SembastDB.instance.database;
 
   //CRUD
-  Future addUnreadMessage(UnreadMessage unreadMessage) async {
-    await _unreadMessageStore.add(await _db, unreadMessage.toJson());
+  Future<bool> addUnreadMessage(UnreadMessage unreadMessage) async {
+    var key = await _unreadMessageStore.add(await _db, unreadMessage.toJson());
+
+    return !isStringEmpty(key.toString());
   }
 
-  Future editUnreadMessage(UnreadMessage unreadMessage) async {
+  Future<bool> editUnreadMessage(UnreadMessage unreadMessage) async {
     final finder = Finder(filter: Filter.equals("id", unreadMessage.id));
 
-    await _unreadMessageStore.update(await _db, unreadMessage.toJson(), finder: finder);
+    var noOfUpdated = await _unreadMessageStore.update(await _db, unreadMessage.toJson(), finder: finder);
+
+    return noOfUpdated == 1;
   }
 
-  Future deleteUnreadMessage(String unreadMessageId) async {
+  Future<bool> deleteUnreadMessage(String unreadMessageId) async {
     final finder = Finder(filter: Filter.equals("id", unreadMessageId));
 
-    await _unreadMessageStore.delete(await _db, finder: finder);
+    var noOfDeleted = await _unreadMessageStore.delete(await _db, finder: finder);
+
+    return noOfDeleted == 1;
   }
 
   Future<UnreadMessage> getSingleUnreadMessage(String unreadMessageId) async {

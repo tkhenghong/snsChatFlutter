@@ -12,20 +12,26 @@ class SettingsDBService {
   Future<Database> get _db async => await SembastDB.instance.database;
 
   //CRUD
-  Future addSettings(Settings settings) async {
-    await _settingsStore.add(await _db, settings.toJson());
+  Future<bool> addSettings(Settings settings) async {
+    var key = await _settingsStore.add(await _db, settings.toJson());
+
+    return !isStringEmpty(key.toString());
   }
 
-  Future editSettings(Settings settings) async {
+  Future<bool> editSettings(Settings settings) async {
     final finder = Finder(filter: Filter.equals("id", settings.id));
 
-    await _settingsStore.update(await _db, settings.toJson(), finder: finder);
+    var noOfUpdated = await _settingsStore.update(await _db, settings.toJson(), finder: finder);
+
+    return noOfUpdated == 1;
   }
 
-  Future deleteSettings(String settingsId) async {
+  Future<bool> deleteSettings(String settingsId) async {
     final finder = Finder(filter: Filter.equals("id", settingsId));
 
-    await _settingsStore.delete(await _db, finder: finder);
+    var noOfDeleted = await _settingsStore.delete(await _db, finder: finder);
+
+    return noOfDeleted == 1;
   }
 
   Future<Settings> getSingleSettings(String settingsId) async {
@@ -47,8 +53,7 @@ class SettingsDBService {
       List<Settings> settingsList = recordSnapshots.map((snapshot) {
         final settings = Settings.fromJson(snapshot.value);
         print("settings.id: " + settings.id);
-        print("snapshot.key: " +
-            snapshot.key.toString());
+        print("snapshot.key: " + snapshot.key.toString());
         settings.id = snapshot.key.toString();
         return settings;
       });
