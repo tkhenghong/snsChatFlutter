@@ -28,6 +28,13 @@ class SignUpPageState extends State<SignUpPage> {
   FocusNode nodeTwo = FocusNode();
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    mobileNoTextController.text = widget.mobileNo.isNotEmpty ? widget.mobileNo : null;
+  }
+
+  @override
   void dispose() {
     // TODO: implement dispose
     nodeOne.dispose();
@@ -39,7 +46,7 @@ class SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
-    mobileNoTextController.text = widget.mobileNo;
+    print("build()");
     return Material(
         child: GestureDetector(
             // call this method here to hide soft keyboard
@@ -55,15 +62,13 @@ class SignUpPageState extends State<SignUpPage> {
                 children: <Widget>[
                   Text(
                     "Sign Up",
-                    style:
-                        TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
                   Text(
                     "Enter your mobile number and name: ",
-                    style: TextStyle(
-                        fontSize: 15.0, fontWeight: FontWeight.normal),
+                    style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.normal),
                     textAlign: TextAlign.center,
                   ),
                   Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
@@ -78,15 +83,13 @@ class SignUpPageState extends State<SignUpPage> {
                             cursorColor: Colors.black,
                             style: TextStyle(color: Colors.black),
                             inputFormatters: [
-                              BlacklistingTextInputFormatter(
-                                  RegExp('[\\.|\\,]')),
+                              BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
                             ],
                             maxLength: 15,
-                            decoration:
-                                InputDecoration(hintText: "Mobile Number"),
+                            decoration: InputDecoration(hintText: "Mobile Number"),
                             autofocus: true,
                             textAlign: TextAlign.center,
-                            keyboardType: TextInputType.number,
+                            keyboardType: TextInputType.phone,
                             focusNode: nodeOne,
                             onFieldSubmitted: (value) {
                               FocusScope.of(context).requestFocus(nodeTwo);
@@ -127,10 +130,8 @@ class SignUpPageState extends State<SignUpPage> {
                     highlightColor: Colors.black54,
                     splashColor: Colors.grey,
                     animationDuration: Duration(milliseconds: 500),
-                    padding: EdgeInsets.only(
-                        left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(50.0)),
+                    padding: EdgeInsets.only(left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
                     child: Text("Submit"),
                   ),
                   Padding(padding: EdgeInsets.symmetric(vertical: 50.00)),
@@ -153,9 +154,7 @@ class SignUpPageState extends State<SignUpPage> {
                       goToVerifyPhoneNumber();
                     } else {
                       Navigator.pop(context);
-                      Fluttertoast.showToast(
-                          msg: 'Unable to login. Please try again.',
-                          toastLength: Toast.LENGTH_SHORT);
+                      Fluttertoast.showToast(msg: 'Unable to login. Please try again.', toastLength: Toast.LENGTH_SHORT);
                       Navigator.pop(context);
                     }
                   },
@@ -164,8 +163,7 @@ class SignUpPageState extends State<SignUpPage> {
               print("if (!isSignedUp)");
               Navigator.pop(context);
               Fluttertoast.showToast(
-                  msg:
-                      'Registered Mobile No./Google Account. Please use other Mobile No./Google Account to register.',
+                  msg: 'Registered Mobile No./Google Account. Please use another Mobile No./Google Account to register.',
                   toastLength: Toast.LENGTH_SHORT);
             }
           },
@@ -175,10 +173,6 @@ class SignUpPageState extends State<SignUpPage> {
   }
 
   goToVerifyPhoneNumber() {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: ((context) => VerifyPhoneNumberPage(
-                mobileNo: mobileNoTextController.value.text))));
+    Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(mobileNo: mobileNoTextController.value.text))));
   }
 }

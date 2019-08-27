@@ -14,6 +14,13 @@ import 'package:snschat_flutter/backend/rest/settings/SettingsAPIService.dart';
 import 'package:snschat_flutter/backend/rest/unreadMessage/UnreadMessageAPIService.dart';
 import 'package:snschat_flutter/backend/rest/user/UserAPIService.dart';
 import 'package:snschat_flutter/backend/rest/userContact/UserContactAPIService.dart';
+import 'package:snschat_flutter/database/sembast/conversation_group/conversation_group.dart';
+import 'package:snschat_flutter/database/sembast/message/message.dart';
+import 'package:snschat_flutter/database/sembast/multimedia/multimedia.dart';
+import 'package:snschat_flutter/database/sembast/settings/settings.dart';
+import 'package:snschat_flutter/database/sembast/unread_message/unread_message.dart';
+import 'package:snschat_flutter/database/sembast/user/user.dart';
+import 'package:snschat_flutter/database/sembast/userContact/userContact.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
@@ -32,6 +39,13 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   UnreadMessageAPIService unreadMessageAPIService = UnreadMessageAPIService();
   UserAPIService userAPIService = UserAPIService();
   UserContactAPIService userContactAPIService = UserContactAPIService();
+  ConversationDBService conversationGroupDBService = new ConversationDBService();
+  MessageDBService messageDBService = MessageDBService();
+  MultimediaDBService multimediaDBService = MultimediaDBService();
+  SettingsDBService settingsDBService = SettingsDBService();
+  UnreadMessageDBService unreadMessageDBService = UnreadMessageDBService();
+  UserDBService userDBService = UserDBService();
+  UserContactDBService userContactDBService = UserContactDBService();
 
   @override
   WholeAppState get initialState => WholeAppState.initial();
@@ -234,8 +248,10 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       // TODO:
       print("currentState.firebaseUser.uid: " + currentState.firebaseUser.uid);
       //TODO: Change to GoogleAccount.id
-      final QuerySnapshot userResult =
-          await Firestore.instance.collection('user').where('googleAccountId', isEqualTo: currentState.googleSignIn.currentUser.id).getDocuments();
+      final QuerySnapshot userResult = await Firestore.instance
+          .collection('user')
+          .where('googleAccountId', isEqualTo: currentState.googleSignIn.currentUser.id)
+          .getDocuments();
       final List<DocumentSnapshot> userDocument = userResult.documents;
 
       print("WholeAppBloc.dart userDocument.length: " + userDocument.length.toString());
@@ -298,32 +314,18 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       FirebaseUser firebaseUser = currentState.firebaseUser;
       GoogleSignInAccount googleSignInAccount = currentState.googleSignIn.currentUser;
       User user = User(
-//          id: generateNewId().toString(),
+          id: null,
           mobileNo: event.mobileNo,
           displayName: firebaseUser.displayName,
           googleAccountId: googleSignInAccount.id,
           realName: event.realName);
 
-      Settings settings = Settings(
-//          id: generateNewId().toString(),
-          notification: true, userId: user.id);
-      print("Adding User and Settings to REST");
-      // API Service
-      user = await userAPIService.addUser(user);
-      settings = await settingsAPIService.addSettings(settings);
-      if (!isObjectEmpty(firebaseUser) && user.id.isNotEmpty && settings.id.isNotEmpty) {
-        print("if (!isObjectEmpty(firebaseUser))");
-        // Check if user is already signed up or not
-        final QuerySnapshot duplicateGoogleAccountResult =
-            await Firestore.instance.collection('user').where('googleAccountId', isEqualTo: firebaseUser.uid).getDocuments();
-        final List<DocumentSnapshot> duplicateGoogleAccountDocuments = duplicateGoogleAccountResult.documents;
+      Settings settings = Settings(id: null, notification: true, userId: user.id);
 
-        final QuerySnapshot duplicateMobileNoResult =
-            await Firestore.instance.collection('user').where('googleAccountId', isEqualTo: firebaseUser.uid).getDocuments();
-        final List<DocumentSnapshot> duplicateMobileNoDocuments = duplicateMobileNoResult.documents;
-        print("duplicateGoogleAccountDocuments.length: " + duplicateGoogleAccountDocuments.length.toString());
-        print("duplicateMobileNoDocuments.length: " + duplicateMobileNoDocuments.length.toString());
-        if (duplicateGoogleAccountDocuments.length == 0 && duplicateMobileNoDocuments.length == 0) {
+      if (!isObjectEmpty(firebaseUser)) {
+        print("if (!isObjectEmpty(firebaseUser))");
+        bool accountExist = await checkExistingAccount(user);
+        if (!accountExist) {
           print("No same google account or mobile no found in the database.");
           print("user.id: " + user.id);
           print("user.mobileNo: " + user.mobileNo);
@@ -331,23 +333,14 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
           print("user.googleAccountId: " + user.googleAccountId);
           print("user.realName: " + user.realName);
 
-          Firestore.instance.collection('settings').document(settings.id).setData({
-            'id': settings.id,
-            'notification': settings.notification,
-            'userId': settings.userId,
-          });
-          Firestore.instance.collection('user').document(user.id).setData({
-            'id': user.id,
-            'displayName': user.displayName,
-            'realName': user.realName,
-            'mobileNo': user.mobileNo,
-            'googleAccountId': user.googleAccountId,
-          });
+          // Create Settings and User
+          bool created = await createSettingsAndUser(user, settings);
 
           if (!isObjectEmpty(event)) {
-            event.callback(true);
+            event.callback(created);
           }
-          return true;
+
+          return created;
         } else {
           print("GOT SAME google account or mobile no found in the database.");
           Fluttertoast.showToast(msg: 'This mobile no has already been registered.', toastLength: Toast.LENGTH_SHORT);
@@ -364,6 +357,72 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       event.callback(false);
     }
     return false;
+  }
+
+  Future<bool> checkExistingAccount(User user) async {
+    // TODO: Throw away Firebase code
+    final QuerySnapshot duplicateGoogleAccountResult =
+        await Firestore.instance.collection('user').where('googleAccountId', isEqualTo: user.googleAccountId).getDocuments();
+    final List<DocumentSnapshot> duplicateGoogleAccountDocuments = duplicateGoogleAccountResult.documents;
+
+    final QuerySnapshot duplicateMobileNoResult =
+        await Firestore.instance.collection('user').where('mobileNo', isEqualTo: user.mobileNo).getDocuments();
+    final List<DocumentSnapshot> duplicateMobileNoDocuments = duplicateMobileNoResult.documents;
+    print("duplicateGoogleAccountDocuments.length: " + duplicateGoogleAccountDocuments.length.toString());
+    print("duplicateMobileNoDocuments.length: " + duplicateMobileNoDocuments.length.toString());
+
+    // Check REST API
+    User userFromServer = await userAPIService.getUserByUsingGoogleAccountId(user.googleAccountId);
+    // TODO: Get user by it's mobile number
+    User userFromServer2 = await userAPIService.getUserByUsingMobileNo(user.mobileNo);
+
+    return duplicateGoogleAccountDocuments.length == 0 &&
+        duplicateMobileNoDocuments.length == 0 &&
+        userFromServer.toString().isEmpty &&
+        userFromServer2.toString().isEmpty;
+  }
+
+  Future<bool> createSettingsAndUser(User user, Settings settings) async {
+    // REST API --> Local DB --> Firebase(Optional)
+    User newUser = await userAPIService.addUser(user);
+    if (newUser.id.isEmpty) {
+      return false;
+    }
+
+    user.id = newUser.id;
+
+    bool userSaved = await userDBService.addUser(user);
+    if (!userSaved) {
+      return false;
+    }
+
+    Settings newSettings = await settingsAPIService.addSettings(settings);
+    if (newSettings.id.isEmpty) {
+      return false;
+    }
+
+    settings.id = newSettings.id;
+
+    bool settingsSaved = await settingsDBService.addSettings(settings);
+    if (!settingsSaved) {
+      return false;
+    }
+
+    // TODO: Throw away Firebase code
+    Firestore.instance.collection('settings').document(settings.id).setData({
+      'id': settings.id,
+      'notification': settings.notification,
+      'userId': settings.userId,
+    });
+    Firestore.instance.collection('user').document(user.id).setData({
+      'id': user.id,
+      'displayName': user.displayName,
+      'realName': user.realName,
+      'mobileNo': user.mobileNo,
+      'googleAccountId': user.googleAccountId,
+    });
+
+    return true;
   }
 
   //  clear app's state and sign out

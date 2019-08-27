@@ -46,4 +46,24 @@ class UserAPIService {
     }
     return null;
   }
+
+  Future<User> getUserByUsingGoogleAccountId(String googleAccountId) async {
+    var httpResponse = await http.get(REST_URL + "/user/googleAccountId/" + googleAccountId);
+
+    if (httpResponseIsOK(httpResponse)) {
+      User user = new User.fromJson(json.decode(httpResponse.body));
+      return user;
+    }
+    return null;
+  }
+
+  Future<User> getUserByUsingMobileNo(String mobileNo) async {
+    var httpResponse = await http.get(REST_URL + "/user/mobileNo/" + mobileNo);
+
+    if (httpResponseIsOK(httpResponse)) {
+      User user = new User.fromJson(json.decode(httpResponse.body));
+      return user;
+    }
+    return null;
+  }
 }
