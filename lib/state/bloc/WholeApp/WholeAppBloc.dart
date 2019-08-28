@@ -28,6 +28,7 @@ import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/objects/settings/settings.dart';
 import 'package:snschat_flutter/objects/user/user.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
+import 'package:snschat_flutter/service/permissions/PermissionService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 
@@ -46,6 +47,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   UnreadMessageDBService unreadMessageDBService = UnreadMessageDBService();
   UserDBService userDBService = UserDBService();
   UserContactDBService userContactDBService = UserContactDBService();
+  PermissionService permissionService = PermissionService();
 
   @override
   WholeAppState get initialState => WholeAppState.initial();
@@ -444,13 +446,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   getPhoneStorageContacts(GetPhoneStorageContactsEvent event) async {
-    Map<PermissionGroup, PermissionStatus> permissions = await requestContactPermission();
-    bool contactAccessGranted = false;
-    permissions.forEach((PermissionGroup permissionGroup, PermissionStatus permissionStatus) {
-      if (permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted) {
-        contactAccessGranted = true;
-      }
-    });
+    bool contactAccessGranted = await permissionService.requestContactPermission();
+
     if (contactAccessGranted) {
       print("contactAccessGranted!");
       Iterable<Contact> contacts = await ContactsService.getContacts();
@@ -468,14 +465,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
         event.callback(false);
       }
     }
-  }
-
-  // TODO: Move to plugins folder > permissions
-  Future<Map<PermissionGroup, PermissionStatus>> requestContactPermission() async {
-    Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([
-      PermissionGroup.contacts,
-    ]);
-    return permissions;
   }
 
   Future<Map<PermissionGroup, PermissionStatus>> checkPermissions(CheckPermissionEvent event) async {

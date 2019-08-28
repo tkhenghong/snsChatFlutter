@@ -2,9 +2,12 @@ import 'dart:async';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
+import 'package:snschat_flutter/environments/development/variables.dart'
+    as globals;
+import 'package:snschat_flutter/service/permissions/PermissionService.dart';
 
 // Video tutorial: https://www.youtube.com/watch?v=LcaOULash7s
 // Make a class to connect your DB file in Android/iOS and make it singleton which can be instantiated only once
@@ -31,7 +34,8 @@ class SembastDB {
     }
 
     // Otherwize, return the value of the function again straight back to the caller.
-    return _dbOpenCompleter.future; // Returns the last value emitted from the function that linked to this completer instance.
+    return _dbOpenCompleter
+        .future; // Returns the last value emitted from the function that linked to this completer instance.
   }
 
   Future _startSembastDatabase() async {
@@ -50,13 +54,21 @@ class SembastDB {
         // make sure it exists
         await dir.create(recursive: true);
         // build the database path
-        dbPath = join(dir.path, 'pocketChat.db'); // join method comes from path.dart
+        dbPath =
+            join(dir.path, 'pocketChat.db'); // join method comes from path.dart
         break;
     }
 
-    // TODO: Request permission in Android/iOS
+    // TODO: Reject all localDB queries if cannot open the database
     // open the database
-    var db = await databaseFactoryIo.openDatabase(dbPath);
-    _dbOpenCompleter.complete(db);
+    PermissionService permissionService = PermissionService();
+    bool storageAccessGranted =
+        await permissionService.requestStoragePermission();
+    if (storageAccessGranted) {
+      var db = await databaseFactoryIo.openDatabase(dbPath);
+      _dbOpenCompleter.complete(db);
+    } else {
+      _dbOpenCompleter.complete(null);
+    }
   }
 }
