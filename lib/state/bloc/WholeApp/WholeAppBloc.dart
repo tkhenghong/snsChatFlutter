@@ -327,11 +327,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
         bool accountExist = await checkExistingAccount(user);
         if (!accountExist) {
           print("No same google account or mobile no found in the database.");
-          print("user.id: " + user.id);
-          print("user.mobileNo: " + user.mobileNo);
-          print("user.displayName: " + user.displayName);
-          print("user.googleAccountId: " + user.googleAccountId);
-          print("user.realName: " + user.realName);
 
           // Create Settings and User
           bool created = await createSettingsAndUser(user, settings);
@@ -395,6 +390,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!userSaved) {
       return false;
     }
+
+    print("user.id: " + user.id);
+    print("user.mobileNo: " + user.mobileNo);
+    print("user.displayName: " + user.displayName);
+    print("user.googleAccountId: " + user.googleAccountId);
+    print("user.realName: " + user.realName);
 
     Settings newSettings = await settingsAPIService.addSettings(settings);
     if (newSettings.id.isEmpty) {
@@ -469,6 +470,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
   }
 
+  // TODO: Move to plugins folder > permissions
   Future<Map<PermissionGroup, PermissionStatus>> requestContactPermission() async {
     Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([
       PermissionGroup.contacts,

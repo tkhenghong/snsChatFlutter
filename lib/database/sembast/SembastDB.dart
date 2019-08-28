@@ -54,6 +54,7 @@ class SembastDB {
         break;
     }
 
+    // TODO: Request permission in Android/iOS
     // open the database
     var db = await databaseFactoryIo.openDatabase(dbPath);
     _dbOpenCompleter.complete(db);
