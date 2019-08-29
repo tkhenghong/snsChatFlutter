@@ -13,12 +13,18 @@ class UserContactDBService {
 
   //CRUD
   Future<bool> addUserContact(UserContact userContact) async {
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     var key = await _userContactStore.add(await _db, userContact.toJson());
 
     return !isStringEmpty(key.toString());
   }
 
   Future<bool> editUserContact(UserContact userContact) async {
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     final finder = Finder(filter: Filter.equals("id", userContact.id));
 
     var noOfUpdated = await _userContactStore.update(await _db, userContact.toJson(), finder: finder);
@@ -27,6 +33,9 @@ class UserContactDBService {
   }
 
   Future<bool> deleteUserContact(String userContactId) async {
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     final finder = Finder(filter: Filter.equals("id", userContactId));
 
     var noOfDeleted = await _userContactStore.delete(await _db, finder: finder);
@@ -35,6 +44,9 @@ class UserContactDBService {
   }
 
   Future<UserContact> getSingleUserContact(String userContactId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
     final finder = Finder(filter: Filter.equals("id", userContactId));
     final recordSnapshot = await _userContactStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? UserContact.fromJson(recordSnapshot.value) : null;
@@ -42,6 +54,9 @@ class UserContactDBService {
 
   // Verify userContact is in the local DB or not when login
   Future<UserContact> getUserContactByConversationGroup(String googleAccountId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
     final finder = Finder(filter: Filter.equals("googleAccountId", googleAccountId));
     final recordSnapshot = await _userContactStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? UserContact.fromJson(recordSnapshot.value) : null;
@@ -49,6 +64,9 @@ class UserContactDBService {
 
   // In future, when multiple logins needed
   Future<List<UserContact>> getAllUserContacts() async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
     final recordSnapshots = await _userContactStore.find(await _db);
     if (!isObjectEmpty(recordSnapshots)) {
       List<UserContact> userContactList = recordSnapshots.map((snapshot) {

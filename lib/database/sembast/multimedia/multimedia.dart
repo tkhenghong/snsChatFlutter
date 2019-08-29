@@ -13,12 +13,18 @@ class MultimediaDBService {
 
   //CRUD
   Future<bool> addMultimedia(Multimedia multimedia) async {
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     var key = await _multimediaStore.add(await _db, multimedia.toJson());
 
     return !isStringEmpty(key.toString());
   }
 
   Future<bool> editMultimedia(Multimedia multimedia) async {
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     final finder = Finder(filter: Filter.equals("id", multimedia.id));
 
     var noOfUpdated = await _multimediaStore.update(await _db, multimedia.toJson(), finder: finder);
@@ -27,6 +33,9 @@ class MultimediaDBService {
   }
 
   Future<bool> deleteMultimedia(String multimediaId) async {
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     final finder = Finder(filter: Filter.equals("id", multimediaId));
 
     var noOfDeleted = await _multimediaStore.delete(await _db, finder: finder);
@@ -35,12 +44,18 @@ class MultimediaDBService {
   }
 
   Future<Multimedia> getSingleMultimedia(String multimediaId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
     final finder = Finder(filter: Filter.equals("id", multimediaId));
     final recordSnapshot = await _multimediaStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? Multimedia.fromJson(recordSnapshot.value) : null;
   }
 
   Future<List<Multimedia>> getMultimediaOfAConversationGroup(String conversationGroupId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
     final finder = Finder(filter: Filter.equals("conversationGroupId", conversationGroupId));
     final recordSnapshots = await _multimediaStore.find(await _db, finder: finder);
     if (!isObjectEmpty(recordSnapshots)) {
@@ -58,6 +73,9 @@ class MultimediaDBService {
   }
 
   Future<List<Multimedia>> getAllMultimedia() async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
     final recordSnapshots = await _multimediaStore.find(await _db);
     if (!isObjectEmpty(recordSnapshots)) {
       List<Multimedia> multimediaList = recordSnapshots.map((snapshot) {

@@ -18,6 +18,9 @@ class ConversationDBService {
   //CRUD
   Future<bool> addConversationGroup(ConversationGroup conversationGroup) async {
     print("ConversationDBService.dart addConversationGroup()");
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     Map<String, dynamic> convertedConversationGroup = conversationGroup.toJson();
     print("convertedConversationGroup['name'].toString(): " + convertedConversationGroup['name'].toString());
     var key = await _conversationGroupStore.add(await _db, conversationGroup.toJson());
@@ -26,6 +29,9 @@ class ConversationDBService {
   }
 
   Future<bool> editConversationGroup(ConversationGroup conversationGroup) async {
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     final finder = Finder(filter: Filter.equals("id", conversationGroup.id));
 
     var noOfUpdated = await _conversationGroupStore.update(await _db, conversationGroup.toJson(), finder: finder);
@@ -34,7 +40,10 @@ class ConversationDBService {
     return noOfUpdated == 1;
   }
 
-  Future deleteConversationGroup(String conversationGroupId) async {
+  Future<bool> deleteConversationGroup(String conversationGroupId) async {
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     final finder = Finder(filter: Filter.equals("id", conversationGroupId));
 
     var noOfDeleted = await _conversationGroupStore.delete(await _db, finder: finder);
@@ -44,12 +53,18 @@ class ConversationDBService {
   }
 
   Future<ConversationGroup> getSingleConversationGroup(String conversationGroupId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
     final finder = Finder(filter: Filter.equals("id", conversationGroupId));
     final recordSnapshot = await _conversationGroupStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? ConversationGroup.fromJson(recordSnapshot.value) : null;
   }
 
   Future<List<ConversationGroup>> getAllConversationGroups() async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
     // Auto sort by createdDate, but when showing in chat page, sort these conversations using last unread message's date
     final finder = Finder(sortOrders: [SortOrder('createdDate')]);
     // Find all Conversation Groups

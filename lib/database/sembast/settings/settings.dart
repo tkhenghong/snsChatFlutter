@@ -13,12 +13,18 @@ class SettingsDBService {
 
   //CRUD
   Future<bool> addSettings(Settings settings) async {
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     var key = await _settingsStore.add(await _db, settings.toJson());
 
     return !isStringEmpty(key.toString());
   }
 
   Future<bool> editSettings(Settings settings) async {
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     final finder = Finder(filter: Filter.equals("id", settings.id));
 
     var noOfUpdated = await _settingsStore.update(await _db, settings.toJson(), finder: finder);
@@ -27,6 +33,9 @@ class SettingsDBService {
   }
 
   Future<bool> deleteSettings(String settingsId) async {
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     final finder = Finder(filter: Filter.equals("id", settingsId));
 
     var noOfDeleted = await _settingsStore.delete(await _db, finder: finder);
@@ -35,12 +44,18 @@ class SettingsDBService {
   }
 
   Future<Settings> getSingleSettings(String settingsId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
     final finder = Finder(filter: Filter.equals("id", settingsId));
     final recordSnapshot = await _settingsStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? Settings.fromJson(recordSnapshot.value) : null;
   }
 
   Future<Settings> getSettingsOfAUser(String userId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
     final finder = Finder(filter: Filter.equals("userId", userId));
     final recordSnapshot = await _settingsStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? Settings.fromJson(recordSnapshot.value) : null;
@@ -48,6 +63,9 @@ class SettingsDBService {
 
   // Possible usage when doing like Facebook multiple users login
   Future<List<Settings>> getAllSettings() async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
     final recordSnapshots = await _settingsStore.find(await _db);
     if (!isObjectEmpty(recordSnapshots)) {
       List<Settings> settingsList = recordSnapshots.map((snapshot) {

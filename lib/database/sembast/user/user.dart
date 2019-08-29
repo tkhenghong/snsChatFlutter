@@ -13,12 +13,18 @@ class UserDBService {
 
   //CRUD
   Future<bool> addUser(User user) async {
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     var key = await _userStore.add(await _db, user.toJson());
 
     return !isStringEmpty(key.toString());
   }
 
   Future<bool> editUser(User user) async {
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     final finder = Finder(filter: Filter.equals("id", user.id));
 
     var noOfUpdated = await _userStore.update(await _db, user.toJson(), finder: finder);
@@ -27,6 +33,9 @@ class UserDBService {
   }
 
   Future<bool> deleteUser(String userId) async {
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     final finder = Finder(filter: Filter.equals("id", userId));
 
     var noOfDeleted = await _userStore.delete(await _db, finder: finder);
@@ -35,6 +44,9 @@ class UserDBService {
   }
 
   Future<User> getSingleUser(String userId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
     final finder = Finder(filter: Filter.equals("id", userId));
     final recordSnapshot = await _userStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? User.fromJson(recordSnapshot.value) : null;
@@ -42,6 +54,9 @@ class UserDBService {
 
   // Verify user is in the local DB or not when login
   Future<User> getUserByGoogleAccountId(String googleAccountId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
     final finder = Finder(filter: Filter.equals("googleAccountId", googleAccountId));
     final recordSnapshot = await _userStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? User.fromJson(recordSnapshot.value) : null;
@@ -49,6 +64,9 @@ class UserDBService {
 
   // In future, when multiple logins needed
   Future<List<User>> getAllUsers() async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
     final recordSnapshots = await _userStore.find(await _db);
     if (!isObjectEmpty(recordSnapshots)) {
       List<User> userList = recordSnapshots.map((snapshot) {

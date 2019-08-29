@@ -13,12 +13,18 @@ class MessageDBService {
 
   //CRUD
   Future<bool> addMessage(Message message) async {
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     var key = await _messageStore.add(await _db, message.toJson());
 
     return !isStringEmpty(key.toString());
   }
 
   Future<bool> editMessage(Message message) async {
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     final finder = Finder(filter: Filter.equals("id", message.id));
 
     var noOfUpdated = await _messageStore.update(await _db, message.toJson(), finder: finder);
@@ -27,6 +33,9 @@ class MessageDBService {
   }
 
   Future<bool> deleteMessage(String messageId) async {
+    if (isObjectEmpty(await _db)) {
+      return false;
+    }
     final finder = Finder(filter: Filter.equals("id", messageId));
 
     var noOfDeleted = await _messageStore.delete(await _db, finder: finder);
@@ -35,12 +44,18 @@ class MessageDBService {
   }
 
   Future<Message> getSingleMessage(String messageId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
     final finder = Finder(filter: Filter.equals("id", messageId));
     final recordSnapshot = await _messageStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? Message.fromJson(recordSnapshot.value) : null;
   }
 
   Future<List<Message>> getMessagesOfAConversationGroup(String conversationGroupId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
     final finder = Finder(filter: Filter.equals("conversationGroupId", conversationGroupId));
     final recordSnapshots = await _messageStore.find(await _db, finder: finder);
     if (!isObjectEmpty(recordSnapshots)) {
@@ -58,6 +73,9 @@ class MessageDBService {
   }
 
   Future<List<Message>> getAllMessages() async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
     final finder = Finder(sortOrders: [SortOrder('createdDate')]);
     final recordSnapshots = await _messageStore.find(await _db, finder: finder);
     if (!isObjectEmpty(recordSnapshots)) {
