@@ -41,10 +41,13 @@ class SembastDB {
     // https://github.com/tekartik/sembast.dart/blob/master/sembast/doc/open.md
 
     var dbPath = "";
+
+    bool storageAccessGranted;
     switch (ENVIRONMENT) {
       case "DEVELOPMENT":
         print("CASE DEVELOPMENT.");
         dbPath = 'pocketChat.db';
+        storageAccessGranted = true;
         break;
       default:
         // get the application documents directory
@@ -53,13 +56,14 @@ class SembastDB {
         await dir.create(recursive: true);
         // build the database path
         dbPath = join(dir.path, 'pocketChat.db'); // join method comes from path.dart
+        // open the database
+        PermissionService permissionService = PermissionService();
+        storageAccessGranted = await permissionService.requestStoragePermission();
         break;
     }
 
-    // TODO: Reject all localDB queries if cannot open the database
-    // open the database
-    PermissionService permissionService = PermissionService();
-    bool storageAccessGranted = await permissionService.requestStoragePermission();
+
+
     if (storageAccessGranted) {
       var db = await databaseFactoryIo.openDatabase(dbPath);
       _dbOpenCompleter.complete(db);

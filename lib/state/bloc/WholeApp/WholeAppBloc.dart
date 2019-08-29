@@ -77,7 +77,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       checkPermissions(event);
       yield currentState;
     } else if (event is UserSignUpEvent) {
-      signUpInFirestore(event);
+      signUp(event);
       yield currentState;
     } else if (event is AddConversationGroupEvent) {
       addConversation(event);
@@ -307,52 +307,57 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   // TODO: Save to SQLite DB
 
   // Sign up a new User record in FireStore using GoogleAccount & FirebaseUser
-  Future<bool> signUpInFirestore(UserSignUpEvent event) async {
-    // Require user to connect to Google first in order to get some info from the user
-    bool isSignedIn = await signInUsingGoogle();
+  Future<bool> signUp(UserSignUpEvent event) async {
+    try {
+      // Require user to connect to Google first in order to get some info from the user
+      bool isSignedIn = await signInUsingGoogle();
 
-    if (isSignedIn) {
-      print("if(isSignedIn)");
-      FirebaseUser firebaseUser = currentState.firebaseUser;
-      GoogleSignInAccount googleSignInAccount = currentState.googleSignIn.currentUser;
-      User user = User(
-          id: null,
-          mobileNo: event.mobileNo,
-          displayName: firebaseUser.displayName,
-          googleAccountId: googleSignInAccount.id,
-          realName: event.realName);
+      if (isSignedIn) {
+        print("if(isSignedIn)");
+        FirebaseUser firebaseUser = currentState.firebaseUser;
+        GoogleSignInAccount googleSignInAccount = currentState.googleSignIn.currentUser;
+        User user = User(
+            id: null,
+            mobileNo: event.mobileNo,
+            displayName: firebaseUser.displayName,
+            googleAccountId: googleSignInAccount.id,
+            realName: event.realName);
 
-      Settings settings = Settings(id: null, notification: true, userId: user.id);
+        Settings settings = Settings(id: null, notification: true, userId: user.id);
 
-      if (!isObjectEmpty(firebaseUser)) {
-        print("if (!isObjectEmpty(firebaseUser))");
-        bool accountExist = await checkExistingAccount(user);
-        if (!accountExist) {
-          print("No same google account or mobile no found in the database.");
+        if (!isObjectEmpty(firebaseUser)) {
+          print("if (!isObjectEmpty(firebaseUser))");
+          bool accountExist = await checkExistingAccount(user);
+          if (!accountExist) {
+            print("No same google account or mobile no found in the database.");
 
-          // Create Settings and User
-          bool created = await createSettingsAndUser(user, settings);
+            // Create Settings and User
+            bool created = await createSettingsAndUser(user, settings);
 
-          if (!isObjectEmpty(event)) {
-            event.callback(created);
+            if (!isObjectEmpty(event)) {
+              event.callback(created);
+            }
+
+            return created;
+          } else {
+            print("GOT SAME google account or mobile no found in the database.");
+            Fluttertoast.showToast(msg: 'This mobile no has already been registered.', toastLength: Toast.LENGTH_SHORT);
+            if (!isObjectEmpty(event)) {
+              event.callback(false);
+            }
+            return false;
           }
-
-          return created;
         } else {
-          print("GOT SAME google account or mobile no found in the database.");
-          Fluttertoast.showToast(msg: 'This mobile no has already been registered.', toastLength: Toast.LENGTH_SHORT);
-          if (!isObjectEmpty(event)) {
-            event.callback(false);
-          }
-          return false;
+          print("if (isObjectEmpty(firebaseUser))");
         }
-      } else {
-        print("if (isObjectEmpty(firebaseUser))");
       }
+      if (!isObjectEmpty(event)) {
+        event.callback(false);
+      }
+    } catch (e) {
+      return false;
     }
-    if (!isObjectEmpty(event)) {
-      event.callback(false);
-    }
+
     return false;
   }
 
@@ -386,7 +391,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return false;
     }
 
-    user.id = newUser.id;
+    settings.userId = user.id = newUser.id;
 
     bool userSaved = await userDBService.addUser(user);
     if (!userSaved) {
@@ -400,7 +405,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     print("user.realName: " + user.realName);
 
     Settings newSettings = await settingsAPIService.addSettings(settings);
-    if (newSettings.id.isEmpty) {
+    // TODO: Make the program return fail when
+    print("settingsAPIService.addSettings done.");
+    print("newSettings: " + newSettings.toString());
+
+    if (isObjectEmpty(newSettings)) {
+      print("if (isObjectEmpty(newSettings))");
       return false;
     }
 

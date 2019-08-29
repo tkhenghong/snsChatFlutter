@@ -17,7 +17,6 @@ class ConversationDBService {
 
   //CRUD
   Future<bool> addConversationGroup(ConversationGroup conversationGroup) async {
-    print("ConversationDBService.dart addConversationGroup()");
     if (isObjectEmpty(await _db)) {
       return false;
     }
