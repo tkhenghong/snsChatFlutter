@@ -49,16 +49,22 @@ class CheckPermissionEvent extends WholeAppEvent {
   CheckPermissionEvent({this.callback});
 }
 
-class RequestPermissionsEvent extends WholeAppEvent {
+class RequestAllPermissionsEvent extends WholeAppEvent {
   Function callback;
 
-  RequestPermissionsEvent({this.callback});
+  RequestAllPermissionsEvent({this.callback});
 }
 
 class GetPhoneStorageContactsEvent extends WholeAppEvent {
   Function callback;
 
   GetPhoneStorageContactsEvent({this.callback});
+}
+
+class GetConversationsForUserEvent extends WholeAppEvent {
+  Function callback;
+
+  GetConversationsForUserEvent({this.callback});
 }
 
 // Conversation

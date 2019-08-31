@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -68,7 +69,11 @@ class SembastDB {
       var db = await databaseFactoryIo.openDatabase(dbPath);
       _dbOpenCompleter.complete(db);
     } else {
+      Fluttertoast.showToast(
+          msg: 'Please enable Storage permission first.',
+          toastLength: Toast.LENGTH_SHORT);
       _dbOpenCompleter.complete(null);
+      _dbOpenCompleter = null;
     }
   }
 }

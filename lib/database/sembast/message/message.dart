@@ -16,7 +16,9 @@ class MessageDBService {
     if (isObjectEmpty(await _db)) {
       return false;
     }
-    var key = await _messageStore.add(await _db, message.toJson());
+
+    Message existingMessage = await getSingleMessage(message.id);
+    var key = existingMessage == null ? await _messageStore.add(await _db, message.toJson()) : null;
 
     return !isStringEmpty(key.toString());
   }

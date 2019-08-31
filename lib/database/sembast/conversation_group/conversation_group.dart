@@ -20,10 +20,11 @@ class ConversationDBService {
     if (isObjectEmpty(await _db)) {
       return false;
     }
-    Map<String, dynamic> convertedConversationGroup = conversationGroup.toJson();
-    print("convertedConversationGroup['name'].toString(): " + convertedConversationGroup['name'].toString());
-    var key = await _conversationGroupStore.add(await _db, conversationGroup.toJson());
-    print("ConversationDBService.dart key: " + key.toString());
+
+    ConversationGroup existingConversationGroup = await getSingleConversationGroup(conversationGroup.id);
+    var key = existingConversationGroup == null ? await _conversationGroupStore.add(await _db, conversationGroup.toJson()) : null;
+
+    // Return added or not added
     return !isStringEmpty(key.toString());
   }
 

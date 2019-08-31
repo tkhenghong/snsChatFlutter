@@ -30,7 +30,8 @@ void main() {
 
     ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(conversationGroup);
     print("newConversationGroup.id:" + newConversationGroup.id.toString());
-    await conversationGroupDBService.addConversationGroup(newConversationGroup);
+    // TODO: Check the value of the boolean return by DB service
+    bool added = await conversationGroupDBService.addConversationGroup(newConversationGroup);
     ConversationGroup conversationGroupFromLocalDB = await conversationGroupDBService.getSingleConversationGroup(conversationGroup.id);
 
     // Validations

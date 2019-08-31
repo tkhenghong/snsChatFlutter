@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
+import 'package:pin_input_text_field/pin_input_text_field.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
-import 'package:snschat_flutter/general/ui-component/pin_text_field.dart';
 
 class VerifyPhoneNumberPage extends StatefulWidget {
   String mobileNo;
@@ -17,6 +18,16 @@ class VerifyPhoneNumberPage extends StatefulWidget {
 }
 
 class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
+  TextEditingController textEditingController;
+  PinDecoration pinDecoration;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    textEditingController = TextEditingController();
+  }
+
   @override
   Widget build(BuildContext context) {
     String phoneNo = widget.mobileNo;
@@ -44,26 +55,34 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
                 'Wrong number?',
                 style: TextStyle(color: Colors.black),
               )),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              PinEntryTextField(
-                  fields: 4,
-                  onSubmit: (pin) {
-                    showLoading(context);
-                    print('PIN number is: ' + pin);
-                    Future.delayed(Duration(milliseconds: 100), () {
-                      //Delay 1 second to simulate something loading
-                      print('Loaded 3 seconds.');
-                      Navigator.pop(context); //pop loading dialog
-                      this.goToChatGroupList();
-                    });
-                  },
-                  fieldWidth: 40.0,
-                  fontSize: 20.0,
-                  isTextObscure: false,
-                  showFieldAsBox: false)
-            ],
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 70.0),
+            // PIN Text Field: https://pub.dev/packages/pin_input_text_field
+            // Auto "Enter" when all PIN text fields have values
+            child: PinInputTextField(
+              pinLength: 4,
+              autoFocus: true,
+              textInputAction: TextInputAction.go,
+              controller: textEditingController,
+              enabled: true,
+              keyboardType: TextInputType.number,
+              decoration: UnderlineDecoration(
+                  textStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold),
+                  color: Colors.black, obscureStyle: ObscureStyle(isTextObscure: true)),
+              onSubmit: (pin) {
+                print('PIN number is: ' + pin);
+                showLoading(context);
+                Future.delayed(Duration(milliseconds: 1000), () {
+                  //Delay 1 second to simulate something loading
+                  print('Loaded 1 second.');
+                  Navigator.pop(context); //pop loading dialog
+                  this.goToChatGroupList();
+                });
+              },
+            ),
           ),
           Text('Enter 4-digit code'),
 //          RaisedButton(onPressed: () {},  child: Text('Resend SMS'),), //In case youre able to resend SMS

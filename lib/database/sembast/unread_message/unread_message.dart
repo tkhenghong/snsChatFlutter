@@ -16,7 +16,9 @@ class UnreadMessageDBService {
     if (isObjectEmpty(await _db)) {
       return false;
     }
-    var key = await _unreadMessageStore.add(await _db, unreadMessage.toJson());
+
+    UnreadMessage existingUnreadMessage = await getSingleUnreadMessage(unreadMessage.id);
+    var key = existingUnreadMessage == null ? await _unreadMessageStore.add(await _db, unreadMessage.toJson()) : null;
 
     return !isStringEmpty(key.toString());
   }

@@ -162,9 +162,7 @@ class SignUpPageState extends State<SignUpPage> {
             } else {
               print("if (!isSignedUp)");
               Navigator.pop(context);
-              Fluttertoast.showToast(
-                  msg: 'Registered Mobile No./Google Account. Please use another Mobile No./Google Account to register.',
-                  toastLength: Toast.LENGTH_SHORT);
+
             }
           },
           mobileNo: mobileNoTextController.value.text,

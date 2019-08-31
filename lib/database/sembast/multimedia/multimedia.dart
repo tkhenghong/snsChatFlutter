@@ -16,7 +16,9 @@ class MultimediaDBService {
     if (isObjectEmpty(await _db)) {
       return false;
     }
-    var key = await _multimediaStore.add(await _db, multimedia.toJson());
+
+    Multimedia existingMultimedia = await getSingleMultimedia(multimedia.id);
+    var key = existingMultimedia == null ? await _multimediaStore.add(await _db, multimedia.toJson()) : null;
 
     return !isStringEmpty(key.toString());
   }

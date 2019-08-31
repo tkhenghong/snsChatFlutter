@@ -49,6 +49,10 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 //            getConversations();
             if (getListDone == false) {
               print("if (!getListDone)");
+              // TODO: Get Conversations for the User
+              wholeAppBloc.dispatch(GetConversationsForUserEvent(callback: () {
+
+              }));
               getConversations().listen((bool done) {
                 print("getConversation() success!");
                 setState(() {
@@ -69,91 +73,11 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   goToLoginPage() {
-    print("goToLoginPage()");
     Navigator.of(context).pushNamedAndRemoveUntil("login_page", (Route<dynamic> route) => false);
   }
 
   Stream<bool> getConversations() async* {
-    print("getConversations()");
-//    print("wholeAppBloc.currentState.userState.id: " + wholeAppBloc.currentState.userState.id.toString());
-//    QuerySnapshot conversationSnapshot = await Firestore.instance
-//        .collection("conversation")
-//        .where("memberIds", arrayContains: wholeAppBloc.currentState.userState.id)
-//        .getDocuments();
-//    List<DocumentSnapshot> conversationDocuments = conversationSnapshot.documents;
-//    print("conversationDocuments.length: " + conversationDocuments.length.toString());
-//    if (conversationDocuments.length > 0) {
-//      print("if (conversationDocuments.length > 0)");
-//      DocumentSnapshot conversationDocument = conversationDocuments[0];
-//
-//      Conversation conversation = new Conversation(
-//        id: conversationDocument["id"].toString(),
-//        name: conversationDocument["name"].toString(),
-//        description: conversationDocument["description"].toString(),
-//        type: conversationDocument["type"].toString(),
-//        timestamp: conversationDocument["timestamp"].toString(),
-//        block: conversationDocument["block"] as bool,
-//        notificationExpireDate: conversationDocument["notificationExpireDate"] as int,
-//        creatorUserId: conversationDocument["creatorUserId"].toString(),
-//        memberIds: List.from(conversationDocument["memberIds"]),
-//        createdDate: conversationDocument["createdDate"].toString(),
-//      );
-//      wholeAppBloc.dispatch(AddConversationEvent(conversation: conversation, callback: (Conversation conversation) {}));
-//    } else {
-//      print("if (conversationDocuments.length <= 0)");
-//    }
-
-    print("wholeAppBloc.currentState.userState.id: " + wholeAppBloc.currentState.userState.id.toString());
-    QuerySnapshot userContactSnapshot = await Firestore.instance
-        .collection("user_contact")
-        .where("userId", isEqualTo: wholeAppBloc.currentState.userState.id)
-        .getDocuments();
-    List<DocumentSnapshot> userContactDocuments = userContactSnapshot.documents;
-    print("userContactDocuments.length: " + userContactDocuments.length.toString());
-    if (userContactDocuments.length > 0) {
-      print("if (userContactDocuments.length > 0)");
-      // You want to get all userContactIds that belonged to this user first
-      // And then form an array to query Conversation table
-      List<String> userContactIds = userContactDocuments.map((DocumentSnapshot userContactDocument) {
-        return userContactDocument["id"].toString();
-      }).toList();
-      print("userContactIds: " + userContactIds.toString());
-      print("userContactIds.length: " + userContactIds.length.toString());
-      for(int i = 0; i < userContactIds.length; i++) {
-        QuerySnapshot conversationGroupSnapshot =
-        await Firestore.instance.collection("conversation").where("memberIds", arrayContains: userContactIds[i]).getDocuments();
-
-        List<DocumentSnapshot> conversationGroupDocuments = conversationGroupSnapshot.documents;
-        print("chat_group_list_page.dart conversationGroupDocuments.length: " + conversationGroupDocuments.length.toString());
-        if (conversationGroupDocuments.length > 0) {
-          print("if (conversationGroupDocuments.length > 0)");
-          DocumentSnapshot conversationGroupDocument = conversationGroupDocuments[0];
-
-          ConversationGroup conversationGroup = new ConversationGroup(
-            id: conversationGroupDocument["id"].toString(),
-            name: conversationGroupDocument["name"].toString(),
-            description: conversationGroupDocument["description"].toString(),
-            type: conversationGroupDocument["type"].toString(),
-            timestamp: conversationGroupDocument["timestamp"].toString(),
-            block: conversationGroupDocument["block"] as bool,
-            notificationExpireDate: conversationGroupDocument["notificationExpireDate"] as int,
-            creatorUserId: conversationGroupDocument["creatorUserId"].toString(),
-            memberIds: List.from(conversationGroupDocument["memberIds"]),
-            createdDate: conversationGroupDocument["createdDate"].toString(),
-          );
-          wholeAppBloc.dispatch(AddConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
-
-        } else {
-          print("if (conversationDocuments.length <= 0)");
-        }
-      }
-      yield true;
-    } else {
-      print("if (userContactDocuments.length <= 0)");
-    }
-
-    print("returned true?");
-//    return false;
+    // TODO: Load conversations in BLOC. Remove this method and dispatch a LoadConversationEvent to BLOC.
   }
 
   getUnreadMessage() async {}

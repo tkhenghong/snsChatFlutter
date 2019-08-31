@@ -16,7 +16,9 @@ class UserContactDBService {
     if (isObjectEmpty(await _db)) {
       return false;
     }
-    var key = await _userContactStore.add(await _db, userContact.toJson());
+
+    UserContact existingUserContact = await getSingleUserContact(userContact.id);
+    var key = existingUserContact == null ? await _userContactStore.add(await _db, userContact.toJson()) : null;
 
     return !isStringEmpty(key.toString());
   }
