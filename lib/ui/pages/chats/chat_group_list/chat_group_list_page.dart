@@ -38,35 +38,28 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   checkUserLogin() async {
-    wholeAppBloc.dispatch(CheckUserLoginEvent(callback: (bool isSignedIn) {
-      if (isSignedIn) {
-        print("if (isSignedIn)");
+    wholeAppBloc.dispatch(CheckUserLoginEvent(callback: (bool hasSignedIn) {
+      if (hasSignedIn) {
         wholeAppBloc.dispatch(UserSignInEvent(callback: (bool isSignedIn) {
-          print("UserSignInEvent success");
           if (isSignedIn) {
-            print("sign in success");
-            print("getListDone: " + getListDone.toString());
-//            getConversations();
-            if (getListDone == false) {
-              print("if (!getListDone)");
-              // TODO: Get Conversations for the User
-              wholeAppBloc.dispatch(GetConversationsForUserEvent(callback: () {
+            wholeAppBloc.dispatch(LoadDatabaseToStateEvent(callback: (bool loadDone){
+              if(loadDone) {
+                if (getListDone == false) {
+                  // TODO: Get Conversations for the User
+                  wholeAppBloc.dispatch(GetConversationsForUserEvent(callback: (bool done) {
+                    setState(() {
+                      getListDone = done;
+                    });
+                  }));
+                }
+              }
+            }));
 
-              }));
-              getConversations().listen((bool done) {
-                print("getConversation() success!");
-                setState(() {
-                  getListDone = done;
-                });
-              });
-            }
           } else {
-            print("sign in failed");
             goToLoginPage();
           }
         })); // Mobile no is not entered here
       } else {
-        print("if (!isSignedIn)");
         goToLoginPage();
       }
     }));
@@ -74,10 +67,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   goToLoginPage() {
     Navigator.of(context).pushNamedAndRemoveUntil("login_page", (Route<dynamic> route) => false);
-  }
-
-  Stream<bool> getConversations() async* {
-    // TODO: Load conversations in BLOC. Remove this method and dispatch a LoadConversationEvent to BLOC.
   }
 
   getUnreadMessage() async {}
@@ -107,7 +96,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                 physics: BouncingScrollPhysics(),
                 itemCount: state.conversationGroupList.length,
                 itemBuilder: (context, index) {
-                  print("ListView.builder");
                   return PageListTile(mapConversationToPageListTile(state.conversationGroupList[index]), context);
                 }),
           );
@@ -121,7 +109,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   PageListItem mapConversationToPageListTile(ConversationGroup conversation) {
-    print('mapConversationToPageListTile()');
     return PageListItem(
         title: Hero(
           tag: conversation.name,

@@ -30,6 +30,7 @@ dependencies:
   #  thumbnails: Generate thumbnails from video
 
   pin_input_text_field: ^2.0.0
+  connectivity: ^0.4.4
 
   flutter_cache_manager: ^1.1.1
   path_provider: ^1.2.0 # A Flutter plugin for finding commonly used locations on the filesystem. Supports iOS and Android.

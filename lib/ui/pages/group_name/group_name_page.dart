@@ -168,6 +168,7 @@ class GroupNamePageState extends State<GroupNamePage> {
   }
 
   // TODO: Conversation Group Creation into BLOC, can be merged with Personal & Broadcast
+  // TODO: Review later to match code of Single Conversation Group creation in select_contacts_page.dart
   Future<ConversationGroup> createGroupConversation() async {
     print("createGroupConversation()");
     ConversationGroup conversationGroup = new ConversationGroup(
@@ -245,7 +246,7 @@ class GroupNamePageState extends State<GroupNamePage> {
       // contact, primaryNo, conversation
       UserContact newUserContact = UserContact(
         id: generateNewId().toString(),
-        userId: "",
+        userIds: [],
         // TODO: Should be matching database ID? Or frontend UserId?
         displayName: contact.displayName,
         realName: contact.displayName,
@@ -275,14 +276,15 @@ class GroupNamePageState extends State<GroupNamePage> {
     print("userDocuments.length: " + userDocuments.length.toString());
     if (userDocuments.length > 0) {
       print("if(userDocuments.length > 0)");
-      newUserContact.userId = userDocuments[0]['id'];
+      newUserContact.userIds = [userDocuments[0]['id']];
     } else {
       print("if(userDocuments.length == 0)");
     }
 
+    // Remove Firebase code
     Firestore.instance.collection('user_contact').document(newUserContact.id).setData({
       'id': newUserContact.id,
-      'userId': newUserContact.userId,
+      'userIds': newUserContact.userIds,
       'displayName': newUserContact.displayName,
       'realName': newUserContact.realName,
       'mobileNo': newUserContact.mobileNo,
@@ -300,7 +302,7 @@ class GroupNamePageState extends State<GroupNamePage> {
     UserContact selfUserContact = UserContact(
       id: generateNewId().toString(),
       // Upload self id from User table
-      userId: currentUser.id,
+      userIds: [currentUser.id],
       displayName: currentUser.displayName,
       realName: currentUser.realName,
       mobileNo: currentUser.mobileNo,

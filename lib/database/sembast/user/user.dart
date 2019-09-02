@@ -71,12 +71,13 @@ class UserDBService {
     }
     final recordSnapshots = await _userStore.find(await _db);
     if (!isObjectEmpty(recordSnapshots)) {
-      List<User> userList = recordSnapshots.map((snapshot) {
+      List<User> userList = [];
+      recordSnapshots.forEach((snapshot) {
         final user = User.fromJson(snapshot.value);
         print("user.id: " + user.id);
         print("snapshot.key: " + snapshot.key.toString());
         user.id = snapshot.key.toString();
-        return user;
+        userList.add(user);
       });
 
       return userList;

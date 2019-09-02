@@ -65,10 +65,10 @@ void main() {
     User userFromServer = await userAPIService.getUserByUsingMobileNo(user.mobileNo);
 
     print("userFromServer.toString(): " + userFromServer.toString());
-//    print("newUser.mobileNo: " + newUser.mobileNo);
-//    print("userFromServer.mobileNo: " + userFromServer.mobileNo);
+    print("newUser.mobileNo: " + newUser.mobileNo);
+    print("userFromServer.mobileNo: " + userFromServer.mobileNo);
 
-//    expect(userFromServer.mobileNo, equals(newUser.mobileNo));
+    expect(userFromServer.mobileNo, equals(newUser.mobileNo));
   });
 
   test("Test Get Users from a Conversation", () async {

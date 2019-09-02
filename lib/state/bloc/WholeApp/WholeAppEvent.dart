@@ -67,6 +67,21 @@ class GetConversationsForUserEvent extends WholeAppEvent {
   GetConversationsForUserEvent({this.callback});
 }
 
+class LoadDatabaseToStateEvent extends WholeAppEvent {
+  Function callback;
+
+  LoadDatabaseToStateEvent({this.callback});
+}
+
+
+class CreateConversationGroupEvent extends WholeAppEvent {
+  // TODO: Create Single Group successfully (1 ConversationGroup, 2 UserContact, 1 UnreadMessage, 1 Multimedia)
+  ConversationGroup conversationGroup;
+  Function callback;
+
+  CreateConversationGroupEvent({this.conversationGroup, this.callback});
+}
+
 // Conversation
 class AddConversationGroupEvent extends WholeAppEvent {
   ConversationGroup conversationGroup;

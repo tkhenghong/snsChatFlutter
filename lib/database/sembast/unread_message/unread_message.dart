@@ -69,12 +69,13 @@ class UnreadMessageDBService {
     }
     final recordSnapshots = await _unreadMessageStore.find(await _db);
     if (!isObjectEmpty(recordSnapshots)) {
-      List<UnreadMessage> unreadMessageList = recordSnapshots.map((snapshot) {
+      List<UnreadMessage> unreadMessageList = [];
+      recordSnapshots.forEach((snapshot) {
         final unreadMessage = UnreadMessage.fromJson(snapshot.value);
         print("unreadMessage.id: " + unreadMessage.id);
         print("snapshot.key: " + snapshot.key.toString());
         unreadMessage.id = snapshot.key.toString();
-        return unreadMessage;
+        unreadMessageList.add(unreadMessage);
       });
 
       return unreadMessageList;

@@ -13,9 +13,10 @@ void main() {
         displayName: "Hong KH",
         mobileNo: "+60182262663",
         conversationId: "rts68h54tsr56h4rsy47",
-        userId: "5847rth54rt4h56sr4h",
+        userIds: ["5847rth54rt4h56sr4h"],
         block: false,
-        lastSeenDate: "19th August 2019");
+        lastSeenDate: "19th August 2019",
+        multimediaId: "54rdgr54gfrae5747486r");
   }
 
   test("Test Create UserContact", () async {
@@ -32,7 +33,7 @@ void main() {
     editedUserContact.realName = "Teoh Kheng Lam";
     editedUserContact.displayName = "KL Lam";
     editedUserContact.mobileNo = "+60182223991";
-    editedUserContact.userId = "999999999";
+    editedUserContact.userIds = ["999999999"];
     bool edited = await userContactAPIService.editUserContact(editedUserContact);
     print("edited:" + edited.toString());
 

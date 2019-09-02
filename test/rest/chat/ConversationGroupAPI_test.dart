@@ -13,7 +13,6 @@ void main() {
       description: "Testing description",
       type: "Single",
       createdDate: "107082019",
-      timestamp: "5643484641654",
       notificationExpireDate: 254631654,
       creatorUserId: "65421654654651",
       memberIds: ["wadwadw56f4sef", "56s4f6r54g89e4g", "54hs564ju456dyth5jsr", "5t4s5g1erg65t4ae"],

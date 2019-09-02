@@ -61,12 +61,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   }
 
   getContacts() async {
-    print('wholeAppBloc.currentState.phoneContactList.length: ' +
-        wholeAppBloc.currentState.phoneContactList.length.toString());
     if (wholeAppBloc.currentState.phoneContactList.length == 0) {
-      print('if(_wholeAppBloc.currentState.phoneContactList.length == 0)');
-      wholeAppBloc.dispatch(
-          GetPhoneStorageContactsEvent(callback: (bool getContactsSuccess) {
+      wholeAppBloc.dispatch(GetPhoneStorageContactsEvent(callback: (bool getContactsSuccess) {
         if (getContactsSuccess) {
           // Set up checkboxes first
           setupCheckBoxes();
@@ -121,9 +117,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       setConversationType(widget.chatGroupType);
     }
 
-    print('contactCheckBoxes.length.toString(): ' +
-        contactCheckBoxes.length.toString());
-
     return new Scaffold(
         appBar: new AppBar(
             title: Row(
@@ -141,8 +134,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                   ),
                   Text(
                     subtitle,
-                    style:
-                        TextStyle(fontSize: 15.0, fontWeight: FontWeight.w300),
+                    style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.w300),
                   )
                 ],
               ),
@@ -156,11 +148,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                   child: Icon(Icons.check),
                 ),
                 onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: ((context) => GroupNamePage(
-                              selectedContacts: selectedContacts))));
+                  Navigator.push(context, MaterialPageRoute(builder: ((context) => GroupNamePage(selectedContacts: selectedContacts))));
                 },
               ),
             ),
@@ -202,8 +190,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                                           'Hey There! I am using PocketChat.',
                                           softWrap: true,
                                         ),
-                                        value: contactCheckBoxes[
-                                            contact.displayName],
+                                        value: contactCheckBoxes[contact.displayName],
                                         onChanged: (bool value) {
                                           if (contactIsSelected(contact)) {
                                             selectedContacts.remove(contact);
@@ -211,18 +198,12 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                                             selectedContacts.add(contact);
                                           }
                                           setState(() {
-                                            contactCheckBoxes[
-                                                contact.displayName] = value;
+                                            contactCheckBoxes[contact.displayName] = value;
                                           });
                                         },
                                         secondary: CircleAvatar(
-                                          backgroundImage:
-                                              contact.avatar.isNotEmpty
-                                                  ? MemoryImage(contact.avatar)
-                                                  : NetworkImage(''),
-                                          child: contact.avatar.isEmpty
-                                              ? Text(contact.displayName[0])
-                                              : Text(''),
+                                          backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
+                                          child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
                                           radius: 20.0,
                                         ),
                                       )
@@ -236,33 +217,16 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                                           softWrap: true,
                                         ),
                                         onTap: () {
-                                          createPersonalConversation(contact)
-                                              .then((conversationGroup) {
-                                            _wholeAppBloc.dispatch(
-                                                AddConversationGroupEvent(
-                                                    conversationGroup:
-                                                    conversationGroup));
-                                            Navigator.of(context)
-                                                .pushNamedAndRemoveUntil(
-                                                    'tabs_page',
-                                                    (Route<dynamic> route) =>
-                                                        false);
+                                          createPersonalConversation(contact).then((conversationGroup) {
+                                            _wholeAppBloc.dispatch(AddConversationGroupEvent(conversationGroup: conversationGroup));
+                                            Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
                                             Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: ((context) =>
-                                                        ChatRoomPage(
-                                                            conversationGroup))));
+                                                context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
                                           });
                                         },
                                         leading: CircleAvatar(
-                                          backgroundImage:
-                                              contact.avatar.isNotEmpty
-                                                  ? MemoryImage(contact.avatar)
-                                                  : NetworkImage(''),
-                                          child: contact.avatar.isEmpty
-                                              ? Text(contact.displayName[0])
-                                              : Text(''),
+                                          backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
+                                          child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
                                           radius: 20.0,
                                         ),
                                       )
@@ -299,48 +263,67 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   }
 
   bool contactIsSelected(Contact contact) {
-    return selectedContacts.any((Contact selectedContact) =>
-        selectedContact.displayName == contact.displayName);
+    return selectedContacts.any((Contact selectedContact) => selectedContact.displayName == contact.displayName);
   }
 
   bool needSelectMultipleContacts() {
 //    return widget.chatGroupType == ChatGroupType.Group || widget.chatGroupType == ChatGroupType.Broadcast;
-    return widget.chatGroupType == "Group" ||
-        widget.chatGroupType == "Broadcast";
+    return widget.chatGroupType == "Group" || widget.chatGroupType == "Broadcast";
   }
 
   // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
   Future<ConversationGroup> createPersonalConversation(Contact contact) async {
     ConversationGroup conversationGroup = new ConversationGroup(
-      id: generateNewId().toString(),
+      id: null,
       creatorUserId: wholeAppBloc.currentState.userState.id,
       createdDate: new DateTime.now().millisecondsSinceEpoch.toString(),
       name: contact.displayName,
       type: "Personal",
       block: false,
       description: '',
+      adminMemberIds: [],
+      memberIds: [],
+      // memberIds put UserContact.id. NOT User.id
+      notificationExpireDate: 0,
     );
-    UserContact newUserContact = UserContact(
-      id: generateNewId().toString(),
-      userId: "",
-      // TODO: Should be matching database ID? Or frontend UserId?
+    // TODO: Create Single Group successfully (1 ConversationGroup, 2 UserContact, 1 UnreadMessage, 1 Multimedia)
+    // TODO: Check your UserContact exist in backend database or not first.
+    UserContact yourOwnUserContact = UserContact(
+      id: null,
+      userIds: [],
+      // Which User owns this UserContact
       displayName: contact.displayName,
       realName: contact.displayName,
+      block: false,
+      //conversationIds: , // Already moved it to ConversationGroup called it memberIds
+      lastSeenDate: "",
+      // mobileNo: primaryNo.length == 0 ? "" : primaryNo[0], // Added in later code
+    );
+
+    // Need to bring the UserContact's mobile no to go to server to check this mobile no exist or not first. It exist return it's UserContact id and replace this one
+    UserContact targetUserContact = UserContact(
+      id: null,
+      userIds: [],
+      displayName: contact.displayName,
+      realName: contact.displayName,
+      block: false,
+      lastSeenDate: "",
 //      mobileNo: primaryNo.length == 0 ? "" : primaryNo[0], // Added in later code
     );
 
     Multimedia newMultiMedia = Multimedia(
-        id: generateNewId().toString(),
-        imageDataId: "",
-        imageFileId: "",
-        localFullFileUrl: "",
-        localThumbnailUrl: "",
-        remoteThumbnailUrl: "",
-        remoteFullFileUrl: "",
-        userContactId: newUserContact.id,
-        messageId: "");
-    UnreadMessage newUnreadMessage = UnreadMessage(
-        id: generateNewId().toString(), count: 0, date: 0, lastMessage: "");
+        id: null,
+        imageDataId: null,
+        imageFileId: null,
+        localFullFileUrl: null,
+        localThumbnailUrl: null,
+        remoteThumbnailUrl: null,
+        remoteFullFileUrl: null,
+        userContactId: null,
+//        conversationId: conversationGroup.id, // Add the conversationId after the conversationGroup object is created in the backend
+        messageId: null);
+
+    UnreadMessage newUnreadMessage = UnreadMessage(id: null, count: 0, date: 0, lastMessage: "");
 
     // Determine how many phone number he has
     List<String> primaryNo = [];
@@ -350,33 +333,48 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       });
     }
 
-    // Add mobile no to UserContact before save to state
-    newUserContact.mobileNo = primaryNo.length == 0 ? "" : primaryNo[0];
+    // In Malaysia,
+    // If got +60, remove +60.
+    // If got 012285...
+    // Remove the 1st 0 out of the number
+    // When user sign up, make sure:
+    // Get the Country code to identify the user country origin.
+    // Remove the international code to get significant phone number of the user
+    // After sign up, send a command at the backend to replace those UserContact object with exactly same number
 
-    findUserContact(newUserContact);
+    // Add mobileNo of the stranger
+    // Add mobile no to UserContact before save to state
+    targetUserContact.mobileNo = primaryNo.length == 0 ? "" : primaryNo[0];
+    print("primaryNo[0]: " + primaryNo[0]);
+
+    // If got Malaysia number
+    if (primaryNo[0].contains("+60")) {
+      String trimmedString = primaryNo[0].substring(3);
+      print("trimmedString: " + trimmedString);
+    }
+
+    findUserContact(targetUserContact);
     // Personal chat one person only, so only dispatch once
 //    wholeAppBloc
 //        .dispatch(AddConversationMemberEvent(callback: (ConversationMember conversationMember) {}, conversationMember: conversationMember));
-    wholeAppBloc.dispatch(AddUserContactEvent(
-        callback: (UserContact userContact) {}, userContact: newUserContact));
+    // TODO: AddUserContact in WholeAppBloc
+//    wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: targetUserContact));
+//    wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: yourOwnUserContact));
 
     print('newMultiMedia.id: ' + newMultiMedia.id);
+    // TODO: AddUserContact in WholeAppBloc
     uploadConversation(conversationGroup, newUnreadMessage, newMultiMedia);
     return conversationGroup;
   }
 
-  uploadConversation(ConversationGroup conversationGroup, UnreadMessage newUnreadMessage,
-      Multimedia newMultiMedia) async {
+  uploadConversation(ConversationGroup conversationGroup, UnreadMessage newUnreadMessage, Multimedia newMultiMedia) async {
     print("uploadConversation()");
-    await Firestore.instance
-        .collection('conversation')
-        .document(conversationGroup.id)
-        .setData({
+    await Firestore.instance.collection('conversation').document(conversationGroup.id).setData({
       'id': conversationGroup.id,
       'name': conversationGroup.name,
       'type': conversationGroup.type,
       'creatorUserId': conversationGroup.creatorUserId,
-      'createdDate' : conversationGroup.createdDate,
+      'createdDate': conversationGroup.createdDate,
       'block': conversationGroup.block,
       'description': conversationGroup.description,
       'notificationExpireDate': conversationGroup.notificationExpireDate,
@@ -384,10 +382,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     });
 
     print("Upload group conversation successful.");
-    await Firestore.instance
-        .collection('unreadMessage')
-        .document(newUnreadMessage.id)
-        .setData({
+    await Firestore.instance.collection('unreadMessage').document(newUnreadMessage.id).setData({
       'id': newUnreadMessage.id,
       'count': newUnreadMessage.count,
       'date': newUnreadMessage.date,
@@ -396,14 +391,9 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
     print("Upload unreadMessage success!");
 
-    wholeAppBloc.dispatch(OverrideUnreadMessageEvent(
-        unreadMessage: newUnreadMessage,
-        callback: (UnreadMessage unreadMessage) {}));
+    wholeAppBloc.dispatch(OverrideUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
 
-    await Firestore.instance
-        .collection('multimedia')
-        .document(newUnreadMessage.id)
-        .setData({
+    await Firestore.instance.collection('multimedia').document(newUnreadMessage.id).setData({
       'id': newMultiMedia.id,
       'imageDataId': newMultiMedia.imageDataId,
       'imageFileId': newMultiMedia.imageFileId,
@@ -417,8 +407,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     });
 
     print("Upload multimedia success!");
-    wholeAppBloc.dispatch(AddMultimediaEvent(
-        callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
+    wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
 
     //TODO: Check user_contact
   }
@@ -427,14 +416,11 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   // If found, return that edited UserContact object
   // If not found, return NOT edited UserContact object
   Future<UserContact> findUserContact(UserContact newUserContact) async {
-    var conversationDocuments = await Firestore.instance
-        .collection("user")
-        .where("mobileNo", isEqualTo: newUserContact.mobileNo)
-        .getDocuments();
+    var conversationDocuments =
+        await Firestore.instance.collection("user").where("mobileNo", isEqualTo: newUserContact.mobileNo).getDocuments();
     if (conversationDocuments.documents.length > 0) {
       print("if (conversationDocuments.documents.length > 0)");
-      print("conversationDocuments.documents.length.toString(): " +
-          conversationDocuments.documents.length.toString());
+      print("conversationDocuments.documents.length.toString(): " + conversationDocuments.documents.length.toString());
       DocumentSnapshot documentSnapshot = conversationDocuments.documents[0];
       newUserContact.mobileNo = documentSnapshot["mobileNo"];
       return newUserContact;

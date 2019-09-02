@@ -61,12 +61,13 @@ class MessageDBService {
     final finder = Finder(filter: Filter.equals("conversationGroupId", conversationGroupId));
     final recordSnapshots = await _messageStore.find(await _db, finder: finder);
     if (!isObjectEmpty(recordSnapshots)) {
-      List<Message> messageList = recordSnapshots.map((snapshot) {
+      List<Message> messageList = [];
+      recordSnapshots.forEach((snapshot) {
         final message = Message.fromJson(snapshot.value);
         print("message.id: " + message.id);
         print("snapshot.key: " + snapshot.key.toString());
         message.id = snapshot.key.toString();
-        return message;
+        messageList.add(message);
       });
 
       return messageList;
@@ -81,12 +82,13 @@ class MessageDBService {
     final finder = Finder(sortOrders: [SortOrder('createdDate')]);
     final recordSnapshots = await _messageStore.find(await _db, finder: finder);
     if (!isObjectEmpty(recordSnapshots)) {
-      List<Message> messageList = recordSnapshots.map((snapshot) {
+      List<Message> messageList = [];
+      recordSnapshots.forEach((snapshot) {
         final message = Message.fromJson(snapshot.value);
         print("message.id: " + message.id);
         print("snapshot.key: " + snapshot.key.toString());
         message.id = snapshot.key.toString();
-        return message;
+        messageList.add(message);
       });
 
       return messageList;

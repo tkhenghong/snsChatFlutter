@@ -12,7 +12,6 @@ class ConversationGroup {
   List<String> adminMemberIds;
   bool block;
   int notificationExpireDate; // 0 = unblocked, > 0 = blocked until specific time
-  String timestamp;
 
   // Add groupAdmin List<String>
 
@@ -26,8 +25,7 @@ class ConversationGroup {
       this.description,
       this.memberIds,
       this.adminMemberIds,
-      this.notificationExpireDate,
-      this.timestamp});
+      this.notificationExpireDate});
 
   // fromMap in SembastDB tutorial
   factory ConversationGroup.fromJson(Map<String, dynamic> json) {
@@ -41,8 +39,7 @@ class ConversationGroup {
         description: json['description'],
 //        memberIds: json['memberIds'],
 //        adminMemberIds: json['adminMemberIds'],
-        notificationExpireDate: json['notificationExpireDate'],
-        timestamp: json['timestamp']);
+        notificationExpireDate: json['notificationExpireDate']);
 
     // ****Special case: For Lists, you need to convert memberIds and adminMemberIds from List<dynamic> to List<String>****
     var memberIdsFromJson = json['memberIds'];
@@ -68,7 +65,6 @@ class ConversationGroup {
         'memberIds': memberIds,
         'adminMemberIds': adminMemberIds,
         'notificationExpireDate': notificationExpireDate,
-        'timestamp': timestamp,
       };
 }
 

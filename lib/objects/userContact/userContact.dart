@@ -6,36 +6,45 @@ class UserContact {
   String conversationId;
   String displayName;
   String realName;
-  String userId;
-  String mobileNo;
+  List<String> userIds; // This UserContact is belonged to which user? // TODO: Move it to User, declare it as UserContactIds, which means how many contact does this User own?
+  String mobileNo; // Mobile number of the User/Stranger. Will use a method to determine the phone number's origin country. (Require to do strict validation during sign up + SMS verification)
   String lastSeenDate;
+  String multimediaId; // Show the user's picture. Uses the multimedia from the User itself. Show default user picture for strangers.
   bool block;
 
 //  String photoId; // Multimedia // Moved to Multimedia
 
-  UserContact({this.id, this.conversationId, this.displayName, this.realName, this.userId, this.mobileNo, this.lastSeenDate, this.block});
+  UserContact({this.id, this.conversationId, this.displayName, this.realName, this.userIds, this.mobileNo, this.lastSeenDate, this.block, this.multimediaId});
 
-  UserContact.fromJson(Map<String, dynamic> json)
-      : id = json['id'],
-  conversationId = json['conversationId'],
-        displayName = json['displayName'],
-        realName = json['realName'],
-        userId = json['userId'],
-        mobileNo = json['mobileNo'],
-        lastSeenDate = json['lastSeenDate'],
-        block = json['block'];
+  factory UserContact.fromJson(Map<String, dynamic> json) {
+    UserContact userContact = UserContact(
+      id: json['id'],
+      conversationId: json['conversationId'],
+      displayName: json['displayName'],
+      realName: json['realName'],
+      mobileNo: json['mobileNo'],
+      lastSeenDate: json['lastSeenDate'],
+      block: json['block'],
+      multimediaId: json['multimediaId'],
+    );
 
-//        photoId = json['photoId'];
+    var userIdsFromJson = json['userIds'];
+
+    List<String> userIds = new List<String>.from(userIdsFromJson);
+    userContact.userIds = userIds;
+
+    return userContact;
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,
-    'conversationId': conversationId,
+        'conversationId': conversationId,
         'displayName': displayName,
         'realName': realName,
-        'userId': userId,
+        'userIds': userIds,
         'mobileNo': mobileNo,
         'lastSeenDate': lastSeenDate,
         'block': block,
-//        'photoId': photoId,
+    'multimediaId': multimediaId,
       };
 }

@@ -21,11 +21,14 @@ import 'package:snschat_flutter/database/sembast/settings/settings.dart';
 import 'package:snschat_flutter/database/sembast/unread_message/unread_message.dart';
 import 'package:snschat_flutter/database/sembast/user/user.dart';
 import 'package:snschat_flutter/database/sembast/userContact/userContact.dart';
+
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
+import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/objects/settings/settings.dart';
+import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
 import 'package:snschat_flutter/objects/user/user.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/service/permissions/PermissionService.dart';
@@ -40,6 +43,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   UnreadMessageAPIService unreadMessageAPIService = UnreadMessageAPIService();
   UserAPIService userAPIService = UserAPIService();
   UserContactAPIService userContactAPIService = UserContactAPIService();
+
   ConversationDBService conversationGroupDBService = new ConversationDBService();
   MessageDBService messageDBService = MessageDBService();
   MultimediaDBService multimediaDBService = MultimediaDBService();
@@ -47,6 +51,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   UnreadMessageDBService unreadMessageDBService = UnreadMessageDBService();
   UserDBService userDBService = UserDBService();
   UserContactDBService userContactDBService = UserContactDBService();
+
   PermissionService permissionService = PermissionService();
 
   @override
@@ -60,6 +65,9 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       yield currentState;
     } else if (event is CheckUserSignedUpEvent) {
       checkUserSignedUp(event);
+      yield currentState;
+    } else if (event is LoadDatabaseToStateEvent) {
+      loadDatabase(event);
       yield currentState;
     } else if (event is UserSignInEvent) {
       signIn(event);
@@ -79,7 +87,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     } else if (event is UserSignUpEvent) {
       signUp(event);
       yield currentState;
-    } else if(event is GetConversationsForUserEvent) {
+    } else if (event is GetConversationsForUserEvent) {
       loadConversationsOfTheUser(event);
       yield currentState;
     } else if (event is AddConversationGroupEvent) {
@@ -119,10 +127,11 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   // Because if signed in Google SDK library is programmed to remember it every time you open your app
   // Developer doesn't have save those Google data by themselves
   Future<bool> checkUserSignIn(CheckUserLoginEvent event) async {
+    print("checkUserSignIn()");
     bool isSignedIn = false;
 
     isSignedIn = await currentState.googleSignIn.isSignedIn();
-
+    print("isSignedIn: " + isSignedIn.toString());
     if (!isObjectEmpty(event)) {
       event.callback(isSignedIn);
     }
@@ -133,8 +142,28 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   // Use contact mobile number to check this number is signed up or not in the developer's Firebase
   Future<bool> checkUserSignedUp(CheckUserSignedUpEvent event) async {
     bool isSignedUp = false;
-    User existingUser = await userAPIService.getUserByUsingMobileNo(event.mobileNo);
+    User existingUser;
+    bool googleSignInDone = await signInUsingGoogle();
+
+    if (!googleSignInDone) {
+      if (!isObjectEmpty(event)) {
+        event.callback(isSignedUp);
+      }
+      return false;
+    }
+
+    if (!isStringEmpty(event.mobileNo)) {
+      print("userAPIService.getUserByUsingMobileNo.");
+      existingUser = await userAPIService.getUserByUsingMobileNo(event.mobileNo);
+    } else {
+      print("userAPIService.getUserByUsingGoogleAccountId.");
+      existingUser = await userAPIService.getUserByUsingGoogleAccountId(currentState.googleSignIn.currentUser.id);
+    }
+
     isSignedUp = existingUser != null;
+
+    print("isSignedUp: " + isSignedUp.toString());
+
     if (!isObjectEmpty(event)) {
       event.callback(isSignedUp);
     }
@@ -142,13 +171,61 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return isSignedUp;
   }
 
+  Future<bool> loadDatabase(LoadDatabaseToStateEvent event) async {
+    bool googleSignInDone = await signInUsingGoogle();
+    if (!googleSignInDone) {
+      if (!isObjectEmpty(event)) {
+        event.callback(false);
+      }
+
+      return false;
+    }
+    User userFromDB = await userDBService.getUserByGoogleAccountId(currentState.googleSignIn.currentUser.id);
+
+    if (userFromDB == null) {
+      if (!isObjectEmpty(event)) {
+        event.callback(false);
+      }
+
+      return false;
+    }
+
+    Settings settingsFromDB = await settingsDBService.getSettingsOfAUser(userFromDB.id);
+
+    if (settingsFromDB == null) {
+      if (!isObjectEmpty(event)) {
+        event.callback(false);
+      }
+
+      return false;
+    }
+
+    List<ConversationGroup> conversationGroupListFromDB = await conversationGroupDBService.getAllConversationGroups();
+    List<Message> messageListFromDB = await messageDBService.getAllMessages();
+    List<Multimedia> multimediaListFromDB = await multimediaDBService.getAllMultimedia();
+    List<UnreadMessage> unreadMessageListFromDB = await unreadMessageDBService.getAllUnreadMessage();
+    List<UserContact> userContactListFromDB = await userContactDBService.getAllUserContacts();
+
+    addUserToState(AddUserEvent(user: userFromDB, callback: (User user) {}));
+    addSettingsToState(AddSettingsEvent(settings: settingsFromDB, callback: (Settings settings) {}));
+    currentState.conversationGroupList = conversationGroupListFromDB;
+    currentState.messageList = messageListFromDB;
+    currentState.multimediaList = multimediaListFromDB;
+    currentState.unreadMessageList = unreadMessageListFromDB;
+    currentState.userContactList = userContactListFromDB;
+
+    if (!isObjectEmpty(event)) {
+      event.callback(true);
+    }
+
+    return true;
+  }
+
   // Sign in using Google.
   // Will check user signed up or not first. If signed up, will read User data from Firebase
   // Output: The state will have GoogleAccount, FirebaseUser, User, Settings data
   Future<bool> signIn(UserSignInEvent event) async {
-    CheckUserSignedUpEvent checkUserSignedUpEvent = CheckUserSignedUpEvent(callback: (bool isSignedUp) {}, mobileNo: event.mobileNo);
-
-    bool isSignedUp = await checkUserSignedUp(checkUserSignedUpEvent);
+    bool isSignedUp = await checkUserSignedUp(CheckUserSignedUpEvent(callback: (bool isSignedUp) {}, mobileNo: event.mobileNo));
 
     if (isSignedUp) {
       bool googleSignedIn = await signInUsingGoogle();
@@ -160,7 +237,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       }
 
       bool getUserSuccessful = await getUserAndSettings();
-
       if (getUserSuccessful) {
         // In case of Sign in from login page, check mobile no with state's mobile no got from Firebase's User table
         if (!isStringEmpty(event.mobileNo)) {
@@ -232,6 +308,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       if (userFromServer == null) {
         return false;
       }
+
       Settings settingsFromServer = await settingsAPIService.getSettingsOfAUser(userFromServer.id);
       if (settingsFromServer == null) {
         return false;
@@ -404,25 +481,29 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   Future<bool> loadConversationsOfTheUser(GetConversationsForUserEvent event) async {
-    List<ConversationGroup> conversationGroupListFromServer = await conversationGroupAPIService.getConversationGroupsForUser(currentState.userState.id);
+    List<ConversationGroup> conversationGroupListFromServer =
+        await conversationGroupAPIService.getConversationGroupsForUser(currentState.userState.id);
     List<ConversationGroup> conversationGroupListFromDB = await conversationGroupDBService.getAllConversationGroups();
-    if(conversationGroupListFromServer != null && conversationGroupListFromServer.length > 0) {
+    if (conversationGroupListFromServer != null && conversationGroupListFromServer.length > 0) {
       // Update the current info of the conversationGroup to latest information
       conversationGroupListFromServer.forEach((conversationGroupFromServer) {
-        bool conversationGroupExist = conversationGroupListFromDB.contains((ConversationGroup conversatGroupFromDB) => conversatGroupFromDB.id == conversationGroupFromServer.id);
-        if(conversationGroupExist) {
+        // TODO: Review the performance of this loop
+        bool conversationGroupExist = conversationGroupListFromDB
+            .contains((ConversationGroup conversatGroupFromDB) => conversatGroupFromDB.id == conversationGroupFromServer.id);
+        if (conversationGroupExist) {
           conversationGroupDBService.editConversationGroup(conversationGroupFromServer);
         } else {
           conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
         }
         addConversationToState(AddConversationGroupEvent(callback: () {}, conversationGroup: conversationGroupFromServer));
-        // TODO: Review the performance
-
-
-
       });
     }
 
+    if (!isObjectEmpty(event)) {
+      event.callback(true);
+    }
+
+    return true;
   }
 
   Future<Map<PermissionGroup, PermissionStatus>> requestAllRequiredPermissions({RequestAllPermissionsEvent event}) async {
@@ -444,8 +525,9 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       }
     });
 
-    if(conversationExist) {
-      currentState.conversationGroupList.removeWhere((ConversationGroup conversationGroup) => conversationGroup.id == event.conversationGroup.id);
+    if (conversationExist) {
+      currentState.conversationGroupList
+          .removeWhere((ConversationGroup conversationGroup) => conversationGroup.id == event.conversationGroup.id);
       currentState.conversationGroupList.add(event.conversationGroup);
     } else {
       currentState.conversationGroupList.add(event.conversationGroup);
@@ -507,7 +589,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       event.callback(event.multimedia);
     }
   }
-
 
   addSettingsToState(AddSettingsEvent event) async {
     print("event.message.id: " + event.settings.id);

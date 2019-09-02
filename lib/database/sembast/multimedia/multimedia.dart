@@ -61,12 +61,13 @@ class MultimediaDBService {
     final finder = Finder(filter: Filter.equals("conversationGroupId", conversationGroupId));
     final recordSnapshots = await _multimediaStore.find(await _db, finder: finder);
     if (!isObjectEmpty(recordSnapshots)) {
-      List<Multimedia> multimediaList = recordSnapshots.map((snapshot) {
+      List<Multimedia> multimediaList = [];
+      recordSnapshots.forEach((snapshot) {
         final multimedia = Multimedia.fromJson(snapshot.value);
         print("multimedia.id: " + multimedia.id);
         print("snapshot.key: " + snapshot.key.toString());
         multimedia.id = snapshot.key.toString();
-        return multimedia;
+        multimediaList.add(multimedia);
       });
 
       return multimediaList;
@@ -80,12 +81,13 @@ class MultimediaDBService {
     }
     final recordSnapshots = await _multimediaStore.find(await _db);
     if (!isObjectEmpty(recordSnapshots)) {
-      List<Multimedia> multimediaList = recordSnapshots.map((snapshot) {
+      List<Multimedia> multimediaList = [];
+      recordSnapshots.forEach((snapshot) {
         final multimedia = Multimedia.fromJson(snapshot.value);
         print("multimedia.id: " + multimedia.id);
         print("snapshot.key: " + snapshot.key.toString());
         multimedia.id = snapshot.key.toString();
-        return multimedia;
+        multimediaList.add(multimedia);
       });
 
       return multimediaList;

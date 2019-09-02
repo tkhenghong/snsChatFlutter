@@ -15,71 +15,71 @@ void main() {
         displayName: "Hong KH",
         mobileNo: "+60182262663",
         conversationId: "rts68h54tsr56h4rsy47",
-        userId: "5847rth54rt4h56sr4h",
+        userIds: ["5847rth54rt4h56sr4h"],
         block: false,
-        lastSeenDate: "19th August 2019");
+        lastSeenDate: "19th August 2019",
+        multimediaId: "54rdgr54gfrae5747486r");
   }
 
   test("Test Create UserContact Locally", () async {
     UserContact userContact = createTestObject();
-    
+
     UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
     await userContactDBService.addUserContact(newUserContact);
     UserContact userContactFromLocalDB = await userContactDBService.getSingleUserContact(newUserContact.id);
-    
+
     expect(newUserContact.id, isNotEmpty);
     expect(userContactFromLocalDB.id, equals(newUserContact.id));
   });
 
   test("Test Edit UserContact Locally", () async {
     UserContact userContact = createTestObject();
-    
+
     UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
     await userContactDBService.addUserContact(newUserContact);
-    
+
     UserContact editedUserContact = newUserContact;
     editedUserContact.realName = "Teoh Kheng Lam";
     editedUserContact.displayName = "KL Lam";
     editedUserContact.mobileNo = "+60182223991";
-    editedUserContact.userId = "999999999";
-    
+    editedUserContact.userIds = ["999999999"];
+
     bool edited = await userContactAPIService.editUserContact(editedUserContact);
     await userContactDBService.editUserContact(editedUserContact);
 
     UserContact userContactFromLocalDB = await userContactDBService.getSingleUserContact(userContact.id);
-    
+
     expect(userContactFromLocalDB.id, equals(editedUserContact.id));
     expect(userContactFromLocalDB.realName, equals(editedUserContact.realName));
     expect(userContactFromLocalDB.displayName, equals(editedUserContact.displayName));
     expect(userContactFromLocalDB.mobileNo, equals(editedUserContact.mobileNo));
-    expect(userContactFromLocalDB.userId, equals(editedUserContact.userId));
+    expect(userContactFromLocalDB.userIds, equals(editedUserContact.userIds));
     expect(edited, isTrue);
   });
 
   test("Test Get UserContact Locally", () async {
     UserContact userContact = createTestObject();
-    
+
     UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
     await userContactDBService.addUserContact(newUserContact);
-    
+
     UserContact userContactFromServer = await userContactAPIService.getUserContact(newUserContact.id);
     UserContact userContactFromLocalDB = await userContactDBService.getSingleUserContact(userContact.id);
-    
+
     expect(userContactFromServer.id, equals(newUserContact.id));
     expect(userContactFromLocalDB.id, equals(userContactFromServer.id));
   });
 
   test("Test Delete UserContact Locally", () async {
     UserContact userContact = createTestObject();
-    
+
     UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
     await userContactDBService.addUserContact(newUserContact);
-    
+
     bool deleted = await userContactAPIService.deleteUserContact(newUserContact.id);
     await userContactDBService.deleteUserContact(userContact.id);
     print("deleted:" + deleted.toString());
-    
-    
+
     expect(deleted, isTrue);
     expect(await userContactDBService.getSingleUserContact(userContact.id), null);
   });

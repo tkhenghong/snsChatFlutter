@@ -70,12 +70,13 @@ class SettingsDBService {
     }
     final recordSnapshots = await _settingsStore.find(await _db);
     if (!isObjectEmpty(recordSnapshots)) {
-      List<Settings> settingsList = recordSnapshots.map((snapshot) {
+      List<Settings> settingsList = [];
+      recordSnapshots.forEach((snapshot) {
         final settings = Settings.fromJson(snapshot.value);
         print("settings.id: " + settings.id);
         print("snapshot.key: " + snapshot.key.toString());
         settings.id = snapshot.key.toString();
-        return settings;
+        settingsList.add(settings);
       });
 
       return settingsList;

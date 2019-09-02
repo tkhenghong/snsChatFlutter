@@ -23,7 +23,6 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     textEditingController = TextEditingController();
   }
