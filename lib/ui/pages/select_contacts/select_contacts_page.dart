@@ -362,6 +362,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 //    wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: yourOwnUserContact));
 
     print('newMultiMedia.id: ' + newMultiMedia.id);
+
+    wholeAppBloc.dispatch(CreateConversationGroupEvent());
     // TODO: AddUserContact in WholeAppBloc
     uploadConversation(conversationGroup, newUnreadMessage, newMultiMedia);
     return conversationGroup;

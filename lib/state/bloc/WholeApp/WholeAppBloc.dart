@@ -120,6 +120,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     } else if (event is OverrideUnreadMessageEvent) {
       overrideUnreadMessageEvent(event);
       yield currentState;
+    } else if(event is CreateConversationGroupEvent) {
+      createConversationGroup(event);
     }
   }
 
@@ -513,6 +515,23 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       event.callback(permissions);
     }
     return permissions;
+  }
+
+  Future<bool> createConversationGroup(CreateConversationGroupEvent event) async {
+    // Create Single Group successfully (1 ConversationGroup, 2 UserContact, 1 UnreadMessage, 1 Multimedia)
+    // Upload conversation to REST API and Local DB
+    switch(event.type) {
+      case "Single":
+        break;
+      case "Group":
+        break;
+      case "Broadcast":
+        break;
+      default:
+        return false;
+        break;
+    }
+    return true;
   }
 
   addConversationToState(AddConversationGroupEvent event) async {

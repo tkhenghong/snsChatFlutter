@@ -77,9 +77,13 @@ class LoadDatabaseToStateEvent extends WholeAppEvent {
 class CreateConversationGroupEvent extends WholeAppEvent {
   // TODO: Create Single Group successfully (1 ConversationGroup, 2 UserContact, 1 UnreadMessage, 1 Multimedia)
   ConversationGroup conversationGroup;
+  String type;
+  List<UserContact> userContactList;
+  UnreadMessage unreadMessage;
+  Multimedia multimedia;
   Function callback;
 
-  CreateConversationGroupEvent({this.conversationGroup, this.callback});
+  CreateConversationGroupEvent({this.conversationGroup, this.type, this.userContactList, this.unreadMessage, this.multimedia, this.callback});
 }
 
 // Conversation
