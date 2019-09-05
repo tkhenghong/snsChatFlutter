@@ -334,24 +334,14 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     // Remove the international code to get significant phone number of the user
     // After sign up, send a command at the backend to replace those UserContact object with exactly same number
 
-    // Add mobileNo of the stranger
-    // Add mobile no to UserContact before save to state
-    targetUserContact.mobileNo = primaryNo.length == 0 ? "" : primaryNo[0];
-    print("primaryNo[0]: " + primaryNo[0]);
+    // TODO: Do it in BLOC
+//    findUserContact(targetUserContact);
 
-    // If got Malaysia number
-    if (primaryNo[0].contains("+60")) {
-      String trimmedString = primaryNo[0].substring(3);
-      print("trimmedString: " + trimmedString);
-    }
+//    print('groupMultiMedia.id: ' + groupMultiMedia.id);
 
-    findUserContact(targetUserContact);
+    wholeAppBloc.dispatch(CreateConversationGroupEvent(multimedia: groupMultiMedia, contactList: [contact], conversationGroup: conversationGroup));
 
-    print('groupMultiMedia.id: ' + groupMultiMedia.id);
-
-    wholeAppBloc.dispatch(CreateConversationGroupEvent(multimedia: groupMultiMedia, userContactList: [targetUserContact]));
-
-    uploadConversation(conversationGroup, newUnreadMessage, groupMultiMedia);
+//    uploadConversation(conversationGroup, newUnreadMessage, groupMultiMedia);
     return conversationGroup;
   }
 

@@ -64,6 +64,15 @@ class UserContactDBService {
     return !isObjectEmpty(recordSnapshot) ? UserContact.fromJson(recordSnapshot.value) : null;
   }
 
+  Future<UserContact> getUserContactByMobileNo(String mobileNo) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
+    final finder = Finder(filter: Filter.equals("mobileNo", mobileNo));
+    final recordSnapshot = await _userContactStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? UserContact.fromJson(recordSnapshot.value) : null;
+  }
+
   // In future, when multiple logins needed
   Future<List<UserContact>> getAllUserContacts() async {
     if (isObjectEmpty(await _db)) {

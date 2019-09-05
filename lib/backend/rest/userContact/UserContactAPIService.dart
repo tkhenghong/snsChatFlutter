@@ -46,4 +46,14 @@ class UserContactAPIService {
     }
     return null;
   }
+
+  Future<UserContact> getUserContactByMobileNo(String mobileNo) async {
+    var httpResponse = await http.get(REST_URL + "/userContact/mobileNo" + mobileNo);
+
+    if (httpResponseIsOK(httpResponse)) {
+      UserContact userContact = new UserContact.fromJson(json.decode(httpResponse.body));
+      return userContact;
+    }
+    return null;
+  }
 }

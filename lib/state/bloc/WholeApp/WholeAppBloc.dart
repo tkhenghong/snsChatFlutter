@@ -29,6 +29,7 @@ import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/objects/settings/settings.dart';
 import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
+import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart' as prefix0;
 import 'package:snschat_flutter/objects/user/user.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/service/permissions/PermissionService.dart';
@@ -483,9 +484,10 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   Future<bool> loadConversationsOfTheUser(GetConversationsForUserEvent event) async {
+    List<ConversationGroup> conversationGroupListFromDB = await conversationGroupDBService.getAllConversationGroups();
+    currentState.conversationGroupList = conversationGroupListFromDB;
     List<ConversationGroup> conversationGroupListFromServer =
         await conversationGroupAPIService.getConversationGroupsForUser(currentState.userState.id);
-    List<ConversationGroup> conversationGroupListFromDB = await conversationGroupDBService.getAllConversationGroups();
     if (conversationGroupListFromServer != null && conversationGroupListFromServer.length > 0) {
       // Update the current info of the conversationGroup to latest information
       conversationGroupListFromServer.forEach((conversationGroupFromServer) {
@@ -570,12 +572,27 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     List<UserContact> newUserContactList = [];
     userContactList.forEach((userContact) async {
-      UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
-      if (newUserContact != null) {
-        newUserContactList.add(newUserContact);
+      // findUserContact(targetUserContact);
+      UserContact existingUserContact = await userContactAPIService.getUserContactByMobileNo(userContact.mobileNo);
+      if(existingUserContact == null) {
+        // There's userContact that has the same mobile number
+        UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
+        if (newUserContact != null) {
+          newUserContactList.add(newUserContact);
+        }
+
+        // Weakness: No error handling if UserContact save to DB fails
+        userContactDBService.addUserContact(userContact);
+
+      } else {
+
       }
     });
 
+    print("event.contactList.length: " + event.contactList.length.toString());
+    print("newUserContactList.length: " + newUserContactList.length.toString());
+
+    // event.contactList doesn't include yourself, so newUserContactList need to remove yourself first
     if (event.contactList.length != newUserContactList.length - 1) {
       // That means some UseContact are not uploaded into the REST
       return false;
@@ -589,7 +606,56 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return newUserContact.id;
     });
 
-    conversationGroupAPIService.addConversationGroup(event.conversationGroup);
+    // ConversationGroup upload first
+    ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(event.conversationGroup);
+
+    if (isStringEmpty(newConversationGroup.id)) {
+      return false;
+    }
+
+    bool conversationGroupSaved = await conversationGroupDBService.addConversationGroup(newConversationGroup);
+
+    if (!conversationGroupSaved) {
+      return false;
+    }
+    // TODO: Create Single Group successfully (1 ConversationGroup, 2 UserContact, 1 UnreadMessage, 1 Multimedia)
+
+    UnreadMessage unreadMessage = UnreadMessage(
+      id: null,
+      conversationId: newConversationGroup.id,
+      count: 0,
+      date: DateTime.now().millisecondsSinceEpoch,
+      lastMessage: "",
+      userId: newConversationGroup.creatorUserId,
+    );
+
+    UnreadMessage newUnreadMessage = await unreadMessageAPIService.addUnreadMessage(unreadMessage);
+
+    if (isStringEmpty(newUnreadMessage.id)) {
+      return false;
+    }
+
+    bool unreadMessageSaved = await unreadMessageDBService.addUnreadMessage(newUnreadMessage);
+
+    if (!unreadMessageSaved) {
+      return false;
+    }
+
+    Multimedia newMultimedia = await multimediaAPIService.addMultimedia(event.multimedia);
+
+    if (isStringEmpty(newMultimedia.id)) {
+      return false;
+    }
+
+    bool conversationGroupMultimediaSaved = await multimediaDBService.addMultimedia(newMultimedia);
+
+    if (!conversationGroupMultimediaSaved) {
+      return false;
+    }
+
+    userContactList.forEach((userContact) {
+      userContactDBService.addUserContact(userContact);
+    });
 
     switch (event.type) {
       case "Single":

@@ -48,6 +48,17 @@ void main() {
     expect(userContactFromServer.id == newUserContact.id, isTrue);
   });
 
+  test("Test Get UserContact Locally By Using Mobile No", () async {
+    UserContact userContact = createTestObject();
+
+    UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
+
+    UserContact userContactFromServer = await userContactAPIService.getUserContactByMobileNo(newUserContact.mobileNo);
+
+    expect(userContactFromServer.mobileNo, equals(newUserContact.mobileNo));
+    expect(newUserContact.mobileNo, equals(userContact.mobileNo));
+  });
+
   test("Test Delete UserContact", () async {
     UserContact userContact = createTestObject();
     UserContact newUserContact = await userContactAPIService.addUserContact(userContact);

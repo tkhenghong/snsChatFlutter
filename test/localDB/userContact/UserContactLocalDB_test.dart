@@ -70,6 +70,19 @@ void main() {
     expect(userContactFromLocalDB.id, equals(userContactFromServer.id));
   });
 
+  test("Test Get UserContact Locally By Using Mobile No", () async {
+    UserContact userContact = createTestObject();
+
+    UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
+    await userContactDBService.addUserContact(newUserContact);
+
+    UserContact userContactFromServer = await userContactAPIService.getUserContactByMobileNo(newUserContact.mobileNo);
+    UserContact userContactFromLocalDB = await userContactDBService.getUserContactByMobileNo(userContact.mobileNo);
+
+    expect(userContactFromServer.mobileNo, equals(newUserContact.mobileNo));
+    expect(userContactFromLocalDB.mobileNo, equals(userContactFromServer.mobileNo));
+  });
+
   test("Test Delete UserContact Locally", () async {
     UserContact userContact = createTestObject();
 
