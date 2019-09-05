@@ -570,30 +570,13 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       userContactList.add(userContact);
     });
 
-    List<UserContact> newUserContactList = [];
-    userContactList.forEach((userContact) async {
-      // findUserContact(targetUserContact);
-      UserContact existingUserContact = await userContactAPIService.getUserContactByMobileNo(userContact.mobileNo);
-      if(existingUserContact == null) {
-        // There's userContact that has the same mobile number
-        UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
-        if (newUserContact != null) {
-          newUserContactList.add(newUserContact);
-        }
-
-        // Weakness: No error handling if UserContact save to DB fails
-        userContactDBService.addUserContact(userContact);
-
-      } else {
-
-      }
-    });
+    List<UserContact> newUserContactList = await uploadUserContactList(userContactList);
 
     print("event.contactList.length: " + event.contactList.length.toString());
     print("newUserContactList.length: " + newUserContactList.length.toString());
 
-    // event.contactList doesn't include yourself, so newUserContactList need to remove yourself first
-    if (event.contactList.length != newUserContactList.length - 1) {
+    // event.contactList doesn't include yourself, so newUserContactList.length - 1 OR Any UserContact is not added into the list (means not uploaded successfully)
+    if ((event.contactList.length != newUserContactList.length - 1) || newUserContactList.length == 0) {
       // That means some UseContact are not uploaded into the REST
       return false;
     }
@@ -602,54 +585,28 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     userContactList = newUserContactList;
 
     // Give the list of UserContactIds to memberIds of ConversationGroup
-    event.conversationGroup.memberIds = userContactList.map((newUserContact) {
-      return newUserContact.id;
-    });
+    event.conversationGroup.memberIds = userContactList.map((newUserContact) => newUserContact.id);
 
-    // ConversationGroup upload first
-    ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(event.conversationGroup);
+    // 2. Upload ConversationGroup
+    ConversationGroup newConversationGroup = await uploadConversationGroup(event.conversationGroup);
 
-    if (isStringEmpty(newConversationGroup.id)) {
+    if(newConversationGroup == null) {
       return false;
     }
 
-    bool conversationGroupSaved = await conversationGroupDBService.addConversationGroup(newConversationGroup);
-
-    if (!conversationGroupSaved) {
-      return false;
-    }
     // TODO: Create Single Group successfully (1 ConversationGroup, 2 UserContact, 1 UnreadMessage, 1 Multimedia)
 
-    UnreadMessage unreadMessage = UnreadMessage(
-      id: null,
-      conversationId: newConversationGroup.id,
-      count: 0,
-      date: DateTime.now().millisecondsSinceEpoch,
-      lastMessage: "",
-      userId: newConversationGroup.creatorUserId,
-    );
+    UnreadMessage newUnreadMessage = await uploadUnreadMessage(newConversationGroup);
 
-    UnreadMessage newUnreadMessage = await unreadMessageAPIService.addUnreadMessage(unreadMessage);
-
-    if (isStringEmpty(newUnreadMessage.id)) {
+    if(newUnreadMessage == null) {
       return false;
     }
 
-    bool unreadMessageSaved = await unreadMessageDBService.addUnreadMessage(newUnreadMessage);
+    event.multimedia.conversationId = newConversationGroup.id;
 
-    if (!unreadMessageSaved) {
-      return false;
-    }
+    Multimedia newMultimedia = await uploadConversationGroupMultimedia(event.multimedia);
 
-    Multimedia newMultimedia = await multimediaAPIService.addMultimedia(event.multimedia);
-
-    if (isStringEmpty(newMultimedia.id)) {
-      return false;
-    }
-
-    bool conversationGroupMultimediaSaved = await multimediaDBService.addMultimedia(newMultimedia);
-
-    if (!conversationGroupMultimediaSaved) {
+    if(newMultimedia == null) {
       return false;
     }
 
@@ -657,18 +614,88 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       userContactDBService.addUserContact(userContact);
     });
 
-    switch (event.type) {
-      case "Single":
-        break;
-      case "Group":
-        break;
-      case "Broadcast":
-        break;
-      default:
-        return false;
-        break;
+    if (!isObjectEmpty(event)) {
+      event.callback(event.conversationGroup);
     }
+
     return true;
+  }
+
+  // Upload the list of UserContact to REST API (checked duplicates at there), get them back, and save all of them to DB and State
+  Future<List<UserContact>> uploadUserContactList(List<UserContact> userContactList) async {
+    List<UserContact> newUserContactList = [];
+    userContactList.forEach((userContact) async {
+      // findUserContact(targetUserContact);
+      UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
+      if(newUserContact != null) {
+        UserContact existingUserContact = await userContactAPIService.getUserContact(newUserContact.id);
+        if(existingUserContact != null) {
+          newUserContactList.add(existingUserContact);
+          // Weakness: No error handling if UserContact save to DB fails
+          userContactDBService.addUserContact(existingUserContact);
+          addUserContactToState(AddUserContactEvent(userContact: existingUserContact));
+        }
+      }
+    });
+
+    return newUserContactList;
+  }
+
+  Future<ConversationGroup> uploadConversationGroup(ConversationGroup conversationGroup) async {
+    ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(conversationGroup);
+
+    if (isStringEmpty(newConversationGroup.id)) {
+      return null;
+    }
+
+    bool conversationGroupSaved = await conversationGroupDBService.addConversationGroup(newConversationGroup);
+
+    if (!conversationGroupSaved) {
+      return null;
+    }
+
+    return newConversationGroup;
+  }
+
+  Future<UnreadMessage> uploadUnreadMessage(ConversationGroup conversationGroup) async {
+    UnreadMessage unreadMessage = UnreadMessage(
+      id: null,
+      conversationId: conversationGroup.id,
+      count: 0,
+      date: DateTime.now().millisecondsSinceEpoch,
+      lastMessage: "",
+      userId: conversationGroup.creatorUserId,
+    );
+
+    UnreadMessage newUnreadMessage = await unreadMessageAPIService.addUnreadMessage(unreadMessage);
+
+    if (isStringEmpty(newUnreadMessage.id)) {
+      return null;
+    }
+
+    bool unreadMessageSaved = await unreadMessageDBService.addUnreadMessage(newUnreadMessage);
+
+    if (!unreadMessageSaved) {
+      return null;
+    }
+
+    return newUnreadMessage;
+  }
+
+  Future<Multimedia> uploadConversationGroupMultimedia(Multimedia multimedia) async {
+    Multimedia newMultimedia = await multimediaAPIService.addMultimedia(multimedia);
+
+    if (isStringEmpty(newMultimedia.id)) {
+      return null;
+    }
+
+    bool conversationGroupMultimediaSaved = await multimediaDBService.addMultimedia(newMultimedia);
+
+    if (!conversationGroupMultimediaSaved) {
+      return null;
+    }
+
+    return newMultimedia;
   }
 
   addConversationToState(AddConversationGroupEvent event) async {

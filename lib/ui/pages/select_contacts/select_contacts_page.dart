@@ -286,32 +286,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       // memberIds put UserContact.id. NOT User.id
       notificationExpireDate: 0,
     );
-    // TODO: Create Single Group successfully (1 ConversationGroup, 2 UserContact, 1 UnreadMessage, 1 Multimedia)
-    // TODO: Check your UserContact exist in backend database or not first.
-
-    // Yourself not added here
-//    UserContact yourOwnUserContact = UserContact(
-//      id: null,
-//      userIds: [],
-//      // Which User owns this UserContact
-//      displayName: contact.displayName,
-//      realName: contact.displayName,
-//      block: false,
-//      //conversationIds: , // Already moved it to ConversationGroup called it memberIds
-//      lastSeenDate: "",
-//      // mobileNo: primaryNo.length == 0 ? "" : primaryNo[0], // Added in later code
-//    );
-
-    // Need to bring the UserContact's mobile no to go to server to check this mobile no exist or not first. It exist return it's UserContact id and replace this one
-    UserContact targetUserContact = UserContact(
-      id: null,
-      userIds: [],
-      displayName: contact.displayName,
-      realName: contact.displayName,
-      block: false,
-      lastSeenDate: "",
-//      mobileNo: primaryNo.length == 0 ? "" : primaryNo[0], // Added in later code
-    );
+    // TODO: Check your UserContact exist in backend database or not first. (DONE)
 
     Multimedia groupMultiMedia = Multimedia(
         id: null,
@@ -322,7 +297,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         remoteThumbnailUrl: null,
         remoteFullFileUrl: null,
         userContactId: null,
-//        conversationId: conversationGroup.id, // Add the conversationId after the conversationGroup object is created in the backend
+        conversationId: null, // Add the conversationId after the conversationGroup object is created in the backend
         messageId: null);
 
     // In Malaysia,
@@ -334,15 +309,15 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     // Remove the international code to get significant phone number of the user
     // After sign up, send a command at the backend to replace those UserContact object with exactly same number
 
-    // TODO: Do it in BLOC
-//    findUserContact(targetUserContact);
-
-//    print('groupMultiMedia.id: ' + groupMultiMedia.id);
-
-    wholeAppBloc.dispatch(CreateConversationGroupEvent(multimedia: groupMultiMedia, contactList: [contact], conversationGroup: conversationGroup));
-
-//    uploadConversation(conversationGroup, newUnreadMessage, groupMultiMedia);
+    wholeAppBloc.dispatch(CreateConversationGroupEvent(multimedia: groupMultiMedia, contactList: [contact], conversationGroup: conversationGroup, type: "Single", callback: (bool conversationGroupCreated){
+      if(conversationGroupCreated) {
+        print("Conversation Group Created.");
+      } else {
+        print("Conversation Group Failed.");
+      }
+    }));
     return conversationGroup;
+//    uploadConversation(conversationGroup, newUnreadMessage, groupMultiMedia);
   }
 
   uploadConversation(ConversationGroup conversationGroup, UnreadMessage newUnreadMessage, Multimedia groupMultiMedia) async {
