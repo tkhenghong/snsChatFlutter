@@ -120,7 +120,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     } else if (event is OverrideUnreadMessageEvent) {
       overrideUnreadMessageEvent(event);
       yield currentState;
-    } else if(event is CreateConversationGroupEvent) {
+    } else if (event is CreateConversationGroupEvent) {
       createConversationGroup(event);
     }
   }
@@ -520,7 +520,78 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   Future<bool> createConversationGroup(CreateConversationGroupEvent event) async {
     // Create Single Group successfully (1 ConversationGroup, 2 UserContact, 1 UnreadMessage, 1 Multimedia)
     // Upload conversation to REST API and Local DB
-    switch(event.type) {
+
+    UserContact yourOwnUserContact = UserContact(
+      id: null,
+      userIds: [currentState.userState.id],
+      // Which User owns this UserContact
+      displayName: currentState.userState.displayName,
+      realName: currentState.userState.realName,
+      block: false,
+      lastSeenDate: "",
+      mobileNo: currentState.userState.mobileNo,
+    );
+
+    List<UserContact> userContactList = [];
+
+    //Add yourself first
+    userContactList.add(yourOwnUserContact);
+
+    event.contactList.forEach((contact) {
+      List<String> primaryNo = [];
+      if (contact.phones.length > 0) {
+        contact.phones.forEach((phoneNo) {
+          primaryNo.add(phoneNo.value);
+        });
+      }
+
+      UserContact userContact = UserContact(
+        id: null,
+        userIds: [currentState.userState.id],
+        // So this contact number is mine. Later send it to backend and merge with other UserContact who got the same number
+        displayName: contact.displayName,
+        realName: contact.displayName,
+        block: false,
+        lastSeenDate: "",
+      );
+
+      userContact.mobileNo = primaryNo.length == 0 ? "" : primaryNo[0];
+      print("primaryNo[0]: " + primaryNo[0]);
+
+      // If got Malaysia number
+      if (primaryNo[0].contains("+60")) {
+        print("If Malaysian Number: ");
+        String trimmedString = primaryNo[0].substring(3);
+        print("trimmedString: " + trimmedString);
+      }
+
+      userContactList.add(userContact);
+    });
+
+    List<UserContact> newUserContactList = [];
+    userContactList.forEach((userContact) async {
+      UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
+      if (newUserContact != null) {
+        newUserContactList.add(newUserContact);
+      }
+    });
+
+    if (event.contactList.length != newUserContactList.length - 1) {
+      // That means some UseContact are not uploaded into the REST
+      return false;
+    }
+
+    // Replace the list with no Id with the one with Ids
+    userContactList = newUserContactList;
+
+    // Give the list of UserContactIds to memberIds of ConversationGroup
+    event.conversationGroup.memberIds = userContactList.map((newUserContact) {
+      return newUserContact.id;
+    });
+
+    conversationGroupAPIService.addConversationGroup(event.conversationGroup);
+
+    switch (event.type) {
       case "Single":
         break;
       case "Group":

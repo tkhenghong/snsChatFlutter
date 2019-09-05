@@ -288,17 +288,19 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     );
     // TODO: Create Single Group successfully (1 ConversationGroup, 2 UserContact, 1 UnreadMessage, 1 Multimedia)
     // TODO: Check your UserContact exist in backend database or not first.
-    UserContact yourOwnUserContact = UserContact(
-      id: null,
-      userIds: [],
-      // Which User owns this UserContact
-      displayName: contact.displayName,
-      realName: contact.displayName,
-      block: false,
-      //conversationIds: , // Already moved it to ConversationGroup called it memberIds
-      lastSeenDate: "",
-      // mobileNo: primaryNo.length == 0 ? "" : primaryNo[0], // Added in later code
-    );
+
+    // Yourself not added here
+//    UserContact yourOwnUserContact = UserContact(
+//      id: null,
+//      userIds: [],
+//      // Which User owns this UserContact
+//      displayName: contact.displayName,
+//      realName: contact.displayName,
+//      block: false,
+//      //conversationIds: , // Already moved it to ConversationGroup called it memberIds
+//      lastSeenDate: "",
+//      // mobileNo: primaryNo.length == 0 ? "" : primaryNo[0], // Added in later code
+//    );
 
     // Need to bring the UserContact's mobile no to go to server to check this mobile no exist or not first. It exist return it's UserContact id and replace this one
     UserContact targetUserContact = UserContact(
@@ -311,7 +313,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 //      mobileNo: primaryNo.length == 0 ? "" : primaryNo[0], // Added in later code
     );
 
-    Multimedia newMultiMedia = Multimedia(
+    Multimedia groupMultiMedia = Multimedia(
         id: null,
         imageDataId: null,
         imageFileId: null,
@@ -322,16 +324,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         userContactId: null,
 //        conversationId: conversationGroup.id, // Add the conversationId after the conversationGroup object is created in the backend
         messageId: null);
-
-    UnreadMessage newUnreadMessage = UnreadMessage(id: null, count: 0, date: 0, lastMessage: "");
-
-    // Determine how many phone number he has
-    List<String> primaryNo = [];
-    if (contact.phones.length > 0) {
-      contact.phones.forEach((phoneNo) {
-        primaryNo.add(phoneNo.value);
-      });
-    }
 
     // In Malaysia,
     // If got +60, remove +60.
@@ -354,22 +346,16 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     }
 
     findUserContact(targetUserContact);
-    // Personal chat one person only, so only dispatch once
-//    wholeAppBloc
-//        .dispatch(AddConversationMemberEvent(callback: (ConversationMember conversationMember) {}, conversationMember: conversationMember));
-    // TODO: AddUserContact in WholeAppBloc
-//    wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: targetUserContact));
-//    wholeAppBloc.dispatch(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: yourOwnUserContact));
 
-    print('newMultiMedia.id: ' + newMultiMedia.id);
+    print('groupMultiMedia.id: ' + groupMultiMedia.id);
 
-    wholeAppBloc.dispatch(CreateConversationGroupEvent());
-    // TODO: AddUserContact in WholeAppBloc
-    uploadConversation(conversationGroup, newUnreadMessage, newMultiMedia);
+    wholeAppBloc.dispatch(CreateConversationGroupEvent(multimedia: groupMultiMedia, userContactList: [targetUserContact]));
+
+    uploadConversation(conversationGroup, newUnreadMessage, groupMultiMedia);
     return conversationGroup;
   }
 
-  uploadConversation(ConversationGroup conversationGroup, UnreadMessage newUnreadMessage, Multimedia newMultiMedia) async {
+  uploadConversation(ConversationGroup conversationGroup, UnreadMessage newUnreadMessage, Multimedia groupMultiMedia) async {
     print("uploadConversation()");
     await Firestore.instance.collection('conversation').document(conversationGroup.id).setData({
       'id': conversationGroup.id,
@@ -396,20 +382,20 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     wholeAppBloc.dispatch(OverrideUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
 
     await Firestore.instance.collection('multimedia').document(newUnreadMessage.id).setData({
-      'id': newMultiMedia.id,
-      'imageDataId': newMultiMedia.imageDataId,
-      'imageFileId': newMultiMedia.imageFileId,
-      'localFullFileUrl': newMultiMedia.localFullFileUrl,
-      'localThumbnailUrl': newMultiMedia.localThumbnailUrl,
-      'remoteThumbnailUrl': newMultiMedia.remoteThumbnailUrl,
-      'remoteFullFileUrl': newMultiMedia.remoteFullFileUrl,
-      'messageId': newMultiMedia.messageId,
-      'userContactId': newMultiMedia.userContactId,
-      'conversationId': newMultiMedia.conversationId,
+      'id': groupMultiMedia.id,
+      'imageDataId': groupMultiMedia.imageDataId,
+      'imageFileId': groupMultiMedia.imageFileId,
+      'localFullFileUrl': groupMultiMedia.localFullFileUrl,
+      'localThumbnailUrl': groupMultiMedia.localThumbnailUrl,
+      'remoteThumbnailUrl': groupMultiMedia.remoteThumbnailUrl,
+      'remoteFullFileUrl': groupMultiMedia.remoteFullFileUrl,
+      'messageId': groupMultiMedia.messageId,
+      'userContactId': groupMultiMedia.userContactId,
+      'conversationId': groupMultiMedia.conversationId,
     });
 
     print("Upload multimedia success!");
-    wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: newMultiMedia));
+    wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: groupMultiMedia));
 
     //TODO: Check user_contact
   }
