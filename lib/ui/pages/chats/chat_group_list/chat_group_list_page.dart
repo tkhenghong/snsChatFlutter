@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -37,11 +38,11 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     super.dispose();
   }
 
-  checkUserLogin() async {
+  initialize() async {
     wholeAppBloc.dispatch(CheckUserLoginEvent(callback: (bool hasSignedIn) {
       if (hasSignedIn) {
-        wholeAppBloc.dispatch(UserSignInEvent(callback: (bool isSignedIn) {
-          if (isSignedIn) {
+//        wholeAppBloc.dispatch(UserSignInEvent(callback: (bool isSignedIn) {
+//          if (isSignedIn) {
             wholeAppBloc.dispatch(LoadDatabaseToStateEvent(callback: (bool loadDone){
               if(loadDone) {
                 if (getListDone == false) {
@@ -54,11 +55,11 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                 }
               }
             }));
-
-          } else {
-            goToLoginPage();
-          }
-        })); // Mobile no is not entered here
+//
+//          } else {
+//            goToLoginPage();
+//          }
+//        })); // Mobile no is not entered here
       } else {
         goToLoginPage();
       }
@@ -76,7 +77,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
 
-    checkUserLogin();
+    initialize();
     return BlocBuilder(
       bloc: wholeAppBloc,
       builder: (context, WholeAppState state) {

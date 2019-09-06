@@ -273,6 +273,11 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
   Future<ConversationGroup> createPersonalConversation(Contact contact) async {
+
+    List<Contact> contactList = [];
+    contactList.add(contact);
+
+    print("createPersonalConversation()");
     ConversationGroup conversationGroup = new ConversationGroup(
       id: null,
       creatorUserId: wholeAppBloc.currentState.userState.id,
@@ -309,7 +314,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     // Remove the international code to get significant phone number of the user
     // After sign up, send a command at the backend to replace those UserContact object with exactly same number
 
-    wholeAppBloc.dispatch(CreateConversationGroupEvent(multimedia: groupMultiMedia, contactList: [contact], conversationGroup: conversationGroup, type: "Single", callback: (bool conversationGroupCreated){
+    print("Before CreateConversationGroupEvent");
+    wholeAppBloc.dispatch(CreateConversationGroupEvent(multimedia: groupMultiMedia, contactList: contactList, conversationGroup: conversationGroup, type: "Single", callback: (bool conversationGroupCreated){
       if(conversationGroupCreated) {
         print("Conversation Group Created.");
       } else {

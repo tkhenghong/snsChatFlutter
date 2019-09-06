@@ -220,7 +220,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!isObjectEmpty(event)) {
       event.callback(true);
     }
-
+    print("All Data Loaded!");
     return true;
   }
 
@@ -520,6 +520,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   Future<bool> createConversationGroup(CreateConversationGroupEvent event) async {
+    print("CreateConversationGroupEvent in BLOC");
     // Create Single Group successfully (1 ConversationGroup, 2 UserContact, 1 UnreadMessage, 1 Multimedia)
     // Upload conversation to REST API and Local DB
 
@@ -533,16 +534,18 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       lastSeenDate: "",
       mobileNo: currentState.userState.mobileNo,
     );
-
+    print("Created UserContact");
     List<UserContact> userContactList = [];
 
     //Add yourself first
     userContactList.add(yourOwnUserContact);
-
+    print("Added yourself into userContactList.");
     event.contactList.forEach((contact) {
       List<String> primaryNo = [];
       if (contact.phones.length > 0) {
+        print("if (contact.phones.length > 0)");
         contact.phones.forEach((phoneNo) {
+          print("phoneNo.value: " + phoneNo.value);
           primaryNo.add(phoneNo.value);
         });
       }
@@ -570,7 +573,10 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       userContactList.add(userContact);
     });
 
+    print("Group members have been added into userContactList.");
+
     List<UserContact> newUserContactList = await uploadUserContactList(userContactList);
+    print("Uploaded and saved uploadUserContactList to REST, DB and State.");
 
     print("event.contactList.length: " + event.contactList.length.toString());
     print("newUserContactList.length: " + newUserContactList.length.toString());
@@ -580,7 +586,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       // That means some UseContact are not uploaded into the REST
       return false;
     }
-
+    print("Uploaded and saved uploadUserContactList to REST, DB and State.");
     // Replace the list with no Id with the one with Ids
     userContactList = newUserContactList;
 
@@ -589,7 +595,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     // 2. Upload ConversationGroup
     ConversationGroup newConversationGroup = await uploadConversationGroup(event.conversationGroup);
-
+    print("Uploaded and saved conversationGroup to REST, DB and State.");
     if(newConversationGroup == null) {
       return false;
     }
@@ -597,7 +603,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     // TODO: Create Single Group successfully (1 ConversationGroup, 2 UserContact, 1 UnreadMessage, 1 Multimedia)
 
     UnreadMessage newUnreadMessage = await uploadUnreadMessage(newConversationGroup);
-
+    print("Uploaded and saved UnreadMessage to REST, DB and State.");
     if(newUnreadMessage == null) {
       return false;
     }
@@ -605,7 +611,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     event.multimedia.conversationId = newConversationGroup.id;
 
     Multimedia newMultimedia = await uploadConversationGroupMultimedia(event.multimedia);
-
+    print("Uploaded and saved ConversationGroup Multimedia to REST, DB and State.");
     if(newMultimedia == null) {
       return false;
     }
