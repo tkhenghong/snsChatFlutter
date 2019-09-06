@@ -610,10 +610,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return false;
     }
 
-    userContactList.forEach((userContact) {
-      userContactDBService.addUserContact(userContact);
-    });
-
     if (!isObjectEmpty(event)) {
       event.callback(event.conversationGroup);
     }
