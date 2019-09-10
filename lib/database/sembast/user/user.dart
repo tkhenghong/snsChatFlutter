@@ -74,9 +74,6 @@ class UserDBService {
       List<User> userList = [];
       recordSnapshots.forEach((snapshot) {
         final user = User.fromJson(snapshot.value);
-        print("user.id: " + user.id);
-        print("snapshot.key: " + snapshot.key.toString());
-        user.id = snapshot.key.toString();
         userList.add(user);
       });
 

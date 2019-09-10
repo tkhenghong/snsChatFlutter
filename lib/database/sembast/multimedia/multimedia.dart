@@ -84,9 +84,6 @@ class MultimediaDBService {
       List<Multimedia> multimediaList = [];
       recordSnapshots.forEach((snapshot) {
         final multimedia = Multimedia.fromJson(snapshot.value);
-        print("multimedia.id: " + multimedia.id);
-        print("snapshot.key: " + snapshot.key.toString());
-        multimedia.id = snapshot.key.toString();
         multimediaList.add(multimedia);
       });
 

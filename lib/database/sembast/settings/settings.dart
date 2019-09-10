@@ -73,9 +73,6 @@ class SettingsDBService {
       List<Settings> settingsList = [];
       recordSnapshots.forEach((snapshot) {
         final settings = Settings.fromJson(snapshot.value);
-        print("settings.id: " + settings.id);
-        print("snapshot.key: " + snapshot.key.toString());
-        settings.id = snapshot.key.toString();
         settingsList.add(settings);
       });
 

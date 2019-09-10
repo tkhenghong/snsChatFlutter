@@ -83,9 +83,6 @@ class UserContactDBService {
       List<UserContact> userContactList = [];
       recordSnapshots.forEach((snapshot) {
         final userContact = UserContact.fromJson(snapshot.value);
-        print("userContact.id: " + userContact.id);
-        print("snapshot.key: " + snapshot.key.toString());
-        userContact.id = snapshot.key.toString();
         userContactList.add(userContact);
       });
 

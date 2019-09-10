@@ -72,9 +72,6 @@ class UnreadMessageDBService {
       List<UnreadMessage> unreadMessageList = [];
       recordSnapshots.forEach((snapshot) {
         final unreadMessage = UnreadMessage.fromJson(snapshot.value);
-        print("unreadMessage.id: " + unreadMessage.id);
-        print("snapshot.key: " + snapshot.key.toString());
-        unreadMessage.id = snapshot.key.toString();
         unreadMessageList.add(unreadMessage);
       });
 
