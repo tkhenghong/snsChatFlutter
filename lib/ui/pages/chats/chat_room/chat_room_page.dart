@@ -553,7 +553,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           senderName: wholeAppBloc.currentState.userState.displayName,
           status: "Sent",
           type: "Text",
-          timestamp: DateTime.now().millisecondsSinceEpoch.toString(),
+          timestamp: DateTime.now().millisecondsSinceEpoch,
         );
         print("Checkpoint 3");
 

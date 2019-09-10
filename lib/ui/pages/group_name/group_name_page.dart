@@ -72,7 +72,8 @@ class GroupNamePageState extends State<GroupNamePage> {
                 onTap: () {
                   createGroupConversation().then((conversationGroup) {
                     print("Go back to Main Page!");
-                    _wholeAppBloc.dispatch(AddConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+                    _wholeAppBloc.dispatch(AddConversationGroupEvent(
+                        conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
                     Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
                     Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
                   });
@@ -175,7 +176,7 @@ class GroupNamePageState extends State<GroupNamePage> {
       id: generateNewId().toString(),
       notificationExpireDate: 0,
       creatorUserId: wholeAppBloc.currentState.userState.id,
-      createdDate: new DateTime.now().millisecondsSinceEpoch.toString(),
+      createdDate: new DateTime.now().millisecondsSinceEpoch,
       name: textEditingController.text,
       type: "Group",
       block: false,
@@ -254,8 +255,7 @@ class GroupNamePageState extends State<GroupNamePage> {
         // TODO: mobile no is not saved as mobile number
         mobileNo: primaryNo.length == 0 ? contact.displayName : primaryNo[0],
         block: false,
-        lastSeenDate: "",
-        conversationId: conversationGroup.id,
+        lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
       );
       print("newUserContact: " + newUserContact.toString());
 //      UserContact userContact = await
@@ -290,7 +290,6 @@ class GroupNamePageState extends State<GroupNamePage> {
       'mobileNo': newUserContact.mobileNo,
       'block': newUserContact.block,
       'lastSeenDate': newUserContact.lastSeenDate,
-      'conversationId': newUserContact.conversationId
     });
 
     return newUserContact;
@@ -307,8 +306,7 @@ class GroupNamePageState extends State<GroupNamePage> {
       realName: currentUser.realName,
       mobileNo: currentUser.mobileNo,
       block: false,
-      lastSeenDate: "",
-      conversationId: conversationGroup.id,
+      lastSeenDate: new DateTime.now().millisecondsSinceEpoch, // unknown time
     );
     print("selfUserContact: " + selfUserContact.toString());
 
@@ -335,7 +333,7 @@ class GroupNamePageState extends State<GroupNamePage> {
       'description': conversationGroup.description,
       'notificationExpireDate': conversationGroup.notificationExpireDate,
       'memberIds': conversationGroup.memberIds,
-      'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
 
     print("Upload group conversation successful.");
@@ -350,7 +348,7 @@ class GroupNamePageState extends State<GroupNamePage> {
 
     print("Upload unreadMessage success!");
 
-    wholeAppBloc.dispatch(OverrideUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
+    wholeAppBloc.dispatch(AddUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
 
     await Firestore.instance.collection('multimedia').document(newUnreadMessage.id).setData({
       'id': newMultiMedia.id,

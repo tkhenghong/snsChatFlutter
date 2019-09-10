@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,15 +8,20 @@ import 'package:flutter/material.dart';
 // Import package
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
+import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/chat/conversation_member.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
+import 'package:snschat_flutter/service/FirebaseStorage/FirebaseStorageService.dart';
+import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
@@ -217,12 +223,9 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                                           softWrap: true,
                                         ),
                                         onTap: () {
-                                          createPersonalConversation(contact).then((conversationGroup) {
-                                            _wholeAppBloc.dispatch(AddConversationGroupEvent(conversationGroup: conversationGroup));
-                                            Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
-                                            Navigator.push(
-                                                context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
-                                          });
+                                          if(widget.chatGroupType == "Personal") {
+                                            createPersonalConversation(contact);
+                                          }
                                         },
                                         leading: CircleAvatar(
                                           backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
@@ -281,7 +284,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     ConversationGroup conversationGroup = new ConversationGroup(
       id: null,
       creatorUserId: wholeAppBloc.currentState.userState.id,
-      createdDate: new DateTime.now().millisecondsSinceEpoch.toString(),
+      createdDate: new DateTime.now().millisecondsSinceEpoch,
       name: contact.displayName,
       type: "Personal",
       block: false,
@@ -291,7 +294,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       // memberIds put UserContact.id. NOT User.id
       notificationExpireDate: 0,
     );
-    // TODO: Check your UserContact exist in backend database or not first. (DONE)
 
     Multimedia groupMultiMedia = Multimedia(
         id: null,
@@ -305,6 +307,21 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         conversationId: null, // Add the conversationId after the conversationGroup object is created in the backend
         messageId: null);
 
+    if(!isObjectEmpty(contact.avatar)) {
+      print("if(!isObjectEmpty(contact.avatar))");
+      FileService fileService = FileService();
+      File copiedFile = await fileService.downloadFileFromUint8List(contact.avatar, contact.displayName);
+      if(!isObjectEmpty(copiedFile)) {
+        print("if(isObjectEmpty(copiedFile))");
+        print("copiedFile.path: " + copiedFile.path);
+        groupMultiMedia.localThumbnailUrl = groupMultiMedia.localFullFileUrl = copiedFile.path;
+        FirebaseStorageService firebaseStorageService = FirebaseStorageService();
+        String remoteURL = await firebaseStorageService.uploadFile(copiedFile.path, contact.displayName);
+        print("remoteURL: " + remoteURL);
+        groupMultiMedia.remoteThumbnailUrl = groupMultiMedia.remoteFullFileUrl = remoteURL;
+      }
+    }
+
     // In Malaysia,
     // If got +60, remove +60.
     // If got 012285...
@@ -315,74 +332,18 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     // After sign up, send a command at the backend to replace those UserContact object with exactly same number
 
     print("Before CreateConversationGroupEvent");
-    wholeAppBloc.dispatch(CreateConversationGroupEvent(multimedia: groupMultiMedia, contactList: contactList, conversationGroup: conversationGroup, type: "Single", callback: (bool conversationGroupCreated){
-      if(conversationGroupCreated) {
-        print("Conversation Group Created.");
+    wholeAppBloc.dispatch(CreateConversationGroupEvent(multimedia: groupMultiMedia, contactList: contactList, conversationGroup: conversationGroup, type: widget.chatGroupType, callback: (ConversationGroup newConversationGroup){
+      print("CreateConversationGroupEvent callback success! ");
+      Navigator.pop(context);
+      if(newConversationGroup != null) {
+        print("if(newConversationGroup != null)");
+        Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
+        Navigator.push(
+            context, MaterialPageRoute(builder: ((context) => ChatRoomPage(newConversationGroup))));
       } else {
-        print("Conversation Group Failed.");
+        Fluttertoast.showToast(msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
       }
     }));
     return conversationGroup;
-//    uploadConversation(conversationGroup, newUnreadMessage, groupMultiMedia);
-  }
-
-  uploadConversation(ConversationGroup conversationGroup, UnreadMessage newUnreadMessage, Multimedia groupMultiMedia) async {
-    print("uploadConversation()");
-    await Firestore.instance.collection('conversation').document(conversationGroup.id).setData({
-      'id': conversationGroup.id,
-      'name': conversationGroup.name,
-      'type': conversationGroup.type,
-      'creatorUserId': conversationGroup.creatorUserId,
-      'createdDate': conversationGroup.createdDate,
-      'block': conversationGroup.block,
-      'description': conversationGroup.description,
-      'notificationExpireDate': conversationGroup.notificationExpireDate,
-      'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
-    });
-
-    print("Upload group conversation successful.");
-    await Firestore.instance.collection('unreadMessage').document(newUnreadMessage.id).setData({
-      'id': newUnreadMessage.id,
-      'count': newUnreadMessage.count,
-      'date': newUnreadMessage.date,
-      'lastMessage': newUnreadMessage.lastMessage,
-    });
-
-    print("Upload unreadMessage success!");
-
-    wholeAppBloc.dispatch(OverrideUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
-
-    await Firestore.instance.collection('multimedia').document(newUnreadMessage.id).setData({
-      'id': groupMultiMedia.id,
-      'imageDataId': groupMultiMedia.imageDataId,
-      'imageFileId': groupMultiMedia.imageFileId,
-      'localFullFileUrl': groupMultiMedia.localFullFileUrl,
-      'localThumbnailUrl': groupMultiMedia.localThumbnailUrl,
-      'remoteThumbnailUrl': groupMultiMedia.remoteThumbnailUrl,
-      'remoteFullFileUrl': groupMultiMedia.remoteFullFileUrl,
-      'messageId': groupMultiMedia.messageId,
-      'userContactId': groupMultiMedia.userContactId,
-      'conversationId': groupMultiMedia.conversationId,
-    });
-
-    print("Upload multimedia success!");
-    wholeAppBloc.dispatch(AddMultimediaEvent(callback: (Multimedia multimedia) {}, multimedia: groupMultiMedia));
-
-    //TODO: Check user_contact
-  }
-
-  // Find the group member that the user added into the conversation using his/her phone number
-  // If found, return that edited UserContact object
-  // If not found, return NOT edited UserContact object
-  Future<UserContact> findUserContact(UserContact newUserContact) async {
-    var conversationDocuments =
-        await Firestore.instance.collection("user").where("mobileNo", isEqualTo: newUserContact.mobileNo).getDocuments();
-    if (conversationDocuments.documents.length > 0) {
-      print("if (conversationDocuments.documents.length > 0)");
-      print("conversationDocuments.documents.length.toString(): " + conversationDocuments.documents.length.toString());
-      DocumentSnapshot documentSnapshot = conversationDocuments.documents[0];
-      newUserContact.mobileNo = documentSnapshot["mobileNo"];
-      return newUserContact;
-    } else {}
   }
 }

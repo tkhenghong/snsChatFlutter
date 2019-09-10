@@ -166,9 +166,9 @@ class AddGoogleSignInEvent extends WholeAppEvent {
 }
 
 // Unread Message
-class OverrideUnreadMessageEvent extends WholeAppEvent {
+class AddUnreadMessageEvent extends WholeAppEvent {
   UnreadMessage unreadMessage;
   Function callback;
 
-  OverrideUnreadMessageEvent({this.unreadMessage, this.callback});
+  AddUnreadMessageEvent({this.unreadMessage, this.callback});
 }

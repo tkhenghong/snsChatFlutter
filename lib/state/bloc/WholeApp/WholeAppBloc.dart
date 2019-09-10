@@ -1,4 +1,5 @@
 import 'dart:async';
+//import 'dart:core';
 
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -118,8 +119,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     } else if (event is AddGoogleSignInEvent) {
       addGoogleSignInToState(event);
       yield currentState;
-    } else if (event is OverrideUnreadMessageEvent) {
-      overrideUnreadMessageEvent(event);
+    } else if (event is AddUnreadMessageEvent) {
+      addUnreadMessageToState(event);
       yield currentState;
     } else if (event is CreateConversationGroupEvent) {
       createConversationGroup(event);
@@ -133,7 +134,10 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     print("checkUserSignIn()");
     bool isSignedIn = false;
 
-    isSignedIn = await currentState.googleSignIn.isSignedIn();
+    List<User> userList = await userDBService.getAllUsers();
+
+    isSignedIn = await currentState.googleSignIn.isSignedIn() || userList == null || userList.length == 0;
+
     print("isSignedIn: " + isSignedIn.toString());
     if (!isObjectEmpty(event)) {
       event.callback(isSignedIn);
@@ -175,31 +179,39 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   Future<bool> loadDatabase(LoadDatabaseToStateEvent event) async {
-    bool googleSignInDone = await signInUsingGoogle();
-    if (!googleSignInDone) {
+    try {
+      await currentState.googleSignIn.signInSilently(suppressErrors: false);
+    } catch (e) {
+      print("Error caught during login. Go to login page.");
+      if (!isObjectEmpty(event)) {
+        event.callback(false);
+      }
+      return false;
+    }
+
+    // Can be removed
+    if (!(await currentState.googleSignIn.isSignedIn())) {
+      // Google Account is not signed in, straight false
+      Fluttertoast.showToast(msg: 'Google is not signed in. Please sign in first.', toastLength: Toast.LENGTH_LONG);
       if (!isObjectEmpty(event)) {
         event.callback(false);
       }
 
       return false;
     }
+
     User userFromDB = await userDBService.getUserByGoogleAccountId(currentState.googleSignIn.currentUser.id);
-
-    if (userFromDB == null) {
+    if (isObjectEmpty(userFromDB)) {
       if (!isObjectEmpty(event)) {
         event.callback(false);
       }
-
       return false;
     }
-
     Settings settingsFromDB = await settingsDBService.getSettingsOfAUser(userFromDB.id);
-
-    if (settingsFromDB == null) {
+    if (userFromDB == null && settingsFromDB == null) {
       if (!isObjectEmpty(event)) {
         event.callback(false);
       }
-
       return false;
     }
 
@@ -208,6 +220,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     List<Multimedia> multimediaListFromDB = await multimediaDBService.getAllMultimedia();
     List<UnreadMessage> unreadMessageListFromDB = await unreadMessageDBService.getAllUnreadMessage();
     List<UserContact> userContactListFromDB = await userContactDBService.getAllUserContacts();
+
+    print("conversationGroupListFromDB.length: " + conversationGroupListFromDB.length.toString());
+    print("messageListFromDB.length: " + messageListFromDB.length.toString());
+    print("multimediaListFromDB.length: " + multimediaListFromDB.length.toString());
+    print("unreadMessageListFromDB.length: " + unreadMessageListFromDB.length.toString());
+    print("userContactListFromDB.length: " + userContactListFromDB.length.toString());
 
     addUserToState(AddUserEvent(user: userFromDB, callback: (User user) {}));
     addSettingsToState(AddSettingsEvent(settings: settingsFromDB, callback: (Settings settings) {}));
@@ -228,51 +246,41 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   // Will check user signed up or not first. If signed up, will read User data from Firebase
   // Output: The state will have GoogleAccount, FirebaseUser, User, Settings data
   Future<bool> signIn(UserSignInEvent event) async {
-    bool isSignedUp = await checkUserSignedUp(CheckUserSignedUpEvent(callback: (bool isSignedUp) {}, mobileNo: event.mobileNo));
-
-    if (isSignedUp) {
-      bool googleSignedIn = await signInUsingGoogle();
-      if (!googleSignedIn) {
-        if (!isObjectEmpty(event)) {
-          event.callback(false);
-        }
-        return false;
-      }
-
-      bool getUserSuccessful = await getUserAndSettings();
-      if (getUserSuccessful) {
-        // In case of Sign in from login page, check mobile no with state's mobile no got from Firebase's User table
-        if (!isStringEmpty(event.mobileNo)) {
-          if (currentState.userState.mobileNo.toString() != event.mobileNo.toString()) {
-            if (!isObjectEmpty(event)) {
-              event.callback(false);
-            }
-
-            return false;
-          }
-        }
-
-        if (!isObjectEmpty(event)) {
-          event.callback(true);
-        }
-
-        return true;
-      } else {
-        signOut(null);
-      }
-
+    bool googleSignedIn = await signInUsingGoogle();
+    if (!googleSignedIn) {
       if (!isObjectEmpty(event)) {
         event.callback(false);
       }
-
-      return false;
-    } else {
-      if (!isObjectEmpty(event)) {
-        event.callback(false);
-      }
-
       return false;
     }
+
+    bool getUserAndSettingsSuccessful = await getUserAndSettings();
+    if (getUserAndSettingsSuccessful) {
+      // In case of Sign in from login page, check mobile no with state's mobile no got from User's current state
+      if (!isStringEmpty(event.mobileNo)) {
+        if (currentState.userState.mobileNo.toString() != event.mobileNo.toString()) {
+          if (!isObjectEmpty(event)) {
+            event.callback(false);
+          }
+
+          return false;
+        }
+      }
+
+      if (!isObjectEmpty(event)) {
+        event.callback(true);
+      }
+
+      return true;
+    } else {
+      signOut(null);
+    }
+
+    if (!isObjectEmpty(event)) {
+      event.callback(false);
+    }
+
+    return false;
   }
 
   // Sign into the Google account to get data from Google
@@ -306,97 +314,80 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   // Import User & Settings data from REST to app's state
   Future<bool> getUserAndSettings() async {
-    if (!isObjectEmpty(currentState.firebaseUser)) {
-      User userFromServer = await userAPIService.getUserByUsingGoogleAccountId(currentState.googleSignIn.currentUser.id);
-      if (userFromServer == null) {
-        return false;
-      }
-
-      Settings settingsFromServer = await settingsAPIService.getSettingsOfAUser(userFromServer.id);
-      if (settingsFromServer == null) {
-        return false;
-      }
-
-      if (userFromServer.id == settingsFromServer.userId) {
-        currentState.userState = userFromServer;
-        currentState.settingsState = settingsFromServer;
-
-        bool userSaved = await userDBService.addUser(userFromServer);
-        bool settingsSaved = await settingsDBService.addSettings(settingsFromServer);
-
-        return userSaved && settingsSaved;
-      } else {
-        Fluttertoast.showToast(msg: 'Please use the correct Google account to sign in', toastLength: Toast.LENGTH_SHORT);
-      }
+    if (isObjectEmpty(currentState.firebaseUser)) {
+      return false;
     }
-    return false;
+
+    User userFromServer = await userAPIService.getUserByUsingGoogleAccountId(currentState.googleSignIn.currentUser.id);
+    if (userFromServer == null) {
+      return false;
+    }
+
+    Settings settingsFromServer = await settingsAPIService.getSettingsOfAUser(userFromServer.id);
+    if (settingsFromServer == null) {
+      return false;
+    }
+
+    if (userFromServer.id == settingsFromServer.userId) {
+      currentState.userState = userFromServer;
+      currentState.settingsState = settingsFromServer;
+
+      bool userSaved = await userDBService.addUser(userFromServer);
+      bool settingsSaved = await settingsDBService.addSettings(settingsFromServer);
+
+      return userSaved && settingsSaved;
+    } else {
+      Fluttertoast.showToast(msg: 'Please use the correct Google account to sign in', toastLength: Toast.LENGTH_SHORT);
+    }
+
+    return true;
   }
 
   // Sign up a new User record in FireStore using GoogleAccount & FirebaseUser
   Future<bool> signUp(UserSignUpEvent event) async {
-    try {
-      // Require user to connect to Google first in order to get some info from the user
-      bool isSignedIn = await signInUsingGoogle();
+    bool isSignedUp = await checkUserSignedUp(CheckUserSignedUpEvent(callback: (bool isSignedUp) {}, mobileNo: event.mobileNo));
 
-      if (isSignedIn) {
-        FirebaseUser firebaseUser = currentState.firebaseUser;
-
-        if (!isObjectEmpty(firebaseUser)) {
-          GoogleSignInAccount googleSignInAccount = currentState.googleSignIn.currentUser;
-          User user = User(
-              id: null,
-              mobileNo: event.mobileNo,
-              displayName: firebaseUser.displayName,
-              googleAccountId: googleSignInAccount.id,
-              realName: event.realName);
-
-          Settings settings = Settings(id: null, notification: true, userId: user.id);
-          bool accountExist = await isAccountExist(user);
-          print("accountExist: " + accountExist.toString());
-          if (!accountExist) {
-            bool created = await createSettingsAndUser(user, settings);
-
-            if (!isObjectEmpty(event)) {
-              event.callback(created);
-            }
-
-            return created;
-          } else {
-            Fluttertoast.showToast(
-                msg: 'Registered Mobile No./Google Account. Please use another Mobile No./Google Account to register.',
-                toastLength: Toast.LENGTH_SHORT);
-            if (!isObjectEmpty(event)) {
-              event.callback(false);
-            }
-            return false;
-          }
-        }
-      }
+    if (isSignedUp) {
       if (!isObjectEmpty(event)) {
         event.callback(false);
       }
-    } catch (e) {
+
       return false;
+    }
+    FirebaseUser firebaseUser = currentState.firebaseUser;
+
+    if (!isObjectEmpty(firebaseUser)) {
+      GoogleSignInAccount googleSignInAccount = currentState.googleSignIn.currentUser;
+      User user = User(
+          id: null,
+          mobileNo: event.mobileNo,
+          displayName: firebaseUser.displayName,
+          googleAccountId: googleSignInAccount.id,
+          realName: event.realName);
+
+      Settings settings = Settings(id: null, notification: true, userId: user.id);
+      bool created = await createSettingsAndUser(user, settings);
+
+      if (!isObjectEmpty(event)) {
+        event.callback(created);
+      }
+
+      return created;
+    }
+    Fluttertoast.showToast(
+        msg: 'Registered Mobile No./Google Account. Please use another Mobile No./Google Account to register.',
+        toastLength: Toast.LENGTH_SHORT);
+
+    if (!isObjectEmpty(event)) {
+      event.callback(false);
     }
 
     return false;
-  }
-
-  Future<bool> isAccountExist(User user) async {
-    // Check REST API
-    User userFromServer = await userAPIService.getUserByUsingGoogleAccountId(user.googleAccountId);
-    User userFromServer2 = await userAPIService.getUserByUsingMobileNo(user.mobileNo);
-
-    // Exist = true, Not Exist = false;
-    bool result = userFromServer != null && userFromServer2 != null;
-    print("duplicate? " + result.toString());
-    return result;
   }
 
   Future<bool> createSettingsAndUser(User user, Settings settings) async {
     // REST API --> Local DB
 
-    // Check first before create one
     User userFromServer = await userAPIService.addUser(user);
     if (userFromServer == null) {
       return false;
@@ -483,23 +474,25 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return permissionResults;
   }
 
+  // At this point the currentState already has conversationGroupList from DB
   Future<bool> loadConversationsOfTheUser(GetConversationsForUserEvent event) async {
-    List<ConversationGroup> conversationGroupListFromDB = await conversationGroupDBService.getAllConversationGroups();
-    currentState.conversationGroupList = conversationGroupListFromDB;
     List<ConversationGroup> conversationGroupListFromServer =
         await conversationGroupAPIService.getConversationGroupsForUser(currentState.userState.id);
+    print("getConversationGroupsForUser success");
+
     if (conversationGroupListFromServer != null && conversationGroupListFromServer.length > 0) {
       // Update the current info of the conversationGroup to latest information
       conversationGroupListFromServer.forEach((conversationGroupFromServer) {
         // TODO: Review the performance of this loop
-        bool conversationGroupExist = conversationGroupListFromDB
+        bool conversationGroupExist = currentState.conversationGroupList
             .contains((ConversationGroup conversatGroupFromDB) => conversatGroupFromDB.id == conversationGroupFromServer.id);
         if (conversationGroupExist) {
           conversationGroupDBService.editConversationGroup(conversationGroupFromServer);
         } else {
           conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
         }
-        addConversationToState(AddConversationGroupEvent(callback: () {}, conversationGroup: conversationGroupFromServer));
+        addConversationToState(
+            AddConversationGroupEvent(callback: (ConversationGroup conversationGroup) {}, conversationGroup: conversationGroupFromServer));
       });
     }
 
@@ -508,6 +501,11 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
 
     return true;
+  }
+
+  Future<bool> loadUnreadMessageOfTheUser() {
+    // TODO: load unread messge from server when first time loading
+//    List<UnreadMessage> unreadMessageList = unreadMessageAPIService.getUnreadMessagesOfAUser(userId)
   }
 
   Future<Map<PermissionGroup, PermissionStatus>> requestAllRequiredPermissions({RequestAllPermissionsEvent event}) async {
@@ -519,19 +517,19 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return permissions;
   }
 
-  Future<bool> createConversationGroup(CreateConversationGroupEvent event) async {
+  Future<ConversationGroup> createConversationGroup(CreateConversationGroupEvent event) async {
     print("CreateConversationGroupEvent in BLOC");
     // Create Single Group successfully (1 ConversationGroup, 2 UserContact, 1 UnreadMessage, 1 Multimedia)
     // Upload conversation to REST API and Local DB
 
     UserContact yourOwnUserContact = UserContact(
       id: null,
+      // userIds: Which User owns this UserContact
       userIds: [currentState.userState.id],
-      // Which User owns this UserContact
       displayName: currentState.userState.displayName,
       realName: currentState.userState.realName,
       block: false,
-      lastSeenDate: "",
+      lastSeenDate: new DateTime.now().millisecondsSinceEpoch, // make unknown time, let server decide
       mobileNo: currentState.userState.mobileNo,
     );
     print("Created UserContact");
@@ -541,6 +539,10 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     userContactList.add(yourOwnUserContact);
     print("Added yourself into userContactList.");
     event.contactList.forEach((contact) {
+      print("contact.displayName: " + contact.displayName);
+      print("contact.givenName: " + contact.givenName);
+      print("contact.familyName: " + contact.familyName.toString());
+      print("contact.middleName: " + contact.middleName.toString());
       List<String> primaryNo = [];
       if (contact.phones.length > 0) {
         print("if (contact.phones.length > 0)");
@@ -548,6 +550,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
           print("phoneNo.value: " + phoneNo.value);
           primaryNo.add(phoneNo.value);
         });
+      } else {
+        // No phone number and the display name is the phone number itself
+        // Reason: No contact.phones when the mobile number doesn't have a name on it
+        String mobileNo = contact.displayName.replaceAll("\\s", "");
+        print("mobileNo with whitespaces removed: " + mobileNo);
+        primaryNo.add(mobileNo);
       }
 
       UserContact userContact = UserContact(
@@ -557,11 +565,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
         displayName: contact.displayName,
         realName: contact.displayName,
         block: false,
-        lastSeenDate: "",
+        lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
       );
 
       userContact.mobileNo = primaryNo.length == 0 ? "" : primaryNo[0];
-      print("primaryNo[0]: " + primaryNo[0]);
+
+      print("userContact.mobileNo: " + userContact.mobileNo);
 
       // If got Malaysia number
       if (primaryNo[0].contains("+60")) {
@@ -573,8 +582,11 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       userContactList.add(userContact);
     });
 
+    print("userContactList.length: " + userContactList.length.toString());
+
     print("Group members have been added into userContactList.");
 
+    // Note: Backend already helped you to check any duplicates of the same UserContact
     List<UserContact> newUserContactList = await uploadUserContactList(userContactList);
     print("Uploaded and saved uploadUserContactList to REST, DB and State.");
 
@@ -584,74 +596,94 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     // event.contactList doesn't include yourself, so newUserContactList.length - 1 OR Any UserContact is not added into the list (means not uploaded successfully)
     if ((event.contactList.length != newUserContactList.length - 1) || newUserContactList.length == 0) {
       // That means some UseContact are not uploaded into the REST
-      return false;
+      return null;
     }
-    print("Uploaded and saved uploadUserContactList to REST, DB and State.");
+
     // Replace the list with no Id with the one with Ids
     userContactList = newUserContactList;
 
     // Give the list of UserContactIds to memberIds of ConversationGroup
-    event.conversationGroup.memberIds = userContactList.map((newUserContact) => newUserContact.id);
+    event.conversationGroup.memberIds = userContactList.map((newUserContact) => newUserContact.id).toList();
+
+    // Add your own userContact's ID as admin by find the one that has the same mobile number in the userContactList
+    event.conversationGroup.adminMemberIds
+        .add(userContactList.firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentState.userState.mobileNo).id);
+
+    print("Verify event.conversationGroup.memberIds");
+    event.conversationGroup.memberIds.forEach((String userContactId) {
+      print("userContactId: " + userContactId.toString());
+    });
+
+    print("Verify event.conversationGroup.adminMemberIds");
+    event.conversationGroup.adminMemberIds.forEach((String userContactId) {
+      print("userContactId: " + userContactId.toString());
+    });
 
     // 2. Upload ConversationGroup
-    ConversationGroup newConversationGroup = await uploadConversationGroup(event.conversationGroup);
+    ConversationGroup newConversationGroup = await uploadAndSaveConversationGroup(event.conversationGroup);
     print("Uploaded and saved conversationGroup to REST, DB and State.");
-    if(newConversationGroup == null) {
-      return false;
+    if (newConversationGroup == null) {
+      return null;
     }
 
-    // TODO: Create Single Group successfully (1 ConversationGroup, 2 UserContact, 1 UnreadMessage, 1 Multimedia)
+    print("newConversationGroup.id: " + newConversationGroup.id.toString());
+    addConversationToState(
+        AddConversationGroupEvent(conversationGroup: newConversationGroup, callback: (ConversationGroup conversationGroup) {}));
 
-    UnreadMessage newUnreadMessage = await uploadUnreadMessage(newConversationGroup);
+    // TODO: Create Personal Group successfully (1 ConversationGroup, 2 UserContact, 1 UnreadMessage, 1 Multimedia)
+    // 3. Upload Unread Message
+    UnreadMessage newUnreadMessage = await uploadAndSaveUnreadMessage(newConversationGroup);
     print("Uploaded and saved UnreadMessage to REST, DB and State.");
-    if(newUnreadMessage == null) {
-      return false;
+    if (newUnreadMessage == null) {
+      return null;
     }
+
+    addUnreadMessageToState(AddUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
 
     event.multimedia.conversationId = newConversationGroup.id;
 
-    Multimedia newMultimedia = await uploadConversationGroupMultimedia(event.multimedia);
+    // 4. Upload Group Multimedia
+    Multimedia newMultimedia = await uploadAndSaveMultimedia(event.multimedia);
     print("Uploaded and saved ConversationGroup Multimedia to REST, DB and State.");
-    if(newMultimedia == null) {
-      return false;
+    if (newMultimedia == null) {
+      return null;
     }
+
+    addMultimediaToState(AddMultimediaEvent(multimedia: newMultimedia, callback: (Multimedia multimedia) {}));
 
     if (!isObjectEmpty(event)) {
-      event.callback(event.conversationGroup);
+      event.callback(newConversationGroup);
     }
 
-    return true;
+    return newConversationGroup;
   }
 
   // Upload the list of UserContact to REST API (checked duplicates at there), get them back, and save all of them to DB and State
   Future<List<UserContact>> uploadUserContactList(List<UserContact> userContactList) async {
     List<UserContact> newUserContactList = [];
-    userContactList.forEach((userContact) async {
-      // findUserContact(targetUserContact);
+    for (UserContact userContact in userContactList) {
       UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
-      if(newUserContact != null) {
+      if (newUserContact != null) {
         UserContact existingUserContact = await userContactAPIService.getUserContact(newUserContact.id);
-        if(existingUserContact != null) {
-          newUserContactList.add(existingUserContact);
+        if (existingUserContact != null) {
           // Weakness: No error handling if UserContact save to DB fails
           userContactDBService.addUserContact(existingUserContact);
-          addUserContactToState(AddUserContactEvent(userContact: existingUserContact));
+          addUserContactToState(AddUserContactEvent(userContact: existingUserContact, callback: (UserContact userContact) {}));
+          newUserContactList.add(existingUserContact);
         }
       }
-    });
+    }
 
     return newUserContactList;
   }
 
-  Future<ConversationGroup> uploadConversationGroup(ConversationGroup conversationGroup) async {
+  Future<ConversationGroup> uploadAndSaveConversationGroup(ConversationGroup conversationGroup) async {
     ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(conversationGroup);
 
-    if (isStringEmpty(newConversationGroup.id)) {
+    if (newConversationGroup == null) {
       return null;
     }
-
     bool conversationGroupSaved = await conversationGroupDBService.addConversationGroup(newConversationGroup);
-
     if (!conversationGroupSaved) {
       return null;
     }
@@ -659,7 +691,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return newConversationGroup;
   }
 
-  Future<UnreadMessage> uploadUnreadMessage(ConversationGroup conversationGroup) async {
+  Future<UnreadMessage> uploadAndSaveUnreadMessage(ConversationGroup conversationGroup) async {
     UnreadMessage unreadMessage = UnreadMessage(
       id: null,
       conversationId: conversationGroup.id,
@@ -684,7 +716,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return newUnreadMessage;
   }
 
-  Future<Multimedia> uploadConversationGroupMultimedia(Multimedia multimedia) async {
+  Future<Multimedia> uploadAndSaveMultimedia(Multimedia multimedia) async {
     Multimedia newMultimedia = await multimediaAPIService.addMultimedia(multimedia);
 
     if (isStringEmpty(newMultimedia.id)) {
@@ -711,38 +743,52 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     });
 
     if (conversationExist) {
+      print("if (conversationExist)");
       currentState.conversationGroupList
           .removeWhere((ConversationGroup conversationGroup) => conversationGroup.id == event.conversationGroup.id);
       currentState.conversationGroupList.add(event.conversationGroup);
     } else {
+      print("if (!conversationExist)");
       currentState.conversationGroupList.add(event.conversationGroup);
     }
 
-    if (!conversationExist) {
-      currentState.conversationGroupList.add(event.conversationGroup);
-    }
     if (!isObjectEmpty(event)) {
       event.callback(event.conversationGroup);
     }
   }
 
-  overrideUnreadMessageEvent(OverrideUnreadMessageEvent event) async {
+  addUnreadMessageToState(AddUnreadMessageEvent event) async {
     print('event.unreadMessage.id: ' + event.unreadMessage.id);
-    // Remove existing same id unreadMessage
-    currentState.unreadMessageList.removeWhere((existingunreadMessage) => existingunreadMessage.id == event.unreadMessage.id);
-    // Read unreadMessage
-    currentState.unreadMessageList.add(event.unreadMessage);
+
+    bool unreadMessageExist = false;
+
+    currentState.unreadMessageList.forEach((UnreadMessage existingUnreadMessage) {
+      if (existingUnreadMessage.id == event.unreadMessage.id) {
+        unreadMessageExist = true;
+      }
+    });
+
+    if (unreadMessageExist) {
+      // Remove existing same id unreadMessage
+      currentState.unreadMessageList.removeWhere((existingunreadMessage) => existingunreadMessage.id == event.unreadMessage.id);
+      // Read unreadMessage
+      currentState.unreadMessageList.add(event.unreadMessage);
+    } else {
+      currentState.unreadMessageList.add(event.unreadMessage);
+    }
+
     if (!isObjectEmpty(event)) {
       event.callback(event.unreadMessage);
     }
   }
 
+  // Don't have to replace message
   addMessageToState(AddMessageEvent event) async {
     print("event.message.id: " + event.message.id);
     // Check repetition
     bool messageExist = false;
 
-    currentState.conversationGroupList.forEach((ConversationGroup existingMessage) {
+    currentState.messageList.forEach((Message existingMessage) {
       if (existingMessage.id == event.message.id) {
         messageExist = true;
       }
@@ -751,11 +797,13 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!messageExist) {
       currentState.messageList.add(event.message);
     }
+
     if (!isObjectEmpty(event)) {
       event.callback(event.message);
     }
   }
 
+  // Don't have to replace multimedia
   addMultimediaToState(AddMultimediaEvent event) async {
     print("event.multimedia.id: " + event.multimedia.id);
     bool multimediaIdExist = false;

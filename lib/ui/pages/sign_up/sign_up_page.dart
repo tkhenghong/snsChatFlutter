@@ -161,8 +161,8 @@ class SignUpPageState extends State<SignUpPage> {
                   mobileNo: mobileNoTextController.value.text));
             } else {
               print("if (!isSignedUp)");
+              Fluttertoast.showToast(msg: 'Unable to sign up. Please try again.', toastLength: Toast.LENGTH_SHORT);
               Navigator.pop(context);
-
             }
           },
           mobileNo: mobileNoTextController.value.text,
