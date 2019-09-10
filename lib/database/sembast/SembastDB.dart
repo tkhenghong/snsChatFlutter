@@ -7,6 +7,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
+import 'package:snschat_flutter/general/functions/validation_functions.dart';
+import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:snschat_flutter/service/permissions/PermissionService.dart';
 
 // Video tutorial: https://www.youtube.com/watch?v=LcaOULash7s
@@ -43,7 +45,7 @@ class SembastDB {
 
     var dbPath = "";
 
-    bool storageAccessGranted;
+    bool storageAccessGranted = false;
     switch (ENVIRONMENT) {
       case "DEVELOPMENT":
         print("CASE DEVELOPMENT.");
@@ -51,21 +53,23 @@ class SembastDB {
         storageAccessGranted = true;
         break;
       default:
+        FileService fileService = FileService();
         // get the application documents directory
-        var dir = await getApplicationDocumentsDirectory();
-        // make sure it exists
-        await dir.create(recursive: true);
-        // build the database path
-        dbPath = join(dir.path, 'pocketChat.db'); // join method comes from path.dart
-        // open the database
-        PermissionService permissionService = PermissionService();
-        storageAccessGranted = await permissionService.requestStoragePermission();
+        String path = await fileService.getApplicationDocumentDirectory();
+        if(isStringEmpty(path)) {
+          storageAccessGranted = false;
+        } else {
+          // build the database path
+          dbPath = join(path, 'pocketChat.db'); // join method comes from path.dart
+          storageAccessGranted = true;
+        }
         break;
     }
 
 
 
     if (storageAccessGranted) {
+      // open the database
       var db = await databaseFactoryIo.openDatabase(dbPath);
       _dbOpenCompleter.complete(db);
     } else {
