@@ -29,7 +29,7 @@ class ConversationGroupAPIService {
 
   Future<bool> editConversationGroup(ConversationGroup conversation) async {
     String conversationJsonString = json.encode(conversation.toJson());
-    var httpResponse = await http.put(REST_URL + "/conversationGroup", body: conversationJsonString,  headers: createAcceptJSONHeader());
+    var httpResponse = await http.put(REST_URL + "/conversationGroup", body: conversationJsonString, headers: createAcceptJSONHeader());
     return httpResponseIsOK(httpResponse);
   }
 
@@ -50,7 +50,10 @@ class ConversationGroupAPIService {
   Future<List<ConversationGroup>> getConversationGroupsForUser(String userId) async {
     var httpResponse = await http.get(REST_URL + "/conversationGroup/user/" + userId);
     if (httpResponseIsOK(httpResponse)) {
-      List<ConversationGroup> conversationList = convert.jsonDecode(httpResponse.body) as List<ConversationGroup>;
+      Iterable list = json.decode(httpResponse.body);
+      List<ConversationGroup> conversationList = list.map((model) => ConversationGroup.fromJson(model)).toList();
+//      List<dynamic> convertedList = convert.jsonDecode(httpResponse.body);
+//      List<ConversationGroup> conversationList = new List<ConversationGroup>.from(convertedList);
       return conversationList;
     }
     return null;
