@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-void showLoading(BuildContext context) {
+void showLoading(BuildContext context, String message) {
   showDialog(
       context: context,
       barrierDismissible: false,
@@ -15,7 +15,7 @@ void showLoading(BuildContext context) {
               ),
               new Padding(
                 padding: EdgeInsets.all(20.0),
-                child: new Text("Loading"),
+                child: new Text(message),
               ),
             ],
           ),

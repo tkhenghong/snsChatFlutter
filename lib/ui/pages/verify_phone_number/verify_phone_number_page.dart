@@ -66,14 +66,10 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
               enabled: true,
               keyboardType: TextInputType.number,
               decoration: UnderlineDecoration(
-                  textStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold),
-                  color: Colors.black, obscureStyle: ObscureStyle(isTextObscure: true)),
+                  textStyle: TextStyle(color: Colors.black, fontSize: 20.0, fontWeight: FontWeight.bold), color: Colors.black),
               onSubmit: (pin) {
                 print('PIN number is: ' + pin);
-                showLoading(context);
+                showLoading(context, "Verifying PIN...");
                 Future.delayed(Duration(milliseconds: 1000), () {
                   //Delay 1 second to simulate something loading
                   print('Loaded 1 second.');

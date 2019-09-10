@@ -21,7 +21,7 @@ class Message {
   String status; // Sent, received, unread, read
   String messageContent;
   String multimediaId; // Multimedia
-  String timestamp;
+  int timestamp;
 
   Message(
       {this.id,

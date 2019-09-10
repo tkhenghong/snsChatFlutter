@@ -3,6 +3,7 @@ import 'package:snschat_flutter/backend/rest/userContact/UserContactAPIService.d
 import 'package:flutter_test/flutter_test.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 
+// NOTE: I have made
 void main() {
   UserContactAPIService userContactAPIService = UserContactAPIService();
 
@@ -12,10 +13,9 @@ void main() {
         realName: "Teoh Kheng Hong",
         displayName: "Hong KH",
         mobileNo: "+60182262663",
-        conversationId: "rts68h54tsr56h4rsy47",
-        userIds: ["5847rth54rt4h56sr4h"],
+        userIds: ["5847rth54rt4h56sr4h", "5d7385f079d3941d808f7e30"],
         block: false,
-        lastSeenDate: "19th August 2019",
+        lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
         multimediaId: "54rdgr54gfrae5747486r");
   }
 
@@ -40,12 +40,17 @@ void main() {
     expect(edited, isTrue);
   });
 
+
   test("Test Get UserContact", () async {
     UserContact userContact = createTestObject();
+    print("Before send to server");
+    print("userContact.lastSeenDate: "+ userContact.lastSeenDate.toString());
+    DateTime lastSeenDateDT = new DateTime.fromMicrosecondsSinceEpoch(userContact.lastSeenDate);
+    print("lastSeenDateDT.toIso8601String(): " + lastSeenDateDT.toIso8601String());
     UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
     UserContact userContactFromServer = await userContactAPIService.getUserContact(newUserContact.id);
-    print("userContactFromServer.id == newUserContact.id:" + (userContactFromServer.id == newUserContact.id).toString());
     expect(userContactFromServer.id == newUserContact.id, isTrue);
+    expect(userContactFromServer.lastSeenDate == newUserContact.lastSeenDate, isTrue);
   });
 
   test("Test Get UserContact Locally By Using Mobile No", () async {

@@ -4,11 +4,11 @@ class ConversationGroup {
   // Single conversation, group conversation & broadcast channel
   String id;
   String creatorUserId;
-  String createdDate;
+  int createdDate;
   String name;
   String type;
   String description;
-  List<String> memberIds;
+  List<String> memberIds; // UserContactIds
   List<String> adminMemberIds;
   bool block;
   int notificationExpireDate; // 0 = unblocked, > 0 = blocked until specific time

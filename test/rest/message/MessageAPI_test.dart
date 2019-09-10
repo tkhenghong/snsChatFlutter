@@ -11,7 +11,7 @@ void main() {
     return new Message(
       id: null,
       conversationId: "wadhawidafgrs",
-      timestamp: "seiughrsiughrisdg",
+      timestamp: new DateTime.now().millisecondsSinceEpoch,
       messageContent: "bla bla bla",
       type: "Message",
       status: "READ",

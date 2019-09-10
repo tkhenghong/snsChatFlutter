@@ -14,10 +14,9 @@ void main() {
         realName: "Teoh Kheng Hong",
         displayName: "Hong KH",
         mobileNo: "+60182262663",
-        conversationId: "rts68h54tsr56h4rsy47",
         userIds: ["5847rth54rt4h56sr4h"],
         block: false,
-        lastSeenDate: "19th August 2019",
+        lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
         multimediaId: "54rdgr54gfrae5747486r");
   }
 

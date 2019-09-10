@@ -14,7 +14,7 @@ void main() {
         userId: "r5tf4h5t4h654tsr",
         conversationId: "td54tf564hrsth",
         lastMessage: "568rt4ghrt54hts4rh",
-        date: 654156874,
+        date: new DateTime.now().millisecondsSinceEpoch,
         count: 99);
   }
 

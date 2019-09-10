@@ -14,8 +14,8 @@ void main() {
       id: null,
       name: "Testing Group 1",
       description: "Testing description",
-      type: "Single",
-      createdDate: "107082019",
+      type: "Personal",
+      createdDate: new DateTime.now().millisecondsSinceEpoch,
       notificationExpireDate: 254631654,
       creatorUserId: "65421654654651",
       memberIds: ["wadwadw56f4sef", "56s4f6r54g89e4g", "54hs564ju456dyth5jsr", "5t4s5g1erg65t4ae"],
@@ -32,7 +32,7 @@ void main() {
     // TODO: Check the value of the boolean return by DB service
     bool added = await conversationGroupDBService.addConversationGroup(newConversationGroup);
     ConversationGroup conversationGroupFromLocalDB = await conversationGroupDBService.getSingleConversationGroup(conversationGroup.id);
-
+    print("conversationGroupFromLocalDB.id: " + conversationGroupFromLocalDB.id);
     // Validations
     expect(newConversationGroup.id, isNotEmpty);
     expect(conversationGroupFromLocalDB.id, equals(newConversationGroup.id)); // Only comparing ids due to no equatable package
