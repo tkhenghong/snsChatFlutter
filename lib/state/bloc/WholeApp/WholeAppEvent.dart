@@ -73,6 +73,11 @@ class LoadDatabaseToStateEvent extends WholeAppEvent {
   LoadDatabaseToStateEvent({this.callback});
 }
 
+class LoadUserPreviousDataEvent extends WholeAppEvent {
+  Function callback;
+
+  LoadUserPreviousDataEvent({this.callback});
+}
 
 class CreateConversationGroupEvent extends WholeAppEvent {
   // TODO: Create Single Group successfully (1 ConversationGroup, 2 UserContact, 1 UnreadMessage, 1 Multimedia)

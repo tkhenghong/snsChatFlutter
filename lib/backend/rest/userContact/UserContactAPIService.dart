@@ -59,4 +59,15 @@ class UserContactAPIService {
     }
     return null;
   }
+
+  Future<List<UserContact>> getUserContactsByUserId(String userId) async {
+    var httpResponse = await http.get(REST_URL + "/userContact/user/" + userId);
+
+    if (httpResponseIsOK(httpResponse)) {
+      Iterable list = json.decode(httpResponse.body);
+      List<UserContact> userContactList = list.map((model) => UserContact.fromJson(model)).toList();
+      return userContactList;
+    }
+    return null;
+  }
 }

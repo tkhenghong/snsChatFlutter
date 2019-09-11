@@ -89,8 +89,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     } else if (event is UserSignUpEvent) {
       signUp(event);
       yield currentState;
-    } else if (event is GetConversationsForUserEvent) {
-      loadConversationsOfTheUser(event);
+    } else if (event is LoadUserPreviousDataEvent) {
+      loadUserPreviousData(event);
       yield currentState;
     } else if (event is AddConversationGroupEvent) {
       addConversationToState(event);
@@ -474,8 +474,20 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return permissionResults;
   }
 
+  Future<bool> loadUserPreviousData(LoadUserPreviousDataEvent event) async {
+    bool loadConversationsDone = await loadConversationsOfTheUser();
+    bool loadUnreadMessageDone = await loadUnreadMessageOfTheUser();
+    bool loadUserContactsDone = await getUserContactsOfTheUser();
+
+    print("loadConversationsDone: " + loadConversationsDone.toString());
+    print("loadUnreadMessageDone: " + loadUnreadMessageDone.toString());
+    print("loadUserContactsDone: " + loadUserContactsDone.toString());
+
+    return loadConversationsDone && loadUnreadMessageDone && loadUserContactsDone;
+  }
+
   // At this point the currentState already has conversationGroupList from DB
-  Future<bool> loadConversationsOfTheUser(GetConversationsForUserEvent event) async {
+  Future<bool> loadConversationsOfTheUser() async {
     List<ConversationGroup> conversationGroupListFromServer =
         await conversationGroupAPIService.getConversationGroupsForUser(currentState.userState.id);
     print("getConversationGroupsForUser success");
@@ -494,18 +506,75 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
         addConversationToState(
             AddConversationGroupEvent(callback: (ConversationGroup conversationGroup) {}, conversationGroup: conversationGroupFromServer));
       });
+      return true;
     }
 
-    if (!isObjectEmpty(event)) {
-      event.callback(true);
-    }
-
-    return true;
+    return false;
   }
 
-  Future<bool> loadUnreadMessageOfTheUser() {
+  Future<bool> getUserContactsOfTheUser() async {
+    List<UserContact> userContactListFromServer = await userContactAPIService.getUserContactsByUserId(currentState.userState.id);
+    if (userContactListFromServer != null && userContactListFromServer.length > 0) {
+      // Update the current info of the conversationGroup to latest information
+      userContactListFromServer.forEach((userContactFromServer) {
+        // TODO: Review the performance of this loop
+        bool userContactExist = currentState.conversationGroupList
+            .contains((UserContact userContactFromDB) => userContactFromDB.id == userContactFromServer.id);
+        if (userContactExist) {
+          userContactDBService.editUserContact(userContactFromServer);
+        } else {
+          userContactDBService.addUserContact(userContactFromServer);
+        }
+        addUserContactToState(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: userContactFromServer));
+      });
+
+      return true;
+    }
+
+    return false;
+  }
+
+  Future<bool> loadUnreadMessageOfTheUser() async {
     // TODO: load unread messge from server when first time loading
-//    List<UnreadMessage> unreadMessageList = unreadMessageAPIService.getUnreadMessagesOfAUser(userId)
+    print("currentState.userState.id: " + currentState.userState.id);
+    List<UnreadMessage> unreadMessageListFromServer = await unreadMessageAPIService.getUnreadMessagesOfAUser(currentState.userState.id);
+    print("getUnreadMessagesOfAUser success");
+
+    if (unreadMessageListFromServer != null && unreadMessageListFromServer.length > 0) {
+      // Update the current info of the conversationGroup to latest information
+      unreadMessageListFromServer.forEach((unreadMessageFromServer) {
+        // TODO: Review the performance of this loop
+        bool unreadMessageExist = currentState.unreadMessageList
+            .contains((UnreadMessage unreadMessageFromDB) => unreadMessageFromDB.id == unreadMessageFromServer.id);
+        if (unreadMessageExist) {
+          unreadMessageDBService.editUnreadMessage(unreadMessageFromServer);
+        } else {
+          unreadMessageDBService.addUnreadMessage(unreadMessageFromServer);
+        }
+        addUnreadMessageToState(AddUnreadMessageEvent(callback: (UnreadMessage unreadMessage) {}, unreadMessage: unreadMessageFromServer));
+      });
+
+      return true;
+    }
+
+    return false;
+  }
+
+  // TODO: Don't need this??
+  Future<bool> getSettingsOfTheUserFromServer() async {
+    // Assume you have signed in and loaded DB
+    Settings settingsFromServer = await settingsAPIService.getSettingsOfAUser(currentState.userState.id);
+    if (isObjectEmpty(settingsFromServer)) {
+      return false;
+    }
+    bool settingsExist = !isObjectEmpty(currentState.settingsState);
+    if (settingsExist) {
+      settingsDBService.editSettings(settingsFromServer);
+    } else {
+      settingsDBService.addSettings(settingsFromServer);
+    }
+
+    addSettingsToState(AddSettingsEvent(callback: (Settings settings) {}, settings: settingsFromServer));
   }
 
   Future<Map<PermissionGroup, PermissionStatus>> requestAllRequiredPermissions({RequestAllPermissionsEvent event}) async {
@@ -529,7 +598,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       displayName: currentState.userState.displayName,
       realName: currentState.userState.realName,
       block: false,
-      lastSeenDate: new DateTime.now().millisecondsSinceEpoch, // make unknown time, let server decide
+      lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
+      // make unknown time, let server decide
       mobileNo: currentState.userState.mobileNo,
     );
     print("Created UserContact");
@@ -553,7 +623,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       } else {
         // No phone number and the display name is the phone number itself
         // Reason: No contact.phones when the mobile number doesn't have a name on it
-        String mobileNo = contact.displayName.replaceAll("\\s", "");
+        String mobileNo = contact.displayName.replaceAll("TO\\s", "");
         print("mobileNo with whitespaces removed: " + mobileNo);
         primaryNo.add(mobileNo);
       }
