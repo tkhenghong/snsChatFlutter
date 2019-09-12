@@ -80,7 +80,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     return BlocBuilder(
       bloc: wholeAppBloc,
       builder: (context, WholeAppState state) {
-        if (!isObjectEmpty(state.conversationGroupList) && state.conversationGroupList.length > 0) {
+        if (conversationGroupsAreReady(state) && unreadMessagesAreReady(state)) {
           return SmartRefresher(
             controller: _refreshController,
             header: WaterDropHeader(),
@@ -108,9 +108,18 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     );
   }
 
+  bool conversationGroupsAreReady(WholeAppState state) {
+    return !isObjectEmpty(state.conversationGroupList) && state.conversationGroupList.length > 0;
+  }
+
+  bool unreadMessagesAreReady(WholeAppState state) {
+    return !isObjectEmpty(state.conversationGroupList) && state.conversationGroupList.length > 0;
+  }
+
   PageListItem mapConversationToPageListTile(ConversationGroup conversation) {
     Multimedia multimedia = wholeAppBloc.currentState.multimediaList.firstWhere((Multimedia multimedia) => (multimedia.conversationId == conversation.id));
     UnreadMessage unreadMessage = wholeAppBloc.currentState.unreadMessageList.firstWhere((UnreadMessage unreadMessage) => (unreadMessage.conversationId == conversation.id));
+
     print("formatTime(unreadMessage.date): " + formatTime(unreadMessage.date));
 
     return PageListItem(

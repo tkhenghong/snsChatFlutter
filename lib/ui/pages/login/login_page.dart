@@ -68,7 +68,7 @@ class LoginPageState extends State<LoginPage> {
             permissionStatus == PermissionStatus.granted) {
           print(
               'if(permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted)');
-          wholeAppBloc.dispatch(GetPhoneStorageContactsEvent(callback: () {}));
+          wholeAppBloc.dispatch(GetPhoneStorageContactsEvent(callback: (bool done) {}));
         }
       });
     }));
