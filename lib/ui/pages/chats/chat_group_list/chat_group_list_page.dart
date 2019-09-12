@@ -50,7 +50,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           if (hasSignedIn) {
             if (getListDone == false) {
               // TODO: Get Conversations for the User
-              wholeAppBloc.dispatch(GetConversationsForUserEvent(callback: (bool done) {
+              wholeAppBloc.dispatch(LoadUserPreviousDataEvent(callback: (bool done) {
                 print("done: " + done.toString());
                 setState(() {
                   getListDone = done;
