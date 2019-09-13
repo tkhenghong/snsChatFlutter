@@ -30,12 +30,12 @@ import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/objects/settings/settings.dart';
 import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
-import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart' as prefix0;
 import 'package:snschat_flutter/objects/user/user.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/service/permissions/PermissionService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
+import 'package:time_formatter/time_formatter.dart';
 
 class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   ConversationGroupAPIService conversationGroupAPIService = ConversationGroupAPIService();
@@ -226,6 +226,30 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     print("multimediaListFromDB.length: " + multimediaListFromDB.length.toString());
     print("unreadMessageListFromDB.length: " + unreadMessageListFromDB.length.toString());
     print("userContactListFromDB.length: " + userContactListFromDB.length.toString());
+
+    conversationGroupListFromDB.forEach((ConversationGroup conversationGroup) {
+      print("conversationGroup.id: " + conversationGroup.id);
+      print("conversationGroup.name: " + conversationGroup.name);
+    });
+
+    messageListFromDB.forEach((Message message) {
+      print("message.id: " + message.id);
+    });
+
+    multimediaListFromDB.forEach((Multimedia multimedia) {
+      print("multimedia: " + multimedia.toString());
+    });
+
+    unreadMessageListFromDB.forEach((UnreadMessage unreadMessage) {
+      print("unreadMessage.id: " + unreadMessage.id);
+      print("unreadMessage.date: " + formatTime(unreadMessage.date));
+    });
+
+    userContactListFromDB.forEach((UserContact userContact) {
+      print("userContact.id: " + userContact.id);
+      print("userContact.displayName: " + userContact.displayName);
+      print("userContact.mobileNo: " + userContact.mobileNo);
+    });
 
     addUserToState(AddUserEvent(user: userFromDB, callback: (User user) {}));
     addSettingsToState(AddSettingsEvent(settings: settingsFromDB, callback: (Settings settings) {}));
@@ -483,7 +507,13 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     print("loadUnreadMessageDone: " + loadUnreadMessageDone.toString());
     print("loadUserContactsDone: " + loadUserContactsDone.toString());
 
-    return loadConversationsDone && loadUnreadMessageDone && loadUserContactsDone;
+    bool allDone = loadConversationsDone && loadUnreadMessageDone && loadUserContactsDone;
+
+    if (!isObjectEmpty(event)) {
+      event.callback(allDone);
+    }
+
+    return allDone;
   }
 
   // At this point the currentState already has conversationGroupList from DB
@@ -511,6 +541,32 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     return false;
   }
+
+  // TODO: Load multimedia from server (by getting conversationGroupList ready and get it's multimedia from server)
+//  Future<bool> loadMultimediaOfConverastionGroups() async {
+//    List<Multimedia> multimediaList =
+//    await multimediaAPIService.getMultimediaOfAUser(currentState.userState.id);
+//    print("getConversationGroupsForUser success");
+//
+//    if (conversationGroupListFromServer != null && conversationGroupListFromServer.length > 0) {
+//      // Update the current info of the conversationGroup to latest information
+//      conversationGroupListFromServer.forEach((conversationGroupFromServer) {
+//        // TODO: Review the performance of this loop
+//        bool conversationGroupExist = currentState.conversationGroupList
+//            .contains((ConversationGroup conversatGroupFromDB) => conversatGroupFromDB.id == conversationGroupFromServer.id);
+//        if (conversationGroupExist) {
+//          conversationGroupDBService.editConversationGroup(conversationGroupFromServer);
+//        } else {
+//          conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
+//        }
+//        addConversationToState(
+//            AddConversationGroupEvent(callback: (ConversationGroup conversationGroup) {}, conversationGroup: conversationGroupFromServer));
+//      });
+//      return true;
+//    }
+//
+//    return false;
+//  }
 
   Future<bool> getUserContactsOfTheUser() async {
     List<UserContact> userContactListFromServer = await userContactAPIService.getUserContactsByUserId(currentState.userState.id);

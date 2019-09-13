@@ -50,9 +50,8 @@ class UnreadMessageAPIService {
     var httpResponse = await http.get(REST_URL + "/unreadMessage/user/" + userId);
 
     if (httpResponseIsOK(httpResponse)) {
-      // TODO: Solve this List conversion problem
-      var jsonResponse = convert.jsonDecode(httpResponse.body);
-      List<UnreadMessage> unreadMessageList = convert.jsonDecode(jsonResponse);
+      Iterable list = json.decode(httpResponse.body);
+      List<UnreadMessage> unreadMessageList = list.map((model) => UnreadMessage.fromJson(model)).toList();
       return unreadMessageList;
     }
     return null;

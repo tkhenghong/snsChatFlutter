@@ -117,7 +117,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   PageListItem mapConversationToPageListTile(ConversationGroup conversation) {
-    Multimedia multimedia = wholeAppBloc.currentState.multimediaList.firstWhere((Multimedia multimedia) => (multimedia.conversationId == conversation.id));
+//    Multimedia multimedia = wholeAppBloc.currentState.multimediaList.firstWhere((Multimedia multimedia) => (multimedia.conversationId == conversation.id));
     UnreadMessage unreadMessage = wholeAppBloc.currentState.unreadMessageList.firstWhere((UnreadMessage unreadMessage) => (unreadMessage.conversationId == conversation.id));
 
     print("formatTime(unreadMessage.date): " + formatTime(unreadMessage.date));
