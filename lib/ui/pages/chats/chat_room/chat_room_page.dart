@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
@@ -12,9 +13,11 @@ import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
+import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
+import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 
 class ChatRoomPage extends StatefulWidget {
   final ConversationGroup _conversationGroup;
@@ -36,6 +39,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   ScrollController listScrollController = new ScrollController();
   RefreshController _refreshController;
   FocusNode focusNode = new FocusNode();
+  FileService fileService = FileService();
 
   File imageFile;
 
@@ -48,8 +52,8 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     focusNode.addListener(onFocusChange);
     isLoading = false;
     isShowSticker = false;
-
-    //    readLocal(); // TODO: Read local db for message list
+    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
+    wholeAppBloc = _wholeAppBloc;
   }
 
   @override
@@ -59,74 +63,11 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     super.dispose();
   }
 
-  Future<Multimedia> getConversationPhoto() async {
-    Multimedia groupPhoto;
-    var multimediaDocuments = await Firestore.instance
-        .collection("multimedia")
-        .where("conversationId", isEqualTo: widget._conversationGroup.id)
-        .getDocuments();
-    if (multimediaDocuments.documents.length == 0) {
-      print("if (multimediaDocuments.documents.length == 0)");
-    } else {
-      print("if (multimediaDocuments.documents.length > 0)");
-      DocumentSnapshot groupPhotoSnapshot = multimediaDocuments.documents[0];
-      groupPhoto = new Multimedia(
-        id: groupPhotoSnapshot["id"].toString(),
-        conversationId: groupPhotoSnapshot["id"].toString(),
-        imageDataId: groupPhotoSnapshot["imageDataId"].toString(),
-        imageFileId: groupPhotoSnapshot["imageFileId"].toString(),
-        localFullFileUrl: groupPhotoSnapshot["localFullFileUrl"].toString(),
-        localThumbnailUrl: groupPhotoSnapshot["localThumbnailUrl"].toString(),
-        messageId: groupPhotoSnapshot["messageId"].toString(),
-        remoteFullFileUrl: groupPhotoSnapshot["remoteFullFileUrl"].toString(),
-        remoteThumbnailUrl: groupPhotoSnapshot["remoteThumbnailUrl"].toString(),
-        userContactId: groupPhotoSnapshot["userContactId"].toString(),
-      );
-    }
-    return groupPhoto;
-  }
-
   @override
   Widget build(BuildContext context) {
     print("chat_room_page.dart build()");
-    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
-    wholeAppBloc = _wholeAppBloc;
+
     print("widget._conversation.id: " + widget._conversationGroup.id);
-    getConversationPhoto().then((Multimedia groupPhoto) {
-      if (!isObjectEmpty(groupPhoto)) {
-        print("if(!isObjectEmpty(groupPhoto))");
-        print("groupPhoto.localFullFileUrl: " + groupPhoto.localFullFileUrl);
-        if (!isStringEmpty(groupPhoto.localFullFileUrl)) {
-          print("if(!isStringEmpty(groupPhoto.localFullFileUrl))");
-          imageFile = File(groupPhoto.localFullFileUrl);
-          imageFile.exists().then((fileExists) {
-            if (!fileExists) {
-              print("if(!fileExists)");
-              print('chat-room.page.dart local file not exist!');
-              loadImageHandler(groupPhoto).then((remoteDownloadedfile) {
-                print(
-                    "remoteDownloadedfile.path: " + remoteDownloadedfile.path);
-                setState(() {
-                  imageFile = remoteDownloadedfile;
-                });
-              });
-            } else {
-              print("if(fileExists)");
-            }
-          });
-        }
-      }
-    });
-
-    imageFile = File("lib/ui/images/group2013.jpg");
-
-    // TODO: Get from the state after reading all stuffs from Firebase (online)
-//    wholeAppBloc.currentState.multimediaList.forEach((Multimedia existingMultimedia) {
-//      print("Got existing multimedia.");
-//      if (existingMultimedia.id == widget._conversation.groupPhotoId) {
-//        groupPhoto = existingMultimedia;
-//      }
-//    });
 
     // Chat Room page UI
     return GestureDetector(
@@ -144,8 +85,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                 child: Material(
                   color: Colors.black,
                   child: InkWell(
-                    customBorder: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0)),
+                    customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
                     onTap: () {
                       Navigator.of(context).pop();
                     },
@@ -157,18 +97,13 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                           child: CircleAvatar(
                             radius: 20.0,
                             backgroundColor: Colors.white,
-//                            backgroundImage: widget._conversation.groupPhoto.imageData != 0
-//                                ? MemoryImage(widget._conversation.groupPhoto.imageData)
-//                                : NetworkImage(''),
-//                            child: widget._conversation.groupPhoto.imageData.length == 0 ? Text(widget._conversation.name[0]) : Text(''),
-                            backgroundImage: imageFound
-                                ? FileImage(imageFile)
-                                : AssetImage("lib/ui/images/group2013.jpg"),
+                            child: Image.asset(
+                              fileService.getDefaultImagePath(widget._conversationGroup.type),
+                            ),
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 5.0, vertical: 50.0),
+                          padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 50.0),
                         ),
                       ],
                     ),
@@ -178,12 +113,10 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               Material(
                 color: Colors.black,
                 child: InkWell(
-                    customBorder: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0)),
+                    customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
                     onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                              ChatInfoPage(widget._conversationGroup)));
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (BuildContext context) => ChatInfoPage(widget._conversationGroup)));
                     },
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,17 +168,12 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
-//TODO: Read message from DB
-//  readMessageListfromDB() async {
-//  }
-
   Widget buildLoading() {
     return Positioned(
       child: isLoading
           ? Container(
               child: Center(
-                child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)),
+                child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)),
               ),
               color: Colors.white.withOpacity(0.8),
             )
@@ -313,25 +241,31 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       ),
       width: double.infinity,
       height: 50.0,
-      decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
-          color: Colors.white),
+      decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 0.5)), color: Colors.white),
     );
   }
 
   Widget buildListMessage() {
-    return StreamBuilder(
-      stream: Firestore.instance
-          .collection("message")
-          .where("conversationId", isEqualTo: widget._conversationGroup.id)
-          .orderBy('timestamp', descending: true)
-          .snapshots(),
-      builder: (BuildContext context, snapshot) {
-        if (!snapshot.hasData) {
-          return Expanded(
-//            flex: 1,
-              child: Center(child: Text("Loading messages...")));
+    return BlocBuilder(
+      bloc: wholeAppBloc,
+      builder: (BuildContext context, WholeAppState state) {
+        if (!messagesAreReady(state)) {
+          return Expanded(child: Center(child: Text("Loading messages...")));
         } else {
+          // Doing traditional due to not mature knowledge on map()
+          List<Message> messageList = [];
+          state.messageList.forEach((message) {
+            if (message.conversationId == widget._conversationGroup.id) {
+              messageList.add(message);
+            }
+          });
+          if (messageList.length > 0) {
+            messageList.sort((message1, message2) {
+              // Sorts based on number
+              return message1.timestamp.compareTo(message2.timestamp);
+            });
+          }
+
           return Flexible(
               child: new SmartRefresher(
             header: ClassicHeader(),
@@ -341,11 +275,10 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             controller: _refreshController,
             child: ListView.builder(
               controller: listScrollController,
-              itemCount: snapshot.data.documents.length,
+              itemCount: messageList.length,
               reverse: true,
               physics: BouncingScrollPhysics(),
-              itemBuilder: (context, index) =>
-                  displayChatMessage(index, snapshot.data.documents[index]),
+              itemBuilder: (context, index) => displayChatMessage(index, messageList[index]),
             ),
           ));
         }
@@ -353,8 +286,11 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
-  Widget displayChatMessage(int index, DocumentSnapshot document) {
-    print("Happened here?");
+  bool messagesAreReady(WholeAppState state) {
+    return !isObjectEmpty(state.messageList) && state.messageList.length > 0;
+  }
+
+  Widget displayChatMessage(int index, Message message) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -362,57 +298,33 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           child: Column(
             children: <Widget>[
               Text(
-                document['senderName'].toString() +
-                    document['message'].toString() +
-                    document['timestamp'].toString(),
+                message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
+                // TODO: Solve time,
                 style: TextStyle(color: Colors.white),
               ),
             ],
           ),
           padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
           width: 200.0,
-          decoration: BoxDecoration(
-              color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+          decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
           margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
         ),
       ],
     );
-
-    // Data save into Message object Firestore
-    // Firestore.instance.collection('message').document(newMessage.id).setData({
-    //          'id': newMessage.id, // Self generated Id
-    //          'conversationId': newMessage.conversationId,
-    //          'message': newMessage.message,
-    //          'multimediaId': newMessage.multimediaId,
-    //          'receiverId': newMessage.receiverId,
-    //          'receiverMobileNo': newMessage.receiverMobileNo,
-    //          'receiverName': newMessage.receiverName,
-    //          'senderId': newMessage.senderId,
-    //          'senderMobileNo': newMessage.senderMobileNo,
-    //          'senderName': newMessage.senderName,
-    //          'status': newMessage.status,
-    //          'type': newMessage.type,
-    //          'timestamp': newMessage.timestamp,
-    //        });
-
-    // Template of Message (left):
-    //                    Container(
-//                      child: Text(
-//                        "Test message",
-//                        style: TextStyle(color: Colors.white),
-//                      ),
-//                      padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-//                      width: 200.0,
-//                      decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
-//                      margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
-//                    ),
-
-    // wholeAppBloc.currentState.userState.id
   }
 
-// Image.asset(
-//          'lib/assets/balls.jpg',
-//        ),
+  String messageTimeDisplay(int timestamp) {
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat("dd-mm-yyyy").format(now);
+    print("now: " + formattedDate);
+    DateTime today = DateTime.parse(formattedDate);
+    String formattedDate2 = DateFormat("dd-mm-yyyy hh:mm:ss").format(today);
+    print("today: " + formattedDate2);
+    DateTime messageTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    String formattedDate3 = DateFormat("dd-mm-yyyy").format(messageTime);
+    return formattedDate3;
+  }
+
   Widget buildSticker() {
     return Container(
       child: Column(
@@ -507,9 +419,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
         ],
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       ),
-      decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
-          color: Colors.white),
+      decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 0.5)), color: Colors.white),
       padding: EdgeInsets.all(5.0),
       height: 180.0,
     );
@@ -561,15 +471,10 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       }
       print("Checkpoint 1");
       if (!isObjectEmpty(newMessage) && !isObjectEmpty(newMultimedia)) {
-        print(
-            'if(!isObjectEmpty(newMessage) && !isObjectEmpty(newMultimedia))');
-        wholeAppBloc.dispatch(AddMessageEvent(
-            message: newMessage, callback: (Message message) {}));
+        print('if(!isObjectEmpty(newMessage) && !isObjectEmpty(newMultimedia))');
+        wholeAppBloc.dispatch(AddMessageEvent(message: newMessage, callback: (Message message) {}));
 
-        Firestore.instance
-            .collection('message')
-            .document(newMessage.id)
-            .setData({
+        Firestore.instance.collection('message').document(newMessage.id).setData({
           'id': newMessage.id, // Self generated Id
           'conversationId': newMessage.conversationId,
           'message': newMessage.messageContent,
@@ -585,14 +490,12 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           'type': newMessage.type,
           'timestamp': newMessage.timestamp,
         });
-        Fluttertoast.showToast(
-            msg: 'Message sent!', toastLength: Toast.LENGTH_SHORT);
+        Fluttertoast.showToast(msg: 'Message sent!', toastLength: Toast.LENGTH_SHORT);
       } else {
         print('if(isObjectEmpty(newMessage) || isObjectEmpty(newMultimedia))');
       }
 
-      listScrollController.animateTo(0.0,
-          duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+      listScrollController.animateTo(0.0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
       Fluttertoast.showToast(msg: 'Nothing to send');
     }

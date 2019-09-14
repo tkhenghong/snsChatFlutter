@@ -1,7 +1,8 @@
-import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:snschat_flutter/general/functions/repeating_functions.dart';
+// Combinations. If the multimedia object contains
+// conversationId only: Conversation Group's photo
+// userContactId only: User Contact's ID
+// conversationId + messageId = A Multimedia message, belonged to a conversation
+// userId;
 
 class Multimedia {
   // Image, Video, Gifs, Sticker, Recording, links
@@ -12,9 +13,10 @@ class Multimedia {
   String remoteFullFileUrl;
   String imageDataId; // Uint8List
   String imageFileId; // File
-  String messageId;
-  String userContactId;
-  String conversationId;
+  String messageId; // Belong to a message.
+  String userContactId; // Belong to user too. Because 1 User, 1 UserContact.
+  String conversationId; // Belong to ConversationGroup group photo
+  String userId;
 
   Multimedia(
       {this.id,
@@ -26,7 +28,8 @@ class Multimedia {
       this.imageFileId,
       this.messageId,
       this.userContactId,
-      this.conversationId});
+      this.conversationId,
+      this.userId});
 
   Multimedia.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -38,7 +41,8 @@ class Multimedia {
         imageFileId = json['imageFileId'],
         messageId = json['messageId'],
         userContactId = json['userContactId'],
-        conversationId = json['conversationId'];
+        conversationId = json['conversationId'],
+        userId = json['userId'];
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -51,6 +55,7 @@ class Multimedia {
         'messageId': messageId,
         'userContactId': userContactId,
         'conversationId': conversationId,
+        'userId': userId,
       };
 
 // KS put

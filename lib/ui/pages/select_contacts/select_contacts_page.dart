@@ -305,7 +305,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         remoteFullFileUrl: null,
         userContactId: null,
         conversationId: null, // Add the conversationId after the conversationGroup object is created in the backend
-        messageId: null);
+        messageId: null,
+        userId: null);
 
     if(!isObjectEmpty(contact.avatar)) {
       print("if(!isObjectEmpty(contact.avatar))");

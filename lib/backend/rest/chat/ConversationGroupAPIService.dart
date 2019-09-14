@@ -52,8 +52,6 @@ class ConversationGroupAPIService {
     if (httpResponseIsOK(httpResponse)) {
       Iterable list = json.decode(httpResponse.body);
       List<ConversationGroup> conversationList = list.map((model) => ConversationGroup.fromJson(model)).toList();
-//      List<dynamic> convertedList = convert.jsonDecode(httpResponse.body);
-//      List<ConversationGroup> conversationList = new List<ConversationGroup>.from(convertedList);
       return conversationList;
     }
     return null;

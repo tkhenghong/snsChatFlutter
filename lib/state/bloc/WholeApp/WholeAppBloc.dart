@@ -227,29 +227,29 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     print("unreadMessageListFromDB.length: " + unreadMessageListFromDB.length.toString());
     print("userContactListFromDB.length: " + userContactListFromDB.length.toString());
 
-    conversationGroupListFromDB.forEach((ConversationGroup conversationGroup) {
-      print("conversationGroup.id: " + conversationGroup.id);
-      print("conversationGroup.name: " + conversationGroup.name);
-    });
-
-    messageListFromDB.forEach((Message message) {
-      print("message.id: " + message.id);
-    });
-
-    multimediaListFromDB.forEach((Multimedia multimedia) {
-      print("multimedia: " + multimedia.toString());
-    });
-
-    unreadMessageListFromDB.forEach((UnreadMessage unreadMessage) {
-      print("unreadMessage.id: " + unreadMessage.id);
-      print("unreadMessage.date: " + formatTime(unreadMessage.date));
-    });
-
-    userContactListFromDB.forEach((UserContact userContact) {
-      print("userContact.id: " + userContact.id);
-      print("userContact.displayName: " + userContact.displayName);
-      print("userContact.mobileNo: " + userContact.mobileNo);
-    });
+//    conversationGroupListFromDB.forEach((ConversationGroup conversationGroup) {
+//      print("conversationGroup.id: " + conversationGroup.id);
+//      print("conversationGroup.name: " + conversationGroup.name);
+//    });
+//
+//    messageListFromDB.forEach((Message message) {
+//      print("message.id: " + message.id);
+//    });
+//
+//    multimediaListFromDB.forEach((Multimedia multimedia) {
+//      print("multimedia: " + multimedia.toString());
+//    });
+//
+//    unreadMessageListFromDB.forEach((UnreadMessage unreadMessage) {
+//      print("unreadMessage.id: " + unreadMessage.id);
+//      print("unreadMessage.date: " + formatTime(unreadMessage.date));
+//    });
+//
+//    userContactListFromDB.forEach((UserContact userContact) {
+//      print("userContact.id: " + userContact.id);
+//      print("userContact.displayName: " + userContact.displayName);
+//      print("userContact.mobileNo: " + userContact.mobileNo);
+//    });
 
     addUserToState(AddUserEvent(user: userFromDB, callback: (User user) {}));
     addSettingsToState(AddSettingsEvent(settings: settingsFromDB, callback: (Settings settings) {}));
@@ -390,7 +390,28 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
           realName: event.realName);
 
       Settings settings = Settings(id: null, notification: true, userId: user.id);
-      bool created = await createSettingsAndUser(user, settings);
+      Multimedia multimedia = Multimedia(
+          id: null,
+          conversationId: null,
+          imageDataId: null,
+          imageFileId: null,
+          localFullFileUrl: null,
+          localThumbnailUrl: null,
+          remoteFullFileUrl: null,
+          remoteThumbnailUrl: null,
+          messageId: null,
+          userContactId: null);
+      UserContact userContact = UserContact(
+        id: null,
+        multimediaId: null,
+        mobileNo: event.mobileNo,
+        displayName: firebaseUser.displayName,
+        realName: event.realName,
+        lastSeenDate: DateTime.now().millisecondsSinceEpoch,
+        block: false,
+        userIds: [], // Add userId into it after User is Created
+      );
+      bool created = await createUser(user, settings, multimedia, userContact);
 
       if (!isObjectEmpty(event)) {
         event.callback(created);
@@ -409,18 +430,52 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return false;
   }
 
-  Future<bool> createSettingsAndUser(User user, Settings settings) async {
+  Future<bool> createUser(User user, Settings settings, Multimedia multimedia, UserContact userContact) async {
     // REST API --> Local DB
+
+    Multimedia multimediaFromServer = await multimediaAPIService.addMultimedia(multimedia);
+    if (multimediaFromServer == null) {
+      return false;
+    }
+
+//    multimedia.id = user.multimediaId = multimediaFromServer.id;
+    multimedia.id = multimediaFromServer.id;
+
+    print("multimedia.id: " + multimedia.id);
+
+    bool multimediaSaved = await multimediaDBService.addMultimedia(multimedia);
+    if (!multimediaSaved) {
+      return false;
+    }
 
     User userFromServer = await userAPIService.addUser(user);
     if (userFromServer == null) {
       return false;
     }
 
-    settings.userId = user.id = userFromServer.id;
+    multimedia.userId = settings.userId = user.id = userFromServer.id;
+
+    // Update the multimedia after the User is created
+    multimediaAPIService.editMultimedia(multimedia);
+    multimediaDBService.editMultimedia(multimedia);
+
+    userContact.userIds.add(user.id);
+    userContact.multimediaId = multimedia.id;
 
     bool userSaved = await userDBService.addUser(user);
     if (!userSaved) {
+      return false;
+    }
+
+    UserContact userContactFromServer = await userContactAPIService.addUserContact(userContact);
+    if (userContactFromServer == null) {
+      return false;
+    }
+
+    userContact.id = userContactFromServer.id;
+
+    bool userContactSaved = await userContactDBService.addUserContact(userContact);
+    if (!userContactSaved) {
       return false;
     }
 
@@ -499,15 +554,18 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   Future<bool> loadUserPreviousData(LoadUserPreviousDataEvent event) async {
+    print("wholeAppBloc.dart loadUserPreviousData()");
     bool loadConversationsDone = await loadConversationsOfTheUser();
     bool loadUnreadMessageDone = await loadUnreadMessageOfTheUser();
     bool loadUserContactsDone = await getUserContactsOfTheUser();
+    bool loadMultimediaDone = await loadMultimediaOfTheUser();
 
     print("loadConversationsDone: " + loadConversationsDone.toString());
     print("loadUnreadMessageDone: " + loadUnreadMessageDone.toString());
     print("loadUserContactsDone: " + loadUserContactsDone.toString());
+    print("loadMultimediaDone: " + loadMultimediaDone.toString());
 
-    bool allDone = loadConversationsDone && loadUnreadMessageDone && loadUserContactsDone;
+    bool allDone = loadConversationsDone && loadUnreadMessageDone && loadUserContactsDone && loadMultimediaDone;
 
     if (!isObjectEmpty(event)) {
       event.callback(allDone);
@@ -518,55 +576,85 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   // At this point the currentState already has conversationGroupList from DB
   Future<bool> loadConversationsOfTheUser() async {
+    print("wholeAppBloc.dart loadConversationsOfTheUser()");
     List<ConversationGroup> conversationGroupListFromServer =
         await conversationGroupAPIService.getConversationGroupsForUser(currentState.userState.id);
-    print("getConversationGroupsForUser success");
-
-    if (conversationGroupListFromServer != null && conversationGroupListFromServer.length > 0) {
+    print("wholeAppBloc.dart conversationGroupAPIService.getConversationGroupsForUser");
+    if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0) {
+      print("conversationGroupListFromServer.length: " + conversationGroupListFromServer.length.toString());
       // Update the current info of the conversationGroup to latest information
       conversationGroupListFromServer.forEach((conversationGroupFromServer) {
         // TODO: Review the performance of this loop
         bool conversationGroupExist = currentState.conversationGroupList
-            .contains((ConversationGroup conversatGroupFromDB) => conversatGroupFromDB.id == conversationGroupFromServer.id);
+            .contains((ConversationGroup conversationGroupFromDB) => conversationGroupFromDB.id == conversationGroupFromServer.id);
         if (conversationGroupExist) {
+          print("if (conversationGroupExist)");
           conversationGroupDBService.editConversationGroup(conversationGroupFromServer);
         } else {
+          print("if (!conversationGroupExist)");
           conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
         }
         addConversationToState(
             AddConversationGroupEvent(callback: (ConversationGroup conversationGroup) {}, conversationGroup: conversationGroupFromServer));
       });
-      return true;
     }
 
-    return false;
+    return true;
   }
 
-  // TODO: Load multimedia from server (by getting conversationGroupList ready and get it's multimedia from server)
-//  Future<bool> loadMultimediaOfConverastionGroups() async {
-//    List<Multimedia> multimediaList =
-//    await multimediaAPIService.getMultimediaOfAUser(currentState.userState.id);
-//    print("getConversationGroupsForUser success");
-//
-//    if (conversationGroupListFromServer != null && conversationGroupListFromServer.length > 0) {
-//      // Update the current info of the conversationGroup to latest information
-//      conversationGroupListFromServer.forEach((conversationGroupFromServer) {
-//        // TODO: Review the performance of this loop
-//        bool conversationGroupExist = currentState.conversationGroupList
-//            .contains((ConversationGroup conversatGroupFromDB) => conversatGroupFromDB.id == conversationGroupFromServer.id);
-//        if (conversationGroupExist) {
-//          conversationGroupDBService.editConversationGroup(conversationGroupFromServer);
-//        } else {
-//          conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
-//        }
-//        addConversationToState(
-//            AddConversationGroupEvent(callback: (ConversationGroup conversationGroup) {}, conversationGroup: conversationGroupFromServer));
-//      });
-//      return true;
-//    }
-//
-//    return false;
-//  }
+  // Get:
+  // getMultimediaOfAUser
+  // getMultimediaOfAConversation (Means you already covered the message's multimedia part)
+  // getMultimediaOfAUserContact
+  Future<bool> loadMultimediaOfTheUser() async {
+    print("loadMultimediaOfTheUser()");
+    print("currentState.userState.id: " + currentState.userState.id);
+
+    List<Multimedia> multimediaList = [];
+
+    Multimedia multimediaFromServer = await multimediaAPIService.getMultimediaOfAUser(currentState.userState.id);
+
+    if (isObjectEmpty(multimediaFromServer)) {
+      return false;
+    }
+
+    multimediaList.add(multimediaFromServer);
+
+    if (!isObjectEmpty(currentState.conversationGroupList) && currentState.conversationGroupList.length > 0) {
+      for (ConversationGroup conversationGroup in currentState.conversationGroupList) {
+        List<Multimedia> multimediaListFromServer = await multimediaAPIService.getMultimediaOfAConversationGroup(conversationGroup.id);
+        if (!isObjectEmpty(multimediaListFromServer) && multimediaListFromServer.length > 0) {
+          multimediaListFromServer.forEach((multimediaFromServer2) {
+            multimediaList.add(multimediaFromServer2);
+          });
+        }
+      }
+    }
+
+    if(!isObjectEmpty(currentState.userContactList) && currentState.userContactList.length > 0) {
+      for (UserContact userContact in currentState.userContactList) {
+        Multimedia multimediaFromServer3 = await multimediaAPIService.getMultimediaOfAUserContact(userContact.id);
+        if(!isObjectEmpty(multimediaFromServer3)) {
+          multimediaList.add(multimediaFromServer3);
+        }
+      }
+    }
+
+    print("!isObjectEmpty(multimediaList): " + (!isObjectEmpty(multimediaList)).toString());
+
+    if (!isObjectEmpty(multimediaList) && multimediaList.length > 0) {
+      print("multimediaList.length: " + multimediaList.length.toString());
+      print("if (!isObjectEmpty(multimediaList) && multimediaList.length > 0)");
+      multimediaList.forEach((Multimedia multimediaFromServer) {
+        multimediaDBService.addMultimedia(multimediaFromServer);
+        addMultimediaToState(AddMultimediaEvent(multimedia: multimediaFromServer, callback: (Multimedia multimedia) {}));
+      });
+    } else {
+      print("isObjectEmpty(multimediaList) || multimediaList.length == 0");
+    }
+
+    return true;
+  }
 
   Future<bool> getUserContactsOfTheUser() async {
     List<UserContact> userContactListFromServer = await userContactAPIService.getUserContactsByUserId(currentState.userState.id);
@@ -609,11 +697,9 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
         }
         addUnreadMessageToState(AddUnreadMessageEvent(callback: (UnreadMessage unreadMessage) {}, unreadMessage: unreadMessageFromServer));
       });
-
-      return true;
     }
 
-    return false;
+    return true;
   }
 
   // TODO: Don't need this??
@@ -631,6 +717,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
 
     addSettingsToState(AddSettingsEvent(callback: (Settings settings) {}, settings: settingsFromServer));
+
+    return true;
   }
 
   Future<Map<PermissionGroup, PermissionStatus>> requestAllRequiredPermissions({RequestAllPermissionsEvent event}) async {

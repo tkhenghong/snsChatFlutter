@@ -1,4 +1,3 @@
-
 class User {
   String id;
   String displayName;

@@ -33,7 +33,11 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   @override
   initState() {
     super.initState();
+    print("chat_group_list_page.dart initState()");
     _refreshController = new RefreshController();
+    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
+    wholeAppBloc = _wholeAppBloc;
+    initialize();
   }
 
   void dispose() {
@@ -42,6 +46,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   initialize() async {
+    print("initialize()");
     wholeAppBloc.dispatch(LoadDatabaseToStateEvent(callback: (bool loadDone) {
       print("loadDone: " + loadDone.toString());
       if (loadDone) {
@@ -53,7 +58,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
               wholeAppBloc.dispatch(LoadUserPreviousDataEvent(callback: (bool done) {
                 print("done: " + done.toString());
                 setState(() {
-                  getListDone = done;
+                  getListDone = true;
                 });
               }));
             }
@@ -73,10 +78,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
-    wholeAppBloc = _wholeAppBloc;
 
-    initialize();
     return BlocBuilder(
       bloc: wholeAppBloc,
       builder: (context, WholeAppState state) {
@@ -113,14 +115,12 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   bool unreadMessagesAreReady(WholeAppState state) {
-    return !isObjectEmpty(state.conversationGroupList) && state.conversationGroupList.length > 0;
+    return !isObjectEmpty(state.unreadMessageList) && state.unreadMessageList.length > 0;
   }
 
   PageListItem mapConversationToPageListTile(ConversationGroup conversation) {
-//    Multimedia multimedia = wholeAppBloc.currentState.multimediaList.firstWhere((Multimedia multimedia) => (multimedia.conversationId == conversation.id));
-    UnreadMessage unreadMessage = wholeAppBloc.currentState.unreadMessageList.firstWhere((UnreadMessage unreadMessage) => (unreadMessage.conversationId == conversation.id));
-
-    print("formatTime(unreadMessage.date): " + formatTime(unreadMessage.date));
+    Multimedia multimedia = findMultimedia(conversation.id);
+    UnreadMessage unreadMessage = findUnreadMessage(conversation.id);
 
     return PageListItem(
         title: Hero(
@@ -152,7 +152,29 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         });
   }
 
-  // TODO: Incomplete
+  Multimedia findMultimedia(String conversationId) {
+    Multimedia multimedia;
+    wholeAppBloc.currentState.multimediaList.forEach((Multimedia existingMultimedia) {
+      if (existingMultimedia.conversationId == conversationId) {
+        multimedia = existingMultimedia;
+      }
+    });
+
+    return multimedia;
+  }
+
+  UnreadMessage findUnreadMessage(String conversationId) {
+    UnreadMessage unreadMessage;
+    wholeAppBloc.currentState.unreadMessageList.forEach((UnreadMessage existingUnreadMessage) {
+      if (existingUnreadMessage.conversationId == conversationId) {
+        unreadMessage = existingUnreadMessage;
+      }
+    });
+
+    return unreadMessage;
+  }
+
+// TODO: Incomplete
 //  AssetImage getImage(Multimedia multimedia, String type) {
 //    File file = await fileService.getLocalImage(multimedia, type);
 //    File file2 = File(multimedia.localFullFileUrl);

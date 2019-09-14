@@ -13,6 +13,7 @@ void main() {
       conversationId: "waiuohdaiwjbgfkj",
       userContactId: "iefkushnkjlsngs",
       messageId: "seoifnskjgbreg",
+      userId: "58r4g54rdg5r4gh",
       remoteThumbnailUrl: "sefikuhsejkfhsg",
       remoteFullFileUrl: "d689gt4re56hgtr4sh",
       localThumbnailUrl: "54dfghzd4h45th56ts4r",

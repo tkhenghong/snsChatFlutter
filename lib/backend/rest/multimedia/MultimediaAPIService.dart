@@ -40,19 +40,40 @@ class MultimediaAPIService {
   Future<Multimedia> getSingleMultimedia(String multimediaId) async {
     var httpResponse = await http.get(REST_URL + "/multimedia/" + multimediaId);
     if (httpResponseIsOK(httpResponse)) {
-      Multimedia message = new Multimedia.fromJson(json.decode(httpResponse.body));
-      return message;
+      Multimedia multimedia = new Multimedia.fromJson(json.decode(httpResponse.body));
+      return multimedia;
     }
     return null;
   }
 
-  Future<List<Multimedia>> getMultimediaOfAUser(String userId) async {
+  Future<Multimedia> getMultimediaOfAUser(String userId) async {
     var httpResponse = await http.get(REST_URL + "/multimedia/user/" + userId);
 
     if (httpResponseIsOK(httpResponse)) {
-      var jsonResponse = convert.jsonDecode(httpResponse.body);
-      List<Multimedia> multimediaList = convert.jsonDecode(jsonResponse);
+      Multimedia multimedia = new Multimedia.fromJson(json.decode(httpResponse.body));
+
+      return multimedia;
+    }
+    return null;
+  }
+
+  Future<List<Multimedia>> getMultimediaOfAConversationGroup(String conversationGroupId) async {
+    var httpResponse = await http.get(REST_URL + "/multimedia/conversationGroup/" + conversationGroupId);
+    if (httpResponseIsOK(httpResponse)) {
+      Iterable list = json.decode(httpResponse.body);
+      List<Multimedia> multimediaList = list.map((model) => Multimedia.fromJson(model)).toList();
+
       return multimediaList;
+    }
+    return null;
+  }
+
+  Future<Multimedia> getMultimediaOfAUserContact(String userContactId) async {
+    var httpResponse = await http.get(REST_URL + "/multimedia/userContact/" + userContactId);
+    if (httpResponseIsOK(httpResponse)) {
+      Multimedia multimedia = new Multimedia.fromJson(json.decode(httpResponse.body));
+
+      return multimedia;
     }
     return null;
   }
