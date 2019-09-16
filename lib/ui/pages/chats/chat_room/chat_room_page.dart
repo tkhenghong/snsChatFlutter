@@ -69,6 +69,13 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
     print("widget._conversation.id: " + widget._conversationGroup.id);
 
+    // TODO: Send message using websocket
+    // Do in this order (To allow resend message if anything goes wrong [Send timeout, websocket down, Internet down situations])
+    // 1. Send to DB
+    // 2. Send to State
+    // 3. Send to API
+    // 4. Retrieve through WebSocket
+
     // Chat Room page UI
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
