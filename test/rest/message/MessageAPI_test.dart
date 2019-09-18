@@ -10,7 +10,7 @@ void main() {
   Message createTestObject() {
     return new Message(
       id: null,
-      conversationId: "wadhawidafgrs",
+      conversationId: "5d7cc09dfff90a3328bbb8f9",
       timestamp: new DateTime.now().millisecondsSinceEpoch,
       messageContent: "bla bla bla",
       type: "Message",
