@@ -513,14 +513,13 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   getPhoneStorageContacts(GetPhoneStorageContactsEvent event) async {
     bool contactAccessGranted = await permissionService.requestContactPermission();
-
     if (contactAccessGranted) {
       Iterable<Contact> contacts = await ContactsService.getContacts();
       currentState.phoneContactList = contacts.toList(growable: true);
       currentState.phoneContactList.sort((a, b) => a.displayName.compareTo(b.displayName));
 
       // Dart way of removing duplicates. // https://stackoverflow.com/questions/12030613/how-to-delete-duplicates-in-a-dart-list-list-distinct
-      currentState.phoneContactList = currentState.phoneContactList.toSet().toList();
+      currentState.phoneContactList = currentState.phoneContactList.toList();
       if (!isObjectEmpty(event)) {
         event.callback(true);
       }

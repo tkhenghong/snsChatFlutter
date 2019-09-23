@@ -62,8 +62,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     // Set up checkboxes first
     wholeAppBloc.currentState.phoneContactList.forEach((contact) {
       contactCheckBoxes[contact.displayName] = false;
-      contactLoaded = true;
     });
+    contactLoaded = true;
   }
 
   getContacts() async {
@@ -223,7 +223,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                                           softWrap: true,
                                         ),
                                         onTap: () {
-                                          if(widget.chatGroupType == "Personal") {
+                                          if (widget.chatGroupType == "Personal") {
                                             createPersonalConversation(contact);
                                           }
                                         },
@@ -240,29 +240,42 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                       );
                     },
                   )
-                : Center(
-                    child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        'Unable to read contacts from storage. Please grant contact permission first.',
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      RaisedButton(
-                        onPressed: () {
-                          // Restart the process
-                          setState(() {
-                            isLoading = true;
-                          });
-                        },
-                        child: Text("Grant Contact Permission"),
+                : contactLoaded
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              'No contact in your phone storage. Create a few to start a conversation!',
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
                       )
-                    ],
-                  )));
+                    : Center(
+                        child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            'Unable to read contacts from storage. Please grant contact permission first.',
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(
+                            height: 10.0,
+                          ),
+                          RaisedButton(
+                            onPressed: () {
+                              // Restart the process
+                              setState(() {
+                                isLoading = true;
+                              });
+                            },
+                            child: Text("Grant Contact Permission"),
+                          )
+                        ],
+                      )));
   }
 
   bool contactIsSelected(Contact contact) {
@@ -276,7 +289,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
   Future<ConversationGroup> createPersonalConversation(Contact contact) async {
-
     List<Contact> contactList = [];
     contactList.add(contact);
 
@@ -304,15 +316,16 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         remoteThumbnailUrl: null,
         remoteFullFileUrl: null,
         userContactId: null,
-        conversationId: null, // Add the conversationId after the conversationGroup object is created in the backend
+        conversationId: null,
+        // Add the conversationId after the conversationGroup object is created in the backend
         messageId: null,
         userId: null);
 
-    if(!isObjectEmpty(contact.avatar)) {
+    if (!isObjectEmpty(contact.avatar)) {
       print("if(!isObjectEmpty(contact.avatar))");
       FileService fileService = FileService();
       File copiedFile = await fileService.downloadFileFromUint8List(contact.avatar, contact.displayName);
-      if(!isObjectEmpty(copiedFile)) {
+      if (!isObjectEmpty(copiedFile)) {
         print("if(isObjectEmpty(copiedFile))");
         print("copiedFile.path: " + copiedFile.path);
         groupMultiMedia.localThumbnailUrl = groupMultiMedia.localFullFileUrl = copiedFile.path;
@@ -333,18 +346,22 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     // After sign up, send a command at the backend to replace those UserContact object with exactly same number
 
     print("Before CreateConversationGroupEvent");
-    wholeAppBloc.dispatch(CreateConversationGroupEvent(multimedia: groupMultiMedia, contactList: contactList, conversationGroup: conversationGroup, type: widget.chatGroupType, callback: (ConversationGroup newConversationGroup){
-      print("CreateConversationGroupEvent callback success! ");
-      Navigator.pop(context);
-      if(newConversationGroup != null) {
-        print("if(newConversationGroup != null)");
-        Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
-        Navigator.push(
-            context, MaterialPageRoute(builder: ((context) => ChatRoomPage(newConversationGroup))));
-      } else {
-        Fluttertoast.showToast(msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
-      }
-    }));
+    wholeAppBloc.dispatch(CreateConversationGroupEvent(
+        multimedia: groupMultiMedia,
+        contactList: contactList,
+        conversationGroup: conversationGroup,
+        type: widget.chatGroupType,
+        callback: (ConversationGroup newConversationGroup) {
+          print("CreateConversationGroupEvent callback success! ");
+          Navigator.pop(context);
+          if (newConversationGroup != null) {
+            print("if(newConversationGroup != null)");
+            Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
+            Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(newConversationGroup))));
+          } else {
+            Fluttertoast.showToast(msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
+          }
+        }));
     return conversationGroup;
   }
 }
