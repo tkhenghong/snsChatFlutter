@@ -884,7 +884,25 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return false;
     }
 
+    bool multimediaExist = !isObjectEmpty(event.multimedia);
+    Multimedia multimedia;
+
+    if(multimediaExist) {
+      event.multimedia.messageId = message.id;
+      multimedia = await uploadAndSaveMultimedia(event.multimedia);
+    }
+
+    // If multimediaExist(When you pass in the object) but multimedia is empty (due to upload to OSS failed/save object to API/DB failed)
+    if((multimediaExist && isObjectEmpty(multimedia))) {
+      if (!isObjectEmpty(event)) {
+        event.callback(false);
+      }
+      return false;
+    }
+
     addMessageToState(AddMessageEvent(message: message, callback: (Message message) {}));
+
+    addMultimediaToState(AddMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
 
     if (!isObjectEmpty(event)) {
       event.callback(true);

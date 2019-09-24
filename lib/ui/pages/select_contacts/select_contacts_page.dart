@@ -289,6 +289,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
   Future<ConversationGroup> createPersonalConversation(Contact contact) async {
+    // TODO: create loading that cannot be dismissed to prevent exit, and make it faster
     List<Contact> contactList = [];
     contactList.add(contact);
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -67,6 +68,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     webSocketStream.listen((onData) {
       print("onData listener is working.");
       print("onData: " + onData.toString());
+      Message receivedMessage = Message.fromJson(json.decode(onData));
+      print("receivedMessage.id" + receivedMessage.id);
+      print("receivedMessage.messageContent" + receivedMessage.messageContent);
     }, onError: (onError) {
       print("onError listener is working.");
       print("onError: " + onError.toString());
@@ -461,16 +465,48 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     print("sendChatMessage()");
     // type: 0 = text, 1 = image, 2 = sticker
     if (content.trim() != '') {
-      print("sendChatMessage()");
+      print("if (content.trim() != '')");
       textEditingController.clear();
-      webSocketChannel.sink.add(content);
+
       Message newMessage;
       Multimedia newMultimedia;
-      if (type == 0) {
-        print("if (type == 0)");
-        // Text
+
+      switch(type) {
+        case 0:
+          print("if (type == 0)");
+          // Text
+          print("Checkpoint 2");
+          newMessage = Message(
+            id: null,
+            conversationId: widget._conversationGroup.id,
+            messageContent: content,
+            multimediaId: newMultimedia.id,
+            // Send to group will not need receiver
+            receiverId: "",
+            receiverMobileNo: "",
+            receiverName: "",
+            senderId: wholeAppBloc.currentState.userState.id,
+            senderMobileNo: wholeAppBloc.currentState.userState.mobileNo,
+            senderName: wholeAppBloc.currentState.userState.displayName,
+            status: "Sent",
+            type: "Text",
+            timestamp: DateTime.now().millisecondsSinceEpoch,
+          );
+          print("Checkpoint 3");
+          break;
+        case 1:
+          // Image
+          break;
+        case 2:
+          break;
+        default:
+          Fluttertoast.showToast(msg: 'Error. Unable to determine message type.', toastLength: Toast.LENGTH_SHORT);
+          break;
+      }
+      // Text doesn't need multimedia, so others other than Text needs multimedia
+      if (type != 0) {
         newMultimedia = Multimedia(
-            id: generateNewId().toString(),
+            id: null,
             conversationId: widget._conversationGroup.id,
             messageId: "",
             // Add after message created
@@ -481,33 +517,22 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             localThumbnailUrl: "",
             remoteFullFileUrl: "",
             remoteThumbnailUrl: "");
-        print("Checkpoint 2");
-        newMessage = Message(
-          id: generateNewId().toString(),
-          conversationId: widget._conversationGroup.id,
-          messageContent: content,
-          multimediaId: newMultimedia.id,
-          // Send to group will not need receiver
-          receiverId: "",
-          receiverMobileNo: "",
-          receiverName: "",
-          senderId: wholeAppBloc.currentState.userState.id,
-          senderMobileNo: wholeAppBloc.currentState.userState.mobileNo,
-          senderName: wholeAppBloc.currentState.userState.displayName,
-          status: "Sent",
-          type: "Text",
-          timestamp: DateTime.now().millisecondsSinceEpoch,
-        );
-        print("Checkpoint 3");
-
-        newMultimedia.messageId = newMessage.id;
       }
       print("Checkpoint 1");
-      if (!isObjectEmpty(newMessage) && !isObjectEmpty(newMultimedia)) {
+      if (!isObjectEmpty(newMessage)) {
         print('if(!isObjectEmpty(newMessage) && !isObjectEmpty(newMultimedia))');
-        wholeAppBloc.dispatch(AddMessageEvent(message: newMessage, callback: (Message message) {}));
 
-        Fluttertoast.showToast(msg: 'Message sent!', toastLength: Toast.LENGTH_SHORT);
+        wholeAppBloc.dispatch(SendMessageEvent(
+            message: newMessage,
+            multimedia: newMultimedia,
+            callback: (Message message) {
+              if (isObjectEmpty(message)) {
+                Fluttertoast.showToast(msg: 'Message not sent. Please try again.', toastLength: Toast.LENGTH_SHORT);
+              } else {
+                webSocketChannel.sink.add(json.encode(message.toJson()));
+                Fluttertoast.showToast(msg: 'Message sent!', toastLength: Toast.LENGTH_SHORT);
+              }
+            }));
       } else {
         print('if(isObjectEmpty(newMessage) || isObjectEmpty(newMultimedia))');
       }
