@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -20,6 +19,8 @@ import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 
 class ChatRoomPage extends StatefulWidget {
   final ConversationGroup _conversationGroup;
@@ -47,6 +48,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
   WholeAppBloc wholeAppBloc;
 
+  String WEBSOCKET_URL = globals.WEBSOCKET_URL;
   WebSocketChannel webSocketChannel;
   Stream<dynamic> webSocketStream;
 
@@ -59,7 +61,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     isShowSticker = false;
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
-    webSocketChannel = IOWebSocketChannel.connect("ws://192.168.88.159:8080/socket");
+    webSocketChannel = IOWebSocketChannel.connect(WEBSOCKET_URL);
     webSocketStream = webSocketChannel.stream.asBroadcastStream();
 
     webSocketStream.listen((onData) {
@@ -82,6 +84,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   void dispose() {
     listScrollController.dispose();
     textEditingController.dispose();
+    webSocketChannel.sink.close();
     super.dispose();
   }
 
@@ -460,6 +463,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     if (content.trim() != '') {
       print("sendChatMessage()");
       textEditingController.clear();
+      webSocketChannel.sink.add(content);
       Message newMessage;
       Multimedia newMultimedia;
       if (type == 0) {
@@ -503,22 +507,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
         print('if(!isObjectEmpty(newMessage) && !isObjectEmpty(newMultimedia))');
         wholeAppBloc.dispatch(AddMessageEvent(message: newMessage, callback: (Message message) {}));
 
-        Firestore.instance.collection('message').document(newMessage.id).setData({
-          'id': newMessage.id, // Self generated Id
-          'conversationId': newMessage.conversationId,
-          'message': newMessage.messageContent,
-          'multimediaId': newMessage.multimediaId,
-          'receiverId': newMessage.receiverId,
-          'receiverMobileNo': newMessage.receiverMobileNo,
-          'receiverName': newMessage.receiverName,
-
-          'senderId': newMessage.senderId,
-          'senderMobileNo': newMessage.senderMobileNo,
-          'senderName': newMessage.senderName,
-          'status': newMessage.status,
-          'type': newMessage.type,
-          'timestamp': newMessage.timestamp,
-        });
         Fluttertoast.showToast(msg: 'Message sent!', toastLength: Toast.LENGTH_SHORT);
       } else {
         print('if(isObjectEmpty(newMessage) || isObjectEmpty(newMultimedia))');

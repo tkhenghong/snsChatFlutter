@@ -124,6 +124,10 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       yield currentState;
     } else if (event is CreateConversationGroupEvent) {
       createConversationGroup(event);
+      yield currentState;
+    } else if (event is SendMessageEvent) {
+      sendMessage(event);
+      yield currentState;
     }
   }
 
@@ -871,6 +875,23 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return newConversationGroup;
   }
 
+  Future<bool> sendMessage(SendMessageEvent event) async {
+    Message message = await uploadAndSaveMessage(event.message);
+    if(isObjectEmpty(message)) {
+      if (!isObjectEmpty(event)) {
+        event.callback(false);
+      }
+      return false;
+    }
+
+    addMessageToState(AddMessageEvent(message: message, callback: (Message message) {}));
+
+    if (!isObjectEmpty(event)) {
+      event.callback(true);
+    }
+    return true;
+  }
+
   // Upload the list of UserContact to REST API (checked duplicates at there), get them back, and save all of them to DB and State
   Future<List<UserContact>> uploadUserContactList(List<UserContact> userContactList) async {
     List<UserContact> newUserContactList = [];
@@ -943,6 +964,22 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
 
     return newMultimedia;
+  }
+
+  Future<Message> uploadAndSaveMessage(Message message) async {
+    Message newMessage = await messageAPIService.addMessage(message);
+
+    if (isStringEmpty(newMessage.id)) {
+      return null;
+    }
+
+    bool messageSaved = await messageDBService.addMessage(newMessage);
+
+    if (!messageSaved) {
+      return null;
+    }
+
+    return newMessage;
   }
 
   addConversationToState(AddConversationGroupEvent event) async {

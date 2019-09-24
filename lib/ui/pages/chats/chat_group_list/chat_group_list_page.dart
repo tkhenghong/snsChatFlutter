@@ -14,7 +14,6 @@ import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
-import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:time_formatter/time_formatter.dart';
 
 class ChatGroupListPage extends StatefulWidget {
@@ -50,6 +49,10 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     wholeAppBloc.dispatch(LoadDatabaseToStateEvent(callback: (bool loadDone) {
       print("loadDone: " + loadDone.toString());
       if (loadDone) {
+        // Set list done to true to prevent waiting due to poor Internet connection
+        setState(() {
+          getListDone = true;
+        });
         wholeAppBloc.dispatch(CheckUserLoginEvent(callback: (bool hasSignedIn) {
           print("hasSignedIn: " + hasSignedIn.toString());
           if (hasSignedIn) {
@@ -57,9 +60,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
               // TODO: Get Conversations for the User
               wholeAppBloc.dispatch(LoadUserPreviousDataEvent(callback: (bool done) {
                 print("done: " + done.toString());
-                setState(() {
-                  getListDone = true;
-                });
               }));
             }
           } else {

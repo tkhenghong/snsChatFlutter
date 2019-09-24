@@ -90,6 +90,13 @@ class CreateConversationGroupEvent extends WholeAppEvent {
   CreateConversationGroupEvent({this.conversationGroup, this.type, this.contactList, this.multimedia, this.callback});
 }
 
+class SendMessageEvent extends WholeAppEvent {
+  Message message;
+  Function callback;
+
+  SendMessageEvent({this.message, this.callback});
+}
+
 // Conversation
 class AddConversationGroupEvent extends WholeAppEvent {
   ConversationGroup conversationGroup;
