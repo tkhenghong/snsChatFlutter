@@ -18,6 +18,8 @@ import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
+import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class ChatRoomPage extends StatefulWidget {
   final ConversationGroup _conversationGroup;
@@ -45,6 +47,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
   WholeAppBloc wholeAppBloc;
 
+  WebSocketChannel webSocketChannel;
+  Stream<dynamic> webSocketStream;
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +59,23 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     isShowSticker = false;
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
+    webSocketChannel = IOWebSocketChannel.connect("ws://192.168.88.159:8080/socket");
+    webSocketStream = webSocketChannel.stream.asBroadcastStream();
+
+    webSocketStream.listen((onData) {
+      print("onData listener is working.");
+      print("onData: " + onData.toString());
+    }, onError: (onError) {
+      print("onError listener is working.");
+      print("onError: " + onError.toString());
+    }, onDone: () {
+      print("onDone listener is working.");
+    }, cancelOnError: false);
+  }
+
+  // TODO: Add message to DB and State and display it into this Chat Room Page
+  addMessageToDbAndState() async {
+//    wholeAppBloc.dispatch(AddMessageEvent(message: ))
   }
 
   @override
