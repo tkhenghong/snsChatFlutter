@@ -281,24 +281,30 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
+  // TODO: Refresh the message list after added the message (Because it doesn't refresh itself)
   Widget buildListMessage() {
     return BlocBuilder(
       bloc: wholeAppBloc,
       builder: (BuildContext context, WholeAppState state) {
+        print("state.messageList.length: " + state.messageList.length.toString());
         if (!messagesAreReady(state)) {
+          print("!messagesAreReady(state)");
           return Expanded(child: Center(child: Text("Loading messages...")));
         } else {
+          print("messagesAreReady(state)");
           // Doing traditional due to not mature knowledge on map()
           List<Message> messageList = [];
+          print("state.messageList.length: " + state.messageList.length.toString());
           state.messageList.forEach((message) {
             if (message.conversationId == widget._conversationGroup.id) {
               messageList.add(message);
             }
           });
           if (messageList.length > 0) {
+            print(" if (messageList.length > 0)");
             messageList.sort((message1, message2) {
               // Sorts based on number
-              return message1.timestamp.compareTo(message2.timestamp);
+              return message2.timestamp.compareTo(message1.timestamp);
             });
           }
 
@@ -327,8 +333,12 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   Widget displayChatMessage(int index, Message message) {
+    print("displayChatMessage()");
+    print("message.senderId: " + message.senderId);
+    print("wholeAppBloc.currentState.userState.id: " + wholeAppBloc.currentState.userState.id);
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+//      crossAxisAlignment: message.senderId == wholeAppBloc.currentState.userState.id ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+      mainAxisAlignment: isSenderMessage(message) ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: <Widget>[
         Container(
           child: Column(
@@ -343,21 +353,26 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
           width: 200.0,
           decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
-          margin: EdgeInsets.only(bottom: 20.0, right: 100.0),
+          margin: EdgeInsets.only(bottom: 20.0, right: isSenderMessage(message) ? 10.0 : 0.0, left: isSenderMessage(message) ? 10.0 : 0.0),
         ),
       ],
     );
   }
 
+  bool isSenderMessage(Message message) {
+    return message.senderId == wholeAppBloc.currentState.userState.id;
+  }
+
   String messageTimeDisplay(int timestamp) {
     DateTime now = DateTime.now();
-    String formattedDate = DateFormat("dd-mm-yyyy").format(now);
+    String formattedDate = DateFormat("dd-MM-yyyy").format(now);
     print("now: " + formattedDate);
-    DateTime today = DateTime.parse(formattedDate);
-    String formattedDate2 = DateFormat("dd-mm-yyyy hh:mm:ss").format(today);
+    DateFormat dateFormat = DateFormat("dd-MM-yyyy");
+    DateTime today = dateFormat.parse(formattedDate);
+    String formattedDate2 = DateFormat("dd-MM-yyyy hh:mm:ss").format(today);
     print("today: " + formattedDate2);
     DateTime messageTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    String formattedDate3 = DateFormat("dd-mm-yyyy").format(messageTime);
+    String formattedDate3 = DateFormat("hh:mm").format(messageTime);
     return formattedDate3;
   }
 
@@ -471,7 +486,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       Message newMessage;
       Multimedia newMultimedia;
 
-      switch(type) {
+      switch (type) {
         case 0:
           print("if (type == 0)");
           // Text
@@ -480,7 +495,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             id: null,
             conversationId: widget._conversationGroup.id,
             messageContent: content,
-            multimediaId: newMultimedia.id,
+            multimediaId: null,
             // Send to group will not need receiver
             receiverId: "",
             receiverMobileNo: "",

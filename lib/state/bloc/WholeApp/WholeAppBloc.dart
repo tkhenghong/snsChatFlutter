@@ -634,10 +634,10 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       }
     }
 
-    if(!isObjectEmpty(currentState.userContactList) && currentState.userContactList.length > 0) {
+    if (!isObjectEmpty(currentState.userContactList) && currentState.userContactList.length > 0) {
       for (UserContact userContact in currentState.userContactList) {
         Multimedia multimediaFromServer3 = await multimediaAPIService.getMultimediaOfAUserContact(userContact.id);
-        if(!isObjectEmpty(multimediaFromServer3)) {
+        if (!isObjectEmpty(multimediaFromServer3)) {
           multimediaList.add(multimediaFromServer3);
         }
       }
@@ -875,39 +875,41 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return newConversationGroup;
   }
 
-  Future<bool> sendMessage(SendMessageEvent event) async {
-    Message message = await uploadAndSaveMessage(event.message);
-    if(isObjectEmpty(message)) {
+  Future<Message> sendMessage(SendMessageEvent event) async {
+    Message newMessage = await uploadAndSaveMessage(event.message);
+    if (isObjectEmpty(newMessage)) {
       if (!isObjectEmpty(event)) {
-        event.callback(false);
+        event.callback(null);
       }
-      return false;
+      return null;
     }
 
     bool multimediaExist = !isObjectEmpty(event.multimedia);
     Multimedia multimedia;
 
-    if(multimediaExist) {
-      event.multimedia.messageId = message.id;
+    if (multimediaExist) {
+      event.multimedia.messageId = newMessage.id;
       multimedia = await uploadAndSaveMultimedia(event.multimedia);
     }
 
     // If multimediaExist(When you pass in the object) but multimedia is empty (due to upload to OSS failed/save object to API/DB failed)
-    if((multimediaExist && isObjectEmpty(multimedia))) {
+    if ((multimediaExist && isObjectEmpty(multimedia))) {
       if (!isObjectEmpty(event)) {
-        event.callback(false);
+        event.callback(null);
       }
-      return false;
+      return null;
     }
 
-    addMessageToState(AddMessageEvent(message: message, callback: (Message message) {}));
+    addMessageToState(AddMessageEvent(message: newMessage, callback: (Message message) {}));
 
-    addMultimediaToState(AddMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
+    if (multimediaExist) {
+      addMultimediaToState(AddMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
+    }
 
     if (!isObjectEmpty(event)) {
-      event.callback(true);
+      event.callback(newMessage);
     }
-    return true;
+    return newMessage;
   }
 
   // Upload the list of UserContact to REST API (checked duplicates at there), get them back, and save all of them to DB and State
@@ -985,9 +987,10 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   Future<Message> uploadAndSaveMessage(Message message) async {
+    // TODO: Save message to DB & State first, then API (so that you can retry the message if it's determined not sent)
     Message newMessage = await messageAPIService.addMessage(message);
 
-    if (isStringEmpty(newMessage.id)) {
+    if (isObjectEmpty(newMessage)) {
       return null;
     }
 
