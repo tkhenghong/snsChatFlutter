@@ -60,8 +60,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     focusNode.addListener(onFocusChange);
     isLoading = false;
     isShowSticker = false;
-    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
-    wholeAppBloc = _wholeAppBloc;
+    wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     webSocketChannel = IOWebSocketChannel.connect(WEBSOCKET_URL);
     webSocketStream = webSocketChannel.stream.asBroadcastStream();
 
@@ -283,9 +282,16 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
   // TODO: Refresh the message list after added the message (Because it doesn't refresh itself)
   Widget buildListMessage() {
+    // TODO: Use BlocListener because BlocBuilder only response when build() is triggered.
+    // Last time it will show your message, because you were using Firebase which use StreamBuilder as listener,
+    // so the ListView will be triggered everytime a message is received.
+    // Resource: https://pub.dev/documentation/flutter_bloc/latest/flutter_bloc/BlocListener-class.html
+
+
     return BlocBuilder(
       bloc: wholeAppBloc,
       builder: (BuildContext context, WholeAppState state) {
+        print("Building list Message()");
         print("state.messageList.length: " + state.messageList.length.toString());
         if (!messagesAreReady(state)) {
           print("!messagesAreReady(state)");
@@ -309,20 +315,13 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           }
 
           return Flexible(
-              child: new SmartRefresher(
-            header: ClassicHeader(),
-            onRefresh: () {
-              _refreshController.refreshCompleted();
-            },
-            controller: _refreshController,
-            child: ListView.builder(
-              controller: listScrollController,
-              itemCount: messageList.length,
-              reverse: true,
-              physics: BouncingScrollPhysics(),
-              itemBuilder: (context, index) => displayChatMessage(index, messageList[index]),
-            ),
-          ));
+              child: ListView.builder(
+                controller: listScrollController,
+                itemCount: messageList.length,
+                reverse: true,
+                physics: BouncingScrollPhysics(),
+                itemBuilder: (context, index) => displayChatMessage(index, messageList[index]),
+              ));
         }
       },
     );
@@ -536,7 +535,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       print("Checkpoint 1");
       if (!isObjectEmpty(newMessage)) {
         print('if(!isObjectEmpty(newMessage) && !isObjectEmpty(newMultimedia))');
-
         wholeAppBloc.dispatch(SendMessageEvent(
             message: newMessage,
             multimedia: newMultimedia,
@@ -548,11 +546,13 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                 Fluttertoast.showToast(msg: 'Message sent!', toastLength: Toast.LENGTH_SHORT);
               }
             }));
+        print("Scroll down.");
+        listScrollController.animateTo(0.0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
       } else {
         print('if(isObjectEmpty(newMessage) || isObjectEmpty(newMultimedia))');
       }
 
-      listScrollController.animateTo(0.0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+
     } else {
       Fluttertoast.showToast(msg: 'Nothing to send');
     }

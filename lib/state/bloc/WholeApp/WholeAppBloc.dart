@@ -97,8 +97,10 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       yield currentState;
     } else if (event is AddMessageEvent) {
       addMessageToState(event);
+      print("Send signal after AddMessageEvent");
       yield currentState;
     } else if (event is AddMultimediaEvent) {
+      print("Send signal after AddMultimediaEvent");
       addMultimediaToState(event);
       yield currentState;
     } else if (event is AddSettingsEvent) {
@@ -127,6 +129,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       yield currentState;
     } else if (event is SendMessageEvent) {
       sendMessage(event);
+      print("Send signal to app state!");
       yield currentState;
     }
   }
@@ -900,10 +903,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return null;
     }
 
-    addMessageToState(AddMessageEvent(message: newMessage, callback: (Message message) {}));
+    print("Dispatch message");
+    // Do this instead of triggering method directly will make the Bloc to resend the signals to listeners
+    dispatch(AddMessageEvent(message: newMessage, callback: (Message message) {}));
 
     if (multimediaExist) {
-      addMultimediaToState(AddMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
+      dispatch(AddMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
     }
 
     if (!isObjectEmpty(event)) {
