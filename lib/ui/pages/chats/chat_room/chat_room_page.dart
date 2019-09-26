@@ -78,11 +78,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     }, cancelOnError: false);
   }
 
-  // TODO: Add message to DB and State and display it into this Chat Room Page
-  addMessageToDbAndState() async {
-//    wholeAppBloc.dispatch(AddMessageEvent(message: ))
-  }
-
   @override
   void dispose() {
     listScrollController.dispose();
@@ -280,51 +275,46 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
-  // TODO: Refresh the message list after added the message (Because it doesn't refresh itself)
   Widget buildListMessage() {
-    // TODO: Use BlocListener because BlocBuilder only response when build() is triggered.
-    // Last time it will show your message, because you were using Firebase which use StreamBuilder as listener,
-    // so the ListView will be triggered everytime a message is received.
-    // Resource: https://pub.dev/documentation/flutter_bloc/latest/flutter_bloc/BlocListener-class.html
-
-
     return BlocBuilder(
-      bloc: wholeAppBloc,
-      builder: (BuildContext context, WholeAppState state) {
-        print("Building list Message()");
-        print("state.messageList.length: " + state.messageList.length.toString());
-        if (!messagesAreReady(state)) {
-          print("!messagesAreReady(state)");
-          return Expanded(child: Center(child: Text("Loading messages...")));
-        } else {
-          print("messagesAreReady(state)");
-          // Doing traditional due to not mature knowledge on map()
-          List<Message> messageList = [];
+        bloc: wholeAppBloc,
+        builder: (BuildContext context, WholeAppState state) {
           print("state.messageList.length: " + state.messageList.length.toString());
-          state.messageList.forEach((message) {
-            if (message.conversationId == widget._conversationGroup.id) {
-              messageList.add(message);
-            }
-          });
-          if (messageList.length > 0) {
-            print(" if (messageList.length > 0)");
-            messageList.sort((message1, message2) {
-              // Sorts based on number
-              return message2.timestamp.compareTo(message1.timestamp);
-            });
-          }
+          if (!messagesAreReady(state)) {
+            print("!messagesAreReady(state)");
+//            return Expanded(child: Center(child: Text("Loading messages...")));
+            return Flexible(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'No messages.',
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          } else {
+            print("messagesAreReady(state)");
+            List<Message> messageList = [];
+            print("state.length: " + state.messageList.length.toString());
+            messageList = state.messageList.where((Message message) => message.conversationId == widget._conversationGroup.id).toList();
+            messageList.sort((message1, message2) => message2.timestamp.compareTo(message1.timestamp));
 
-          return Flexible(
+            return Flexible(
               child: ListView.builder(
                 controller: listScrollController,
                 itemCount: messageList.length,
                 reverse: true,
                 physics: BouncingScrollPhysics(),
                 itemBuilder: (context, index) => displayChatMessage(index, messageList[index]),
-              ));
-        }
-      },
-    );
+              ),
+            );
+          }
+        });
   }
 
   bool messagesAreReady(WholeAppState state) {
@@ -335,25 +325,37 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     print("displayChatMessage()");
     print("message.senderId: " + message.senderId);
     print("wholeAppBloc.currentState.userState.id: " + wholeAppBloc.currentState.userState.id);
-    return Row(
-//      crossAxisAlignment: message.senderId == wholeAppBloc.currentState.userState.id ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-      mainAxisAlignment: isSenderMessage(message) ? MainAxisAlignment.end : MainAxisAlignment.start,
+    return Column(
       children: <Widget>[
-        Container(
-          child: Column(
-            children: <Widget>[
-              Text(
-                message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
-                // TODO: Solve time,
-                style: TextStyle(color: Colors.white),
-              ),
-            ],
-          ),
-          padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-          width: 200.0,
-          decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
-          margin: EdgeInsets.only(bottom: 20.0, right: isSenderMessage(message) ? 10.0 : 0.0, left: isSenderMessage(message) ? 10.0 : 0.0),
+        Text(
+          message.senderName + ", " + messageTimeDisplay(message.timestamp),
+          style: TextStyle(fontSize: 10.0, color: Colors.black38),
         ),
+        Row(
+//      crossAxisAlignment: message.senderId == wholeAppBloc.currentState.userState.id ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+          mainAxisAlignment: isSenderMessage(message) ? MainAxisAlignment.end : MainAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+              decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+              margin:
+                  EdgeInsets.only(bottom: 20.0, right: isSenderMessage(message) ? 10.0 : 0.0, left: isSenderMessage(message) ? 10.0 : 0.0),
+              child: Row(
+                children: <Widget>[
+                  Column(
+                    children: <Widget>[
+                      Text(
+//                message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
+                        message.messageContent,
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        )
       ],
     );
   }
@@ -544,6 +546,10 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               } else {
                 webSocketChannel.sink.add(json.encode(message.toJson()));
                 Fluttertoast.showToast(msg: 'Message sent!', toastLength: Toast.LENGTH_SHORT);
+                // Need to do this,or else the message list won't refresh
+                setState(() {
+                  // Do nothing
+                });
               }
             }));
         print("Scroll down.");
@@ -551,8 +557,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       } else {
         print('if(isObjectEmpty(newMessage) || isObjectEmpty(newMultimedia))');
       }
-
-
     } else {
       Fluttertoast.showToast(msg: 'Nothing to send');
     }
