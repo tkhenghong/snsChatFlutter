@@ -15,6 +15,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:snschat_flutter/enums/chat_group/chat_group.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
+import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/chat/conversation_member.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
@@ -290,10 +291,10 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
   Future<ConversationGroup> createPersonalConversation(Contact contact) async {
     // TODO: create loading that cannot be dismissed to prevent exit, and make it faster
+    showLoading(context, "Loading conversation...");
     List<Contact> contactList = [];
     contactList.add(contact);
 
-    print("createPersonalConversation()");
     ConversationGroup conversationGroup = new ConversationGroup(
       id: null,
       creatorUserId: wholeAppBloc.currentState.userState.id,
@@ -357,6 +358,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           Navigator.pop(context);
           if (newConversationGroup != null) {
             print("if(newConversationGroup != null)");
+            Navigator.pop(context); //pop loading dialog
             Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
             Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(newConversationGroup))));
           } else {

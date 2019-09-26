@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
@@ -20,6 +21,31 @@ class FileService {
       await dir.create(recursive: true);
       return dir.path; // join method comes from path.dart
     } else {
+      return null;
+    }
+  }
+
+  Future<File> copyFile(File fileToBeCopied, String directory) async {
+    if (isObjectEmpty(fileToBeCopied)) {
+      return null;
+    }
+
+    String destinationFilePath = "";
+
+    switch (directory) {
+      case "ApplicationDocumentDirectory":
+        destinationFilePath = await getApplicationDocumentDirectory();
+        break;
+      default:
+        break;
+    }
+
+    try {
+      File copiedFile = await fileToBeCopied.copy(destinationFilePath);
+      print("copiedFile.path: " + copiedFile.path);
+      return copiedFile;
+    } catch (e) {
+      Fluttertoast.showToast(msg: "Error in file copying.");
       return null;
     }
   }

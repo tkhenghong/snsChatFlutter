@@ -6,11 +6,14 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snschat_flutter/general/functions/repeating_functions.dart';
+import 'package:snschat_flutter/general/functions/validation_functions.dart';
+import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
 import 'package:snschat_flutter/objects/user/user.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
+import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
@@ -34,6 +37,7 @@ class GroupNamePageState extends State<GroupNamePage> {
   bool imageExists = false;
   WholeAppBloc wholeAppBloc;
   List<UserContact> userContactList = [];
+  FileService fileService;
 
   @override
   Widget build(BuildContext context) {
@@ -172,8 +176,11 @@ class GroupNamePageState extends State<GroupNamePage> {
   // TODO: Review later to match code of Single Conversation Group creation in select_contacts_page.dart
   Future<ConversationGroup> createGroupConversation() async {
     print("createGroupConversation()");
+    showLoading(context, "Loading conversation...");
+    fileService = FileService();
+
     ConversationGroup conversationGroup = new ConversationGroup(
-      id: generateNewId().toString(),
+      id: null,
       notificationExpireDate: 0,
       creatorUserId: wholeAppBloc.currentState.userState.id,
       createdDate: new DateTime.now().millisecondsSinceEpoch,
@@ -181,16 +188,23 @@ class GroupNamePageState extends State<GroupNamePage> {
       type: "Group",
       block: false,
       description: '',
+      adminMemberIds: [],
+      memberIds: []
     );
     print("conversationGroup: " + conversationGroup.toString());
 
+    File copiedImageFile = null;
+    if(!isStringEmpty(imageFile.path)) {
+      copiedImageFile = await fileService.copyFile(imageFile, "ApplicationDocumentDirectory");
+    }
+
     // Multimedia for group chat
     Multimedia newMultiMedia = Multimedia(
-      id: generateNewId().toString(),
+      id: null,
       imageDataId: "",
       imageFileId: "",
-      localFullFileUrl: imageFile.path,
-      localThumbnailUrl: null,
+      localFullFileUrl: isObjectEmpty(copiedImageFile) ? null : copiedImageFile.path,
+      localThumbnailUrl: isObjectEmpty(copiedImageFile) ? null : copiedImageFile.path,
       remoteThumbnailUrl: null,
       remoteFullFileUrl: null,
       messageId: "",
