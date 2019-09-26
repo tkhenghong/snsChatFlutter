@@ -79,11 +79,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     }, cancelOnError: false);
   }
 
-  // TODO: Add message to DB and State and display it into this Chat Room Page
-  addMessageToDbAndState() async {
-//    wholeAppBloc.dispatch(AddMessageEvent(message: ))
-  }
-
   @override
   void dispose() {
     listScrollController.dispose();
@@ -281,57 +276,51 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
-  // TODO: Refresh the message list after added the message (Because it doesn't refresh itself)
   Widget buildListMessage() {
     return BlocBuilder(
-      bloc: wholeAppBloc,
-      builder: (BuildContext context, WholeAppState state) {
-        print("state.messageList.length: " + state.messageList.length.toString());
-        if (!messagesAreReady(state)) {
-          print("!messagesAreReady(state)");
-          return Expanded(child: Center(child: Text("Loading messages...")));
-        } else {
-          print("messagesAreReady(state)");
-          // Doing traditional due to not mature knowledge on map()
-          List<Message> messageList = [];
+        bloc: wholeAppBloc,
+        builder: (BuildContext context, WholeAppState state) {
           print("state.messageList.length: " + state.messageList.length.toString());
-          state.messageList.forEach((message) {
-            if (message.conversationId == widget._conversationGroup.id) {
-              messageList.add(message);
-            }
-          });
-          if (messageList.length > 0) {
-            print(" if (messageList.length > 0)");
-            messageList.sort((message1, message2) {
-              // Sorts based on number
-              return message2.timestamp.compareTo(message1.timestamp);
-            });
-          }
+          if (!messagesAreReady(state)) {
+            print("!messagesAreReady(state)");
+//            return Expanded(child: Center(child: Text("Loading messages...")));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'No messages.',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          } else {
+            print("messagesAreReady(state)");
+            List<Message> messageList = [];
+            print("state.length: " + state.messageList.length.toString());
+            messageList = state.messageList.where((Message message) => message.conversationId == widget._conversationGroup.id).toList();
+            messageList.sort((message1, message2) => message2.timestamp.compareTo(message1.timestamp));
 
-          return Flexible(
-              child: new SmartRefresher(
-            header: ClassicHeader(),
-            onRefresh: () {
-              _refreshController.refreshCompleted();
-            },
-            controller: _refreshController,
-            child: ListView.builder(
-              controller: listScrollController,
-              itemCount: messageList.length,
-              reverse: true,
-              physics: BouncingScrollPhysics(),
-              itemBuilder: (context, index) => displayChatMessage(index, messageList[index]),
-            ),
-          ));
-        }
-      },
-    );
+            return Flexible(
+              child: ListView.builder(
+                controller: listScrollController,
+                itemCount: messageList.length,
+                reverse: true,
+                physics: BouncingScrollPhysics(),
+                itemBuilder: (context, index) => displayChatMessage(index, messageList[index]),
+              ),
+            );
+          }
+        });
   }
 
   bool messagesAreReady(WholeAppState state) {
     return !isObjectEmpty(state.messageList) && state.messageList.length > 0;
   }
 
+  // TODO: Modify the CSS of the message, looks horrible and difficult to see when all info stucked together
   Widget displayChatMessage(int index, Message message) {
     print("displayChatMessage()");
     print("message.senderId: " + message.senderId);
@@ -344,7 +333,8 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           child: Column(
             children: <Widget>[
               Text(
-                message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
+//                message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
+                message.messageContent,
                 // TODO: Solve time,
                 style: TextStyle(color: Colors.white),
               ),
@@ -536,7 +526,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       print("Checkpoint 1");
       if (!isObjectEmpty(newMessage)) {
         print('if(!isObjectEmpty(newMessage) && !isObjectEmpty(newMultimedia))');
-
         wholeAppBloc.dispatch(SendMessageEvent(
             message: newMessage,
             multimedia: newMultimedia,
@@ -546,12 +535,15 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               } else {
                 webSocketChannel.sink.add(json.encode(message.toJson()));
                 Fluttertoast.showToast(msg: 'Message sent!', toastLength: Toast.LENGTH_SHORT);
+                // Need to do this,or else the message list won't refresh
+                setState(() {
+                  // Do nothing
+                });
               }
             }));
       } else {
         print('if(isObjectEmpty(newMessage) || isObjectEmpty(newMultimedia))');
       }
-
       listScrollController.animateTo(0.0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     } else {
       Fluttertoast.showToast(msg: 'Nothing to send');
