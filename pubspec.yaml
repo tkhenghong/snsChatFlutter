@@ -35,6 +35,9 @@ dependencies:
   time_formatter: ^1.0.0+5
   palette_generator: ^0.2.0
   web_socket_channel: ^1.0.15
+  emoji_picker: ^0.0.2
+  video_player: ^0.10.2+1
+  flutter_downloader: ^1.2.2 # Allow download something in background
 
   flutter_cache_manager: ^1.1.1
   path_provider: ^1.2.0 # A Flutter plugin for finding commonly used locations on the filesystem. Supports iOS and Android.
