@@ -323,20 +323,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         messageId: null,
         userId: null);
 
-    if (!isObjectEmpty(contact.avatar)) {
-      print("if(!isObjectEmpty(contact.avatar))");
-      FileService fileService = FileService();
-      File copiedFile = await fileService.downloadFileFromUint8List(contact.avatar, contact.displayName);
-      if (!isObjectEmpty(copiedFile)) {
-        print("if(isObjectEmpty(copiedFile))");
-        print("copiedFile.path: " + copiedFile.path);
-        groupMultiMedia.localThumbnailUrl = groupMultiMedia.localFullFileUrl = copiedFile.path;
-        FirebaseStorageService firebaseStorageService = FirebaseStorageService();
-        String remoteURL = await firebaseStorageService.uploadFile(copiedFile.path, contact.displayName);
-        print("remoteURL: " + remoteURL);
-        groupMultiMedia.remoteThumbnailUrl = groupMultiMedia.remoteFullFileUrl = remoteURL;
-      }
-    }
+    uploadConversationGroupPhoto(contact, groupMultiMedia);
 
     // In Malaysia,
     // If got +60, remove +60.
@@ -366,5 +353,30 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           }
         }));
     return conversationGroup;
+  }
+
+  Future<Multimedia> uploadConversationGroupPhoto(Contact contact, Multimedia groupMultiMedia) async {
+    if (!isObjectEmpty(contact.avatar)) {
+      print("if(!isObjectEmpty(contact.avatar))");
+      FileService fileService = FileService();
+      File copiedFile = await fileService.downloadFileFromUint8List(contact.avatar, contact.displayName);
+      if (!isObjectEmpty(copiedFile)) {
+        print("if(isObjectEmpty(copiedFile))");
+        print("copiedFile.path: " + copiedFile.path);
+        groupMultiMedia.localThumbnailUrl = groupMultiMedia.localFullFileUrl = copiedFile.path;
+        FirebaseStorageService firebaseStorageService = FirebaseStorageService();
+        String remoteURL = await firebaseStorageService.uploadFile(copiedFile.path, contact.displayName);
+        print("remoteURL: " + remoteURL);
+        if(isStringEmpty(remoteURL)) {
+          return null;
+        }
+        groupMultiMedia.remoteThumbnailUrl = groupMultiMedia.remoteFullFileUrl = remoteURL;
+        return groupMultiMedia;
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
   }
 }

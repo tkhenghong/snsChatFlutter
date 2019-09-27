@@ -57,23 +57,44 @@ class MultimediaAPIService {
     return null;
   }
 
-  Future<List<Multimedia>> getMultimediaOfAConversationGroup(String conversationGroupId) async {
-    var httpResponse = await http.get(REST_URL + "/multimedia/conversationGroup/" + conversationGroupId);
-    if (httpResponseIsOK(httpResponse)) {
-      Iterable list = json.decode(httpResponse.body);
-      List<Multimedia> multimediaList = list.map((model) => Multimedia.fromJson(model)).toList();
-
-      return multimediaList;
-    }
-    return null;
-  }
-
   Future<Multimedia> getMultimediaOfAUserContact(String userContactId) async {
     var httpResponse = await http.get(REST_URL + "/multimedia/userContact/" + userContactId);
     if (httpResponseIsOK(httpResponse)) {
       Multimedia multimedia = new Multimedia.fromJson(json.decode(httpResponse.body));
 
       return multimedia;
+    }
+    return null;
+  }
+
+  Future<Multimedia> getConversationGroupPhotoMultimedia(String conversationGroupId) async {
+    var httpResponse = await http.get(REST_URL + "/multimedia/conversationGroup/photo/" + conversationGroupId);
+    if (httpResponseIsOK(httpResponse)) {
+      Multimedia multimedia = new Multimedia.fromJson(json.decode(httpResponse.body));
+
+      return multimedia;
+    }
+    return null;
+  }
+
+  // conversationGroupId is required for find the exact multimedia easier
+  Future<Multimedia> getMessageMultimedia(String conversationGroupId, String messageId) async {
+    var httpResponse = await http.get(REST_URL + "/multimedia/message/" + conversationGroupId + "/" + messageId);
+    if (httpResponseIsOK(httpResponse)) {
+      Multimedia multimedia = new Multimedia.fromJson(json.decode(httpResponse.body));
+
+      return multimedia;
+    }
+    return null;
+  }
+
+  Future<List<Multimedia>> getAllMultimediaOfAConversationGroup(String conversationGroupId) async {
+    var httpResponse = await http.get(REST_URL + "/multimedia/conversationGroup/" + conversationGroupId);
+    if (httpResponseIsOK(httpResponse)) {
+      Iterable list = json.decode(httpResponse.body);
+      List<Multimedia> multimediaList = list.map((model) => Multimedia.fromJson(model)).toList();
+
+      return multimediaList;
     }
     return null;
   }

@@ -2,7 +2,7 @@
 // conversationId only: Conversation Group's photo
 // userContactId only: User Contact's ID
 // conversationId + messageId = A Multimedia message, belonged to a conversation
-// userId;
+// userId = User's multmedia;
 
 class Multimedia {
   // Image, Video, Gifs, Sticker, Recording, links

@@ -628,7 +628,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     if (!isObjectEmpty(currentState.conversationGroupList) && currentState.conversationGroupList.length > 0) {
       for (ConversationGroup conversationGroup in currentState.conversationGroupList) {
-        List<Multimedia> multimediaListFromServer = await multimediaAPIService.getMultimediaOfAConversationGroup(conversationGroup.id);
+        List<Multimedia> multimediaListFromServer = await multimediaAPIService.getAllMultimediaOfAConversationGroup(conversationGroup.id);
         if (!isObjectEmpty(multimediaListFromServer) && multimediaListFromServer.length > 0) {
           multimediaListFromServer.forEach((multimediaFromServer2) {
             multimediaList.add(multimediaFromServer2);
