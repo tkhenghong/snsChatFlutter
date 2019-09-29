@@ -16,7 +16,9 @@ class FileService {
     bool storageAccessGranted = await permissionService.requestStoragePermission();
     if (storageAccessGranted) {
       // get the application documents directory
-      var dir = await getApplicationDocumentsDirectory();
+//      var dir = await getApplicationDocumentsDirectory();
+    // TODO: Testing directory
+      var dir = await getExternalStorageDirectory();
       // make sure it exists
       await dir.create(recursive: true);
       return dir.path; // join method comes from path.dart
@@ -50,13 +52,14 @@ class FileService {
     }
   }
 
-  Future<File> downloadFileFromUint8List(Uint8List rawFile, String fileName) async {
+  Future<File> downloadFileFromUint8List(Uint8List rawFile, String fileName, String fileFormat) async {
     try {
-      File file = new File.fromRawPath(rawFile);
-      print("file.path: " + file.path);
       String path = await getApplicationDocumentDirectory();
-      String fileFullPath = path + fileName;
+      String fileFullPath = path + "/" + fileName + "." + fileFormat;
       print("fileFullPath: " + fileFullPath);
+      File file = await File(fileFullPath).writeAsBytes(rawFile);
+      bool fileExist = await file.exists();
+      print("fileExist: " + fileExist.toString());
       File copiedFile = await file.copy(fileFullPath);
       print("copiedFile.path: " + copiedFile.path);
       return copiedFile;
@@ -67,6 +70,7 @@ class FileService {
     }
   }
 
+  // Check if file exist
   Future<File> getFile(String filePath) async {
     try {
       File file = File(filePath);

@@ -32,6 +32,7 @@ import 'package:snschat_flutter/objects/settings/settings.dart';
 import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
 import 'package:snschat_flutter/objects/user/user.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
+import 'package:snschat_flutter/service/FirebaseStorage/FirebaseStorageService.dart';
 import 'package:snschat_flutter/service/permissions/PermissionService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
@@ -826,8 +827,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     event.conversationGroup.memberIds = userContactList.map((newUserContact) => newUserContact.id).toList();
 
     // Add your own userContact's ID as admin by find the one that has the same mobile number in the userContactList
-    event.conversationGroup.adminMemberIds
-        .add(userContactList.firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentState.userState.mobileNo).id);
+    if(event.conversationGroup.type == "Personal") {
+      event.conversationGroup.adminMemberIds = userContactList.map((UserContact userContact) => userContact.id).toList();
+    } else {
+      event.conversationGroup.adminMemberIds
+          .add(userContactList.firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentState.userState.mobileNo).id);
+    }
 
     print("Verify event.conversationGroup.memberIds");
     event.conversationGroup.memberIds.forEach((String userContactId) {
@@ -850,7 +855,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     addConversationToState(
         AddConversationGroupEvent(conversationGroup: newConversationGroup, callback: (ConversationGroup conversationGroup) {}));
 
-    // TODO: Create Personal Group successfully (1 ConversationGroup, 2 UserContact, 1 UnreadMessage, 1 Multimedia)
     // 3. Upload Unread Message
     UnreadMessage newUnreadMessage = await uploadAndSaveUnreadMessage(newConversationGroup);
     print("Uploaded and saved UnreadMessage to REST, DB and State.");
@@ -869,6 +873,13 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return null;
     }
 
+
+    if(!isStringEmpty(newMultimedia.localFullFileUrl)) {
+      // If there's a local file, upload the file and update the multimedia in API, DB and state
+      updateMultimedia(newMultimedia, newConversationGroup);
+    }
+
+    // No matter what situation, you need to show the group photo to the user first(load faster)
     addMultimediaToState(AddMultimediaEvent(multimedia: newMultimedia, callback: (Multimedia multimedia) {}));
 
     if (!isObjectEmpty(event)) {
@@ -989,6 +1000,28 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
 
     return newMultimedia;
+  }
+
+  Future<bool> updateMultimedia(Multimedia multimedia, ConversationGroup conversationGroup) async {
+    FirebaseStorageService firebaseStorageService = FirebaseStorageService();
+    String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
+    if(!isStringEmpty(remoteUrl)) {
+      multimedia.remoteFullFileUrl = remoteUrl;
+      multimedia.remoteThumbnailUrl = remoteUrl;
+
+      bool updated = await multimediaAPIService.editMultimedia(multimedia);
+
+      if(!updated) {
+        return null;
+      }
+      bool updatedinDB = await multimediaDBService.editMultimedia(multimedia);
+
+      if(!updatedinDB) {
+        return null;
+      }
+
+      addMultimediaToState(AddMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
+    }
   }
 
   Future<Message> uploadAndSaveMessage(Message message) async {

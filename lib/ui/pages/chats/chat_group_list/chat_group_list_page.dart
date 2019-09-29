@@ -78,7 +78,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return BlocBuilder(
       bloc: wholeAppBloc,
       builder: (context, WholeAppState state) {
@@ -119,6 +118,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   PageListItem mapConversationToPageListTile(ConversationGroup conversation) {
+    print("conversation.id: " + conversation.id);
     Multimedia multimedia = findMultimedia(conversation.id);
     UnreadMessage unreadMessage = findUnreadMessage(conversation.id);
 
@@ -132,7 +132,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           tag: conversation.id,
           child: CircleAvatar(
             backgroundColor: Colors.white,
-            backgroundImage: AssetImage(fileService.getDefaultImagePath(conversation.type)), // temporary
+            backgroundImage: processImage(multimedia, conversation.type), // temporary
 //            child: conversation.groupPhoto.imageData.length == 0 ? Text(conversation.name[0]) : Text(''),
             child: Text(''),
           ),
@@ -154,11 +154,16 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   Multimedia findMultimedia(String conversationId) {
     Multimedia multimedia;
-    wholeAppBloc.currentState.multimediaList.forEach((Multimedia existingMultimedia) {
-      if (existingMultimedia.conversationId == conversationId) {
-        multimedia = existingMultimedia;
-      }
+    print("wholeAppBloc.currentState.multimediaList.length: " + wholeAppBloc.currentState.multimediaList.length.toString());
+    multimedia = wholeAppBloc.currentState.multimediaList.firstWhere((Multimedia existingMultimedia) {
+      return existingMultimedia.conversationId.toString() == conversationId;
     });
+
+    if(isObjectEmpty(multimedia)) {
+      print("Multimedia is not found.");
+    } else {
+      print("Multimedia is found.");
+    }
 
     return multimedia;
   }
@@ -175,12 +180,24 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
 // TODO: Incomplete
-//  AssetImage getImage(Multimedia multimedia, String type) {
-//    File file = await fileService.getLocalImage(multimedia, type);
-//    File file2 = File(multimedia.localFullFileUrl);
-//    if(isObjectEmpty(file2)) {
-//      return fileService.getDefaultImage(type);
-//    }
-//    return Image(image: NetworkToFileImage(url: multimedia.remoteFullFileUrl, file: file2));
-//  }
+  ImageProvider processImage(Multimedia multimedia, String type) {
+    try {
+      print("multimedia.localFullFileUrl: " + multimedia.localFullFileUrl.toString());
+      File file = File(multimedia.localFullFileUrl); // Image.file(file).image;
+      return FileImage(file);
+    } catch (e) {
+      print("Local file is missing");
+      print("Reason: " + e.toString());
+      // In case local file is missing
+      try {
+        print("multimedia.remoteFullFileUrl: " + multimedia.remoteFullFileUrl.toString());
+        return NetworkImage(multimedia.remoteFullFileUrl); // Image.network(multimedia.remoteFullFileUrl).image
+      } catch (e) {
+        print("Network file is missing too.");
+        print("Reason: " + e.toString());
+        // In case network is empty too
+        return AssetImage(fileService.getDefaultImagePath(type)); // Image.asset(fileService.getDefaultImagePath(type)).image
+      }
+    }
+  }
 }

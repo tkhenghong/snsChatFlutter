@@ -323,7 +323,15 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         messageId: null,
         userId: null);
 
-    uploadConversationGroupPhoto(contact, groupMultiMedia);
+    File userContactImage;
+    if (!isObjectEmpty(contact.avatar)) {
+      userContactImage = await getUserContactPhoto(contact);
+    }
+
+    if (!isObjectEmpty(userContactImage)) {
+      groupMultiMedia.localFullFileUrl = userContactImage.path;
+      groupMultiMedia.localThumbnailUrl = userContactImage.path;
+    }
 
     // In Malaysia,
     // If got +60, remove +60.
@@ -355,26 +363,13 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     return conversationGroup;
   }
 
-  Future<Multimedia> uploadConversationGroupPhoto(Contact contact, Multimedia groupMultiMedia) async {
+  // Used to get UserContact Photo from Phone Storage
+  Future<File> getUserContactPhoto(Contact contact) async {
     if (!isObjectEmpty(contact.avatar)) {
       print("if(!isObjectEmpty(contact.avatar))");
       FileService fileService = FileService();
-      File copiedFile = await fileService.downloadFileFromUint8List(contact.avatar, contact.displayName);
-      if (!isObjectEmpty(copiedFile)) {
-        print("if(isObjectEmpty(copiedFile))");
-        print("copiedFile.path: " + copiedFile.path);
-        groupMultiMedia.localThumbnailUrl = groupMultiMedia.localFullFileUrl = copiedFile.path;
-        FirebaseStorageService firebaseStorageService = FirebaseStorageService();
-        String remoteURL = await firebaseStorageService.uploadFile(copiedFile.path, contact.displayName);
-        print("remoteURL: " + remoteURL);
-        if(isStringEmpty(remoteURL)) {
-          return null;
-        }
-        groupMultiMedia.remoteThumbnailUrl = groupMultiMedia.remoteFullFileUrl = remoteURL;
-        return groupMultiMedia;
-      } else {
-        return null;
-      }
+      File copiedFile = await fileService.downloadFileFromUint8List(contact.avatar, DateTime.now().millisecondsSinceEpoch.toString(), "jpg");
+      return copiedFile;
     } else {
       return null;
     }
