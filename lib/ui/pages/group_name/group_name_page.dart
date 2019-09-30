@@ -169,7 +169,7 @@ class GroupNamePageState extends State<GroupNamePage> {
 
   Future<ConversationGroup> createGroupConversation(List<Contact> contact) async {
     print("createGroupConversation()");
-    showLoading(context, "Loading conversation...");
+    showLoading(context, "Creating conversation...");
     fileService = FileService();
 
     ConversationGroup conversationGroup = new ConversationGroup(

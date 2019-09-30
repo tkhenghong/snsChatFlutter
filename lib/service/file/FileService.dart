@@ -32,6 +32,10 @@ class FileService {
       return null;
     }
 
+    // Retrieve file name
+    int lastSlash = fileToBeCopied.path.lastIndexOf("/");
+    String fileName = fileToBeCopied.path.substring(lastSlash+1, fileToBeCopied.path.length);
+
     String destinationFilePath = "";
 
     switch (directory) {
@@ -42,12 +46,20 @@ class FileService {
         break;
     }
 
+    if(!isStringEmpty(destinationFilePath)) {
+      destinationFilePath = destinationFilePath + fileName;
+    }
+
+    print("destinationFilePath: " + destinationFilePath);
+
     try {
       File copiedFile = await fileToBeCopied.copy(destinationFilePath);
       print("copiedFile.path: " + copiedFile.path);
       return copiedFile;
     } catch (e) {
       Fluttertoast.showToast(msg: "Error in file copying.");
+      print("Error in file copying.");
+      print("Reason: " + e.toString());
       return null;
     }
   }
