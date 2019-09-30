@@ -75,13 +75,7 @@ class GroupNamePageState extends State<GroupNamePage> {
                   child: Icon(Icons.check),
                 ),
                 onTap: () {
-                  createGroupConversation().then((conversationGroup) {
-                    print("Go back to Main Page!");
-                    _wholeAppBloc.dispatch(AddConversationGroupEvent(
-                        conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
-                    Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
-                    Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
-                  });
+                  createGroupConversation(widget.selectedContacts);
                 },
               ),
             ),
@@ -173,9 +167,7 @@ class GroupNamePageState extends State<GroupNamePage> {
         ));
   }
 
-  // TODO: Conversation Group Creation into BLOC, can be merged with Personal & Broadcast
-  // TODO: Review later to match code of Single Conversation Group creation in select_contacts_page.dart
-  Future<ConversationGroup> createGroupConversation() async {
+  Future<ConversationGroup> createGroupConversation(List<Contact> contact) async {
     print("createGroupConversation()");
     showLoading(context, "Loading conversation...");
     fileService = FileService();
