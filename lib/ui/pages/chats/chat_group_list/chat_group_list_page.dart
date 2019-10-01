@@ -156,7 +156,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     Multimedia multimedia;
     print("wholeAppBloc.currentState.multimediaList.length: " + wholeAppBloc.currentState.multimediaList.length.toString());
     multimedia = wholeAppBloc.currentState.multimediaList.firstWhere((Multimedia existingMultimedia) {
-      return existingMultimedia.conversationId.toString() == conversationId;
+      return existingMultimedia.conversationId.toString() == conversationId && isStringEmpty(existingMultimedia.messageId);
     });
 
     if(isObjectEmpty(multimedia)) {
@@ -179,7 +179,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     return unreadMessage;
   }
 
-// TODO: Incomplete
+// TODO: Put this code in somewhere
+  // Returns ImageProvider object
   ImageProvider processImage(Multimedia multimedia, String type) {
     try {
       print("multimedia.localFullFileUrl: " + multimedia.localFullFileUrl.toString());

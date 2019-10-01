@@ -92,6 +92,8 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
     print("widget._conversation.id: " + widget._conversationGroup.id);
 
+    Multimedia multimedia = findMultimedia(widget._conversationGroup.id);
+
     // TODO: Send message using websocket
     // Do in this order (To allow resend message if anything goes wrong [Send timeout, websocket down, Internet down situations])
     // 1. Send to DB
@@ -127,9 +129,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                           child: CircleAvatar(
                             radius: 20.0,
                             backgroundColor: Colors.white,
-                            child: Image.asset(
-                              fileService.getDefaultImagePath(widget._conversationGroup.type),
-                            ),
+                            backgroundImage: processImage(multimedia, widget._conversationGroup.type),
                           ),
                         ),
                         Padding(
@@ -615,4 +615,32 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   List<Message> messageList = [];
+
+  Multimedia findMultimedia(String conversationId) {
+    return wholeAppBloc.currentState.multimediaList.firstWhere((Multimedia existingMultimedia) =>
+        existingMultimedia.conversationId.toString() == conversationId && isStringEmpty(existingMultimedia.messageId));
+  }
+
+  // TODO: Decide where to put this logic (same with chat_group_list_page.dart)
+  // Returns Widget object
+  ImageProvider processImage(Multimedia multimedia, String type) {
+    try {
+      print("multimedia.localFullFileUrl: " + multimedia.localFullFileUrl.toString());
+      File file = File(multimedia.localFullFileUrl); // Image.file(file).image;
+      return FileImage(file);
+    } catch (e) {
+      print("Local file is missing");
+      print("Reason: " + e.toString());
+      // In case local file is missing
+      try {
+        print("multimedia.remoteFullFileUrl: " + multimedia.remoteFullFileUrl.toString());
+        return NetworkImage(multimedia.remoteFullFileUrl); // Image.network(multimedia.remoteFullFileUrl).image
+      } catch (e) {
+        print("Network file is missing too.");
+        print("Reason: " + e.toString());
+        // In case network is empty too
+        return AssetImage(fileService.getDefaultImagePath(type)); // Image.asset(fileService.getDefaultImagePath(type)).image
+      }
+    }
+  }
 }

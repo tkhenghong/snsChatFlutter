@@ -44,8 +44,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
     print("widget._conversation.id: " + widget._conversationGroup.id);
-    imageFile = File("lib/ui/images/group2013.jpg");
 
+    Multimedia multimedia = findMultimedia(widget._conversationGroup.id);
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Material(
@@ -85,14 +85,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                     ),
                     background: Hero(
                       tag: widget._conversationGroup.id,
-                      // TODO: Need to change it to Future
-//                      child: groupPhoto.localFullFileUrl.length != 0
-//                          ? Image.file(imageFile)
-//                          : Image.asset(
-//                              'lib/ui/icons/default_group_photo.jpg',
-//                              fit: BoxFit.cover,
-//                            ),
-                      child: Image.asset(fileService.getDefaultImagePath(widget._conversationGroup.type)),
+                      child: processImage(multimedia, widget._conversationGroup.type),
                     )),
                 actions: <Widget>[
                   IconButton(
@@ -378,5 +371,33 @@ class ChatInfoPageState extends State<ChatInfoPage> {
             ],
           )),
     );
+  }
+
+  Multimedia findMultimedia(String conversationId) {
+    return wholeAppBloc.currentState.multimediaList.firstWhere((Multimedia existingMultimedia) =>
+    existingMultimedia.conversationId.toString() == conversationId && isStringEmpty(existingMultimedia.messageId));
+  }
+
+  // TODO: Decide where to put this logic (same with chat_group_list_page.dart)
+  // Returns Widget object
+  Widget processImage(Multimedia multimedia, String type) {
+    try {
+      print("multimedia.localFullFileUrl: " + multimedia.localFullFileUrl.toString());
+      File file = File(multimedia.localFullFileUrl); // Image.file(file).image;
+      return Image.file(file);
+    } catch (e) {
+      print("Local file is missing");
+      print("Reason: " + e.toString());
+      // In case local file is missing
+      try {
+        print("multimedia.remoteFullFileUrl: " + multimedia.remoteFullFileUrl.toString());
+        return Image.network(multimedia.remoteFullFileUrl); // Image.network(multimedia.remoteFullFileUrl).image
+      } catch (e) {
+        print("Network file is missing too.");
+        print("Reason: " + e.toString());
+        // In case network is empty too
+        return Image.asset(fileService.getDefaultImagePath(type)); // Image.asset(fileService.getDefaultImagePath(type)).image
+      }
+    }
   }
 }
