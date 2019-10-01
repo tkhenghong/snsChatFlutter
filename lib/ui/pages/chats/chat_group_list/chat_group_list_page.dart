@@ -63,10 +63,12 @@ class ChatGroupListState extends State<ChatGroupListPage> {
               }));
             }
           } else {
+            wholeAppBloc.dispatch(UserSignOutEvent()); // Remove State data before leaving
             goToLoginPage();
           }
         }));
       } else {
+        wholeAppBloc.dispatch(UserSignOutEvent()); // Remove State data before leaving
         goToLoginPage();
       }
     }));
