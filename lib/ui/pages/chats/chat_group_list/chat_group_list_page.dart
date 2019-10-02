@@ -88,6 +88,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
             controller: _refreshController,
             header: WaterDropHeader(),
             onRefresh: () {
+              setState(() {});
               //Delay 1 second to simulate something loading
               Future.delayed(Duration(seconds: 1), () {
                 _refreshController.refreshCompleted();
