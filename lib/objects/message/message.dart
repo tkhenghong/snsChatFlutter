@@ -1,6 +1,3 @@
-import 'package:snschat_flutter/general/functions/repeating_functions.dart';
-import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
-
 // system message or normal message, sticker, gifs, emojis, video, recording, photos,
 class Message {
   String id;
@@ -69,26 +66,3 @@ class Message {
         'timestamp': timestamp,
       };
 }
-
-//class Recipient {
-//  Sender sender;
-//  Receiver receiver;
-//
-//  Recipient({this.sender, this.receiver});
-//}
-//
-//class Sender {
-//  String id;
-//  String mobileNo;
-//  String name;
-//  int time; // send time
-//  Sender({this.id, this.mobileNo, this.name, this.time});
-//}
-//
-//class Receiver {
-//  String id;
-//  String mobileNo;
-//  String name;
-//  int time; // receive time
-//  Receiver({this.id, this.mobileNo, this.name, this.time});
-//}

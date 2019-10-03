@@ -68,11 +68,9 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
               decoration: UnderlineDecoration(
                   textStyle: TextStyle(color: Colors.black, fontSize: 20.0, fontWeight: FontWeight.bold), color: Colors.black),
               onSubmit: (pin) {
-                print('PIN number is: ' + pin);
                 showLoading(context, "Verifying PIN...");
                 Future.delayed(Duration(milliseconds: 1000), () {
                   //Delay 1 second to simulate something loading
-                  print('Loaded 1 second.');
                   Navigator.pop(context); //pop loading dialog
                   this.goToChatGroupList();
                 });

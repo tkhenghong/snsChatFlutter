@@ -1,17 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
-import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
-import 'package:snschat_flutter/objects/user/user.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
@@ -21,7 +17,6 @@ import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
 
 import 'package:image_picker/image_picker.dart';
-import 'package:image/image.dart' as CustomImage;
 
 class GroupNamePage extends StatefulWidget {
   final List<Contact> selectedContacts;
@@ -204,14 +199,14 @@ class GroupNamePageState extends State<GroupNamePage> {
     // Multimedia for group chat
     Multimedia groupMultiMedia = Multimedia(
       id: null,
-      imageDataId: "",
-      imageFileId: "",
+      imageDataId: null,
+      imageFileId: null,
       localFullFileUrl: isObjectEmpty(copiedImageFile) ? null : copiedImageFile.path,
       localThumbnailUrl: isObjectEmpty(thumbnailImageFile) ? null : thumbnailImageFile.path,
       remoteThumbnailUrl: null,
       remoteFullFileUrl: null,
-      messageId: "",
-      userContactId: "",
+      messageId: null,
+      userContactId: null,
       conversationId: conversationGroup.id,
     );
 

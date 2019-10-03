@@ -449,8 +449,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 //    multimedia.id = user.multimediaId = multimediaFromServer.id;
     multimedia.id = multimediaFromServer.id;
 
-    print("multimedia.id: " + multimedia.id);
-
     bool multimediaSaved = await multimediaDBService.addMultimedia(multimedia);
     if (!multimediaSaved) {
       return false;
@@ -561,16 +559,15 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   Future<bool> loadUserPreviousData(LoadUserPreviousDataEvent event) async {
-    print("wholeAppBloc.dart loadUserPreviousData()");
     bool loadConversationsDone = await loadConversationsOfTheUser();
     bool loadUnreadMessageDone = await loadUnreadMessageOfTheUser();
     bool loadUserContactsDone = await getUserContactsOfTheUser();
     bool loadMultimediaDone = await loadMultimediaOfTheUser();
 
-    print("loadConversationsDone: " + loadConversationsDone.toString());
-    print("loadUnreadMessageDone: " + loadUnreadMessageDone.toString());
-    print("loadUserContactsDone: " + loadUserContactsDone.toString());
-    print("loadMultimediaDone: " + loadMultimediaDone.toString());
+//    print("loadConversationsDone: " + loadConversationsDone.toString());
+//    print("loadUnreadMessageDone: " + loadUnreadMessageDone.toString());
+//    print("loadUserContactsDone: " + loadUserContactsDone.toString());
+//    print("loadMultimediaDone: " + loadMultimediaDone.toString());
 
     bool allDone = loadConversationsDone && loadUnreadMessageDone && loadUserContactsDone && loadMultimediaDone;
 
@@ -583,22 +580,17 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   // At this point the currentState already has conversationGroupList from DB
   Future<bool> loadConversationsOfTheUser() async {
-    print("wholeAppBloc.dart loadConversationsOfTheUser()");
     List<ConversationGroup> conversationGroupListFromServer =
         await conversationGroupAPIService.getConversationGroupsForUser(currentState.userState.id);
-    print("wholeAppBloc.dart conversationGroupAPIService.getConversationGroupsForUser");
     if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0) {
-      print("conversationGroupListFromServer.length: " + conversationGroupListFromServer.length.toString());
       // Update the current info of the conversationGroup to latest information
       conversationGroupListFromServer.forEach((conversationGroupFromServer) {
         // TODO: Review the performance of this loop
         bool conversationGroupExist = currentState.conversationGroupList
             .contains((ConversationGroup conversationGroupFromDB) => conversationGroupFromDB.id == conversationGroupFromServer.id);
         if (conversationGroupExist) {
-          print("if (conversationGroupExist)");
           conversationGroupDBService.editConversationGroup(conversationGroupFromServer);
         } else {
-          print("if (!conversationGroupExist)");
           conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
         }
         addConversationToState(
@@ -614,9 +606,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   // getMultimediaOfAConversation (Means you already covered the message's multimedia part)
   // getMultimediaOfAUserContact
   Future<bool> loadMultimediaOfTheUser() async {
-    print("loadMultimediaOfTheUser()");
-    print("currentState.userState.id: " + currentState.userState.id);
-
     List<Multimedia> multimediaList = [];
 
     Multimedia multimediaFromServer = await multimediaAPIService.getMultimediaOfAUser(currentState.userState.id);
@@ -647,17 +636,11 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       }
     }
 
-    print("!isObjectEmpty(multimediaList): " + (!isObjectEmpty(multimediaList)).toString());
-
     if (!isObjectEmpty(multimediaList) && multimediaList.length > 0) {
-      print("multimediaList.length: " + multimediaList.length.toString());
-      print("if (!isObjectEmpty(multimediaList) && multimediaList.length > 0)");
       multimediaList.forEach((Multimedia multimediaFromServer) {
         multimediaDBService.addMultimedia(multimediaFromServer);
         addMultimediaToState(AddMultimediaEvent(multimedia: multimediaFromServer, callback: (Multimedia multimedia) {}));
       });
-    } else {
-      print("isObjectEmpty(multimediaList) || multimediaList.length == 0");
     }
 
     return true;
@@ -686,10 +669,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   Future<bool> loadUnreadMessageOfTheUser() async {
-    // TODO: load unread messge from server when first time loading
-    print("currentState.userState.id: " + currentState.userState.id);
     List<UnreadMessage> unreadMessageListFromServer = await unreadMessageAPIService.getUnreadMessagesOfAUser(currentState.userState.id);
-    print("getUnreadMessagesOfAUser success");
 
     if (unreadMessageListFromServer != null && unreadMessageListFromServer.length > 0) {
       // Update the current info of the conversationGroup to latest information
@@ -827,22 +807,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     event.conversationGroup.memberIds = userContactList.map((newUserContact) => newUserContact.id).toList();
 
     // Add your own userContact's ID as admin by find the one that has the same mobile number in the userContactList
-    if(event.conversationGroup.type == "Personal") {
+    if (event.conversationGroup.type == "Personal") {
       event.conversationGroup.adminMemberIds = userContactList.map((UserContact userContact) => userContact.id).toList();
     } else {
       event.conversationGroup.adminMemberIds
           .add(userContactList.firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentState.userState.mobileNo).id);
     }
-
-    print("Verify event.conversationGroup.memberIds");
-    event.conversationGroup.memberIds.forEach((String userContactId) {
-      print("userContactId: " + userContactId.toString());
-    });
-
-    print("Verify event.conversationGroup.adminMemberIds");
-    event.conversationGroup.adminMemberIds.forEach((String userContactId) {
-      print("userContactId: " + userContactId.toString());
-    });
 
     // 2. Upload ConversationGroup
     ConversationGroup newConversationGroup = await uploadAndSaveConversationGroup(event.conversationGroup);
@@ -873,8 +843,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return null;
     }
 
-
-    if(!isStringEmpty(newMultimedia.localFullFileUrl)) {
+    if (!isStringEmpty(newMultimedia.localFullFileUrl)) {
       // If there's a local file, upload the file and update the multimedia in API, DB and state
       updateMultimediaContent(newMultimedia, newConversationGroup);
     }
@@ -914,7 +883,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return null;
     }
 
-    print("Dispatch message");
     // Do this instead of triggering method directly will make the Bloc to resend the signals to listeners
     dispatch(AddMessageEvent(message: newMessage, callback: (Message message) {}));
 
@@ -1005,19 +973,20 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   Future<bool> updateMultimediaContent(Multimedia multimedia, ConversationGroup conversationGroup) async {
     FirebaseStorageService firebaseStorageService = FirebaseStorageService();
     String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
-    String remoteThumbnailUrl = await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
-    if(!isStringEmpty(remoteUrl)) {
+    String remoteThumbnailUrl =
+        await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
+    if (!isStringEmpty(remoteUrl)) {
       multimedia.remoteFullFileUrl = remoteUrl;
       multimedia.remoteThumbnailUrl = remoteThumbnailUrl;
 
       bool updated = await multimediaAPIService.editMultimedia(multimedia);
 
-      if(!updated) {
+      if (!updated) {
         return null;
       }
       bool updatedInDB = await multimediaDBService.editMultimedia(multimedia);
 
-      if(!updatedInDB) {
+      if (!updatedInDB) {
         return null;
       }
 
@@ -1055,12 +1024,10 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     });
 
     if (conversationExist) {
-      print("if (conversationExist)");
       currentState.conversationGroupList
           .removeWhere((ConversationGroup conversationGroup) => conversationGroup.id == event.conversationGroup.id);
       currentState.conversationGroupList.add(event.conversationGroup);
     } else {
-      print("if (!conversationExist)");
       currentState.conversationGroupList.add(event.conversationGroup);
     }
 
@@ -1070,8 +1037,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   addUnreadMessageToState(AddUnreadMessageEvent event) async {
-    print('event.unreadMessage.id: ' + event.unreadMessage.id);
-
     bool unreadMessageExist = false;
 
     currentState.unreadMessageList.forEach((UnreadMessage existingUnreadMessage) {
@@ -1096,7 +1061,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   // Don't have to replace message
   addMessageToState(AddMessageEvent event) async {
-    print("event.message.id: " + event.message.id);
     // Check repetition
     bool messageExist = false;
 
@@ -1117,7 +1081,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   // Don't have to replace multimedia
   addMultimediaToState(AddMultimediaEvent event) async {
-    print("event.multimedia.id: " + event.multimedia.id);
     bool multimediaIdExist = false;
 
     // Check repetition
@@ -1136,7 +1099,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   addSettingsToState(AddSettingsEvent event) async {
-    print("event.message.id: " + event.settings.id);
     await Firestore.instance.collection('settings').document(event.settings.id).setData({
       'id': generateNewId().toString(), // Self generated Id
       'userId': event.settings.userId,
@@ -1149,7 +1111,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   addUserToState(AddUserEvent event) async {
-    print("event.message.id: " + event.user.id);
     currentState.userState = event.user;
     if (!isObjectEmpty(event)) {
       event.callback(event.user);
@@ -1157,8 +1118,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   addUserContactToState(AddUserContactEvent event) async {
-    print("event.userContact.id: " + event.userContact.id);
-
     // Check repetition
     bool userContactExist = false;
 
@@ -1177,8 +1136,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   addContactToState(AddContactEvent event) async {
-    print("event.userContact.displayName: " + event.contact.displayName);
-
     // Check repetition
     bool userContactExist = false;
 
@@ -1197,7 +1154,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   addFirebaseAuthToState(AddFirebaseAuthEvent event) async {
-    print("event.firebaseAuth.app.name: " + event.firebaseAuth.app.name);
     currentState.firebaseAuth = event.firebaseAuth;
     if (!isObjectEmpty(event)) {
       event.callback(event.firebaseAuth);
@@ -1205,7 +1161,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   addGoogleSignInToState(AddGoogleSignInEvent event) async {
-    print("event.googleSignIn.currentUser.displayName: " + event.googleSignIn.currentUser.displayName);
     currentState.googleSignIn = event.googleSignIn;
     if (!isObjectEmpty(event)) {
       event.callback(event.googleSignIn);

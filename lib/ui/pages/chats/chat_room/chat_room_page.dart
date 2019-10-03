@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
@@ -40,20 +39,20 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   bool isLoading;
   bool imageFound = false;
 
+  String WEBSOCKET_URL = globals.WEBSOCKET_URL;
+
+  File imageFile;
+  WebSocketChannel webSocketChannel;
+  Stream<dynamic> webSocketStream;
+
   TextEditingController textEditingController = new TextEditingController();
   ScrollController listScrollController = new ScrollController();
   RefreshController _refreshController;
   FocusNode focusNode = new FocusNode();
-  FileService fileService = FileService();
-  ImageService imageService = ImageService();
-
-  File imageFile;
 
   WholeAppBloc wholeAppBloc;
-
-  String WEBSOCKET_URL = globals.WEBSOCKET_URL;
-  WebSocketChannel webSocketChannel;
-  Stream<dynamic> webSocketStream;
+  FileService fileService = FileService();
+  ImageService imageService = ImageService();
 
   @override
   void initState() {

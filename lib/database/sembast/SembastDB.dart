@@ -40,7 +40,6 @@ class SembastDB {
   }
 
   Future _startSembastDatabase() async {
-    print("SembastDB.dart _startSembastDatabase()");
     // https://github.com/tekartik/sembast.dart/blob/master/sembast/doc/open.md
 
     var dbPath = "";
@@ -48,7 +47,6 @@ class SembastDB {
     bool storageAccessGranted = false;
     switch (ENVIRONMENT) {
       case "DEVELOPMENT":
-        print("CASE DEVELOPMENT.");
         dbPath = 'pocketChat.db';
         storageAccessGranted = true;
         break;

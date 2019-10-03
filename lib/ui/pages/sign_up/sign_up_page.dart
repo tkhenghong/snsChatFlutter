@@ -46,7 +46,6 @@ class SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
-    print("build()");
     return Material(
         child: GestureDetector(
             // call this method here to hide soft keyboard
@@ -146,22 +145,23 @@ class SignUpPageState extends State<SignUpPage> {
       wholeAppBloc.dispatch(UserSignUpEvent(
           callback: (bool isSignedUp) {
             if (isSignedUp) {
-              print("if (isSignedUp)");
               wholeAppBloc.dispatch(UserSignInEvent(
                   callback: (bool signInSuccessful) {
                     if (signInSuccessful) {
                       Navigator.pop(context); // Check this
                       goToVerifyPhoneNumber();
                     } else {
-                      Navigator.pop(context);
+                      Navigator.pop(context); // Pop loading indicator
                       Fluttertoast.showToast(msg: 'Unable to login. Please try again.', toastLength: Toast.LENGTH_SHORT);
+                      wholeAppBloc.dispatch(UserSignOutEvent()); // Reset everything to initial state first
                       Navigator.pop(context);
                     }
                   },
                   mobileNo: mobileNoTextController.value.text));
             } else {
-              print("if (!isSignedUp)");
+              Navigator.pop(context); // Pop loading indicator
               Fluttertoast.showToast(msg: 'Unable to sign up. Please try again.', toastLength: Toast.LENGTH_SHORT);
+              wholeAppBloc.dispatch(UserSignOutEvent()); // Reset everything to initial state first
               Navigator.pop(context);
             }
           },

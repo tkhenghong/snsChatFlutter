@@ -1,17 +1,15 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:snschat_flutter/general/functions/repeating_functions.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/custom_dialogs.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
+import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
-import 'package:palette_generator/palette_generator.dart';
 
 class ChatInfoPage extends StatefulWidget {
   ConversationGroup _conversationGroup;
@@ -25,11 +23,14 @@ class ChatInfoPage extends StatefulWidget {
 }
 
 class ChatInfoPageState extends State<ChatInfoPage> {
-  TextEditingController textEditingController;
+  bool messageListDone;
+
   WholeAppBloc wholeAppBloc;
+
+  TextEditingController textEditingController;
   File imageFile;
   FileService fileService = FileService();
-  bool messageListDone;
+  ImageService imageService = ImageService();
 
   @override
   void initState() {
@@ -43,7 +44,6 @@ class ChatInfoPageState extends State<ChatInfoPage> {
   Widget build(BuildContext context) {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
-    print("widget._conversation.id: " + widget._conversationGroup.id);
 
     Multimedia multimedia = findMultimedia(widget._conversationGroup.id);
     return GestureDetector(
@@ -66,11 +66,9 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                           CustomDialogs customDialog = new CustomDialogs(
                               context: context,
                               title: "Edit Group Name",
-                              description:
-                                  "Edit the group name below. Press OK to save.",
+                              description: "Edit the group name below. Press OK to save.",
                               value: widget._conversationGroup.name);
-                          String groupName =
-                              await customDialog.showConfirmationDialog();
+                          String groupName = await customDialog.showConfirmationDialog();
                           if (widget._conversationGroup.name != groupName) {
                             widget._conversationGroup.name = groupName;
                           }
@@ -85,7 +83,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                     ),
                     background: Hero(
                       tag: widget._conversationGroup.id,
-                      child: processImage(multimedia, widget._conversationGroup.type),
+                      child: processImage(multimedia, widget._conversationGroup.type), // at bottom
                     )),
                 actions: <Widget>[
                   IconButton(
@@ -130,8 +128,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                   isStringEmpty(widget._conversationGroup.description)
                                       ? "Add Group description"
                                       : widget._conversationGroup.description,
-                                  style: TextStyle(
-                                      fontSize: 17.0, color: Colors.black54),
+                                  style: TextStyle(fontSize: 17.0, color: Colors.black54),
                                 ),
                                 Padding(
                                   padding: EdgeInsets.only(bottom: 5.0),
@@ -166,12 +163,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                   padding: EdgeInsets.only(top: 5.0),
                                 ),
                                 Text(
-                                  widget._conversationGroup.notificationExpireDate ==
-                                          0
-                                      ? "On"
-                                      : "Off",
-                                  style: TextStyle(
-                                      fontSize: 17.0, color: Colors.black54),
+                                  widget._conversationGroup.notificationExpireDate == 0 ? "On" : "Off",
+                                  style: TextStyle(fontSize: 17.0, color: Colors.black54),
                                 ),
                                 Padding(
                                   padding: EdgeInsets.only(bottom: 5.0),
@@ -190,8 +183,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             print("Tapped.");
                           },
                           child: Padding(
-                            padding: EdgeInsets.only(
-                                left: 10.0, top: 10.0, right: 5.0),
+                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,8 +191,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 Padding(
                                     padding: EdgeInsets.only(top: 5.0),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: <Widget>[
                                         Text(
                                           "Favourites⭐",
@@ -226,8 +217,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             print("Tapped.");
                           },
                           child: Padding(
-                            padding: EdgeInsets.only(
-                                left: 10.0, top: 10.0, right: 5.0),
+                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,8 +225,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 Padding(
                                     padding: EdgeInsets.only(top: 5.0),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: <Widget>[
                                         Text(
                                           "Media",
@@ -262,8 +251,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             print("Tapped.");
                           },
                           child: Padding(
-                            padding: EdgeInsets.only(
-                                left: 10.0, top: 10.0, right: 5.0),
+                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,8 +259,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 Padding(
                                     padding: EdgeInsets.only(top: 5.0),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
                                       children: <Widget>[
                                         Icon(Icons.people),
                                         Text(
@@ -298,8 +285,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             print("Tapped.");
                           },
                           child: Padding(
-                            padding: EdgeInsets.only(
-                                left: 10.0, top: 10.0, right: 5.0),
+                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -307,16 +293,12 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 Padding(
                                     padding: EdgeInsets.only(top: 5.0),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
                                       children: <Widget>[
-                                        Icon(Icons.exit_to_app,
-                                            color: Colors.red),
+                                        Icon(Icons.exit_to_app, color: Colors.red),
                                         Text(
                                           "Exit group",
-                                          style: TextStyle(
-                                              fontSize: 17.0,
-                                              color: Colors.red),
+                                          style: TextStyle(fontSize: 17.0, color: Colors.red),
                                         ),
                                       ],
                                     )),
@@ -337,8 +319,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             print("Tapped.");
                           },
                           child: Padding(
-                            padding: EdgeInsets.only(
-                                left: 10.0, top: 10.0, right: 5.0),
+                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -346,15 +327,12 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 Padding(
                                     padding: EdgeInsets.only(top: 5.0),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
                                       children: <Widget>[
                                         Icon(Icons.report, color: Colors.red),
                                         Text(
                                           "Report group",
-                                          style: TextStyle(
-                                              fontSize: 17.0,
-                                              color: Colors.red),
+                                          style: TextStyle(fontSize: 17.0, color: Colors.red),
                                         ),
                                       ],
                                     )),
@@ -375,7 +353,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
 
   Multimedia findMultimedia(String conversationId) {
     return wholeAppBloc.currentState.multimediaList.firstWhere((Multimedia existingMultimedia) =>
-    existingMultimedia.conversationId.toString() == conversationId && isStringEmpty(existingMultimedia.messageId));
+        existingMultimedia.conversationId.toString() == conversationId && isStringEmpty(existingMultimedia.messageId));
   }
 
   // TODO: Decide where to put this logic (same with chat_group_list_page.dart)

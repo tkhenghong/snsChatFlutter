@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:web_socket_channel/io.dart';
 
+// Not using it right now, currently testing it inside chat room page.
 class WebSocketService {
   final IOWebSocketChannel channel = IOWebSocketChannel.connect("ws://echo.websocket.org");
 

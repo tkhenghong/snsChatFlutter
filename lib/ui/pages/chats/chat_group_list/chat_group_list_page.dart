@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,16 +24,17 @@ class ChatGroupListPage extends StatefulWidget {
 }
 
 class ChatGroupListState extends State<ChatGroupListPage> {
+  bool getListDone = false;
+
   RefreshController _refreshController;
   WholeAppBloc wholeAppBloc;
-  bool getListDone = false;
+
   FileService fileService = FileService();
   ImageService imageService = ImageService();
 
   @override
   initState() {
     super.initState();
-    print("chat_group_list_page.dart initState()");
     _refreshController = new RefreshController();
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
@@ -47,22 +47,17 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   initialize() async {
-    print("initialize()");
     wholeAppBloc.dispatch(LoadDatabaseToStateEvent(callback: (bool loadDone) {
-      print("loadDone: " + loadDone.toString());
       if (loadDone) {
         // Set list done to true to prevent waiting due to poor Internet connection
         setState(() {
           getListDone = true;
         });
         wholeAppBloc.dispatch(CheckUserLoginEvent(callback: (bool hasSignedIn) {
-          print("hasSignedIn: " + hasSignedIn.toString());
           if (hasSignedIn) {
             if (getListDone == false) {
               // TODO: Get Conversations for the User
-              wholeAppBloc.dispatch(LoadUserPreviousDataEvent(callback: (bool done) {
-                print("done: " + done.toString());
-              }));
+              wholeAppBloc.dispatch(LoadUserPreviousDataEvent(callback: (bool done) {}));
             }
           } else {
             wholeAppBloc.dispatch(UserSignOutEvent()); // Remove State data before leaving
@@ -160,16 +155,9 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   Multimedia findMultimedia(String conversationId) {
     Multimedia multimedia;
-    print("wholeAppBloc.currentState.multimediaList.length: " + wholeAppBloc.currentState.multimediaList.length.toString());
     multimedia = wholeAppBloc.currentState.multimediaList.firstWhere((Multimedia existingMultimedia) {
       return existingMultimedia.conversationId.toString() == conversationId && isStringEmpty(existingMultimedia.messageId);
     });
-
-    if(isObjectEmpty(multimedia)) {
-      print("Multimedia is not found.");
-    } else {
-      print("Multimedia is found.");
-    }
 
     return multimedia;
   }
