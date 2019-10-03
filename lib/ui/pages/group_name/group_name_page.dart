@@ -180,21 +180,23 @@ class GroupNamePageState extends State<GroupNamePage> {
     showLoading(context, "Creating conversation...");
 
     ConversationGroup conversationGroup = new ConversationGroup(
-      id: null,
-      notificationExpireDate: 0,
-      creatorUserId: wholeAppBloc.currentState.userState.id,
-      createdDate: new DateTime.now().millisecondsSinceEpoch,
-      name: textEditingController.text,
-      type: "Group",
-      block: false,
-      description: '',
-      adminMemberIds: [],
-      memberIds: []
-    );
+        id: null,
+        notificationExpireDate: 0,
+        creatorUserId: wholeAppBloc.currentState.userState.id,
+        createdDate: new DateTime.now().millisecondsSinceEpoch,
+        name: textEditingController.text,
+        type: "Group",
+        block: false,
+        description: '',
+        adminMemberIds: [],
+        memberIds: []);
     print("conversationGroup: " + conversationGroup.toString());
-    File copiedImageFile = null;
-    if(!isStringEmpty(imageFile.path)) {
+    File copiedImageFile;
+    File thumbnailImageFile;
+    if (!isStringEmpty(imageFile.path)) {
+      // Copy full file to our directory. Create thumbnail of this image and copy this to our directory as well.
       copiedImageFile = await fileService.copyFile(imageFile, "ApplicationDocumentDirectory");
+      thumbnailImageFile = await getImageThumbnail();
     }
 
     // Multimedia for group chat
@@ -203,7 +205,7 @@ class GroupNamePageState extends State<GroupNamePage> {
       imageDataId: "",
       imageFileId: "",
       localFullFileUrl: isObjectEmpty(copiedImageFile) ? null : copiedImageFile.path,
-      localThumbnailUrl: isObjectEmpty(copiedImageFile) ? null : copiedImageFile.path,
+      localThumbnailUrl: isObjectEmpty(thumbnailImageFile) ? null : thumbnailImageFile.path,
       remoteThumbnailUrl: null,
       remoteFullFileUrl: null,
       messageId: "",
@@ -241,12 +243,22 @@ class GroupNamePageState extends State<GroupNamePage> {
     });
   }
 
-  getThumbnail() async {
-    CustomImage.Image image = CustomImage.decodeImage(imageFile.readAsBytesSync());
-    CustomImage.Image thumbnail = CustomImage.copyResize(image, width: 50);
+  // TODO: Put this into somewhere
+  Future<File> getImageThumbnail() async {
+    print("getImageThumbnail()");
+    try {
+      CustomImage.Image image = CustomImage.decodeImage(imageFile.readAsBytesSync());
+      CustomImage.Image thumbnail = CustomImage.copyResize(image, width: 50);
 
-    // TODO: Here
-//    File(await fileService.)..writeAsBytesSync(encodePng(thumbnail));
-    File copiedThumbnailImage = await fileService.copyFile(imageFile, "ApplicationDocumentDirectory");
+      File temporaryThumbnailFile = new File(await fileService.getApplicationDocumentDirectory() + "temp.png")
+        ..writeAsBytesSync(CustomImage.encodePng(thumbnail));
+      File copiedThumbnailImage = await fileService.copyFile(temporaryThumbnailFile, "ApplicationDocumentDirectory");
+      print("copiedThumbnailImage.path: " + copiedThumbnailImage.path);
+      return copiedThumbnailImage;
+    } catch (e) {
+      print("Failed to get thumbnail.");
+      print("Reason: " + e.toString());
+      return null;
+    }
   }
 }
