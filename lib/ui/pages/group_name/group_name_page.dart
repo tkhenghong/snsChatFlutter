@@ -15,6 +15,7 @@ import 'package:snschat_flutter/objects/user/user.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
+import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
@@ -40,6 +41,7 @@ class GroupNamePageState extends State<GroupNamePage> {
   WholeAppBloc wholeAppBloc;
   List<UserContact> userContactList = [];
   FileService fileService;
+  ImageService imageService = ImageService();
 
   @override
   void initState() {
@@ -196,7 +198,7 @@ class GroupNamePageState extends State<GroupNamePage> {
     if (!isStringEmpty(imageFile.path)) {
       // Copy full file to our directory. Create thumbnail of this image and copy this to our directory as well.
       copiedImageFile = await fileService.copyFile(imageFile, "ApplicationDocumentDirectory");
-      thumbnailImageFile = await getImageThumbnail();
+      thumbnailImageFile = await imageService.getImageThumbnail(imageFile);
     }
 
     // Multimedia for group chat
@@ -241,24 +243,5 @@ class GroupNamePageState extends State<GroupNamePage> {
     setState(() {
       imageFile = image;
     });
-  }
-
-  // TODO: Put this into somewhere
-  Future<File> getImageThumbnail() async {
-    print("getImageThumbnail()");
-    try {
-      CustomImage.Image image = CustomImage.decodeImage(imageFile.readAsBytesSync());
-      CustomImage.Image thumbnail = CustomImage.copyResize(image, width: 50);
-
-      File temporaryThumbnailFile = new File(await fileService.getApplicationDocumentDirectory() + "temp.png")
-        ..writeAsBytesSync(CustomImage.encodePng(thumbnail));
-      File copiedThumbnailImage = await fileService.copyFile(temporaryThumbnailFile, "ApplicationDocumentDirectory");
-      print("copiedThumbnailImage.path: " + copiedThumbnailImage.path);
-      return copiedThumbnailImage;
-    } catch (e) {
-      print("Failed to get thumbnail.");
-      print("Reason: " + e.toString());
-      return null;
-    }
   }
 }

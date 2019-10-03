@@ -14,6 +14,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
+import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
@@ -44,6 +45,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   RefreshController _refreshController;
   FocusNode focusNode = new FocusNode();
   FileService fileService = FileService();
+  ImageService imageService = ImageService();
 
   File imageFile;
 
@@ -129,7 +131,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                           child: CircleAvatar(
                             radius: 20.0,
                             backgroundColor: Colors.white,
-                            backgroundImage: processImage(multimedia, widget._conversationGroup.type),
+                            backgroundImage: imageService.processImage(multimedia, widget._conversationGroup.type),
                           ),
                         ),
                         Padding(
@@ -616,31 +618,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
   List<Message> messageList = [];
 
+  // TODO: Move this into BLOC (easier)
   Multimedia findMultimedia(String conversationId) {
     return wholeAppBloc.currentState.multimediaList.firstWhere((Multimedia existingMultimedia) =>
         existingMultimedia.conversationId.toString() == conversationId && isStringEmpty(existingMultimedia.messageId));
-  }
-
-  // TODO: Decide where to put this logic (same with chat_group_list_page.dart)
-  // Returns Widget object
-  ImageProvider processImage(Multimedia multimedia, String type) {
-    try {
-      print("multimedia.localFullFileUrl: " + multimedia.localFullFileUrl.toString());
-      File file = File(multimedia.localFullFileUrl); // Image.file(file).image;
-      return FileImage(file);
-    } catch (e) {
-      print("Local file is missing");
-      print("Reason: " + e.toString());
-      // In case local file is missing
-      try {
-        print("multimedia.remoteFullFileUrl: " + multimedia.remoteFullFileUrl.toString());
-        return NetworkImage(multimedia.remoteFullFileUrl); // Image.network(multimedia.remoteFullFileUrl).image
-      } catch (e) {
-        print("Network file is missing too.");
-        print("Reason: " + e.toString());
-        // In case network is empty too
-        return AssetImage(fileService.getDefaultImagePath(type)); // Image.asset(fileService.getDefaultImagePath(type)).image
-      }
-    }
   }
 }

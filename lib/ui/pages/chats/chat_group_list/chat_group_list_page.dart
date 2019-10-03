@@ -10,6 +10,7 @@ import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
+import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
@@ -28,6 +29,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   WholeAppBloc wholeAppBloc;
   bool getListDone = false;
   FileService fileService = FileService();
+  ImageService imageService = ImageService();
 
   @override
   initState() {
@@ -135,7 +137,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           tag: conversation.id,
           child: CircleAvatar(
             backgroundColor: Colors.white,
-            backgroundImage: processImage(multimedia, conversation.type), // temporary
+            backgroundImage: imageService.processImage(multimedia, conversation.type), // temporary
+            // TODO: Make the below code as an "image" if all multimedia URLs (and files) are missing
 //            child: conversation.groupPhoto.imageData.length == 0 ? Text(conversation.name[0]) : Text(''),
             child: Text(''),
           ),
@@ -180,28 +183,5 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     });
 
     return unreadMessage;
-  }
-
-// TODO: Put this code in somewhere
-  // Returns ImageProvider object
-  ImageProvider processImage(Multimedia multimedia, String type) {
-    try {
-      print("multimedia.localFullFileUrl: " + multimedia.localFullFileUrl.toString());
-      File file = File(multimedia.localFullFileUrl); // Image.file(file).image;
-      return FileImage(file);
-    } catch (e) {
-      print("Local file is missing");
-      print("Reason: " + e.toString());
-      // In case local file is missing
-      try {
-        print("multimedia.remoteFullFileUrl: " + multimedia.remoteFullFileUrl.toString());
-        return NetworkImage(multimedia.remoteFullFileUrl); // Image.network(multimedia.remoteFullFileUrl).image
-      } catch (e) {
-        print("Network file is missing too.");
-        print("Reason: " + e.toString());
-        // In case network is empty too
-        return AssetImage(fileService.getDefaultImagePath(type)); // Image.asset(fileService.getDefaultImagePath(type)).image
-      }
-    }
   }
 }

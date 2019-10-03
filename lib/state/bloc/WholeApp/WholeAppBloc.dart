@@ -876,7 +876,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     if(!isStringEmpty(newMultimedia.localFullFileUrl)) {
       // If there's a local file, upload the file and update the multimedia in API, DB and state
-      updateMultimedia(newMultimedia, newConversationGroup);
+      updateMultimediaContent(newMultimedia, newConversationGroup);
     }
 
     // No matter what situation, you need to show the group photo to the user first(load faster)
@@ -1002,26 +1002,29 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return newMultimedia;
   }
 
-  Future<bool> updateMultimedia(Multimedia multimedia, ConversationGroup conversationGroup) async {
+  Future<bool> updateMultimediaContent(Multimedia multimedia, ConversationGroup conversationGroup) async {
     FirebaseStorageService firebaseStorageService = FirebaseStorageService();
     String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
+    String remoteThumbnailUrl = await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
     if(!isStringEmpty(remoteUrl)) {
       multimedia.remoteFullFileUrl = remoteUrl;
-      multimedia.remoteThumbnailUrl = remoteUrl;
+      multimedia.remoteThumbnailUrl = remoteThumbnailUrl;
 
       bool updated = await multimediaAPIService.editMultimedia(multimedia);
 
       if(!updated) {
         return null;
       }
-      bool updatedinDB = await multimediaDBService.editMultimedia(multimedia);
+      bool updatedInDB = await multimediaDBService.editMultimedia(multimedia);
 
-      if(!updatedinDB) {
+      if(!updatedInDB) {
         return null;
       }
 
       addMultimediaToState(AddMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
     }
+
+    return null;
   }
 
   Future<Message> uploadAndSaveMessage(Message message) async {
