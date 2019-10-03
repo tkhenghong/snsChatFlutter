@@ -20,6 +20,7 @@ import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
 
 import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as CustomImage;
 
 class GroupNamePage extends StatefulWidget {
   final List<Contact> selectedContacts;
@@ -39,6 +40,13 @@ class GroupNamePageState extends State<GroupNamePage> {
   WholeAppBloc wholeAppBloc;
   List<UserContact> userContactList = [];
   FileService fileService;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fileService = FileService();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +178,6 @@ class GroupNamePageState extends State<GroupNamePage> {
   Future<ConversationGroup> createGroupConversation(List<Contact> contact) async {
     print("createGroupConversation()");
     showLoading(context, "Creating conversation...");
-    fileService = FileService();
 
     ConversationGroup conversationGroup = new ConversationGroup(
       id: null,
@@ -232,5 +239,14 @@ class GroupNamePageState extends State<GroupNamePage> {
     setState(() {
       imageFile = image;
     });
+  }
+
+  getThumbnail() async {
+    CustomImage.Image image = CustomImage.decodeImage(imageFile.readAsBytesSync());
+    CustomImage.Image thumbnail = CustomImage.copyResize(image, width: 50);
+
+    // TODO: Here
+//    File(await fileService.)..writeAsBytesSync(encodePng(thumbnail));
+    File copiedThumbnailImage = await fileService.copyFile(imageFile, "ApplicationDocumentDirectory");
   }
 }

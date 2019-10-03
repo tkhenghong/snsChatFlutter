@@ -30,7 +30,7 @@ class FirebaseStorageService {
 
       // If meet these User Profile photo, Group Conversation Photo, or
       // Create Thumbnail for them
-      if (type == "GroupPhoto" || type == "User" || type == "UserContact") {
+      if (type == "Group" || type == "User" || type == "UserContact") {
         print("if (type == \"GroupPhoto\" || type == \"User\" || type == \"UserContact\")");
         String filePathInFirebaseStorage = '$type/$id/thumbnail-$fileName.$fileFormat';
         print("filePathInFirebaseStorage (thumbnail): " + filePathInFirebaseStorage);
