@@ -132,7 +132,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           tag: conversation.id,
           child: CircleAvatar(
             backgroundColor: Colors.white,
-            backgroundImage: imageService.processImage(multimedia, conversation.type), // temporary
+            backgroundImage: imageService.processImageThumbnail(multimedia, conversation.type), // temporary
             // TODO: Make the below code as an "image" if all multimedia URLs (and files) are missing
 //            child: conversation.groupPhoto.imageData.length == 0 ? Text(conversation.name[0]) : Text(''),
             child: Text(''),

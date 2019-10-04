@@ -130,7 +130,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                           child: CircleAvatar(
                             radius: 20.0,
                             backgroundColor: Colors.white,
-                            backgroundImage: imageService.processImage(multimedia, widget._conversationGroup.type),
+                            backgroundImage: imageService.processImageThumbnail(multimedia, widget._conversationGroup.type),
                           ),
                         ),
                         Padding(

@@ -12,12 +12,14 @@ import 'package:snschat_flutter/service/permissions/PermissionService.dart';
 class FileService {
   PermissionService permissionService = PermissionService();
 
+  // TODO: getApplicationDocumentDirectory should change to getDirectories,
+  // TODO: so you can get any directory based on where you want.
   Future<String> getApplicationDocumentDirectory() async {
     bool storageAccessGranted = await permissionService.requestStoragePermission();
     if (storageAccessGranted) {
       // get the application documents directory
 //      var dir = await getApplicationDocumentsDirectory();
-    // TODO: Testing directory
+    // TODO: Testing directory. Original should be the above code
       var dir = await getExternalStorageDirectory();
       // make sure it exists
       await dir.create(recursive: true);

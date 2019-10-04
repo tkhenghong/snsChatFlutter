@@ -190,11 +190,18 @@ class GroupNamePageState extends State<GroupNamePage> {
     print("conversationGroup: " + conversationGroup.toString());
     File copiedImageFile;
     File thumbnailImageFile;
+    DateTime startTime = DateTime.now();
+    DateTime endTime;
     if (!isStringEmpty(imageFile.path)) {
       // Copy full file to our directory. Create thumbnail of this image and copy this to our directory as well.
       copiedImageFile = await fileService.copyFile(imageFile, "ApplicationDocumentDirectory");
       thumbnailImageFile = await imageService.getImageThumbnail(imageFile);
+      endTime = DateTime.now();
     }
+
+    int differenceInMilliseconds = endTime.difference(startTime).inMilliseconds;
+
+    print("Miliseconds used to copy group photo to destination, create thumbnail of the group photo: " + differenceInMilliseconds.toString());
 
     // Multimedia for group chat
     Multimedia groupMultiMedia = Multimedia(

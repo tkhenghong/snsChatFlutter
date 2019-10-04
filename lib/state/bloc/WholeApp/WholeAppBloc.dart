@@ -717,6 +717,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return permissions;
   }
 
+  // TODO: Allow conversationGroup to be created first, other components have to update the conversationGroup from now on
+  // TODO: To allow faster loading
   Future<ConversationGroup> createConversationGroup(CreateConversationGroupEvent event) async {
     print("CreateConversationGroupEvent in BLOC");
     // Create Single Group successfully (1 ConversationGroup, 2 UserContact, 1 UnreadMessage, 1 Multimedia)
@@ -733,22 +735,14 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       // make unknown time, let server decide
       mobileNo: currentState.userState.mobileNo,
     );
-    print("Created UserContact");
     List<UserContact> userContactList = [];
 
     //Add yourself first
     userContactList.add(yourOwnUserContact);
-    print("Added yourself into userContactList.");
     event.contactList.forEach((contact) {
-      print("contact.displayName: " + contact.displayName);
-      print("contact.givenName: " + contact.givenName);
-      print("contact.familyName: " + contact.familyName.toString());
-      print("contact.middleName: " + contact.middleName.toString());
       List<String> primaryNo = [];
       if (contact.phones.length > 0) {
-        print("if (contact.phones.length > 0)");
         contact.phones.forEach((phoneNo) {
-          print("phoneNo.value: " + phoneNo.value);
           primaryNo.add(phoneNo.value);
         });
       } else {
@@ -771,7 +765,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
       userContact.mobileNo = primaryNo.length == 0 ? "" : primaryNo[0];
 
-      print("userContact.mobileNo: " + userContact.mobileNo);
 
       // If got Malaysia number
       if (primaryNo[0].contains("+60")) {
@@ -783,16 +776,9 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       userContactList.add(userContact);
     });
 
-    print("userContactList.length: " + userContactList.length.toString());
-
-    print("Group members have been added into userContactList.");
-
     // Note: Backend already helped you to check any duplicates of the same UserContact
     List<UserContact> newUserContactList = await uploadUserContactList(userContactList);
     print("Uploaded and saved uploadUserContactList to REST, DB and State.");
-
-    print("event.contactList.length: " + event.contactList.length.toString());
-    print("newUserContactList.length: " + newUserContactList.length.toString());
 
     // event.contactList doesn't include yourself, so newUserContactList.length - 1 OR Any UserContact is not added into the list (means not uploaded successfully)
     if ((event.contactList.length != newUserContactList.length - 1) || newUserContactList.length == 0) {
