@@ -40,10 +40,7 @@ class UserContactAPIService {
   Future<UserContact> getUserContact(String userContactId) async {
     var httpResponse = await http.get(REST_URL + "/userContact/" + userContactId);
 
-    print("getUserContact Success");
     if (httpResponseIsOK(httpResponse)) {
-      print("if (httpResponseIsOK(httpResponse))");
-      print("httpResponse.body: " + httpResponse.body);
       UserContact userContact = new UserContact.fromJson(json.decode(httpResponse.body));
       return userContact;
     }

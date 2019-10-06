@@ -315,12 +315,16 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         userId: null);
 
     File userContactImage;
-    if (!isObjectEmpty(contact.avatar)) {
-      userContactImage = await getUserContactPhoto(contact);
-    }
+    // TOOD: Temporary close it because not yet able to convert Uint8List to File
+//    if (!isObjectEmpty(contact.avatar) && contact.avatar.length > 0) {
+//      print("if (!isObjectEmpty(contact.avatar))");
+//      print("contact.avatar.length.toString(): " + contact.avatar.length.toString());
+//      userContactImage = await getUserContactPhoto(contact);
+//    }
 
     if (!isObjectEmpty(userContactImage)) {
       groupMultiMedia.localFullFileUrl = userContactImage.path;
+      // TODO: What if this userContact is known user in REST?
       groupMultiMedia.localThumbnailUrl = userContactImage.path;
     }
 

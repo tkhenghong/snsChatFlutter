@@ -56,6 +56,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   UserContactDBService userContactDBService = UserContactDBService();
 
   PermissionService permissionService = PermissionService();
+  FirebaseStorageService firebaseStorageService = FirebaseStorageService();
 
   @override
   WholeAppState get initialState => WholeAppState.initial();
@@ -131,6 +132,9 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     } else if (event is SendMessageEvent) {
       sendMessage(event);
       print("Send signal to app state!");
+      yield currentState;
+    } else if (event is ProcessMessageFromWebSocketEvent) {
+      processMessageFromWebSocket(event);
       yield currentState;
     }
   }
@@ -765,7 +769,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
       userContact.mobileNo = primaryNo.length == 0 ? "" : primaryNo[0];
 
-
       // If got Malaysia number
       if (primaryNo[0].contains("+60")) {
         print("If Malaysian Number: ");
@@ -796,8 +799,9 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (event.conversationGroup.type == "Personal") {
       event.conversationGroup.adminMemberIds = userContactList.map((UserContact userContact) => userContact.id).toList();
     } else {
-      event.conversationGroup.adminMemberIds
-          .add(userContactList.firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentState.userState.mobileNo).id);
+      event.conversationGroup.adminMemberIds.add(userContactList
+          .firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentState.userState.mobileNo, orElse: () => null)
+          .id);
     }
 
     // 2. Upload ConversationGroup
@@ -808,8 +812,14 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
 
     print("newConversationGroup.id: " + newConversationGroup.id.toString());
-    addConversationToState(
-        AddConversationGroupEvent(conversationGroup: newConversationGroup, callback: (ConversationGroup conversationGroup) {}));
+    addConversationToState(AddConversationGroupEvent(
+        conversationGroup: newConversationGroup,
+        callback: (ConversationGroup conversationGroup) {
+          // Send success here to prevent the user waiting too long (ConversationGroup with UnreadMessage)
+          if (!isObjectEmpty(event)) {
+            event.callback(conversationGroup);
+          }
+        }));
 
     // 3. Upload Unread Message
     UnreadMessage newUnreadMessage = await uploadAndSaveUnreadMessage(newConversationGroup);
@@ -836,10 +846,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     // No matter what situation, you need to show the group photo to the user first(load faster)
     addMultimediaToState(AddMultimediaEvent(multimedia: newMultimedia, callback: (Multimedia multimedia) {}));
-
-    if (!isObjectEmpty(event)) {
-      event.callback(newConversationGroup);
-    }
 
     return newConversationGroup;
   }
@@ -957,7 +963,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   Future<bool> updateMultimediaContent(Multimedia multimedia, ConversationGroup conversationGroup) async {
-    FirebaseStorageService firebaseStorageService = FirebaseStorageService();
     String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
     String remoteThumbnailUrl =
         await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
@@ -997,6 +1002,25 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
 
     return newMessage;
+  }
+
+  processMessageFromWebSocket(ProcessMessageFromWebSocketEvent event) async {
+    // If Own message we won't save it
+    if (event.message.senderId == currentState.userState.id) {
+      if (!isObjectEmpty(event)) {
+        event.callback(event.message);
+      }
+    } else {
+      // Other people message
+      print("Other people's message");
+      messageDBService.addMessage(event.message);
+
+      dispatch(AddMessageEvent(message: event.message, callback: (Message message) {}));
+    }
+
+    if (!isObjectEmpty(event)) {
+      event.callback(event.message);
+    }
   }
 
   addConversationToState(AddConversationGroupEvent event) async {
@@ -1045,6 +1069,15 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
   }
 
+  UnreadMessage findUnreadMessage(String conversationId) {
+    UnreadMessage unreadMessage;
+    unreadMessage = currentState.unreadMessageList.firstWhere((UnreadMessage existingUnreadMessage) {
+      return existingUnreadMessage.conversationId == conversationId;
+    }, orElse: () => null);
+
+    return unreadMessage;
+  }
+
   // Don't have to replace message
   addMessageToState(AddMessageEvent event) async {
     // Check repetition
@@ -1082,6 +1115,15 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!isObjectEmpty(event)) {
       event.callback(event.multimedia);
     }
+  }
+
+  Multimedia findMultimedia(String conversationId) {
+    Multimedia multimedia;
+    multimedia = currentState.multimediaList.firstWhere((Multimedia existingMultimedia) {
+      return existingMultimedia.conversationId.toString() == conversationId && isStringEmpty(existingMultimedia.messageId);
+    }, orElse: () => null);
+
+    return multimedia;
   }
 
   addSettingsToState(AddSettingsEvent event) async {

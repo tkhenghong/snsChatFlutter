@@ -118,21 +118,22 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   PageListItem mapConversationToPageListTile(ConversationGroup conversation) {
-    print("conversation.id: " + conversation.id);
-    Multimedia multimedia = findMultimedia(conversation.id);
-    UnreadMessage unreadMessage = findUnreadMessage(conversation.id);
+    Multimedia multimedia = wholeAppBloc.findMultimedia(conversation.id);
+    UnreadMessage unreadMessage = wholeAppBloc.findUnreadMessage(conversation.id);
 
     return PageListItem(
         title: Hero(
           tag: conversation.name,
           child: Text(conversation.name),
         ),
-        subtitle: Text(unreadMessage.lastMessage),
+        subtitle: Text(isObjectEmpty(unreadMessage) ? "" : unreadMessage.lastMessage),
+//        subtitle: Text(""),
         leading: Hero(
           tag: conversation.id,
           child: CircleAvatar(
             backgroundColor: Colors.white,
             backgroundImage: imageService.processImageThumbnail(multimedia, conversation.type), // temporary
+//              backgroundImage: AssetImage(fileService.getDefaultImagePath(conversation.type)),
             // TODO: Make the below code as an "image" if all multimedia URLs (and files) are missing
 //            child: conversation.groupPhoto.imageData.length == 0 ? Text(conversation.name[0]) : Text(''),
             child: Text(''),
@@ -142,34 +143,14 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           children: <Widget>[
             Padding(
               padding: EdgeInsets.only(top: 10.0),
-              child: Text(formatTime(unreadMessage.date), style: TextStyle(fontSize: 9.0)),
+              child: Text(isObjectEmpty(unreadMessage) ? "" : formatTime(unreadMessage.date), style: TextStyle(fontSize: 9.0)),
             ),
-            Text(unreadMessage.count.toString() == "0" ? "" : unreadMessage.count.toString())
+            Text(isObjectEmpty(unreadMessage) ? "" : unreadMessage.count.toString() == "0" ? "" : unreadMessage.count.toString())
           ],
         ),
         onTap: (BuildContext context, object) {
           // Send argument need to use the old way
           Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversation))));
         });
-  }
-
-  Multimedia findMultimedia(String conversationId) {
-    Multimedia multimedia;
-    multimedia = wholeAppBloc.currentState.multimediaList.firstWhere((Multimedia existingMultimedia) {
-      return existingMultimedia.conversationId.toString() == conversationId && isStringEmpty(existingMultimedia.messageId);
-    });
-
-    return multimedia;
-  }
-
-  UnreadMessage findUnreadMessage(String conversationId) {
-    UnreadMessage unreadMessage;
-    wholeAppBloc.currentState.unreadMessageList.forEach((UnreadMessage existingUnreadMessage) {
-      if (existingUnreadMessage.conversationId == conversationId) {
-        unreadMessage = existingUnreadMessage;
-      }
-    });
-
-    return unreadMessage;
   }
 }

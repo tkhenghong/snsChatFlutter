@@ -42,7 +42,7 @@ class FileService {
 
     switch (directory) {
       case "ApplicationDocumentDirectory":
-        destinationFilePath = await getApplicationDocumentDirectory();
+        destinationFilePath = await getApplicationDocumentDirectory() + "/";
         break;
       default:
         break;
@@ -52,11 +52,8 @@ class FileService {
       destinationFilePath = destinationFilePath + fileName;
     }
 
-    print("destinationFilePath: " + destinationFilePath);
-
     try {
       File copiedFile = await fileToBeCopied.copy(destinationFilePath);
-      print("copiedFile.path: " + copiedFile.path);
       return copiedFile;
     } catch (e) {
       Fluttertoast.showToast(msg: "Error in file copying.");
@@ -70,16 +67,13 @@ class FileService {
     try {
       String path = await getApplicationDocumentDirectory();
       String fileFullPath = path + "/" + fileName + "." + fileFormat;
-      print("fileFullPath: " + fileFullPath);
       File file = await File(fileFullPath).writeAsBytes(rawFile);
       bool fileExist = await file.exists();
-      print("fileExist: " + fileExist.toString());
       File copiedFile = await file.copy(fileFullPath);
-      print("copiedFile.path: " + copiedFile.path);
       return copiedFile;
     } catch (e) {
       print("downloadFileFromUint8List error");
-      print("e: " + e.toString());
+      print("Reason: " + e.toString());
       return null;
     }
   }
@@ -138,7 +132,8 @@ class FileService {
         return "lib/ui/icons/default_user_icon.png";
         break;
       default:
-        return "lib/ui/icons/none.png";
+//        return "lib/ui/icons/none.png";
+        return "lib/ui/icons/default_user_icon.png";
         break;
     }
   }

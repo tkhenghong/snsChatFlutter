@@ -51,6 +51,7 @@ class FirebaseStorageService {
       return url;
     } catch (e) {
       print("Upload failed");
+      print("Reason: " + e.toString());
       return null;
     }
   }

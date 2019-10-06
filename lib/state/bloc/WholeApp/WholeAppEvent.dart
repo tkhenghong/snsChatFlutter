@@ -98,6 +98,13 @@ class SendMessageEvent extends WholeAppEvent {
   SendMessageEvent({this.message, this.multimedia, this.callback});
 }
 
+class ProcessMessageFromWebSocketEvent extends WholeAppEvent {
+  Message message;
+  Function callback;
+
+  ProcessMessageFromWebSocketEvent({this.message, this.callback});
+}
+
 // Conversation
 class AddConversationGroupEvent extends WholeAppEvent {
   ConversationGroup conversationGroup;

@@ -187,7 +187,7 @@ class GroupNamePageState extends State<GroupNamePage> {
         description: '',
         adminMemberIds: [],
         memberIds: []);
-    print("conversationGroup: " + conversationGroup.toString());
+
     File copiedImageFile;
     File thumbnailImageFile;
     DateTime startTime = DateTime.now();
@@ -201,7 +201,8 @@ class GroupNamePageState extends State<GroupNamePage> {
 
     int differenceInMilliseconds = endTime.difference(startTime).inMilliseconds;
 
-    print("Miliseconds used to copy group photo to destination, create thumbnail of the group photo: " + differenceInMilliseconds.toString());
+    print(
+        "Miliseconds used to copy group photo to destination, create thumbnail of the group photo: " + differenceInMilliseconds.toString());
 
     // Multimedia for group chat
     Multimedia groupMultiMedia = Multimedia(

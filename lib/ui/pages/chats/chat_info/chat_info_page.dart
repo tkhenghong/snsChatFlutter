@@ -38,14 +38,13 @@ class ChatInfoPageState extends State<ChatInfoPage> {
     super.initState();
     textEditingController = new TextEditingController();
     textEditingController.text = widget._conversationGroup.name;
+    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
+    wholeAppBloc = _wholeAppBloc;
   }
 
   @override
   Widget build(BuildContext context) {
-    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
-    wholeAppBloc = _wholeAppBloc;
-
-    Multimedia multimedia = findMultimedia(widget._conversationGroup.id);
+    Multimedia multimedia = wholeAppBloc.findMultimedia(widget._conversationGroup.id);
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Material(
@@ -349,11 +348,6 @@ class ChatInfoPageState extends State<ChatInfoPage> {
             ],
           )),
     );
-  }
-
-  Multimedia findMultimedia(String conversationId) {
-    return wholeAppBloc.currentState.multimediaList.firstWhere((Multimedia existingMultimedia) =>
-        existingMultimedia.conversationId.toString() == conversationId && isStringEmpty(existingMultimedia.messageId));
   }
 
   // TODO: Decide where to put this logic (same with chat_group_list_page.dart)

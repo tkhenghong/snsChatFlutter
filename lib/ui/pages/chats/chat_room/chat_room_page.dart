@@ -40,6 +40,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   bool imageFound = false;
 
   String WEBSOCKET_URL = globals.WEBSOCKET_URL;
+  List<Message> messageList = [];
 
   File imageFile;
   WebSocketChannel webSocketChannel;
@@ -69,6 +70,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       print("onData listener is working.");
       print("onData: " + onData.toString());
       Message receivedMessage = Message.fromJson(json.decode(onData));
+      wholeAppBloc.dispatch(ProcessMessageFromWebSocketEvent(message: receivedMessage, callback: (Message message){
+        setState(() {});
+      }));
       print("receivedMessage.id" + receivedMessage.id);
       print("receivedMessage.messageContent" + receivedMessage.messageContent);
     }, onError: (onError) {
@@ -89,13 +93,11 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
   @override
   Widget build(BuildContext context) {
-    print("chat_room_page.dart build()");
-
     print("widget._conversation.id: " + widget._conversationGroup.id);
 
-    Multimedia multimedia = findMultimedia(widget._conversationGroup.id);
+    Multimedia multimedia = wholeAppBloc.findMultimedia(widget._conversationGroup.id);
 
-    // TODO: Send message using websocket
+    // TODO: Send message using WebSocket
     // Do in this order (To allow resend message if anything goes wrong [Send timeout, websocket down, Internet down situations])
     // 1. Send to DB
     // 2. Send to State
@@ -613,13 +615,5 @@ class ChatRoomPageState extends State<ChatRoomPage> {
         isShowSticker = false;
       });
     }
-  }
-
-  List<Message> messageList = [];
-
-  // TODO: Move this into BLOC (easier)
-  Multimedia findMultimedia(String conversationId) {
-    return wholeAppBloc.currentState.multimediaList.firstWhere((Multimedia existingMultimedia) =>
-        existingMultimedia.conversationId.toString() == conversationId && isStringEmpty(existingMultimedia.messageId));
   }
 }
