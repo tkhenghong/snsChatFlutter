@@ -8,7 +8,6 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 // Not using it right now, currently testing it inside chat room page.
 class WebSocketService {
-  final IOWebSocketChannel channel = IOWebSocketChannel.connect("ws://echo.websocket.org");
   String WEBSOCKET_URL = globals.WEBSOCKET_URL;
 
   WebSocketChannel webSocketChannel;
