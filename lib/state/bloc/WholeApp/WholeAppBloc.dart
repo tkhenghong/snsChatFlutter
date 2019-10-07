@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -34,6 +35,7 @@ import 'package:snschat_flutter/objects/user/user.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/objects/websocket/WebSocketMessage.dart';
 import 'package:snschat_flutter/service/FirebaseStorage/FirebaseStorageService.dart';
+import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/service/permissions/PermissionService.dart';
 import 'package:snschat_flutter/service/websocket/WebSocketService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
@@ -58,6 +60,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   PermissionService permissionService = PermissionService();
   FirebaseStorageService firebaseStorageService = FirebaseStorageService();
+  ImageService imageService = ImageService();
   WebSocketService webSocketService = WebSocketService();
 
   @override
@@ -591,6 +594,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   Future<bool> loadConversationsOfTheUser() async {
     List<ConversationGroup> conversationGroupListFromServer =
         await conversationGroupAPIService.getConversationGroupsForUser(currentState.userState.id);
+    print("conversationGroupListFromServer.length: " + conversationGroupListFromServer.length.toString());
     if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0) {
       // Update the current info of the conversationGroup to latest information
       conversationGroupListFromServer.forEach((conversationGroupFromServer) {
@@ -784,6 +788,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       userContactList.add(userContact);
     });
 
+    // 1. Upload UserContactList
     // Note: Backend already helped you to check any duplicates of the same UserContact
     List<UserContact> newUserContactList = await uploadUserContactList(userContactList);
     print("Uploaded and saved uploadUserContactList to REST, DB and State.");
@@ -811,10 +816,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     // 2. Upload ConversationGroup
     ConversationGroup newConversationGroup = await uploadAndSaveConversationGroup(event.conversationGroup);
-    print("Uploaded and saved conversationGroup to REST, DB and State.");
+    print("Uploaded and saved conversationGroup to REST, DB.");
     if (newConversationGroup == null) {
       return null;
     }
+
+    event.conversationGroup = newConversationGroup;
 
     print("newConversationGroup.id: " + newConversationGroup.id.toString());
     addConversationToState(AddConversationGroupEvent(
@@ -827,8 +834,16 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
         }));
 
     // 3. Upload Unread Message
-    UnreadMessage newUnreadMessage = await uploadAndSaveUnreadMessage(newConversationGroup);
-    print("Uploaded and saved UnreadMessage to REST, DB and State.");
+    UnreadMessage unreadMessage = UnreadMessage(
+      id: null,
+      conversationId: newConversationGroup.id,
+      count: 0,
+      date: DateTime.now().millisecondsSinceEpoch,
+      lastMessage: "",
+      userId: newConversationGroup.creatorUserId,
+    );
+    UnreadMessage newUnreadMessage = await uploadAndSaveUnreadMessage(unreadMessage);
+    print("Uploaded and saved UnreadMessage to REST, DB.");
     if (newUnreadMessage == null) {
       return null;
     }
@@ -838,8 +853,18 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     event.multimedia.conversationId = newConversationGroup.id;
 
     // 4. Upload Group Multimedia
+    // Create thumbnail before upload
+    File thumbnailImageFile;
+    if (!isStringEmpty(event.multimedia.localFullFileUrl)) {
+      thumbnailImageFile = await imageService.getImageThumbnail(event.imageFile);
+    }
+
+    if (!isObjectEmpty(thumbnailImageFile)) {
+      event.multimedia.localThumbnailUrl = thumbnailImageFile.path;
+    }
+
     Multimedia newMultimedia = await uploadAndSaveMultimedia(event.multimedia);
-    print("Uploaded and saved ConversationGroup Multimedia to REST, DB and State.");
+    print("Uploaded and saved ConversationGroup Multimedia to REST, DB.");
     if (newMultimedia == null) {
       return null;
     }
@@ -926,16 +951,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return newConversationGroup;
   }
 
-  Future<UnreadMessage> uploadAndSaveUnreadMessage(ConversationGroup conversationGroup) async {
-    UnreadMessage unreadMessage = UnreadMessage(
-      id: null,
-      conversationId: conversationGroup.id,
-      count: 0,
-      date: DateTime.now().millisecondsSinceEpoch,
-      lastMessage: "",
-      userId: conversationGroup.creatorUserId,
-    );
-
+  Future<UnreadMessage> uploadAndSaveUnreadMessage(UnreadMessage unreadMessage) async {
     UnreadMessage newUnreadMessage = await unreadMessageAPIService.addUnreadMessage(unreadMessage);
 
     if (isStringEmpty(newUnreadMessage.id)) {

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:contacts_service/contacts_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -86,9 +88,10 @@ class CreateConversationGroupEvent extends WholeAppEvent {
   String type;
   List<Contact> contactList;
   Multimedia multimedia;
+  File imageFile;
   Function callback;
 
-  CreateConversationGroupEvent({this.conversationGroup, this.type, this.contactList, this.multimedia, this.callback});
+  CreateConversationGroupEvent({this.conversationGroup, this.type, this.contactList, this.imageFile, this.multimedia, this.callback});
 }
 
 class SendMessageEvent extends WholeAppEvent {

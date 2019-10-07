@@ -11,7 +11,6 @@ import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
-import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
@@ -36,7 +35,6 @@ class GroupNamePageState extends State<GroupNamePage> {
   WholeAppBloc wholeAppBloc;
   List<UserContact> userContactList = [];
   FileService fileService;
-  ImageService imageService = ImageService();
 
   @override
   void initState() {
@@ -189,13 +187,11 @@ class GroupNamePageState extends State<GroupNamePage> {
         memberIds: []);
 
     File copiedImageFile;
-    File thumbnailImageFile;
     DateTime startTime = DateTime.now();
     DateTime endTime;
     if (!isStringEmpty(imageFile.path)) {
       // Copy full file to our directory. Create thumbnail of this image and copy this to our directory as well.
       copiedImageFile = await fileService.copyFile(imageFile, "ApplicationDocumentDirectory");
-      thumbnailImageFile = await imageService.getImageThumbnail(imageFile);
       endTime = DateTime.now();
     }
 
@@ -210,7 +206,7 @@ class GroupNamePageState extends State<GroupNamePage> {
       imageDataId: null,
       imageFileId: null,
       localFullFileUrl: isObjectEmpty(copiedImageFile) ? null : copiedImageFile.path,
-      localThumbnailUrl: isObjectEmpty(thumbnailImageFile) ? null : thumbnailImageFile.path,
+      localThumbnailUrl: null,
       remoteThumbnailUrl: null,
       remoteFullFileUrl: null,
       messageId: null,
@@ -220,6 +216,7 @@ class GroupNamePageState extends State<GroupNamePage> {
 
     wholeAppBloc.dispatch(CreateConversationGroupEvent(
         multimedia: groupMultiMedia,
+        imageFile: imageFile,
         contactList: widget.selectedContacts,
         conversationGroup: conversationGroup,
         type: "Group",
