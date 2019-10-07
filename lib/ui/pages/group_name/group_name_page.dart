@@ -63,7 +63,7 @@ class GroupNamePageState extends State<GroupNamePage> {
                     style: TextStyle(fontSize: 18.0),
                   ),
                   Text(
-                    "Select a contact",
+                    "Add group name below",
                     style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.w300),
                   )
                 ],
@@ -115,6 +115,9 @@ class GroupNamePageState extends State<GroupNamePage> {
                           children: <Widget>[
                             TextField(
                               controller: textEditingController,
+                              decoration: InputDecoration(
+                                hintText: "Type group subject here..."
+                              ),
                             ),
                             Text(
                               "Provide a group subject and optional group icon.",

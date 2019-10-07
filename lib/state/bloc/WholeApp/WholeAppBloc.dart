@@ -571,6 +571,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   Future<bool> loadUserPreviousData(LoadUserPreviousDataEvent event) async {
+    print("LoadUserPreviousDataEvent");
     bool loadConversationsDone = await loadConversationsOfTheUser();
     bool loadUnreadMessageDone = await loadUnreadMessageOfTheUser();
     bool loadUserContactsDone = await getUserContactsOfTheUser();
@@ -592,15 +593,20 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   // At this point the currentState already has conversationGroupList from DB
   Future<bool> loadConversationsOfTheUser() async {
+    print("WholeAppBloc.dart loadConversationsOfTheUser()");
     List<ConversationGroup> conversationGroupListFromServer =
         await conversationGroupAPIService.getConversationGroupsForUser(currentState.userState.id);
     print("conversationGroupListFromServer.length: " + conversationGroupListFromServer.length.toString());
     if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0) {
+      print("if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0)");
       // Update the current info of the conversationGroup to latest information
       conversationGroupListFromServer.forEach((conversationGroupFromServer) {
+        print("conversationGroupFromServer.id: " + conversationGroupFromServer.id);
+        print("conversationGroupFromServer.name: " + conversationGroupFromServer.name);
         // TODO: Review the performance of this loop
         bool conversationGroupExist = currentState.conversationGroupList
             .contains((ConversationGroup conversationGroupFromDB) => conversationGroupFromDB.id == conversationGroupFromServer.id);
+        print("conversationGroupExist: " + conversationGroupExist.toString());
         if (conversationGroupExist) {
           conversationGroupDBService.editConversationGroup(conversationGroupFromServer);
         } else {

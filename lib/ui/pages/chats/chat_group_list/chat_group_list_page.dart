@@ -56,10 +56,11 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         });
         wholeAppBloc.dispatch(CheckUserLoginEvent(callback: (bool hasSignedIn) {
           if (hasSignedIn) {
-            if (getListDone == false) {
-              // TODO: Get Conversations for the User
-              wholeAppBloc.dispatch(LoadUserPreviousDataEvent(callback: (bool done) {}));
-            }
+            wholeAppBloc.dispatch(LoadUserPreviousDataEvent(callback: (bool done) {
+              setState(() {
+                print("Reload the page");
+              });
+            }));
           } else {
             wholeAppBloc.dispatch(UserSignOutEvent()); // Remove State data before leaving
             goToLoginPage();
