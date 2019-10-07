@@ -594,11 +594,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   // At this point the currentState already has conversationGroupList from DB
   Future<bool> loadConversationsOfTheUser() async {
     print("WholeAppBloc.dart loadConversationsOfTheUser()");
+    // TODO: Go backend to fix the problem on why previous conversationGroups cannot get to the frontend(Suspecting MongoDB command problem)
     List<ConversationGroup> conversationGroupListFromServer =
         await conversationGroupAPIService.getConversationGroupsForUser(currentState.userState.id);
-    print("conversationGroupListFromServer.length: " + conversationGroupListFromServer.length.toString());
     if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0) {
       print("if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0)");
+      print("conversationGroupListFromServer.length: " + conversationGroupListFromServer.length.toString());
       // Update the current info of the conversationGroup to latest information
       conversationGroupListFromServer.forEach((conversationGroupFromServer) {
         print("conversationGroupFromServer.id: " + conversationGroupFromServer.id);
