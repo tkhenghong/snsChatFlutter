@@ -1,36 +1,36 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:convert';
+
+import 'package:snschat_flutter/objects/websocket/WebSocketMessage.dart';
 import 'package:web_socket_channel/io.dart';
+
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 // Not using it right now, currently testing it inside chat room page.
 class WebSocketService {
   final IOWebSocketChannel channel = IOWebSocketChannel.connect("ws://echo.websocket.org");
+  String WEBSOCKET_URL = globals.WEBSOCKET_URL;
 
-  test() async {
-    print("WebsocketService test()");
-    StreamBuilder(
-      stream: channel.stream,
-      builder: (context, snapshot) {
-        if(snapshot.hasData) {
-          print("WebsocketService if(snapshot.hasData)");
-          print("snapshot.data: " + snapshot.data);
+  WebSocketChannel webSocketChannel;
+  Stream<dynamic> webSocketStream;
 
-//          channel.sink.add("Message sent back to Websocket server");
-
-          return Text(snapshot.data);
-        } else {
-          print("WebsocketService if(!snapshot.hasData)");
-          return Text("No data");
-        }
-      },
-    );
-
-    print("Second type of Listen");
-    channel.stream.listen((message) {
-        print("Channel connected.");
-        print("message: " + message.toString());
-    });
-
-    channel.sink.add("Testing message");
+  connect() async {
+    webSocketChannel = IOWebSocketChannel.connect(WEBSOCKET_URL);
+    webSocketStream = webSocketChannel.stream.asBroadcastStream();
   }
+
+  Stream<dynamic> getWebSocketStream() {
+    return webSocketStream;
+  }
+
+  sendWebSocketMessage(WebSocketMessage webSocketMessage) {
+    webSocketChannel.sink.add(json.encode(webSocketMessage.toJson()));
+  }
+
+  closeWebSocket() {
+    webSocketChannel.sink.close();
+  }
+
+
 
 }

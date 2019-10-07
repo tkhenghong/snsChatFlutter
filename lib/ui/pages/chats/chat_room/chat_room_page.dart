@@ -12,14 +12,13 @@ import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
+import 'package:snschat_flutter/objects/websocket/WebSocketMessage.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
-import 'package:web_socket_channel/io.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 
@@ -43,12 +42,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   List<Message> messageList = [];
 
   File imageFile;
-  WebSocketChannel webSocketChannel;
-  Stream<dynamic> webSocketStream;
 
   TextEditingController textEditingController = new TextEditingController();
   ScrollController listScrollController = new ScrollController();
-  RefreshController _refreshController;
   FocusNode focusNode = new FocusNode();
 
   WholeAppBloc wholeAppBloc;
@@ -58,36 +54,16 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   @override
   void initState() {
     super.initState();
-    _refreshController = new RefreshController();
     focusNode.addListener(onFocusChange);
     isLoading = false;
     isShowSticker = false;
     wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
-    webSocketChannel = IOWebSocketChannel.connect(WEBSOCKET_URL);
-    webSocketStream = webSocketChannel.stream.asBroadcastStream();
-
-    webSocketStream.listen((onData) {
-      print("onData listener is working.");
-      print("onData: " + onData.toString());
-      Message receivedMessage = Message.fromJson(json.decode(onData));
-      wholeAppBloc.dispatch(ProcessMessageFromWebSocketEvent(message: receivedMessage, callback: (Message message){
-        setState(() {});
-      }));
-      print("receivedMessage.id" + receivedMessage.id);
-      print("receivedMessage.messageContent" + receivedMessage.messageContent);
-    }, onError: (onError) {
-      print("onError listener is working.");
-      print("onError: " + onError.toString());
-    }, onDone: () {
-      print("onDone listener is working.");
-    }, cancelOnError: false);
   }
 
   @override
   void dispose() {
     listScrollController.dispose();
     textEditingController.dispose();
-    webSocketChannel.sink.close();
     super.dispose();
   }
 
@@ -547,7 +523,10 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               if (isObjectEmpty(message)) {
                 Fluttertoast.showToast(msg: 'Message not sent. Please try again.', toastLength: Toast.LENGTH_SHORT);
               } else {
-                webSocketChannel.sink.add(json.encode(message.toJson()));
+                WebSocketMessage webSocketMessage = WebSocketMessage(
+                  message: message
+                );
+                wholeAppBloc.dispatch(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (WebSocketMessage websocketMessage) {}));
                 Fluttertoast.showToast(msg: 'Message sent!', toastLength: Toast.LENGTH_SHORT);
                 // Need to do this,or else the message list won't refresh
                 setState(() {

@@ -1,5 +1,5 @@
 import 'dart:async';
-//import 'dart:core';
+import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -32,11 +32,12 @@ import 'package:snschat_flutter/objects/settings/settings.dart';
 import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
 import 'package:snschat_flutter/objects/user/user.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
+import 'package:snschat_flutter/objects/websocket/WebSocketMessage.dart';
 import 'package:snschat_flutter/service/FirebaseStorage/FirebaseStorageService.dart';
 import 'package:snschat_flutter/service/permissions/PermissionService.dart';
+import 'package:snschat_flutter/service/websocket/WebSocketService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
-import 'package:time_formatter/time_formatter.dart';
 
 class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   ConversationGroupAPIService conversationGroupAPIService = ConversationGroupAPIService();
@@ -57,6 +58,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   PermissionService permissionService = PermissionService();
   FirebaseStorageService firebaseStorageService = FirebaseStorageService();
+  WebSocketService webSocketService = WebSocketService();
 
   @override
   WholeAppState get initialState => WholeAppState.initial();
@@ -99,10 +101,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       yield currentState;
     } else if (event is AddMessageEvent) {
       addMessageToState(event);
-      print("Send signal after AddMessageEvent");
       yield currentState;
     } else if (event is AddMultimediaEvent) {
-      print("Send signal after AddMultimediaEvent");
       addMultimediaToState(event);
       yield currentState;
     } else if (event is AddSettingsEvent) {
@@ -131,7 +131,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       yield currentState;
     } else if (event is SendMessageEvent) {
       sendMessage(event);
-      print("Send signal to app state!");
+      yield currentState;
+    } else if(event is InitializeWebSocketServiceEvent) {
+      listenToWebSocketMessage(event);
+      yield currentState;
+    } else if(event is SendWebSocketMessageEvent) {
+      sendWebSocketMessage(event);
       yield currentState;
     } else if (event is ProcessMessageFromWebSocketEvent) {
       processMessageFromWebSocket(event);
@@ -1004,25 +1009,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return newMessage;
   }
 
-  processMessageFromWebSocket(ProcessMessageFromWebSocketEvent event) async {
-    // If Own message we won't save it
-    if (event.message.senderId == currentState.userState.id) {
-      if (!isObjectEmpty(event)) {
-        event.callback(event.message);
-      }
-    } else {
-      // Other people message
-      print("Other people's message");
-      messageDBService.addMessage(event.message);
-
-      dispatch(AddMessageEvent(message: event.message, callback: (Message message) {}));
-    }
-
-    if (!isObjectEmpty(event)) {
-      event.callback(event.message);
-    }
-  }
-
   addConversationToState(AddConversationGroupEvent event) async {
     // Check repetition
     bool conversationExist = false;
@@ -1192,6 +1178,76 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     currentState.googleSignIn = event.googleSignIn;
     if (!isObjectEmpty(event)) {
       event.callback(event.googleSignIn);
+    }
+  }
+
+  // Initialize, connect to WebSocket and listen to WebSocketMessage object
+  listenToWebSocketMessage(InitializeWebSocketServiceEvent event) {
+    webSocketService.connect();
+    Stream<dynamic> webSocketStream = webSocketService.getWebSocketStream();
+    webSocketStream.listen((onData) {
+      print("onData listener is working.");
+      print("onData: " + onData.toString());
+      WebSocketMessage receivedWebSocketMessage = WebSocketMessage.fromJson(json.decode(onData));
+      dispatch(ProcessMessageFromWebSocketEvent(webSocketMessage: receivedWebSocketMessage, callback: (WebSocketMessage webSocketMessage){}));
+    }, onError: (onError) {
+      print("onError listener is working.");
+      print("onError: " + onError.toString());
+    }, onDone: () {
+      print("onDone listener is working.");
+    }, cancelOnError: false);
+  }
+
+  // Send WebSocketMessage
+  sendWebSocketMessage(SendWebSocketMessageEvent event) async {
+    webSocketService.sendWebSocketMessage(event.webSocketMessage);
+
+    if (!isObjectEmpty(event)) {
+      event.callback(event.webSocketMessage);
+    }
+  }
+
+  // Process WebSocketMessage objects to identify what object is inside this object(object in object)
+  // Used in 1 place only which is inside InitializeWebSocketServiceEvent
+  processMessageFromWebSocket(ProcessMessageFromWebSocketEvent event) async {
+    print("ProcessMessageFromWebSocketEvent");
+    WebSocketMessage webSocketMessage = event.webSocketMessage;
+    if(!isObjectEmpty(webSocketMessage.conversationGroup)) {
+      // Conversation Group message
+    } else if(!isObjectEmpty(webSocketMessage.message)) {
+      // "Message" message
+      print("else if(!isObjectEmpty(webSocketMessage.message))");
+
+      if (event.webSocketMessage.message.senderId == currentState.userState.id) {
+        // If it's our own message, we won't save it
+        // Nothing
+      } else {
+        // If it's other people message
+        print("Other people's message");
+        messageDBService.addMessage(event.webSocketMessage.message);
+
+        dispatch(AddMessageEvent(message: event.webSocketMessage.message, callback: (Message message) {}));
+      }
+    } else if(!isObjectEmpty(webSocketMessage.multimedia)) {
+      // Multimedia message
+
+    } else if(!isObjectEmpty(webSocketMessage.settings)) {
+      // Settings message
+
+    } else if(!isObjectEmpty(webSocketMessage.unreadMessage)) {
+      // UnreadMessage message
+
+    } else if(!isObjectEmpty(webSocketMessage.user)) {
+      // User message
+
+    } else if(!isObjectEmpty(webSocketMessage.userContact)) {
+      // UserContact message
+
+    }
+
+
+    if (!isObjectEmpty(event)) {
+      event.callback(event.webSocketMessage);
     }
   }
 }

@@ -1,6 +1,3 @@
-import 'package:snschat_flutter/general/functions/repeating_functions.dart';
-import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
-
 // Why UserContact is needed if it can be merged into User itself?
 // Because I need to create a table that has unknown contact numbers(those who hasn't registered as User)
 class UserContact {
@@ -30,7 +27,6 @@ class UserContact {
       multimediaId: json['multimediaId'],
     );
 
-    var lastSeenDateFromJson = json['lastSeenDate'];
     var userIdsFromJson = json['userIds'];
 
     List<String> userIds = new List<String>.from(userIdsFromJson);

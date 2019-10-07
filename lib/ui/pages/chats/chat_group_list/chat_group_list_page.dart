@@ -47,6 +47,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   initialize() async {
+    wholeAppBloc.dispatch(InitializeWebSocketServiceEvent());
     wholeAppBloc.dispatch(LoadDatabaseToStateEvent(callback: (bool loadDone) {
       if (loadDone) {
         // Set list done to true to prevent waiting due to poor Internet connection

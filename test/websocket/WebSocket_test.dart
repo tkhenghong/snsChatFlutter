@@ -4,6 +4,6 @@ import 'package:snschat_flutter/service/websocket/WebSocketService.dart';
 void main() {
   WebSocketService webSocketService = WebSocketService();
   test(("Test WebSocket Connection Configuration"), () async {
-    webSocketService.test();
+//    webSocketService.test();
   });
 }

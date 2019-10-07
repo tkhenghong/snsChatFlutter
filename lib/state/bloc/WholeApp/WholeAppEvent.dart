@@ -8,6 +8,7 @@ import 'package:snschat_flutter/objects/settings/settings.dart';
 import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
 import 'package:snschat_flutter/objects/user/user.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
+import 'package:snschat_flutter/objects/websocket/WebSocketMessage.dart';
 
 abstract class WholeAppEvent {}
 
@@ -99,10 +100,10 @@ class SendMessageEvent extends WholeAppEvent {
 }
 
 class ProcessMessageFromWebSocketEvent extends WholeAppEvent {
-  Message message;
+  WebSocketMessage webSocketMessage;
   Function callback;
 
-  ProcessMessageFromWebSocketEvent({this.message, this.callback});
+  ProcessMessageFromWebSocketEvent({this.webSocketMessage, this.callback});
 }
 
 // Conversation
@@ -191,4 +192,17 @@ class AddUnreadMessageEvent extends WholeAppEvent {
   Function callback;
 
   AddUnreadMessageEvent({this.unreadMessage, this.callback});
+}
+
+class InitializeWebSocketServiceEvent extends WholeAppEvent {
+  Function callback;
+
+  InitializeWebSocketServiceEvent({this.callback});
+}
+
+class SendWebSocketMessageEvent extends WholeAppEvent {
+  WebSocketMessage webSocketMessage;
+  Function callback;
+
+  SendWebSocketMessageEvent({this.webSocketMessage, this.callback});
 }
