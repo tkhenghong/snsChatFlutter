@@ -29,7 +29,4 @@ class WebSocketService {
   closeWebSocket() {
     webSocketChannel.sink.close();
   }
-
-
-
 }

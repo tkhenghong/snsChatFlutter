@@ -132,10 +132,10 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     } else if (event is SendMessageEvent) {
       sendMessage(event);
       yield currentState;
-    } else if(event is InitializeWebSocketServiceEvent) {
+    } else if (event is InitializeWebSocketServiceEvent) {
       listenToWebSocketMessage(event);
       yield currentState;
-    } else if(event is SendWebSocketMessageEvent) {
+    } else if (event is SendWebSocketMessageEvent) {
       sendWebSocketMessage(event);
       yield currentState;
     } else if (event is ProcessMessageFromWebSocketEvent) {
@@ -1189,7 +1189,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       print("onData listener is working.");
       print("onData: " + onData.toString());
       WebSocketMessage receivedWebSocketMessage = WebSocketMessage.fromJson(json.decode(onData));
-      dispatch(ProcessMessageFromWebSocketEvent(webSocketMessage: receivedWebSocketMessage, callback: (WebSocketMessage webSocketMessage){}));
+      dispatch(
+          ProcessMessageFromWebSocketEvent(webSocketMessage: receivedWebSocketMessage, callback: (WebSocketMessage webSocketMessage) {}));
     }, onError: (onError) {
       print("onError listener is working.");
       print("onError: " + onError.toString());
@@ -1212,9 +1213,9 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   processMessageFromWebSocket(ProcessMessageFromWebSocketEvent event) async {
     print("ProcessMessageFromWebSocketEvent");
     WebSocketMessage webSocketMessage = event.webSocketMessage;
-    if(!isObjectEmpty(webSocketMessage.conversationGroup)) {
+    if (!isObjectEmpty(webSocketMessage.conversationGroup)) {
       // Conversation Group message
-    } else if(!isObjectEmpty(webSocketMessage.message)) {
+    } else if (!isObjectEmpty(webSocketMessage.message)) {
       // "Message" message
       print("else if(!isObjectEmpty(webSocketMessage.message))");
 
@@ -1228,23 +1229,22 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
         dispatch(AddMessageEvent(message: event.webSocketMessage.message, callback: (Message message) {}));
       }
-    } else if(!isObjectEmpty(webSocketMessage.multimedia)) {
+    } else if (!isObjectEmpty(webSocketMessage.multimedia)) {
       // Multimedia message
 
-    } else if(!isObjectEmpty(webSocketMessage.settings)) {
+    } else if (!isObjectEmpty(webSocketMessage.settings)) {
       // Settings message
 
-    } else if(!isObjectEmpty(webSocketMessage.unreadMessage)) {
+    } else if (!isObjectEmpty(webSocketMessage.unreadMessage)) {
       // UnreadMessage message
 
-    } else if(!isObjectEmpty(webSocketMessage.user)) {
+    } else if (!isObjectEmpty(webSocketMessage.user)) {
       // User message
 
-    } else if(!isObjectEmpty(webSocketMessage.userContact)) {
+    } else if (!isObjectEmpty(webSocketMessage.userContact)) {
       // UserContact message
 
     }
-
 
     if (!isObjectEmpty(event)) {
       event.callback(event.webSocketMessage);

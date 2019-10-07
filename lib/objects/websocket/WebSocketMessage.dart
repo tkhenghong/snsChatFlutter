@@ -30,9 +30,6 @@ class WebSocketMessage {
     var userFromJson = jsonBody['user'];
     var userContactFromJson = jsonBody['userContact'];
 
-    print("conversationGroupFromJson: " + conversationGroupFromJson.toString());
-    print("messageFromJson: " + messageFromJson.toString());
-
     webSocketMessage.conversationGroup =
         isStringEmpty(conversationGroupFromJson) ? null : ConversationGroup.fromJson(json.decode(conversationGroupFromJson));
     webSocketMessage.message = isStringEmpty(messageFromJson) ? null : Message.fromJson(json.decode(messageFromJson));

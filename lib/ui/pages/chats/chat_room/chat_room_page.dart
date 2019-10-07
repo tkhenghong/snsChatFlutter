@@ -523,10 +523,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               if (isObjectEmpty(message)) {
                 Fluttertoast.showToast(msg: 'Message not sent. Please try again.', toastLength: Toast.LENGTH_SHORT);
               } else {
-                WebSocketMessage webSocketMessage = WebSocketMessage(
-                  message: message
-                );
-                wholeAppBloc.dispatch(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (WebSocketMessage websocketMessage) {}));
+                WebSocketMessage webSocketMessage = WebSocketMessage(message: message);
+                wholeAppBloc.dispatch(
+                    SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (WebSocketMessage websocketMessage) {}));
                 Fluttertoast.showToast(msg: 'Message sent!', toastLength: Toast.LENGTH_SHORT);
                 // Need to do this,or else the message list won't refresh
                 setState(() {
