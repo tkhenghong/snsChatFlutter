@@ -28,21 +28,6 @@ class FirebaseStorageService {
       print("Uploading to " + uploadPath);
       StorageUploadTask uploadTask = storageRef.putFile(file);
 
-      // If meet these User Profile photo, Group Conversation Photo, or
-      // Create Thumbnail for them
-      if (type == "Group" || type == "User" || type == "UserContact") {
-        print("if (type == \"GroupPhoto\" || type == \"User\" || type == \"UserContact\")");
-        String filePathInFirebaseStorage = '$type/$id/thumbnail-$fileName.$fileFormat';
-        print("filePathInFirebaseStorage (thumbnail): " + filePathInFirebaseStorage);
-        StorageReference thumbnailRef = FirebaseStorage.instance.ref().child(filePathInFirebaseStorage);
-        String uploadThumbnailPath = await thumbnailRef.getPath();
-        print("Uploading to " + uploadThumbnailPath);
-        StorageUploadTask uploadThumbnailTask = thumbnailRef.putFile(file);
-        StorageTaskSnapshot downloadThumbnailUrl = await uploadThumbnailTask.onComplete;
-        String thumbnailURL = await downloadThumbnailUrl.ref.getDownloadURL();
-        print("thumbnailURL: " + thumbnailURL);
-      }
-
       // Get Remote URL
       StorageTaskSnapshot downloadUrl = await uploadTask.onComplete;
       final String url = (await downloadUrl.ref.getDownloadURL());
