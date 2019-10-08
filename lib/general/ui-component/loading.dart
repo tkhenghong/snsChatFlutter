@@ -28,6 +28,7 @@ void showLoading(BuildContext context, String message) {
 void showCenterLoadingIndicator(BuildContext context) {
   showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return Center(
           child: CircularProgressIndicator(),

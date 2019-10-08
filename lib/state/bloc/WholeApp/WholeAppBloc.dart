@@ -596,7 +596,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     print("WholeAppBloc.dart loadConversationsOfTheUser()");
     // TODO: Go backend to fix the problem on why previous conversationGroups cannot get to the frontend(Suspecting MongoDB command problem)
     List<ConversationGroup> conversationGroupListFromServer =
-        await conversationGroupAPIService.getConversationGroupsForUser(currentState.userState.id);
+        await conversationGroupAPIService.getConversationGroupsForUserByMobileNo(currentState.userState.mobileNo);
     if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0) {
       print("if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0)");
       print("conversationGroupListFromServer.length: " + conversationGroupListFromServer.length.toString());
@@ -628,6 +628,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   Future<bool> loadMultimediaOfTheUser() async {
     List<Multimedia> multimediaList = [];
 
+    // TODO: Should get a list of multimedia from User, UserContact, ConversationGroup and Message (A lot of work from backend)
     Multimedia multimediaFromServer = await multimediaAPIService.getMultimediaOfAUser(currentState.userState.id);
 
     if (isObjectEmpty(multimediaFromServer)) {

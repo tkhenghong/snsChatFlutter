@@ -47,12 +47,14 @@ class ConversationGroupAPIService {
     return null;
   }
 
-  Future<List<ConversationGroup>> getConversationGroupsForUser(String userId) async {
-    var httpResponse = await http.get(REST_URL + "/conversationGroup/user/" + userId);
+  Future<List<ConversationGroup>> getConversationGroupsForUserByMobileNo(String mobileNo) async {
+    var httpResponse = await http.get(REST_URL + "/conversationGroup/user/mobileNo/" + mobileNo);
     if (httpResponseIsOK(httpResponse)) {
       Iterable list = json.decode(httpResponse.body);
       List<ConversationGroup> conversationList = list.map((model) => ConversationGroup.fromJson(model)).toList();
       return conversationList;
+    } else {
+      print("if (!httpResponseIsOK(httpResponse))");
     }
     return null;
   }
