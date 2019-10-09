@@ -834,7 +834,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     event.conversationGroup = newConversationGroup;
 
     print("newConversationGroup.id: " + newConversationGroup.id.toString());
-    addConversationToState(AddConversationGroupEvent(
+    dispatch(AddConversationGroupEvent(
         conversationGroup: newConversationGroup,
         callback: (ConversationGroup conversationGroup) {
           // Send success here to prevent the user waiting too long (ConversationGroup with UnreadMessage)
@@ -857,8 +857,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (newUnreadMessage == null) {
       return null;
     }
-
-    addUnreadMessageToState(AddUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
 
     event.multimedia.conversationId = newConversationGroup.id;
 
@@ -918,10 +916,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     // Do this instead of triggering method directly will make the Bloc to resend the signals to listeners
     dispatch(AddMessageEvent(message: newMessage, callback: (Message message) {}));
 
-    if (multimediaExist) {
-      dispatch(AddMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
-    }
-
     if (!isObjectEmpty(event)) {
       event.callback(newMessage);
     }
@@ -958,6 +952,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return null;
     }
 
+    dispatch(AddConversationGroupEvent(conversationGroup: newConversationGroup, callback: (ConversationGroup conversationGroup) {}));
+
     return newConversationGroup;
   }
 
@@ -974,6 +970,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return null;
     }
 
+    dispatch(AddUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
+
     return newUnreadMessage;
   }
 
@@ -989,6 +987,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!conversationGroupMultimediaSaved) {
       return null;
     }
+
+    dispatch(AddMultimediaEvent(multimedia: newMultimedia, callback: (Multimedia multimedia) {}));
 
     return newMultimedia;
   }
@@ -1012,7 +1012,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
         return null;
       }
 
-      addMultimediaToState(AddMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
+      dispatch(AddMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
     }
 
     return null;
@@ -1031,6 +1031,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!messageSaved) {
       return null;
     }
+
+    dispatch(AddMessageEvent(message: newMessage, callback: (Message message) {}));
 
     return newMessage;
   }
