@@ -637,6 +637,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     multimediaList.add(multimediaFromServer);
 
+    // Get multimedia of the conversationGroups
     if (!isObjectEmpty(currentState.conversationGroupList) && currentState.conversationGroupList.length > 0) {
       for (ConversationGroup conversationGroup in currentState.conversationGroupList) {
         List<Multimedia> multimediaListFromServer = await multimediaAPIService.getAllMultimediaOfAConversationGroup(conversationGroup.id);
@@ -648,6 +649,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       }
     }
 
+    // Get multimedia of the UserContacts that this user own
     if (!isObjectEmpty(currentState.userContactList) && currentState.userContactList.length > 0) {
       for (UserContact userContact in currentState.userContactList) {
         Multimedia multimediaFromServer3 = await multimediaAPIService.getMultimediaOfAUserContact(userContact.id);

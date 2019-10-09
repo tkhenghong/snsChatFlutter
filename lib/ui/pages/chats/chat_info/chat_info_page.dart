@@ -10,6 +10,7 @@ import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
+import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 
 class ChatInfoPage extends StatefulWidget {
   ConversationGroup _conversationGroup;
@@ -48,305 +49,328 @@ class ChatInfoPageState extends State<ChatInfoPage> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Material(
-          color: Colors.white,
-          child: CustomScrollView(
-            physics: BouncingScrollPhysics(),
-            slivers: <Widget>[
-              SliverAppBar(
-                floating: true,
-                pinned: true,
-                titleSpacing: 0.0,
-                expandedHeight: 250.0,
-                flexibleSpace: FlexibleSpaceBar(
-                    title: Hero(
-                      tag: widget._conversationGroup.name,
-                      child: FlatButton(
-                        onPressed: () async {
-                          CustomDialogs customDialog = new CustomDialogs(
-                              context: context,
-                              title: "Edit Group Name",
-                              description: "Edit the group name below. Press OK to save.",
-                              value: widget._conversationGroup.name);
-                          String groupName = await customDialog.showConfirmationDialog();
-                          if (widget._conversationGroup.name != groupName) {
-                            widget._conversationGroup.name = groupName;
-                          }
-                        },
-                        child: Text(
-                          widget._conversationGroup.name,
-                          style: TextStyle(color: Colors.white),
-                          overflow: TextOverflow.fade,
-                          softWrap: true,
+        color: Colors.white,
+        child: BlocBuilder(
+          bloc: wholeAppBloc,
+          builder: (BuildContext context, WholeAppState state) {
+            ConversationGroup conversationGroup = state.conversationGroupList.firstWhere(
+                (ConversationGroup existingConversationGroup) => existingConversationGroup.id == widget._conversationGroup.id,
+                orElse: null);
+            return CustomScrollView(
+              physics: BouncingScrollPhysics(),
+              slivers: <Widget>[
+                SliverAppBar(
+                  floating: true,
+                  pinned: true,
+                  titleSpacing: 0.0,
+                  expandedHeight: 250.0,
+                  flexibleSpace: FlexibleSpaceBar(
+                      title: Hero(
+                        tag: conversationGroup.name,
+                        child: FlatButton(
+                          onPressed: () async {
+                            CustomDialogs customDialog = new CustomDialogs(
+                                context: context,
+                                title: "Edit Group Name",
+                                description: "Edit the group name below. Press OK to save.",
+                                value: conversationGroup.name);
+                            String groupName = await customDialog.showConfirmationDialog();
+                            if (conversationGroup.name != groupName) {
+                              conversationGroup.name = groupName;
+                              // TODO: Update Group name in REST, DB and State
+                            }
+                          },
+                          child: Text(
+                            conversationGroup.name,
+                            style: TextStyle(color: Colors.white),
+                            overflow: TextOverflow.fade,
+                            softWrap: true,
+                          ),
                         ),
                       ),
-                    ),
-                    background: Hero(
-                      tag: widget._conversationGroup.id,
-                      child: processImage(multimedia, widget._conversationGroup.type), // at bottom
-                    )),
-                actions: <Widget>[
-                  IconButton(
-                      icon: Icon(Icons.share),
-                      onPressed: () {
-                        Fluttertoast.showToast(
-                            msg: "Shared!",
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM,
-                            timeInSecForIos: 1,
-                            fontSize: 16.0);
-                      })
-                ],
-              ),
-              SliverList(
-                delegate: SliverChildListDelegate([
-                  Material(
-                      color: Colors.white,
-                      child: Container(
-                        height: 60.0,
-                        child: InkWell(
-                          onTap: () {
-                            print("Tapped.");
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 10.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Padding(
-                                  padding: EdgeInsets.only(top: 5.0),
-                                ),
-                                Text(
-                                  "Group description",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(top: 5.0),
-                                ),
-                                Text(
-                                  isStringEmpty(widget._conversationGroup.description)
-                                      ? "Add Group description"
-                                      : widget._conversationGroup.description,
-                                  style: TextStyle(fontSize: 17.0, color: Colors.black54),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(bottom: 5.0),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                      background: Hero(
+                        tag: conversationGroup.id,
+                        child: processImage(multimedia, conversationGroup.type), // at bottom
                       )),
-                  Material(
-                      color: Colors.white,
-                      child: Container(
-                        height: 60.0,
-                        child: InkWell(
-                          onTap: () {
-                            print("Tapped.");
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 10.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Padding(
-                                  padding: EdgeInsets.only(top: 5.0),
-                                ),
-                                Text(
-                                  "Notifications",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(top: 5.0),
-                                ),
-                                Text(
-                                  widget._conversationGroup.notificationExpireDate == 0 ? "On" : "Off",
-                                  style: TextStyle(fontSize: 17.0, color: Colors.black54),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(bottom: 5.0),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      )),
-                  Material(
-                      color: Colors.white,
-                      child: Container(
-                        height: 60.0,
-                        child: InkWell(
-                          onTap: () {
-                            print("Tapped.");
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Padding(
+                  actions: <Widget>[
+                    IconButton(
+                        icon: Icon(Icons.share),
+                        onPressed: () {
+                          Fluttertoast.showToast(
+                              msg: "Shared!",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIos: 1,
+                              fontSize: 16.0);
+                        })
+                  ],
+                ),
+                SliverList(
+                  delegate: SliverChildListDelegate([
+                    Material(
+                        color: Colors.white,
+                        child: Container(
+                          height: 60.0,
+                          child: InkWell(
+                            onTap: () {
+                              print("Tapped.");
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(left: 10.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Padding(
                                     padding: EdgeInsets.only(top: 5.0),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: <Widget>[
-                                        Text(
-                                          "Favourites⭐",
-                                          style: TextStyle(fontSize: 17.0),
-                                        ),
-                                        Icon(Icons.keyboard_arrow_right)
-                                      ],
-                                    )),
-                                Padding(
-                                  padding: EdgeInsets.only(bottom: 5.0),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      )),
-                  Material(
-                      color: Colors.white,
-                      child: Container(
-                        height: 60.0,
-                        child: InkWell(
-                          onTap: () {
-                            print("Tapped.");
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Padding(
+                                  ),
+                                  InkWell(
+                                    onTap: () async {
+                                      CustomDialogs customDialog = new CustomDialogs(
+                                          context: context,
+                                          title: "Edit Group Description",
+                                          description: "Edit the group description below. Press OK to save.",
+                                          value: conversationGroup.description);
+                                      String groupDescription = await customDialog.showConfirmationDialog();
+                                      if (conversationGroup.description != groupDescription) {
+                                        conversationGroup.description = groupDescription;
+                                        // TODO: Update Group description in REST, DB and State
+                                      }
+                                    },
+                                    child: Text(
+                                      "Group description",
+                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  Padding(
                                     padding: EdgeInsets.only(top: 5.0),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: <Widget>[
-                                        Text(
-                                          "Media",
-                                          style: TextStyle(fontSize: 17.0),
-                                        ),
-                                        Icon(Icons.keyboard_arrow_right)
-                                      ],
-                                    )),
-                                Padding(
-                                  padding: EdgeInsets.only(bottom: 5.0),
-                                ),
-                              ],
+                                  ),
+                                  Text(
+                                    isStringEmpty(conversationGroup.description) ? "Add Group description" : conversationGroup.description,
+                                    style: TextStyle(fontSize: 17.0, color: Colors.black54),
+
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 5.0),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      )),
-                  Material(
-                      color: Colors.white,
-                      child: Container(
-                        height: 60.0,
-                        child: InkWell(
-                          onTap: () {
-                            print("Tapped.");
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Padding(
+                        )),
+                    Material(
+                        color: Colors.white,
+                        child: Container(
+                          height: 60.0,
+                          child: InkWell(
+                            onTap: () {
+                              print("Tapped.");
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(left: 10.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Padding(
                                     padding: EdgeInsets.only(top: 5.0),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: <Widget>[
-                                        Icon(Icons.people),
-                                        Text(
-                                          "Group members",
-                                          style: TextStyle(fontSize: 17.0),
-                                        ),
-                                      ],
-                                    )),
-                                Padding(
-                                  padding: EdgeInsets.only(bottom: 5.0),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      )),
-                  Material(
-                      color: Colors.white,
-                      child: Container(
-                        height: 60.0,
-                        child: InkWell(
-                          onTap: () {
-                            print("Tapped.");
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Padding(
+                                  ),
+                                  Text(
+                                    "Notifications",
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  Padding(
                                     padding: EdgeInsets.only(top: 5.0),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: <Widget>[
-                                        Icon(Icons.exit_to_app, color: Colors.red),
-                                        Text(
-                                          "Exit group",
-                                          style: TextStyle(fontSize: 17.0, color: Colors.red),
-                                        ),
-                                      ],
-                                    )),
-                                Padding(
-                                  padding: EdgeInsets.only(bottom: 5.0),
-                                ),
-                              ],
+                                  ),
+                                  Text(
+                                    conversationGroup.notificationExpireDate == 0 ? "On" : "Off",
+                                    style: TextStyle(fontSize: 17.0, color: Colors.black54),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 5.0),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      )),
-                  Material(
-                      color: Colors.white,
-                      child: Container(
-                        height: 60.0,
-                        child: InkWell(
-                          onTap: () {
-                            print("Tapped.");
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Padding(
-                                    padding: EdgeInsets.only(top: 5.0),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: <Widget>[
-                                        Icon(Icons.report, color: Colors.red),
-                                        Text(
-                                          "Report group",
-                                          style: TextStyle(fontSize: 17.0, color: Colors.red),
-                                        ),
-                                      ],
-                                    )),
-                                Padding(
-                                  padding: EdgeInsets.only(bottom: 5.0),
-                                ),
-                              ],
+                        )),
+                    Material(
+                        color: Colors.white,
+                        child: Container(
+                          height: 60.0,
+                          child: InkWell(
+                            onTap: () {
+                              print("Tapped.");
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Padding(
+                                      padding: EdgeInsets.only(top: 5.0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          Text(
+                                            "Favourites⭐",
+                                            style: TextStyle(fontSize: 17.0),
+                                          ),
+                                          Icon(Icons.keyboard_arrow_right)
+                                        ],
+                                      )),
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 5.0),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      )),
-                ]),
-              ),
-            ],
-          )),
+                        )),
+                    Material(
+                        color: Colors.white,
+                        child: Container(
+                          height: 60.0,
+                          child: InkWell(
+                            onTap: () {
+                              print("Tapped.");
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Padding(
+                                      padding: EdgeInsets.only(top: 5.0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          Text(
+                                            "Media",
+                                            style: TextStyle(fontSize: 17.0),
+                                          ),
+                                          Icon(Icons.keyboard_arrow_right)
+                                        ],
+                                      )),
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 5.0),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )),
+                    Material(
+                        color: Colors.white,
+                        child: Container(
+                          height: 60.0,
+                          child: InkWell(
+                            onTap: () {
+                              print("Tapped.");
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Padding(
+                                      padding: EdgeInsets.only(top: 5.0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: <Widget>[
+                                          Icon(Icons.people),
+                                          Text(
+                                            "Group members",
+                                            style: TextStyle(fontSize: 17.0),
+                                          ),
+                                        ],
+                                      )),
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 5.0),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )),
+                    Material(
+                        color: Colors.white,
+                        child: Container(
+                          height: 60.0,
+                          child: InkWell(
+                            onTap: () {
+                              print("Tapped.");
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Padding(
+                                      padding: EdgeInsets.only(top: 5.0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: <Widget>[
+                                          Icon(Icons.exit_to_app, color: Colors.red),
+                                          Text(
+                                            "Exit group",
+                                            style: TextStyle(fontSize: 17.0, color: Colors.red),
+                                          ),
+                                        ],
+                                      )),
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 5.0),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )),
+                    Material(
+                        color: Colors.white,
+                        child: Container(
+                          height: 60.0,
+                          child: InkWell(
+                            onTap: () {
+                              print("Tapped.");
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Padding(
+                                      padding: EdgeInsets.only(top: 5.0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: <Widget>[
+                                          Icon(Icons.report, color: Colors.red),
+                                          Text(
+                                            "Report group",
+                                            style: TextStyle(fontSize: 17.0, color: Colors.red),
+                                          ),
+                                        ],
+                                      )),
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 5.0),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )),
+                  ]),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
 
