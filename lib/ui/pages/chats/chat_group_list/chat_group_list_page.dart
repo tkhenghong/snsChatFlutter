@@ -120,7 +120,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   PageListItem mapConversationToPageListTile(ConversationGroup conversation) {
-    Multimedia multimedia = wholeAppBloc.findMultimedia(conversation.id);
+    Multimedia multimedia = wholeAppBloc.findMultimediaByConversationId(conversation.id);
     UnreadMessage unreadMessage = wholeAppBloc.findUnreadMessage(conversation.id);
 
     return PageListItem(

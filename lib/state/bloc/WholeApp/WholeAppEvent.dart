@@ -117,6 +117,13 @@ class AddConversationGroupEvent extends WholeAppEvent {
   AddConversationGroupEvent({this.conversationGroup, this.callback});
 }
 
+class EditConversationGroupEvent extends WholeAppEvent {
+  ConversationGroup conversationGroup;
+  Function callback;
+
+  EditConversationGroupEvent({this.conversationGroup, this.callback});
+}
+
 // Message
 
 class AddMessageEvent extends WholeAppEvent {
@@ -124,6 +131,13 @@ class AddMessageEvent extends WholeAppEvent {
   Function callback;
 
   AddMessageEvent({this.message, this.callback});
+}
+
+class EditMessageEvent extends WholeAppEvent {
+  Message message;
+  Function callback;
+
+  EditMessageEvent({this.message, this.callback});
 }
 
 // Multimedia
@@ -135,6 +149,13 @@ class AddMultimediaEvent extends WholeAppEvent {
   AddMultimediaEvent({this.multimedia, this.callback});
 }
 
+class EditMultimediaEvent extends WholeAppEvent {
+  Multimedia multimedia;
+  Function callback;
+
+  EditMultimediaEvent({this.multimedia, this.callback});
+}
+
 // Settings
 
 class AddSettingsEvent extends WholeAppEvent {
@@ -142,6 +163,13 @@ class AddSettingsEvent extends WholeAppEvent {
   Function callback;
 
   AddSettingsEvent({this.settings, this.callback});
+}
+
+class EditSettingsEvent extends WholeAppEvent {
+  Settings settings;
+  Function callback;
+
+  EditSettingsEvent({this.settings, this.callback});
 }
 
 // User
@@ -153,7 +181,14 @@ class AddUserEvent extends WholeAppEvent {
   AddUserEvent({this.user, this.callback});
 }
 
-// Settings
+class EditUserEvent extends WholeAppEvent {
+  User user;
+  Function callback;
+
+  EditUserEvent({this.user, this.callback});
+}
+
+// UserContact
 
 class AddUserContactEvent extends WholeAppEvent {
   UserContact userContact;
@@ -162,13 +197,12 @@ class AddUserContactEvent extends WholeAppEvent {
   AddUserContactEvent({this.userContact, this.callback});
 }
 
-// Storage Contact
-
-class AddContactEvent extends WholeAppEvent {
-  Contact contact;
+// Used to edit your own UserContact
+class EditUserContactEvent extends WholeAppEvent {
+  UserContact userContact;
   Function callback;
 
-  AddContactEvent({this.contact, this.callback});
+  EditUserContactEvent({this.userContact, this.callback});
 }
 
 // FirebaseAuth

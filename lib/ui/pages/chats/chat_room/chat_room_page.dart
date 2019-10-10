@@ -71,7 +71,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   Widget build(BuildContext context) {
     print("widget._conversation.id: " + widget._conversationGroup.id);
 
-    Multimedia multimedia = wholeAppBloc.findMultimedia(widget._conversationGroup.id);
+    Multimedia multimedia = wholeAppBloc.findMultimediaByConversationId(widget._conversationGroup.id);
 
     // TODO: Send message using WebSocket
     // Do in this order (To allow resend message if anything goes wrong [Send timeout, websocket down, Internet down situations])

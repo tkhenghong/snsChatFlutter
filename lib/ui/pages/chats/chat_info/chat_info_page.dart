@@ -45,7 +45,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    Multimedia multimedia = wholeAppBloc.findMultimedia(widget._conversationGroup.id);
+    Multimedia multimedia = wholeAppBloc.findMultimediaByConversationId(widget._conversationGroup.id);
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Material(
@@ -78,6 +78,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             if (conversationGroup.name != groupName) {
                               conversationGroup.name = groupName;
                               // TODO: Update Group name in REST, DB and State
+
                             }
                           },
                           child: Text(

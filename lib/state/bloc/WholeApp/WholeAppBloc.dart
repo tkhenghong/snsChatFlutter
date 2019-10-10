@@ -117,9 +117,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     } else if (event is AddUserContactEvent) {
       addUserContactToState(event);
       yield currentState;
-    } else if (event is AddContactEvent) {
-      addContactToState(event);
-      yield currentState;
     } else if (event is AddFirebaseAuthEvent) {
       addFirebaseAuthToState(event);
       yield currentState;
@@ -594,7 +591,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   // At this point the currentState already has conversationGroupList from DB
   Future<bool> loadConversationsOfTheUser() async {
     print("WholeAppBloc.dart loadConversationsOfTheUser()");
-    // TODO: Go backend to fix the problem on why previous conversationGroups cannot get to the frontend(Suspecting MongoDB command problem)
     List<ConversationGroup> conversationGroupListFromServer =
         await conversationGroupAPIService.getConversationGroupsForUserByMobileNo(currentState.userState.mobileNo);
     if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0) {
@@ -800,7 +796,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     // 1. Upload UserContactList
     // Note: Backend already helped you to check any duplicates of the same UserContact
-    List<UserContact> newUserContactList = await uploadUserContactList(userContactList);
+    List<UserContact> newUserContactList = await addUserContactList(userContactList);
     print("Uploaded and saved uploadUserContactList to REST, DB and State.");
 
     // event.contactList doesn't include yourself, so newUserContactList.length - 1 OR Any UserContact is not added into the list (means not uploaded successfully)
@@ -825,7 +821,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
 
     // 2. Upload ConversationGroup
-    ConversationGroup newConversationGroup = await uploadAndSaveConversationGroup(event.conversationGroup);
+    ConversationGroup newConversationGroup = await addConversationGroup(event.conversationGroup);
     print("Uploaded and saved conversationGroup to REST, DB.");
     if (newConversationGroup == null) {
       return null;
@@ -852,7 +848,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       lastMessage: "",
       userId: newConversationGroup.creatorUserId,
     );
-    UnreadMessage newUnreadMessage = await uploadAndSaveUnreadMessage(unreadMessage);
+    UnreadMessage newUnreadMessage = await addUnreadMessage(unreadMessage);
     print("Uploaded and saved UnreadMessage to REST, DB.");
     if (newUnreadMessage == null) {
       return null;
@@ -871,7 +867,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       event.multimedia.localThumbnailUrl = thumbnailImageFile.path;
     }
 
-    Multimedia newMultimedia = await uploadAndSaveMultimedia(event.multimedia);
+    Multimedia newMultimedia = await addMultimedia(event.multimedia);
     print("Uploaded and saved ConversationGroup Multimedia to REST, DB.");
     if (newMultimedia == null) {
       return null;
@@ -889,7 +885,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   Future<Message> sendMessage(SendMessageEvent event) async {
-    Message newMessage = await uploadAndSaveMessage(event.message);
+    Message newMessage = await addMessage(event.message);
     if (isObjectEmpty(newMessage)) {
       if (!isObjectEmpty(event)) {
         event.callback(null);
@@ -902,7 +898,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     if (multimediaExist) {
       event.multimedia.messageId = newMessage.id;
-      multimedia = await uploadAndSaveMultimedia(event.multimedia);
+      multimedia = await addMultimedia(event.multimedia);
     }
 
     // If multimediaExist(When you pass in the object) but multimedia is empty (due to upload to OSS failed/save object to API/DB failed)
@@ -923,7 +919,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   // Upload the list of UserContact to REST API (checked duplicates at there), get them back, and save all of them to DB and State
-  Future<List<UserContact>> uploadUserContactList(List<UserContact> userContactList) async {
+  Future<List<UserContact>> addUserContactList(List<UserContact> userContactList) async {
     List<UserContact> newUserContactList = [];
     for (UserContact userContact in userContactList) {
       UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
@@ -941,13 +937,15 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return newUserContactList;
   }
 
-  Future<ConversationGroup> uploadAndSaveConversationGroup(ConversationGroup conversationGroup) async {
+  Future<ConversationGroup> addConversationGroup(ConversationGroup conversationGroup) async {
     ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(conversationGroup);
 
-    if (newConversationGroup == null) {
+    if (isObjectEmpty(newConversationGroup)) {
       return null;
     }
+
     bool conversationGroupSaved = await conversationGroupDBService.addConversationGroup(newConversationGroup);
+
     if (!conversationGroupSaved) {
       return null;
     }
@@ -957,10 +955,27 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return newConversationGroup;
   }
 
-  Future<UnreadMessage> uploadAndSaveUnreadMessage(UnreadMessage unreadMessage) async {
+  Future<ConversationGroup> editConversationGroup(ConversationGroup conversationGroup) async {
+    bool updatedInREST = await conversationGroupAPIService.editConversationGroup(conversationGroup);
+
+    if (!updatedInREST) {
+      return null;
+    }
+    bool conversationGroupSaved = await conversationGroupDBService.editConversationGroup(conversationGroup);
+
+    if (!conversationGroupSaved) {
+      return null;
+    }
+
+    dispatch(AddConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+
+    return conversationGroup;
+  }
+
+  Future<UnreadMessage> addUnreadMessage(UnreadMessage unreadMessage) async {
     UnreadMessage newUnreadMessage = await unreadMessageAPIService.addUnreadMessage(unreadMessage);
 
-    if (isStringEmpty(newUnreadMessage.id)) {
+    if (isObjectEmpty(newUnreadMessage)) {
       return null;
     }
 
@@ -975,10 +990,28 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return newUnreadMessage;
   }
 
-  Future<Multimedia> uploadAndSaveMultimedia(Multimedia multimedia) async {
+  Future<UnreadMessage> editUnreadMessage(UnreadMessage unreadMessage) async {
+    bool updatedInREST = await unreadMessageAPIService.editUnreadMessage(unreadMessage);
+
+    if (!updatedInREST) {
+      return null;
+    }
+
+    bool unreadMessageSaved = await unreadMessageDBService.editUnreadMessage(unreadMessage);
+
+    if (!unreadMessageSaved) {
+      return null;
+    }
+
+    dispatch(AddUnreadMessageEvent(unreadMessage: unreadMessage, callback: (UnreadMessage unreadMessage) {}));
+
+    return unreadMessage;
+  }
+
+  Future<Multimedia> addMultimedia(Multimedia multimedia) async {
     Multimedia newMultimedia = await multimediaAPIService.addMultimedia(multimedia);
 
-    if (isStringEmpty(newMultimedia.id)) {
+    if (isObjectEmpty(newMultimedia)) {
       return null;
     }
 
@@ -993,6 +1026,24 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return newMultimedia;
   }
 
+  Future<Multimedia> editMultimedia(Multimedia multimedia) async {
+    bool updatedInREST = await multimediaAPIService.editMultimedia(multimedia);
+
+    if (!updatedInREST) {
+      return null;
+    }
+
+    bool multimediaSaved = await multimediaDBService.editMultimedia(multimedia);
+
+    if (!multimediaSaved) {
+      return null;
+    }
+
+    dispatch(AddMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
+
+    return multimedia;
+  }
+
   Future<bool> updateMultimediaContent(Multimedia multimedia, ConversationGroup conversationGroup) async {
     String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
     String remoteThumbnailUrl =
@@ -1001,24 +1052,18 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       multimedia.remoteFullFileUrl = remoteUrl;
       multimedia.remoteThumbnailUrl = remoteThumbnailUrl;
 
-      bool updated = await multimediaAPIService.editMultimedia(multimedia);
-
-      if (!updated) {
-        return null;
-      }
-      bool updatedInDB = await multimediaDBService.editMultimedia(multimedia);
-
-      if (!updatedInDB) {
-        return null;
+      Multimedia editedMultimedia = await editMultimedia(multimedia);
+      if (isObjectEmpty(editedMultimedia)) {
+        return false;
       }
 
-      dispatch(AddMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
+      return true;
     }
 
-    return null;
+    return false;
   }
 
-  Future<Message> uploadAndSaveMessage(Message message) async {
+  Future<Message> addMessage(Message message) async {
     // TODO: Save message to DB & State first, then API (so that you can retry the message if it's determined not sent)
     Message newMessage = await messageAPIService.addMessage(message);
 
@@ -1036,6 +1081,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     return newMessage;
   }
+
+  // No edit message
 
   addConversationToState(AddConversationGroupEvent event) async {
     // Check repetition
@@ -1083,15 +1130,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
   }
 
-  UnreadMessage findUnreadMessage(String conversationId) {
-    UnreadMessage unreadMessage;
-    unreadMessage = currentState.unreadMessageList.firstWhere((UnreadMessage existingUnreadMessage) {
-      return existingUnreadMessage.conversationId == conversationId;
-    }, orElse: () => null);
-
-    return unreadMessage;
-  }
-
   // Don't have to replace message
   addMessageToState(AddMessageEvent event) async {
     // Check repetition
@@ -1131,15 +1169,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
   }
 
-  Multimedia findMultimedia(String conversationId) {
-    Multimedia multimedia;
-    multimedia = currentState.multimediaList.firstWhere((Multimedia existingMultimedia) {
-      return existingMultimedia.conversationId.toString() == conversationId && isStringEmpty(existingMultimedia.messageId);
-    }, orElse: () => null);
-
-    return multimedia;
-  }
-
   addSettingsToState(AddSettingsEvent event) async {
     await Firestore.instance.collection('settings').document(event.settings.id).setData({
       'id': generateNewId().toString(), // Self generated Id
@@ -1177,24 +1206,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
   }
 
-  addContactToState(AddContactEvent event) async {
-    // Check repetition
-    bool userContactExist = false;
-
-    currentState.phoneContactList.forEach((Contact existingContact) {
-      if (existingContact.displayName == event.contact.displayName) {
-        userContactExist = true;
-      }
-    });
-
-    if (!userContactExist) {
-      currentState.phoneContactList.add(event.contact);
-    }
-    if (!isObjectEmpty(event)) {
-      event.callback(event.contact);
-    }
-  }
-
   addFirebaseAuthToState(AddFirebaseAuthEvent event) async {
     currentState.firebaseAuth = event.firebaseAuth;
     if (!isObjectEmpty(event)) {
@@ -1207,6 +1218,24 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!isObjectEmpty(event)) {
       event.callback(event.googleSignIn);
     }
+  }
+
+  UnreadMessage findUnreadMessage(String conversationId) {
+    UnreadMessage unreadMessage;
+    unreadMessage = currentState.unreadMessageList.firstWhere((UnreadMessage existingUnreadMessage) {
+      return existingUnreadMessage.conversationId == conversationId;
+    }, orElse: () => null);
+
+    return unreadMessage;
+  }
+
+  Multimedia findMultimediaByConversationId(String conversationId) {
+    Multimedia multimedia;
+    multimedia = currentState.multimediaList.firstWhere((Multimedia existingMultimedia) {
+      return existingMultimedia.conversationId.toString() == conversationId && isStringEmpty(existingMultimedia.messageId);
+    }, orElse: () => null);
+
+    return multimedia;
   }
 
   // Initialize, connect to WebSocket and listen to WebSocketMessage object
