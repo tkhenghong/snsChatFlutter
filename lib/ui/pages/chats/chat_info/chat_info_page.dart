@@ -78,8 +78,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             String groupName = await customDialog.showConfirmationDialog();
                             if (conversationGroup.name != groupName) {
                               conversationGroup.name = groupName;
-                              // TODO: Update Group name in REST, DB and State
-                              wholeAppBloc.dispatch(EditConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup){}));
+                              wholeAppBloc.dispatch(EditConversationGroupEvent(
+                                  conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
                             }
                           },
                           child: Text(
@@ -114,8 +114,18 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                         child: Container(
                           height: 60.0,
                           child: InkWell(
-                            onTap: () {
-                              print("Tapped.");
+                            onTap: () async {
+                              CustomDialogs customDialog = new CustomDialogs(
+                                  context: context,
+                                  title: "Edit Group Description",
+                                  description: "Edit the group description below. Press OK to save.",
+                                  value: conversationGroup.description);
+                              String groupDescription = await customDialog.showConfirmationDialog();
+                              if (conversationGroup.description != groupDescription) {
+                                conversationGroup.description = groupDescription;
+                                wholeAppBloc.dispatch(EditConversationGroupEvent(
+                                    conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+                              }
                             },
                             child: Padding(
                               padding: EdgeInsets.only(left: 10.0),
@@ -126,24 +136,9 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                   Padding(
                                     padding: EdgeInsets.only(top: 5.0),
                                   ),
-                                  InkWell(
-                                    onTap: () async {
-                                      CustomDialogs customDialog = new CustomDialogs(
-                                          context: context,
-                                          title: "Edit Group Description",
-                                          description: "Edit the group description below. Press OK to save.",
-                                          value: conversationGroup.description);
-                                      String groupDescription = await customDialog.showConfirmationDialog();
-                                      if (conversationGroup.description != groupDescription) {
-                                        conversationGroup.description = groupDescription;
-                                        // TODO: Update Group description in REST, DB and State
-                                        wholeAppBloc.dispatch(EditConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup){}));
-                                      }
-                                    },
-                                    child: Text(
-                                      "Group description",
-                                      style: TextStyle(fontWeight: FontWeight.bold),
-                                    ),
+                                  Text(
+                                    "Group description",
+                                    style: TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                   Padding(
                                     padding: EdgeInsets.only(top: 5.0),
@@ -151,7 +146,6 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                   Text(
                                     isStringEmpty(conversationGroup.description) ? "Add Group description" : conversationGroup.description,
                                     style: TextStyle(fontSize: 17.0, color: Colors.black54),
-
                                   ),
                                   Padding(
                                     padding: EdgeInsets.only(bottom: 5.0),
@@ -168,6 +162,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                           child: InkWell(
                             onTap: () {
                               print("Tapped.");
+                              // TODO: Set notificationExpireDate
                             },
                             child: Padding(
                               padding: EdgeInsets.only(left: 10.0),

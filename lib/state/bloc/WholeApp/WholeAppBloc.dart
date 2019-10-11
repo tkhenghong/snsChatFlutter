@@ -99,31 +99,49 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     } else if (event is LoadUserPreviousDataEvent) {
       loadUserPreviousData(event);
       yield currentState;
-    } else if (event is AddConversationGroupEvent) {
+    } else if (event is EditConversationGroupEvent) {
+      editConversationGroup(event);
+      yield currentState;
+    } else if (event is EditMultimediaEvent) {
+      editMultimedia(event);
+      yield currentState;
+    } else if (event is EditSettingsEvent) {
+      editSettings(event);
+      yield currentState;
+    } else if (event is EditUnreadMessageEvent) {
+      editUnreadMessage(event);
+      yield currentState;
+    } else if (event is EditUserEvent) {
+      editUser(event);
+      yield currentState;
+    } else if (event is EditUserContactEvent) {
+      editUserContact(event);
+      yield currentState;
+    } else if (event is AddConversationGroupToStateEvent) {
       addConversationToState(event);
       yield currentState;
-    } else if (event is AddMessageEvent) {
+    } else if (event is AddMessageToStateEvent) {
       addMessageToState(event);
       yield currentState;
-    } else if (event is AddMultimediaEvent) {
+    } else if (event is AddMultimediaToStateEvent) {
       addMultimediaToState(event);
       yield currentState;
-    } else if (event is AddSettingsEvent) {
+    } else if (event is AddSettingsToStateEvent) {
       addSettingsToState(event);
       yield currentState;
-    } else if (event is AddUserEvent) {
+    } else if (event is AddUserToStateEvent) {
       addUserToState(event);
       yield currentState;
-    } else if (event is AddUserContactEvent) {
+    } else if (event is AddUserContactToStateEvent) {
       addUserContactToState(event);
       yield currentState;
-    } else if (event is AddFirebaseAuthEvent) {
+    } else if (event is AddFirebaseAuthToStateEvent) {
       addFirebaseAuthToState(event);
       yield currentState;
-    } else if (event is AddGoogleSignInEvent) {
+    } else if (event is AddGoogleSignInToStateEvent) {
       addGoogleSignInToState(event);
       yield currentState;
-    } else if (event is AddUnreadMessageEvent) {
+    } else if (event is AddUnreadMessageToStateEvent) {
       addUnreadMessageToState(event);
       yield currentState;
     } else if (event is CreateConversationGroupEvent) {
@@ -268,8 +286,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 //      print("userContact.mobileNo: " + userContact.mobileNo);
 //    });
 
-    addUserToState(AddUserEvent(user: userFromDB, callback: (User user) {}));
-    addSettingsToState(AddSettingsEvent(settings: settingsFromDB, callback: (Settings settings) {}));
+    addUserToState(AddUserToStateEvent(user: userFromDB, callback: (User user) {}));
+    addSettingsToState(AddSettingsToStateEvent(settings: settingsFromDB, callback: (Settings settings) {}));
     currentState.conversationGroupList = conversationGroupListFromDB;
     currentState.messageList = messageListFromDB;
     currentState.multimediaList = multimediaListFromDB;
@@ -590,27 +608,25 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   // At this point the currentState already has conversationGroupList from DB
   Future<bool> loadConversationsOfTheUser() async {
-    print("WholeAppBloc.dart loadConversationsOfTheUser()");
     List<ConversationGroup> conversationGroupListFromServer =
         await conversationGroupAPIService.getConversationGroupsForUserByMobileNo(currentState.userState.mobileNo);
+
     if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0) {
-      print("if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0)");
-      print("conversationGroupListFromServer.length: " + conversationGroupListFromServer.length.toString());
+
       // Update the current info of the conversationGroup to latest information
       conversationGroupListFromServer.forEach((conversationGroupFromServer) {
-        print("conversationGroupFromServer.id: " + conversationGroupFromServer.id);
-        print("conversationGroupFromServer.name: " + conversationGroupFromServer.name);
         // TODO: Review the performance of this loop
         bool conversationGroupExist = currentState.conversationGroupList
             .contains((ConversationGroup conversationGroupFromDB) => conversationGroupFromDB.id == conversationGroupFromServer.id);
-        print("conversationGroupExist: " + conversationGroupExist.toString());
+
         if (conversationGroupExist) {
           conversationGroupDBService.editConversationGroup(conversationGroupFromServer);
         } else {
           conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
         }
+
         addConversationToState(
-            AddConversationGroupEvent(callback: (ConversationGroup conversationGroup) {}, conversationGroup: conversationGroupFromServer));
+            AddConversationGroupToStateEvent(callback: (ConversationGroup conversationGroup) {}, conversationGroup: conversationGroupFromServer));
       });
     }
 
@@ -635,9 +651,13 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     // Get multimedia of the conversationGroups
     if (!isObjectEmpty(currentState.conversationGroupList) && currentState.conversationGroupList.length > 0) {
+
       for (ConversationGroup conversationGroup in currentState.conversationGroupList) {
+
         List<Multimedia> multimediaListFromServer = await multimediaAPIService.getAllMultimediaOfAConversationGroup(conversationGroup.id);
+
         if (!isObjectEmpty(multimediaListFromServer) && multimediaListFromServer.length > 0) {
+
           multimediaListFromServer.forEach((multimediaFromServer2) {
             multimediaList.add(multimediaFromServer2);
           });
@@ -647,8 +667,11 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     // Get multimedia of the UserContacts that this user own
     if (!isObjectEmpty(currentState.userContactList) && currentState.userContactList.length > 0) {
+
       for (UserContact userContact in currentState.userContactList) {
+
         Multimedia multimediaFromServer3 = await multimediaAPIService.getMultimediaOfAUserContact(userContact.id);
+
         if (!isObjectEmpty(multimediaFromServer3)) {
           multimediaList.add(multimediaFromServer3);
         }
@@ -656,9 +679,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
 
     if (!isObjectEmpty(multimediaList) && multimediaList.length > 0) {
+
       multimediaList.forEach((Multimedia multimediaFromServer) {
+
         multimediaDBService.addMultimedia(multimediaFromServer);
-        addMultimediaToState(AddMultimediaEvent(multimedia: multimediaFromServer, callback: (Multimedia multimedia) {}));
+
+        dispatch(AddMultimediaToStateEvent(multimedia: multimediaFromServer, callback: (Multimedia multimedia) {}));
       });
     }
 
@@ -678,7 +704,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
         } else {
           userContactDBService.addUserContact(userContactFromServer);
         }
-        addUserContactToState(AddUserContactEvent(callback: (UserContact userContact) {}, userContact: userContactFromServer));
+        dispatch(AddUserContactToStateEvent(callback: (UserContact userContact) {}, userContact: userContactFromServer));
       });
 
       return true;
@@ -701,7 +727,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
         } else {
           unreadMessageDBService.addUnreadMessage(unreadMessageFromServer);
         }
-        addUnreadMessageToState(AddUnreadMessageEvent(callback: (UnreadMessage unreadMessage) {}, unreadMessage: unreadMessageFromServer));
+        dispatch(AddUnreadMessageToStateEvent(callback: (UnreadMessage unreadMessage) {}, unreadMessage: unreadMessageFromServer));
       });
     }
 
@@ -722,7 +748,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       settingsDBService.addSettings(settingsFromServer);
     }
 
-    addSettingsToState(AddSettingsEvent(callback: (Settings settings) {}, settings: settingsFromServer));
+    dispatch(AddSettingsToStateEvent(callback: (Settings settings) {}, settings: settingsFromServer));
 
     return true;
   }
@@ -830,7 +856,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     event.conversationGroup = newConversationGroup;
 
     print("newConversationGroup.id: " + newConversationGroup.id.toString());
-    dispatch(AddConversationGroupEvent(
+    dispatch(AddConversationGroupToStateEvent(
         conversationGroup: newConversationGroup,
         callback: (ConversationGroup conversationGroup) {
           // Send success here to prevent the user waiting too long (ConversationGroup with UnreadMessage)
@@ -879,7 +905,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
 
     // No matter what situation, you need to show the group photo to the user first(load faster)
-    addMultimediaToState(AddMultimediaEvent(multimedia: newMultimedia, callback: (Multimedia multimedia) {}));
+    dispatch(AddMultimediaToStateEvent(multimedia: newMultimedia, callback: (Multimedia multimedia) {}));
 
     return newConversationGroup;
   }
@@ -910,7 +936,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
 
     // Do this instead of triggering method directly will make the Bloc to resend the signals to listeners
-    dispatch(AddMessageEvent(message: newMessage, callback: (Message message) {}));
+    dispatch(AddMessageToStateEvent(message: newMessage, callback: (Message message) {}));
 
     if (!isObjectEmpty(event)) {
       event.callback(newMessage);
@@ -928,7 +954,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
         if (existingUserContact != null) {
           // Weakness: No error handling if UserContact save to DB fails
           userContactDBService.addUserContact(existingUserContact);
-          addUserContactToState(AddUserContactEvent(userContact: existingUserContact, callback: (UserContact userContact) {}));
+          dispatch(AddUserContactToStateEvent(userContact: existingUserContact, callback: (UserContact userContact) {}));
           newUserContactList.add(existingUserContact);
         }
       }
@@ -950,7 +976,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return null;
     }
 
-    dispatch(AddConversationGroupEvent(conversationGroup: newConversationGroup, callback: (ConversationGroup conversationGroup) {}));
+    dispatch(AddConversationGroupToStateEvent(conversationGroup: newConversationGroup, callback: (ConversationGroup conversationGroup) {}));
 
     return newConversationGroup;
   }
@@ -967,7 +993,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return null;
     }
 
-    dispatch(AddConversationGroupEvent(conversationGroup: event.conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+    dispatch(AddConversationGroupToStateEvent(conversationGroup: event.conversationGroup, callback: (ConversationGroup conversationGroup) {}));
 
     if (!isObjectEmpty(event)) {
       event.callback(event.conversationGroup);
@@ -989,31 +1015,9 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return null;
     }
 
-    dispatch(AddUnreadMessageEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
+    dispatch(AddUnreadMessageToStateEvent(unreadMessage: newUnreadMessage, callback: (UnreadMessage unreadMessage) {}));
 
     return newUnreadMessage;
-  }
-
-  Future<UnreadMessage> editUnreadMessage(EditUnreadMessageEvent event) async {
-    bool updatedInREST = await unreadMessageAPIService.editUnreadMessage(event.unreadMessage);
-
-    if (!updatedInREST) {
-      return null;
-    }
-
-    bool unreadMessageSaved = await unreadMessageDBService.editUnreadMessage(event.unreadMessage);
-
-    if (!unreadMessageSaved) {
-      return null;
-    }
-
-    dispatch(AddUnreadMessageEvent(unreadMessage: event.unreadMessage, callback: (UnreadMessage unreadMessage) {}));
-
-    if (!isObjectEmpty(event)) {
-      event.callback(event.unreadMessage);
-    }
-
-    return event.unreadMessage;
   }
 
   Future<Multimedia> addMultimedia(Multimedia multimedia) async {
@@ -1029,7 +1033,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return null;
     }
 
-    dispatch(AddMultimediaEvent(multimedia: newMultimedia, callback: (Multimedia multimedia) {}));
+    dispatch(AddMultimediaToStateEvent(multimedia: newMultimedia, callback: (Multimedia multimedia) {}));
 
     return newMultimedia;
   }
@@ -1047,13 +1051,101 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return null;
     }
 
-    dispatch(AddMultimediaEvent(multimedia: event.multimedia, callback: (Multimedia multimedia) {}));
+    dispatch(AddMultimediaToStateEvent(multimedia: event.multimedia, callback: (Multimedia multimedia) {}));
 
     if (!isObjectEmpty(event)) {
       event.callback(event.multimedia);
     }
 
     return event.multimedia;
+  }
+
+  Future<Settings> editSettings(EditSettingsEvent event) async {
+    bool updatedInREST = await settingsAPIService.editSettings(event.settings);
+
+    if (!updatedInREST) {
+      return null;
+    }
+
+    bool settingsSaved = await settingsDBService.editSettings(event.settings);
+
+    if (!settingsSaved) {
+      return null;
+    }
+
+    dispatch(AddSettingsToStateEvent(settings: event.settings, callback: (Settings settings) {}));
+
+    if (!isObjectEmpty(event)) {
+      event.callback(event.settings);
+    }
+
+    return event.settings;
+  }
+
+  Future<UnreadMessage> editUnreadMessage(EditUnreadMessageEvent event) async {
+    bool updatedInREST = await unreadMessageAPIService.editUnreadMessage(event.unreadMessage);
+
+    if (!updatedInREST) {
+      return null;
+    }
+
+    bool unreadMessageSaved = await unreadMessageDBService.editUnreadMessage(event.unreadMessage);
+
+    if (!unreadMessageSaved) {
+      return null;
+    }
+
+    dispatch(AddUnreadMessageToStateEvent(unreadMessage: event.unreadMessage, callback: (UnreadMessage unreadMessage) {}));
+
+    if (!isObjectEmpty(event)) {
+      event.callback(event.unreadMessage);
+    }
+
+    return event.unreadMessage;
+  }
+
+  Future<User> editUser(EditUserEvent event) async {
+    bool updatedInREST = await userAPIService.editUser(event.user);
+
+    if (!updatedInREST) {
+      return null;
+    }
+
+    bool userSaved = await userDBService.editUser(event.user);
+
+    if (!userSaved) {
+      return null;
+    }
+
+    dispatch(AddUserToStateEvent(user: event.user, callback: (User user) {}));
+
+    if (!isObjectEmpty(event)) {
+      event.callback(event.user);
+    }
+
+    return event.user;
+  }
+
+  Future<UserContact> editUserContact(EditUserContactEvent event) async {
+    bool updatedInREST = await userContactAPIService.editUserContact(event.userContact);
+
+    if (!updatedInREST) {
+      return null;
+    }
+
+    bool userContactSaved = await userContactDBService.editUserContact(event.userContact);
+
+    if (!userContactSaved) {
+      return null;
+    }
+
+    dispatch(AddUserContactToStateEvent(userContact: event.userContact, callback: (UserContact userContact) {}));
+
+    if (!isObjectEmpty(event)) {
+      event.callback(event.userContact);
+    }
+
+    return event.userContact;
   }
 
   Future<bool> updateMultimediaContent(Multimedia multimedia, ConversationGroup conversationGroup) async {
@@ -1064,6 +1156,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       multimedia.remoteFullFileUrl = remoteUrl;
       multimedia.remoteThumbnailUrl = remoteThumbnailUrl;
 
+      // Special: straight call editMulimedia function instead of dispatch
       Multimedia editedMultimedia = await editMultimedia(EditMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia){}));
 
       if (isObjectEmpty(editedMultimedia)) {
@@ -1090,14 +1183,14 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return null;
     }
 
-    dispatch(AddMessageEvent(message: newMessage, callback: (Message message) {}));
+    dispatch(AddMessageToStateEvent(message: newMessage, callback: (Message message) {}));
 
     return newMessage;
   }
 
   // No edit message
 
-  Future<ConversationGroup> addConversationToState(AddConversationGroupEvent event) async {
+  Future<ConversationGroup> addConversationToState(AddConversationGroupToStateEvent event) async {
     // Check repetition
     bool conversationExist = false;
 
@@ -1122,7 +1215,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return event.conversationGroup;
   }
 
-  Future<UnreadMessage> addUnreadMessageToState(AddUnreadMessageEvent event) async {
+  Future<UnreadMessage> addUnreadMessageToState(AddUnreadMessageToStateEvent event) async {
     bool unreadMessageExist = false;
 
     currentState.unreadMessageList.forEach((UnreadMessage existingUnreadMessage) {
@@ -1148,7 +1241,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   // Don't have to replace message
-  Future<Message> addMessageToState(AddMessageEvent event) async {
+  Future<Message> addMessageToState(AddMessageToStateEvent event) async {
     // Check repetition
     bool messageExist = false;
 
@@ -1170,7 +1263,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   // Don't have to replace multimedia
-  Future<Multimedia> addMultimediaToState(AddMultimediaEvent event) async {
+  Future<Multimedia> addMultimediaToState(AddMultimediaToStateEvent event) async {
     bool multimediaIdExist = false;
 
     // Check repetition
@@ -1190,7 +1283,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return event.multimedia;
   }
 
-  Future<Settings> addSettingsToState(AddSettingsEvent event) async {
+  Future<Settings> addSettingsToState(AddSettingsToStateEvent event) async {
     await Firestore.instance.collection('settings').document(event.settings.id).setData({
       'id': generateNewId().toString(), // Self generated Id
       'userId': event.settings.userId,
@@ -1204,7 +1297,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return event.settings;
   }
 
-  Future<User> addUserToState(AddUserEvent event) async {
+  Future<User> addUserToState(AddUserToStateEvent event) async {
     currentState.userState = event.user;
     if (!isObjectEmpty(event)) {
       event.callback(event.user);
@@ -1213,7 +1306,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return event.user;
   }
 
-  Future<UserContact> addUserContactToState(AddUserContactEvent event) async {
+  Future<UserContact> addUserContactToState(AddUserContactToStateEvent event) async {
     // Check repetition
     bool userContactExist = false;
 
@@ -1233,14 +1326,14 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return event.userContact;
   }
 
-  addFirebaseAuthToState(AddFirebaseAuthEvent event) async {
+  addFirebaseAuthToState(AddFirebaseAuthToStateEvent event) async {
     currentState.firebaseAuth = event.firebaseAuth;
     if (!isObjectEmpty(event)) {
       event.callback(event.firebaseAuth);
     }
   }
 
-  addGoogleSignInToState(AddGoogleSignInEvent event) async {
+  addGoogleSignInToState(AddGoogleSignInToStateEvent event) async {
     currentState.googleSignIn = event.googleSignIn;
     if (!isObjectEmpty(event)) {
       event.callback(event.googleSignIn);
@@ -1311,7 +1404,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
         print("Other people's message");
         messageDBService.addMessage(event.webSocketMessage.message);
 
-        dispatch(AddMessageEvent(message: event.webSocketMessage.message, callback: (Message message) {}));
+        dispatch(AddMessageToStateEvent(message: event.webSocketMessage.message, callback: (Message message) {}));
       }
     } else if (!isObjectEmpty(webSocketMessage.multimedia)) {
       // Multimedia message

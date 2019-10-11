@@ -110,11 +110,11 @@ class ProcessMessageFromWebSocketEvent extends WholeAppEvent {
 }
 
 // Conversation
-class AddConversationGroupEvent extends WholeAppEvent {
+class AddConversationGroupToStateEvent extends WholeAppEvent {
   ConversationGroup conversationGroup;
   Function callback;
 
-  AddConversationGroupEvent({this.conversationGroup, this.callback});
+  AddConversationGroupToStateEvent({this.conversationGroup, this.callback});
 }
 
 class EditConversationGroupEvent extends WholeAppEvent {
@@ -126,11 +126,11 @@ class EditConversationGroupEvent extends WholeAppEvent {
 
 // Message
 
-class AddMessageEvent extends WholeAppEvent {
+class AddMessageToStateEvent extends WholeAppEvent {
   Message message;
   Function callback;
 
-  AddMessageEvent({this.message, this.callback});
+  AddMessageToStateEvent({this.message, this.callback});
 }
 
 class EditMessageEvent extends WholeAppEvent {
@@ -142,11 +142,11 @@ class EditMessageEvent extends WholeAppEvent {
 
 // Multimedia
 
-class AddMultimediaEvent extends WholeAppEvent {
+class AddMultimediaToStateEvent extends WholeAppEvent {
   Multimedia multimedia;
   Function callback;
 
-  AddMultimediaEvent({this.multimedia, this.callback});
+  AddMultimediaToStateEvent({this.multimedia, this.callback});
 }
 
 class EditMultimediaEvent extends WholeAppEvent {
@@ -157,11 +157,11 @@ class EditMultimediaEvent extends WholeAppEvent {
 }
 
 // Unread Message
-class AddUnreadMessageEvent extends WholeAppEvent {
+class AddUnreadMessageToStateEvent extends WholeAppEvent {
   UnreadMessage unreadMessage;
   Function callback;
 
-  AddUnreadMessageEvent({this.unreadMessage, this.callback});
+  AddUnreadMessageToStateEvent({this.unreadMessage, this.callback});
 }
 
 class EditUnreadMessageEvent extends WholeAppEvent {
@@ -173,11 +173,11 @@ class EditUnreadMessageEvent extends WholeAppEvent {
 
 // Settings
 
-class AddSettingsEvent extends WholeAppEvent {
+class AddSettingsToStateEvent extends WholeAppEvent {
   Settings settings;
   Function callback;
 
-  AddSettingsEvent({this.settings, this.callback});
+  AddSettingsToStateEvent({this.settings, this.callback});
 }
 
 class EditSettingsEvent extends WholeAppEvent {
@@ -189,11 +189,11 @@ class EditSettingsEvent extends WholeAppEvent {
 
 // User
 
-class AddUserEvent extends WholeAppEvent {
+class AddUserToStateEvent extends WholeAppEvent {
   User user;
   Function callback;
 
-  AddUserEvent({this.user, this.callback});
+  AddUserToStateEvent({this.user, this.callback});
 }
 
 class EditUserEvent extends WholeAppEvent {
@@ -205,11 +205,11 @@ class EditUserEvent extends WholeAppEvent {
 
 // UserContact
 
-class AddUserContactEvent extends WholeAppEvent {
+class AddUserContactToStateEvent extends WholeAppEvent {
   UserContact userContact;
   Function callback;
 
-  AddUserContactEvent({this.userContact, this.callback});
+  AddUserContactToStateEvent({this.userContact, this.callback});
 }
 
 // Used to edit your own UserContact
@@ -222,20 +222,20 @@ class EditUserContactEvent extends WholeAppEvent {
 
 // FirebaseAuth
 
-class AddFirebaseAuthEvent extends WholeAppEvent {
+class AddFirebaseAuthToStateEvent extends WholeAppEvent {
   FirebaseAuth firebaseAuth;
   Function callback;
 
-  AddFirebaseAuthEvent({this.firebaseAuth, this.callback});
+  AddFirebaseAuthToStateEvent({this.firebaseAuth, this.callback});
 }
 
 // GoogleSignIn
 
-class AddGoogleSignInEvent extends WholeAppEvent {
+class AddGoogleSignInToStateEvent extends WholeAppEvent {
   GoogleSignIn googleSignIn;
   Function callback;
 
-  AddGoogleSignInEvent({this.googleSignIn, this.callback});
+  AddGoogleSignInToStateEvent({this.googleSignIn, this.callback});
 }
 
 
