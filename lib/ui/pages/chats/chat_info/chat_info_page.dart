@@ -10,6 +10,7 @@ import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
+import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 
 class ChatInfoPage extends StatefulWidget {
@@ -78,7 +79,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             if (conversationGroup.name != groupName) {
                               conversationGroup.name = groupName;
                               // TODO: Update Group name in REST, DB and State
-
+                              wholeAppBloc.dispatch(EditConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup){}));
                             }
                           },
                           child: Text(
@@ -136,6 +137,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                       if (conversationGroup.description != groupDescription) {
                                         conversationGroup.description = groupDescription;
                                         // TODO: Update Group description in REST, DB and State
+                                        wholeAppBloc.dispatch(EditConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup){}));
                                       }
                                     },
                                     child: Text(

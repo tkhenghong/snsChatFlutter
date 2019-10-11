@@ -156,6 +156,21 @@ class EditMultimediaEvent extends WholeAppEvent {
   EditMultimediaEvent({this.multimedia, this.callback});
 }
 
+// Unread Message
+class AddUnreadMessageEvent extends WholeAppEvent {
+  UnreadMessage unreadMessage;
+  Function callback;
+
+  AddUnreadMessageEvent({this.unreadMessage, this.callback});
+}
+
+class EditUnreadMessageEvent extends WholeAppEvent {
+  UnreadMessage unreadMessage;
+  Function callback;
+
+  EditUnreadMessageEvent({this.unreadMessage, this.callback});
+}
+
 // Settings
 
 class AddSettingsEvent extends WholeAppEvent {
@@ -223,13 +238,6 @@ class AddGoogleSignInEvent extends WholeAppEvent {
   AddGoogleSignInEvent({this.googleSignIn, this.callback});
 }
 
-// Unread Message
-class AddUnreadMessageEvent extends WholeAppEvent {
-  UnreadMessage unreadMessage;
-  Function callback;
-
-  AddUnreadMessageEvent({this.unreadMessage, this.callback});
-}
 
 class InitializeWebSocketServiceEvent extends WholeAppEvent {
   Function callback;

@@ -955,21 +955,25 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return newConversationGroup;
   }
 
-  Future<ConversationGroup> editConversationGroup(ConversationGroup conversationGroup) async {
-    bool updatedInREST = await conversationGroupAPIService.editConversationGroup(conversationGroup);
+  Future<ConversationGroup> editConversationGroup(EditConversationGroupEvent event) async {
+    bool updatedInREST = await conversationGroupAPIService.editConversationGroup(event.conversationGroup);
 
     if (!updatedInREST) {
       return null;
     }
-    bool conversationGroupSaved = await conversationGroupDBService.editConversationGroup(conversationGroup);
+    bool conversationGroupSaved = await conversationGroupDBService.editConversationGroup(event.conversationGroup);
 
     if (!conversationGroupSaved) {
       return null;
     }
 
-    dispatch(AddConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+    dispatch(AddConversationGroupEvent(conversationGroup: event.conversationGroup, callback: (ConversationGroup conversationGroup) {}));
 
-    return conversationGroup;
+    if (!isObjectEmpty(event)) {
+      event.callback(event.conversationGroup);
+    }
+
+    return event.conversationGroup;
   }
 
   Future<UnreadMessage> addUnreadMessage(UnreadMessage unreadMessage) async {
@@ -990,22 +994,26 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return newUnreadMessage;
   }
 
-  Future<UnreadMessage> editUnreadMessage(UnreadMessage unreadMessage) async {
-    bool updatedInREST = await unreadMessageAPIService.editUnreadMessage(unreadMessage);
+  Future<UnreadMessage> editUnreadMessage(EditUnreadMessageEvent event) async {
+    bool updatedInREST = await unreadMessageAPIService.editUnreadMessage(event.unreadMessage);
 
     if (!updatedInREST) {
       return null;
     }
 
-    bool unreadMessageSaved = await unreadMessageDBService.editUnreadMessage(unreadMessage);
+    bool unreadMessageSaved = await unreadMessageDBService.editUnreadMessage(event.unreadMessage);
 
     if (!unreadMessageSaved) {
       return null;
     }
 
-    dispatch(AddUnreadMessageEvent(unreadMessage: unreadMessage, callback: (UnreadMessage unreadMessage) {}));
+    dispatch(AddUnreadMessageEvent(unreadMessage: event.unreadMessage, callback: (UnreadMessage unreadMessage) {}));
 
-    return unreadMessage;
+    if (!isObjectEmpty(event)) {
+      event.callback(event.unreadMessage);
+    }
+
+    return event.unreadMessage;
   }
 
   Future<Multimedia> addMultimedia(Multimedia multimedia) async {
@@ -1026,22 +1034,26 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return newMultimedia;
   }
 
-  Future<Multimedia> editMultimedia(Multimedia multimedia) async {
-    bool updatedInREST = await multimediaAPIService.editMultimedia(multimedia);
+  Future<Multimedia> editMultimedia(EditMultimediaEvent event) async {
+    bool updatedInREST = await multimediaAPIService.editMultimedia(event.multimedia);
 
     if (!updatedInREST) {
       return null;
     }
 
-    bool multimediaSaved = await multimediaDBService.editMultimedia(multimedia);
+    bool multimediaSaved = await multimediaDBService.editMultimedia(event.multimedia);
 
     if (!multimediaSaved) {
       return null;
     }
 
-    dispatch(AddMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
+    dispatch(AddMultimediaEvent(multimedia: event.multimedia, callback: (Multimedia multimedia) {}));
 
-    return multimedia;
+    if (!isObjectEmpty(event)) {
+      event.callback(event.multimedia);
+    }
+
+    return event.multimedia;
   }
 
   Future<bool> updateMultimediaContent(Multimedia multimedia, ConversationGroup conversationGroup) async {
@@ -1052,7 +1064,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       multimedia.remoteFullFileUrl = remoteUrl;
       multimedia.remoteThumbnailUrl = remoteThumbnailUrl;
 
-      Multimedia editedMultimedia = await editMultimedia(multimedia);
+      Multimedia editedMultimedia = await editMultimedia(EditMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia){}));
+
       if (isObjectEmpty(editedMultimedia)) {
         return false;
       }
@@ -1084,7 +1097,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   // No edit message
 
-  addConversationToState(AddConversationGroupEvent event) async {
+  Future<ConversationGroup> addConversationToState(AddConversationGroupEvent event) async {
     // Check repetition
     bool conversationExist = false;
 
@@ -1105,9 +1118,11 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!isObjectEmpty(event)) {
       event.callback(event.conversationGroup);
     }
+
+    return event.conversationGroup;
   }
 
-  addUnreadMessageToState(AddUnreadMessageEvent event) async {
+  Future<UnreadMessage> addUnreadMessageToState(AddUnreadMessageEvent event) async {
     bool unreadMessageExist = false;
 
     currentState.unreadMessageList.forEach((UnreadMessage existingUnreadMessage) {
@@ -1128,10 +1143,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!isObjectEmpty(event)) {
       event.callback(event.unreadMessage);
     }
+
+    return event.unreadMessage;
   }
 
   // Don't have to replace message
-  addMessageToState(AddMessageEvent event) async {
+  Future<Message> addMessageToState(AddMessageEvent event) async {
     // Check repetition
     bool messageExist = false;
 
@@ -1148,10 +1165,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!isObjectEmpty(event)) {
       event.callback(event.message);
     }
+
+    return event.message;
   }
 
   // Don't have to replace multimedia
-  addMultimediaToState(AddMultimediaEvent event) async {
+  Future<Multimedia> addMultimediaToState(AddMultimediaEvent event) async {
     bool multimediaIdExist = false;
 
     // Check repetition
@@ -1167,9 +1186,11 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!isObjectEmpty(event)) {
       event.callback(event.multimedia);
     }
+
+    return event.multimedia;
   }
 
-  addSettingsToState(AddSettingsEvent event) async {
+  Future<Settings> addSettingsToState(AddSettingsEvent event) async {
     await Firestore.instance.collection('settings').document(event.settings.id).setData({
       'id': generateNewId().toString(), // Self generated Id
       'userId': event.settings.userId,
@@ -1179,16 +1200,20 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!isObjectEmpty(event)) {
       event.callback(event.settings);
     }
+
+    return event.settings;
   }
 
-  addUserToState(AddUserEvent event) async {
+  Future<User> addUserToState(AddUserEvent event) async {
     currentState.userState = event.user;
     if (!isObjectEmpty(event)) {
       event.callback(event.user);
     }
+
+    return event.user;
   }
 
-  addUserContactToState(AddUserContactEvent event) async {
+  Future<UserContact> addUserContactToState(AddUserContactEvent event) async {
     // Check repetition
     bool userContactExist = false;
 
@@ -1204,6 +1229,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!isObjectEmpty(event)) {
       event.callback(event.userContact);
     }
+
+    return event.userContact;
   }
 
   addFirebaseAuthToState(AddFirebaseAuthEvent event) async {
