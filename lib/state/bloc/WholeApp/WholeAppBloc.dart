@@ -612,7 +612,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
         await conversationGroupAPIService.getConversationGroupsForUserByMobileNo(currentState.userState.mobileNo);
 
     if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0) {
-
       // Update the current info of the conversationGroup to latest information
       conversationGroupListFromServer.forEach((conversationGroupFromServer) {
         // TODO: Review the performance of this loop
@@ -625,8 +624,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
           conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
         }
 
-        addConversationToState(
-            AddConversationGroupToStateEvent(callback: (ConversationGroup conversationGroup) {}, conversationGroup: conversationGroupFromServer));
+        addConversationToState(AddConversationGroupToStateEvent(
+            callback: (ConversationGroup conversationGroup) {}, conversationGroup: conversationGroupFromServer));
       });
     }
 
@@ -651,13 +650,10 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     // Get multimedia of the conversationGroups
     if (!isObjectEmpty(currentState.conversationGroupList) && currentState.conversationGroupList.length > 0) {
-
       for (ConversationGroup conversationGroup in currentState.conversationGroupList) {
-
         List<Multimedia> multimediaListFromServer = await multimediaAPIService.getAllMultimediaOfAConversationGroup(conversationGroup.id);
 
         if (!isObjectEmpty(multimediaListFromServer) && multimediaListFromServer.length > 0) {
-
           multimediaListFromServer.forEach((multimediaFromServer2) {
             multimediaList.add(multimediaFromServer2);
           });
@@ -667,9 +663,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     // Get multimedia of the UserContacts that this user own
     if (!isObjectEmpty(currentState.userContactList) && currentState.userContactList.length > 0) {
-
       for (UserContact userContact in currentState.userContactList) {
-
         Multimedia multimediaFromServer3 = await multimediaAPIService.getMultimediaOfAUserContact(userContact.id);
 
         if (!isObjectEmpty(multimediaFromServer3)) {
@@ -679,9 +673,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
 
     if (!isObjectEmpty(multimediaList) && multimediaList.length > 0) {
-
       multimediaList.forEach((Multimedia multimediaFromServer) {
-
         multimediaDBService.addMultimedia(multimediaFromServer);
 
         dispatch(AddMultimediaToStateEvent(multimedia: multimediaFromServer, callback: (Multimedia multimedia) {}));
@@ -993,7 +985,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return null;
     }
 
-    dispatch(AddConversationGroupToStateEvent(conversationGroup: event.conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+    dispatch(
+        AddConversationGroupToStateEvent(conversationGroup: event.conversationGroup, callback: (ConversationGroup conversationGroup) {}));
 
     if (!isObjectEmpty(event)) {
       event.callback(event.conversationGroup);
@@ -1039,19 +1032,26 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   Future<Multimedia> editMultimedia(EditMultimediaEvent event) async {
-    bool updatedInREST = await multimediaAPIService.editMultimedia(event.multimedia);
-
-    if (!updatedInREST) {
-      return null;
+    print("editMultimedia");
+    if (event.updateInREST) {
+      bool updatedInREST = await multimediaAPIService.editMultimedia(event.multimedia);
+      print("updatedInREST: " + updatedInREST.toString());
+      if (!updatedInREST) {
+        return null;
+      }
     }
 
-    bool multimediaSaved = await multimediaDBService.editMultimedia(event.multimedia);
-
-    if (!multimediaSaved) {
-      return null;
+    if (event.updateInDB) {
+      bool multimediaSaved = await multimediaDBService.editMultimedia(event.multimedia);
+      print("multimediaSaved: " + multimediaSaved.toString());
+      if (!multimediaSaved) {
+        return null;
+      }
     }
 
-    dispatch(AddMultimediaToStateEvent(multimedia: event.multimedia, callback: (Multimedia multimedia) {}));
+    if (event.updateInState) {
+      dispatch(AddMultimediaToStateEvent(multimedia: event.multimedia, callback: (Multimedia multimedia) {}));
+    }
 
     if (!isObjectEmpty(event)) {
       event.callback(event.multimedia);
@@ -1149,15 +1149,20 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   Future<bool> updateMultimediaContent(Multimedia multimedia, ConversationGroup conversationGroup) async {
+    print("updateMultimediaContent()");
     String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
+    print("remoteUrl: " + remoteUrl.toString());
     String remoteThumbnailUrl =
         await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
+    print("remoteThumbnailUrl: " + remoteThumbnailUrl.toString());
     if (!isStringEmpty(remoteUrl)) {
       multimedia.remoteFullFileUrl = remoteUrl;
       multimedia.remoteThumbnailUrl = remoteThumbnailUrl;
 
-      // Special: straight call editMulimedia function instead of dispatch
-      Multimedia editedMultimedia = await editMultimedia(EditMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia){}));
+      print("Updating multimedia...");
+      // Special: straight call editMultimedia function instead of dispatch
+      Multimedia editedMultimedia = await editMultimedia(EditMultimediaEvent(
+          multimedia: multimedia, updateInREST: true, updateInDB: true, updateInState: true, callback: (Multimedia multimedia) {}));
 
       if (isObjectEmpty(editedMultimedia)) {
         return false;

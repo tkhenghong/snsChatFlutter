@@ -151,9 +151,12 @@ class AddMultimediaToStateEvent extends WholeAppEvent {
 
 class EditMultimediaEvent extends WholeAppEvent {
   Multimedia multimedia;
+  bool updateInREST;
+  bool updateInDB;
+  bool updateInState;
   Function callback;
 
-  EditMultimediaEvent({this.multimedia, this.callback});
+  EditMultimediaEvent({this.multimedia, this.updateInREST, this.updateInDB, this.updateInState, this.callback});
 }
 
 // Unread Message

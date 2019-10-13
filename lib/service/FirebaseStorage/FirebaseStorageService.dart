@@ -40,11 +40,4 @@ class FirebaseStorageService {
       return null;
     }
   }
-
-  // Returns full file URL of the file at temp location (for copy to another place later)
-  Future<String> downloadFile(String remoteUrl, String fileName) async {
-    String uri = Uri.decodeFull(remoteUrl);
-    final RegExp regex = RegExp('([^?/]*\.(jpg))');
-    final String fileName = regex.stringMatch(uri);
-  }
 }

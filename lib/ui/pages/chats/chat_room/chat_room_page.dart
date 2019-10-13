@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -105,11 +106,22 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                         Icon(Icons.arrow_back),
                         Hero(
                           tag: widget._conversationGroup.id,
-                          child: CircleAvatar(
-                            radius: 20.0,
-                            backgroundColor: Colors.white,
-                            backgroundImage: imageService.processImageThumbnail(multimedia, widget._conversationGroup.type),
-                          ),
+                          child: isStringEmpty(multimedia.remoteThumbnailUrl)
+                              ? Image.asset(fileService.getDefaultImagePath(widget._conversationGroup.type))
+                              : CachedNetworkImage(
+                                  // Note: imageBuilder is a place that tell CachedNetworkImage how the image should be displayed
+                                  imageBuilder: (BuildContext context, ImageProvider<dynamic> imageProvider) {
+                                    return CircleAvatar(
+                                      backgroundColor: Colors.white,
+                                      backgroundImage: imageProvider,
+                                    );
+                                  },
+                                  useOldImageOnUrlChange: true,
+                                  imageUrl: multimedia.remoteThumbnailUrl,
+                                  placeholder: (context, url) => new CircularProgressIndicator(),
+                                  errorWidget: (context, url, error) =>
+                                      Image.asset(fileService.getDefaultImagePath(widget._conversationGroup.type)),
+                                ),
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 50.0),

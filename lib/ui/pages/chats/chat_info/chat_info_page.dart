@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
@@ -92,7 +93,21 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                       ),
                       background: Hero(
                         tag: conversationGroup.id,
-                        child: processImage(multimedia, conversationGroup.type), // at bottom
+                        child: isStringEmpty(multimedia.remoteThumbnailUrl)
+                            ? Image.asset(fileService.getDefaultImagePath(widget._conversationGroup.type))
+                            : CachedNetworkImage(
+                                useOldImageOnUrlChange: true,
+                                imageUrl: multimedia.remoteFullFileUrl,
+                                placeholder: (context, url) => CachedNetworkImage(
+                                  useOldImageOnUrlChange: true,
+                                  imageUrl: multimedia.remoteThumbnailUrl,
+                                  placeholder: (context, url) => new CircularProgressIndicator(),
+                                  errorWidget: (context, url, error) =>
+                                      Image.asset(fileService.getDefaultImagePath(widget._conversationGroup.type)),
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    Image.asset(fileService.getDefaultImagePath(widget._conversationGroup.type)),
+                              ),
                       )),
                   actions: <Widget>[
                     IconButton(
@@ -370,28 +385,5 @@ class ChatInfoPageState extends State<ChatInfoPage> {
         ),
       ),
     );
-  }
-
-  // TODO: Decide where to put this logic (same with chat_group_list_page.dart)
-  // Returns Widget object
-  Widget processImage(Multimedia multimedia, String type) {
-    try {
-      print("multimedia.localFullFileUrl: " + multimedia.localFullFileUrl.toString());
-      File file = File(multimedia.localFullFileUrl); // Image.file(file).image;
-      return Image.file(file);
-    } catch (e) {
-      print("Local file is missing");
-      print("Reason: " + e.toString());
-      // In case local file is missing
-      try {
-        print("multimedia.remoteFullFileUrl: " + multimedia.remoteFullFileUrl.toString());
-        return Image.network(multimedia.remoteFullFileUrl); // Image.network(multimedia.remoteFullFileUrl).image
-      } catch (e) {
-        print("Network file is missing too.");
-        print("Reason: " + e.toString());
-        // In case network is empty too
-        return Image.asset(fileService.getDefaultImagePath(type)); // Image.asset(fileService.getDefaultImagePath(type)).image
-      }
-    }
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -129,16 +130,20 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           child: Text(conversation.name),
         ),
         subtitle: Text(isObjectEmpty(unreadMessage) ? "" : unreadMessage.lastMessage),
-//        subtitle: Text(""),
         leading: Hero(
           tag: conversation.id,
-          child: CircleAvatar(
-            backgroundColor: Colors.white,
-            backgroundImage: imageService.processImageThumbnail(multimedia, conversation.type), // temporary
-//              backgroundImage: AssetImage(fileService.getDefaultImagePath(conversation.type)),
-            // TODO: Make the below code as an "image" if all multimedia URLs (and files) are missing
-//            child: conversation.groupPhoto.imageData.length == 0 ? Text(conversation.name[0]) : Text(''),
-            child: Text(''),
+          child: CachedNetworkImage(
+            // Note: imageBuilder is a place that tell CachedNetworkImage how the image should be displayed
+            imageBuilder: (BuildContext context, ImageProvider<dynamic> imageProvider) {
+              return CircleAvatar(
+                backgroundColor: Colors.white,
+                backgroundImage: imageProvider,
+              );
+            },
+            useOldImageOnUrlChange: true,
+            imageUrl: multimedia.remoteThumbnailUrl,
+            placeholder: (context, url) => new CircularProgressIndicator(),
+            errorWidget: (context, url, error) => Image.asset(fileService.getDefaultImagePath(conversation.type)),
           ),
         ),
         trailing: Column(
