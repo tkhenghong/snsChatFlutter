@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
@@ -53,6 +54,51 @@ class ImageService {
     }
   }
 
+  Widget loadImageThumbnailCircleAvatar(Multimedia multimedia, String type) {
+    return isObjectEmpty(multimedia)
+        ? CircleAvatar(
+      backgroundColor: Colors.white,
+      backgroundImage: AssetImage(fileService.getDefaultImagePath(type)),
+    )
+        : isStringEmpty(multimedia.remoteThumbnailUrl)
+        ? Image.asset(fileService.getDefaultImagePath(type))
+        : CachedNetworkImage(
+      // Note: imageBuilder is a place that tell CachedNetworkImage how the image should be displayed
+      imageBuilder: (BuildContext context, ImageProvider<dynamic> imageProvider) {
+        return CircleAvatar(
+          backgroundColor: Colors.white,
+          backgroundImage: imageProvider,
+        );
+      },
+      useOldImageOnUrlChange: true,
+      imageUrl: multimedia.remoteThumbnailUrl,
+      placeholder: (context, url) => new CircularProgressIndicator(),
+      errorWidget: (context, url, error) => Image.asset(fileService.getDefaultImagePath(type)),
+    );
+  }
+
+  Widget loadFullImage(Multimedia multimedia, String type) {
+    return isObjectEmpty(multimedia)
+        ? Image.asset(fileService.getDefaultImagePath(type))
+        : isStringEmpty(multimedia.remoteThumbnailUrl)
+        ? Image.asset(fileService.getDefaultImagePath(type))
+        : CachedNetworkImage(
+      useOldImageOnUrlChange: true,
+      imageUrl: multimedia.remoteFullFileUrl,
+      placeholder: (context, url) =>
+          CachedNetworkImage(
+            useOldImageOnUrlChange: true,
+            imageUrl: multimedia.remoteThumbnailUrl,
+            placeholder: (context, url) => new CircularProgressIndicator(),
+            errorWidget: (context, url, error) =>
+                Image.asset(fileService.getDefaultImagePath(type)),
+          ),
+      errorWidget: (context, url, error) =>
+          Image.asset(fileService.getDefaultImagePath(type)),
+    )
+    ,
+  }
+
   // Only handles thumbnail download
   downloadThumbnailFileAndUpdateMultimedia(Multimedia multimedia, BuildContext context) async {
     fileService.downloadFile(multimedia.remoteThumbnailUrl, true, true).then((File file) {
@@ -61,7 +107,11 @@ class ImageService {
         wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
         // Don't update it in REST
         wholeAppBloc.dispatch(EditMultimediaEvent(
-            multimedia: multimedia, updateInREST: false, updateInDB: true, updateInState: true, callback: (Multimedia multimedia) {}));
+            multimedia: multimedia,
+            updateInREST: false,
+            updateInDB: true,
+            updateInState: true,
+            callback: (Multimedia multimedia) {}));
       }
     });
   }
@@ -80,7 +130,8 @@ class ImageService {
           new DateTime.now().millisecondsSinceEpoch.toString() +
           ".png";
       // Put it into our directory, set it as temp.png first (File format: FILEPATH/thumbnail-95102006192014.png)
-      File thumbnailFile = new File(fullThumbnailDirectory)..writeAsBytesSync(CustomImage.encodePng(thumbnail));
+      File thumbnailFile = new File(fullThumbnailDirectory)
+        ..writeAsBytesSync(CustomImage.encodePng(thumbnail));
 
       return thumbnailFile;
     } catch (e) {

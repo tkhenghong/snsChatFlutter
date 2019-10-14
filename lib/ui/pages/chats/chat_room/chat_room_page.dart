@@ -106,22 +106,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                         Icon(Icons.arrow_back),
                         Hero(
                           tag: widget._conversationGroup.id,
-                          child: isStringEmpty(multimedia.remoteThumbnailUrl)
-                              ? Image.asset(fileService.getDefaultImagePath(widget._conversationGroup.type))
-                              : CachedNetworkImage(
-                                  // Note: imageBuilder is a place that tell CachedNetworkImage how the image should be displayed
-                                  imageBuilder: (BuildContext context, ImageProvider<dynamic> imageProvider) {
-                                    return CircleAvatar(
-                                      backgroundColor: Colors.white,
-                                      backgroundImage: imageProvider,
-                                    );
-                                  },
-                                  useOldImageOnUrlChange: true,
-                                  imageUrl: multimedia.remoteThumbnailUrl,
-                                  placeholder: (context, url) => new CircularProgressIndicator(),
-                                  errorWidget: (context, url, error) =>
-                                      Image.asset(fileService.getDefaultImagePath(widget._conversationGroup.type)),
-                                ),
+                          child: imageService.loadImageThumbnailCircleAvatar(multimedia, widget._conversationGroup.type),
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 50.0),

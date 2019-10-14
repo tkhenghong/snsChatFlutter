@@ -91,24 +91,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                           ),
                         ),
                       ),
-                      background: Hero(
-                        tag: conversationGroup.id,
-                        child: isStringEmpty(multimedia.remoteThumbnailUrl)
-                            ? Image.asset(fileService.getDefaultImagePath(widget._conversationGroup.type))
-                            : CachedNetworkImage(
-                                useOldImageOnUrlChange: true,
-                                imageUrl: multimedia.remoteFullFileUrl,
-                                placeholder: (context, url) => CachedNetworkImage(
-                                  useOldImageOnUrlChange: true,
-                                  imageUrl: multimedia.remoteThumbnailUrl,
-                                  placeholder: (context, url) => new CircularProgressIndicator(),
-                                  errorWidget: (context, url, error) =>
-                                      Image.asset(fileService.getDefaultImagePath(widget._conversationGroup.type)),
-                                ),
-                                errorWidget: (context, url, error) =>
-                                    Image.asset(fileService.getDefaultImagePath(widget._conversationGroup.type)),
-                              ),
-                      )),
+                      background: Hero(tag: conversationGroup.id, child: imageService.loadFullImage(multimedia, conversationGroup.type))),
                   actions: <Widget>[
                     IconButton(
                         icon: Icon(Icons.share),

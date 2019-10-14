@@ -132,19 +132,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         subtitle: Text(isObjectEmpty(unreadMessage) ? "" : unreadMessage.lastMessage),
         leading: Hero(
           tag: conversation.id,
-          child: CachedNetworkImage(
-            // Note: imageBuilder is a place that tell CachedNetworkImage how the image should be displayed
-            imageBuilder: (BuildContext context, ImageProvider<dynamic> imageProvider) {
-              return CircleAvatar(
-                backgroundColor: Colors.white,
-                backgroundImage: imageProvider,
-              );
-            },
-            useOldImageOnUrlChange: true,
-            imageUrl: multimedia.remoteThumbnailUrl,
-            placeholder: (context, url) => new CircularProgressIndicator(),
-            errorWidget: (context, url, error) => Image.asset(fileService.getDefaultImagePath(conversation.type)),
-          ),
+          child: imageService.loadImageThumbnailCircleAvatar(multimedia, conversation.type),
         ),
         trailing: Column(
           children: <Widget>[
