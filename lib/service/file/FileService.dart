@@ -169,9 +169,11 @@ class FileService {
     return renamedFile;
   }
 
+  // TODO: Make a default Icon Image return method
   String getDefaultImagePath(String type) {
     switch (type) {
       case "Personal":
+      case "UserContact":
         return "lib/ui/icons/single_conversation.png";
         break;
       case "Group":

@@ -1363,6 +1363,35 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return multimedia;
   }
 
+  Multimedia findMultimediaByUserContactId(String userContactId) {
+    Multimedia multimedia;
+    multimedia = currentState.multimediaList.firstWhere((Multimedia existingMultimedia) {
+      return existingMultimedia.userContactId.toString() == userContactId;
+    }, orElse: () => null);
+
+    return multimedia;
+  }
+
+  List<UserContact> getUserContactsByConversationId(String conversationGroupId) {
+    List<UserContact> userContactList = [];
+
+    ConversationGroup conversationGroup = currentState.conversationGroupList.firstWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == conversationGroupId, orElse: null);
+    if(isObjectEmpty(conversationGroup)) {
+      return [];
+    }
+
+    if(isObjectEmpty(conversationGroup.memberIds) && conversationGroup.memberIds.length > 0) {
+      for(String memberId in conversationGroup.memberIds) {
+        UserContact userContact = currentState.userContactList.firstWhere((UserContact userContact) => userContact.id == memberId);
+        if(!isObjectEmpty(userContact)) {
+          userContactList.add(userContact);
+        }
+      }
+    }
+
+    return userContactList;
+  }
+
   // Initialize, connect to WebSocket and listen to WebSocketMessage object
   listenToWebSocketMessage(InitializeWebSocketServiceEvent event) {
     webSocketService.connect();

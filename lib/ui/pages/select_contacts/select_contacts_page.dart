@@ -41,7 +41,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   String title = "";
   String subtitle = "";
   RefreshController _refreshController;
-  ScrollController scrollController = new ScrollController();
+  ScrollController scrollController;
 
   @override
   initState() {
@@ -363,7 +363,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     if (!isObjectEmpty(contact.avatar)) {
       print("if(!isObjectEmpty(contact.avatar))");
       FileService fileService = FileService();
-      File copiedFile = await fileService.downloadFileFromUint8List(contact.avatar, DateTime.now().millisecondsSinceEpoch.toString(), "jpg");
+      File copiedFile =
+          await fileService.downloadFileFromUint8List(contact.avatar, DateTime.now().millisecondsSinceEpoch.toString(), "jpg");
       return copiedFile;
     } else {
       return null;

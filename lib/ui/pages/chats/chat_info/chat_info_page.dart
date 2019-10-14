@@ -8,6 +8,7 @@ import 'package:snschat_flutter/general/ui-component/custom_dialogs.dart';
 import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
+import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
@@ -31,6 +32,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
   WholeAppBloc wholeAppBloc;
 
   TextEditingController textEditingController;
+  ScrollController scrollController;
+
   File imageFile;
   FileService fileService = FileService();
   ImageService imageService = ImageService();
@@ -40,6 +43,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
     // TODO: implement initState
     super.initState();
     textEditingController = new TextEditingController();
+    scrollController = new ScrollController();
     textEditingController.text = widget._conversationGroup.name;
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
@@ -48,6 +52,10 @@ class ChatInfoPageState extends State<ChatInfoPage> {
   @override
   Widget build(BuildContext context) {
     Multimedia multimedia = wholeAppBloc.findMultimediaByConversationId(widget._conversationGroup.id);
+    List<UserContact> userContactList = wholeAppBloc.getUserContactsByConversationId(widget._conversationGroup.id);
+    List<Multimedia> multimediaList =
+        userContactList.map((UserContact userContact) => wholeAppBloc.findMultimediaByUserContactId(userContact.id));
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Material(
@@ -279,7 +287,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                         children: <Widget>[
                                           Icon(Icons.people),
                                           Text(
-                                            "Group members",
+                                            "Group members: " + userContactList.length.toString() + " participants",
                                             style: TextStyle(fontSize: 17.0),
                                           ),
                                         ],
@@ -292,6 +300,38 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             ),
                           ),
                         )),
+                    // TODO: Fix ListView below
+                    ListView(
+                      controller: scrollController,
+                      children: userContactList
+                          .map((UserContact userContact) => Container(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: <Widget>[
+                                    ListTile(
+                                      title: Text(
+                                        userContact.displayName,
+                                        softWrap: true,
+                                      ),
+                                      subtitle: Text(
+                                        'Hey There! I am using PocketChat.',
+                                        softWrap: true,
+                                      ),
+                                      onTap: () {
+                                        print("Tapped!");
+                                      },
+                                      leading: imageService.loadImageThumbnailCircleAvatar(
+                                          multimediaList.firstWhere(
+                                              (Multimedia userContactMultimedia) => userContactMultimedia.userContactId == userContact.id,
+                                              orElse: null),
+                                          "UserContact"),
+                                    )
+                                  ],
+                                ),
+                              ))
+                          .toList(),
+                    ),
                     Material(
                         color: Colors.white,
                         child: Container(
