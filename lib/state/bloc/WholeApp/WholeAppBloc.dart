@@ -1376,11 +1376,15 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     List<UserContact> userContactList = [];
 
     ConversationGroup conversationGroup = currentState.conversationGroupList.firstWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == conversationGroupId, orElse: null);
+    print("conversationGroup.id: " + conversationGroup.id);
+    conversationGroup.memberIds.forEach((String memberId) => print("conversationGroup.memberId: " + memberId));
+
     if(isObjectEmpty(conversationGroup)) {
+      print("if(isObjectEmpty(conversationGroup))");
       return [];
     }
 
-    if(isObjectEmpty(conversationGroup.memberIds) && conversationGroup.memberIds.length > 0) {
+    if(!isObjectEmpty(conversationGroup.memberIds) && conversationGroup.memberIds.length > 0) {
       for(String memberId in conversationGroup.memberIds) {
         UserContact userContact = currentState.userContactList.firstWhere((UserContact userContact) => userContact.id == memberId);
         if(!isObjectEmpty(userContact)) {

@@ -54,7 +54,10 @@ class ChatInfoPageState extends State<ChatInfoPage> {
     Multimedia multimedia = wholeAppBloc.findMultimediaByConversationId(widget._conversationGroup.id);
     List<UserContact> userContactList = wholeAppBloc.getUserContactsByConversationId(widget._conversationGroup.id);
     List<Multimedia> multimediaList =
-        userContactList.map((UserContact userContact) => wholeAppBloc.findMultimediaByUserContactId(userContact.id));
+        userContactList.map((UserContact userContact) => wholeAppBloc.findMultimediaByUserContactId(userContact.id)).toList();
+
+    print("userContactList.length:" + userContactList.length.toString());
+    print("multimediaList.length:" + multimediaList.length.toString());
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
@@ -301,36 +304,48 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                           ),
                         )),
                     // TODO: Fix ListView below
-                    ListView(
-                      controller: scrollController,
-                      children: userContactList
-                          .map((UserContact userContact) => Container(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    ListTile(
-                                      title: Text(
-                                        userContact.displayName,
-                                        softWrap: true,
-                                      ),
-                                      subtitle: Text(
-                                        'Hey There! I am using PocketChat.',
-                                        softWrap: true,
-                                      ),
-                                      onTap: () {
-                                        print("Tapped!");
-                                      },
-                                      leading: imageService.loadImageThumbnailCircleAvatar(
-                                          multimediaList.firstWhere(
-                                              (Multimedia userContactMultimedia) => userContactMultimedia.userContactId == userContact.id,
-                                              orElse: null),
-                                          "UserContact"),
-                                    )
-                                  ],
-                                ),
-                              ))
-                          .toList(),
+                    Container(
+                      height: 100.0,
+                      child: ListView(
+                        controller: scrollController,
+                        children: userContactList
+                            .map((UserContact userContact) => Container(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: <Widget>[
+                                      ListTile(
+                                        title: Text(
+                                          userContact.displayName,
+                                          softWrap: true,
+                                        ),
+                                        subtitle: Text(
+                                          'Hey There! I am using PocketChat.',
+                                          softWrap: true,
+                                        ),
+                                        onTap: () {
+                                          print("Tapped!");
+                                        },
+                                        leading: imageService.loadImageThumbnailCircleAvatar(
+                                            multimediaList.firstWhere(
+                                                (Multimedia userContactMultimedia) {
+                                                  print("Execute in chat info page?");
+                                                  if(isObjectEmpty(userContactMultimedia)) {
+                                                    print('if(isObjectEmpty(userContactMultimedia))');
+                                                  } else {
+                                                    print('if(!isObjectEmpty(userContactMultimedia))');
+                                                  }
+
+                                                  return userContactMultimedia.userContactId == userContact.id;
+                                                },
+                                                orElse: null),
+                                            "UserContact"),
+                                      )
+                                    ],
+                                  ),
+                                ))
+                            .toList(),
+                      ),
                     ),
                     Material(
                         color: Colors.white,
