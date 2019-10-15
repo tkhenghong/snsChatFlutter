@@ -903,6 +903,14 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   Future<Message> sendMessage(SendMessageEvent event) async {
+    UnreadMessage unreadMessageOfTheConversationGroup = currentState.unreadMessageList
+        .firstWhere((UnreadMessage unreadMessage) => unreadMessage.conversationId == event.message.conversationId, orElse: null);
+
+    if (!isObjectEmpty(unreadMessageOfTheConversationGroup)) {
+      unreadMessageOfTheConversationGroup.lastMessage = event.message.messageContent;
+      dispatch(EditUnreadMessageEvent(unreadMessage: unreadMessageOfTheConversationGroup, callback: (UnreadMessage unreadMessage) {}));
+    }
+
     Message newMessage = await addMessage(event.message);
     if (isObjectEmpty(newMessage)) {
       if (!isObjectEmpty(event)) {
@@ -1375,19 +1383,20 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   List<UserContact> getUserContactsByConversationId(String conversationGroupId) {
     List<UserContact> userContactList = [];
 
-    ConversationGroup conversationGroup = currentState.conversationGroupList.firstWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == conversationGroupId, orElse: null);
+    ConversationGroup conversationGroup = currentState.conversationGroupList
+        .firstWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == conversationGroupId, orElse: null);
     print("conversationGroup.id: " + conversationGroup.id);
     conversationGroup.memberIds.forEach((String memberId) => print("conversationGroup.memberId: " + memberId));
 
-    if(isObjectEmpty(conversationGroup)) {
+    if (isObjectEmpty(conversationGroup)) {
       print("if(isObjectEmpty(conversationGroup))");
       return [];
     }
 
-    if(!isObjectEmpty(conversationGroup.memberIds) && conversationGroup.memberIds.length > 0) {
-      for(String memberId in conversationGroup.memberIds) {
+    if (!isObjectEmpty(conversationGroup.memberIds) && conversationGroup.memberIds.length > 0) {
+      for (String memberId in conversationGroup.memberIds) {
         UserContact userContact = currentState.userContactList.firstWhere((UserContact userContact) => userContact.id == memberId);
-        if(!isObjectEmpty(userContact)) {
+        if (!isObjectEmpty(userContact)) {
           userContactList.add(userContact);
         }
       }
