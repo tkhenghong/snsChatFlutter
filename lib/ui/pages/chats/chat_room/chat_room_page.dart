@@ -105,7 +105,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                       children: <Widget>[
                         Icon(Icons.arrow_back),
                         Hero(
-                          tag: widget._conversationGroup.id,
+                          tag: widget._conversationGroup.id + "1",
                           child: imageService.loadImageThumbnailCircleAvatar(multimedia, widget._conversationGroup.type),
                         ),
                         Padding(
@@ -132,7 +132,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                           padding: EdgeInsets.only(top: 10.0, right: 250.0),
                         ),
                         Hero(
-                          tag: widget._conversationGroup.name,
+                          tag: widget._conversationGroup.id,
                           child: Text(
                             widget._conversationGroup.name,
                             style: TextStyle(

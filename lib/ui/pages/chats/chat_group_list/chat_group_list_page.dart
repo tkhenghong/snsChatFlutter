@@ -126,12 +126,12 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
     return PageListItem(
         title: Hero(
-          tag: conversation.name,
+          tag: conversation.id,
           child: Text(conversation.name),
         ),
         subtitle: Text(isObjectEmpty(unreadMessage) ? "" : unreadMessage.lastMessage),
         leading: Hero(
-          tag: conversation.id,
+          tag: conversation.id + "1",
           child: imageService.loadImageThumbnailCircleAvatar(multimedia, conversation.type),
         ),
         trailing: Column(

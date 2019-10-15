@@ -59,6 +59,30 @@ class ChatInfoPageState extends State<ChatInfoPage> {
     print("userContactList.length:" + userContactList.length.toString());
     print("multimediaList.length:" + multimediaList.length.toString());
 
+    userContactList.forEach((UserContact userContact) {
+      if (!isObjectEmpty(userContact)) {
+        print("UserContact");
+        print("userContact.id: " + userContact.id.toString());
+        print("userContact.mobileNo: " + userContact.mobileNo.toString());
+        print("userContact.block: " + userContact.block.toString());
+        print("userContact.displayName: " + userContact.displayName.toString());
+        print("userContact.realName: " + userContact.realName.toString());
+        print("userContact.lastSeenDate: " + userContact.lastSeenDate.toString());
+        print("userContact.multimediaId: " + userContact.multimediaId.toString());
+      }
+    });
+
+    multimediaList.forEach((Multimedia multimedia) {
+      if (!isObjectEmpty(multimedia)) {
+        print("Multimedia");
+        print("multimedia.id: " + multimedia.id.toString());
+        print("multimedia.userContactId: " + multimedia.userContactId.toString());
+        print("multimedia.userId: " + multimedia.userId.toString());
+        print("multimedia.conversationId: " + multimedia.conversationId.toString());
+        print("multimedia.messageId: " + multimedia.messageId.toString());
+      }
+    });
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Material(
@@ -75,34 +99,36 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                 SliverAppBar(
                   floating: true,
                   pinned: true,
-                  titleSpacing: 0.0,
                   expandedHeight: 250.0,
                   flexibleSpace: FlexibleSpaceBar(
                       title: Hero(
-                        tag: conversationGroup.name,
+                        tag: conversationGroup.id,
                         child: FlatButton(
-                          onPressed: () async {
-                            CustomDialogs customDialog = new CustomDialogs(
-                                context: context,
-                                title: "Edit Group Name",
-                                description: "Edit the group name below. Press OK to save.",
-                                value: conversationGroup.name);
-                            String groupName = await customDialog.showConfirmationDialog();
-                            if (conversationGroup.name != groupName) {
-                              conversationGroup.name = groupName;
-                              wholeAppBloc.dispatch(EditConversationGroupEvent(
-                                  conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
-                            }
-                          },
-                          child: Text(
-                            conversationGroup.name,
-                            style: TextStyle(color: Colors.white),
-                            overflow: TextOverflow.fade,
-                            softWrap: true,
-                          ),
-                        ),
+                            onPressed: () async {
+                              CustomDialogs customDialog = new CustomDialogs(
+                                  context: context,
+                                  title: "Edit Group Name",
+                                  description: "Edit the group name below. Press OK to save.",
+                                  value: conversationGroup.name);
+                              String groupName = await customDialog.showConfirmationDialog();
+                              if (conversationGroup.name != groupName) {
+                                conversationGroup.name = groupName;
+                                wholeAppBloc.dispatch(EditConversationGroupEvent(
+                                    conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+                              }
+                            },
+                            child: Container(
+                              padding: EdgeInsetsDirectional.only(top: 25.0),
+                              child: Text(
+                                conversationGroup.name,
+                                style: TextStyle(color: Colors.white, fontSize: 18.0),
+                                overflow: TextOverflow.fade,
+                                softWrap: true,
+                              ),
+                            )),
                       ),
-                      background: Hero(tag: conversationGroup.id, child: imageService.loadFullImage(multimedia, conversationGroup.type))),
+                      background:
+                          Hero(tag: conversationGroup.id + "1", child: imageService.loadFullImage(multimedia, conversationGroup.type))),
                   actions: <Widget>[
                     IconButton(
                         icon: Icon(Icons.share),
@@ -303,9 +329,9 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             ),
                           ),
                         )),
-                    // TODO: Fix ListView below
+                    // TODO: Make it become ExpansionTile
                     Container(
-                      height: 100.0,
+                      height: 300.0,
                       child: ListView(
                         controller: scrollController,
                         children: userContactList
@@ -326,20 +352,14 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                         onTap: () {
                                           print("Tapped!");
                                         },
-                                        leading: imageService.loadImageThumbnailCircleAvatar(
-                                            multimediaList.firstWhere(
-                                                (Multimedia userContactMultimedia) {
-                                                  print("Execute in chat info page?");
-                                                  if(isObjectEmpty(userContactMultimedia)) {
-                                                    print('if(isObjectEmpty(userContactMultimedia))');
-                                                  } else {
-                                                    print('if(!isObjectEmpty(userContactMultimedia))');
-                                                  }
-
-                                                  return userContactMultimedia.userContactId == userContact.id;
-                                                },
-                                                orElse: null),
-                                            "UserContact"),
+                                        leading: imageService.loadImageThumbnailCircleAvatar(null, "UserContact"),
+//                                        leading: imageService.loadImageThumbnailCircleAvatar(
+//                                            multimediaList.firstWhere(
+//                                                (Multimedia userContactMultimedia) =>
+//                                                    !isObjectEmpty(userContactMultimedia) &&
+//                                                    userContactMultimedia.userContactId == userContact.id,
+//                                                orElse: null),
+//                                            "UserContact"),
                                       )
                                     ],
                                   ),
