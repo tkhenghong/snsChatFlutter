@@ -531,7 +531,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               }
             }));
         print("Scroll down.");
-        listScrollController.animateTo(0.0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
       } else {
         print('if(isObjectEmpty(newMessage) || isObjectEmpty(newMultimedia))');
       }
