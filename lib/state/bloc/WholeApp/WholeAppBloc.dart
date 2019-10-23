@@ -428,8 +428,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       Multimedia multimedia = Multimedia(
           id: null,
           conversationId: null,
-          imageDataId: null,
-          imageFileId: null,
           localFullFileUrl: null,
           localThumbnailUrl: null,
           remoteFullFileUrl: null,
@@ -445,6 +443,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
         lastSeenDate: DateTime.now().millisecondsSinceEpoch,
         block: false,
         userIds: [], // Add userId into it after User is Created
+        userId: null
       );
       bool created = await createUser(user, settings, multimedia, userContact);
 
@@ -486,7 +485,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return false;
     }
 
-    multimedia.userId = settings.userId = user.id = userFromServer.id;
+    userContact.userId = multimedia.userId = settings.userId = user.id = userFromServer.id;
 
     // Update the multimedia after the User is created
     multimediaAPIService.editMultimedia(multimedia);

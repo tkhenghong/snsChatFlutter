@@ -302,8 +302,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
     Multimedia groupMultiMedia = Multimedia(
         id: null,
-        imageDataId: null,
-        imageFileId: null,
         localFullFileUrl: null,
         localThumbnailUrl: null,
         remoteThumbnailUrl: null,

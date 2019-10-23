@@ -2,7 +2,9 @@
 // Because I need to create a table that has unknown contact numbers(those who hasn't registered as User)
 class UserContact {
   String id;
+
   String displayName;
+
   String realName;
 
   // TODO: Move it to User, declare it as UserContactIds, which means how many contact does this User own.
@@ -13,11 +15,13 @@ class UserContact {
 
   // Mobile number of the User/Stranger. Will use a method to determine the phone number's origin country. (Require to do strict validation during sign up + SMS verification)
   String mobileNo;
+
   int lastSeenDate;
+
+  bool block;
 
   // Show the user's picture. Uses the multimedia from the User itself. Show default user picture for strangers.
   String multimediaId;
-  bool block;
 
   UserContact(
       {this.id,

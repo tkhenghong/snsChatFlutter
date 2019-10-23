@@ -18,8 +18,6 @@ void main() {
       remoteFullFileUrl: "d689gt4re56hgtr4sh",
       localThumbnailUrl: "54dfghzd4h45th56ts4r",
       localFullFileUrl: "rtsde5fb8ts5dh896sy4jh",
-      imageFileId: "5dg4rde5g486reg6h54s",
-      imageDataId: "685dg4r658h4t68rts468y4h"
     );
   }
 
@@ -37,7 +35,6 @@ void main() {
     editedMultimedia.localThumbnailUrl = "Edited localThumbnailUrl";
     editedMultimedia.remoteThumbnailUrl = "Edited remoteThumbnailUrl";
     editedMultimedia.remoteFullFileUrl = "Edited remoteFullFileUrl";
-    editedMultimedia.imageFileId = "Edited imageFileId";
     bool edited = await multimediaAPIService.editMultimedia(editedMultimedia);
     print("edited:" + edited.toString());
 

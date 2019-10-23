@@ -206,8 +206,6 @@ class GroupNamePageState extends State<GroupNamePage> {
     // Multimedia for group chat
     Multimedia groupMultiMedia = Multimedia(
       id: null,
-      imageDataId: null,
-      imageFileId: null,
       localFullFileUrl: isObjectEmpty(copiedImageFile) ? null : copiedImageFile.path,
       localThumbnailUrl: null,
       remoteThumbnailUrl: null,

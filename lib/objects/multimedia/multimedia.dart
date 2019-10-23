@@ -11,8 +11,6 @@ class Multimedia {
   String localThumbnailUrl;
   String remoteThumbnailUrl;
   String remoteFullFileUrl;
-  String imageDataId; // Uint8List
-  String imageFileId; // File
   String messageId; // Belong to a message.
   String userContactId; // Belong to user too. Because 1 User, 1 UserContact.
   String conversationId; // Belong to ConversationGroup group photo
@@ -24,8 +22,6 @@ class Multimedia {
       this.localThumbnailUrl,
       this.remoteThumbnailUrl,
       this.remoteFullFileUrl,
-      this.imageDataId,
-      this.imageFileId,
       this.messageId,
       this.userContactId,
       this.conversationId,
@@ -37,8 +33,6 @@ class Multimedia {
         localThumbnailUrl = json['localThumbnailUrl'],
         remoteThumbnailUrl = json['remoteThumbnailUrl'],
         remoteFullFileUrl = json['remoteFullFileUrl'],
-        imageDataId = json['imageDataId'],
-        imageFileId = json['imageFileId'],
         messageId = json['messageId'],
         userContactId = json['userContactId'],
         conversationId = json['conversationId'],
@@ -50,8 +44,6 @@ class Multimedia {
         'localThumbnailUrl': localThumbnailUrl,
         'remoteThumbnailUrl': remoteThumbnailUrl,
         'remoteFullFileUrl': remoteFullFileUrl,
-        'imageDataId': imageDataId,
-        'imageFileId': imageFileId,
         'messageId': messageId,
         'userContactId': userContactId,
         'conversationId': conversationId,

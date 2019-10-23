@@ -503,8 +503,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             messageId: "",
             // Add after message created
             userContactId: "",
-            imageDataId: "",
-            imageFileId: "",
             localFullFileUrl: "",
             localThumbnailUrl: "",
             remoteFullFileUrl: "",
