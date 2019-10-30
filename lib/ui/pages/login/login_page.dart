@@ -14,6 +14,7 @@ import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:date_format/date_format.dart';
+import 'package:international_phone_input/international_phone_input.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -26,6 +27,9 @@ class LoginPageState extends State<LoginPage> {
   WholeAppBloc wholeAppBloc;
   final _formKey = GlobalKey<FormState>();
   TextEditingController mobileNoTextController = new TextEditingController();
+
+  String phoneIsoCode = "MY";
+  String phoneNumber = "+60";
 
   _signIn() async {
     if (_formKey.currentState.validate()) {
@@ -95,30 +99,43 @@ class LoginPageState extends State<LoginPage> {
                   Padding(padding: EdgeInsets.symmetric(vertical: 20.00)),
                   Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                      child: Form(
-                        key: _formKey,
-                        child: TextFormField(
-                          controller: mobileNoTextController,
-                          validator: (value) {
-                            if (value.isEmpty) {
-                              return "Please enter your phone number";
-                            }
-                            if (value.length < 8) {
-                              return "Please enter a valid phone number format";
-                            }
-                          },
-                          cursorColor: Colors.black,
-                          style: TextStyle(color: Colors.black),
-                          inputFormatters: [
-                            BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
-                          ],
-                          maxLength: 15,
-                          decoration:
+                      child: Column(
+                        children: <Widget>[
+                          InternationalPhoneInput(
+                            initialSelection: phoneIsoCode,
+                            initialPhoneNumber: phoneNumber,
+                            onPhoneNumberChange: (String number, String internationalizedPhoneNumber, String isoCode) {
+                              print("number: " + number);
+                              print("internationalizedPhoneNumber: " + internationalizedPhoneNumber);
+                              print("isoCode: " + isoCode);
+                            },
+                          ),
+                          Form(
+                            key: _formKey,
+                            child: TextFormField(
+                              controller: mobileNoTextController,
+                              validator: (value) {
+                                if (value.isEmpty) {
+                                  return "Please enter your phone number";
+                                }
+                                if (value.length < 8) {
+                                  return "Please enter a valid phone number format";
+                                }
+                              },
+                              cursorColor: Colors.black,
+                              style: TextStyle(color: Colors.black),
+                              inputFormatters: [
+                                BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
+                              ],
+                              maxLength: 15,
+                              decoration:
                               InputDecoration(hintText: "Mobile Number"),
-                          autofocus: true,
-                          textAlign: TextAlign.center,
-                          keyboardType: TextInputType.number,
-                        ),
+                              autofocus: true,
+                              textAlign: TextAlign.center,
+                              keyboardType: TextInputType.number,
+                            ),
+                          )
+                        ],
                       )),
                   RaisedButton(
                     onPressed: () => _signIn(),

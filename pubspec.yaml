@@ -39,6 +39,7 @@ dependencies:
   video_player: ^0.10.2+1
   flutter_downloader: ^1.2.2 # Allow download something in background
   image: ^2.1.4
+  international_phone_input: ^1.0.1
 
   flutter_cache_manager: ^1.1.1
   path_provider: ^1.2.0 # A Flutter plugin for finding commonly used locations on the filesystem. Supports iOS and Android.
