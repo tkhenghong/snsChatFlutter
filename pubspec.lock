@@ -205,12 +205,12 @@ packages:
     source: hosted
     version: "1.0.6"
   device_info:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: device_info
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.0+2"
+    version: "0.4.1+1"
   emoji_picker:
     dependency: "direct main"
     description:
@@ -788,4 +788,4 @@ packages:
     version: "2.2.0"
 sdks:
   dart: ">=2.4.0 <3.0.0"
-  flutter: ">=1.6.2 <2.0.0"
+  flutter: ">=1.6.7 <2.0.0"

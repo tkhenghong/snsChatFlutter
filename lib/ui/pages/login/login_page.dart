@@ -15,6 +15,7 @@ import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number
 import 'package:url_launcher/url_launcher.dart';
 import 'package:date_format/date_format.dart';
 import 'package:international_phone_input/international_phone_input.dart';
+import 'package:device_info/device_info.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -29,7 +30,7 @@ class LoginPageState extends State<LoginPage> {
   TextEditingController mobileNoTextController = new TextEditingController();
 
   String phoneIsoCode = "MY";
-  String phoneNumber = "+60";
+  String phoneNumber = "";
 
   _signIn() async {
     if (_formKey.currentState.validate()) {
@@ -62,6 +63,14 @@ class LoginPageState extends State<LoginPage> {
     }
   }
 
+  testDeviceInfo() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    print("deviceInfo: " + deviceInfo.toString());
+    print("androidInfo: " + androidInfo.toString());
+    
+  }
+
   @override
   Widget build(BuildContext context) {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
@@ -78,6 +87,18 @@ class LoginPageState extends State<LoginPage> {
         }
       });
     }));
+
+    https://flutter.io/tutorials/internationalization/#tracking-locale
+    Locale myLocale = Localizations.localeOf(context);
+
+    print("myLocale: " + myLocale.toString());
+    print("myLocale.countryCode: " + myLocale.countryCode.toString());
+    print("myLocale.languageCode: " + myLocale.languageCode.toString());
+    print("myLocale.scriptCode: " + myLocale.scriptCode.toString());
+
+    testDeviceInfo();
+
+    print("DateTime.now().timeZoneName.toString(): " + DateTime.now().timeZoneName.toString());
 
     return BlocBuilder(
       bloc: _wholeAppBloc,
@@ -104,6 +125,7 @@ class LoginPageState extends State<LoginPage> {
                           InternationalPhoneInput(
                             initialSelection: phoneIsoCode,
                             initialPhoneNumber: phoneNumber,
+                            hintText: "Mobile Number",
                             onPhoneNumberChange: (String number, String internationalizedPhoneNumber, String isoCode) {
                               print("number: " + number);
                               print("internationalizedPhoneNumber: " + internationalizedPhoneNumber);
