@@ -5,7 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:permission_handler/permission_handler.dart';
+import 'package:snschat_flutter/backend/rest/ipLocation/IPLocationAPIService.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
+import 'package:snschat_flutter/objects/IPGeoLocation/IPGeoLocation.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
@@ -29,7 +31,9 @@ class LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController mobileNoTextController = new TextEditingController();
 
-  String phoneIsoCode = "MY";
+  bool deviceLocated = false;
+
+  String phoneIsoCode = "";
   String phoneNumber = "";
 
   _signIn() async {
@@ -71,6 +75,16 @@ class LoginPageState extends State<LoginPage> {
     
   }
 
+  getIPLocation() async {
+    IPLocationAPIService ipLocationAPIService = IPLocationAPIService();
+    IPGeoLocation ipGeoLocation = await ipLocationAPIService.getIPGeolocation();
+    setState(() {
+      print("Set state!");
+      phoneIsoCode = ipGeoLocation.country_code2;
+      deviceLocated = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
@@ -97,6 +111,13 @@ class LoginPageState extends State<LoginPage> {
     print("myLocale.scriptCode: " + myLocale.scriptCode.toString());
 
     testDeviceInfo();
+    print("phoneIsoCode: " + phoneIsoCode);
+    if(!deviceLocated) {
+      print("if(!deviceLocated)");
+      getIPLocation();
+    } else {
+      print("if(deviceLocated)");
+    }
 
     print("DateTime.now().timeZoneName.toString(): " + DateTime.now().timeZoneName.toString());
 
@@ -123,12 +144,12 @@ class LoginPageState extends State<LoginPage> {
                       child: Column(
                         children: <Widget>[
                           CountryCodePicker(
-                            initialSelection: "MY",
+                            initialSelection: phoneIsoCode,
                             alignLeft: false,
                             showCountryOnly: false,
                             showFlag: true,
-                            showOnlyCountryWhenClosed: true,
-                            favorite: ["MY"],
+                            showOnlyCountryWhenClosed: false,
+                            favorite: [phoneIsoCode],
                             onChanged: (CountryCode countryCode) {
                               print("Testing country picker onChanged().");
                               print("countryCode: " + countryCode.toString());
