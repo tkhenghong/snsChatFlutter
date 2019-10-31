@@ -148,37 +148,32 @@ class LoginPageState extends State<LoginPage> {
                                 favorite: [phoneIsoCode],
                                 onChanged: (CountryCode countryCode) {},
                               ),
-                              IconButton(
-                                  icon: Icon(Icons.replay),
-                                  onPressed: () {
-                                    setState(() {});
-                                  }),
+                              Form(
+                                key: _formKey,
+                                child: TextFormField(
+                                  controller: mobileNoTextController,
+                                  validator: (value) {
+                                    if (value.isEmpty) {
+                                      return "Please enter your phone number";
+                                    }
+                                    if (value.length < 8) {
+                                      return "Please enter a valid phone number format";
+                                    }
+                                  },
+                                  cursorColor: Colors.black,
+                                  style: TextStyle(color: Colors.black),
+                                  inputFormatters: [
+                                    BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
+                                  ],
+                                  maxLength: 15,
+                                  decoration: InputDecoration(hintText: "Mobile Number"),
+                                  autofocus: true,
+                                  textAlign: TextAlign.center,
+                                  keyboardType: TextInputType.number,
+                                ),
+                              )
                             ],
                           ),
-                          Form(
-                            key: _formKey,
-                            child: TextFormField(
-                              controller: mobileNoTextController,
-                              validator: (value) {
-                                if (value.isEmpty) {
-                                  return "Please enter your phone number";
-                                }
-                                if (value.length < 8) {
-                                  return "Please enter a valid phone number format";
-                                }
-                              },
-                              cursorColor: Colors.black,
-                              style: TextStyle(color: Colors.black),
-                              inputFormatters: [
-                                BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
-                              ],
-                              maxLength: 15,
-                              decoration: InputDecoration(hintText: "Mobile Number"),
-                              autofocus: true,
-                              textAlign: TextAlign.center,
-                              keyboardType: TextInputType.number,
-                            ),
-                          )
                         ],
                       )),
                   RaisedButton(
