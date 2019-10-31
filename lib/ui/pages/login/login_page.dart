@@ -14,7 +14,7 @@ import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:date_format/date_format.dart';
-import 'package:international_phone_input/international_phone_input.dart';
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:device_info/device_info.dart';
 
 class LoginPage extends StatefulWidget {
@@ -122,14 +122,22 @@ class LoginPageState extends State<LoginPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 32.0),
                       child: Column(
                         children: <Widget>[
-                          InternationalPhoneInput(
-                            initialSelection: phoneIsoCode,
-                            initialPhoneNumber: phoneNumber,
-                            hintText: "Mobile Number",
-                            onPhoneNumberChange: (String number, String internationalizedPhoneNumber, String isoCode) {
-                              print("number: " + number);
-                              print("internationalizedPhoneNumber: " + internationalizedPhoneNumber);
-                              print("isoCode: " + isoCode);
+                          CountryCodePicker(
+                            initialSelection: "MY",
+                            alignLeft: false,
+                            showCountryOnly: false,
+                            showFlag: true,
+                            showOnlyCountryWhenClosed: true,
+                            favorite: ["MY"],
+                            onChanged: (CountryCode countryCode) {
+                              print("Testing country picker onChanged().");
+                              print("countryCode: " + countryCode.toString());
+                              print("countryCode.name: " + countryCode.name.toString());
+                              print("countryCode.code: " + countryCode.code.toString());
+                              print("countryCode.dialCode: " + countryCode.dialCode.toString());
+                              print("countryCode.flagUri: " + countryCode.flagUri.toString());
+                              print("countryCode.toCountryStringOnly(): " + countryCode.toCountryStringOnly().toString());
+                              print("countryCode.toLongString(): " + countryCode.toLongString().toString());
                             },
                           ),
                           Form(
