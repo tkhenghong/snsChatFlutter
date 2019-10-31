@@ -154,7 +154,7 @@ packages:
       name: connectivity
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.4"
+    version: "0.4.5+2"
   contacts_service:
     dependency: "direct main"
     description:
@@ -169,13 +169,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.1"
-  country_code_picker:
+  country_pickers:
     dependency: "direct main"
     description:
-      name: country_code_picker
+      name: country_pickers
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.7"
+    version: "1.1.0"
   crypto:
     dependency: transitive
     description:

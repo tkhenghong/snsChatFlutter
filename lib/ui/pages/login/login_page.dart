@@ -1,3 +1,5 @@
+import 'package:country_pickers/country.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -17,7 +19,9 @@ import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:date_format/date_format.dart';
-import 'package:country_code_picker/country_code_picker.dart';
+
+//import 'package:country_code_picker/country_code_picker.dart';
+import 'package:country_pickers/country_pickers.dart';
 import 'package:device_info/device_info.dart';
 
 class LoginPage extends StatefulWidget {
@@ -32,12 +36,12 @@ class LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController mobileNoTextController = new TextEditingController();
 
-  Widget countryPickerWidget;
-
   bool deviceLocated = false;
 
   String phoneIsoCode = "";
   String phoneNumber = "";
+
+  Country _selectedDialogCountry, _selectedCupertinoCountry;
 
   _signIn() async {
     if (_formKey.currentState.validate()) {
@@ -76,6 +80,42 @@ class LoginPageState extends State<LoginPage> {
     print("androidInfo: " + androidInfo.toString());
   }
 
+  Widget _buildDropdownItem(Country country) => Container(
+        child: Row(
+          children: <Widget>[
+            CountryPickerUtils.getDefaultFlagImage(country),
+            SizedBox(
+              width: 8.0,
+            ),
+            Text("+${country.phoneCode}(${country.isoCode})"),
+          ],
+        ),
+      );
+
+  void _openCountryPickerDialog() => showDialog(
+        context: context,
+        builder: (context) => Theme(
+            data: Theme.of(context).copyWith(primaryColor: Colors.pink),
+            child: CountryPickerDialog(
+              titlePadding: EdgeInsets.all(8.0),
+              searchCursorColor: Colors.pinkAccent,
+              searchInputDecoration: InputDecoration(hintText: 'Search...'),
+              isSearchable: true,
+              title: Text('Select your phone code'),
+              onValuePicked: (Country country) => setState(() => _selectedDialogCountry = country),
+//            itemBuilder: _buildDialogItem
+            )),
+      );
+
+  void _openCupertinoCountryPicker() => showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return CountryPickerCupertino(
+          pickerSheetHeight: 300.0,
+          onValuePicked: (Country country) => setState(() => _selectedCupertinoCountry = country),
+        );
+      });
+
   @override
   Widget build(BuildContext context) {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
@@ -92,15 +132,6 @@ class LoginPageState extends State<LoginPage> {
     print("phoneIsoCode: " + phoneIsoCode.toString());
     if (!deviceLocated) {
       print("if(!deviceLocated)");
-      countryPickerWidget = CountryCodePicker(
-        initialSelection: "US",
-        alignLeft: false,
-        showCountryOnly: false,
-        showFlag: true,
-        showOnlyCountryWhenClosed: false,
-        favorite: [phoneIsoCode],
-        onChanged: (CountryCode countryCode) {},
-      );
       wholeAppBloc.dispatch(GetIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {
         print("Callback success");
         setState(() {
@@ -139,19 +170,39 @@ class LoginPageState extends State<LoginPage> {
                         children: <Widget>[
                           Row(
                             children: <Widget>[
-                              CountryCodePicker(
-                                // Show fails when there's no Wifi.
-                                // Try another developer's country picker.
-                                // TODO: Try ask developer this issue in GitHub
-                                initialSelection: state.ipGeoLocation.country_code2,
-                                alignLeft: false,
-                                showCountryOnly: false,
-                                showFlag: true,
-                                showOnlyCountryWhenClosed: false,
-                                favorite: [phoneIsoCode],
-                                onChanged: (CountryCode countryCode) {},
-                              ),
+
+//                              CountryCodePicker(
+//                                // Show fails when there's no Wifi.
+//                                // Try another developer's country picker.
+//                                // TODO: Try ask developer this issue in GitHub
+//                                initialSelection: state.ipGeoLocation.country_code2,
+//                                alignLeft: false,
+//                                showCountryOnly: false,
+//                                showFlag: true,
+//                                showOnlyCountryWhenClosed: false,
+//                                favorite: [phoneIsoCode],
+//                                onChanged: (CountryCode countryCode) {},
+//                              ),
                             ],
+                          ),
+                          CountryPickerDropdown(
+                            initialValue: 'tr',
+                            itemBuilder: _buildDropdownItem,
+                            onValuePicked: (Country country) {
+                              print("${country.name}");
+                            },
+                          ),
+                          RaisedButton(
+                            child: Text("Click here for _openCountryPickerDialog()"),
+                            onPressed: () {
+                              _openCountryPickerDialog();
+                            },
+                          ),
+                          RaisedButton(
+                            child: Text("Click here for _openCupertinoCountryPicker"),
+                            onPressed: () {
+                              _openCupertinoCountryPicker();
+                            },
                           ),
                           Form(
                             key: _formKey,

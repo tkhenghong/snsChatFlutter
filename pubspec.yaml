@@ -30,7 +30,7 @@ dependencies:
   #  thumbnails: Generate thumbnails from video
 
   pin_input_text_field: ^2.0.0
-  connectivity: ^0.4.4
+  connectivity: ^0.4.5+2
   network_to_file_image: ^2.0.6
   time_formatter: ^1.0.0+5
   palette_generator: ^0.2.0
@@ -40,7 +40,8 @@ dependencies:
   flutter_downloader: ^1.2.2 # Allow download something in background
   image: ^2.1.4
 #  international_phone_input: ^1.0.1 # Not accurate
-  country_code_picker: ^1.1.7
+#  country_code_picker: ^1.1.7
+  country_pickers: ^1.1.0
   device_info: ^0.4.1+1
 
   flutter_cache_manager: ^1.1.1
