@@ -254,3 +254,9 @@ class SendWebSocketMessageEvent extends WholeAppEvent {
 
   SendWebSocketMessageEvent({this.webSocketMessage, this.callback});
 }
+
+class GetIPGeoLocationEvent extends WholeAppEvent {
+  Function callback;
+
+  GetIPGeoLocationEvent({this.callback});
+}

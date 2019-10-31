@@ -8,6 +8,7 @@ import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:snschat_flutter/objects/settings/settings.dart';
 import 'package:snschat_flutter/objects/user/user.dart';
+import 'package:snschat_flutter/objects/IPGeoLocation/IPGeoLocation.dart';
 
 class WholeAppState {
   List<ConversationGroup> conversationGroupList;
@@ -21,6 +22,7 @@ class WholeAppState {
   FirebaseUser firebaseUser;
   FirebaseAuth firebaseAuth;
   GoogleSignIn googleSignIn;
+  IPGeoLocation ipGeoLocation;
 
   WholeAppState._();
 
@@ -37,6 +39,7 @@ class WholeAppState {
       ..settingsState = new Settings()
       ..userState = new User()
       ..googleSignIn = new GoogleSignIn()
-      ..firebaseAuth = FirebaseAuth.instance;
+      ..firebaseAuth = FirebaseAuth.instance
+      ..ipGeoLocation = null;
   }
 }

@@ -16,6 +16,7 @@ import 'package:snschat_flutter/backend/rest/settings/SettingsAPIService.dart';
 import 'package:snschat_flutter/backend/rest/unreadMessage/UnreadMessageAPIService.dart';
 import 'package:snschat_flutter/backend/rest/user/UserAPIService.dart';
 import 'package:snschat_flutter/backend/rest/userContact/UserContactAPIService.dart';
+import 'package:snschat_flutter/backend/rest/ipLocation/IPLocationAPIService.dart';
 import 'package:snschat_flutter/database/sembast/conversation_group/conversation_group.dart';
 import 'package:snschat_flutter/database/sembast/message/message.dart';
 import 'package:snschat_flutter/database/sembast/multimedia/multimedia.dart';
@@ -34,6 +35,8 @@ import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
 import 'package:snschat_flutter/objects/user/user.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/objects/websocket/WebSocketMessage.dart';
+import 'package:snschat_flutter/objects/IPGeoLocation/IPGeoLocation.dart';
+
 import 'package:snschat_flutter/service/FirebaseStorage/FirebaseStorageService.dart';
 import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/service/permissions/PermissionService.dart';
@@ -49,6 +52,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   UnreadMessageAPIService unreadMessageAPIService = UnreadMessageAPIService();
   UserAPIService userAPIService = UserAPIService();
   UserContactAPIService userContactAPIService = UserContactAPIService();
+  IPLocationAPIService ipLocationAPIService = IPLocationAPIService();
 
   ConversationDBService conversationGroupDBService = new ConversationDBService();
   MessageDBService messageDBService = MessageDBService();
@@ -158,6 +162,9 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       yield currentState;
     } else if (event is ProcessMessageFromWebSocketEvent) {
       processMessageFromWebSocket(event);
+      yield currentState;
+    } else if (event is GetIPGeoLocationEvent) {
+      getIPGeoLocation(event);
       yield currentState;
     }
   }
@@ -435,16 +442,16 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
           messageId: null,
           userContactId: null);
       UserContact userContact = UserContact(
-        id: null,
-        multimediaId: null,
-        mobileNo: event.mobileNo,
-        displayName: firebaseUser.displayName,
-        realName: event.realName,
-        lastSeenDate: DateTime.now().millisecondsSinceEpoch,
-        block: false,
-        userIds: [], // Add userId into it after User is Created
-        userId: null
-      );
+          id: null,
+          multimediaId: null,
+          mobileNo: event.mobileNo,
+          displayName: firebaseUser.displayName,
+          realName: event.realName,
+          lastSeenDate: DateTime.now().millisecondsSinceEpoch,
+          block: false,
+          userIds: [],
+          // Add userId into it after User is Created
+          userId: null);
       bool created = await createUser(user, settings, multimedia, userContact);
 
       if (!isObjectEmpty(event)) {
@@ -1471,6 +1478,24 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     if (!isObjectEmpty(event)) {
       event.callback(event.webSocketMessage);
+    }
+  }
+
+  getIPLocation() async {}
+
+  getIPGeoLocation(GetIPGeoLocationEvent event) async {
+    IPGeoLocation ipGeoLocation = await ipLocationAPIService.getIPGeolocation();
+
+    if (isObjectEmpty(ipGeoLocation)) {
+      if (!isObjectEmpty(event)) {
+        event.callback(null);
+      }
+    }
+
+    currentState.ipGeoLocation = ipGeoLocation;
+
+    if (!isObjectEmpty(event)) {
+      event.callback(ipGeoLocation);
     }
   }
 }

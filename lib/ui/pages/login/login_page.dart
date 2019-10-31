@@ -6,6 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:permission_handler/permission_handler.dart';
 import 'package:snschat_flutter/backend/rest/ipLocation/IPLocationAPIService.dart';
+import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/objects/IPGeoLocation/IPGeoLocation.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
@@ -31,6 +32,8 @@ class LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController mobileNoTextController = new TextEditingController();
 
+  Widget countryPickerWidget;
+
   bool deviceLocated = false;
 
   String phoneIsoCode = "";
@@ -39,31 +42,30 @@ class LoginPageState extends State<LoginPage> {
   _signIn() async {
     if (_formKey.currentState.validate()) {
       showCenterLoadingIndicator(context);
-      wholeAppBloc.dispatch(CheckUserSignedUpEvent(callback: (bool isSignedUp) {
-        if (isSignedUp) {
-          wholeAppBloc.dispatch(UserSignInEvent(
-              callback: (bool signInSuccessful) {
-                if (signInSuccessful) {
-                  Navigator.pop(context);
-                  goToVerifyPhoneNumber();
-                } else {
-                  Fluttertoast.showToast(
-                      msg: 'Invalid Mobile No./matching Google account. Please try again!',
-                      toastLength: Toast.LENGTH_SHORT);
-                  wholeAppBloc.dispatch(UserSignOutEvent());
-                  Navigator.pop(context);
-                }
-              },
-              mobileNo: mobileNoTextController.value.text));
-        } else {
-          Fluttertoast.showToast(
-              msg: 'Welcome! Please sign up first!',
-              toastLength: Toast.LENGTH_SHORT);
-          wholeAppBloc.dispatch(UserSignOutEvent()); // Reset everything to initial state first
-          Navigator.pop(context);
-          goToSignUp();
-        }
-      }, mobileNo: mobileNoTextController.value.text));
+      wholeAppBloc.dispatch(CheckUserSignedUpEvent(
+          callback: (bool isSignedUp) {
+            if (isSignedUp) {
+              wholeAppBloc.dispatch(UserSignInEvent(
+                  callback: (bool signInSuccessful) {
+                    if (signInSuccessful) {
+                      Navigator.pop(context);
+                      goToVerifyPhoneNumber();
+                    } else {
+                      Fluttertoast.showToast(
+                          msg: 'Invalid Mobile No./matching Google account. Please try again!', toastLength: Toast.LENGTH_SHORT);
+                      wholeAppBloc.dispatch(UserSignOutEvent());
+                      Navigator.pop(context);
+                    }
+                  },
+                  mobileNo: mobileNoTextController.value.text));
+            } else {
+              Fluttertoast.showToast(msg: 'Welcome! Please sign up first!', toastLength: Toast.LENGTH_SHORT);
+              wholeAppBloc.dispatch(UserSignOutEvent()); // Reset everything to initial state first
+              Navigator.pop(context);
+              goToSignUp();
+            }
+          },
+          mobileNo: mobileNoTextController.value.text));
     }
   }
 
@@ -72,49 +74,41 @@ class LoginPageState extends State<LoginPage> {
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     print("deviceInfo: " + deviceInfo.toString());
     print("androidInfo: " + androidInfo.toString());
-    
-  }
-
-  getIPLocation() async {
-    IPLocationAPIService ipLocationAPIService = IPLocationAPIService();
-    IPGeoLocation ipGeoLocation = await ipLocationAPIService.getIPGeolocation();
-    setState(() {
-      print("Set state!");
-      phoneIsoCode = ipGeoLocation.country_code2;
-      deviceLocated = true;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
-    wholeAppBloc.dispatch(CheckPermissionEvent(
-        callback: (Map<PermissionGroup, PermissionStatus> permissionResults) {
-      permissionResults.forEach(
-          (PermissionGroup permissionGroup, PermissionStatus permissionStatus) {
-        if (permissionGroup == PermissionGroup.contacts &&
-            permissionStatus == PermissionStatus.granted) {
-          print(
-              'if(permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted)');
+    wholeAppBloc.dispatch(CheckPermissionEvent(callback: (Map<PermissionGroup, PermissionStatus> permissionResults) {
+      permissionResults.forEach((PermissionGroup permissionGroup, PermissionStatus permissionStatus) {
+        if (permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted) {
+          print('if(permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted)');
           wholeAppBloc.dispatch(GetPhoneStorageContactsEvent(callback: (bool done) {}));
         }
       });
     }));
 
-    https://flutter.io/tutorials/internationalization/#tracking-locale
-    Locale myLocale = Localizations.localeOf(context);
-
-    print("myLocale: " + myLocale.toString());
-    print("myLocale.countryCode: " + myLocale.countryCode.toString());
-    print("myLocale.languageCode: " + myLocale.languageCode.toString());
-    print("myLocale.scriptCode: " + myLocale.scriptCode.toString());
-
-    testDeviceInfo();
-    print("phoneIsoCode: " + phoneIsoCode);
-    if(!deviceLocated) {
+    print("phoneIsoCode: " + phoneIsoCode.toString());
+    if (!deviceLocated) {
       print("if(!deviceLocated)");
-      getIPLocation();
+      countryPickerWidget = CountryCodePicker(
+        initialSelection: "US",
+        alignLeft: false,
+        showCountryOnly: false,
+        showFlag: true,
+        showOnlyCountryWhenClosed: false,
+        favorite: [phoneIsoCode],
+        onChanged: (CountryCode countryCode) {},
+      );
+      wholeAppBloc.dispatch(GetIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {
+        print("Callback success");
+        setState(() {
+          print("Set state!");
+          phoneIsoCode = ipGeoLocation.country_code2;
+          deviceLocated = true;
+        });
+      }));
     } else {
       print("if(deviceLocated)");
     }
@@ -124,6 +118,7 @@ class LoginPageState extends State<LoginPage> {
     return BlocBuilder(
       bloc: _wholeAppBloc,
       builder: (context, WholeAppState state) {
+        print("Build?");
         return GestureDetector(
             onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
             //Focuses on nothing, means disable focus and hide keyboard
@@ -134,8 +129,7 @@ class LoginPageState extends State<LoginPage> {
                   Padding(padding: EdgeInsets.symmetric(vertical: 70.00)),
                   Text(
                     "Login",
-                    style:
-                        TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   Padding(padding: EdgeInsets.symmetric(vertical: 20.00)),
@@ -143,23 +137,23 @@ class LoginPageState extends State<LoginPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 32.0),
                       child: Column(
                         children: <Widget>[
-                          CountryCodePicker(
-                            initialSelection: phoneIsoCode,
-                            alignLeft: false,
-                            showCountryOnly: false,
-                            showFlag: true,
-                            showOnlyCountryWhenClosed: false,
-                            favorite: [phoneIsoCode],
-                            onChanged: (CountryCode countryCode) {
-                              print("Testing country picker onChanged().");
-                              print("countryCode: " + countryCode.toString());
-                              print("countryCode.name: " + countryCode.name.toString());
-                              print("countryCode.code: " + countryCode.code.toString());
-                              print("countryCode.dialCode: " + countryCode.dialCode.toString());
-                              print("countryCode.flagUri: " + countryCode.flagUri.toString());
-                              print("countryCode.toCountryStringOnly(): " + countryCode.toCountryStringOnly().toString());
-                              print("countryCode.toLongString(): " + countryCode.toLongString().toString());
-                            },
+                          Row(
+                            children: <Widget>[
+                              CountryCodePicker(
+                                initialSelection: !isObjectEmpty(state.ipGeoLocation) ? state.ipGeoLocation.country_code2 : phoneIsoCode,
+                                alignLeft: false,
+                                showCountryOnly: false,
+                                showFlag: true,
+                                showOnlyCountryWhenClosed: false,
+                                favorite: [phoneIsoCode],
+                                onChanged: (CountryCode countryCode) {},
+                              ),
+                              IconButton(
+                                  icon: Icon(Icons.replay),
+                                  onPressed: () {
+                                    setState(() {});
+                                  }),
+                            ],
                           ),
                           Form(
                             key: _formKey,
@@ -179,8 +173,7 @@ class LoginPageState extends State<LoginPage> {
                                 BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
                               ],
                               maxLength: 15,
-                              decoration:
-                              InputDecoration(hintText: "Mobile Number"),
+                              decoration: InputDecoration(hintText: "Mobile Number"),
                               autofocus: true,
                               textAlign: TextAlign.center,
                               keyboardType: TextInputType.number,
@@ -195,8 +188,7 @@ class LoginPageState extends State<LoginPage> {
                     highlightColor: Colors.black54,
                     splashColor: Colors.grey,
                     animationDuration: Duration(milliseconds: 500),
-                    padding: EdgeInsets.only(
-                        left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
+                    padding: EdgeInsets.only(left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
                     shape: RoundedRectangleBorder(
 //                  side: BorderSide(color: Colors.black, width: 1.0),
                         borderRadius: BorderRadius.circular(50.0)),
@@ -254,34 +246,25 @@ class LoginPageState extends State<LoginPage> {
   }
 
   goToVerifyPhoneNumber() {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: ((context) => VerifyPhoneNumberPage(
-                mobileNo: mobileNoTextController.value.text))));
+    Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(mobileNo: mobileNoTextController.value.text))));
   }
 
   goToSignUp() {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: ((context) =>
-                SignUpPage(mobileNo: mobileNoTextController.value.text))));
+    Navigator.push(context, MaterialPageRoute(builder: ((context) => SignUpPage(mobileNo: mobileNoTextController.value.text))));
   }
 
   goToContactSupport() async {
     String now = formatDate(new DateTime.now(), [dd, '/', mm, '/', yyyy]);
     String linebreak = '%0D%0A';
-    String url =
-        'mailto:<support@neurogine.com>?subject=Request for Contact Support ' +
-            now +
-            ' &body=Name: ' +
-            linebreak +
-            linebreak +
-            'Email: ' +
-            linebreak +
-            linebreak +
-            'Enquiry Details:';
+    String url = 'mailto:<support@neurogine.com>?subject=Request for Contact Support ' +
+        now +
+        ' &body=Name: ' +
+        linebreak +
+        linebreak +
+        'Email: ' +
+        linebreak +
+        linebreak +
+        'Enquiry Details:';
     if (await canLaunch(url)) {
       await launch(url);
     } else {

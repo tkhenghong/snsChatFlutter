@@ -17,6 +17,8 @@ import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
 import 'package:time_formatter/time_formatter.dart';
 
+import 'package:snschat_flutter/objects/IPGeoLocation/IPGeoLocation.dart';
+
 class ChatGroupListPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -49,6 +51,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   initialize() async {
     wholeAppBloc.dispatch(InitializeWebSocketServiceEvent());
+    wholeAppBloc.dispatch(GetIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {}));
     wholeAppBloc.dispatch(LoadDatabaseToStateEvent(callback: (bool loadDone) {
       if (loadDone) {
         // Set list done to true to prevent waiting due to poor Internet connection
