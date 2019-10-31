@@ -140,7 +140,10 @@ class LoginPageState extends State<LoginPage> {
                           Row(
                             children: <Widget>[
                               CountryCodePicker(
-                                initialSelection: !isObjectEmpty(state.ipGeoLocation) ? state.ipGeoLocation.country_code2 : phoneIsoCode,
+                                // Show fails when there's no Wifi.
+                                // Try another developer's country picker.
+                                // TODO: Try ask developer this issue in GitHub
+                                initialSelection: state.ipGeoLocation.country_code2,
                                 alignLeft: false,
                                 showCountryOnly: false,
                                 showFlag: true,
@@ -148,32 +151,32 @@ class LoginPageState extends State<LoginPage> {
                                 favorite: [phoneIsoCode],
                                 onChanged: (CountryCode countryCode) {},
                               ),
-                              Form(
-                                key: _formKey,
-                                child: TextFormField(
-                                  controller: mobileNoTextController,
-                                  validator: (value) {
-                                    if (value.isEmpty) {
-                                      return "Please enter your phone number";
-                                    }
-                                    if (value.length < 8) {
-                                      return "Please enter a valid phone number format";
-                                    }
-                                  },
-                                  cursorColor: Colors.black,
-                                  style: TextStyle(color: Colors.black),
-                                  inputFormatters: [
-                                    BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
-                                  ],
-                                  maxLength: 15,
-                                  decoration: InputDecoration(hintText: "Mobile Number"),
-                                  autofocus: true,
-                                  textAlign: TextAlign.center,
-                                  keyboardType: TextInputType.number,
-                                ),
-                              )
                             ],
                           ),
+                          Form(
+                            key: _formKey,
+                            child: TextFormField(
+                              controller: mobileNoTextController,
+                              validator: (value) {
+                                if (value.isEmpty) {
+                                  return "Please enter your phone number";
+                                }
+                                if (value.length < 8) {
+                                  return "Please enter a valid phone number format";
+                                }
+                              },
+                              cursorColor: Colors.black,
+                              style: TextStyle(color: Colors.black),
+                              inputFormatters: [
+                                BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
+                              ],
+                              maxLength: 15,
+                              decoration: InputDecoration(hintText: "Mobile Number"),
+                              autofocus: true,
+                              textAlign: TextAlign.center,
+                              keyboardType: TextInputType.number,
+                            ),
+                          )
                         ],
                       )),
                   RaisedButton(
