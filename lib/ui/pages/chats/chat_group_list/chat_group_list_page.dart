@@ -69,7 +69,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
             wholeAppBloc.dispatch(GetIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {
               goToLoginPage();
             }));
-
           }
         }));
       } else {

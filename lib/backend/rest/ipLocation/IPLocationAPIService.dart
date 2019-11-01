@@ -13,17 +13,22 @@ class IPLocationAPIService {
   String IP_GEOLOCATION_API_KEY = globals.IP_GEOLOCATION_API_KEY;
 
   Future<IPGeoLocation> getIPGeolocation() async {
-
     String wholeURL = "https://api.ipgeolocation.io/ipgeo?apiKey=$IP_GEOLOCATION_API_KEY";
 
-    var httpResponse = await http.get(wholeURL);
+    try {
+      var httpResponse = await http.get(wholeURL);
 
-    if (httpResponseIsOK(httpResponse)) {
-      print("httpResponse.body: " + httpResponse.body.toString());
-      IPGeoLocation ipGeoLocation = IPGeoLocation.fromJson(json.decode(httpResponse.body));
+      if (httpResponseIsOK(httpResponse)) {
+        print("httpResponse.body: " + httpResponse.body.toString());
+        IPGeoLocation ipGeoLocation = IPGeoLocation.fromJson(json.decode(httpResponse.body));
 
-      return ipGeoLocation;
+        return ipGeoLocation;
+      }
+    } catch (e) {
+      print("Error in getIPGeolocation().");
+      print("Error: " + e.toString());
     }
+
     return null;
   }
 }

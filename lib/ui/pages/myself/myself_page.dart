@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snschat_flutter/general/ui-component/list-view.dart';
+import 'package:snschat_flutter/objects/IPGeoLocation/IPGeoLocation.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 
@@ -23,27 +24,17 @@ class MyselfPageState extends State<MyselfPage> {
   }
 
   List<PageListItem> listItems = [
-    PageListItem(
-        title: Text("Settings"),
-        leading: Icon(Icons.settings),
-        onTap: (context, object) => goToSettingsPage(context, object)),
-    PageListItem(
-        title: Text("About"),
-        leading: Icon(Icons.info),
-        onTap: (context, object) => goToSettingsPage(context, object)),
-    PageListItem(
-        title: Text("Help"),
-        leading: Icon(Icons.help),
-        onTap: (context, object) => goToSettingsPage(context, object)),
-    PageListItem(
-        title: Text("Feedback"),
-        leading: Icon(Icons.feedback),
-        onTap: (context, object) => goToSettingsPage(context, object)),
+    PageListItem(title: Text("Settings"), leading: Icon(Icons.settings), onTap: (context, object) => goToSettingsPage(context, object)),
+    PageListItem(title: Text("About"), leading: Icon(Icons.info), onTap: (context, object) => goToSettingsPage(context, object)),
+    PageListItem(title: Text("Help"), leading: Icon(Icons.help), onTap: (context, object) => goToSettingsPage(context, object)),
+    PageListItem(title: Text("Feedback"), leading: Icon(Icons.feedback), onTap: (context, object) => goToSettingsPage(context, object)),
     PageListItem(
         title: Text("Logout"),
         leading: Icon(Icons.exit_to_app),
         onTap: (context, object) {
-          logOut(context, object);
+          wholeAppBloc.dispatch(GetIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {
+            logOut(context, object);
+          }));
         }),
   ];
 

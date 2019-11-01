@@ -1,4 +1,3 @@
-import 'package:country_pickers/country.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
@@ -7,10 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:permission_handler/permission_handler.dart';
-import 'package:snschat_flutter/backend/rest/ipLocation/IPLocationAPIService.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
-import 'package:snschat_flutter/objects/IPGeoLocation/IPGeoLocation.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
@@ -20,9 +17,7 @@ import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number
 import 'package:url_launcher/url_launcher.dart';
 import 'package:date_format/date_format.dart';
 
-//import 'package:country_code_picker/country_code_picker.dart';
-import 'package:country_pickers/country_pickers.dart';
-import 'package:device_info/device_info.dart';
+import 'package:country_code_picker/country_code_picker.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -39,8 +34,6 @@ class LoginPageState extends State<LoginPage> {
   bool deviceLocated = false;
 
   String phoneNumber = "";
-
-  Country _selectedDialogCountry, _selectedCupertinoCountry;
 
   _signIn() async {
     if (_formKey.currentState.validate()) {
@@ -72,48 +65,9 @@ class LoginPageState extends State<LoginPage> {
     }
   }
 
-  testDeviceInfo() async {
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    print("deviceInfo: " + deviceInfo.toString());
-    print("androidInfo: " + androidInfo.toString());
+  String isIPLocationExists(WholeAppState state) {
+    return isObjectEmpty(state.ipGeoLocation) ? "US" : state.ipGeoLocation.country_code2;
   }
-
-  Widget _buildDropdownItem(Country country) => Container(
-        child: Row(
-          children: <Widget>[
-            CountryPickerUtils.getDefaultFlagImage(country),
-            SizedBox(
-              width: 8.0,
-            ),
-            Text("+${country.phoneCode} ${country.name}"),
-          ],
-        ),
-      );
-
-  void _openCountryPickerDialog() => showDialog(
-        context: context,
-        builder: (context) => Theme(
-            data: Theme.of(context).copyWith(primaryColor: Colors.pink),
-            child: CountryPickerDialog(
-              titlePadding: EdgeInsets.all(8.0),
-              searchCursorColor: Colors.pinkAccent,
-              searchInputDecoration: InputDecoration(hintText: 'Search...'),
-              isSearchable: true,
-              title: Text('Select your phone code'),
-              onValuePicked: (Country country) => setState(() => _selectedDialogCountry = country),
-//            itemBuilder: _buildDialogItem
-            )),
-      );
-
-  void _openCupertinoCountryPicker() => showCupertinoModalPopup<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return CountryPickerCupertino(
-          pickerSheetHeight: 300.0,
-          onValuePicked: (Country country) => setState(() => _selectedCupertinoCountry = country),
-        );
-      });
 
   @override
   Widget build(BuildContext context) {
@@ -127,8 +81,6 @@ class LoginPageState extends State<LoginPage> {
         }
       });
     }));
-
-    print("DateTime.now().timeZoneName.toString(): " + DateTime.now().timeZoneName.toString());
 
     return BlocBuilder(
       bloc: _wholeAppBloc,
@@ -154,64 +106,48 @@ class LoginPageState extends State<LoginPage> {
                         children: <Widget>[
                           Row(
                             children: <Widget>[
-
-//                              CountryCodePicker(
-//                                // Show fails when there's no Wifi.
-//                                // Try another developer's country picker.
-//                                // TODO: Try ask developer this issue in GitHub
-//                                initialSelection: state.ipGeoLocation.country_code2,
-//                                alignLeft: false,
-//                                showCountryOnly: false,
-//                                showFlag: true,
-//                                showOnlyCountryWhenClosed: false,
-//                                favorite: [phoneIsoCode],
-//                                onChanged: (CountryCode countryCode) {},
-//                              ),
+                              Padding(
+                                padding: EdgeInsets.only(left: 20.0),
+                              ),
+                              CountryCodePicker(
+                                initialSelection: isIPLocationExists(state),
+                                alignLeft: false,
+                                showCountryOnly: false,
+                                showFlag: true,
+                                showOnlyCountryWhenClosed: false,
+                                favorite: [isIPLocationExists(state)],
+                                onChanged: (CountryCode countryCode) {},
+                              ),
+                              Container(
+                                width: 150.0,
+                                margin: EdgeInsetsDirectional.only(top: 20.0),
+                                child: Form(
+                                  key: _formKey,
+                                  child: TextFormField(
+                                    controller: mobileNoTextController,
+                                    validator: (value) {
+                                      if (value.isEmpty) {
+                                        return "Please enter your phone number";
+                                      }
+                                      if (value.length < 8) {
+                                        return "Please enter a valid phone number format";
+                                      }
+                                    },
+                                    cursorColor: Colors.black,
+                                    style: TextStyle(color: Colors.black),
+                                    inputFormatters: [
+                                      BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
+                                    ],
+                                    maxLength: 15,
+                                    decoration: InputDecoration(hintText: "Mobile Number"),
+                                    autofocus: true,
+                                    textAlign: TextAlign.left,
+                                    keyboardType: TextInputType.number,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
-                          CountryPickerDropdown(
-                            initialValue: isObjectEmpty(state.ipGeoLocation) ? "US" : state.ipGeoLocation.country_code2,
-                            itemBuilder: _buildDropdownItem,
-                            onValuePicked: (Country country) {
-                              print("${country.name}");
-                            },
-                          ),
-                          RaisedButton(
-                            child: Text("Click here for _openCountryPickerDialog()"),
-                            onPressed: () {
-                              _openCountryPickerDialog();
-                            },
-                          ),
-                          RaisedButton(
-                            child: Text("Click here for _openCupertinoCountryPicker"),
-                            onPressed: () {
-                              _openCupertinoCountryPicker();
-                            },
-                          ),
-                          Form(
-                            key: _formKey,
-                            child: TextFormField(
-                              controller: mobileNoTextController,
-                              validator: (value) {
-                                if (value.isEmpty) {
-                                  return "Please enter your phone number";
-                                }
-                                if (value.length < 8) {
-                                  return "Please enter a valid phone number format";
-                                }
-                              },
-                              cursorColor: Colors.black,
-                              style: TextStyle(color: Colors.black),
-                              inputFormatters: [
-                                BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
-                              ],
-                              maxLength: 15,
-                              decoration: InputDecoration(hintText: "Mobile Number"),
-                              autofocus: true,
-                              textAlign: TextAlign.center,
-                              keyboardType: TextInputType.number,
-                            ),
-                          )
                         ],
                       )),
                   RaisedButton(
