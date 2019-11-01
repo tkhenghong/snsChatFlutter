@@ -38,7 +38,6 @@ class LoginPageState extends State<LoginPage> {
 
   bool deviceLocated = false;
 
-  String phoneIsoCode = "";
   String phoneNumber = "";
 
   Country _selectedDialogCountry, _selectedCupertinoCountry;
@@ -87,7 +86,7 @@ class LoginPageState extends State<LoginPage> {
             SizedBox(
               width: 8.0,
             ),
-            Text("+${country.phoneCode}(${country.isoCode})"),
+            Text("+${country.phoneCode} ${country.name}"),
           ],
         ),
       );
@@ -128,21 +127,6 @@ class LoginPageState extends State<LoginPage> {
         }
       });
     }));
-
-    print("phoneIsoCode: " + phoneIsoCode.toString());
-    if (!deviceLocated) {
-      print("if(!deviceLocated)");
-      wholeAppBloc.dispatch(GetIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {
-        print("Callback success");
-        setState(() {
-          print("Set state!");
-          phoneIsoCode = ipGeoLocation.country_code2;
-          deviceLocated = true;
-        });
-      }));
-    } else {
-      print("if(deviceLocated)");
-    }
 
     print("DateTime.now().timeZoneName.toString(): " + DateTime.now().timeZoneName.toString());
 
@@ -186,7 +170,7 @@ class LoginPageState extends State<LoginPage> {
                             ],
                           ),
                           CountryPickerDropdown(
-                            initialValue: 'tr',
+                            initialValue: isObjectEmpty(state.ipGeoLocation) ? "US" : state.ipGeoLocation.country_code2,
                             itemBuilder: _buildDropdownItem,
                             onValuePicked: (Country country) {
                               print("${country.name}");
