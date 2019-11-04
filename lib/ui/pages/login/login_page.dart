@@ -31,9 +31,21 @@ class LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController mobileNoTextController = new TextEditingController();
 
+  CountryCode countryCode;
+
   bool deviceLocated = false;
 
-  String phoneNumber = "";
+  String getPhoneNumber() {
+    String phoneNoInitials = "";
+    if (isObjectEmpty(countryCode)) {
+      phoneNoInitials = wholeAppBloc.currentState.ipGeoLocation.calling_code;
+    } else {
+      phoneNoInitials = countryCode.dialCode;
+    }
+    String phoneNumber = phoneNoInitials + mobileNoTextController.value.text;
+    print("REAL phoneNumber: " + phoneNumber);
+    return phoneNumber;
+  }
 
   _signIn() async {
     if (_formKey.currentState.validate()) {
@@ -53,7 +65,7 @@ class LoginPageState extends State<LoginPage> {
                       Navigator.pop(context);
                     }
                   },
-                  mobileNo: mobileNoTextController.value.text));
+                  mobileNo: getPhoneNumber()));
             } else {
               Fluttertoast.showToast(msg: 'Welcome! Please sign up first!', toastLength: Toast.LENGTH_SHORT);
               wholeAppBloc.dispatch(UserSignOutEvent()); // Reset everything to initial state first
@@ -61,7 +73,7 @@ class LoginPageState extends State<LoginPage> {
               goToSignUp();
             }
           },
-          mobileNo: mobileNoTextController.value.text));
+          mobileNo: getPhoneNumber()));
     }
   }
 
@@ -69,8 +81,22 @@ class LoginPageState extends State<LoginPage> {
     return isObjectEmpty(state.ipGeoLocation) ? "US" : state.ipGeoLocation.country_code2;
   }
 
+  onCountryPickerChanged(CountryCode countryCode) {
+    print("onCountryPickerChanged()");
+    print("countryCode: " + countryCode.toString());
+    print("countryCode.code: " + countryCode.code.toString());
+    print("countryCode.flagUri: " + countryCode.flagUri.toString());
+    this.countryCode = countryCode;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final deviceWidth = MediaQuery.of(context).size.width;
+    final deviceHeight = MediaQuery.of(context).size.height;
+
+    print("deviceWidth: " + deviceWidth.toString());
+    print("deviceHeight: " + deviceHeight.toString());
+
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
     wholeAppBloc.dispatch(CheckPermissionEvent(callback: (Map<PermissionGroup, PermissionStatus> permissionResults) {
@@ -116,11 +142,11 @@ class LoginPageState extends State<LoginPage> {
                                 showFlag: true,
                                 showOnlyCountryWhenClosed: false,
                                 favorite: [isIPLocationExists(state)],
-                                onChanged: (CountryCode countryCode) {},
+                                onChanged: onCountryPickerChanged,
                               ),
                               Container(
-                                width: 150.0,
-                                margin: EdgeInsetsDirectional.only(top: 20.0),
+                                width: deviceWidth * 0.5,
+                                margin: EdgeInsetsDirectional.only(top: deviceHeight * 0.03),
                                 child: Form(
                                   key: _formKey,
                                   child: TextFormField(
@@ -132,6 +158,8 @@ class LoginPageState extends State<LoginPage> {
                                       if (value.length < 8) {
                                         return "Please enter a valid phone number format";
                                       }
+
+                                      return null;
                                     },
                                     cursorColor: Colors.black,
                                     style: TextStyle(color: Colors.black),
@@ -178,10 +206,7 @@ class LoginPageState extends State<LoginPage> {
                         TextSpan(
                             text: "Contact Support",
                             style: TextStyle(color: Colors.black),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                goToContactSupport();
-                              })
+                            recognizer: TapGestureRecognizer()..onTap = () => goToContactSupport)
                       ])),
                   Padding(padding: EdgeInsets.symmetric(vertical: 5.00)),
                   RichText(
@@ -190,10 +215,7 @@ class LoginPageState extends State<LoginPage> {
                         TextSpan(
                             text: "Terms and Conditions",
                             style: TextStyle(color: Colors.black),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                goToTermsAndConditions();
-                              })
+                            recognizer: TapGestureRecognizer()..onTap = () => goToTermsAndConditions())
                       ])),
                   Padding(padding: EdgeInsets.symmetric(vertical: 5.00)),
                   RichText(
@@ -202,10 +224,7 @@ class LoginPageState extends State<LoginPage> {
                         TextSpan(
                             text: "Privacy Notice",
                             style: TextStyle(color: Colors.black),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                goToPrivacyNotice()();
-                              })
+                            recognizer: TapGestureRecognizer()..onTap = () => goToPrivacyNotice())
                       ])),
                 ],
               ),
@@ -215,11 +234,11 @@ class LoginPageState extends State<LoginPage> {
   }
 
   goToVerifyPhoneNumber() {
-    Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(mobileNo: mobileNoTextController.value.text))));
+    Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(mobileNo: getPhoneNumber()))));
   }
 
   goToSignUp() {
-    Navigator.push(context, MaterialPageRoute(builder: ((context) => SignUpPage(mobileNo: mobileNoTextController.value.text))));
+    Navigator.push(context, MaterialPageRoute(builder: ((context) => SignUpPage(mobileNo: getPhoneNumber()))));
   }
 
   goToContactSupport() async {

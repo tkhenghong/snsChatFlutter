@@ -8,6 +8,7 @@ import 'package:snschat_flutter/objects/IPGeoLocation/IPGeoLocation.dart';
 
 import '../RestResponseUtils.dart';
 
+// There's a problem when connected to VPN, be careful.
 class IPLocationAPIService {
   String REST_URL = globals.REST_URL;
   String IP_GEOLOCATION_API_KEY = globals.IP_GEOLOCATION_API_KEY;
