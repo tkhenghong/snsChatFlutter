@@ -1486,7 +1486,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   getIPGeoLocation(GetIPGeoLocationEvent event) async {
     IPGeoLocation ipGeoLocation = await ipLocationAPIService.getIPGeolocation();
 
-    print("Hellow?");
     if (isObjectEmpty(ipGeoLocation)) {
       if (!isObjectEmpty(event)) {
         event.callback(null);

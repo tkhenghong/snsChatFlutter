@@ -472,7 +472,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             id: null,
             conversationId: widget._conversationGroup.id,
             messageContent: content,
-            multimediaId: null,
+            multimediaId: "",
             // Send to group will not need receiver
             receiverId: "",
             receiverMobileNo: "",
