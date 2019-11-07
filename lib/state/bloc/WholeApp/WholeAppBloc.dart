@@ -791,7 +791,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       } else {
         // No phone number and the display name is the phone number itself
         // Reason: No contact.phones when the mobile number doesn't have a name on it
-        String mobileNo = contact.displayName.replaceAll("TO\\s", "");
+        String mobileNo = contact.displayName.replaceAll(new RegExp(r"\s+\b|\b\s|\s|\b"), "");
         print("mobileNo with whitespaces removed: " + mobileNo);
         primaryNo.add(mobileNo);
       }
