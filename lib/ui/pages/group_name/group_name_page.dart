@@ -192,7 +192,7 @@ class GroupNamePageState extends State<GroupNamePage> {
     File copiedImageFile;
     DateTime startTime = DateTime.now();
     DateTime endTime;
-    if (!isStringEmpty(imageFile.path)) {
+    if (!isObjectEmpty(imageFile) && !isStringEmpty(imageFile.path)) {
       // Copy full file to our directory. Create thumbnail of this image and copy this to our directory as well.
       copiedImageFile = await fileService.copyFile(imageFile, "ApplicationDocumentDirectory");
       endTime = DateTime.now();

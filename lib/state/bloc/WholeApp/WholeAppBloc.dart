@@ -955,9 +955,9 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     List<UserContact> newUserContactList = [];
     for (UserContact userContact in userContactList) {
       UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
-      if (newUserContact != null) {
+      if (!isObjectEmpty(newUserContact)) {
         UserContact existingUserContact = await userContactAPIService.getUserContact(newUserContact.id);
-        if (existingUserContact != null) {
+        if (!isObjectEmpty(existingUserContact)) {
           // Weakness: No error handling if UserContact save to DB fails
           userContactDBService.addUserContact(existingUserContact);
           dispatch(AddUserContactToStateEvent(userContact: existingUserContact, callback: (UserContact userContact) {}));
