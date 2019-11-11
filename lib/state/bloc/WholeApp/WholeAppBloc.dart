@@ -194,6 +194,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     User existingUser;
     bool googleSignInDone = await signInUsingGoogle();
 
+    // If Google not signed in, return true to prevent user thought they are not registered and can be created
     if (!googleSignInDone) {
       if (!isObjectEmpty(event)) {
         event.callback(isSignedUp);
@@ -209,7 +210,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       existingUser = await userAPIService.getUserByUsingGoogleAccountId(currentState.googleSignIn.currentUser.id);
     }
 
-    isSignedUp = existingUser != null;
+    isSignedUp = !isObjectEmpty(existingUser);
 
     print("isSignedUp: " + isSignedUp.toString());
 
@@ -491,12 +492,10 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     dispatch(AddMultimediaToStateEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
 
     User userFromServer = await userAPIService.addUser(user);
-    if (userFromServer == null) {
+    print("userFromServer: " + userFromServer.toString());
+    if (isObjectEmpty(userFromServer)) {
       return false;
     }
-
-    // TODO: Does it run here?
-    print("CHECKPOINT 1");
 
     userContact.userId = multimedia.userId = settings.userId = user.id = userFromServer.id;
 
