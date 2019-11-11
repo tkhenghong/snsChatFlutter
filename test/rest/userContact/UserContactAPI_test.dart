@@ -13,6 +13,8 @@ void main() {
         realName: "Teoh Kheng Hong",
         displayName: "Hong KH",
         mobileNo: "+60182262663",
+//        mobileNo: "0182262663",
+//        mobileNo: "+1-202-555-0118",
         userIds: ["5847rth54rt4h56sr4h", "5d7385f079d3941d808f7e30"],
         block: false,
         lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
@@ -40,11 +42,10 @@ void main() {
     expect(edited, isTrue);
   });
 
-
   test("Test Get UserContact", () async {
     UserContact userContact = createTestObject();
     print("Before send to server");
-    print("userContact.lastSeenDate: "+ userContact.lastSeenDate.toString());
+    print("userContact.lastSeenDate: " + userContact.lastSeenDate.toString());
     DateTime lastSeenDateDT = new DateTime.fromMicrosecondsSinceEpoch(userContact.lastSeenDate);
     print("lastSeenDateDT.toIso8601String(): " + lastSeenDateDT.toIso8601String());
     UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
@@ -55,10 +56,14 @@ void main() {
 
   test("Test Get UserContact Locally By Using Mobile No", () async {
     UserContact userContact = createTestObject();
+    print("userContact.mobileNo: " + userContact.mobileNo);
 
     UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
 
     UserContact userContactFromServer = await userContactAPIService.getUserContactByMobileNo(newUserContact.mobileNo);
+
+    print("userContactFromServer.mobileNo: " + userContactFromServer.mobileNo);
+    print("newUserContact.mobileNo: " + newUserContact.mobileNo);
 
     expect(userContactFromServer.mobileNo, equals(newUserContact.mobileNo));
     expect(newUserContact.mobileNo, equals(userContact.mobileNo));

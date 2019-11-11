@@ -471,6 +471,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     return false;
   }
 
+  // TODO: Check user creation process
   Future<bool> createUser(User user, Settings settings, Multimedia multimedia, UserContact userContact) async {
     // REST API --> Local DB
 
@@ -487,16 +488,21 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return false;
     }
 
+    dispatch(AddMultimediaToStateEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
+
     User userFromServer = await userAPIService.addUser(user);
     if (userFromServer == null) {
       return false;
     }
 
+    // TODO: Does it run here?
+    print("CHECKPOINT 1");
+
     userContact.userId = multimedia.userId = settings.userId = user.id = userFromServer.id;
 
     // Update the multimedia after the User is created
-    multimediaAPIService.editMultimedia(multimedia);
-    multimediaDBService.editMultimedia(multimedia);
+    dispatch(EditMultimediaEvent(
+        multimedia: multimedia, updateInDB: true, updateInREST: true, updateInState: true, callback: (Multimedia multimedia) {}));
 
     userContact.userIds.add(user.id);
     userContact.multimediaId = multimedia.id;
@@ -506,17 +512,25 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return false;
     }
 
+    dispatch(AddUserToStateEvent(user: user, callback: (User user) {}));
+
     UserContact userContactFromServer = await userContactAPIService.addUserContact(userContact);
+
+    // TODO: Problem in adding UserContact
+    print("userContactFromServer: " + userContactFromServer.toString());
     if (userContactFromServer == null) {
       return false;
     }
 
     userContact.id = userContactFromServer.id;
 
+
     bool userContactSaved = await userContactDBService.addUserContact(userContact);
     if (!userContactSaved) {
       return false;
     }
+
+    dispatch(AddUserContactToStateEvent(userContact: userContact, callback: (UserContact userContact) {}));
 
     Settings settingsFromServer = await settingsAPIService.addSettings(settings);
     if (settingsFromServer == null) {
@@ -529,6 +543,8 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     if (!settingsSaved) {
       return false;
     }
+
+    dispatch(AddSettingsToStateEvent(settings: settings, callback: (Settings settings) {}));
 
     return true;
   }
