@@ -314,6 +314,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   // Output: The state will have GoogleAccount, FirebaseUser, User, Settings data
   Future<bool> signIn(UserSignInEvent event) async {
     bool googleSignedIn = await signInUsingGoogle();
+    print("googleSignedIn: " + googleSignedIn.toString());
     if (!googleSignedIn) {
       if (!isObjectEmpty(event)) {
         event.callback(false);

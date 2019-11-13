@@ -67,10 +67,10 @@ class LoginPageState extends State<LoginPage> {
                   },
                   mobileNo: getPhoneNumber()));
             } else {
-              Fluttertoast.showToast(msg: 'Welcome! Please sign up first!', toastLength: Toast.LENGTH_SHORT);
+//              Fluttertoast.showToast(msg: 'Welcome! Please sign up first!', toastLength: Toast.LENGTH_SHORT);
               wholeAppBloc.dispatch(UserSignOutEvent()); // Reset everything to initial state first
               Navigator.pop(context);
-              goToSignUp();
+//              goToSignUp();
             }
           },
           mobileNo: getPhoneNumber()));
