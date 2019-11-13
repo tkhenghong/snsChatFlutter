@@ -22,7 +22,7 @@ class ConversationDBService {
     }
 
     ConversationGroup existingConversationGroup = await getSingleConversationGroup(conversationGroup.id);
-    var key = existingConversationGroup == null ? await _conversationGroupStore.add(await _db, conversationGroup.toJson()) : null;
+    var key = isObjectEmpty(existingConversationGroup) ? await _conversationGroupStore.add(await _db, conversationGroup.toJson()) : null;
 
     // Return added or not added
     return !isStringEmpty(key.toString());

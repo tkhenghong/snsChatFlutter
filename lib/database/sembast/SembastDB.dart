@@ -30,7 +30,7 @@ class SembastDB {
   // Get the
   Future<Database> get database async {
     // if _dbOpenCompleter is not null, it will not create a new instance of database object from Sembast
-    if (_dbOpenCompleter == null) {
+    if (isObjectEmpty(_dbOpenCompleter)) {
       _dbOpenCompleter = Completer();
       _startSembastDatabase();
     }

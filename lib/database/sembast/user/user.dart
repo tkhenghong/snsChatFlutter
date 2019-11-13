@@ -18,7 +18,7 @@ class UserDBService {
     }
 
     User existingUser = await getSingleUser(user.id);
-    var key = existingUser == null ? await _userStore.add(await _db, user.toJson()) : null;
+    var key = isObjectEmpty(existingUser) ? await _userStore.add(await _db, user.toJson()) : null;
 
     return !isStringEmpty(key.toString());
   }
