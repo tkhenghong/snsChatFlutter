@@ -178,7 +178,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     List<User> userList = await userDBService.getAllUsers();
 
-    isSignedIn = await currentState.googleSignIn.isSignedIn() || userList == null || userList.length == 0;
+    isSignedIn = await currentState.googleSignIn.isSignedIn() || isObjectEmpty(userList) || userList.length == 0;
 
     print("isSignedIn: " + isSignedIn.toString());
     if (!isObjectEmpty(event)) {
@@ -251,7 +251,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       return false;
     }
     Settings settingsFromDB = await settingsDBService.getSettingsOfAUser(userFromDB.id);
-    if (userFromDB == null && settingsFromDB == null) {
+    if (isObjectEmpty(userFromDB) && isObjectEmpty(settingsFromDB)) {
       if (!isObjectEmpty(event)) {
         event.callback(false);
       }
@@ -387,12 +387,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     }
 
     User userFromServer = await userAPIService.getUserByUsingGoogleAccountId(currentState.googleSignIn.currentUser.id);
-    if (userFromServer == null) {
+    if (isObjectEmpty(userFromServer)) {
       return false;
     }
 
     Settings settingsFromServer = await settingsAPIService.getSettingsOfAUser(userFromServer.id);
-    if (settingsFromServer == null) {
+    if (isObjectEmpty(settingsFromServer)) {
       return false;
     }
 
@@ -478,7 +478,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     // REST API --> Local DB
 
     Multimedia multimediaFromServer = await multimediaAPIService.addMultimedia(multimedia);
-    if (multimediaFromServer == null) {
+    if (isObjectEmpty(multimediaFromServer)) {
       return false;
     }
 
@@ -518,7 +518,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     // TODO: Problem in adding UserContact
     print("userContactFromServer: " + userContactFromServer.toString());
-    if (userContactFromServer == null) {
+    if (isObjectEmpty(userContactFromServer)) {
       return false;
     }
 
@@ -533,7 +533,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     dispatch(AddUserContactToStateEvent(userContact: userContact, callback: (UserContact userContact) {}));
 
     Settings settingsFromServer = await settingsAPIService.addSettings(settings);
-    if (settingsFromServer == null) {
+    if (isObjectEmpty(settingsFromServer)) {
       return false;
     }
 
@@ -838,6 +838,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     // Note: Backend already helped you to check any duplicates of the same UserContact
     List<UserContact> newUserContactList = await addUserContactList(userContactList);
     print("Uploaded and saved uploadUserContactList to REST, DB and State.");
+    print("newUserContactList.length: " + newUserContactList.length.toString());
 
     // event.contactList doesn't include yourself, so newUserContactList.length - 1 OR Any UserContact is not added into the list (means not uploaded successfully)
     if ((event.contactList.length != newUserContactList.length - 1) || newUserContactList.length == 0) {
@@ -863,7 +864,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     // 2. Upload ConversationGroup
     ConversationGroup newConversationGroup = await addConversationGroup(event.conversationGroup);
     print("Uploaded and saved conversationGroup to REST, DB.");
-    if (newConversationGroup == null) {
+    if (isObjectEmpty(newConversationGroup)) {
       return null;
     }
 
@@ -890,7 +891,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     );
     UnreadMessage newUnreadMessage = await addUnreadMessage(unreadMessage);
     print("Uploaded and saved UnreadMessage to REST, DB.");
-    if (newUnreadMessage == null) {
+    if (isObjectEmpty(newUnreadMessage)) {
       return null;
     }
 
@@ -909,7 +910,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     Multimedia newMultimedia = await addMultimedia(event.multimedia);
     print("Uploaded and saved ConversationGroup Multimedia to REST, DB.");
-    if (newMultimedia == null) {
+    if (isObjectEmpty(newMultimedia)) {
       return null;
     }
 
@@ -971,6 +972,12 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     List<UserContact> newUserContactList = [];
     for (UserContact userContact in userContactList) {
       UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
+      if(isObjectEmpty(newUserContact)) {
+        print("if(isObjectEmpty(newUserContact)) Unable to add new UserContact");
+      } else {
+        print("if(!isObjectEmpty(newUserContact))");
+        print("newUserContact: " + newUserContact.id);
+      }
       if (!isObjectEmpty(newUserContact)) {
         UserContact existingUserContact = await userContactAPIService.getUserContact(newUserContact.id);
         if (!isObjectEmpty(existingUserContact)) {
