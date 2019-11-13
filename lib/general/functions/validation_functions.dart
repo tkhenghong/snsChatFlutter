@@ -1,10 +1,10 @@
 isObjectEmpty(Object obj) {
-  bool empty = obj.toString() == "" || obj == null;
+  bool empty =  obj == null || obj.toString() == "";
   return empty;
 }
 
 isStringEmpty(String string) {
-  return string == "" || string == null;
+  return string == null || string == "";
 }
 
 //bool isItemExistsInList(List<Object> objList, Object obj) {
