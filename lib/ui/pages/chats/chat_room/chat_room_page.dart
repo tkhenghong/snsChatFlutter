@@ -36,6 +36,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   bool isLoading;
   bool imageFound = false;
 
+  Color appBarTextTitleColor;
+  Color appBarThemeColor;
+
   String WEBSOCKET_URL = globals.WEBSOCKET_URL;
   List<Message> messageList = [];
 
@@ -69,6 +72,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   Widget build(BuildContext context) {
     print("widget._conversation.id: " + widget._conversationGroup.id);
 
+    appBarTextTitleColor = Theme.of(context).appBarTheme.textTheme.title.color;
+    appBarThemeColor = Theme.of(context).appBarTheme.color;
+
     Multimedia multimedia = wholeAppBloc.findMultimediaByConversationId(widget._conversationGroup.id);
 
     // TODO: Send message using WebSocket
@@ -92,7 +98,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               Tooltip(
                 message: "Back",
                 child: Material(
-                  color: Colors.black,
+                  color: appBarThemeColor,
                   child: InkWell(
                     customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
                     onTap: () {
@@ -103,7 +109,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                         Icon(Icons.arrow_back),
                         Hero(
                           tag: widget._conversationGroup.id + "1",
-                          child: imageService.loadImageThumbnailCircleAvatar(multimedia, widget._conversationGroup.type),
+                          child: imageService.loadImageThumbnailCircleAvatar(multimedia, widget._conversationGroup.type, context),
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 50.0),
@@ -114,7 +120,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                 ),
               ),
               Material(
-                color: Colors.black,
+                color: appBarThemeColor,
                 child: InkWell(
                     customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
                     onTap: () {
@@ -132,15 +138,12 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                           tag: widget._conversationGroup.id,
                           child: Text(
                             widget._conversationGroup.name,
-                            style: TextStyle(
-                                color: Colors.white,
-                                // fontSize: 20.0,
-                                fontWeight: FontWeight.bold),
+                            style: TextStyle(color: appBarTextTitleColor, fontWeight: FontWeight.bold),
                           ),
                         ),
                         Text(
                           "Tap here for more details",
-                          style: TextStyle(color: Colors.white, fontSize: 13.0),
+                          style: TextStyle(color: appBarTextTitleColor, fontSize: 13.0),
                         )
                       ],
                     )),
@@ -195,7 +198,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               child: IconButton(
                 icon: Icon(Icons.image),
                 onPressed: getImage,
-                color: Colors.black,
               ),
             ),
             color: Colors.white,
@@ -206,7 +208,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               child: IconButton(
                 icon: Icon(Icons.face),
                 onPressed: getSticker,
-                color: Colors.black,
               ),
             ),
             color: Colors.white,
@@ -216,8 +217,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           Flexible(
             child: Container(
               child: TextField(
-                cursorColor: Colors.black,
-                style: TextStyle(color: Colors.black, fontSize: 17.0),
+                style: TextStyle(fontSize: 17.0),
                 controller: textEditingController,
                 decoration: InputDecoration.collapsed(
                   hintText: 'Type your message...',
@@ -235,7 +235,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               child: IconButton(
                 icon: Icon(Icons.send),
                 onPressed: () => sendChatMessage(textEditingController.text, 0),
-                color: Colors.black,
               ),
             ),
             color: Colors.white,
@@ -310,7 +309,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           children: <Widget>[
             Container(
               padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-              decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8.0)),
+              decoration: BoxDecoration(color: appBarThemeColor, borderRadius: BorderRadius.circular(8.0)),
               margin:
                   EdgeInsets.only(bottom: 20.0, right: isSenderMessage(message) ? 10.0 : 0.0, left: isSenderMessage(message) ? 10.0 : 0.0),
               child: Row(

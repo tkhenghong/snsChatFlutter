@@ -37,10 +37,12 @@ class UserSignInEvent extends WholeAppEvent {
 
 class UserSignUpEvent extends WholeAppEvent {
   String mobileNo;
-  String realName;
+  String countryCode;
+  String effectiveMobileNo;
+  String displayName;
   Function callback;
 
-  UserSignUpEvent({this.callback, this.mobileNo, this.realName});
+  UserSignUpEvent({this.callback, this.mobileNo, this.countryCode, this.effectiveMobileNo, this.displayName});
 }
 
 class UserSignOutEvent extends WholeAppEvent {}

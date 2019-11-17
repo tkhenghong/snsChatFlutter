@@ -17,8 +17,8 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
   Animation animation;
   static const List<IconData> icons = const [Icons.person_add, Icons.group_add]; // TODO: Add Broadcast
   static const List<String> chatTitles = const ["Personal", "Group"]; // TODO: Add Broadcast
-  Color backgroundColor = Colors.black;
   Color foregroundColor = Colors.white;
+  Color themePrimaryColor;
 
   int _bottomNavBarIndex = 0;
   String tabTitle = "Chats"; // Have to put default tab name or compiler will say null error
@@ -48,6 +48,9 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
 
   @override
   Widget build(BuildContext context) {
+
+    themePrimaryColor = Theme.of(context).textTheme.title.color;
+
     print('Tabs Page: build? ');
     return Material(
       color: Colors.white,
@@ -59,7 +62,9 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
             title: Text(
               tabTitle,
               textAlign: TextAlign.start,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32.0, color: Colors.black),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32.0,
+                  color: themePrimaryColor
+              ),
             ),
           ),
           backgroundColor: Colors.white,
@@ -88,31 +93,31 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
               BottomNavigationBarItem(
                 icon: Icon(
                   Icons.chat,
-                  color: Colors.black,
+                  color: themePrimaryColor,
                 ),
                 title: Text(
                   "Chats",
-                  style: TextStyle(color: Colors.black),
+                  style: TextStyle(color: themePrimaryColor),
                 ),
               ),
               BottomNavigationBarItem(
                 icon: Icon(
                   Icons.code,
-                  color: Colors.black,
+                  color: themePrimaryColor,
                 ),
                 title: Text(
                   "Scan QR Code",
-                  style: TextStyle(color: Colors.black),
+                  style: TextStyle(color: themePrimaryColor),
                 ),
               ),
               BottomNavigationBarItem(
                 icon: Icon(
                   Icons.person,
-                  color: Colors.black,
+                  color: themePrimaryColor,
                 ),
                 title: Text(
                   "Myself",
-                  style: TextStyle(color: Colors.black),
+                  style: TextStyle(color: themePrimaryColor),
                 ),
               ),
             ],
@@ -138,7 +143,6 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
                             : index == 1 ? "Create Group Conversation" : index == 2 ? "Create Broadcast Group" : "Create Others...",
                         child: FloatingActionButton(
                           heroTag: null,
-                          backgroundColor: backgroundColor,
                           mini: true,
                           child: Icon(icons[index], color: foregroundColor),
                           onPressed: () {
@@ -154,7 +158,6 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
                 ..add(
                   new FloatingActionButton(
                     heroTag: null,
-                    backgroundColor: Colors.black,
                     child: AnimatedBuilder(
                       animation: _animationController,
                       builder: (BuildContext context, Widget child) {

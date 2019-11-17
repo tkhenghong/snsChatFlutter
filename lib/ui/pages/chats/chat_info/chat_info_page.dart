@@ -51,6 +51,9 @@ class ChatInfoPageState extends State<ChatInfoPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    Color textSelectionColor = Theme.of(context).textSelectionColor;
+
     Multimedia multimedia = wholeAppBloc.findMultimediaByConversationId(widget._conversationGroup.id);
     List<UserContact> userContactList = wholeAppBloc.getUserContactsByConversationId(widget._conversationGroup.id);
     List<Multimedia> multimediaList =
@@ -180,7 +183,9 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                   ),
                                   Text(
                                     isStringEmpty(conversationGroup.description) ? "Add Group description" : conversationGroup.description,
-                                    style: TextStyle(fontSize: 17.0, color: Colors.black54),
+                                    style: TextStyle(fontSize: 17.0,
+                                        color: textSelectionColor,
+                                    ),
                                   ),
                                   Padding(
                                     padding: EdgeInsets.only(bottom: 5.0),
@@ -217,7 +222,9 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                   ),
                                   Text(
                                     conversationGroup.notificationExpireDate == 0 ? "On" : "Off",
-                                    style: TextStyle(fontSize: 17.0, color: Colors.black54),
+                                    style: TextStyle(fontSize: 17.0,
+                                        color: textSelectionColor
+                                    ),
                                   ),
                                   Padding(
                                     padding: EdgeInsets.only(bottom: 5.0),
@@ -352,7 +359,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                         onTap: () {
                                           print("Tapped!");
                                         },
-                                        leading: imageService.loadImageThumbnailCircleAvatar(null, "UserContact"),
+                                        leading: imageService.loadImageThumbnailCircleAvatar(null, "UserContact", context),
 //                                        leading: imageService.loadImageThumbnailCircleAvatar(
 //                                            multimediaList.firstWhere(
 //                                                (Multimedia userContactMultimedia) =>

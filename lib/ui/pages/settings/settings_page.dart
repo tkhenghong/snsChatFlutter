@@ -14,7 +14,6 @@ class SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Settings"),
-        backgroundColor: Colors.black,
       ),
       body: PageListView(array: allSettings, context: context),
     );

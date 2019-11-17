@@ -38,8 +38,6 @@ class ScanQrCodePageState extends State<ScanQrCodePage> {
         ),
         RaisedButton(
             textColor: Colors.white,
-            color: Colors.black,
-            highlightColor: Colors.black54,
             splashColor: Colors.grey,
             onPressed: scan,
             child: const Text('START CAMERA SCAN')),

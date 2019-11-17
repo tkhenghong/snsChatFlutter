@@ -40,15 +40,41 @@ class BlocWrapperState extends State<BlocWrapper> {
 //      checkUserSignIn();
 //    });
 
+    Color primaryColor = Colors.black;
+    Color primaryColorInText = Colors.white;
+    Color primaryColorWhenFocus = Colors.black54;
+    Brightness primaryBrightness = Brightness.light;
+    TextStyle primaryTextStyle = TextStyle(color: primaryColor);
+    TextStyle primaryTextStyleInAppBarText = TextStyle(color: primaryColorInText, fontSize: 18.0, fontWeight: FontWeight.bold);
+
     return BlocProvider<WholeAppBloc>(
       builder: (BuildContext context) => WholeAppBloc(),
       child: MaterialApp(
-        title: 'FLutter Chat Test App',
+        title: 'PocketChat',
         theme: ThemeData(
 //        fontFamily: 'OpenSans',
-          brightness: Brightness.light,
-          primaryColor: const Color(0xff000000),
-          primarySwatch: Colors.blue,
+          brightness: primaryBrightness,
+          primaryColor: primaryColor,
+          accentColor: primaryColor,
+          cursorColor: primaryColor,
+          highlightColor: primaryColorWhenFocus,
+          textSelectionColor: primaryColorWhenFocus,
+          buttonColor: primaryColor,
+          buttonTheme: ButtonThemeData(
+            buttonColor: primaryColor,
+            textTheme: ButtonTextTheme.primary
+          ),
+          errorColor: primaryColor,
+          bottomAppBarColor: primaryColor,
+          bottomAppBarTheme: BottomAppBarTheme(
+            color: primaryColor,
+          ),
+          appBarTheme: AppBarTheme(
+              color: primaryColor,
+              textTheme: TextTheme(
+                button: primaryTextStyleInAppBarText,
+                title: primaryTextStyleInAppBarText,
+              )),
         ),
         home: TabsPage(),
         routes: {

@@ -5,15 +5,9 @@ class User {
   String mobileNo;
   String googleAccountId;
   String countryCode;
+  String effectivePhoneNo;
 
-  User({
-    this.id,
-    this.displayName,
-    this.realName,
-    this.mobileNo,
-    this.googleAccountId,
-    this.countryCode
-  });
+  User({this.id, this.displayName, this.realName, this.mobileNo, this.googleAccountId, this.countryCode, this.effectivePhoneNo});
 
   User.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -21,7 +15,8 @@ class User {
         realName = json['realName'],
         mobileNo = json['mobileNo'],
         googleAccountId = json['googleAccountId'],
-        countryCode = json['countryCode'];
+        countryCode = json['countryCode'],
+        effectivePhoneNo = json['effectivePhoneNo'];
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -29,6 +24,7 @@ class User {
         'realName': realName,
         'mobileNo': mobileNo,
         'googleAccountId': googleAccountId,
-    'countryCode': countryCode
+        'countryCode': countryCode,
+        'effectivePhoneNo': effectivePhoneNo,
       };
 }

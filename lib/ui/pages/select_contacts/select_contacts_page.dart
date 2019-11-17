@@ -20,6 +20,8 @@ import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
 import 'package:snschat_flutter/ui/pages/group_name/group_name_page.dart';
 
+import 'CustomSearchDelegate.dart';
+
 class SelectContactsPage extends StatefulWidget {
   final String chatGroupType;
 
@@ -116,158 +118,197 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     }
 
     return new Scaffold(
-        appBar: new AppBar(
-            title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(top: 10.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    title,
-                    style: TextStyle(fontSize: 18.0),
-                  ),
-                  Text(
-                    subtitle,
-                    style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.w300),
-                  )
-                ],
-              ),
-            ),
-            Tooltip(
-              message: "Next",
-              child: InkWell(
-                borderRadius: BorderRadius.circular(30.0),
-                child: Padding(
-                  padding: EdgeInsets.all(15.0),
-                  child: Icon(Icons.check),
-                ),
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: ((context) => GroupNamePage(selectedContacts: selectedContacts))));
-                },
-              ),
-            ),
-          ],
-        )),
-        body: isLoading
-            ? Center(
-                child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Text('Reading contacts from storage....'),
-                  SizedBox(
-                    height: 10.0,
-                  ),
-                  CircularProgressIndicator(),
-                ],
-              ))
-            : wholeAppBloc.currentState.phoneContactList.length > 0
-                ? BlocBuilder(
-                    bloc: _wholeAppBloc,
-                    builder: (context, WholeAppState state) {
-                      return ListView(
-                        controller: scrollController,
-                        physics: BouncingScrollPhysics(),
-                        children: state.phoneContactList.map((Contact contact) {
-                          return Container(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: <Widget>[
-                                needSelectMultipleContacts()
-                                    ? CheckboxListTile(
-                                        title: Text(
-                                          contact.displayName,
-                                          softWrap: true,
-                                        ),
-                                        subtitle: Text(
-                                          'Hey There! I am using PocketChat.',
-                                          softWrap: true,
-                                        ),
-                                        value: contactCheckBoxes[contact.displayName],
-                                        onChanged: (bool value) {
-                                          if (contactIsSelected(contact)) {
-                                            selectedContacts.remove(contact);
-                                          } else {
-                                            selectedContacts.add(contact);
-                                          }
-                                          setState(() {
-                                            contactCheckBoxes[contact.displayName] = value;
-                                          });
-                                        },
-                                        secondary: CircleAvatar(
-                                          backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
-                                          child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
-                                          radius: 20.0,
-                                        ),
-                                      )
-                                    : ListTile(
-                                        title: Text(
-                                          contact.displayName,
-                                          softWrap: true,
-                                        ),
-                                        subtitle: Text(
-                                          'Hey There! I am using PocketChat.',
-                                          softWrap: true,
-                                        ),
-                                        onTap: () {
-                                          if (widget.chatGroupType == "Personal") {
-                                            createPersonalConversation(contact);
-                                          }
-                                        },
-                                        leading: CircleAvatar(
-                                          backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
-                                          child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
-                                          radius: 20.0,
-                                        ),
-                                      )
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                      );
-                    },
-                  )
-                : contactLoaded
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              'No contact in your phone storage. Create a few to start a conversation!',
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      )
-                    : Center(
-                        child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            'Unable to read contacts from storage. Please grant contact permission first.',
-                            textAlign: TextAlign.center,
+      appBar: appBar(context),
+      body: isLoading
+          ? showLoadingContactsPage(context)
+          : wholeAppBloc.currentState.phoneContactList.length > 0
+              ? BlocBuilder(
+                  bloc: _wholeAppBloc,
+                  builder: (context, WholeAppState state) {
+                    return ListView(
+                      controller: scrollController,
+                      physics: BouncingScrollPhysics(),
+                      children: state.phoneContactList.map((Contact contact) {
+                        return Container(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              needSelectMultipleContacts()
+                                  ? showMultiContactSelectPage(context, contact)
+                                  : showSingleContactSelectPage(context, contact)
+                            ],
                           ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                          RaisedButton(
-                            onPressed: () {
-                              // Restart the process
-                              setState(() {
-                                isLoading = true;
-                              });
-                            },
-                            child: Text("Grant Contact Permission"),
-                          )
-                        ],
-                      )));
+                        );
+                      }).toList(),
+                    );
+                  },
+                )
+              : contactLoaded ? showNoContactPage(context) : showNoContactPermissionPage(context),
+      bottomNavigationBar: _bottomAppBar(context),
+      floatingActionButton: _floatingActionButton(context),
+    );
+  }
+
+  Widget appBar(BuildContext context) {
+    return AppBar(
+        title: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.only(top: 10.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                title,
+                style: TextStyle(fontSize: 18.0),
+              ),
+              Text(
+                subtitle,
+                style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.w300),
+              )
+            ],
+          ),
+        ),
+        Tooltip(
+          message: "Next",
+          child: InkWell(
+            borderRadius: BorderRadius.circular(30.0),
+            child: Padding(
+              padding: EdgeInsets.all(15.0),
+              child: Icon(Icons.check),
+            ),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: ((context) => GroupNamePage(selectedContacts: selectedContacts))));
+            },
+          ),
+        ),
+      ],
+    ));
+  }
+
+  Widget showLoadingContactsPage(BuildContext context) {
+    return Center(
+        child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Text('Reading contacts from storage....'),
+        SizedBox(
+          height: 10.0,
+        ),
+        CircularProgressIndicator(),
+      ],
+    ));
+  }
+
+  Widget showMultiContactSelectPage(BuildContext context, Contact contact) {
+    return CheckboxListTile(
+      title: Text(
+        contact.displayName,
+        softWrap: true,
+      ),
+      subtitle: Text(
+        'Hey There! I am using PocketChat.',
+        softWrap: true,
+      ),
+      value: contactCheckBoxes[contact.displayName],
+      onChanged: (bool value) {
+        if (contactIsSelected(contact)) {
+          selectedContacts.remove(contact);
+        } else {
+          selectedContacts.add(contact);
+        }
+        setState(() {
+          contactCheckBoxes[contact.displayName] = value;
+        });
+      },
+      secondary: CircleAvatar(
+        backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
+        child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
+        radius: 20.0,
+      ),
+    );
+  }
+
+  Widget showSingleContactSelectPage(BuildContext context, Contact contact) {
+    return ListTile(
+      title: Text(
+        contact.displayName,
+        softWrap: true,
+      ),
+      subtitle: Text(
+        'Hey There! I am using PocketChat.',
+        softWrap: true,
+      ),
+      onTap: () {
+        if (widget.chatGroupType == "Personal") {
+          createPersonalConversation(contact);
+        }
+      },
+      leading: CircleAvatar(
+        backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
+        child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
+        radius: 20.0,
+      ),
+    );
+  }
+
+  Widget showNoContactPage(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            'No contact in your phone storage. Create a few to start a conversation!',
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget showNoContactPermissionPage(BuildContext context) {
+    return Center(
+        child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Text(
+          'Unable to read contacts from storage. Please grant contact permission first.',
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(
+          height: 10.0,
+        ),
+        RaisedButton(
+          onPressed: () {
+            // Restart the process
+            setState(() {
+              isLoading = true;
+            });
+          },
+          child: Text("Grant Contact Permission"),
+        )
+      ],
+    ));
+  }
+
+  BottomAppBar _bottomAppBar(BuildContext context) {
+    return BottomAppBar(
+      shape: CircularNotchedRectangle(),
+      color: Theme.of(context).primaryColor,
+    );
+  }
+
+  FloatingActionButton _floatingActionButton(BuildContext context) {
+    return FloatingActionButton(
+      child: Icon(Icons.search),
+      onPressed: () => showSearch(context: context, delegate: CustomSearchDelegate()),
+    );
   }
 
   bool contactIsSelected(Contact contact) {

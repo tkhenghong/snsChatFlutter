@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:permission_handler/permission_handler.dart';
+
 import 'package:snschat_flutter/backend/rest/chat/ConversationGroupAPIService.dart';
 import 'package:snschat_flutter/backend/rest/message/MessageAPIService.dart';
 import 'package:snschat_flutter/backend/rest/multimedia/MultimediaAPIService.dart';
@@ -429,9 +430,11 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       User user = User(
           id: null,
           mobileNo: event.mobileNo,
+          countryCode: event.countryCode,
+          effectivePhoneNo: event.effectiveMobileNo,
           displayName: firebaseUser.displayName,
           googleAccountId: googleSignInAccount.id,
-          realName: event.realName);
+          realName: event.displayName);
 
       Settings settings = Settings(id: null, notification: true, userId: user.id);
       Multimedia multimedia = Multimedia(
@@ -448,7 +451,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
           multimediaId: null,
           mobileNo: event.mobileNo,
           displayName: firebaseUser.displayName,
-          realName: event.realName,
+          realName: event.displayName,
           lastSeenDate: DateTime.now().millisecondsSinceEpoch,
           block: false,
           userIds: [],
@@ -524,7 +527,6 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
     userContact.id = userContactFromServer.id;
 
-
     bool userContactSaved = await userContactDBService.addUserContact(userContact);
     if (!userContactSaved) {
       return false;
@@ -567,10 +569,25 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
   }
 
   getPhoneStorageContacts(GetPhoneStorageContactsEvent event) async {
+    print("getPhoneStorageContacts()");
     bool contactAccessGranted = await permissionService.requestContactPermission();
     if (contactAccessGranted) {
       Iterable<Contact> contacts = await ContactsService.getContacts();
-      currentState.phoneContactList = contacts.toList(growable: true);
+      Iterable<Contact> filteredContacts = contacts.where((Contact contact) {
+        print("contact.displayName.toString(): " + contact.displayName.toString());
+        bool phoneNoIsEligible = false;
+        contact.phones.forEach((Item phoneNumber) {
+          print("phoneNumber.value.toString(): " + phoneNumber.value.toString());
+          print("phoneNumber.label.toString(): " + phoneNumber.label.toString());
+          // 7 should be the shortest international number in the world
+          if (phoneNumber.value.length > 6) {
+            phoneNoIsEligible = true;
+          }
+        });
+
+        return phoneNoIsEligible;
+      });
+      currentState.phoneContactList = filteredContacts.toList(growable: true);
       currentState.phoneContactList.sort((a, b) => a.displayName.compareTo(b.displayName));
 
       // Dart way of removing duplicates. // https://stackoverflow.com/questions/12030613/how-to-delete-duplicates-in-a-dart-list-list-distinct
@@ -972,7 +989,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     List<UserContact> newUserContactList = [];
     for (UserContact userContact in userContactList) {
       UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
-      if(isObjectEmpty(newUserContact)) {
+      if (isObjectEmpty(newUserContact)) {
         print("if(isObjectEmpty(newUserContact)) Unable to add new UserContact");
       } else {
         print("if(!isObjectEmpty(newUserContact))");

@@ -33,11 +33,15 @@ class LoginPageState extends State<LoginPage> {
 
   CountryCode countryCode;
 
+  String countryCodeString;
+
   bool deviceLocated = false;
+
+  Color themePrimaryColor;
 
   String getPhoneNumber() {
     String phoneNoInitials = "";
-    if (isObjectEmpty(countryCode)) {
+    if (isObjectEmpty(countryCode) && !isObjectEmpty(wholeAppBloc.currentState.ipGeoLocation)) {
       phoneNoInitials = wholeAppBloc.currentState.ipGeoLocation.calling_code;
     } else {
       phoneNoInitials = countryCode.dialCode;
@@ -67,8 +71,7 @@ class LoginPageState extends State<LoginPage> {
                   },
                   mobileNo: getPhoneNumber()));
             } else {
-              Fluttertoast.showToast(
-                  msg: 'Invalid Mobile No./matching Google account. Please try again!', toastLength: Toast.LENGTH_SHORT);
+              Fluttertoast.showToast(msg: 'Invalid Mobile No./matching Google account. Please try again!', toastLength: Toast.LENGTH_SHORT);
               wholeAppBloc.dispatch(UserSignOutEvent()); // Reset everything to initial state first
               Navigator.pop(context);
 //              goToSignUp();
@@ -88,6 +91,7 @@ class LoginPageState extends State<LoginPage> {
     print("countryCode.code: " + countryCode.code.toString());
     print("countryCode.flagUri: " + countryCode.flagUri.toString());
     this.countryCode = countryCode;
+    this.countryCodeString = countryCode.code.toString();
   }
 
   @override
@@ -95,11 +99,11 @@ class LoginPageState extends State<LoginPage> {
     final deviceWidth = MediaQuery.of(context).size.width;
     final deviceHeight = MediaQuery.of(context).size.height;
 
-    print("deviceWidth: " + deviceWidth.toString());
-    print("deviceHeight: " + deviceHeight.toString());
+    themePrimaryColor = Theme.of(context).textTheme.title.color;
 
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
+
     wholeAppBloc.dispatch(CheckPermissionEvent(callback: (Map<PermissionGroup, PermissionStatus> permissionResults) {
       permissionResults.forEach((PermissionGroup permissionGroup, PermissionStatus permissionStatus) {
         if (permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted) {
@@ -109,10 +113,11 @@ class LoginPageState extends State<LoginPage> {
       });
     }));
 
+    countryCodeString = isIPLocationExists(wholeAppBloc.currentState);
+
     return BlocBuilder(
       bloc: _wholeAppBloc,
       builder: (context, WholeAppState state) {
-        print("Build?");
         return GestureDetector(
             onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
             //Focuses on nothing, means disable focus and hide keyboard
@@ -137,12 +142,12 @@ class LoginPageState extends State<LoginPage> {
                                 padding: EdgeInsets.only(left: 20.0),
                               ),
                               CountryCodePicker(
-                                initialSelection: isIPLocationExists(state),
+                                initialSelection: countryCodeString,
                                 alignLeft: false,
                                 showCountryOnly: false,
                                 showFlag: true,
                                 showOnlyCountryWhenClosed: false,
-                                favorite: [isIPLocationExists(state)],
+                                favorite: [countryCodeString],
                                 onChanged: onCountryPickerChanged,
                               ),
                               Container(
@@ -162,8 +167,6 @@ class LoginPageState extends State<LoginPage> {
 
                                       return null;
                                     },
-                                    cursorColor: Colors.black,
-                                    style: TextStyle(color: Colors.black),
                                     inputFormatters: [
                                       BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
                                     ],
@@ -182,14 +185,10 @@ class LoginPageState extends State<LoginPage> {
                   RaisedButton(
                     onPressed: () => _signIn(),
                     textColor: Colors.white,
-                    color: Colors.black,
-                    highlightColor: Colors.black54,
                     splashColor: Colors.grey,
                     animationDuration: Duration(milliseconds: 500),
                     padding: EdgeInsets.only(left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
-                    shape: RoundedRectangleBorder(
-//                  side: BorderSide(color: Colors.black, width: 1.0),
-                        borderRadius: BorderRadius.circular(50.0)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
                     child: Text("Next"),
                   ),
                   Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
@@ -198,7 +197,7 @@ class LoginPageState extends State<LoginPage> {
                       onPressed: () => goToSignUp(),
                       child: Text(
                         "Sign Up Now",
-                        style: TextStyle(color: Colors.black),
+                        style: TextStyle(color: themePrimaryColor),
                       )),
                   Padding(padding: EdgeInsets.symmetric(vertical: 50.00)),
                   RichText(
@@ -206,7 +205,7 @@ class LoginPageState extends State<LoginPage> {
                       text: TextSpan(children: [
                         TextSpan(
                             text: "Contact Support",
-                            style: TextStyle(color: Colors.black),
+                            style: TextStyle(color: themePrimaryColor),
                             recognizer: TapGestureRecognizer()..onTap = () => goToContactSupport)
                       ])),
                   Padding(padding: EdgeInsets.symmetric(vertical: 5.00)),
@@ -215,7 +214,7 @@ class LoginPageState extends State<LoginPage> {
                       text: TextSpan(children: [
                         TextSpan(
                             text: "Terms and Conditions",
-                            style: TextStyle(color: Colors.black),
+                            style: TextStyle(color: themePrimaryColor),
                             recognizer: TapGestureRecognizer()..onTap = () => goToTermsAndConditions())
                       ])),
                   Padding(padding: EdgeInsets.symmetric(vertical: 5.00)),
@@ -224,7 +223,7 @@ class LoginPageState extends State<LoginPage> {
                       text: TextSpan(children: [
                         TextSpan(
                             text: "Privacy Notice",
-                            style: TextStyle(color: Colors.black),
+                            style: TextStyle(color: themePrimaryColor),
                             recognizer: TapGestureRecognizer()..onTap = () => goToPrivacyNotice())
                       ])),
                 ],
@@ -239,7 +238,10 @@ class LoginPageState extends State<LoginPage> {
   }
 
   goToSignUp() {
-    Navigator.push(context, MaterialPageRoute(builder: ((context) => SignUpPage(mobileNo: getPhoneNumber()))));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: ((context) => SignUpPage(mobileNo: mobileNoTextController.value.text, countryCodeString: countryCodeString))));
   }
 
   goToContactSupport() async {
