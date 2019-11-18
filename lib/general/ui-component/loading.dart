@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 void showLoading(BuildContext context, String message) {
-  Color appBarTextTitleColor = Theme.of(context).appBarTheme.textTheme.title.color;
+  Color appBarTextTitleColor = Theme.of(context).primaryColor;
 
   showDialog(
       context: context,

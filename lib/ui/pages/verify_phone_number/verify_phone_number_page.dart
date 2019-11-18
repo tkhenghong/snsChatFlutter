@@ -46,7 +46,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
 //                  color: Colors.black
                   ),
                   children: <TextSpan>[
-                TextSpan(text: 'We have sent and SMS with a code to '),
+                TextSpan(text: 'We have sent and SMS with a code to ', style: TextStyle(color: Theme.of(context).primaryColor)),
                 TextSpan(text: phoneNo.toString(), style: TextStyle(inherit: true, fontWeight: FontWeight.bold)),
 // TODO: Add other types of error messages for different situations
 //                TextSpan(text: 'Can\'t send an SMS with your code because you\'ve tried to register '),
