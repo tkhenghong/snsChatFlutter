@@ -224,9 +224,9 @@ class SignUpPageState extends State<SignUpPage> {
             }
           },
           mobileNo: getPhoneNumber(),
-          effectiveMobileNo: mobileNoTextController.value.text,
+          effectivePhoneNumber: mobileNoTextController.value.text.toString(),
           countryCode: widget.countryCodeString,
-          displayName: nameTextController.value.text));
+          displayName: nameTextController.value.text.toString()));
     }
   }
 

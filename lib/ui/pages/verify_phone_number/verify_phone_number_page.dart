@@ -21,6 +21,8 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
   TextEditingController textEditingController;
   PinDecoration pinDecoration;
 
+  Color themePrimaryColor;
+
   @override
   void initState() {
     super.initState();
@@ -30,6 +32,8 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
   @override
   Widget build(BuildContext context) {
     String phoneNo = widget.mobileNo;
+
+    themePrimaryColor = Theme.of(context).primaryColor;
     return Scaffold(
       appBar: AppBar(
         title: Text('Verify ' + phoneNo),
@@ -46,12 +50,12 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
 //                  color: Colors.black
                   ),
                   children: <TextSpan>[
-                TextSpan(text: 'We have sent and SMS with a code to ', style: TextStyle(color: Theme.of(context).primaryColor)),
-                TextSpan(text: phoneNo.toString(), style: TextStyle(inherit: true, fontWeight: FontWeight.bold)),
-// TODO: Add other types of error messages for different situations
-//                TextSpan(text: 'Can\'t send an SMS with your code because you\'ve tried to register '),
-//                TextSpan(text: phoneNo.toString(), style: TextStyle(inherit: true, fontWeight: FontWeight.bold)),
-//                TextSpan(text: ' recently. Request a call or wait before requesting an SMS. '),
+                TextSpan(text: 'We have sent and SMS with a code to ', style: TextStyle(color: themePrimaryColor)),
+                TextSpan(text: phoneNo.toString(), style: TextStyle(inherit: true, color: themePrimaryColor, fontWeight: FontWeight.bold)),
+                // TODO: Add other types of error messages for different situations
+                // TextSpan(text: 'Can\'t send an SMS with your code because you\'ve tried to register '),
+                // TextSpan(text: phoneNo.toString(), style: TextStyle(inherit: true, fontWeight: FontWeight.bold)),
+                // TextSpan(text: ' recently. Request a call or wait before requesting an SMS. '),
               ])),
           FlatButton(
               onPressed: () {},

@@ -431,7 +431,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
           id: null,
           mobileNo: event.mobileNo,
           countryCode: event.countryCode,
-          effectivePhoneNo: event.effectiveMobileNo,
+          effectivePhoneNumber: event.effectivePhoneNumber,
           displayName: firebaseUser.displayName,
           googleAccountId: googleSignInAccount.id,
           realName: event.displayName);
