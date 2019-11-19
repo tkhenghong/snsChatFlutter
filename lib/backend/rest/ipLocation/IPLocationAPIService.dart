@@ -20,7 +20,6 @@ class IPLocationAPIService {
       var httpResponse = await http.get(wholeURL);
 
       if (httpResponseIsOK(httpResponse)) {
-        print("httpResponse.body: " + httpResponse.body.toString());
         IPGeoLocation ipGeoLocation = IPGeoLocation.fromJson(json.decode(httpResponse.body));
 
         return ipGeoLocation;
