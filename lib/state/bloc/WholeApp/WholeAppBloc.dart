@@ -1458,6 +1458,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
     webSocketStream.listen((onData) {
       print("onData listener is working.");
       print("onData: " + onData.toString());
+      Fluttertoast.showToast(msg: "Message confirmed received!", toastLength: Toast.LENGTH_LONG);
       WebSocketMessage receivedWebSocketMessage = WebSocketMessage.fromJson(json.decode(onData));
       dispatch(
           ProcessMessageFromWebSocketEvent(webSocketMessage: receivedWebSocketMessage, callback: (WebSocketMessage webSocketMessage) {}));
