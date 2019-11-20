@@ -1490,16 +1490,20 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
       // "Message" message
       print("else if(!isObjectEmpty(webSocketMessage.message))");
 
-      if (event.webSocketMessage.message.senderId == currentState.userState.id) {
-        // If it's our own message, we won't save it
-        // Nothing
-      } else {
-        // If it's other people message
-        print("Other people's message");
-        messageDBService.addMessage(event.webSocketMessage.message);
+      messageDBService.addMessage(event.webSocketMessage.message);
 
-        dispatch(AddMessageToStateEvent(message: event.webSocketMessage.message, callback: (Message message) {}));
-      }
+      dispatch(AddMessageToStateEvent(message: event.webSocketMessage.message, callback: (Message message) {}));
+
+//      if (event.webSocketMessage.message.senderId == currentState.userState.id) {
+//        // If it's our own message, we won't save it
+//        // Nothing
+//      } else {
+//        // If it's other people message
+//        print("Other people's message");
+//        messageDBService.addMessage(event.webSocketMessage.message);
+//
+//        dispatch(AddMessageToStateEvent(message: event.webSocketMessage.message, callback: (Message message) {}));
+//      }
     } else if (!isObjectEmpty(webSocketMessage.multimedia)) {
       // Multimedia message
 
