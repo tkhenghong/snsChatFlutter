@@ -42,7 +42,7 @@ packages:
       name: bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.14.4"
+    version: "2.0.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -133,7 +133,7 @@ packages:
       name: cloud_firestore
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.12.10"
+    version: "0.12.10+2"
   code_builder:
     dependency: transitive
     description:
@@ -238,7 +238,7 @@ packages:
       name: equatable
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.0"
+    version: "1.0.0"
   firebase_auth:
     dependency: "direct main"
     description:
@@ -252,7 +252,7 @@ packages:
       name: firebase_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.1+5"
+    version: "0.4.0+9"
   firebase_storage:
     dependency: "direct main"
     description:
@@ -278,7 +278,7 @@ packages:
       name: flutter_bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.20.1"
+    version: "2.0.1"
   flutter_cache_manager:
     dependency: "direct main"
     description:
@@ -381,7 +381,7 @@ packages:
       name: image_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.1+11"
+    version: "0.6.2+1"
   intl:
     dependency: "direct main"
     description:
@@ -528,7 +528,7 @@ packages:
       name: path_provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.2"
+    version: "1.4.4"
   pedantic:
     dependency: transitive
     description:
@@ -722,7 +722,7 @@ packages:
       name: synchronized
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.0+1"
+    version: "2.1.0+2"
   term_glyph:
     dependency: transitive
     description:
@@ -799,7 +799,7 @@ packages:
       name: watcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.7+12"
+    version: "0.9.7+13"
   web_socket_channel:
     dependency: "direct main"
     description:
@@ -823,4 +823,4 @@ packages:
     version: "2.2.0"
 sdks:
   dart: ">=2.5.0 <3.0.0"
-  flutter: ">=1.9.1+hotfix.5 <2.0.0"
+  flutter: ">=1.9.1+hotfix.4 <2.0.0"

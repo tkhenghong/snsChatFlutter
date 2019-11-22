@@ -58,9 +58,9 @@ dependencies:
   cached_network_image: ^1.1.1
 
   # State management
-  bloc: ^0.14.4
-  flutter_bloc: ^0.20.0
-  equatable: ^0.4.0
+  bloc: ^2.0.0
+  flutter_bloc: ^2.0.1
+  equatable: ^1.0.0
 
   #Google DB
   firebase_core: ^0.4.0+8
