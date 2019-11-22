@@ -84,93 +84,98 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     // 3. Send to API
     // 4. Retrieve through WebSocket
 
-    // Chat Room page UI
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          titleSpacing: 0.0,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Tooltip(
-                message: "Back",
-                child: Material(
-                  color: appBarThemeColor,
-                  child: InkWell(
-                    customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Row(
-                      children: <Widget>[
-                        Icon(Icons.arrow_back),
-                        Hero(
-                          tag: widget._conversationGroup.id + "1",
-                          child: imageService.loadImageThumbnailCircleAvatar(multimedia, widget._conversationGroup.type, context),
+    return BlocBuilder(
+      bloc: wholeAppBloc,
+      builder: (BuildContext context, WholeAppState state) {
+        // Chat Room page UI
+        return GestureDetector(
+          onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
+          child: Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              titleSpacing: 0.0,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Tooltip(
+                    message: "Back",
+                    child: Material(
+                      color: appBarThemeColor,
+                      child: InkWell(
+                        customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                        onTap: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Row(
+                          children: <Widget>[
+                            Icon(Icons.arrow_back),
+                            Hero(
+                              tag: widget._conversationGroup.id + "1",
+                              child: imageService.loadImageThumbnailCircleAvatar(multimedia, widget._conversationGroup.type, context),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 50.0),
+                            ),
+                          ],
                         ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 50.0),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
-              Material(
-                color: appBarThemeColor,
-                child: InkWell(
-                    customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-                    onTap: () {
-                      Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (BuildContext context) => ChatInfoPage(widget._conversationGroup)));
-                    },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.only(top: 10.0, right: 250.0),
-                        ),
-                        Hero(
-                          tag: widget._conversationGroup.id,
-                          child: Text(
-                            widget._conversationGroup.name,
-                            style: TextStyle(color: appBarTextTitleColor, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Text(
-                          "Tap here for more details",
-                          style: TextStyle(color: appBarTextTitleColor, fontSize: 13.0),
-                        )
-                      ],
-                    )),
-              ),
-            ],
-          ),
-        ),
-        body: WillPopScope(
-          // To handle event when user press back button when sticker screen is on, dismiss sticker if keyboard is shown
-          child: Stack(
-            children: <Widget>[
-              Column(
-                children: <Widget>[
-                  //UI for message list
-                  buildListMessage(),
-                  // UI for stickers, gifs
-                  (isShowSticker ? buildSticker() : Container()),
-                  // UI for text field
-                  buildInput(),
+                  Material(
+                    color: appBarThemeColor,
+                    child: InkWell(
+                        customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+                        onTap: () {
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (BuildContext context) => ChatInfoPage(widget._conversationGroup)));
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.only(top: 10.0, right: 250.0),
+                            ),
+                            Hero(
+                              tag: widget._conversationGroup.id,
+                              child: Text(
+                                widget._conversationGroup.name,
+                                style: TextStyle(color: appBarTextTitleColor, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            Text(
+                              "Tap here for more details",
+                              style: TextStyle(color: appBarTextTitleColor, fontSize: 13.0),
+                            )
+                          ],
+                        )),
+                  ),
                 ],
               ),
-              buildLoading(),
-            ],
+            ),
+            body: WillPopScope(
+              // To handle event when user press back button when sticker screen is on, dismiss sticker if keyboard is shown
+              child: Stack(
+                children: <Widget>[
+                  Column(
+                    children: <Widget>[
+                      //UI for message list
+                      buildListMessage(context, state),
+                      // UI for stickers, gifs
+                      (isShowSticker ? buildSticker() : Container()),
+                      // UI for text field
+                      buildInput(),
+                    ],
+                  ),
+                  buildLoading(),
+                ],
+              ),
+              onWillPop: onBackPress,
+            ),
           ),
-          onWillPop: onBackPress,
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -247,46 +252,38 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
-  Widget buildListMessage() {
-    return BlocBuilder(
-        bloc: wholeAppBloc,
-        builder: (BuildContext context, WholeAppState state) {
-          print("state.messageList.length: " + state.messageList.length.toString());
-          if (!messagesAreReady(state)) {
-            print("!messagesAreReady(state)");
-//            return Expanded(child: Center(child: Text("Loading messages...")));
-            return Flexible(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'No messages.',
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
+  Widget buildListMessage(BuildContext context, WholeAppState state) {
+    print("state.messageList.length: " + state.messageList.length.toString());
+    getMessageList(state);
+    return !messagesAreReady(state)
+        ? Flexible(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'No messages.',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-            );
-          } else {
-            print("messagesAreReady(state)");
-            List<Message> messageList = [];
-            print("state.length: " + state.messageList.length.toString());
-            messageList = state.messageList.where((Message message) => message.conversationId == widget._conversationGroup.id).toList();
-            messageList.sort((message1, message2) => message2.timestamp.compareTo(message1.timestamp));
+            ),
+          )
+        : Flexible(
+            child: ListView.builder(
+              controller: listScrollController,
+              itemCount: messageList.length,
+              reverse: true,
+              physics: BouncingScrollPhysics(),
+              itemBuilder: (context, index) => displayChatMessage(index, messageList[index]),
+            ),
+          );
+  }
 
-            return Flexible(
-              child: ListView.builder(
-                controller: listScrollController,
-                itemCount: messageList.length,
-                reverse: true,
-                physics: BouncingScrollPhysics(),
-                itemBuilder: (context, index) => displayChatMessage(index, messageList[index]),
-              ),
-            );
-          }
-        });
+  getMessageList(WholeAppState state) {
+    messageList = state.messageList.where((Message message) => message.conversationId == widget._conversationGroup.id).toList();
+    messageList.sort((message1, message2) => message2.timestamp.compareTo(message1.timestamp));
   }
 
   bool messagesAreReady(WholeAppState state) {
