@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
-import 'package:snschat_flutter/objects/chat/conversation_group.dart';
+import 'package:snschat_flutter/objects/conversationGroup/conversation_group.dart';
 
 import '../RestRequestUtils.dart';
 import '../RestResponseUtils.dart';
