@@ -25,4 +25,4 @@ class ConversationGroupsLoaded extends ConversationGroupState {
   String toString() => 'ConversationGroupsLoaded {conversationGroupList: $conversationGroupList}';
 }
 
-class ConversationGroupNotLoaded extends ConversationGroupState {}
+class ConversationGroupsNotLoaded extends ConversationGroupState {}

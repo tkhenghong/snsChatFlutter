@@ -1,0 +1,97 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:snschat_flutter/database/sembast/index.dart';
+import 'package:snschat_flutter/general/functions/validation_functions.dart';
+import 'package:snschat_flutter/objects/index.dart';
+
+import 'bloc.dart';
+import 'package:bloc/bloc.dart';
+
+// Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial
+class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
+  ConversationDBService conversationGroupDBService = new ConversationDBService();
+
+  @override
+  GoogleInfoState get initialState => GoogleInfoLoading();
+
+  @override
+  Stream<GoogleInfoState> mapEventToState(GoogleInfoEvent event) async* {
+    if (event is InitializeGoogleInfoEvent) {
+      yield* _mapInitializeGoogleInfoToState(event);
+    } else if (event is RemoveGoogleInfoEvent) {
+      yield* _removeGoogleInfoFromState(event);
+    }
+  }
+
+  Stream<GoogleInfoState> _mapInitializeGoogleInfoToState(InitializeGoogleInfoEvent event) async* {
+
+    if(state is GoogleInfoNotLoaded || state is GoogleInfoLoading) {
+      try {
+        // TODO: Google Sign in
+        GoogleSignIn googleSignIn = new GoogleSignIn();
+        FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+        FirebaseUser firebaseUser;
+
+        GoogleSignInAccount googleSignInAccount;
+
+        if (!await googleSignIn.isSignedIn()) {
+          // For login page
+          googleSignInAccount = await googleSignIn.signIn();
+        } else {
+          // For chat group list page
+          googleSignInAccount = await googleSignIn.signInSilently(suppressErrors: false);
+        }
+
+        if (isObjectEmpty(googleSignInAccount)) {
+          Fluttertoast.showToast(msg: 'Google sign in canceled.', toastLength: Toast.LENGTH_SHORT);
+          yield GoogleInfoNotLoaded();
+        }
+
+        GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+
+        AuthCredential credential = GoogleAuthProvider.getCredential(
+            idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
+
+        AuthResult authResult = await firebaseAuth.signInWithCredential(credential);
+        firebaseUser = authResult.user;
+
+        functionCallback(event, {googleSignIn, firebaseAuth, firebaseUser});
+        yield GoogleInfoLoaded(googleSignIn, firebaseAuth, firebaseUser);
+      } catch (e) {
+        functionCallback(event, {null, null, null});
+        yield GoogleInfoNotLoaded();
+      }
+    }
+  }
+
+  Stream<GoogleInfoState> _removeGoogleInfoFromState(RemoveGoogleInfoEvent event) async* {
+    if (state is GoogleInfoLoaded) {
+
+      try {
+        GoogleSignIn googleSignIn = (state as GoogleInfoLoaded).googleSignIn;
+        FirebaseAuth firebaseAuth = (state as GoogleInfoLoaded).firebaseAuth;
+        FirebaseUser firebaseUser = (state as GoogleInfoLoaded).firebaseUser;
+
+        firebaseAuth.signOut();
+        firebaseUser.delete();
+        googleSignIn.disconnect();
+        googleSignIn.signOut();
+
+        firebaseUser = null;
+      } catch (e) {
+        print('Error when trying to sign out.');
+        print('Error: ' + e);
+      }
+      yield GoogleInfoNotLoaded();
+    }
+  }
+
+  // To send response to those dispatched Actions
+  void functionCallback(event, value) {
+    if (!isObjectEmpty(event)) {
+      event.callback(value);
+    }
+  }
+}
