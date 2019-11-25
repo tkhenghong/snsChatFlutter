@@ -30,3 +30,17 @@ class RemoveGoogleInfoEvent extends GoogleInfoEvent {
   @override
   String toString() => 'RemoveGoogleInfoEvent';
 }
+
+// GetOwnGoogleInfoEvent
+
+class GetOwnGoogleInfoEvent extends GoogleInfoEvent {
+  final Function callback;
+
+  GetOwnGoogleInfoEvent(this.callback);
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'RemoveGoogleInfoEvent';
+}

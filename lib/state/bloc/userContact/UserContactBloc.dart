@@ -24,6 +24,8 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       yield* _deleteUserContactToState(event);
     } else if (event is SendUserContactEvent) {
       yield* _uploadUserContact(event);
+    } else if (event is GetOwnUserContactEvent) {
+      yield* _getOwnUserContact(event);
     }
   }
 
@@ -93,6 +95,13 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     }
 
     add(AddUserContactToStateEvent(userContact: newUserContact, callback: (UserContact userContact) {}));
+  }
+
+  Stream<UserContactState> _getOwnUserContact(GetOwnUserContactEvent event) async* {
+    // GetOwnUserContactEvent
+
+    // GetOwnUserEvent
+
   }
 
   // To send response to those dispatched Actions

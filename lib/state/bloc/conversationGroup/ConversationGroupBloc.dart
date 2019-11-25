@@ -82,6 +82,18 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
   Stream<ConversationGroupState> _createConversationGroup(CreateConversationGroupEvent event) async* {
     // TODO: Add all other objects first
 
+    UserContact yourOwnUserContact = UserContact(
+      id: null,
+      // userIds: Which User owns this UserContact
+      userIds: [currentState.userState.id],
+      displayName: currentState.userState.displayName,
+      realName: currentState.userState.realName,
+      block: false,
+      lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
+      // make unknown time, let server decide
+      mobileNo: currentState.userState.mobileNo,
+    );
+
     List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
     yield ConversationGroupsLoaded(existingConversationGroupList);

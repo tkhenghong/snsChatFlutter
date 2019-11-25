@@ -72,3 +72,15 @@ class ChangeUserEvent extends UserEvent {
   @override
   String toString() => 'ChangeUserEvent {user: $user}';
 }
+
+class GetOwnUserEvent extends UserEvent {
+  final Function callback;
+
+  GetOwnUserEvent({this.callback});
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'GetOwnUserEvent';
+}

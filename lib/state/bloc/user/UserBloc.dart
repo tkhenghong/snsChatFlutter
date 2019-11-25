@@ -1,8 +1,11 @@
 import 'package:bloc/bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:snschat_flutter/backend/rest/index.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/state/bloc/google/bloc.dart';
 import 'package:snschat_flutter/state/bloc/user/bloc.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
@@ -24,6 +27,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       yield* _deleteUserToState(event);
     } else if (event is ChangeUserEvent) {
       yield* _changeUser(event);
+    } else if (event is GetOwnUserEvent) {
+      yield* _getOwnUser(event);
     }
   }
 
@@ -104,6 +109,17 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     }
 
     add(AddUserToStateEvent(user: newUser, callback: (User user) {}));
+  }
+
+  // GetOwnUserEvent
+  Stream<UserState> _getOwnUser(GetOwnUserEvent event) async* {
+    if (state is UserLoaded) {
+      // TODO: Probably need sending info from
+      // GetOwnGoogleInfoEvent
+      (state as GoogleInfoState).props.add(GetOwnGoogleInfoEvent((GoogleSignIn googleSignIn, FirebaseAuth firebaseAuth, FirebaseUser firebaseUser) {
+
+      }));
+    }
   }
 
   // To send response to those dispatched Actions

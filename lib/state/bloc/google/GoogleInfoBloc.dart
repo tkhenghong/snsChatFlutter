@@ -22,7 +22,11 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
       yield* _mapInitializeGoogleInfoToState(event);
     } else if (event is RemoveGoogleInfoEvent) {
       yield* _removeGoogleInfoFromState(event);
+    } else if (event is GetOwnGoogleInfoEvent) {
+      yield* _getOwnGoogleInfo(event);
     }
+
+    // GetOwnGoogleInfoEvent
   }
 
   Stream<GoogleInfoState> _mapInitializeGoogleInfoToState(InitializeGoogleInfoEvent event) async* {
@@ -81,12 +85,39 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
 
         firebaseUser = null;
       } catch (e) {
-        print('Error when trying to sign out.');
+        print('RemoveGoogleInfoEvent error.');
         print('Error: ' + e);
       }
+
+      functionCallback(event, true);
+
       yield GoogleInfoNotLoaded();
     }
   }
+
+  Stream<GoogleInfoState> _getOwnGoogleInfo(GetOwnGoogleInfoEvent event) async* {
+    if (state is GoogleInfoLoaded) {
+      // GetOwnGoogleInfo
+      try {
+        GoogleSignIn googleSignIn = (state as GoogleInfoLoaded).googleSignIn;
+        FirebaseAuth firebaseAuth = (state as GoogleInfoLoaded).firebaseAuth;
+        FirebaseUser firebaseUser = (state as GoogleInfoLoaded).firebaseUser;
+
+
+        if (!isObjectEmpty(event)) {
+          event.callback(googleSignIn, firebaseAuth, firebaseUser);
+        }
+
+//        functionCallback(event, {googleSignIn, firebaseAuth, firebaseUser});
+      } catch (e) {
+        print('GetOwnGoogleInfoEvent error.');
+        print('Error: ' + e);
+      }
+
+    }
+  }
+
+
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
