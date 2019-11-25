@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:snschat_flutter/objects/index.dart';
 
@@ -74,9 +75,12 @@ class ChangeUserEvent extends UserEvent {
 }
 
 class GetOwnUserEvent extends UserEvent {
+  final FirebaseUser firebaseUser;
+  final FirebaseAuth firebaseAuth;
+  final GoogleSignIn googleSignIn;
   final Function callback;
 
-  GetOwnUserEvent({this.callback});
+  GetOwnUserEvent({this.googleSignIn, this.firebaseAuth, this.firebaseUser, this.callback});
 
   @override
   List<Object> get props => [];
