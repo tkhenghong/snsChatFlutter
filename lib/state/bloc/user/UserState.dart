@@ -11,15 +11,15 @@ abstract class UserState extends Equatable {
 class UserLoading extends UserState {}
 
 class UserLoaded extends UserState {
-  final List<User> userList;
+  final User user;
 
-  const UserLoaded([this.userList = const []]);
-
-  @override
-  List<Object> get props => [userList];
+  const UserLoaded([this.user]);
 
   @override
-  String toString() => 'UserLoaded {userList: $userList}';
+  List<Object> get props => [user];
+
+  @override
+  String toString() => 'UserLoaded {user: $user}';
 }
 
 class UserNotLoaded extends UserState {}

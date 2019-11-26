@@ -19,105 +19,96 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   Stream<UserState> mapEventToState(UserEvent event) async* {
     if (event is InitializeUserEvent) {
       yield* _initializeUserToState(event);
-    } else if (event is AddUserToStateEvent) {
-      yield* _addUserToState(event);
+    } else if (event is AddUserEvent) {
+      yield* _addUser(event);
     } else if (event is EditUserToStateEvent) {
       yield* _editUserToState(event);
-    } else if (event is DeleteUserToStateEvent) {
-      yield* _deleteUserToState(event);
-    } else if (event is ChangeUserEvent) {
-      yield* _changeUser(event);
+    } else if (event is DeleteUserFromStateEvent) {
+      yield* _deleteUserFromState(event);
     } else if (event is GetOwnUserEvent) {
       yield* _getOwnUser(event);
     }
   }
 
-  // Require:
-  // 1. GoogleSignIn: To find that user using googleSignIn unique ID
   Stream<UserState> _initializeUserToState(InitializeUserEvent event) async* {
     try {
-      List<User> userListFromDB = await userDBService.getAllUsers();
-
       User userFromDB = await userDBService.getUserByGoogleAccountId(event.googleSignIn.currentUser.id);
 
       print("userFromDB.id: " + userFromDB.id.toString());
 
-      if(!isObjectEmpty(userFromDB)) {
-        yield UserLoaded(userListFromDB);
+      if (!isObjectEmpty(userFromDB)) {
+        yield UserLoaded(userFromDB);
         functionCallback(event, true);
       } else {
         yield UserNotLoaded();
         functionCallback(event, false);
       }
-
-
-
     } catch (e) {
       functionCallback(event, false);
     }
   }
 
-  Stream<UserState> _addUserToState(AddUserToStateEvent event) async* {
+  // Register user in API, DB, BLOC
+  Stream<UserState> _addUser(AddUserEvent event) async* {
     if (state is UserLoaded) {
-      List<User> existingUserList = (state as UserLoaded).userList;
+      User userFromServer = await userAPIService.addUser(event.user);
 
-      existingUserList.removeWhere((User existingUser) => existingUser.id == event.user.id);
+      if (isObjectEmpty(userFromServer)) {
+        functionCallback(event, null);
+      }
 
-      existingUserList.add(event.user);
+      bool userSaved = await userDBService.addUser(userFromServer);
 
-      functionCallback(event, event.user);
-      yield UserLoaded(existingUserList);
+      if (!userSaved) {
+        functionCallback(event, null);
+      }
+
+      functionCallback(event, userFromServer);
+      yield UserLoaded(userFromServer);
     }
   }
 
+  // Change User information in API, DB, and State
   Stream<UserState> _editUserToState(EditUserToStateEvent event) async* {
     if (state is UserLoaded) {
-      List<User> existingUserList = (state as UserLoaded).userList;
+      bool updatedInREST = await userAPIService.editUser(event.user);
 
-      existingUserList.removeWhere((User existingUser) => existingUser.id == event.user.id);
+      if (!updatedInREST) {
+        functionCallback(event, null);
+      }
 
-      existingUserList.add(event.user);
+      bool userSaved = await userDBService.editUser(event.user);
+
+      if (!userSaved) {
+        functionCallback(event, null);
+      }
 
       functionCallback(event, event.user);
-      yield UserLoaded(existingUserList);
+      yield UserLoaded(event.user);
     }
   }
 
-  Stream<UserState> _deleteUserToState(DeleteUserToStateEvent event) async* {
+  // Remove User from DB, and BLOC state
+  Stream<UserState> _deleteUserFromState(DeleteUserFromStateEvent event) async* {
     if (state is UserLoaded) {
-      List<User> existingUserList = (state as UserLoaded).userList;
+      bool userDeleted = await userDBService.deleteUser(event.user.id);
 
-      existingUserList.removeWhere((User existingUser) => existingUser.id == event.user.id);
+      if (!userDeleted) {
+        functionCallback(event, false);
+      }
 
       functionCallback(event, true);
-      yield UserLoaded(existingUserList);
+      yield UserNotLoaded();
     }
   }
 
-  Stream<UserState> _changeUser(ChangeUserEvent event) async* {
-
-    User newUser = await userAPIService.addUser(event.user);
-
-    if (isObjectEmpty(newUser)) {
-      functionCallback(event, false);
-    }
-
-    bool userSaved = await userDBService.addUser(newUser);
-
-    if (!userSaved) {
-      functionCallback(event, false);
-    }
-
-    add(AddUserToStateEvent(user: newUser, callback: (User user) {}));
-  }
-
-  // GetOwnUserEvent
   Stream<UserState> _getOwnUser(GetOwnUserEvent event) async* {
     if (state is UserLoaded) {
-      // TODO: Probably need sending info from
-      // GetOwnGoogleInfoEvent
-      (state as GoogleInfoState).props.add(GetOwnGoogleInfoEvent((GoogleSignIn googleSignIn, FirebaseAuth firebaseAuth, FirebaseUser firebaseUser) {
-
+      User user = (state as UserLoaded).user;
+      functionCallback(event, user);
+      (state as GoogleInfoState).props
+          .add(GetOwnGoogleInfoEvent((GoogleSignIn googleSignIn, FirebaseAuth firebaseAuth, FirebaseUser firebaseUser) {
+        print('Experiment: see whether can get another BLOC\'s data when inside a BLOC');
       }));
     }
   }

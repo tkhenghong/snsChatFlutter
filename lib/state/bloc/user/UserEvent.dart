@@ -21,11 +21,11 @@ class InitializeUserEvent extends UserEvent {
   String toString() => 'InitializeUsersEvent. {googleSignIn: $googleSignIn}';
 }
 
-class AddUserToStateEvent extends UserEvent {
+class AddUserEvent extends UserEvent {
   final User user;
   final Function callback;
 
-  AddUserToStateEvent({this.user, this.callback});
+  AddUserEvent({this.user, this.callback});
 
   @override
   List<Object> get props => [user];
@@ -34,6 +34,8 @@ class AddUserToStateEvent extends UserEvent {
   String toString() => 'AddUserToStateEvent {user: $user}';
 }
 
+
+// Used for edit user for API, DB and State
 class EditUserToStateEvent extends UserEvent {
   final User user;
   final Function callback;
@@ -47,31 +49,17 @@ class EditUserToStateEvent extends UserEvent {
   String toString() => 'EditUserToStateEvent {user: $user}';
 }
 
-class DeleteUserToStateEvent extends UserEvent {
+class DeleteUserFromStateEvent extends UserEvent {
   final User user;
   final Function callback;
 
-  DeleteUserToStateEvent({this.user, this.callback});
+  DeleteUserFromStateEvent({this.user, this.callback});
 
   @override
   List<Object> get props => [user];
 
   @override
   String toString() => 'DeleteUserToStateEvent {user: $user}';
-}
-
-// Used for edit user for API, DB and State
-class ChangeUserEvent extends UserEvent {
-  final User user;
-  final Function callback;
-
-  ChangeUserEvent({this.user, this.callback});
-
-  @override
-  List<Object> get props => [user];
-
-  @override
-  String toString() => 'ChangeUserEvent {user: $user}';
 }
 
 class GetOwnUserEvent extends UserEvent {
