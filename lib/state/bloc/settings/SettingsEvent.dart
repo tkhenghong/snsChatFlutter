@@ -10,19 +10,20 @@ abstract class SettingsEvent extends Equatable {
 }
 
 class InitializeSettingssEvent extends SettingsEvent {
+  final User user; // Must have User object to load correct Settings to State
   final Function callback;
 
-  const InitializeSettingssEvent({this.callback});
+  const InitializeSettingssEvent({this.user, this.callback});
 
   @override
   String toString() => 'InitializeSettingssEvent';
 }
 
-class AddSettingsToStateEvent extends SettingsEvent {
+class AddSettingsEvent extends SettingsEvent {
   final Settings settings;
   final Function callback;
 
-  AddSettingsToStateEvent({this.settings, this.callback});
+  AddSettingsEvent({this.settings, this.callback});
 
   @override
   List<Object> get props => [settings];
@@ -31,11 +32,11 @@ class AddSettingsToStateEvent extends SettingsEvent {
   String toString() => 'AddSettingsToStateEvent {settings: $settings}';
 }
 
-class EditSettingsToStateEvent extends SettingsEvent {
+class EditSettingsEvent extends SettingsEvent {
   final Settings settings;
   final Function callback;
 
-  EditSettingsToStateEvent({this.settings, this.callback});
+  EditSettingsEvent({this.settings, this.callback});
 
   @override
   List<Object> get props => [settings];
@@ -44,29 +45,15 @@ class EditSettingsToStateEvent extends SettingsEvent {
   String toString() => 'EditSettingsToStateEvent {settings: $settings}';
 }
 
-class DeleteSettingsToStateEvent extends SettingsEvent {
+class DeleteSettingsEvent extends SettingsEvent {
   final Settings settings;
   final Function callback;
 
-  DeleteSettingsToStateEvent({this.settings, this.callback});
+  DeleteSettingsEvent({this.settings, this.callback});
 
   @override
   List<Object> get props => [settings];
 
   @override
   String toString() => 'DeleteSettingsToStateEvent {settings: $settings}';
-}
-
-// Used for edit settings for API, DB and State
-class ChangeSettingsEvent extends SettingsEvent {
-  final Settings settings;
-  final Function callback;
-
-  ChangeSettingsEvent({this.settings, this.callback});
-
-  @override
-  List<Object> get props => [settings];
-
-  @override
-  String toString() => 'ChangeSettingsEvent {settings: $settings}';
 }

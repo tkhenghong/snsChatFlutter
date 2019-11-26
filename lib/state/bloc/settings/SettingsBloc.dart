@@ -15,84 +15,83 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   @override
   Stream<SettingsState> mapEventToState(SettingsEvent event) async* {
     if (event is InitializeSettingssEvent) {
-      yield* _initializeSettingssToState(event);
-    } else if (event is AddSettingsToStateEvent) {
-      yield* _addSettingsToState(event);
-    } else if (event is EditSettingsToStateEvent) {
-      yield* _editSettingsToState(event);
-    } else if (event is DeleteSettingsToStateEvent) {
-      yield* _deleteSettingsToState(event);
-    } else if (event is ChangeSettingsEvent) {
-      yield* _changeSettings(event);
+      yield* _initializeSettingsToState(event);
+    } else if (event is AddSettingsEvent) {
+      yield* _addSettings(event);
+    } else if (event is EditSettingsEvent) {
+      yield* _editSettings(event);
+    } else if (event is DeleteSettingsEvent) {
+      yield* _deleteSettings(event);
     }
   }
 
-  Stream<SettingsState> _initializeSettingssToState(InitializeSettingssEvent event) async* {
+  Stream<SettingsState> _initializeSettingsToState(InitializeSettingssEvent event) async* {
     try {
-      List<Settings> settingsListFromDB = await settingsDBService.getAllSettings();
-
-      print("settingsListFromDB.length: " + settingsListFromDB.length.toString());
-
-      yield SettingssLoaded(settingsListFromDB);
-
-      functionCallback(event, true);
+      if (!isObjectEmpty(event.user)) {
+        Settings settingsFromDB = await settingsDBService.getSettingsOfAUser(event.user.id);
+        print("settingsFromDB.userId: " + settingsFromDB.userId);
+        functionCallback(event, true);
+        yield SettingsLoaded(settingsFromDB);
+      } else {
+        functionCallback(event, false);
+        yield SettingsNotLoaded();
+      }
     } catch (e) {
       functionCallback(event, false);
+      yield SettingsNotLoaded();
     }
   }
 
-  Stream<SettingsState> _addSettingsToState(AddSettingsToStateEvent event) async* {
-    if (state is SettingssLoaded) {
-      List<Settings> existingSettingsList = (state as SettingssLoaded).settingsList;
+  // Add Settings into REST, DB, and BLOC
+  Stream<SettingsState> _addSettings(AddSettingsEvent event) async* {
+    if (state is SettingsLoaded) {
+      Settings newSettings = await settingsAPIService.addSettings(event.settings);
 
-      existingSettingsList.removeWhere((Settings existingSettings) => existingSettings.id == event.settings.id);
+      if (isObjectEmpty(newSettings)) {
+        functionCallback(event, false);
+      } else {
+        bool settingsSaved = await settingsDBService.addSettings(newSettings);
 
-      existingSettingsList.add(event.settings);
-
-      functionCallback(event, event.settings);
-      yield SettingssLoaded(existingSettingsList);
+        if (!settingsSaved) {
+          functionCallback(event, false);
+        } else {
+          functionCallback(event, newSettings);
+          yield SettingsLoaded(newSettings);
+        }
+      }
     }
   }
 
-  Stream<SettingsState> _editSettingsToState(EditSettingsToStateEvent event) async* {
-    if (state is SettingssLoaded) {
-      List<Settings> existingSettingsList = (state as SettingssLoaded).settingsList;
+  Stream<SettingsState> _editSettings(EditSettingsEvent event) async* {
+    if (state is SettingsLoaded) {
+      bool updatedInREST = await settingsAPIService.editSettings(event.settings);
 
-      existingSettingsList.removeWhere((Settings existingSettings) => existingSettings.id == event.settings.id);
+      if (!updatedInREST) {
+        functionCallback(event, false);
+      } else {
+        bool settingsSaved = await settingsDBService.editSettings(event.settings);
 
-      existingSettingsList.add(event.settings);
-
-      functionCallback(event, event.settings);
-      yield SettingssLoaded(existingSettingsList);
+        if (!settingsSaved) {
+          functionCallback(event, false);
+        } else {
+          functionCallback(event, event.settings);
+          yield SettingsLoaded(event.settings);
+        }
+      }
     }
   }
 
-  Stream<SettingsState> _deleteSettingsToState(DeleteSettingsToStateEvent event) async* {
-    if (state is SettingssLoaded) {
-      List<Settings> existingSettingsList = (state as SettingssLoaded).settingsList;
+  Stream<SettingsState> _deleteSettings(DeleteSettingsEvent event) async* {
+    if (state is SettingsLoaded) {
+      bool settingsDeleted = await settingsDBService.deleteSettings(event.settings.id);
 
-      existingSettingsList.removeWhere((Settings existingSettings) => existingSettings.id == event.settings.id);
-
-      functionCallback(event, true);
-      yield SettingssLoaded(existingSettingsList);
+      if (!settingsDeleted) {
+        functionCallback(event, false);
+      } else {
+        functionCallback(event, true);
+        yield SettingsNotLoaded();
+      }
     }
-  }
-
-  Stream<SettingsState> _changeSettings(ChangeSettingsEvent event) async* {
-
-    Settings newSettings = await settingsAPIService.addSettings(event.settings);
-
-    if (isObjectEmpty(newSettings)) {
-      functionCallback(event, false);
-    }
-
-    bool settingsSaved = await settingsDBService.addSettings(newSettings);
-
-    if (!settingsSaved) {
-      functionCallback(event, false);
-    }
-
-    add(AddSettingsToStateEvent(settings: newSettings, callback: (Settings settings) {}));
   }
 
   // To send response to those dispatched Actions

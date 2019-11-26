@@ -54,6 +54,16 @@ class UserContactDBService {
     return !isObjectEmpty(recordSnapshot) ? UserContact.fromJson(recordSnapshot.value) : null;
   }
 
+  // Used for retreiving your own UserContact
+  Future<UserContact> getUserContactByUserId(String userId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
+    final finder = Finder(filter: Filter.equals("userId", userId));
+    final recordSnapshot = await _userContactStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? UserContact.fromJson(recordSnapshot.value) : null;
+  }
+
   // Verify userContact is in the local DB or not when login
   Future<UserContact> getUserContactByConversationGroup(String googleAccountId) async {
     if (isObjectEmpty(await _db)) {

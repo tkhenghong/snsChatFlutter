@@ -18,11 +18,11 @@ class InitializeUnreadMessagesEvent extends UnreadMessageEvent {
   String toString() => 'InitializeUnreadMessagesEvent';
 }
 
-class AddUnreadMessageToStateEvent extends UnreadMessageEvent {
+class AddUnreadMessageEvent extends UnreadMessageEvent {
   final UnreadMessage unreadMessage;
   final Function callback;
 
-  AddUnreadMessageToStateEvent({this.unreadMessage, this.callback});
+  AddUnreadMessageEvent({this.unreadMessage, this.callback});
 
   @override
   List<Object> get props => [unreadMessage];
@@ -31,11 +31,11 @@ class AddUnreadMessageToStateEvent extends UnreadMessageEvent {
   String toString() => 'AddUnreadMessageToStateEvent {unreadMessage: $unreadMessage}';
 }
 
-class EditUnreadMessageToStateEvent extends UnreadMessageEvent {
+class EditUnreadMessageEvent extends UnreadMessageEvent {
   final UnreadMessage unreadMessage;
   final Function callback;
 
-  EditUnreadMessageToStateEvent({this.unreadMessage, this.callback});
+  EditUnreadMessageEvent({this.unreadMessage, this.callback});
 
   @override
   List<Object> get props => [unreadMessage];
@@ -44,29 +44,15 @@ class EditUnreadMessageToStateEvent extends UnreadMessageEvent {
   String toString() => 'EditUnreadMessageToStateEvent {unreadMessage: $unreadMessage}';
 }
 
-class DeleteUnreadMessageToStateEvent extends UnreadMessageEvent {
+class DeleteUnreadMessageEvent extends UnreadMessageEvent {
   final UnreadMessage unreadMessage;
   final Function callback;
 
-  DeleteUnreadMessageToStateEvent({this.unreadMessage, this.callback});
+  DeleteUnreadMessageEvent({this.unreadMessage, this.callback});
 
   @override
   List<Object> get props => [unreadMessage];
 
   @override
   String toString() => 'DeleteUnreadMessageToStateEvent {unreadMessage: $unreadMessage}';
-}
-
-// Used for edit unreadMessage for API, DB and State
-class ChangeUnreadMessageEvent extends UnreadMessageEvent {
-  final UnreadMessage unreadMessage;
-  final Function callback;
-
-  ChangeUnreadMessageEvent({this.unreadMessage, this.callback});
-
-  @override
-  List<Object> get props => [unreadMessage];
-
-  @override
-  String toString() => 'ChangeUnreadMessageEvent {unreadMessage: $unreadMessage}';
 }

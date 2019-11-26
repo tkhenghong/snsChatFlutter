@@ -34,8 +34,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     try {
       User userFromDB = await userDBService.getUserByGoogleAccountId(event.googleSignIn.currentUser.id);
 
-      print("userFromDB.id: " + userFromDB.id.toString());
-
       if (!isObjectEmpty(userFromDB)) {
         yield UserLoaded(userFromDB);
         functionCallback(event, true);
@@ -45,6 +43,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       }
     } catch (e) {
       functionCallback(event, false);
+      yield UserNotLoaded();
     }
   }
 

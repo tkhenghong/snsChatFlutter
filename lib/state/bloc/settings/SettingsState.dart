@@ -10,16 +10,16 @@ abstract class SettingsState extends Equatable {
 
 class SettingsLoading extends SettingsState {}
 
-class SettingssLoaded extends SettingsState {
-  final List<Settings> settingsList;
+class SettingsLoaded extends SettingsState {
+  final Settings settings;
 
-  const SettingssLoaded([this.settingsList = const []]);
-
-  @override
-  List<Object> get props => [settingsList];
+  const SettingsLoaded([this.settings = const []]);
 
   @override
-  String toString() => 'SettingsLoaded {settingsList: $settingsList}';
+  List<Object> get props => [settings];
+
+  @override
+  String toString() => 'SettingsLoaded {settings: $settings}';
 }
 
-class SettingssNotLoaded extends SettingsState {}
+class SettingsNotLoaded extends SettingsState {}

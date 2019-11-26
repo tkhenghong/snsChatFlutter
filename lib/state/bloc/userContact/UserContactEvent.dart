@@ -57,23 +57,11 @@ class DeleteUserContactToStateEvent extends UserContactEvent {
   String toString() => 'DeleteUserContactToStateEvent {userContact: $userContact}';
 }
 
-class SendUserContactEvent extends UserContactEvent {
-  final UserContact userContact;
-  final Function callback;
-
-  SendUserContactEvent({this.userContact, this.callback});
-
-  @override
-  List<Object> get props => [userContact];
-
-  @override
-  String toString() => 'SendUserContactEvent {userContact: $userContact}';
-}
-
 class GetOwnUserContactEvent extends UserContactEvent {
+  final User user;
   final Function callback;
 
-  GetOwnUserContactEvent({this.callback});
+  GetOwnUserContactEvent({this.user, this.callback});
 
   @override
   List<Object> get props => [];
