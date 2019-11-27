@@ -1,3 +1,4 @@
+import 'package:snschat_flutter/backend/rest/chat/ConversationGroupAPIService.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/index.dart';
@@ -7,7 +8,8 @@ import 'package:bloc/bloc.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial
 class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGroupState> {
-  ConversationDBService conversationGroupDBService = new ConversationDBService();
+  ConversationGroupAPIService conversationGroupAPIService = ConversationGroupAPIService();
+  ConversationDBService conversationGroupDBService = ConversationDBService();
 
   @override
   ConversationGroupState get initialState => ConversationGroupsLoading();
@@ -43,60 +45,88 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
   }
 
   Stream<ConversationGroupState> _addConversationGroupToState(AddConversationGroupToStateEvent event) async* {
+    ConversationGroup newConversationGroup;
+    bool added = false;
     if (state is ConversationGroupsLoaded) {
-      List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
-      existingConversationGroupList
-          .removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == event.conversationGroup.id);
+      newConversationGroup = await conversationGroupAPIService.addConversationGroup(event.conversationGroup);
 
-      existingConversationGroupList.add(event.conversationGroup);
+      if(!isObjectEmpty(newConversationGroup)) {
+        added = await conversationGroupDBService.addConversationGroup(newConversationGroup);
+        if(added) {
+          List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
-      yield ConversationGroupsLoaded(existingConversationGroupList);
+          existingConversationGroupList.add(newConversationGroup);
+
+          functionCallback(event, newConversationGroup);
+          yield ConversationGroupsLoaded(existingConversationGroupList);
+        }
+      }
+    }
+
+    if(isObjectEmpty(newConversationGroup) || !added) {
+      functionCallback(event, null);
     }
   }
 
   Stream<ConversationGroupState> _editConversationGroupToState(EditConversationGroupEvent event) async* {
+    bool updatedInREST = false;
+    bool saved = false;
     if (state is ConversationGroupsLoaded) {
-      List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
-      existingConversationGroupList
-          .removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == event.conversationGroup.id);
+      updatedInREST = await conversationGroupAPIService.editConversationGroup(event.conversationGroup);
 
-      existingConversationGroupList.add(event.conversationGroup);
+      if(updatedInREST) {
+        saved = await conversationGroupDBService.editConversationGroup(event.conversationGroup);
+        if(saved) {
+          List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
-      yield ConversationGroupsLoaded(existingConversationGroupList);
+          existingConversationGroupList
+              .removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == event.conversationGroup.id);
+
+          existingConversationGroupList.add(event.conversationGroup);
+
+          functionCallback(event, event.conversationGroup);
+          yield ConversationGroupsLoaded(existingConversationGroupList);
+        }
+      }
+    }
+
+    if(!updatedInREST|| !saved) {
+      functionCallback(event, null);
     }
   }
 
   Stream<ConversationGroupState> _deleteConversationGroupToState(DeleteConversationGroupEvent event) async* {
+    bool deletedInREST = false;
+    bool deleted = false;
     if (state is ConversationGroupsLoaded) {
-      List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
-      existingConversationGroupList
-          .removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == event.conversationGroup.id);
+      deletedInREST = await conversationGroupAPIService.deleteConversationGroup(event.conversationGroup.id);
 
-      yield ConversationGroupsLoaded(existingConversationGroupList);
+      if(deletedInREST) {
+        deleted = await conversationGroupDBService.deleteConversationGroup(event.conversationGroup.id);
+
+        if(deleted) {
+          List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
+
+          existingConversationGroupList
+              .removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == event.conversationGroup.id);
+
+          functionCallback(event, true);
+          yield ConversationGroupsLoaded(existingConversationGroupList);
+        }
+      }
+    }
+
+    if(!deletedInREST || !deleted) {
+      functionCallback(event, false);
     }
   }
 
   Stream<ConversationGroupState> _createConversationGroup(CreateConversationGroupEvent event) async* {
     // TODO: Add all other objects first
 
-    UserContact yourOwnUserContact = UserContact(
-      id: null,
-      // userIds: Which User owns this UserContact
-      userIds: [currentState.userState.id],
-      displayName: currentState.userState.displayName,
-      realName: currentState.userState.realName,
-      block: false,
-      lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
-      // make unknown time, let server decide
-      mobileNo: currentState.userState.mobileNo,
-    );
-
-    List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
-
-    yield ConversationGroupsLoaded(existingConversationGroupList);
   }
 
   // To send response to those dispatched Actions
