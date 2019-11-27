@@ -69,35 +69,48 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
   // Change User information in API, DB, and State
   Stream<UserState> _editUserToState(EditUserToStateEvent event) async* {
+    bool updatedInREST = false;
+    bool userSaved = false;
     if (state is UserLoaded) {
-      bool updatedInREST = await userAPIService.editUser(event.user);
+      updatedInREST = await userAPIService.editUser(event.user);
 
-      if (!updatedInREST) {
-        functionCallback(event, null);
+      if (updatedInREST) {
+        userSaved = await userDBService.editUser(event.user);
+
+        if (userSaved) {
+          functionCallback(event, event.user);
+          yield UserLoaded(event.user);
+        }
       }
+    }
 
-      bool userSaved = await userDBService.editUser(event.user);
-
-      if (!userSaved) {
-        functionCallback(event, null);
-      }
-
-      functionCallback(event, event.user);
-      yield UserLoaded(event.user);
+    if (!updatedInREST || !userSaved) {
+      functionCallback(event, null);
     }
   }
 
   // Remove User from DB, and BLOC state
   Stream<UserState> _deleteUserFromState(DeleteUserFromStateEvent event) async* {
+    bool deletedFromREST = false;
+    bool deleted = false;
     if (state is UserLoaded) {
-      bool userDeleted = await userDBService.deleteUser(event.user.id);
+      deletedFromREST = await userAPIService.deleteUser(event.user.id);
+      if (deletedFromREST) {
+        deleted = await userDBService.deleteUser(event.user.id);
+        if (deleted) {
+          functionCallback(event, true);
 
-      if (!userDeleted) {
-        functionCallback(event, false);
+          User existingUser = (state as UserLoaded).user;
+
+          if (existingUser.id == event.user.id) {
+            yield UserNotLoaded();
+          }
+        }
       }
 
-      functionCallback(event, true);
-      yield UserNotLoaded();
+      if(!deletedFromREST || !deleted) {
+        functionCallback(event, false);
+      }
     }
   }
 
@@ -105,7 +118,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     if (state is UserLoaded) {
       User user = (state as UserLoaded).user;
       functionCallback(event, user);
-      (state as GoogleInfoState).props
+      (state as GoogleInfoState)
+          .props
           .add(GetOwnGoogleInfoEvent((GoogleSignIn googleSignIn, FirebaseAuth firebaseAuth, FirebaseUser firebaseUser) {
         print('Experiment: see whether can get another BLOC\'s data when inside a BLOC');
       }));

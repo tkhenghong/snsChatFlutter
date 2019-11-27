@@ -56,16 +56,3 @@ class DeleteMessageToStateEvent extends MessageEvent {
   @override
   String toString() => 'DeleteMessageToStateEvent {message: $message}';
 }
-
-class SendMessageEvent extends MessageEvent {
-  final Message message;
-  final Function callback;
-
-  SendMessageEvent({this.message, this.callback});
-
-  @override
-  List<Object> get props => [message];
-
-  @override
-  String toString() => 'SendMessageEvent {message: $message}';
-}

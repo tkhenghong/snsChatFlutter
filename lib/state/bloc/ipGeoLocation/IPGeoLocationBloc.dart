@@ -23,11 +23,12 @@ class IPGeoLocationBloc extends Bloc<IPGeoLocationEvent, IPGeoLocationState> {
     IPGeoLocation ipGeoLocation = await ipLocationAPIService.getIPGeolocation();
 
     if (!isObjectEmpty(ipGeoLocation)) {
+      functionCallback(event, ipGeoLocation);
       yield IPGeoLocationLoaded(ipGeoLocation);
-      functionCallback(event, true);
+    } else {
+      functionCallback(event, null);
+      yield IPGeoLocationNotLoaded();
     }
-
-    functionCallback(event, false);
   }
 
   void functionCallback(event, value) {

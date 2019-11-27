@@ -13,7 +13,7 @@ class SettingsLoading extends SettingsState {}
 class SettingsLoaded extends SettingsState {
   final Settings settings;
 
-  const SettingsLoaded([this.settings = const []]);
+  const SettingsLoaded([this.settings]);
 
   @override
   List<Object> get props => [settings];

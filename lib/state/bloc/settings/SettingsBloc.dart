@@ -44,40 +44,46 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
   // Add Settings into REST, DB, and BLOC
   Stream<SettingsState> _addSettings(AddSettingsEvent event) async* {
+    Settings newSettings;
+    bool settingsSaved = false;
     if (state is SettingsLoaded) {
-      Settings newSettings = await settingsAPIService.addSettings(event.settings);
+      newSettings = await settingsAPIService.addSettings(event.settings);
 
-      if (isObjectEmpty(newSettings)) {
-        functionCallback(event, false);
-      } else {
-        bool settingsSaved = await settingsDBService.addSettings(newSettings);
+      if (!isObjectEmpty(newSettings)) {
+        settingsSaved = await settingsDBService.addSettings(newSettings);
 
-        if (!settingsSaved) {
-          functionCallback(event, false);
-        } else {
+        if (settingsSaved) {
           functionCallback(event, newSettings);
           yield SettingsLoaded(newSettings);
         }
       }
     }
+
+    if (isObjectEmpty(newSettings) || !settingsSaved) {
+      functionCallback(event, null);
+    }
   }
 
   Stream<SettingsState> _editSettings(EditSettingsEvent event) async* {
+    bool updatedInREST = false;
+    bool updated = false;
     if (state is SettingsLoaded) {
-      bool updatedInREST = await settingsAPIService.editSettings(event.settings);
+      updatedInREST = await settingsAPIService.editSettings(event.settings);
 
-      if (!updatedInREST) {
-        functionCallback(event, false);
-      } else {
-        bool settingsSaved = await settingsDBService.editSettings(event.settings);
+      if (updatedInREST) {
+        updated = await settingsDBService.editSettings(event.settings);
 
-        if (!settingsSaved) {
-          functionCallback(event, false);
-        } else {
+        if (updated) {
           functionCallback(event, event.settings);
           yield SettingsLoaded(event.settings);
         }
+
+        functionCallback(event, false);
       }
+    }
+
+    if (!updatedInREST || !updated) {
+      functionCallback(event, false);
     }
   }
 

@@ -92,7 +92,7 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
       }
     }
     if (!updatedInREST || !unreadMessageSaved) {
-      functionCallback(event, null);
+      functionCallback(event, false);
     }
   }
 

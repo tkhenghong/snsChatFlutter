@@ -22,8 +22,6 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
       yield* _editMessageToState(event);
     } else if (event is DeleteMessageToStateEvent) {
       yield* _deleteMessageToState(event);
-    } else if (event is SendMessageEvent) {
-      yield* _sendMessage(event);
     }
   }
 
@@ -33,69 +31,84 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
 
       print("messageListFromDB.length: " + messageListFromDB.length.toString());
 
-      yield MessagesLoaded(messageListFromDB);
-
       functionCallback(event, true);
+      yield MessagesLoaded(messageListFromDB);
     } catch (e) {
       functionCallback(event, false);
+      yield MessagesNotLoaded();
     }
   }
 
   Stream<MessageState> _addMessageToState(AddMessageToStateEvent event) async* {
+    Message messageFromServer;
+    bool savedIntoDB = false;
     if (state is MessagesLoaded) {
-      List<Message> existingMessageList = (state as MessagesLoaded).messageList;
+      messageFromServer = await messageAPIService.addMessage(event.message);
 
-      existingMessageList.removeWhere((Message existingMessage) => existingMessage.id == event.message.id);
+      if (!isObjectEmpty(messageFromServer)) {
+        savedIntoDB = await messageDBService.addMessage(messageFromServer);
 
-      existingMessageList.add(event.message);
+        if (savedIntoDB) {
+          List<Message> existingMessageList = (state as MessagesLoaded).messageList;
 
-      functionCallback(event, event.message);
-      yield MessagesLoaded(existingMessageList);
+          existingMessageList.add(messageFromServer);
+
+          functionCallback(event, messageFromServer);
+          yield MessagesLoaded(existingMessageList);
+        }
+      }
+      if (isObjectEmpty(messageFromServer) || !savedIntoDB) {
+        functionCallback(event, null);
+      }
     }
   }
 
   Stream<MessageState> _editMessageToState(EditMessageToStateEvent event) async* {
+    bool updatedInREST = false;
+    bool updated = false;
     if (state is MessagesLoaded) {
-      List<Message> existingMessageList = (state as MessagesLoaded).messageList;
+      updatedInREST = await messageAPIService.editMessage(event.message);
+      if (updatedInREST) {
+        updated = await messageDBService.editMessage(event.message);
+        if (updated) {
+          List<Message> existingMessageList = (state as MessagesLoaded).messageList;
 
-      existingMessageList.removeWhere((Message existingMessage) => existingMessage.id == event.message.id);
+          existingMessageList.removeWhere((Message existingMessage) => existingMessage.id == event.message.id);
 
-      existingMessageList.add(event.message);
+          existingMessageList.add(event.message);
 
-      functionCallback(event, event.message);
-      yield MessagesLoaded(existingMessageList);
+          functionCallback(event, event.message);
+          yield MessagesLoaded(existingMessageList);
+        }
+      }
+    }
+
+    if (!updatedInREST || !updated) {
+      functionCallback(event, null);
     }
   }
 
   Stream<MessageState> _deleteMessageToState(DeleteMessageToStateEvent event) async* {
+    bool deletedInREST = false;
+    bool deleted = false;
     if (state is MessagesLoaded) {
-      List<Message> existingMessageList = (state as MessagesLoaded).messageList;
+      deletedInREST = await messageAPIService.deleteMessage(event.message.id);
+      if (deletedInREST) {
+        deleted = await messageDBService.deleteMessage(event.message.id);
+        if (deleted) {
+          List<Message> existingMessageList = (state as MessagesLoaded).messageList;
 
-      existingMessageList.removeWhere((Message existingMessage) => existingMessage.id == event.message.id);
+          existingMessageList.removeWhere((Message existingMessage) => existingMessage.id == event.message.id);
 
-      functionCallback(event, true);
-      yield MessagesLoaded(existingMessageList);
+          functionCallback(event, true);
+          yield MessagesLoaded(existingMessageList);
+        }
+      }
     }
-  }
 
-  Stream<MessageState> _sendMessage(SendMessageEvent event) async* {
-    // TODO: dispatch EditUnreadMessageToEvent to change the current message of the conversationGroup from outside
-
-    Message newMessage = await messageAPIService.addMessage(event.message);
-
-    if (isObjectEmpty(newMessage)) {
+    if (!deletedInREST || !deleted) {
       functionCallback(event, false);
     }
-
-    bool messageSaved = await messageDBService.addMessage(newMessage);
-
-    if (!messageSaved) {
-      functionCallback(event, false);
-    }
-
-    // TODO: Dispatch UploadMultimediaEvent to separate the logic (dispatch it in callback of sendMessageEvent)
-
-    add(AddMessageToStateEvent(message: newMessage, callback: (Message message) {}));
   }
 
   // To send response to those dispatched Actions
