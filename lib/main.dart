@@ -24,22 +24,67 @@ import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number
 import 'database/sembast/SembastDB.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   BlocSupervisor.delegate = SimpleBlocDelegate();
-  runApp(BlocWrapper());
+  runApp(MultiBlocProvider(providers: [
+    BlocProvider<ConversationGroupBloc>(
+      builder: (context) {
+        return ConversationGroupBloc()..add(InitializeConversationGroupsEvent(callback: (bool done) {}));
+      },
+    ),
+    BlocProvider<GoogleInfoBloc>(
+      builder: (context) {
+        return GoogleInfoBloc()..add(InitializeGoogleInfoEvent(callback: (bool done) {}));
+      },
+    ),
+    BlocProvider<IPGeoLocationBloc>(
+      builder: (context) {
+        return IPGeoLocationBloc()..add(GetIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {}));
+      },
+    ),
+    BlocProvider<MessageBloc>(
+      builder: (context) {
+        return MessageBloc()..add(InitializeMessagesEvent(callback: (bool done) {}));
+      },
+    ),
+    BlocProvider<MultimediaBloc>(
+      builder: (context) {
+        return MultimediaBloc()..add(InitializeMultimediaEvent(callback: (bool done) {}));
+      },
+    ),
+    BlocProvider<SettingsBloc>(
+      builder: (context) {
+        return SettingsBloc()..add(InitializeSettingsEvent(callback: (bool done) {}));
+      },
+    ),
+    BlocProvider<UnreadMessageBloc>(
+      builder: (context) {
+        return UnreadMessageBloc()..add(InitializeUnreadMessagesEvent(callback: (bool done) {}));
+      },
+    ),
+    BlocProvider<UserBloc>(
+      builder: (context) {
+        return UserBloc()..add(InitializeUserEvent(callback: (bool done) {}));
+      },
+    ),
+    BlocProvider<UserContactBloc>(
+      builder: (context) {
+        return UserContactBloc()..add(InitializeUserContactsEvent(callback: (bool done) {}));
+      },
+    ),
+  ], child: MyApp()));
 }
 
-class BlocWrapper extends StatefulWidget {
+class MyApp extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return BlocWrapperState();
+    return MyAppState();
   }
 }
 
-class BlocWrapperState extends State<BlocWrapper> {
-
+class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-
     Color primaryColor = Colors.black;
     Color primaryColorInText = Colors.white;
     Color primaryColorWhenFocus = Colors.black54;
@@ -47,95 +92,46 @@ class BlocWrapperState extends State<BlocWrapper> {
     TextStyle primaryTextStyle = TextStyle(color: primaryColor);
     TextStyle primaryTextStyleInAppBarText = TextStyle(color: primaryColorInText, fontSize: 18.0, fontWeight: FontWeight.bold);
 
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<ConversationGroupBloc>(
-          builder: (context) {
-            return ConversationGroupBloc()..add(InitializeConversationGroupsEvent(callback: (bool done) {}));
-          },
-        ),
-        BlocProvider<GoogleInfoBloc>(
-          builder: (context) {
-            return GoogleInfoBloc()..add(InitializeGoogleInfoEvent(callback: (bool done) {}));
-          },
-        ),
-        BlocProvider<IPGeoLocationBloc>(
-          builder: (context) {
-            return IPGeoLocationBloc()..add(GetIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {}));
-          },
-        ),
-        BlocProvider<MessageBloc>(
-          builder: (context) {
-            return MessageBloc()..add(InitializeMessagesEvent(callback: (bool done) {}));
-          },
-        ),
-        BlocProvider<MultimediaBloc>(
-          builder: (context) {
-            return MultimediaBloc()..add(InitializeMultimediaEvent(callback: (bool done) {}));
-          },
-        ),
-        BlocProvider<SettingsBloc>(
-          builder: (context) {
-            return SettingsBloc()..add(InitializeSettingsEvent(callback: (bool done) {}));
-          },
-        ),
-        BlocProvider<UnreadMessageBloc>(
-          builder: (context) {
-            return UnreadMessageBloc()..add(InitializeUnreadMessagesEvent(callback: (bool done) {}));
-          },
-        ),
-        BlocProvider<UserBloc>(
-          builder: (context) {
-            return UserBloc()..add(InitializeUserEvent(callback: (bool done) {}));
-          },
-        ),
-        BlocProvider<UserContactBloc>(
-          builder: (context) {
-            return UserContactBloc()..add(InitializeUserContactsEvent(callback: (bool done) {}));
-          },
-        ),
-      ],
-      child: MaterialApp(
-        title: 'PocketChat',
-        theme: ThemeData(
+    return MaterialApp(
+      title: 'PocketChat',
+      theme: ThemeData(
 //        fontFamily: 'OpenSans',
-          brightness: primaryBrightness,
-          primaryColor: primaryColor,
-          accentColor: primaryColor,
-          cursorColor: primaryColor,
-          highlightColor: primaryColorWhenFocus,
-          textSelectionColor: primaryColorWhenFocus,
-          buttonColor: primaryColor,
-          buttonTheme: ButtonThemeData(buttonColor: primaryColor, textTheme: ButtonTextTheme.primary),
-          errorColor: primaryColor,
-          bottomAppBarColor: primaryColor,
-          bottomAppBarTheme: BottomAppBarTheme(
-            color: primaryColor,
-          ),
-          appBarTheme: AppBarTheme(
-              color: primaryColor,
-              textTheme: TextTheme(
-                button: primaryTextStyleInAppBarText,
-                title: primaryTextStyleInAppBarText,
-              )),
+        brightness: primaryBrightness,
+        primaryColor: primaryColor,
+        accentColor: primaryColor,
+        cursorColor: primaryColor,
+        highlightColor: primaryColorWhenFocus,
+        textSelectionColor: primaryColorWhenFocus,
+        buttonColor: primaryColor,
+        buttonTheme: ButtonThemeData(buttonColor: primaryColor, textTheme: ButtonTextTheme.primary),
+        errorColor: primaryColor,
+        bottomAppBarColor: primaryColor,
+        bottomAppBarTheme: BottomAppBarTheme(
+          color: primaryColor,
         ),
-        home: TabsPage(),
-        routes: {
-          "login_page": (_) => new LoginPage(),
-          "privacy_notice_page": (_) => new PrivacyNoticePage(),
-          "sign_up_page": (_) => new SignUpPage(),
-          "terms_and_conditions_page": (_) => TermsAndConditionsPage(),
-          "verify_phone_number_page": (_) => VerifyPhoneNumberPage(),
-          "tabs_page": (_) => TabsPage(),
-          "chat_group_list_page": (_) => new ChatGroupListPage(),
-          "scan_qr_code_page": (_) => new ScanQrCodePage(),
-          "settings_page": (_) => new SettingsPage(),
-          "myself_page": (_) => new MyselfPage(),
-          "chat_room_page": (_) => new ChatRoomPage(),
-          "chat_info_page": (_) => new ChatInfoPage(),
-          "contacts_page": (_) => new SelectContactsPage(),
-        },
+        appBarTheme: AppBarTheme(
+            color: primaryColor,
+            textTheme: TextTheme(
+              button: primaryTextStyleInAppBarText,
+              title: primaryTextStyleInAppBarText,
+            )),
       ),
+      home: TabsPage(),
+      routes: {
+        "login_page": (_) => new LoginPage(),
+        "privacy_notice_page": (_) => new PrivacyNoticePage(),
+        "sign_up_page": (_) => new SignUpPage(),
+        "terms_and_conditions_page": (_) => TermsAndConditionsPage(),
+        "verify_phone_number_page": (_) => VerifyPhoneNumberPage(),
+        "tabs_page": (_) => TabsPage(),
+        "chat_group_list_page": (_) => new ChatGroupListPage(),
+        "scan_qr_code_page": (_) => new ScanQrCodePage(),
+        "settings_page": (_) => new SettingsPage(),
+        "myself_page": (_) => new MyselfPage(),
+        "chat_room_page": (_) => new ChatRoomPage(),
+        "chat_info_page": (_) => new ChatInfoPage(),
+        "contacts_page": (_) => new SelectContactsPage(),
+      },
     );
   }
 
