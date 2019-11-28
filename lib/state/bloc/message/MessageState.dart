@@ -19,7 +19,7 @@ class MessagesLoaded extends MessageState {
   List<Object> get props => [messageList];
 
   @override
-  String toString() => 'MessageLoaded {messageList: $messageList}';
+  String toString() => 'MessagesLoaded {messageList: $messageList}';
 }
 
 class MessagesNotLoaded extends MessageState {}

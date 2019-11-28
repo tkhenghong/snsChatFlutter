@@ -10,10 +10,10 @@ abstract class MultimediaState extends Equatable {
 
 class MultimediaLoading extends MultimediaState {}
 
-class MultimediasLoaded extends MultimediaState {
+class MultimediaLoaded extends MultimediaState {
   final List<Multimedia> multimediaList;
 
-  const MultimediasLoaded([this.multimediaList = const []]);
+  const MultimediaLoaded([this.multimediaList = const []]);
 
   @override
   List<Object> get props => [multimediaList];

@@ -8,7 +8,7 @@ abstract class UserContactState extends Equatable {
   List<Object> get props => [];
 }
 
-class UserContactLoading extends UserContactState {}
+class UserContactsLoading extends UserContactState {}
 
 class UserContactsLoaded extends UserContactState {
   final List<UserContact> userContactList;

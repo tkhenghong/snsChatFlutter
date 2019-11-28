@@ -14,7 +14,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
 
   @override
   Stream<MultimediaState> mapEventToState(MultimediaEvent event) async* {
-    if (event is InitializeMultimediasEvent) {
+    if (event is InitializeMultimediaEvent) {
       yield* _initializeMultimediasToState(event);
     } else if (event is AddMultimediaToStateEvent) {
       yield* _addMultimediaToState(event);
@@ -27,13 +27,13 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     }
   }
 
-  Stream<MultimediaState> _initializeMultimediasToState(InitializeMultimediasEvent event) async* {
+  Stream<MultimediaState> _initializeMultimediasToState(InitializeMultimediaEvent event) async* {
     try {
       List<Multimedia> multimediaListFromDB = await multimediaDBService.getAllMultimedia();
 
       print("multimediaListFromDB.length: " + multimediaListFromDB.length.toString());
 
-      yield MultimediasLoaded(multimediaListFromDB);
+      yield MultimediaLoaded(multimediaListFromDB);
 
       functionCallback(event, true);
     } catch (e) {
@@ -42,39 +42,39 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
   }
 
   Stream<MultimediaState> _addMultimediaToState(AddMultimediaToStateEvent event) async* {
-    if (state is MultimediasLoaded) {
-      List<Multimedia> existingMultimediaList = (state as MultimediasLoaded).multimediaList;
+    if (state is MultimediaLoaded) {
+      List<Multimedia> existingMultimediaList = (state as MultimediaLoaded).multimediaList;
 
       existingMultimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == event.multimedia.id);
 
       existingMultimediaList.add(event.multimedia);
 
       functionCallback(event, event.multimedia);
-      yield MultimediasLoaded(existingMultimediaList);
+      yield MultimediaLoaded(existingMultimediaList);
     }
   }
 
   Stream<MultimediaState> _editMultimediaToState(EditMultimediaToStateEvent event) async* {
-    if (state is MultimediasLoaded) {
-      List<Multimedia> existingMultimediaList = (state as MultimediasLoaded).multimediaList;
+    if (state is MultimediaLoaded) {
+      List<Multimedia> existingMultimediaList = (state as MultimediaLoaded).multimediaList;
 
       existingMultimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == event.multimedia.id);
 
       existingMultimediaList.add(event.multimedia);
 
       functionCallback(event, event.multimedia);
-      yield MultimediasLoaded(existingMultimediaList);
+      yield MultimediaLoaded(existingMultimediaList);
     }
   }
 
   Stream<MultimediaState> _deleteMultimediaToState(DeleteMultimediaToStateEvent event) async* {
-    if (state is MultimediasLoaded) {
-      List<Multimedia> existingMultimediaList = (state as MultimediasLoaded).multimediaList;
+    if (state is MultimediaLoaded) {
+      List<Multimedia> existingMultimediaList = (state as MultimediaLoaded).multimediaList;
 
       existingMultimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == event.multimedia.id);
 
       functionCallback(event, true);
-      yield MultimediasLoaded(existingMultimediaList);
+      yield MultimediaLoaded(existingMultimediaList);
     }
   }
 

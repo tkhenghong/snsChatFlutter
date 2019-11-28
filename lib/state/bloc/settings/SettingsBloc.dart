@@ -14,7 +14,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
   @override
   Stream<SettingsState> mapEventToState(SettingsEvent event) async* {
-    if (event is InitializeSettingssEvent) {
+    if (event is InitializeSettingsEvent) {
       yield* _initializeSettingsToState(event);
     } else if (event is AddSettingsEvent) {
       yield* _addSettings(event);
@@ -25,7 +25,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     }
   }
 
-  Stream<SettingsState> _initializeSettingsToState(InitializeSettingssEvent event) async* {
+  Stream<SettingsState> _initializeSettingsToState(InitializeSettingsEvent event) async* {
     try {
       if (!isObjectEmpty(event.user)) {
         Settings settingsFromDB = await settingsDBService.getSettingsOfAUser(event.user.id);

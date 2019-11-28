@@ -60,20 +60,3 @@ class DeleteConversationGroupEvent extends ConversationGroupEvent {
   @override
   String toString() => 'DeleteConversationGroupEvent {conversationGroup: $conversationGroup}';
 }
-
-class CreateConversationGroupEvent extends ConversationGroupEvent {
-  final ConversationGroup conversationGroup;
-  final String type;
-  final List<Contact> contactList;
-  final Multimedia multimedia;
-  final File imageFile;
-  final Function callback;
-
-  CreateConversationGroupEvent({this.conversationGroup, this.type, this.contactList, this.imageFile, this.multimedia, this.callback});
-
-  @override
-  List<Object> get props => [conversationGroup, type, contactList, imageFile, multimedia];
-
-  @override
-  String toString() => 'CreateConversationGroupEvent {conversationGroup: $conversationGroup}';
-}

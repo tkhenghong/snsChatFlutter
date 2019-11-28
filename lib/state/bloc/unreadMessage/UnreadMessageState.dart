@@ -19,7 +19,7 @@ class UnreadMessagesLoaded extends UnreadMessageState {
   List<Object> get props => [unreadMessageList];
 
   @override
-  String toString() => 'UnreadMessageLoaded {unreadMessageList: $unreadMessageList}';
+  String toString() => 'UnreadMessagesLoaded {unreadMessageList: $unreadMessageList}';
 }
 
 class UnreadMessagesNotLoaded extends UnreadMessageState {}

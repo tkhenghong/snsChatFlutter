@@ -25,8 +25,6 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       yield* _editConversationGroupToState(event);
     } else if (event is DeleteConversationGroupEvent) {
       yield* _deleteConversationGroupToState(event);
-    } else if (event is CreateConversationGroupEvent) {
-      yield* _createConversationGroup(event);
     }
   }
 
@@ -122,11 +120,6 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     if(!deletedInREST || !deleted) {
       functionCallback(event, false);
     }
-  }
-
-  Stream<ConversationGroupState> _createConversationGroup(CreateConversationGroupEvent event) async* {
-    // TODO: Add all other objects first
-
   }
 
   // To send response to those dispatched Actions
