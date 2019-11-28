@@ -51,17 +51,47 @@ class BlocWrapperState extends State<BlocWrapper> {
       providers: [
         BlocProvider<ConversationGroupBloc>(
           builder: (context) {
-            return ConversationGroupBloc()..add(InitializeConversationGroupsEvent(callback: (bool value) {}));
+            return ConversationGroupBloc()..add(InitializeConversationGroupsEvent(callback: (bool done) {}));
           },
         ),
         BlocProvider<GoogleInfoBloc>(
           builder: (context) {
-            return GoogleInfoBloc()..add(InitializeGoogleInfoEvent(callback: (bool value) {}));
+            return GoogleInfoBloc()..add(InitializeGoogleInfoEvent(callback: (bool done) {}));
           },
         ),
         BlocProvider<IPGeoLocationBloc>(
           builder: (context) {
             return IPGeoLocationBloc()..add(GetIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {}));
+          },
+        ),
+        BlocProvider<MessageBloc>(
+          builder: (context) {
+            return MessageBloc()..add(InitializeMessagesEvent(callback: (bool done) {}));
+          },
+        ),
+        BlocProvider<MultimediaBloc>(
+          builder: (context) {
+            return MultimediaBloc()..add(InitializeMultimediaEvent(callback: (bool done) {}));
+          },
+        ),
+        BlocProvider<SettingsBloc>(
+          builder: (context) {
+            return SettingsBloc()..add(InitializeSettingsEvent(callback: (bool done) {}));
+          },
+        ),
+        BlocProvider<UnreadMessageBloc>(
+          builder: (context) {
+            return UnreadMessageBloc()..add(InitializeUnreadMessagesEvent(callback: (bool done) {}));
+          },
+        ),
+        BlocProvider<UserBloc>(
+          builder: (context) {
+            return UserBloc()..add(InitializeUserEvent(callback: (bool done) {}));
+          },
+        ),
+        BlocProvider<UserContactBloc>(
+          builder: (context) {
+            return UserContactBloc()..add(InitializeUserContactsEvent(callback: (bool done) {}));
           },
         ),
       ],

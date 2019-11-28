@@ -9,13 +9,13 @@ abstract class MultimediaEvent extends Equatable {
   const MultimediaEvent();
 }
 
-class InitializeMultimediasEvent extends MultimediaEvent {
+class InitializeMultimediaEvent extends MultimediaEvent {
   final Function callback;
 
-  const InitializeMultimediasEvent({this.callback});
+  const InitializeMultimediaEvent({this.callback});
 
   @override
-  String toString() => 'InitializeMultimediasEvent';
+  String toString() => 'InitializeMultimediaEvent';
 }
 
 class AddMultimediaToStateEvent extends MultimediaEvent {

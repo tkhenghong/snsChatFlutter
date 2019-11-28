@@ -9,14 +9,14 @@ abstract class SettingsEvent extends Equatable {
   const SettingsEvent();
 }
 
-class InitializeSettingssEvent extends SettingsEvent {
+class InitializeSettingsEvent extends SettingsEvent {
   final User user; // Must have User object to load correct Settings to State
   final Function callback;
 
-  const InitializeSettingssEvent({this.user, this.callback});
+  const InitializeSettingsEvent({this.user, this.callback});
 
   @override
-  String toString() => 'InitializeSettingssEvent';
+  String toString() => 'InitializeSettingsEvent';
 }
 
 class AddSettingsEvent extends SettingsEvent {

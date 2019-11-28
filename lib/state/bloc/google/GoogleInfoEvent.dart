@@ -31,8 +31,6 @@ class RemoveGoogleInfoEvent extends GoogleInfoEvent {
   String toString() => 'RemoveGoogleInfoEvent';
 }
 
-// GetOwnGoogleInfoEvent
-
 class GetOwnGoogleInfoEvent extends GoogleInfoEvent {
   final Function callback;
 

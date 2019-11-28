@@ -10,7 +10,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
   UserContactDBService userContactDBService = UserContactDBService();
 
   @override
-  UserContactState get initialState => UserContactLoading();
+  UserContactState get initialState => UserContactsLoading();
 
   @override
   Stream<UserContactState> mapEventToState(UserContactEvent event) async* {
