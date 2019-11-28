@@ -1,8 +1,11 @@
+import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snschat_flutter/database/startup.dart';
+import 'package:snschat_flutter/objects/index.dart';
 
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
+import 'package:snschat_flutter/state/bloc/bloc.dart';
 
 import 'package:snschat_flutter/ui/pages/chats/chat_group_list/chat_group_list_page.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
@@ -20,7 +23,10 @@ import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number
 
 import 'database/sembast/SembastDB.dart';
 
-void main() => runApp(BlocWrapper());
+void main() {
+  BlocSupervisor.delegate = SimpleBlocDelegate();
+  runApp(BlocWrapper());
+}
 
 class BlocWrapper extends StatefulWidget {
   @override
@@ -30,15 +36,9 @@ class BlocWrapper extends StatefulWidget {
 }
 
 class BlocWrapperState extends State<BlocWrapper> {
-  final WholeAppBloc _wholeAppBloc = WholeAppBloc();
 
   @override
   Widget build(BuildContext context) {
-    print("Starting database...");
-    // Start DB asynchronously
-//    startSQLDatabase().then( (_) {
-//      checkUserSignIn();
-//    });
 
     Color primaryColor = Colors.black;
     Color primaryColorInText = Colors.white;
@@ -47,8 +47,24 @@ class BlocWrapperState extends State<BlocWrapper> {
     TextStyle primaryTextStyle = TextStyle(color: primaryColor);
     TextStyle primaryTextStyleInAppBarText = TextStyle(color: primaryColorInText, fontSize: 18.0, fontWeight: FontWeight.bold);
 
-    return BlocProvider<WholeAppBloc>(
-      builder: (BuildContext context) => WholeAppBloc(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ConversationGroupBloc>(
+          builder: (context) {
+            return ConversationGroupBloc()..add(InitializeConversationGroupsEvent(callback: (bool value) {}));
+          },
+        ),
+        BlocProvider<GoogleInfoBloc>(
+          builder: (context) {
+            return GoogleInfoBloc()..add(InitializeGoogleInfoEvent(callback: (bool value) {}));
+          },
+        ),
+        BlocProvider<IPGeoLocationBloc>(
+          builder: (context) {
+            return IPGeoLocationBloc()..add(GetIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {}));
+          },
+        ),
+      ],
       child: MaterialApp(
         title: 'PocketChat',
         theme: ThemeData(
@@ -60,10 +76,7 @@ class BlocWrapperState extends State<BlocWrapper> {
           highlightColor: primaryColorWhenFocus,
           textSelectionColor: primaryColorWhenFocus,
           buttonColor: primaryColor,
-          buttonTheme: ButtonThemeData(
-            buttonColor: primaryColor,
-            textTheme: ButtonTextTheme.primary
-          ),
+          buttonTheme: ButtonThemeData(buttonColor: primaryColor, textTheme: ButtonTextTheme.primary),
           errorColor: primaryColor,
           bottomAppBarColor: primaryColor,
           bottomAppBarTheme: BottomAppBarTheme(
@@ -98,7 +111,6 @@ class BlocWrapperState extends State<BlocWrapper> {
 
   @override
   void dispose() {
-    _wholeAppBloc.dispose();
     super.dispose();
   }
 }

@@ -7,6 +7,16 @@ abstract class IPGeoLocationEvent extends Equatable {
   const IPGeoLocationEvent();
 }
 
+class InitializeIPGeoLocationEvent extends IPGeoLocationEvent {
+  final Function callback;
+
+  const InitializeIPGeoLocationEvent({this.callback});
+
+  @override
+  String toString() => 'InitializeIPGeoLocationEvent';
+}
+
+
 class GetIPGeoLocationEvent extends IPGeoLocationEvent {
   final Function callback;
 

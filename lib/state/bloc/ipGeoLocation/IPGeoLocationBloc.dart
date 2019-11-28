@@ -14,9 +14,18 @@ class IPGeoLocationBloc extends Bloc<IPGeoLocationEvent, IPGeoLocationState> {
   @override
   Stream<IPGeoLocationState> mapEventToState(event) async* {
     // TODO: implement mapEventToState
+    if(event is InitializeIPGeoLocationEvent) {
+      yield* _initIPGeoLocationToState(event);
+    }
     if (event is GetIPGeoLocationEvent) {
       yield* _mapIPGeoLocationToState(event);
     }
+  }
+
+  // InitializeIPGeoLocationEvent
+  Stream<IPGeoLocationState> _initIPGeoLocationToState(InitializeIPGeoLocationEvent event) async* {
+    functionCallback(event, true);
+    yield IPGeoLocationNotLoaded();
   }
 
   Stream<IPGeoLocationState> _mapIPGeoLocationToState(GetIPGeoLocationEvent event) async* {
