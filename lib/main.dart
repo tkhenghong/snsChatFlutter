@@ -1,10 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:snschat_flutter/database/startup.dart';
 import 'package:snschat_flutter/objects/index.dart';
 
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 
 import 'package:snschat_flutter/ui/pages/chats/chat_group_list/chat_group_list_page.dart';
@@ -20,8 +18,6 @@ import 'package:snschat_flutter/ui/pages/sign_up/sign_up_page.dart';
 import 'package:snschat_flutter/ui/pages/tabs/tabs_page.dart';
 import 'package:snschat_flutter/ui/pages/terms_and_conditions/terms_and_conditions_page.dart';
 import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number_page.dart';
-
-import 'database/sembast/SembastDB.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
