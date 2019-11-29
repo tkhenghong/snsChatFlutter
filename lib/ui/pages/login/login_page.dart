@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +33,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
+
   WholeAppBloc wholeAppBloc;
   final _formKey = GlobalKey<FormState>();
   TextEditingController mobileNoTextController = new TextEditingController();
@@ -43,19 +46,21 @@ class LoginPageState extends State<LoginPage> {
 
   Color themePrimaryColor;
 
+  Stream<IPGeoLocationState> ipGeoLocationStateStream;
+  Stream<GoogleInfoState> googleInfoStateStream;
+
+  GoogleSignIn googleSignIn;
+  FirebaseAuth firebaseAuth;
+  FirebaseUser firebaseUser;
+
+  IPGeoLocationState ipGeoLocationState;
+
   String getPhoneNumber() {
     String phoneNoInitials = "";
+    (BlocProvider.of<GoogleInfoBloc>(context).state as IPGeoLocationLoaded).ipGeoLocation;
+    ipGeoLocationStateStream.listen((IPGeoLocationState ipGeoLocationState) {
 
-    BlocProvider.of<GoogleInfoBloc>(context).add(
-      GetOwnGoogleInfoEvent((GoogleSignIn googleSignIn, FirebaseUser firebaseUser, FirebaseAuth firebaseAuth) {
-
-      }),
-    );
-    BlocProvider.of<IPGeoLocationBloc>(context).add(
-      GetIPGeoLocationEvent((IPGeoLocation geoIPLocation) {
-
-      }),
-    );
+    });
     if (isObjectEmpty(countryCode) && !isObjectEmpty(wholeAppBloc.currentState.ipGeoLocation)) {
       phoneNoInitials = wholeAppBloc.currentState.ipGeoLocation.calling_code;
     } else {
@@ -110,6 +115,21 @@ class LoginPageState extends State<LoginPage> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    ipGeoLocationStateStream = (BlocProvider.of<IPGeoLocationBloc>(context).state as IPGeoLocationLoaded).ipGeoLocation;
+//    googleInfoStateStream =  ;
+    googleSignIn = (BlocProvider.of<GoogleInfoBloc>(context).state as GoogleInfoLoaded).googleSignIn
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final deviceWidth = MediaQuery.of(context).size.width;
     final deviceHeight = MediaQuery.of(context).size.height;
@@ -130,122 +150,125 @@ class LoginPageState extends State<LoginPage> {
 
     countryCodeString = isIPLocationExists(wholeAppBloc.currentState);
 
-    return BlocBuilder(
-      bloc: _wholeAppBloc,
-      builder: (context, WholeAppState state) {
-        return GestureDetector(
-            onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
-            //Focuses on nothing, means disable focus and hide keyboard
-            child: Material(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Padding(padding: EdgeInsets.symmetric(vertical: 70.00)),
-                  Text(
-                    "Login",
-                    style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  Padding(padding: EdgeInsets.symmetric(vertical: 20.00)),
-                  Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                      child: Column(
-                        children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              Padding(
-                                padding: EdgeInsets.only(left: 20.0),
-                              ),
-                              CountryCodePicker(
-                                initialSelection: countryCodeString,
-                                alignLeft: false,
-                                showCountryOnly: false,
-                                showFlag: true,
-                                showOnlyCountryWhenClosed: false,
-                                favorite: [countryCodeString],
-                                onChanged: onCountryPickerChanged,
-                              ),
-                              Container(
-                                width: deviceWidth * 0.5,
-                                margin: EdgeInsetsDirectional.only(top: deviceHeight * 0.03),
-                                child: Form(
-                                  key: _formKey,
-                                  child: TextFormField(
-                                    controller: mobileNoTextController,
-                                    validator: (value) {
-                                      if (value.isEmpty) {
-                                        return "Please enter your phone number";
-                                      }
-                                      if (value.length < 8) {
-                                        return "Please enter a valid phone number format";
-                                      }
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<IPGeoLocationBloc, IPGeoLocationState>(
+          listener: (context, state) {},
+        ),
+      ],
+      child: GestureDetector(
+          onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
+          //Focuses on nothing, means disable focus and hide keyboard
+          child: Material(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Padding(padding: EdgeInsets.symmetric(vertical: 70.00)),
+                Text(
+                  "Login",
+                  style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                Padding(padding: EdgeInsets.symmetric(vertical: 20.00)),
+                Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                    child: Column(
+                      children: <Widget>[
+                        Row(
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.only(left: 20.0),
+                            ),
+                            CountryCodePicker(
+                              initialSelection: countryCodeString,
+                              alignLeft: false,
+                              showCountryOnly: false,
+                              showFlag: true,
+                              showOnlyCountryWhenClosed: false,
+                              favorite: [countryCodeString],
+                              onChanged: onCountryPickerChanged,
+                            ),
+                            Container(
+                              width: deviceWidth * 0.5,
+                              margin: EdgeInsetsDirectional.only(top: deviceHeight * 0.03),
+                              child: Form(
+                                key: _formKey,
+                                child: TextFormField(
+                                  controller: mobileNoTextController,
+                                  validator: (value) {
+                                    if (value.isEmpty) {
+                                      return "Please enter your phone number";
+                                    }
+                                    if (value.length < 8) {
+                                      return "Please enter a valid phone number format";
+                                    }
 
-                                      return null;
-                                    },
-                                    inputFormatters: [
-                                      BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
-                                    ],
-                                    maxLength: 15,
-                                    decoration: InputDecoration(hintText: "Mobile Number"),
-                                    autofocus: true,
-                                    textAlign: TextAlign.left,
-                                    keyboardType: TextInputType.number,
-                                  ),
+                                    return null;
+                                  },
+                                  inputFormatters: [
+                                    BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
+                                  ],
+                                  maxLength: 15,
+                                  decoration: InputDecoration(hintText: "Mobile Number"),
+                                  autofocus: true,
+                                  textAlign: TextAlign.left,
+                                  keyboardType: TextInputType.number,
                                 ),
                               ),
-                            ],
-                          ),
-                        ],
-                      )),
-                  RaisedButton(
-                    onPressed: () => _signIn(),
-                    textColor: Colors.white,
-                    splashColor: Colors.grey,
-                    animationDuration: Duration(milliseconds: 500),
-                    padding: EdgeInsets.only(left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
-                    child: Text("Next"),
-                  ),
-                  Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
-                  Text("Don't have account yet?"),
-                  FlatButton(
-                      onPressed: () => goToSignUp(),
-                      child: Text(
-                        "Sign Up Now",
-                        style: TextStyle(color: themePrimaryColor),
-                      )),
-                  Padding(padding: EdgeInsets.symmetric(vertical: 50.00)),
-                  RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(children: [
-                        TextSpan(
-                            text: "Contact Support",
-                            style: TextStyle(color: themePrimaryColor),
-                            recognizer: TapGestureRecognizer()..onTap = () => goToContactSupport)
-                      ])),
-                  Padding(padding: EdgeInsets.symmetric(vertical: 5.00)),
-                  RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(children: [
-                        TextSpan(
-                            text: "Terms and Conditions",
-                            style: TextStyle(color: themePrimaryColor),
-                            recognizer: TapGestureRecognizer()..onTap = () => goToTermsAndConditions())
-                      ])),
-                  Padding(padding: EdgeInsets.symmetric(vertical: 5.00)),
-                  RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(children: [
-                        TextSpan(
-                            text: "Privacy Notice",
-                            style: TextStyle(color: themePrimaryColor),
-                            recognizer: TapGestureRecognizer()..onTap = () => goToPrivacyNotice())
-                      ])),
-                ],
-              ),
-            ));
-      },
+                            ),
+                          ],
+                        ),
+                      ],
+                    )),
+                RaisedButton(
+                  onPressed: () => _signIn(),
+                  textColor: Colors.white,
+                  splashColor: Colors.grey,
+                  animationDuration: Duration(milliseconds: 500),
+                  padding: EdgeInsets.only(left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
+                  child: Text("Next"),
+                ),
+                Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
+                Text("Don't have account yet?"),
+                FlatButton(
+                    onPressed: () => goToSignUp(),
+                    child: Text(
+                      "Sign Up Now",
+                      style: TextStyle(color: themePrimaryColor),
+                    )),
+                Padding(padding: EdgeInsets.symmetric(vertical: 50.00)),
+                RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(children: [
+                      TextSpan(
+                          text: "Contact Support",
+                          style: TextStyle(color: themePrimaryColor),
+                          recognizer: TapGestureRecognizer()..onTap = () => goToContactSupport)
+                    ])),
+                Padding(padding: EdgeInsets.symmetric(vertical: 5.00)),
+                RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(children: [
+                      TextSpan(
+                          text: "Terms and Conditions",
+                          style: TextStyle(color: themePrimaryColor),
+                          recognizer: TapGestureRecognizer()..onTap = () => goToTermsAndConditions())
+                    ])),
+                Padding(padding: EdgeInsets.symmetric(vertical: 5.00)),
+                RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(children: [
+                      TextSpan(
+                          text: "Privacy Notice",
+                          style: TextStyle(color: themePrimaryColor),
+                          recognizer: TapGestureRecognizer()..onTap = () => goToPrivacyNotice())
+                    ])),
+              ],
+            ),
+          )),
     );
+
   }
 
   goToVerifyPhoneNumber() {
