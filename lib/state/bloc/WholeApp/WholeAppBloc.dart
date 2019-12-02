@@ -1453,7 +1453,7 @@ class WholeAppBloc extends Bloc<WholeAppEvent, WholeAppState> {
 
   // Initialize, connect to WebSocket and listen to WebSocketMessage object
   listenToWebSocketMessage(InitializeWebSocketServiceEvent event) {
-    webSocketService.connect();
+    webSocketService.connectWebSocket();
     Stream<dynamic> webSocketStream = webSocketService.getWebSocketStream();
     webSocketStream.listen((onData) {
       print("onData listener is working.");

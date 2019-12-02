@@ -68,6 +68,11 @@ void main() {
         return UserContactBloc()..add(InitializeUserContactsEvent(callback: (bool done) {}));
       },
     ),
+    BlocProvider<WebSocketBloc>(
+      builder: (context) {
+        return WebSocketBloc()..add(InitializeWebSocketEvent(callback: (bool done) {}));
+      },
+    ),
   ], child: MyApp()));
 }
 

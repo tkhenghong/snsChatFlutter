@@ -13,7 +13,7 @@ class WebSocketService {
   WebSocketChannel webSocketChannel;
   Stream<dynamic> webSocketStream;
 
-  connect() async {
+  connectWebSocket() async {
     webSocketChannel = IOWebSocketChannel.connect(WEBSOCKET_URL);
     webSocketStream = webSocketChannel.stream.asBroadcastStream();
   }
@@ -29,5 +29,10 @@ class WebSocketService {
 
   closeWebSocket() {
     webSocketChannel.sink.close();
+  }
+
+  reconnnectWebSocket() {
+    closeWebSocket();
+    connectWebSocket();
   }
 }

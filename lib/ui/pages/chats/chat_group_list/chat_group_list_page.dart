@@ -14,6 +14,7 @@ import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
+import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
 import 'package:time_formatter/time_formatter.dart';
 
@@ -50,34 +51,12 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   initialize() async {
-    wholeAppBloc.dispatch(InitializeWebSocketServiceEvent());
-    wholeAppBloc.dispatch(LoadDatabaseToStateEvent(callback: (bool loadDone) {
-      if (loadDone) {
-        // Set list done to true to prevent waiting due to poor Internet connection
-        setState(() {
-          getListDone = true;
-        });
-        wholeAppBloc.dispatch(CheckUserLoginEvent(callback: (bool hasSignedIn) {
-          if (hasSignedIn) {
-            wholeAppBloc.dispatch(LoadUserPreviousDataEvent(callback: (bool done) {
-              setState(() {
-                print("Reload the page");
-              });
-            }));
-          } else {
-            wholeAppBloc.dispatch(UserSignOutEvent()); // Remove State data before leaving
-            wholeAppBloc.dispatch(GetIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {
-              goToLoginPage();
-            }));
-          }
-        }));
-      } else {
-        wholeAppBloc.dispatch(UserSignOutEvent()); // Remove State data before leaving
-        wholeAppBloc.dispatch(GetIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {
-          goToLoginPage();
-        }));
-      }
-    }));
+    // InitializeWebSocketEvent not needed anymore
+    // LoadDatabaseToStateEvent don't needed anymore, loadDone thing mechanism will be handled by BlocListeners
+    // CheckUserLoginEvent don't needed anymore, will check using User in the state or not, if not in the state will go to Login page
+    // If not signed in, go to Login page WITH SIGN OUT event
+    // GetIPGeoLocationEvent don't needed anymore.
+
   }
 
   goToLoginPage() {

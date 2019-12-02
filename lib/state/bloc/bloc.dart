@@ -8,3 +8,4 @@ export 'settings/bloc.dart';
 export 'unreadMessage/bloc.dart';
 export 'user/bloc.dart';
 export 'userContact/bloc.dart';
+export 'webSocket/bloc.dart';
