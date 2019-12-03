@@ -108,8 +108,9 @@ class ImageService {
         multimedia.localThumbnailUrl = file.path;
         wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
         // Don't update it in REST
-        wholeAppBloc.dispatch(EditMultimediaEvent(
-            multimedia: multimedia, updateInREST: false, updateInDB: true, updateInState: true, callback: (Multimedia multimedia) {}));
+
+//        wholeAppBloc.dispatch(EditMultimediaEvent(
+//            multimedia: multimedia, updateInREST: false, updateInDB: true, updateInState: true, callback: (Multimedia multimedia) {}));
       }
     });
   }

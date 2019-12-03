@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -9,11 +11,22 @@ import 'package:snschat_flutter/state/bloc/google/bloc.dart';
 import 'package:snschat_flutter/state/bloc/user/bloc.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
+
+  final GoogleInfoBloc googleInfoBloc;
+  StreamSubscription googleInfoSubscription;
+
   UserAPIService userAPIService = UserAPIService();
   UserDBService userDBService = UserDBService();
 
   @override
   UserState get initialState => UserLoading();
+
+  UserBloc(this.googleInfoBloc) {
+    googleInfoSubscription = googleInfoBloc.listen((data) {
+      print('UserBloc.dart googleInfoBloc listener.');
+      print('UserBloc.dart googleInfoBloc data: ' + data.toString());
+    });
+  }
 
   @override
   Stream<UserState> mapEventToState(UserEvent event) async* {
@@ -32,6 +45,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
   Stream<UserState> _initializeUserToState(InitializeUserEvent event) async* {
     try {
+      // Bloc-to-bloc communication. https://bloclibrary.dev/#/architecture
+
       User userFromDB = await userDBService.getUserByGoogleAccountId(event.googleSignIn.currentUser.id);
 
       if (!isObjectEmpty(userFromDB)) {
@@ -118,9 +133,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     if (state is UserLoaded) {
       User user = (state as UserLoaded).user;
       functionCallback(event, user);
-      (state as GoogleInfoState)
-          .props
-          .add(GetOwnGoogleInfoEvent((GoogleSignIn googleSignIn, FirebaseAuth firebaseAuth, FirebaseUser firebaseUser) {
+      googleInfoBloc.add(GetOwnGoogleInfoEvent((GoogleSignIn googleSignIn, FirebaseAuth firebaseAuth, FirebaseUser firebaseUser) {
         print('Experiment: see whether can get another BLOC\'s data when inside a BLOC');
       }));
     }
@@ -131,5 +144,11 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     if (!isObjectEmpty(event)) {
       event.callback(value);
     }
+  }
+
+  @override
+  Future<void> close() {
+    googleInfoSubscription.cancel();
+    return super.close();
   }
 }

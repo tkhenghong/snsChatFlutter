@@ -1,16 +1,30 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:snschat_flutter/backend/rest/index.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/state/bloc/settings/bloc.dart';
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
+
+  final UserBloc userBloc;
+  StreamSubscription userStateSubscription;
+
   SettingsAPIService settingsAPIService = SettingsAPIService();
   SettingsDBService settingsDBService = SettingsDBService();
 
   @override
   SettingsState get initialState => SettingsLoading();
+
+  SettingsBloc(this.userBloc) {
+    userStateSubscription = userBloc.listen((state) {
+      print('SettingsBloc.dart UserBloc state changes.');
+      print('SettingsBloc.dart UserBloc state: ' + state.toString());
+    });
+  }
 
   @override
   Stream<SettingsState> mapEventToState(SettingsEvent event) async* {
@@ -28,6 +42,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   Stream<SettingsState> _initializeSettingsToState(InitializeSettingsEvent event) async* {
     try {
       if (!isObjectEmpty(event.user)) {
+        // TODO: get user from state using better way
         Settings settingsFromDB = await settingsDBService.getSettingsOfAUser(event.user.id);
         print("settingsFromDB.userId: " + settingsFromDB.userId);
         functionCallback(event, true);

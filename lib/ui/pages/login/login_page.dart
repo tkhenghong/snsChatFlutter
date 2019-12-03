@@ -46,14 +46,20 @@ class LoginPageState extends State<LoginPage> {
 
   Color themePrimaryColor;
 
-  Stream<IPGeoLocationState> ipGeoLocationStateStream;
-  Stream<GoogleInfoState> googleInfoStateStream;
+  StreamController<GoogleSignIn> googleSignInStreamController;
+  StreamController<FirebaseAuth> firebaseAuthStreamController;
+  StreamController<FirebaseUser> firebaseUserStreamController;
+  StreamController<IPGeoLocation> ipGeoLocationStreamController;
+
+  Stream<GoogleSignIn> googleSignInStream;
+  Stream<FirebaseAuth> firebaseAuthStream;
+  Stream<FirebaseUser> firebaseUserStream;
+  Stream<IPGeoLocation> ipGeoLocationStream;
 
   GoogleSignIn googleSignIn;
   FirebaseAuth firebaseAuth;
   FirebaseUser firebaseUser;
-
-  IPGeoLocationState ipGeoLocationState;
+  IPGeoLocation ipGeoLocation;
 
   String getPhoneNumber() {
     String phoneNoInitials = "";
@@ -118,9 +124,20 @@ class LoginPageState extends State<LoginPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    ipGeoLocationStateStream = (BlocProvider.of<IPGeoLocationBloc>(context).state as IPGeoLocationLoaded).ipGeoLocation;
-//    googleInfoStateStream =  ;
-    googleSignIn = (BlocProvider.of<GoogleInfoBloc>(context).state as GoogleInfoLoaded).googleSignIn
+    BlocProvider.of<IPGeoLocationBloc>(context).listen((state) {
+      if(state is IPGeoLocationLoaded) {
+        IPGeoLocation ipGeoLocation = (state as IPGeoLocationLoaded).ipGeoLocation;
+
+      }
+    });
+    BlocProvider.of<GoogleInfoBloc>(context).listen((state) {
+      if(state is GoogleInfoLoaded) {
+        GoogleSignIn googleSignIn = (state as GoogleInfoLoaded).googleSignIn;
+        FirebaseAuth firebaseAuth = (state as GoogleInfoLoaded).firebaseAuth;
+        FirebaseUser firebaseUser = (state as GoogleInfoLoaded).firebaseUser;
+
+      }
+    });
   }
 
   @override

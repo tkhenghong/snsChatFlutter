@@ -40,8 +40,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   initState() {
     super.initState();
     _refreshController = new RefreshController();
-    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
-    wholeAppBloc = _wholeAppBloc;
+//    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
+//    wholeAppBloc = _wholeAppBloc;
     initialize();
   }
 
@@ -52,11 +52,10 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   initialize() async {
     // InitializeWebSocketEvent not needed anymore
-    // LoadDatabaseToStateEvent don't needed anymore, loadDone thing mechanism will be handled by BlocListeners
-    // CheckUserLoginEvent don't needed anymore, will check using User in the state or not, if not in the state will go to Login page
+    // LoadDatabaseToStateEvent not needed anymore, loadDone thing mechanism will be handled by BlocListeners
+    // CheckUserLoginEvent not needed anymore, will check using User in the state or not, if not in the state will go to Login page
     // If not signed in, go to Login page WITH SIGN OUT event
-    // GetIPGeoLocationEvent don't needed anymore.
-
+    // GetIPGeoLocationEvent not needed anymore.
   }
 
   goToLoginPage() {
@@ -65,6 +64,44 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   @override
   Widget build(BuildContext context) {
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ConversationGroupBloc, ConversationGroupState>(
+          condition: (context, state) {
+
+            if(state is ConversationGroupsLoading) {
+              print('if(state is ConversationGroupsLoading)');
+//              SmartRefresher.of(context);
+            } else if(state is ConversationGroupsNotLoaded) {
+              print('if(state is ConversationGroupsNotLoaded)');
+            }
+            return true;
+          },
+          listener: (context, state) {
+            if(state is ConversationGroupsLoading) {
+              print('if(state is ConversationGroupsLoading)');
+              SmartRefresher.of(context);
+            } else if(state is ConversationGroupsNotLoaded) {
+              print('if(state is ConversationGroupsNotLoaded)');
+            }
+          },
+        ),
+        BlocListener<UnreadMessageBloc, UnreadMessageState>(
+          listener: (context, state) {},
+        ),
+        BlocListener<MultimediaBloc, MultimediaState>(
+          listener: (context, state) {},
+        ),
+        BlocListener<GoogleInfoBloc, GoogleInfoState>(
+          listener: (context, state) {},
+        ),
+        BlocListener<UserBloc, UserState>(
+          listener: (context, state) {},
+        ),
+      ],
+
+    );
+
     return BlocBuilder(
       bloc: wholeAppBloc,
       builder: (context, WholeAppState state) {
