@@ -32,9 +32,9 @@ class MyselfPageState extends State<MyselfPage> {
         title: Text("Logout"),
         leading: Icon(Icons.exit_to_app),
         onTap: (context, object) {
-          wholeAppBloc.dispatch(GetIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {
-            logOut(context, object);
-          }));
+//          wholeAppBloc.dispatch(GetIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {
+//            logOut(context, object);
+//          }));
         }),
   ];
 
@@ -43,7 +43,7 @@ class MyselfPageState extends State<MyselfPage> {
   }
 
   static logOut(BuildContext context, object) {
-    wholeAppBloc.dispatch(UserSignOutEvent());
+//    wholeAppBloc.dispatch(UserSignOutEvent());
     return Navigator.of(context).pushReplacementNamed("login_page");
   }
 }

@@ -180,7 +180,8 @@ class GroupNamePageState extends State<GroupNamePage> {
     ConversationGroup conversationGroup = new ConversationGroup(
         id: null,
         notificationExpireDate: 0,
-        creatorUserId: wholeAppBloc.currentState.userState.id,
+//        creatorUserId: wholeAppBloc.currentState.userState.id,
+        creatorUserId: 'Test creatorUserId',
         createdDate: new DateTime.now().millisecondsSinceEpoch,
         name: textEditingController.text,
         type: "Group",
@@ -207,24 +208,24 @@ class GroupNamePageState extends State<GroupNamePage> {
       conversationId: conversationGroup.id,
     );
 
-    wholeAppBloc.dispatch(CreateConversationGroupEvent(
-        multimedia: groupMultiMedia,
-        imageFile: imageFile,
-        contactList: widget.selectedContacts,
-        conversationGroup: conversationGroup,
-        type: "Group",
-        callback: (ConversationGroup newConversationGroup) {
-          print("CreateConversationGroupEvent callback success! ");
-          Navigator.pop(context);
-          if (newConversationGroup != null) {
-            print("if(newConversationGroup != null)");
-            Navigator.pop(context); //pop loading dialog
-            Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
-            Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(newConversationGroup))));
-          } else {
-            Fluttertoast.showToast(msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
-          }
-        }));
+//    wholeAppBloc.dispatch(CreateConversationGroupEvent(
+//        multimedia: groupMultiMedia,
+//        imageFile: imageFile,
+//        contactList: widget.selectedContacts,
+//        conversationGroup: conversationGroup,
+//        type: "Group",
+//        callback: (ConversationGroup newConversationGroup) {
+//          print("CreateConversationGroupEvent callback success! ");
+//          Navigator.pop(context);
+//          if (newConversationGroup != null) {
+//            print("if(newConversationGroup != null)");
+//            Navigator.pop(context); //pop loading dialog
+//            Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
+//            Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(newConversationGroup))));
+//          } else {
+//            Fluttertoast.showToast(msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
+//          }
+//        }));
     return conversationGroup;
   }
 

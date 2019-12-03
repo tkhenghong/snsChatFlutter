@@ -293,7 +293,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   Widget displayChatMessage(int index, Message message) {
     print("displayChatMessage()");
     print("message.senderId: " + message.senderId);
-    print("wholeAppBloc.currentState.userState.id: " + wholeAppBloc.currentState.userState.id);
+//    print("wholeAppBloc.currentState.userState.id: " + wholeAppBloc.currentState.userState.id);
     return Column(
       children: <Widget>[
         Text(
@@ -330,7 +330,8 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   bool isSenderMessage(Message message) {
-    return message.senderId == wholeAppBloc.currentState.userState.id;
+//    return message.senderId == wholeAppBloc.currentState.userState.id;
+    return true;
   }
 
   String messageTimeDisplay(int timestamp) {
@@ -470,9 +471,12 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             receiverId: "",
             receiverMobileNo: "",
             receiverName: "",
-            senderId: wholeAppBloc.currentState.userState.id,
-            senderMobileNo: wholeAppBloc.currentState.userState.mobileNo,
-            senderName: wholeAppBloc.currentState.userState.displayName,
+//            senderId: wholeAppBloc.currentState.userState.id,
+//            senderMobileNo: wholeAppBloc.currentState.userState.mobileNo,
+//            senderName: wholeAppBloc.currentState.userState.displayName,
+            senderId: "Testing sender ID",
+            senderMobileNo: 'test senderMobileNo',
+            senderName: 'Test sender Name',
             status: "Sent",
             type: "Text",
             timestamp: DateTime.now().millisecondsSinceEpoch,
@@ -504,23 +508,23 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       print("Checkpoint 1");
       if (!isObjectEmpty(newMessage)) {
         print('if(!isObjectEmpty(newMessage) && !isObjectEmpty(newMultimedia))');
-        wholeAppBloc.dispatch(SendMessageEvent(
-            message: newMessage,
-            multimedia: newMultimedia,
-            callback: (Message message) {
-              if (isObjectEmpty(message)) {
-                Fluttertoast.showToast(msg: 'Message not sent. Please try again.', toastLength: Toast.LENGTH_SHORT);
-              } else {
-                WebSocketMessage webSocketMessage = WebSocketMessage(message: message);
-                wholeAppBloc.dispatch(
-                    SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (WebSocketMessage websocketMessage) {}));
-                Fluttertoast.showToast(msg: 'Message sent!', toastLength: Toast.LENGTH_SHORT);
-                // Need to do this,or else the message list won't refresh
-                setState(() {
-                  // Do nothing
-                });
-              }
-            }));
+//        wholeAppBloc.dispatch(SendMessageEvent(
+//            message: newMessage,
+//            multimedia: newMultimedia,
+//            callback: (Message message) {
+//              if (isObjectEmpty(message)) {
+//                Fluttertoast.showToast(msg: 'Message not sent. Please try again.', toastLength: Toast.LENGTH_SHORT);
+//              } else {
+//                WebSocketMessage webSocketMessage = WebSocketMessage(message: message);
+//                wholeAppBloc.dispatch(
+//                    SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (WebSocketMessage websocketMessage) {}));
+//                Fluttertoast.showToast(msg: 'Message sent!', toastLength: Toast.LENGTH_SHORT);
+//                // Need to do this,or else the message list won't refresh
+//                setState(() {
+//                  // Do nothing
+//                });
+//              }
+//            }));
         print("Scroll down.");
       } else {
         print('if(isObjectEmpty(newMessage) || isObjectEmpty(newMultimedia))');

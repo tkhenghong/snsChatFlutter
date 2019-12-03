@@ -56,8 +56,10 @@ class SignUpPageState extends State<SignUpPage> {
 
   String getPhoneNumber() {
     String phoneNoInitials = "";
-    if (isObjectEmpty(countryCode) && !isObjectEmpty(wholeAppBloc.currentState.ipGeoLocation)) {
-      phoneNoInitials = wholeAppBloc.currentState.ipGeoLocation.calling_code;
+//    if (isObjectEmpty(countryCode) && !isObjectEmpty(wholeAppBloc.currentState.ipGeoLocation)) {
+    if (isObjectEmpty(countryCode)) {
+//      phoneNoInitials = wholeAppBloc.currentState.ipGeoLocation.calling_code;
+      phoneNoInitials = '+60';
     } else {
       phoneNoInitials = countryCode.dialCode;
     }
@@ -199,34 +201,34 @@ class SignUpPageState extends State<SignUpPage> {
 
   signUp() async {
     if (_formKey.currentState.validate()) {
-      showCenterLoadingIndicator(context);
-      wholeAppBloc.dispatch(UserSignUpEvent(
-          callback: (bool isSignedUp) {
-            if (isSignedUp) {
-              wholeAppBloc.dispatch(UserSignInEvent(
-                  callback: (bool signInSuccessful) {
-                    if (signInSuccessful) {
-                      Navigator.pop(context);
-                      goToVerifyPhoneNumber();
-                    } else {
-                      Navigator.pop(context); // Pop loading indicator
-                      Fluttertoast.showToast(msg: 'Unable to login. Please try again.', toastLength: Toast.LENGTH_SHORT);
-                      wholeAppBloc.dispatch(UserSignOutEvent()); // Reset everything to initial state first
-                      Navigator.pop(context);
-                    }
-                  },
-                  mobileNo: getPhoneNumber()));
-            } else {
-              Navigator.pop(context); // Pop loading indicator
-              Fluttertoast.showToast(msg: 'Unable to sign up. Please try again.', toastLength: Toast.LENGTH_SHORT);
-              wholeAppBloc.dispatch(UserSignOutEvent()); // Reset everything to initial state first
-              Navigator.pop(context);
-            }
-          },
-          mobileNo: getPhoneNumber(),
-          effectivePhoneNumber: mobileNoTextController.value.text.toString(),
-          countryCode: widget.countryCodeString,
-          displayName: nameTextController.value.text.toString()));
+//      showCenterLoadingIndicator(context);
+//      wholeAppBloc.dispatch(UserSignUpEvent(
+//          callback: (bool isSignedUp) {
+//            if (isSignedUp) {
+//              wholeAppBloc.dispatch(UserSignInEvent(
+//                  callback: (bool signInSuccessful) {
+//                    if (signInSuccessful) {
+//                      Navigator.pop(context);
+//                      goToVerifyPhoneNumber();
+//                    } else {
+//                      Navigator.pop(context); // Pop loading indicator
+//                      Fluttertoast.showToast(msg: 'Unable to login. Please try again.', toastLength: Toast.LENGTH_SHORT);
+//                      wholeAppBloc.dispatch(UserSignOutEvent()); // Reset everything to initial state first
+//                      Navigator.pop(context);
+//                    }
+//                  },
+//                  mobileNo: getPhoneNumber()));
+//            } else {
+//              Navigator.pop(context); // Pop loading indicator
+//              Fluttertoast.showToast(msg: 'Unable to sign up. Please try again.', toastLength: Toast.LENGTH_SHORT);
+//              wholeAppBloc.dispatch(UserSignOutEvent()); // Reset everything to initial state first
+//              Navigator.pop(context);
+//            }
+//          },
+//          mobileNo: getPhoneNumber(),
+//          effectivePhoneNumber: mobileNoTextController.value.text.toString(),
+//          countryCode: widget.countryCodeString,
+//          displayName: nameTextController.value.text.toString()));
     }
   }
 

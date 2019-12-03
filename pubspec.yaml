@@ -59,8 +59,9 @@ dependencies:
 
   # State management
   bloc: ^2.0.0
-  flutter_bloc: ^2.0.1
+  flutter_bloc: ^2.1.1
   equatable: ^1.0.0
+  rxdart: ^0.22.6
 
   #Google DB
   firebase_core: ^0.4.0+8

@@ -50,7 +50,7 @@ void main() {
     ),
     BlocProvider<SettingsBloc>(
       builder: (context) {
-        return SettingsBloc()..add(InitializeSettingsEvent(callback: (bool done) {}));
+        return SettingsBloc(UserBloc(GoogleInfoBloc()))..add(InitializeSettingsEvent(callback: (bool done) {}));
       },
     ),
     BlocProvider<UnreadMessageBloc>(
@@ -60,7 +60,7 @@ void main() {
     ),
     BlocProvider<UserBloc>(
       builder: (context) {
-        return UserBloc()..add(InitializeUserEvent(callback: (bool done) {}));
+        return UserBloc(GoogleInfoBloc())..add(InitializeUserEvent(callback: (bool done) {}));
       },
     ),
     BlocProvider<UserContactBloc>(

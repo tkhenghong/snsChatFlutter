@@ -6,15 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import 'package:permission_handler/permission_handler.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
-import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/objects/index.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/sign_up/sign_up_page.dart';
@@ -64,11 +60,13 @@ class LoginPageState extends State<LoginPage> {
   String getPhoneNumber() {
     String phoneNoInitials = "";
     (BlocProvider.of<GoogleInfoBloc>(context).state as IPGeoLocationLoaded).ipGeoLocation;
-    ipGeoLocationStateStream.listen((IPGeoLocationState ipGeoLocationState) {
-
-    });
-    if (isObjectEmpty(countryCode) && !isObjectEmpty(wholeAppBloc.currentState.ipGeoLocation)) {
-      phoneNoInitials = wholeAppBloc.currentState.ipGeoLocation.calling_code;
+//    ipGeoLocationStateStream.listen((IPGeoLocationState ipGeoLocationState) {
+//
+//    });
+//    if (isObjectEmpty(countryCode) && !isObjectEmpty(wholeAppBloc.currentState.ipGeoLocation)) {
+    if (isObjectEmpty(countryCode)) {
+//      phoneNoInitials = wholeAppBloc.currentState.ipGeoLocation.calling_code;
+      phoneNoInitials = '+60';
     } else {
       phoneNoInitials = countryCode.dialCode;
     }
@@ -79,31 +77,31 @@ class LoginPageState extends State<LoginPage> {
 
   _signIn() async {
     if (_formKey.currentState.validate()) {
-      showCenterLoadingIndicator(context);
-      wholeAppBloc.dispatch(CheckUserSignedUpEvent(
-          callback: (bool isSignedUp) {
-            if (isSignedUp) {
-              wholeAppBloc.dispatch(UserSignInEvent(
-                  callback: (bool signInSuccessful) {
-                    if (signInSuccessful) {
-                      Navigator.pop(context);
-                      goToVerifyPhoneNumber();
-                    } else {
-                      Fluttertoast.showToast(
-                          msg: 'Invalid Mobile No./matching Google account. Please try again!', toastLength: Toast.LENGTH_SHORT);
-                      wholeAppBloc.dispatch(UserSignOutEvent());
-                      Navigator.pop(context);
-                    }
-                  },
-                  mobileNo: getPhoneNumber()));
-            } else {
-              Fluttertoast.showToast(msg: 'Invalid Mobile No./matching Google account. Please try again!', toastLength: Toast.LENGTH_SHORT);
-              wholeAppBloc.dispatch(UserSignOutEvent()); // Reset everything to initial state first
-              Navigator.pop(context);
-//              goToSignUp();
-            }
-          },
-          mobileNo: getPhoneNumber()));
+//      showCenterLoadingIndicator(context);
+//      wholeAppBloc.dispatch(CheckUserSignedUpEvent(
+//          callback: (bool isSignedUp) {
+//            if (isSignedUp) {
+//              wholeAppBloc.dispatch(UserSignInEvent(
+//                  callback: (bool signInSuccessful) {
+//                    if (signInSuccessful) {
+//                      Navigator.pop(context);
+//                      goToVerifyPhoneNumber();
+//                    } else {
+//                      Fluttertoast.showToast(
+//                          msg: 'Invalid Mobile No./matching Google account. Please try again!', toastLength: Toast.LENGTH_SHORT);
+//                      wholeAppBloc.dispatch(UserSignOutEvent());
+//                      Navigator.pop(context);
+//                    }
+//                  },
+//                  mobileNo: getPhoneNumber()));
+//            } else {
+//              Fluttertoast.showToast(msg: 'Invalid Mobile No./matching Google account. Please try again!', toastLength: Toast.LENGTH_SHORT);
+//              wholeAppBloc.dispatch(UserSignOutEvent()); // Reset everything to initial state first
+//              Navigator.pop(context);
+////              goToSignUp();
+//            }
+//          },
+//          mobileNo: getPhoneNumber()));
     }
   }
 
@@ -156,16 +154,17 @@ class LoginPageState extends State<LoginPage> {
     final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
     wholeAppBloc = _wholeAppBloc;
 
-    wholeAppBloc.dispatch(CheckPermissionEvent(callback: (Map<PermissionGroup, PermissionStatus> permissionResults) {
-      permissionResults.forEach((PermissionGroup permissionGroup, PermissionStatus permissionStatus) {
-        if (permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted) {
-          print('if(permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted)');
-          wholeAppBloc.dispatch(GetPhoneStorageContactsEvent(callback: (bool done) {}));
-        }
-      });
-    }));
+//    wholeAppBloc.dispatch(CheckPermissionEvent(callback: (Map<PermissionGroup, PermissionStatus> permissionResults) {
+//      permissionResults.forEach((PermissionGroup permissionGroup, PermissionStatus permissionStatus) {
+//        if (permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted) {
+//          print('if(permissionGroup == PermissionGroup.contacts && permissionStatus == PermissionStatus.granted)');
+//          wholeAppBloc.dispatch(GetPhoneStorageContactsEvent(callback: (bool done) {}));
+//        }
+//      });
+//    }));
 
-    countryCodeString = isIPLocationExists(wholeAppBloc.currentState);
+//    countryCodeString = isIPLocationExists(wholeAppBloc.currentState);
+    countryCodeString = 'my';
 
     return MultiBlocListener(
       listeners: [

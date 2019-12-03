@@ -54,35 +54,35 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   setupCheckBoxes() {
     // Set up checkboxes first
-    wholeAppBloc.currentState.phoneContactList.forEach((contact) {
-      contactCheckBoxes[contact.displayName] = false;
-    });
+//    wholeAppBloc.currentState.phoneContactList.forEach((contact) {
+//      contactCheckBoxes[contact.displayName] = false;
+//    });
     contactLoaded = true;
   }
 
   getContacts() async {
-    if (wholeAppBloc.currentState.phoneContactList.length == 0) {
-      wholeAppBloc.dispatch(GetPhoneStorageContactsEvent(callback: (bool getContactsSuccess) {
-        if (getContactsSuccess) {
-          // Set up checkboxes first
-          setupCheckBoxes();
-          // Rerender the page
-          setState(() {
-            isLoading = false;
-          });
-        } else {
-          setState(() {
-            isLoading = false;
-          });
-        }
-      }));
-    } else if (!contactLoaded) {
-      // need to add _wholeAppBloc.currentState.phoneContactList.length == 0 together
-      setupCheckBoxes();
-      setState(() {
-        isLoading = false;
-      });
-    }
+//    if (wholeAppBloc.currentState.phoneContactList.length == 0) {
+//      wholeAppBloc.dispatch(GetPhoneStorageContactsEvent(callback: (bool getContactsSuccess) {
+//        if (getContactsSuccess) {
+//          // Set up checkboxes first
+//          setupCheckBoxes();
+//          // Rerender the page
+//          setState(() {
+//            isLoading = false;
+//          });
+//        } else {
+//          setState(() {
+//            isLoading = false;
+//          });
+//        }
+//      }));
+//    } else if (!contactLoaded) {
+//      // need to add _wholeAppBloc.currentState.phoneContactList.length == 0 together
+//      setupCheckBoxes();
+//      setState(() {
+//        isLoading = false;
+//      });
+//    }
   }
 
   setConversationType(String chatGroupType) async {
@@ -121,7 +121,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       appBar: appBar(context),
       body: isLoading
           ? showLoadingContactsPage(context)
-          : wholeAppBloc.currentState.phoneContactList.length > 0
+//          : wholeAppBloc.currentState.phoneContactList.length > 0
+          : true
               ? BlocBuilder(
                   bloc: _wholeAppBloc,
                   builder: (context, WholeAppState state) {
@@ -329,7 +330,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
     ConversationGroup conversationGroup = new ConversationGroup(
       id: null,
-      creatorUserId: wholeAppBloc.currentState.userState.id,
+//      creatorUserId: wholeAppBloc.currentState.userState.id,
+      creatorUserId: 'test creatorUserId',
       createdDate: new DateTime.now().millisecondsSinceEpoch,
       name: contact.displayName,
       type: "Personal",
@@ -377,23 +379,23 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     // After sign up, send a command at the backend to replace those UserContact object with exactly same number
 
     print("Before CreateConversationGroupEvent");
-    wholeAppBloc.dispatch(CreateConversationGroupEvent(
-        multimedia: groupMultiMedia,
-        contactList: contactList,
-        conversationGroup: conversationGroup,
-        type: widget.chatGroupType,
-        callback: (ConversationGroup newConversationGroup) {
-          print("CreateConversationGroupEvent callback success! ");
-          Navigator.pop(context);
-          if (newConversationGroup != null) {
-            print("if(newConversationGroup != null)");
-            Navigator.pop(context); //pop loading dialog
-            Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
-            Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(newConversationGroup))));
-          } else {
-            Fluttertoast.showToast(msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
-          }
-        }));
+//    wholeAppBloc.dispatch(CreateConversationGroupEvent(
+//        multimedia: groupMultiMedia,
+//        contactList: contactList,
+//        conversationGroup: conversationGroup,
+//        type: widget.chatGroupType,
+//        callback: (ConversationGroup newConversationGroup) {
+//          print("CreateConversationGroupEvent callback success! ");
+//          Navigator.pop(context);
+//          if (newConversationGroup != null) {
+//            print("if(newConversationGroup != null)");
+//            Navigator.pop(context); //pop loading dialog
+//            Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
+//            Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(newConversationGroup))));
+//          } else {
+//            Fluttertoast.showToast(msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
+//          }
+//        }));
     return conversationGroup;
   }
 

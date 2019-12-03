@@ -1,8 +1,8 @@
 import 'package:snschat_flutter/backend/rest/chat/ConversationGroupAPIService.dart';
 import 'package:snschat_flutter/database/sembast/conversation_group/conversation_group.dart';
-import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:snschat_flutter/objects/index.dart';
 
 // TODO: These tests will be using both REST API and Local DB
 void main() {

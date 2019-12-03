@@ -116,8 +116,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                               String groupName = await customDialog.showConfirmationDialog();
                               if (conversationGroup.name != groupName) {
                                 conversationGroup.name = groupName;
-                                wholeAppBloc.dispatch(EditConversationGroupEvent(
-                                    conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+//                                wholeAppBloc.dispatch(EditConversationGroupEvent(
+//                                    conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
                               }
                             },
                             child: Container(
@@ -161,8 +161,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                               String groupDescription = await customDialog.showConfirmationDialog();
                               if (conversationGroup.description != groupDescription) {
                                 conversationGroup.description = groupDescription;
-                                wholeAppBloc.dispatch(EditConversationGroupEvent(
-                                    conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+//                                wholeAppBloc.dispatch(EditConversationGroupEvent(
+//                                    conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
                               }
                             },
                             child: Padding(

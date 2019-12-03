@@ -30,8 +30,9 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
   }
 
   Stream<GoogleInfoState> _mapInitializeGoogleInfoToState(InitializeGoogleInfoEvent event) async* {
-
+    print('GoogleInfoBloc.dart _mapInitializeGoogleInfoToState()');
     if(state is GoogleInfoNotLoaded || state is GoogleInfoLoading) {
+      print('GoogleInfoBloc.dart if(state is GoogleInfoNotLoaded || state is GoogleInfoLoading)');
       try {
         // TODO: Google Sign in
         GoogleSignIn googleSignIn = new GoogleSignIn();

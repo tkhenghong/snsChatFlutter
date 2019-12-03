@@ -1,7 +1,7 @@
 import 'package:snschat_flutter/backend/rest/chat/ConversationGroupAPIService.dart';
-import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:snschat_flutter/objects/index.dart';
 
 void main() {
   ConversationGroupAPIService conversationGroupAPIService = ConversationGroupAPIService();

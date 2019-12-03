@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:snschat_flutter/backend/rest/index.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
@@ -22,9 +23,13 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   UserState get initialState => UserLoading();
 
   UserBloc(this.googleInfoBloc) {
-    googleInfoSubscription = googleInfoBloc.listen((data) {
+    googleInfoSubscription = googleInfoBloc.listen((state) {
       print('UserBloc.dart googleInfoBloc listener.');
-      print('UserBloc.dart googleInfoBloc data: ' + data.toString());
+      print('UserBloc.dart googleInfoBloc state: ' + state.toString());
+      if(state is GoogleInfoLoaded) {
+        print('UserBloc.dart googleInfoBloc listener.');
+        add(InitializeUserEvent(googleSignIn: state.googleSignIn));
+      }
     });
   }
 

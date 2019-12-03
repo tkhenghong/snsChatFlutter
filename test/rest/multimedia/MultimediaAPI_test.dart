@@ -1,5 +1,4 @@
 import 'package:snschat_flutter/backend/rest/multimedia/MultimediaAPIService.dart';
-import 'package:snschat_flutter/objects/chat/conversation_group.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
