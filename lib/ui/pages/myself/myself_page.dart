@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snschat_flutter/general/ui-component/list-view.dart';
-import 'package:snschat_flutter/objects/IPGeoLocation/IPGeoLocation.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 
 class MyselfPage extends StatefulWidget {
   @override

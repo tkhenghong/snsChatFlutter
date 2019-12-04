@@ -124,9 +124,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     if (state is UserLoaded) {
       User user = (state as UserLoaded).user;
       functionCallback(event, user);
-      googleInfoBloc.add(GetOwnGoogleInfoEvent((GoogleSignIn googleSignIn, FirebaseAuth firebaseAuth, FirebaseUser firebaseUser) {
-        print('Experiment: see whether can get another BLOC\'s data when inside a BLOC');
-      }));
     }
   }
 
@@ -139,7 +136,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
   @override
   Future<void> close() {
-    googleInfoSubscription.cancel();
     return super.close();
   }
 }

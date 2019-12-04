@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -12,13 +11,10 @@ import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
 import 'package:time_formatter/time_formatter.dart';
 
-import 'package:snschat_flutter/objects/IPGeoLocation/IPGeoLocation.dart';
 
 class ChatGroupListPage extends StatefulWidget {
   @override
@@ -145,7 +141,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     });
 
     userContactBlocSubscription = userContactBloc.listen((state) {
-      print('chat_group_list_page.dart userContactBloc listener working.');
+      print('chat_group_list_page.dart userContactseBloc listener working.');
       print('chat_group_list_page.dart state: ' + state.toString());
     });
 
@@ -159,40 +155,72 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   @override
   Widget build(BuildContext context) {
-    listenToAllStates();
+//    listenToAllStates();
 
-    return BlocBuilder<ConversationGroupBloc, ConversationGroupState>(
-      builder: (context, conversationGroupState) {
-        if(conversationGroupState is ConversationGroupsLoaded) {
-          return BlocBuilder<UnreadMessageBloc, UnreadMessageState>(
-            builder: (context, unreadMessageState) {
-              if(unreadMessageState is UnreadMessagesLoaded) {
-                return BlocBuilder<MultimediaBloc, MultimediaState>(
-                  builder: (context, multimediaState) {
-                    if(multimediaState is MultimediaLoaded) {
-                      return ListView.builder(
-                          scrollDirection: Axis.vertical,
-                          shrinkWrap: true,
-                          physics: BouncingScrollPhysics(),
-                          itemCount: conversationGroupState.conversationGroupList.length,
-                          itemBuilder: (context, index) {
-                            return PageListTile(mapConversationToPageListTile(conversationGroupState.conversationGroupList[index]), context);
-                          });
+    // A bit annoying but need to get state of
+    return BlocBuilder<GoogleInfoBloc, GoogleInfoState>(
+      builder: (context, googleInfoState) {
+        print('chat_group_list_page.dart GoogleInfoBloc state changes');
+        if(googleInfoState is GoogleInfoLoaded) {
+          return BlocBuilder<UserBloc, UserState> (
+            builder: (context, userState) {
+              print('chat_group_list_page.dart UserBloc state changes');
+              if(userState is UserLoaded) {
+                return BlocBuilder<ConversationGroupBloc, ConversationGroupState>(
+                  builder: (context, conversationGroupState) {
+                    print('chat_group_list_page.dart ConversationGroupBloc state changes');
+                    if(conversationGroupState is ConversationGroupsLoaded) {
+                      return BlocBuilder<UnreadMessageBloc, UnreadMessageState>(
+                        builder: (context, unreadMessageState) {
+                          print('chat_group_list_page.dart UnreadMessageBloc state changes');
+                          if(unreadMessageState is UnreadMessagesLoaded) {
+                            return BlocBuilder<MultimediaBloc, MultimediaState>(
+                              builder: (context, multimediaState) {
+                                print('chat_group_list_page.dart MultimediaBloc state changes');
+                                if(multimediaState is MultimediaLoaded) {
+                                  if(conversationGroupState.conversationGroupList.length == 0) {
+                                    return Center(child: Text("No conversations. Tap \"+\" to create one!"));
+                                  } else {
+                                    return ListView.builder(
+                                        scrollDirection: Axis.vertical,
+                                        shrinkWrap: true,
+                                        physics: BouncingScrollPhysics(),
+                                        itemCount: conversationGroupState.conversationGroupList.length,
+                                        itemBuilder: (context, index) {
+                                          PageListItem pageListItem = mapConversationToPageListTile(conversationGroupState.conversationGroupList[index], multimediaState, unreadMessageState);
+                                          return PageListTile(pageListItem, context);
+                                        });
+                                  }
+                                } else {
+                                  return Center(child: Text("Loading messages..."));
+                                }
+                              },
+                            );
+                          } else {
+                            return Center(child: Text("Loading messages..."));
+                          }
+                        },
+                      );
                     } else {
                       return Center(child: Text("Loading messages..."));
                     }
                   },
                 );
               } else {
+                goToLoginPage();
                 return Center(child: Text("Loading messages..."));
               }
             },
           );
         } else {
+          goToLoginPage();
           return Center(child: Text("Loading messages..."));
         }
       },
     );
+
+
+
 
 //    return MultiBlocListener(
 //      listeners: [
@@ -269,28 +297,27 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 //    );
   }
 
-  bool conversationGroupsAreReady(WholeAppState state) {
-    return !isObjectEmpty(state.conversationGroupList) && state.conversationGroupList.length > 0;
-  }
+  PageListItem mapConversationToPageListTile(ConversationGroup conversationGroup, MultimediaState multimediaState, UnreadMessageState unreadMessageState) {
 
-  bool unreadMessagesAreReady(WholeAppState state) {
-    return !isObjectEmpty(state.unreadMessageList) && state.unreadMessageList.length > 0;
-  }
+    Multimedia multimedia = (multimediaState as MultimediaLoaded)
+        .multimediaList.firstWhere((Multimedia existingMultimedia) =>
+    existingMultimedia.conversationId.toString() == conversationGroup.id &&
+        isStringEmpty(existingMultimedia.messageId), orElse: () => null);
 
-  PageListItem mapConversationToPageListTile(ConversationGroup conversation) {
+    UnreadMessage unreadMessage = (unreadMessageState as UnreadMessagesLoaded)
+        .unreadMessageList.firstWhere((UnreadMessage existingUnreadMessage) =>
+    existingUnreadMessage.conversationId.toString() == conversationGroup.id, orElse: () => null);
 
-    Multimedia multimedia = wholeAppBloc.findMultimediaByConversationId(conversation.id);
-    UnreadMessage unreadMessage = wholeAppBloc.findUnreadMessage(conversation.id);
 
     return PageListItem(
         title: Hero(
-          tag: conversation.id,
-          child: Text(conversation.name),
+          tag: conversationGroup.id,
+          child: Text(conversationGroup.name),
         ),
         subtitle: Text(isObjectEmpty(unreadMessage) ? "" : unreadMessage.lastMessage),
         leading: Hero(
-          tag: conversation.id + "1",
-          child: imageService.loadImageThumbnailCircleAvatar(multimedia, conversation.type, context),
+          tag: conversationGroup.id + "1",
+          child: imageService.loadImageThumbnailCircleAvatar(multimedia, conversationGroup.type, context),
         ),
         trailing: Column(
           children: <Widget>[
@@ -303,7 +330,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         ),
         onTap: (BuildContext context, object) {
           // Send argument need to use the old way
-          Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversation))));
+          Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
         });
   }
 }
