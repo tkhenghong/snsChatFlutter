@@ -13,25 +13,11 @@ import 'package:snschat_flutter/state/bloc/user/bloc.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
 
-  final GoogleInfoBloc googleInfoBloc;
-  StreamSubscription googleInfoSubscription;
-
   UserAPIService userAPIService = UserAPIService();
   UserDBService userDBService = UserDBService();
 
   @override
   UserState get initialState => UserLoading();
-
-  UserBloc(this.googleInfoBloc) {
-    googleInfoSubscription = googleInfoBloc.listen((state) {
-      print('UserBloc.dart googleInfoBloc listener.');
-      print('UserBloc.dart googleInfoBloc state: ' + state.toString());
-      if(state is GoogleInfoLoaded) {
-        print('UserBloc.dart googleInfoBloc listener.');
-        add(InitializeUserEvent(googleSignIn: state.googleSignIn));
-      }
-    });
-  }
 
   @override
   Stream<UserState> mapEventToState(UserEvent event) async* {

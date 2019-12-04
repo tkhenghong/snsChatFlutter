@@ -24,54 +24,64 @@ void main() {
   BlocSupervisor.delegate = SimpleBlocDelegate();
   runApp(MultiBlocProvider(providers: [
     BlocProvider<ConversationGroupBloc>(
-      builder: (context) {
-        return ConversationGroupBloc()..add(InitializeConversationGroupsEvent(callback: (bool done) {}));
-      },
+      create: (context) => ConversationGroupBloc(),
+//      builder: (context) {
+//        return ConversationGroupBloc()..add(InitializeConversationGroupsEvent(callback: (bool done) {}));
+//      },
     ),
     BlocProvider<GoogleInfoBloc>(
-      builder: (context) {
-        return GoogleInfoBloc()..add(InitializeGoogleInfoEvent(callback: (bool done) {}));
-      },
+      create: (context) => GoogleInfoBloc(),
+//      builder: (context) {
+//        return GoogleInfoBloc()..add(InitializeGoogleInfoEvent(callback: (bool done) {}));
+//      },
     ),
     BlocProvider<IPGeoLocationBloc>(
-      builder: (context) {
-        return IPGeoLocationBloc()..add(GetIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {}));
-      },
+      create: (context) => IPGeoLocationBloc(),
+//      builder: (context) {
+//        return IPGeoLocationBloc()..add(GetIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {}));
+//      },
     ),
     BlocProvider<MessageBloc>(
-      builder: (context) {
-        return MessageBloc()..add(InitializeMessagesEvent(callback: (bool done) {}));
-      },
+      create: (context) => MessageBloc(),
+//      builder: (context) {
+//        return MessageBloc()..add(InitializeMessagesEvent(callback: (bool done) {}));
+//      },
     ),
     BlocProvider<MultimediaBloc>(
-      builder: (context) {
-        return MultimediaBloc()..add(InitializeMultimediaEvent(callback: (bool done) {}));
-      },
+      create: (context) => MultimediaBloc(),
+//      builder: (context) {
+//        return MultimediaBloc()..add(InitializeMultimediaEvent(callback: (bool done) {}));
+//      },
     ),
     BlocProvider<SettingsBloc>(
-      builder: (context) {
-        return SettingsBloc(UserBloc(GoogleInfoBloc()))..add(InitializeSettingsEvent(callback: (bool done) {}));
-      },
+      create: (context) => SettingsBloc(),
+//      builder: (context) {
+//        return SettingsBloc(UserBloc(GoogleInfoBloc()))..add(InitializeSettingsEvent(callback: (bool done) {}));
+//      },
     ),
     BlocProvider<UnreadMessageBloc>(
-      builder: (context) {
-        return UnreadMessageBloc()..add(InitializeUnreadMessagesEvent(callback: (bool done) {}));
-      },
+      create: (context) => UnreadMessageBloc(),
+//      builder: (context) {
+//        return UnreadMessageBloc()..add(InitializeUnreadMessagesEvent(callback: (bool done) {}));
+//      },
     ),
     BlocProvider<UserBloc>(
-      builder: (context) {
-        return UserBloc(GoogleInfoBloc())..add(InitializeUserEvent(callback: (bool done) {}));
-      },
+      create: (context) => UserBloc(),
+//      builder: (context) {
+//        return UserBloc(GoogleInfoBloc())..add(InitializeUserEvent(callback: (bool done) {}));
+//      },
     ),
     BlocProvider<UserContactBloc>(
-      builder: (context) {
-        return UserContactBloc()..add(InitializeUserContactsEvent(callback: (bool done) {}));
-      },
+      create: (context) => UserContactBloc(),
+//      builder: (context) {
+//        return UserContactBloc()..add(InitializeUserContactsEvent(callback: (bool done) {}));
+//      },
     ),
     BlocProvider<WebSocketBloc>(
-      builder: (context) {
-        return WebSocketBloc()..add(InitializeWebSocketEvent(callback: (bool done) {}));
-      },
+      create: (context) => WebSocketBloc(),
+//      builder: (context) {
+//        return WebSocketBloc()..add(InitializeWebSocketEvent(callback: (bool done) {}));
+//      },
     ),
   ], child: MyApp()));
 }

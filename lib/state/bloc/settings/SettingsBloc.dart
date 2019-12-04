@@ -10,21 +10,11 @@ import 'package:snschat_flutter/state/bloc/settings/bloc.dart';
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
-  final UserBloc userBloc;
-  StreamSubscription userStateSubscription;
-
   SettingsAPIService settingsAPIService = SettingsAPIService();
   SettingsDBService settingsDBService = SettingsDBService();
 
   @override
   SettingsState get initialState => SettingsLoading();
-
-  SettingsBloc(this.userBloc) {
-    userStateSubscription = userBloc.listen((state) {
-      print('SettingsBloc.dart UserBloc state changes.');
-      print('SettingsBloc.dart UserBloc state: ' + state.toString());
-    });
-  }
 
   @override
   Stream<SettingsState> mapEventToState(SettingsEvent event) async* {

@@ -87,13 +87,13 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   final MultimediaBloc multimediaBloc = MultimediaBloc();
   StreamSubscription multimediaBlocSubscription;
 
-  final SettingsBloc settingsBloc = SettingsBloc(UserBloc(GoogleInfoBloc()));
+  final SettingsBloc settingsBloc = SettingsBloc();
   StreamSubscription settingsBlocSubscription;
 
   final UnreadMessageBloc unreadMessageBloc = UnreadMessageBloc();
   StreamSubscription unreadMessageBlocSubscription;
 
-  final UserBloc userBloc = UserBloc(GoogleInfoBloc());
+  final UserBloc userBloc = UserBloc();
   StreamSubscription userBlocSubscription;
 
   final UserContactBloc userContactBloc = UserContactBloc();
