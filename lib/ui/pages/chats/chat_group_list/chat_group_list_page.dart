@@ -15,7 +15,6 @@ import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
 import 'package:time_formatter/time_formatter.dart';
 
-
 class ChatGroupListPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -43,16 +42,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   void dispose() {
     _refreshController.dispose();
-    conversationGroupBlocSubscription.cancel();
-    googleInfoBlocSubscription.cancel();
-    ipGeoLocationBlocSubscription.cancel();
-    messageBlocSubscription.cancel();
-    multimediaBlocSubscription.cancel();
-    settingsBlocSubscription.cancel();
-    unreadMessageBlocSubscription.cancel();
-    userBlocSubscription.cancel();
-    userContactBlocSubscription.cancel();
-    webSocketBlocSubscription.cancel();
     super.dispose();
   }
 
@@ -68,117 +57,67 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     Navigator.of(context).pushNamedAndRemoveUntil("login_page", (Route<dynamic> route) => false);
   }
 
-  final ConversationGroupBloc conversationGroupBloc = ConversationGroupBloc();
-  StreamSubscription conversationGroupBlocSubscription;
-
-  final GoogleInfoBloc googleInfoBloc = GoogleInfoBloc();
-  StreamSubscription googleInfoBlocSubscription;
-
-  final IPGeoLocationBloc ipGeoLocationBloc = IPGeoLocationBloc();
-  StreamSubscription ipGeoLocationBlocSubscription;
-
-  final MessageBloc messageBloc = MessageBloc();
-  StreamSubscription messageBlocSubscription;
-
-  final MultimediaBloc multimediaBloc = MultimediaBloc();
-  StreamSubscription multimediaBlocSubscription;
-
-  final SettingsBloc settingsBloc = SettingsBloc();
-  StreamSubscription settingsBlocSubscription;
-
-  final UnreadMessageBloc unreadMessageBloc = UnreadMessageBloc();
-  StreamSubscription unreadMessageBlocSubscription;
-
-  final UserBloc userBloc = UserBloc();
-  StreamSubscription userBlocSubscription;
-
-  final UserContactBloc userContactBloc = UserContactBloc();
-  StreamSubscription userContactBlocSubscription;
-
-  final WebSocketBloc webSocketBloc = WebSocketBloc();
-  StreamSubscription webSocketBlocSubscription;
-
-
-  listenToAllStates() async {
-    conversationGroupBlocSubscription = conversationGroupBloc.listen((state) {
-      print('chat_group_list_page.dart conversationGroupBloc listener working.');
-      print('chat_group_list_page.dart state: ' + state.toString());
-    });
-
-    googleInfoBlocSubscription = googleInfoBloc.listen((state) {
-      print('chat_group_list_page.dart googleInfoBloc listener working.');
-      print('chat_group_list_page.dart state: ' + state.toString());
-    });
-
-    ipGeoLocationBlocSubscription = ipGeoLocationBloc.listen((state) {
-      print('chat_group_list_page.dart ipGeoLocationBloc listener working.');
-      print('chat_group_list_page.dart state: ' + state.toString());
-    });
-
-    messageBlocSubscription = messageBloc.listen((state) {
-      print('chat_group_list_page.dart messageBloc listener working.');
-      print('chat_group_list_page.dart state: ' + state.toString());
-    });
-
-    multimediaBlocSubscription = multimediaBloc.listen((state) {
-      print('chat_group_list_page.dart multimediaBloc listener working.');
-      print('chat_group_list_page.dart state: ' + state.toString());
-    });
-
-    settingsBlocSubscription = settingsBloc.listen((state) {
-      print('chat_group_list_page.dart settingsBloc listener working.');
-      print('chat_group_list_page.dart state: ' + state.toString());
-    });
-
-    unreadMessageBlocSubscription = unreadMessageBloc.listen((state) {
-      print('chat_group_list_page.dart unreadMessageBloc listener working.');
-      print('chat_group_list_page.dart state: ' + state.toString());
-    });
-
-    userBlocSubscription = userBloc.listen((state) {
-      print('chat_group_list_page.dart userBloc listener working.');
-      print('chat_group_list_page.dart state: ' + state.toString());
-    });
-
-    userContactBlocSubscription = userContactBloc.listen((state) {
-      print('chat_group_list_page.dart userContactseBloc listener working.');
-      print('chat_group_list_page.dart state: ' + state.toString());
-    });
-
-    webSocketBlocSubscription = webSocketBloc.listen((state) {
-      print('chat_group_list_page.dart webSocketBloc listener working.');
-      print('chat_group_list_page.dart state: ' + state.toString());
-    });
-  }
-
-
-
   @override
   Widget build(BuildContext context) {
 //    listenToAllStates();
 
     // A bit annoying but need to get state of
     return BlocBuilder<GoogleInfoBloc, GoogleInfoState>(
+      condition: (context, googleInfoState) {
+        if (googleInfoState is GoogleInfoNotLoaded) {
+          goToLoginPage();
+          return false;
+        }
+        return true;
+      },
       builder: (context, googleInfoState) {
         print('chat_group_list_page.dart GoogleInfoBloc state changes');
-        if(googleInfoState is GoogleInfoLoaded) {
-          return BlocBuilder<UserBloc, UserState> (
+        if (googleInfoState is GoogleInfoLoaded) {
+          return BlocBuilder<UserBloc, UserState>(
+            condition: (context, userState) {
+              if (googleInfoState is UserNotLoaded) {
+                goToLoginPage();
+                return false;
+              }
+              return true;
+            },
             builder: (context, userState) {
               print('chat_group_list_page.dart UserBloc state changes');
-              if(userState is UserLoaded) {
+              if (userState is UserLoaded) {
                 return BlocBuilder<ConversationGroupBloc, ConversationGroupState>(
+                  condition: (context, conversationGroupState) {
+                    if(conversationGroupState is ConversationGroupsNotLoaded) {
+                      goToLoginPage();
+                      return false;
+                    }
+                    return true;
+                  },
                   builder: (context, conversationGroupState) {
                     print('chat_group_list_page.dart ConversationGroupBloc state changes');
-                    if(conversationGroupState is ConversationGroupsLoaded) {
+                    if (conversationGroupState is ConversationGroupsLoaded) {
                       return BlocBuilder<UnreadMessageBloc, UnreadMessageState>(
+                        condition: (context, unreadMessageState) {
+                          if(unreadMessageState is UnreadMessagesNotLoaded) {
+                            goToLoginPage();
+                            return false;
+                          }
+                          return true;
+                        },
                         builder: (context, unreadMessageState) {
                           print('chat_group_list_page.dart UnreadMessageBloc state changes');
-                          if(unreadMessageState is UnreadMessagesLoaded) {
+                          if (unreadMessageState is UnreadMessagesLoaded) {
                             return BlocBuilder<MultimediaBloc, MultimediaState>(
+                              condition: (context, multimediaState) {
+                                if(multimediaState is MultimediasNotLoaded) {
+                                  goToLoginPage();
+                                  return false;
+                                }
+                                return true;
+                              },
                               builder: (context, multimediaState) {
                                 print('chat_group_list_page.dart MultimediaBloc state changes');
-                                if(multimediaState is MultimediaLoaded) {
-                                  if(conversationGroupState.conversationGroupList.length == 0) {
+                                if (multimediaState is MultimediaLoaded) {
+                                  if (conversationGroupState.conversationGroupList.length == 0) {
                                     return Center(child: Text("No conversations. Tap \"+\" to create one!"));
                                   } else {
                                     return ListView.builder(
@@ -187,40 +126,32 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                                         physics: BouncingScrollPhysics(),
                                         itemCount: conversationGroupState.conversationGroupList.length,
                                         itemBuilder: (context, index) {
-                                          PageListItem pageListItem = mapConversationToPageListTile(conversationGroupState.conversationGroupList[index], multimediaState, unreadMessageState);
+                                          PageListItem pageListItem = mapConversationToPageListTile(
+                                              conversationGroupState.conversationGroupList[index], multimediaState, unreadMessageState);
                                           return PageListTile(pageListItem, context);
                                         });
                                   }
-                                } else {
-                                  return Center(child: Text("Loading messages..."));
                                 }
+
+                                return Center(child: Text("Multimedia are not loaded."));
                               },
                             );
-                          } else {
-                            return Center(child: Text("Loading messages..."));
                           }
+                          return Center(child: Text("Unread Messages are not loaded."));
                         },
                       );
-                    } else {
-                      return Center(child: Text("Loading messages..."));
                     }
+                    return Center(child: Text("Conversation Groups are not loaded."));
                   },
                 );
-              } else {
-                goToLoginPage();
-                return Center(child: Text("Loading messages..."));
               }
+              return Center(child: Text("User is not loaded."));
             },
           );
-        } else {
-          goToLoginPage();
-          return Center(child: Text("Loading messages..."));
         }
+        return Center(child: Text("Google is not signed in."));
       },
     );
-
-
-
 
 //    return MultiBlocListener(
 //      listeners: [
@@ -297,17 +228,16 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 //    );
   }
 
-  PageListItem mapConversationToPageListTile(ConversationGroup conversationGroup, MultimediaState multimediaState, UnreadMessageState unreadMessageState) {
+  PageListItem mapConversationToPageListTile(
+      ConversationGroup conversationGroup, MultimediaState multimediaState, UnreadMessageState unreadMessageState) {
+    Multimedia multimedia = (multimediaState as MultimediaLoaded).multimediaList.firstWhere(
+        (Multimedia existingMultimedia) =>
+            existingMultimedia.conversationId.toString() == conversationGroup.id && isStringEmpty(existingMultimedia.messageId),
+        orElse: () => null);
 
-    Multimedia multimedia = (multimediaState as MultimediaLoaded)
-        .multimediaList.firstWhere((Multimedia existingMultimedia) =>
-    existingMultimedia.conversationId.toString() == conversationGroup.id &&
-        isStringEmpty(existingMultimedia.messageId), orElse: () => null);
-
-    UnreadMessage unreadMessage = (unreadMessageState as UnreadMessagesLoaded)
-        .unreadMessageList.firstWhere((UnreadMessage existingUnreadMessage) =>
-    existingUnreadMessage.conversationId.toString() == conversationGroup.id, orElse: () => null);
-
+    UnreadMessage unreadMessage = (unreadMessageState as UnreadMessagesLoaded).unreadMessageList.firstWhere(
+        (UnreadMessage existingUnreadMessage) => existingUnreadMessage.conversationId.toString() == conversationGroup.id,
+        orElse: () => null);
 
     return PageListItem(
         title: Hero(
