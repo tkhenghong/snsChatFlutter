@@ -30,9 +30,7 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
   }
 
   Stream<GoogleInfoState> _mapInitializeGoogleInfoToState(InitializeGoogleInfoEvent event) async* {
-    print('GoogleInfoBloc.dart _mapInitializeGoogleInfoToState()');
     if(state is GoogleInfoNotLoaded || state is GoogleInfoLoading) {
-      print('GoogleInfoBloc.dart if(state is GoogleInfoNotLoaded || state is GoogleInfoLoading)');
       try {
         // TODO: Google Sign in
         GoogleSignIn googleSignIn = new GoogleSignIn();
@@ -62,17 +60,14 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
         AuthResult authResult = await firebaseAuth.signInWithCredential(credential);
         firebaseUser = authResult.user;
 
-        print('GoogleInfoBloc.dart SUCCESS');
         yield GoogleInfoLoaded(googleSignIn, firebaseAuth, firebaseUser);
-//        yield GoogleInfoNotLoaded();
         if (!isObjectEmpty(event)) {
-          print('Test!!!!!!!!!!!!!!!!!!!');
           event.callback(true);
         }
 
       } catch (e) {
-        functionCallback(event, false);
         yield GoogleInfoNotLoaded();
+        functionCallback(event, false);
       }
     }
   }
@@ -82,22 +77,18 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
       try {
         GoogleSignIn googleSignIn = (state as GoogleInfoLoaded).googleSignIn;
         FirebaseAuth firebaseAuth = (state as GoogleInfoLoaded).firebaseAuth;
-        FirebaseUser firebaseUser = (state as GoogleInfoLoaded).firebaseUser;
 
         firebaseAuth.signOut();
-        firebaseUser.delete();
         googleSignIn.disconnect();
         googleSignIn.signOut();
 
-        firebaseUser = null;
       } catch (e) {
         print('RemoveGoogleInfoEvent error.');
         print('Error: ' + e);
       }
 
-      functionCallback(event, true);
-
       yield GoogleInfoNotLoaded();
+      functionCallback(event, true);
     }
   }
 

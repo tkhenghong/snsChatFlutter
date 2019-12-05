@@ -8,6 +8,8 @@ abstract class IPGeoLocationState extends Equatable {
   List<Object> get props => [];
 }
 
+class IPGeoLocationLoading extends IPGeoLocationState {}
+
 class IPGeoLocationLoaded extends IPGeoLocationState {
   final IPGeoLocation ipGeoLocation;
 

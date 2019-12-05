@@ -54,6 +54,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   goToLoginPage() {
+    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
     Navigator.of(context).pushNamedAndRemoveUntil("login_page", (Route<dynamic> route) => false);
   }
 
@@ -66,6 +67,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         if (googleInfoState is GoogleInfoLoaded) {
           print('Coming here?');
           BlocProvider.of<UserBloc>(context).add(InitializeUserEvent(googleSignIn: googleInfoState.googleSignIn));
+          BlocProvider.of<IPGeoLocationBloc>(context).add(GetIPGeoLocationEvent());
         }
 
         if (googleInfoState is GoogleInfoLoading) {

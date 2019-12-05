@@ -22,7 +22,7 @@ class InitializeGoogleInfoEvent extends GoogleInfoEvent {
 class RemoveGoogleInfoEvent extends GoogleInfoEvent {
   final Function callback;
 
-  RemoveGoogleInfoEvent(this.callback);
+  RemoveGoogleInfoEvent({this.callback});
 
   @override
   List<Object> get props => [];

@@ -9,7 +9,7 @@ class IPGeoLocationBloc extends Bloc<IPGeoLocationEvent, IPGeoLocationState> {
   IPLocationAPIService ipLocationAPIService = IPLocationAPIService();
 
   @override
-  get initialState => IPGeoLocationNotLoaded();
+  get initialState => IPGeoLocationLoading();
 
   @override
   Stream<IPGeoLocationState> mapEventToState(event) async* {
@@ -24,19 +24,19 @@ class IPGeoLocationBloc extends Bloc<IPGeoLocationEvent, IPGeoLocationState> {
 
   // InitializeIPGeoLocationEvent
   Stream<IPGeoLocationState> _initIPGeoLocationToState(InitializeIPGeoLocationEvent event) async* {
-    functionCallback(event, true);
     yield IPGeoLocationNotLoaded();
+    functionCallback(event, true);
   }
 
   Stream<IPGeoLocationState> _mapIPGeoLocationToState(GetIPGeoLocationEvent event) async* {
     IPGeoLocation ipGeoLocation = await ipLocationAPIService.getIPGeolocation();
 
     if (!isObjectEmpty(ipGeoLocation)) {
-      functionCallback(event, ipGeoLocation);
       yield IPGeoLocationLoaded(ipGeoLocation);
+      functionCallback(event, ipGeoLocation);
     } else {
-      functionCallback(event, null);
       yield IPGeoLocationNotLoaded();
+      functionCallback(event, null);
     }
   }
 
