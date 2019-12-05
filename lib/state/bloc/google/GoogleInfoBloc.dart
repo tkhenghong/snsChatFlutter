@@ -62,10 +62,16 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
         AuthResult authResult = await firebaseAuth.signInWithCredential(credential);
         firebaseUser = authResult.user;
 
-        functionCallback(event, {googleSignIn, firebaseAuth, firebaseUser});
+        print('GoogleInfoBloc.dart SUCCESS');
         yield GoogleInfoLoaded(googleSignIn, firebaseAuth, firebaseUser);
+//        yield GoogleInfoNotLoaded();
+        if (!isObjectEmpty(event)) {
+          print('Test!!!!!!!!!!!!!!!!!!!');
+          event.callback(true);
+        }
+
       } catch (e) {
-        functionCallback(event, {null, null, null});
+        functionCallback(event, false);
         yield GoogleInfoNotLoaded();
       }
     }
@@ -73,7 +79,6 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
 
   Stream<GoogleInfoState> _removeGoogleInfoFromState(RemoveGoogleInfoEvent event) async* {
     if (state is GoogleInfoLoaded) {
-
       try {
         GoogleSignIn googleSignIn = (state as GoogleInfoLoaded).googleSignIn;
         FirebaseAuth firebaseAuth = (state as GoogleInfoLoaded).firebaseAuth;

@@ -151,8 +151,8 @@ class LoginPageState extends State<LoginPage> {
 
     themePrimaryColor = Theme.of(context).textTheme.title.color;
 
-    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
-    wholeAppBloc = _wholeAppBloc;
+//    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
+//    wholeAppBloc = _wholeAppBloc;
 
 //    wholeAppBloc.dispatch(CheckPermissionEvent(callback: (Map<PermissionGroup, PermissionStatus> permissionResults) {
 //      permissionResults.forEach((PermissionGroup permissionGroup, PermissionStatus permissionStatus) {

@@ -38,18 +38,22 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     try {
       // Bloc-to-bloc communication. https://bloclibrary.dev/#/architecture
 
+      print('event.googleSignIn.currentUser.id: ' + event.googleSignIn.currentUser.id.toString());
       User userFromDB = await userDBService.getUserByGoogleAccountId(event.googleSignIn.currentUser.id);
 
       if (!isObjectEmpty(userFromDB)) {
+        print('UserBloc.dart if (!isObjectEmpty(userFromDB))');
+        print('UserBloc.dart userFromDB' + userFromDB.toString());
         yield UserLoaded(userFromDB);
         functionCallback(event, true);
       } else {
+        print('UserBloc.dart if (isObjectEmpty(userFromDB))');
         yield UserNotLoaded();
         functionCallback(event, false);
       }
     } catch (e) {
-      functionCallback(event, false);
       yield UserNotLoaded();
+      functionCallback(event, false);
     }
   }
 
