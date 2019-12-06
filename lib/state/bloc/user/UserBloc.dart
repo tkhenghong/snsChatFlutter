@@ -31,6 +31,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       yield* _deleteUserFromState(event);
     } else if (event is GetOwnUserEvent) {
       yield* _getOwnUser(event);
+    } else if (event is CheckUserSignedUp) {
+      yield* _checkUserSignedUp(event);
     }
   }
 
@@ -141,5 +143,19 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   @override
   Future<void> close() {
     return super.close();
+  }
+
+  Stream<UserState> _checkUserSignedUp(CheckUserSignedUp event) async* {
+    if(state is UserLoaded) {
+      bool isSignedUp = false;
+      User existingUser;
+      bool googleSignInDone;
+
+
+
+      functionCallback(event, true);
+    } else {
+      functionCallback(event, false);
+    }
   }
 }

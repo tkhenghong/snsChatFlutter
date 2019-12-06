@@ -76,3 +76,16 @@ class GetOwnUserEvent extends UserEvent {
   @override
   String toString() => 'GetOwnUserEvent';
 }
+
+class CheckUserSignedUp extends UserEvent {
+  final String mobileNo;
+  final Function callback;
+
+  CheckUserSignedUp({this.mobileNo, this.callback});
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'CheckUserSignedUp';
+}

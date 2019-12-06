@@ -56,9 +56,18 @@ class LoginPageState extends State<LoginPage> {
     return phoneNumber;
   }
 
-  _signIn() async {
+  _signIn(BuildContext context) async {
     if (_formKey.currentState.validate()) {
       showCenterLoadingIndicator(context);
+
+      BlocProvider.of<GoogleInfoBloc>(context).add(InitializeGoogleInfoEvent(callback: (bool initialized) {
+        if(initialized) {
+          BlocProvider.of<UserBloc>(context).add(CheckUserSignedUp(mobileNo: getPhoneNumber(), callback: (bool isSignedUp) {
+            
+          }));
+        }
+      }));
+
 
 //      wholeAppBloc.dispatch(CheckUserSignedUpEvent(
 //          callback: (bool isSignedUp) {
@@ -208,7 +217,7 @@ class LoginPageState extends State<LoginPage> {
                         ],
                       )),
                   RaisedButton(
-                    onPressed: () => _signIn(),
+                    onPressed: () => _signIn(context),
                     textColor: Colors.white,
                     splashColor: Colors.grey,
                     animationDuration: Duration(milliseconds: 500),
