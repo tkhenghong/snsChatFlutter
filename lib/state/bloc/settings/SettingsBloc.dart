@@ -9,7 +9,6 @@ import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/state/bloc/settings/bloc.dart';
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
-
   SettingsAPIService settingsAPIService = SettingsAPIService();
   SettingsDBService settingsDBService = SettingsDBService();
 
@@ -26,22 +25,33 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       yield* _editSettings(event);
     } else if (event is DeleteSettingsEvent) {
       yield* _deleteSettings(event);
+    } else if (event is GetSettingsOfTheUserEvent) {
+      yield* _getSettingsOfTheUserEvent(event);
     }
   }
 
   Stream<SettingsState> _initializeSettingsToState(InitializeSettingsEvent event) async* {
+    Settings settingsFromDB;
     try {
       if (!isObjectEmpty(event.user)) {
         // TODO: get user from state using better way
-        Settings settingsFromDB = await settingsDBService.getSettingsOfAUser(event.user.id);
+        settingsFromDB = await settingsDBService.getSettingsOfAUser(event.user.id);
         print("settingsFromDB.userId: " + settingsFromDB.userId);
-        functionCallback(event, true);
-        yield SettingsLoaded(settingsFromDB);
+
+        if (!isObjectEmpty(settingsFromDB)) {
+          functionCallback(event, true);
+          yield SettingsLoaded(settingsFromDB);
+        }
       } else {
         functionCallback(event, false);
         yield SettingsNotLoaded();
       }
     } catch (e) {
+      functionCallback(event, false);
+      yield SettingsNotLoaded();
+    }
+
+    if (isObjectEmpty(settingsFromDB)) {
       functionCallback(event, false);
       yield SettingsNotLoaded();
     }
@@ -101,6 +111,20 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       } else {
         functionCallback(event, true);
         yield SettingsNotLoaded();
+      }
+    }
+  }
+
+  // Used during login to initialize Settings after having the User Initialized
+  Stream<SettingsState> _getSettingsOfTheUserEvent(GetSettingsOfTheUserEvent event) async* {
+    if (!isObjectEmpty(event.user)) {
+      Settings settingsFromREST = await settingsAPIService.getSettingsOfAUser(event.user.id);
+
+      bool savedIntoDB = await settingsDBService.addSettings(settingsFromREST);
+
+      if (!isObjectEmpty(settingsFromREST) && savedIntoDB) {
+        yield SettingsLoaded(settingsFromREST);
+        functionCallback(event, true);
       }
     }
   }

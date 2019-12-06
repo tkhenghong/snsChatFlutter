@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
@@ -60,14 +61,35 @@ class LoginPageState extends State<LoginPage> {
     if (_formKey.currentState.validate()) {
       showCenterLoadingIndicator(context);
 
-      BlocProvider.of<GoogleInfoBloc>(context).add(InitializeGoogleInfoEvent(callback: (bool initialized) {
-        if(initialized) {
-          BlocProvider.of<UserBloc>(context).add(CheckUserSignedUp(mobileNo: getPhoneNumber(), callback: (bool isSignedUp) {
-            
-          }));
+      BlocProvider.of<GoogleInfoBloc>(context).add(InitializeGoogleInfoEvent(callback: (GoogleSignIn googleSignIn) {
+        if (!isObjectEmpty(googleSignIn)) {
+          BlocProvider.of<UserBloc>(context).add(CheckUserSignedUp(
+              mobileNo: getPhoneNumber(),
+              googleSignIn: googleSignIn,
+              callback: (bool isSignedUp) {
+                if (isSignedUp) {
+                  BlocProvider.of<UserBloc>(context).add(UserSignInEvent(
+                      googleSignIn: googleSignIn,
+                      mobileNo: getPhoneNumber(),
+                      callback: (bool signedIn) {
+                        if (signedIn) {
+                          Navigator.pop(context);
+                          goToVerifyPhoneNumber(getPhoneNumber());
+                        } else {
+                          Fluttertoast.showToast(
+                              msg: 'Invalid Mobile No./matching Google account. Please try again!', toastLength: Toast.LENGTH_SHORT);
+                          BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+                          Navigator.pop(context);
+                        }
+                      }));
+                }
+              }));
+        } else {
+          Fluttertoast.showToast(msg: 'Please sign into your Google Account.', toastLength: Toast.LENGTH_SHORT);
+          BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+          Navigator.pop(context);
         }
       }));
-
 
 //      wholeAppBloc.dispatch(CheckUserSignedUpEvent(
 //          callback: (bool isSignedUp) {
@@ -121,8 +143,7 @@ class LoginPageState extends State<LoginPage> {
         return false;
       },
       builder: (context, ipGeoLocationState) {
-
-        if(ipGeoLocationState is IPGeoLocationLoading) {
+        if (ipGeoLocationState is IPGeoLocationLoading) {
           BlocProvider.of<IPGeoLocationBloc>(context).add(GetIPGeoLocationEvent());
           return Center();
         }
@@ -150,6 +171,14 @@ class LoginPageState extends State<LoginPage> {
         listeners: [
           BlocListener<IPGeoLocationBloc, IPGeoLocationState>(
             listener: (context, state) {},
+          ),
+          BlocListener<UserBloc, UserState>(
+            listener: (context, state) {
+              if (state is UserLoaded) {
+                // If you hear UserLoaded event, this listener will initialize the settings of the user.
+                BlocProvider.of<SettingsBloc>(context).add(GetSettingsOfTheUserEvent(user: state.user));
+              }
+            },
           ),
         ],
         child: GestureDetector(

@@ -34,7 +34,6 @@ class AddUserEvent extends UserEvent {
   String toString() => 'AddUserToStateEvent {user: $user}';
 }
 
-
 // Used for edit user for API, DB and State
 class EditUserToStateEvent extends UserEvent {
   final User user;
@@ -79,13 +78,28 @@ class GetOwnUserEvent extends UserEvent {
 
 class CheckUserSignedUp extends UserEvent {
   final String mobileNo;
+  final GoogleSignIn googleSignIn;
   final Function callback;
 
-  CheckUserSignedUp({this.mobileNo, this.callback});
+  CheckUserSignedUp({this.mobileNo, this.googleSignIn, this.callback});
 
   @override
   List<Object> get props => [];
 
   @override
   String toString() => 'CheckUserSignedUp';
+}
+
+class UserSignInEvent extends UserEvent {
+  final String mobileNo;
+  final GoogleSignIn googleSignIn;
+  final Function callback;
+
+  UserSignInEvent({this.mobileNo, this.googleSignIn, this.callback});
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'UserSignInEvent';
 }

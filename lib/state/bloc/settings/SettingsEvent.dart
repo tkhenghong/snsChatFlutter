@@ -23,7 +23,7 @@ class AddSettingsEvent extends SettingsEvent {
   final Settings settings;
   final Function callback;
 
-  AddSettingsEvent({this.settings, this.callback});
+  const AddSettingsEvent({this.settings, this.callback});
 
   @override
   List<Object> get props => [settings];
@@ -36,7 +36,7 @@ class EditSettingsEvent extends SettingsEvent {
   final Settings settings;
   final Function callback;
 
-  EditSettingsEvent({this.settings, this.callback});
+  const EditSettingsEvent({this.settings, this.callback});
 
   @override
   List<Object> get props => [settings];
@@ -49,11 +49,25 @@ class DeleteSettingsEvent extends SettingsEvent {
   final Settings settings;
   final Function callback;
 
-  DeleteSettingsEvent({this.settings, this.callback});
+  const DeleteSettingsEvent({this.settings, this.callback});
 
   @override
   List<Object> get props => [settings];
 
   @override
   String toString() => 'DeleteSettingsToStateEvent {settings: $settings}';
+}
+
+class GetSettingsOfTheUserEvent extends SettingsEvent {
+  final User user;
+  final Function callback;
+
+  const GetSettingsOfTheUserEvent({this.user, this.callback});
+
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'GetSettingsOfTheUserEvent';
 }

@@ -12,8 +12,9 @@ abstract class GoogleInfoEvent extends Equatable {
 
 class InitializeGoogleInfoEvent extends GoogleInfoEvent {
   final Function callback;
+  final GoogleSignIn googleSignIn;
 
-  const InitializeGoogleInfoEvent({this.callback});
+  const InitializeGoogleInfoEvent({this.callback, this.googleSignIn});
 
   @override
   String toString() => 'InitializeGoogleInfoEvent';

@@ -1,14 +1,10 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:snschat_flutter/backend/rest/index.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/index.dart';
-import 'package:snschat_flutter/state/bloc/google/bloc.dart';
 import 'package:snschat_flutter/state/bloc/user/bloc.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
@@ -33,6 +29,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       yield* _getOwnUser(event);
     } else if (event is CheckUserSignedUp) {
       yield* _checkUserSignedUp(event);
+    } else if (event is UserSignInEvent) {
+      yield* _signIn(event);
     }
   }
 
@@ -146,16 +144,41 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   Stream<UserState> _checkUserSignedUp(CheckUserSignedUp event) async* {
-    if(state is UserLoaded) {
-      bool isSignedUp = false;
-      User existingUser;
-      bool googleSignInDone;
 
+    bool isSignedUp = false;
+    User existingUser;
 
-
-      functionCallback(event, true);
+    if(!isStringEmpty(event.mobileNo)) {
+      existingUser = await userAPIService.getUserByUsingMobileNo(event.mobileNo);
     } else {
-      functionCallback(event, false);
+      existingUser = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
+    }
+
+    isSignedUp = !isObjectEmpty(existingUser);
+
+    if (!isObjectEmpty(event)) {
+      event.callback(isSignedUp);
+    }
+  }
+
+  Stream<UserState> _signIn(UserSignInEvent event) async* {
+    bool isSignedIn;
+    User userFromServer;
+    if(!isObjectEmpty(event.googleSignIn)) {
+      isSignedIn = await event.googleSignIn.isSignedIn();
+      if(isSignedIn) {
+        userFromServer = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
+
+        if(!isObjectEmpty(userFromServer)) {
+          yield UserLoaded(userFromServer);
+          functionCallback(event, userFromServer);
+        }
+      }
+    }
+
+    if(!isSignedIn || !isObjectEmpty(userFromServer)) {
+      yield UserNotLoaded();
+      functionCallback(event, null);
     }
   }
 }
