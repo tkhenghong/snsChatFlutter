@@ -53,17 +53,18 @@ class LoginPageState extends State<LoginPage> {
       phoneNoInitials = countryCode.dialCode;
     }
     String phoneNumber = phoneNoInitials + mobileNoTextController.value.text;
-    print("REAL phoneNumber: " + phoneNumber);
     return phoneNumber;
   }
 
   _signIn(BuildContext context) async {
     if (_formKey.currentState.validate()) {
+
+      print('getPhoneNumber(): ' + getPhoneNumber());
       showCenterLoadingIndicator(context);
 
       BlocProvider.of<GoogleInfoBloc>(context).add(InitializeGoogleInfoEvent(callback: (GoogleSignIn googleSignIn) {
         if (!isObjectEmpty(googleSignIn)) {
-          BlocProvider.of<UserBloc>(context).add(CheckUserSignedUp(
+          BlocProvider.of<UserBloc>(context).add(CheckUserSignedUpEvent(
               mobileNo: getPhoneNumber(),
               googleSignIn: googleSignIn,
               callback: (bool isSignedUp) {
@@ -90,31 +91,6 @@ class LoginPageState extends State<LoginPage> {
           Navigator.pop(context);
         }
       }));
-
-//      wholeAppBloc.dispatch(CheckUserSignedUpEvent(
-//          callback: (bool isSignedUp) {
-//            if (isSignedUp) {
-//              wholeAppBloc.dispatch(UserSignInEvent(
-//                  callback: (bool signInSuccessful) {
-//                    if (signInSuccessful) {
-//                      Navigator.pop(context);
-//                      goToVerifyPhoneNumber();
-//                    } else {
-//                      Fluttertoast.showToast(
-//                          msg: 'Invalid Mobile No./matching Google account. Please try again!', toastLength: Toast.LENGTH_SHORT);
-//                      wholeAppBloc.dispatch(UserSignOutEvent());
-//                      Navigator.pop(context);
-//                    }
-//                  },
-//                  mobileNo: getPhoneNumber()));
-//            } else {
-//              Fluttertoast.showToast(msg: 'Invalid Mobile No./matching Google account. Please try again!', toastLength: Toast.LENGTH_SHORT);
-//              wholeAppBloc.dispatch(UserSignOutEvent()); // Reset everything to initial state first
-//              Navigator.pop(context);
-////              goToSignUp();
-//            }
-//          },
-//          mobileNo: getPhoneNumber()));
     }
   }
 
@@ -174,9 +150,11 @@ class LoginPageState extends State<LoginPage> {
           ),
           BlocListener<UserBloc, UserState>(
             listener: (context, state) {
+              print('login_page.dart UserBloc Listener is working.');
               if (state is UserLoaded) {
+                print('login_page.dart is state is userloaded');
                 // If you hear UserLoaded event, this listener will initialize the settings of the user.
-                BlocProvider.of<SettingsBloc>(context).add(GetSettingsOfTheUserEvent(user: state.user));
+                BlocProvider.of<SettingsBloc>(context).add(GetUserSettingsEvent(user: state.user));
               }
             },
           ),

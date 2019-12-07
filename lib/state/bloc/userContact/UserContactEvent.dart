@@ -18,11 +18,11 @@ class InitializeUserContactsEvent extends UserContactEvent {
   String toString() => 'InitializeUserContactsEvent';
 }
 
-class AddUserContactToStateEvent extends UserContactEvent {
+class AddUserContactEvent extends UserContactEvent {
   final UserContact userContact;
   final Function callback;
 
-  AddUserContactToStateEvent({this.userContact, this.callback});
+  AddUserContactEvent({this.userContact, this.callback});
 
   @override
   List<Object> get props => [userContact];
@@ -31,11 +31,11 @@ class AddUserContactToStateEvent extends UserContactEvent {
   String toString() => 'AddUserContactToStateEvent {userContact: $userContact}';
 }
 
-class EditUserContactToStateEvent extends UserContactEvent {
+class EditUserContactEvent extends UserContactEvent {
   final UserContact userContact;
   final Function callback;
 
-  EditUserContactToStateEvent({this.userContact, this.callback});
+  EditUserContactEvent({this.userContact, this.callback});
 
   @override
   List<Object> get props => [userContact];
@@ -44,11 +44,11 @@ class EditUserContactToStateEvent extends UserContactEvent {
   String toString() => 'EditUserContactToStateEvent {userContact: $userContact}';
 }
 
-class DeleteUserContactToStateEvent extends UserContactEvent {
+class DeleteUserContactEvent extends UserContactEvent {
   final UserContact userContact;
   final Function callback;
 
-  DeleteUserContactToStateEvent({this.userContact, this.callback});
+  DeleteUserContactEvent({this.userContact, this.callback});
 
   @override
   List<Object> get props => [userContact];

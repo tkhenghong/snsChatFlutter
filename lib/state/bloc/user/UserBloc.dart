@@ -8,7 +8,6 @@ import 'package:snschat_flutter/objects/index.dart';
 import 'package:snschat_flutter/state/bloc/user/bloc.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
-
   UserAPIService userAPIService = UserAPIService();
   UserDBService userDBService = UserDBService();
 
@@ -27,7 +26,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       yield* _deleteUserFromState(event);
     } else if (event is GetOwnUserEvent) {
       yield* _getOwnUser(event);
-    } else if (event is CheckUserSignedUp) {
+    } else if (event is CheckUserSignedUpEvent) {
       yield* _checkUserSignedUp(event);
     } else if (event is UserSignInEvent) {
       yield* _signIn(event);
@@ -59,21 +58,25 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
   // Register user in API, DB, BLOC
   Stream<UserState> _addUser(AddUserEvent event) async* {
+    User userFromServer;
+    bool userSaved = false;
+
     if (state is UserLoaded) {
-      User userFromServer = await userAPIService.addUser(event.user);
+      userFromServer = await userAPIService.addUser(event.user);
 
-      if (isObjectEmpty(userFromServer)) {
-        functionCallback(event, null);
+      if (!isObjectEmpty(userFromServer)) {
+        userSaved = await userDBService.addUser(userFromServer);
+
+        if (userSaved) {
+          functionCallback(event, userFromServer);
+          yield UserLoaded(userFromServer);
+        }
       }
+    }
 
-      bool userSaved = await userDBService.addUser(userFromServer);
-
-      if (!userSaved) {
-        functionCallback(event, null);
-      }
-
-      functionCallback(event, userFromServer);
-      yield UserLoaded(userFromServer);
+    if (isObjectEmpty(userFromServer) || !userSaved) {
+      functionCallback(event, null);
+      yield UserNotLoaded();
     }
   }
 
@@ -118,7 +121,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         }
       }
 
-      if(!deletedFromREST || !deleted) {
+      if (!deletedFromREST || !deleted) {
         functionCallback(event, false);
       }
     }
@@ -131,24 +134,11 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     }
   }
 
-  // To send response to those dispatched Actions
-  void functionCallback(event, value) {
-    if (!isObjectEmpty(event)) {
-      event.callback(value);
-    }
-  }
-
-  @override
-  Future<void> close() {
-    return super.close();
-  }
-
-  Stream<UserState> _checkUserSignedUp(CheckUserSignedUp event) async* {
-
+  Stream<UserState> _checkUserSignedUp(CheckUserSignedUpEvent event) async* {
     bool isSignedUp = false;
     User existingUser;
 
-    if(!isStringEmpty(event.mobileNo)) {
+    if (!isStringEmpty(event.mobileNo)) {
       existingUser = await userAPIService.getUserByUsingMobileNo(event.mobileNo);
     } else {
       existingUser = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
@@ -164,21 +154,33 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   Stream<UserState> _signIn(UserSignInEvent event) async* {
     bool isSignedIn;
     User userFromServer;
-    if(!isObjectEmpty(event.googleSignIn)) {
+    if (!isObjectEmpty(event.googleSignIn)) {
       isSignedIn = await event.googleSignIn.isSignedIn();
-      if(isSignedIn) {
+      if (isSignedIn) {
         userFromServer = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
 
-        if(!isObjectEmpty(userFromServer)) {
+        if (!isObjectEmpty(userFromServer)) {
           yield UserLoaded(userFromServer);
           functionCallback(event, userFromServer);
         }
       }
     }
 
-    if(!isSignedIn || !isObjectEmpty(userFromServer)) {
+    if (!isSignedIn || !isObjectEmpty(userFromServer)) {
       yield UserNotLoaded();
       functionCallback(event, null);
     }
+  }
+
+  // To send response to those dispatched Actions
+  void functionCallback(event, value) {
+    if (!isObjectEmpty(event)) {
+      event.callback(value);
+    }
+  }
+
+  @override
+  Future<void> close() {
+    return super.close();
   }
 }

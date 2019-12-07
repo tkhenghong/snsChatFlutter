@@ -18,11 +18,11 @@ class InitializeMultimediaEvent extends MultimediaEvent {
   String toString() => 'InitializeMultimediaEvent';
 }
 
-class AddMultimediaToStateEvent extends MultimediaEvent {
+class AddMultimediaEvent extends MultimediaEvent {
   final Multimedia multimedia;
   final Function callback;
 
-  AddMultimediaToStateEvent({this.multimedia, this.callback});
+  AddMultimediaEvent({this.multimedia, this.callback});
 
   @override
   List<Object> get props => [multimedia];
@@ -31,11 +31,11 @@ class AddMultimediaToStateEvent extends MultimediaEvent {
   String toString() => 'AddMultimediaToStateEvent {multimedia: $multimedia}';
 }
 
-class EditMultimediaToStateEvent extends MultimediaEvent {
+class EditMultimediaEvent extends MultimediaEvent {
   final Multimedia multimedia;
   final Function callback;
 
-  EditMultimediaToStateEvent({this.multimedia, this.callback});
+  EditMultimediaEvent({this.multimedia, this.callback});
 
   @override
   List<Object> get props => [multimedia];
@@ -44,11 +44,11 @@ class EditMultimediaToStateEvent extends MultimediaEvent {
   String toString() => 'EditMultimediaToStateEvent {multimedia: $multimedia}';
 }
 
-class DeleteMultimediaToStateEvent extends MultimediaEvent {
+class DeleteMultimediaEvent extends MultimediaEvent {
   final Multimedia multimedia;
   final Function callback;
 
-  DeleteMultimediaToStateEvent({this.multimedia, this.callback});
+  DeleteMultimediaEvent({this.multimedia, this.callback});
 
   @override
   List<Object> get props => [multimedia];

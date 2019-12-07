@@ -12,9 +12,8 @@ abstract class GoogleInfoEvent extends Equatable {
 
 class InitializeGoogleInfoEvent extends GoogleInfoEvent {
   final Function callback;
-  final GoogleSignIn googleSignIn;
 
-  const InitializeGoogleInfoEvent({this.callback, this.googleSignIn});
+  const InitializeGoogleInfoEvent({this.callback});
 
   @override
   String toString() => 'InitializeGoogleInfoEvent';
@@ -35,7 +34,7 @@ class RemoveGoogleInfoEvent extends GoogleInfoEvent {
 class GetOwnGoogleInfoEvent extends GoogleInfoEvent {
   final Function callback;
 
-  GetOwnGoogleInfoEvent(this.callback);
+  GetOwnGoogleInfoEvent({this.callback});
 
   @override
   List<Object> get props => [];

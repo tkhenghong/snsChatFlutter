@@ -1,13 +1,14 @@
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
+import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number_page.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -23,7 +24,6 @@ class SignUpPage extends StatefulWidget {
 }
 
 class SignUpPageState extends State<SignUpPage> {
-  WholeAppBloc wholeAppBloc;
   final _formKey = GlobalKey<FormState>();
   TextEditingController nameTextController = new TextEditingController();
   TextEditingController mobileNoTextController = new TextEditingController();
@@ -48,10 +48,6 @@ class SignUpPageState extends State<SignUpPage> {
     nodeOne.dispose();
     nodeTwo.dispose();
     super.dispose();
-  }
-
-  String isIPLocationExists(WholeAppState state) {
-    return isObjectEmpty(state.ipGeoLocation) ? "US" : state.ipGeoLocation.country_code2;
   }
 
   String getPhoneNumber() {
@@ -79,129 +75,223 @@ class SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
-    wholeAppBloc = _wholeAppBloc;
-
     final deviceWidth = MediaQuery.of(context).size.width;
     final deviceHeight = MediaQuery.of(context).size.height;
 
-    return BlocBuilder(
-      bloc: _wholeAppBloc,
-      builder: (context, WholeAppState state) {
-        return Material(
-            child: GestureDetector(
-                // call this method here to hide soft keyboard
-                onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
-                child: Scaffold(
-                  appBar: AppBar(
-                    backgroundColor: Colors.transparent,
-                    elevation: 0, //Set Shadow
-                    iconTheme: IconThemeData(
-                      color: Theme.of(context).primaryColor
-                    ),
-                  ),
-                  body: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        "Sign Up",
-                        style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ),
-                      Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
-                      Text(
-                        "Enter your mobile number and name: ",
-                        style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.normal),
-                        textAlign: TextAlign.center,
-                      ),
-                      Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 28.0),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            children: [
-                              Row(
-                                children: <Widget>[
-                                  CountryCodePicker(
-                                    initialSelection: widget.countryCodeString,
-                                    alignLeft: false,
-                                    showCountryOnly: false,
-                                    showFlag: true,
-                                    showOnlyCountryWhenClosed: false,
-                                    favorite: [widget.countryCodeString],
-                                    onChanged: onCountryPickerChanged,
-                                  ),
-                                  Container(
-                                    width: deviceWidth * 0.6,
-                                    margin: EdgeInsetsDirectional.only(top: deviceHeight * 0.03),
-                                    child: TextFormField(
-                                      controller: mobileNoTextController,
-                                      inputFormatters: [
-                                        BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
-                                      ],
-                                      maxLength: 15,
-                                      decoration: InputDecoration(hintText: "Mobile Number"),
-                                      autofocus: true,
-                                      textAlign: TextAlign.center,
-                                      keyboardType: TextInputType.phone,
-                                      focusNode: nodeOne,
-                                      onFieldSubmitted: (value) {
-                                        FocusScope.of(context).requestFocus(nodeTwo);
-                                      },
-                                      validator: (value) {
-                                        if (value.isEmpty) {
-                                          return "Mobile number is empty";
-                                        }
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<GoogleInfoBloc, GoogleInfoState>(
+          listener: (context, googleInfoState) {
+            if (googleInfoState is GoogleInfoLoaded) {}
+          },
+        ),
+        BlocListener<UserBloc, UserState>(
+          listener: (context, userState) {
+            if (userState is UserLoaded) {}
+          },
+        ),
+        BlocListener<MultimediaBloc, MultimediaState>(
+          listener: (context, multimediaState) {
+            if (multimediaState is MultimediaLoaded) {}
+          },
+        ),
+        BlocListener<SettingsBloc, SettingsState>(
+          listener: (context, settingsState) {
+            if (settingsState is SettingsLoaded) {}
+          },
+        ),
+        BlocListener<UserContactBloc, UserContactState>(
+          listener: (context, userContactState) {
+            if (userContactState is UserContactsLoaded) {}
+          },
+        ),
+      ],
+      child: signUpScreen(deviceHeight, deviceWidth),
+    );
+  }
 
-                                        return null;
-                                      },
-                                    ),
-                                  ),
+  signUpScreen(deviceHeight, deviceWidth) => Material(
+      child: GestureDetector(
+          // call this method here to hide soft keyboard
+          onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
+          child: Scaffold(
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0, //Set Shadow
+              iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
+            ),
+            body: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  "Sign Up",
+                  style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
+                Text(
+                  "Enter your mobile number and name: ",
+                  style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.normal),
+                  textAlign: TextAlign.center,
+                ),
+                Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        Row(
+                          children: <Widget>[
+                            CountryCodePicker(
+                              initialSelection: widget.countryCodeString,
+                              alignLeft: false,
+                              showCountryOnly: false,
+                              showFlag: true,
+                              showOnlyCountryWhenClosed: false,
+                              favorite: [widget.countryCodeString],
+                              onChanged: onCountryPickerChanged,
+                            ),
+                            Container(
+                              width: deviceWidth * 0.6,
+                              margin: EdgeInsetsDirectional.only(top: deviceHeight * 0.03),
+                              child: TextFormField(
+                                controller: mobileNoTextController,
+                                inputFormatters: [
+                                  BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
                                 ],
-                              ),
-                              TextFormField(
-                                controller: nameTextController,
-                                textCapitalization: TextCapitalization.words,
-                                maxLength: 100,
-                                decoration: InputDecoration(hintText: "Name"),
+                                maxLength: 15,
+                                decoration: InputDecoration(hintText: "Mobile Number"),
                                 autofocus: true,
                                 textAlign: TextAlign.center,
-                                keyboardType: TextInputType.text,
-                                focusNode: nodeTwo,
-                                textInputAction: TextInputAction.done,
-                                onFieldSubmitted: (value) {},
+                                keyboardType: TextInputType.phone,
+                                focusNode: nodeOne,
+                                onFieldSubmitted: (value) {
+                                  FocusScope.of(context).requestFocus(nodeTwo);
+                                },
                                 validator: (value) {
                                   if (value.isEmpty) {
-                                    return "Name is empty";
+                                    return "Mobile number is empty";
                                   }
 
                                   return null;
                                 },
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ),
-                      RaisedButton(
-                        onPressed: () => signUp(),
-                        textColor: Colors.white,
-                        animationDuration: Duration(milliseconds: 500),
-                        padding: EdgeInsets.only(left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
-                        child: Text("Submit"),
-                      ),
-                      Padding(padding: EdgeInsets.symmetric(vertical: 50.00)),
-                    ],
+                        TextFormField(
+                          controller: nameTextController,
+                          textCapitalization: TextCapitalization.words,
+                          maxLength: 100,
+                          decoration: InputDecoration(hintText: "Name"),
+                          autofocus: true,
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.text,
+                          focusNode: nodeTwo,
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (value) {},
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return "Name is empty";
+                            }
+
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                )));
-      },
-    );
-  }
+                ),
+                RaisedButton(
+                  onPressed: () => signUp(),
+                  textColor: Colors.white,
+                  animationDuration: Duration(milliseconds: 500),
+                  padding: EdgeInsets.only(left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
+                  child: Text("Submit"),
+                ),
+                Padding(padding: EdgeInsets.symmetric(vertical: 50.00)),
+              ],
+            ),
+          )));
 
   signUp() async {
     if (_formKey.currentState.validate()) {
-//      showCenterLoadingIndicator(context);
+      showCenterLoadingIndicator(context);
+
+      BlocProvider.of<GoogleInfoBloc>(context).add(InitializeGoogleInfoEvent(callback: (bool initialized) {
+        if (initialized) {
+          BlocProvider.of<GoogleInfoBloc>(context)
+              .add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn2, FirebaseAuth firebaseAuth2, FirebaseUser firebaseUser2) {
+            BlocProvider.of<UserBloc>(context).add(CheckUserSignedUpEvent(
+                googleSignIn: googleSignIn2,
+                mobileNo: getPhoneNumber(),
+                callback: (bool isSignedUp) {
+                  if (!isSignedUp) {
+                    User user = User(
+                        id: null,
+                        mobileNo: getPhoneNumber(),
+                        countryCode: widget.countryCodeString,
+                        effectivePhoneNumber: mobileNoTextController.value.text.toString(),
+                        displayName: firebaseUser2.displayName,
+                        googleAccountId: googleSignIn2.currentUser.id,
+                        realName: nameTextController.value.text.toString());
+                    Settings settings = Settings(id: null, notification: true, userId: user.id);
+                    Multimedia multimedia = Multimedia(
+                        id: null,
+                        conversationId: null,
+                        localFullFileUrl: null,
+                        localThumbnailUrl: null,
+                        remoteFullFileUrl: null,
+                        remoteThumbnailUrl: null,
+                        messageId: null,
+                        userContactId: null);
+                    UserContact userContact = UserContact(
+                        id: null,
+                        multimediaId: null,
+                        mobileNo: getPhoneNumber(),
+                        displayName: firebaseUser2.displayName,
+                        realName: nameTextController.value.text.toString(),
+                        lastSeenDate: DateTime.now().millisecondsSinceEpoch,
+                        block: false,
+                        userIds: [],
+                        // Add userId into it after User is Created
+                        userId: null);
+
+                    if (!isObjectEmpty(googleSignIn2)) {
+                      BlocProvider.of<UserBloc>(context).add(AddUserEvent(
+                          user: user,
+                          callback: (User user2) {
+                            userContact.userId = multimedia.userId = settings.userId = user2.id;
+                            BlocProvider.of<SettingsBloc>(context).add(AddSettingsEvent(
+                                settings: settings,
+                                callback: (Settings settings2) {
+                                  BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
+                                      multimedia: multimedia,
+                                      callback: (Multimedia multimedia) {
+                                        userContact.multimediaId = multimedia.id;
+                                        BlocProvider.of<UserContactBloc>(context).add(AddUserContactEvent(
+                                            userContact: userContact,
+                                            callback: (UserContact userContact2) {
+                                              if (!isObjectEmpty(googleSignIn2) &&
+                                                  !isObjectEmpty(user2) &&
+                                                  !isObjectEmpty(settings2) &&
+                                                  !isObjectEmpty(userContact2)) {
+                                                Navigator.pop(context);
+                                                goToVerifyPhoneNumber();
+                                              }
+                                            }));
+                                      }));
+                                }));
+                          }));
+                    }
+                  }
+                }));
+          }));
+        }
+      }));
+
 //      wholeAppBloc.dispatch(UserSignUpEvent(
 //          callback: (bool isSignedUp) {
 //            if (isSignedUp) {

@@ -25,7 +25,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       yield* _editSettings(event);
     } else if (event is DeleteSettingsEvent) {
       yield* _deleteSettings(event);
-    } else if (event is GetSettingsOfTheUserEvent) {
+    } else if (event is GetUserSettingsEvent) {
       yield* _getSettingsOfTheUserEvent(event);
     }
   }
@@ -116,7 +116,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   }
 
   // Used during login to initialize Settings after having the User Initialized
-  Stream<SettingsState> _getSettingsOfTheUserEvent(GetSettingsOfTheUserEvent event) async* {
+  Stream<SettingsState> _getSettingsOfTheUserEvent(GetUserSettingsEvent event) async* {
     if (!isObjectEmpty(event.user)) {
       Settings settingsFromREST = await settingsAPIService.getSettingsOfAUser(event.user.id);
 
