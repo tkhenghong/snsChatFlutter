@@ -28,7 +28,7 @@ class AddMultimediaEvent extends MultimediaEvent {
   List<Object> get props => [multimedia];
 
   @override
-  String toString() => 'AddMultimediaToStateEvent {multimedia: $multimedia}';
+  String toString() => 'AddMultimediaEvent {multimedia: $multimedia}';
 }
 
 class EditMultimediaEvent extends MultimediaEvent {
@@ -41,7 +41,7 @@ class EditMultimediaEvent extends MultimediaEvent {
   List<Object> get props => [multimedia];
 
   @override
-  String toString() => 'EditMultimediaToStateEvent {multimedia: $multimedia}';
+  String toString() => 'EditMultimediaEvent {multimedia: $multimedia}';
 }
 
 class DeleteMultimediaEvent extends MultimediaEvent {
@@ -54,7 +54,7 @@ class DeleteMultimediaEvent extends MultimediaEvent {
   List<Object> get props => [multimedia];
 
   @override
-  String toString() => 'DeleteMultimediaToStateEvent {multimedia: $multimedia}';
+  String toString() => 'DeleteMultimediaEvent {multimedia: $multimedia}';
 }
 
 class SendMultimediaEvent extends MultimediaEvent {

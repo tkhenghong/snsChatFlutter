@@ -22,17 +22,17 @@ class InitializeConversationGroupsEvent extends ConversationGroupEvent {
   String toString() => 'InitializeConversationGroupsEvent';
 }
 
-class AddConversationGroupToStateEvent extends ConversationGroupEvent {
+class AddConversationGroupEvent extends ConversationGroupEvent {
   final ConversationGroup conversationGroup;
   final Function callback;
 
-  const AddConversationGroupToStateEvent({this.conversationGroup, this.callback});
+  const AddConversationGroupEvent({this.conversationGroup, this.callback});
 
   @override
   List<Object> get props => [conversationGroup];
 
   @override
-  String toString() => 'AddConversationGroupToStateEvent {conversationGroup: $conversationGroup}';
+  String toString() => 'AddConversationGroupEvent {conversationGroup: $conversationGroup}';
 }
 
 class EditConversationGroupEvent extends ConversationGroupEvent {

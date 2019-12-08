@@ -1,6 +1,4 @@
-import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
@@ -13,7 +11,6 @@ import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/objects/index.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/sign_up/sign_up_page.dart';
 import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number_page.dart';
@@ -59,7 +56,6 @@ class LoginPageState extends State<LoginPage> {
   _signIn(BuildContext context) async {
     if (_formKey.currentState.validate()) {
 
-      print('getPhoneNumber(): ' + getPhoneNumber());
       showCenterLoadingIndicator(context);
 
       BlocProvider.of<GoogleInfoBloc>(context).add(InitializeGoogleInfoEvent(callback: (GoogleSignIn googleSignIn) {
@@ -72,10 +68,19 @@ class LoginPageState extends State<LoginPage> {
                   BlocProvider.of<UserBloc>(context).add(UserSignInEvent(
                       googleSignIn: googleSignIn,
                       mobileNo: getPhoneNumber(),
-                      callback: (bool signedIn) {
-                        if (signedIn) {
-                          Navigator.pop(context);
-                          goToVerifyPhoneNumber(getPhoneNumber());
+                      callback: (User user2) {
+                        if (!isObjectEmpty(user2)) {
+                          BlocProvider.of<SettingsBloc>(context).add(GetUserSettingsEvent(user: user2, callback: (Settings settings) {
+                            if(!isObjectEmpty(settings)) {
+                              Navigator.pop(context);
+                              goToVerifyPhoneNumber(getPhoneNumber());
+                            } else {
+                              Fluttertoast.showToast(
+                                  msg: 'Invalid Mobile No./matching Google account. Please try again!', toastLength: Toast.LENGTH_SHORT);
+                              BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+                              Navigator.pop(context);
+                            }
+                          }));
                         } else {
                           Fluttertoast.showToast(
                               msg: 'Invalid Mobile No./matching Google account. Please try again!', toastLength: Toast.LENGTH_SHORT);
@@ -83,10 +88,15 @@ class LoginPageState extends State<LoginPage> {
                           Navigator.pop(context);
                         }
                       }));
+                } else {
+                  Fluttertoast.showToast(
+                      msg: 'Unregconized phone number/Google Account. Please sign up first.', toastLength: Toast.LENGTH_SHORT);
+                  BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+                  Navigator.pop(context);
                 }
               }));
         } else {
-          Fluttertoast.showToast(msg: 'Please sign into your Google Account.', toastLength: Toast.LENGTH_SHORT);
+          Fluttertoast.showToast(msg: 'Please sign into your Google Account first.', toastLength: Toast.LENGTH_SHORT);
           BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
           Navigator.pop(context);
         }
@@ -95,10 +105,6 @@ class LoginPageState extends State<LoginPage> {
   }
 
   onCountryPickerChanged(CountryCode countryCode) {
-    print("onCountryPickerChanged()");
-    print("countryCode: " + countryCode.toString());
-    print("countryCode.code: " + countryCode.code.toString());
-    print("countryCode.flagUri: " + countryCode.flagUri.toString());
     this.countryCode = countryCode;
     this.countryCodeString = countryCode.code.toString();
   }
@@ -125,13 +131,11 @@ class LoginPageState extends State<LoginPage> {
         }
 
         if (ipGeoLocationState is IPGeoLocationNotLoaded) {
-          print('login_page.dart if (ipGeoLocationState is IPGeoLocationNotLoaded)');
           countryCodeString = 'US';
           return loginScreen(deviceWidth, deviceHeight);
         }
 
         if (ipGeoLocationState is IPGeoLocationLoaded) {
-          print('login_page.dart if (ipGeoLocationState is IPGeoLocationLoaded)');
           countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? "US" : ipGeoLocationState.ipGeoLocation.country_code2;
           return loginScreen(deviceWidth, deviceHeight);
         }
@@ -150,12 +154,6 @@ class LoginPageState extends State<LoginPage> {
           ),
           BlocListener<UserBloc, UserState>(
             listener: (context, state) {
-              print('login_page.dart UserBloc Listener is working.');
-              if (state is UserLoaded) {
-                print('login_page.dart is state is userloaded');
-                // If you hear UserLoaded event, this listener will initialize the settings of the user.
-                BlocProvider.of<SettingsBloc>(context).add(GetUserSettingsEvent(user: state.user));
-              }
             },
           ),
         ],

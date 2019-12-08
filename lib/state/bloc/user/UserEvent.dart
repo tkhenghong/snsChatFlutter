@@ -31,34 +31,34 @@ class AddUserEvent extends UserEvent {
   List<Object> get props => [user];
 
   @override
-  String toString() => 'AddUserToStateEvent {user: $user}';
+  String toString() => 'AddUserEvent {user: $user}';
 }
 
 // Used for edit user for API, DB and State
-class EditUserToStateEvent extends UserEvent {
+class EditUserEvent extends UserEvent {
   final User user;
   final Function callback;
 
-  EditUserToStateEvent({this.user, this.callback});
+  EditUserEvent({this.user, this.callback});
 
   @override
   List<Object> get props => [user];
 
   @override
-  String toString() => 'EditUserToStateEvent {user: $user}';
+  String toString() => 'EditUserEvent {user: $user}';
 }
 
-class DeleteUserFromStateEvent extends UserEvent {
+class DeleteUserEvent extends UserEvent {
   final User user;
   final Function callback;
 
-  DeleteUserFromStateEvent({this.user, this.callback});
+  DeleteUserEvent({this.user, this.callback});
 
   @override
   List<Object> get props => [user];
 
   @override
-  String toString() => 'DeleteUserToStateEvent {user: $user}';
+  String toString() => 'DeleteUserEvent {user: $user}';
 }
 
 class GetOwnUserEvent extends UserEvent {

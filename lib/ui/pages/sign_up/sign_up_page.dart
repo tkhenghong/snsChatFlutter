@@ -60,15 +60,10 @@ class SignUpPageState extends State<SignUpPage> {
       phoneNoInitials = countryCode.dialCode;
     }
     String phoneNumber = phoneNoInitials + mobileNoTextController.value.text;
-    print("REAL phoneNumber: " + phoneNumber);
     return phoneNumber;
   }
 
   onCountryPickerChanged(CountryCode countryCode) {
-    print("onCountryPickerChanged()");
-    print("countryCode: " + countryCode.toString());
-    print("countryCode.code: " + countryCode.code.toString());
-    print("countryCode.flagUri: " + countryCode.flagUri.toString());
     this.countryCode = countryCode;
     widget.countryCodeString = countryCode.code.toString();
   }
@@ -234,17 +229,17 @@ class SignUpPageState extends State<SignUpPage> {
                         mobileNo: getPhoneNumber(),
                         countryCode: widget.countryCodeString,
                         effectivePhoneNumber: mobileNoTextController.value.text.toString(),
-                        displayName: firebaseUser2.displayName,
-                        googleAccountId: googleSignIn2.currentUser.id,
+                        displayName: firebaseUser2.displayName.toString(),
+                        googleAccountId: googleSignIn2.currentUser.id.toString(),
                         realName: nameTextController.value.text.toString());
-                    Settings settings = Settings(id: null, notification: true, userId: user.id);
+                    Settings settings = Settings(id: null, notification: true, userId: null);
                     Multimedia multimedia = Multimedia(
                         id: null,
                         conversationId: null,
                         localFullFileUrl: null,
                         localThumbnailUrl: null,
-                        remoteFullFileUrl: null,
-                        remoteThumbnailUrl: null,
+                        remoteFullFileUrl: googleSignIn2.currentUser.photoUrl.toString(),
+                        remoteThumbnailUrl: googleSignIn2.currentUser.photoUrl.toString(),
                         messageId: null,
                         userContactId: null);
                     UserContact userContact = UserContact(
@@ -264,31 +259,63 @@ class SignUpPageState extends State<SignUpPage> {
                           user: user,
                           callback: (User user2) {
                             userContact.userId = multimedia.userId = settings.userId = user2.id;
+                            userContact.userIds.add(user2.id);
                             BlocProvider.of<SettingsBloc>(context).add(AddSettingsEvent(
                                 settings: settings,
                                 callback: (Settings settings2) {
-                                  BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
-                                      multimedia: multimedia,
-                                      callback: (Multimedia multimedia) {
-                                        userContact.multimediaId = multimedia.id;
-                                        BlocProvider.of<UserContactBloc>(context).add(AddUserContactEvent(
-                                            userContact: userContact,
-                                            callback: (UserContact userContact2) {
-                                              if (!isObjectEmpty(googleSignIn2) &&
-                                                  !isObjectEmpty(user2) &&
-                                                  !isObjectEmpty(settings2) &&
-                                                  !isObjectEmpty(userContact2)) {
-                                                Navigator.pop(context);
-                                                goToVerifyPhoneNumber();
-                                              }
-                                            }));
-                                      }));
+                                  if (!isObjectEmpty(settings2)) {
+                                    BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
+                                        multimedia: multimedia,
+                                        callback: (Multimedia multimedia) {
+                                          if(!isObjectEmpty(multimedia)) {
+                                            userContact.multimediaId = multimedia.id;
+                                            BlocProvider.of<UserContactBloc>(context).add(AddUserContactEvent(
+                                                userContact: userContact,
+                                                callback: (UserContact userContact2) {
+                                                  if (!isObjectEmpty(googleSignIn2) &&
+                                                      !isObjectEmpty(user2) &&
+                                                      !isObjectEmpty(settings2) &&
+                                                      !isObjectEmpty(userContact2)) {
+                                                    Fluttertoast.showToast(
+                                                        msg: 'Sign up success. Please verify your phone number.',
+                                                        toastLength: Toast.LENGTH_SHORT);
+                                                    Navigator.pop(context);
+                                                    goToVerifyPhoneNumber();
+                                                  }
+                                                }));
+                                          } else {
+                                            Fluttertoast.showToast(
+                                                msg: 'Sign up error. Please try again.',
+                                                toastLength: Toast.LENGTH_SHORT);
+                                          }
+                                        }));
+                                  } else {
+                                    Fluttertoast.showToast(
+                                        msg: 'Sign up error. Please try again.',
+                                        toastLength: Toast.LENGTH_SHORT);
+                                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+                                    Navigator.pop(context);
+                                  }
                                 }));
                           }));
+                    } else {
+                      Fluttertoast.showToast(msg: 'Google Sign in error. Please try again.', toastLength: Toast.LENGTH_SHORT);
+                      BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+                      Navigator.pop(context);
                     }
+                  } else {
+                    Fluttertoast.showToast(
+                        msg: 'Registered Mobile No./Google Account. Please use another Mobile No./Google Account to register.',
+                        toastLength: Toast.LENGTH_SHORT);
+                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+                    Navigator.pop(context);
                   }
                 }));
           }));
+        } else {
+          Fluttertoast.showToast(msg: 'Please sign into your Google account first. Please try again.', toastLength: Toast.LENGTH_LONG);
+          BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+          Navigator.pop(context);
         }
       }));
 

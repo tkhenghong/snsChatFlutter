@@ -40,5 +40,5 @@ class GetOwnGoogleInfoEvent extends GoogleInfoEvent {
   List<Object> get props => [];
 
   @override
-  String toString() => 'RemoveGoogleInfoEvent';
+  String toString() => 'GetOwnGoogleInfoEvent';
 }

@@ -61,21 +61,21 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   Stream<SettingsState> _addSettings(AddSettingsEvent event) async* {
     Settings newSettings;
     bool settingsSaved = false;
-    if (state is SettingsLoaded) {
-      newSettings = await settingsAPIService.addSettings(event.settings);
 
-      if (!isObjectEmpty(newSettings)) {
-        settingsSaved = await settingsDBService.addSettings(newSettings);
+    newSettings = await settingsAPIService.addSettings(event.settings);
 
-        if (settingsSaved) {
-          functionCallback(event, newSettings);
-          yield SettingsLoaded(newSettings);
-        }
+    if (!isObjectEmpty(newSettings)) {
+      settingsSaved = await settingsDBService.addSettings(newSettings);
+
+      if (settingsSaved) {
+        functionCallback(event, newSettings);
+        yield SettingsLoaded(newSettings);
       }
     }
 
     if (isObjectEmpty(newSettings) || !settingsSaved) {
       functionCallback(event, null);
+      yield SettingsNotLoaded();
     }
   }
 
@@ -117,15 +117,23 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
   // Used during login to initialize Settings after having the User Initialized
   Stream<SettingsState> _getSettingsOfTheUserEvent(GetUserSettingsEvent event) async* {
-    if (!isObjectEmpty(event.user)) {
-      Settings settingsFromREST = await settingsAPIService.getSettingsOfAUser(event.user.id);
+    Settings settingsFromREST;
+    bool savedIntoDB;
 
-      bool savedIntoDB = await settingsDBService.addSettings(settingsFromREST);
+    if (!isObjectEmpty(event.user)) {
+      settingsFromREST = await settingsAPIService.getSettingsOfAUser(event.user.id);
+
+      savedIntoDB = await settingsDBService.addSettings(settingsFromREST);
 
       if (!isObjectEmpty(settingsFromREST) && savedIntoDB) {
         yield SettingsLoaded(settingsFromREST);
-        functionCallback(event, true);
+        functionCallback(event, settingsFromREST);
       }
+    }
+
+    if(isObjectEmpty(settingsFromREST) || !savedIntoDB) {
+      yield SettingsNotLoaded();
+      functionCallback(event, null);
     }
   }
 

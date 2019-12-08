@@ -14,7 +14,7 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
   Stream<WebSocketState> mapEventToState(WebSocketEvent event) async* {
     if (event is InitializeWebSocketEvent) {
       yield* _initializeWebSocketToState(event);
-    } else if (event is ReconnectWebSocketToStateEvent) {
+    } else if (event is ReconnectWebSocketEvent) {
       yield* _reconnectWebSocket(event);
     } else if (event is GetOwnWebSocketEvent) {
       yield* _getOwnWebSocket(event);
@@ -33,7 +33,7 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
     }
   }
 
-  Stream<WebSocketState> _reconnectWebSocket(ReconnectWebSocketToStateEvent event) async* {
+  Stream<WebSocketState> _reconnectWebSocket(ReconnectWebSocketEvent event) async* {
 
     if (state is WebSocketLoaded) {
       webSocketService.reconnnectWebSocket();

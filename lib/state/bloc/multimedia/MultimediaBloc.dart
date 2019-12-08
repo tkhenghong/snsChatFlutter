@@ -15,19 +15,19 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
   @override
   Stream<MultimediaState> mapEventToState(MultimediaEvent event) async* {
     if (event is InitializeMultimediaEvent) {
-      yield* _initializeMultimediasToState(event);
+      yield* _initializeMultimediaToState(event);
     } else if (event is AddMultimediaEvent) {
-      yield* _addMultimediaToState(event);
+      yield* _addMultimedia(event);
     } else if (event is EditMultimediaEvent) {
-      yield* _editMultimediaToState(event);
+      yield* _editMultimedia(event);
     } else if (event is DeleteMultimediaEvent) {
-      yield* _deleteMultimediaToState(event);
+      yield* _deleteMultimedia(event);
     } else if (event is SendMultimediaEvent) {
       yield* _uploadMultimedia(event);
     }
   }
 
-  Stream<MultimediaState> _initializeMultimediasToState(InitializeMultimediaEvent event) async* {
+  Stream<MultimediaState> _initializeMultimediaToState(InitializeMultimediaEvent event) async* {
     try {
       List<Multimedia> multimediaListFromDB = await multimediaDBService.getAllMultimedia();
 
@@ -41,31 +41,33 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     }
   }
 
-  Stream<MultimediaState> _addMultimediaToState(AddMultimediaEvent event) async* {
-    if (state is MultimediaLoaded) {
-      Multimedia multimediaFromServer;
-      bool saved = false;
+  Stream<MultimediaState> _addMultimedia(AddMultimediaEvent event) async* {
+    Multimedia multimediaFromServer;
+    bool saved = false;
 
-      multimediaFromServer = await multimediaAPIService.addMultimedia(event.multimedia);
+    multimediaFromServer = await multimediaAPIService.addMultimedia(event.multimedia);
 
-      if (!isObjectEmpty(multimediaFromServer)) {
-        saved = await multimediaDBService.addMultimedia(multimediaFromServer);
-        if (saved) {
-          List<Multimedia> existingMultimediaList = (state as MultimediaLoaded).multimediaList;
-          existingMultimediaList.add(event.multimedia);
-
-          yield MultimediaLoaded(existingMultimediaList);
-          functionCallback(event, multimediaFromServer);
+    if (!isObjectEmpty(multimediaFromServer)) {
+      saved = await multimediaDBService.addMultimedia(multimediaFromServer);
+      if (saved) {
+        List<Multimedia> existingMultimediaList = [];
+        if(state is MultimediaLoaded) {
+          existingMultimediaList = (state as MultimediaLoaded).multimediaList;
         }
-      }
 
-      if (isObjectEmpty(multimediaFromServer) || !saved) {
-        functionCallback(event, null);
+        existingMultimediaList.add(event.multimedia);
+
+        yield MultimediaLoaded(existingMultimediaList);
+        functionCallback(event, multimediaFromServer);
       }
+    }
+
+    if (isObjectEmpty(multimediaFromServer) || !saved) {
+      functionCallback(event, null);
     }
   }
 
-  Stream<MultimediaState> _editMultimediaToState(EditMultimediaEvent event) async* {
+  Stream<MultimediaState> _editMultimedia(EditMultimediaEvent event) async* {
     bool updatedInREST = false;
     bool updated = false;
 
@@ -92,7 +94,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     }
   }
 
-  Stream<MultimediaState> _deleteMultimediaToState(DeleteMultimediaEvent event) async* {
+  Stream<MultimediaState> _deleteMultimedia(DeleteMultimediaEvent event) async* {
     bool deletedInREST = false;
     bool deleted = false;
 

@@ -18,17 +18,17 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
   Stream<ConversationGroupState> mapEventToState(ConversationGroupEvent event) async* {
     // TODO: implement mapEventToState
     if (event is InitializeConversationGroupsEvent) {
-      yield* _mapInitializeConversationGroupToState(event);
-    } else if (event is AddConversationGroupToStateEvent) {
-      yield* _addConversationGroupToState(event);
+      yield* _mapInitializeConversationGroup(event);
+    } else if (event is AddConversationGroupEvent) {
+      yield* _addConversationGroup(event);
     } else if (event is EditConversationGroupEvent) {
-      yield* _editConversationGroupToState(event);
+      yield* _editConversationGroup(event);
     } else if (event is DeleteConversationGroupEvent) {
-      yield* _deleteConversationGroupToState(event);
+      yield* _deleteConversationGroup(event);
     }
   }
 
-  Stream<ConversationGroupState> _mapInitializeConversationGroupToState(InitializeConversationGroupsEvent event) async* {
+  Stream<ConversationGroupState> _mapInitializeConversationGroup(InitializeConversationGroupsEvent event) async* {
     try {
       List<ConversationGroup> conversationGroupListFromDB = await conversationGroupDBService.getAllConversationGroups();
 
@@ -42,11 +42,10 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     }
   }
 
-  Stream<ConversationGroupState> _addConversationGroupToState(AddConversationGroupToStateEvent event) async* {
+  Stream<ConversationGroupState> _addConversationGroup(AddConversationGroupEvent event) async* {
     ConversationGroup newConversationGroup;
     bool added = false;
     if (state is ConversationGroupsLoaded) {
-
       newConversationGroup = await conversationGroupAPIService.addConversationGroup(event.conversationGroup);
 
       if(!isObjectEmpty(newConversationGroup)) {
@@ -67,7 +66,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     }
   }
 
-  Stream<ConversationGroupState> _editConversationGroupToState(EditConversationGroupEvent event) async* {
+  Stream<ConversationGroupState> _editConversationGroup(EditConversationGroupEvent event) async* {
     bool updatedInREST = false;
     bool saved = false;
     if (state is ConversationGroupsLoaded) {
@@ -95,7 +94,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     }
   }
 
-  Stream<ConversationGroupState> _deleteConversationGroupToState(DeleteConversationGroupEvent event) async* {
+  Stream<ConversationGroupState> _deleteConversationGroup(DeleteConversationGroupEvent event) async* {
     bool deletedInREST = false;
     bool deleted = false;
     if (state is ConversationGroupsLoaded) {

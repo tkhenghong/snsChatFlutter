@@ -17,16 +17,16 @@ class InitializeWebSocketEvent extends WebSocketEvent {
   String toString() => 'InitializeWebSocketEvent';
 }
 
-class ReconnectWebSocketToStateEvent extends WebSocketEvent {
+class ReconnectWebSocketEvent extends WebSocketEvent {
   final Function callback;
 
-  ReconnectWebSocketToStateEvent({this.callback});
+  ReconnectWebSocketEvent({this.callback});
 
   @override
   List<Object> get props => [];
 
   @override
-  String toString() => 'ReconnectWebSocketToStateEvent';
+  String toString() => 'ReconnectWebSocketEvent';
 }
 
 class GetOwnWebSocketEvent extends WebSocketEvent {

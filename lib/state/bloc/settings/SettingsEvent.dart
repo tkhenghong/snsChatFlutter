@@ -29,7 +29,7 @@ class AddSettingsEvent extends SettingsEvent {
   List<Object> get props => [settings];
 
   @override
-  String toString() => 'AddSettingsToStateEvent {settings: $settings}';
+  String toString() => 'AddSettingsEvent {settings: $settings}';
 }
 
 class EditSettingsEvent extends SettingsEvent {
@@ -42,7 +42,7 @@ class EditSettingsEvent extends SettingsEvent {
   List<Object> get props => [settings];
 
   @override
-  String toString() => 'EditSettingsToStateEvent {settings: $settings}';
+  String toString() => 'EditSettingsEvent {settings: $settings}';
 }
 
 class DeleteSettingsEvent extends SettingsEvent {
@@ -55,7 +55,7 @@ class DeleteSettingsEvent extends SettingsEvent {
   List<Object> get props => [settings];
 
   @override
-  String toString() => 'DeleteSettingsToStateEvent {settings: $settings}';
+  String toString() => 'DeleteSettingsEvent {settings: $settings}';
 }
 
 class GetUserSettingsEvent extends SettingsEvent {

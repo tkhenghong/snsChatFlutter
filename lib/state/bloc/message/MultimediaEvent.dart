@@ -18,41 +18,41 @@ class InitializeMessagesEvent extends MessageEvent {
   String toString() => 'InitializeMessagesEvent';
 }
 
-class AddMessageToStateEvent extends MessageEvent {
+class AddMessageEvent extends MessageEvent {
   final Message message;
   final Function callback;
 
-  AddMessageToStateEvent({this.message, this.callback});
+  AddMessageEvent({this.message, this.callback});
 
   @override
   List<Object> get props => [message];
 
   @override
-  String toString() => 'AddMessageToStateEvent {message: $message}';
+  String toString() => 'AddMessageEvent {message: $message}';
 }
 
-class EditMessageToStateEvent extends MessageEvent {
+class EditMessageEvent extends MessageEvent {
   final Message message;
   final Function callback;
 
-  EditMessageToStateEvent({this.message, this.callback});
+  EditMessageEvent({this.message, this.callback});
 
   @override
   List<Object> get props => [message];
 
   @override
-  String toString() => 'EditMessageToStateEvent {message: $message}';
+  String toString() => 'EditMessageEvent {message: $message}';
 }
 
-class DeleteMessageToStateEvent extends MessageEvent {
+class DeleteMessageEvent extends MessageEvent {
   final Message message;
   final Function callback;
 
-  DeleteMessageToStateEvent({this.message, this.callback});
+  DeleteMessageEvent({this.message, this.callback});
 
   @override
   List<Object> get props => [message];
 
   @override
-  String toString() => 'DeleteMessageToStateEvent {message: $message}';
+  String toString() => 'DeleteMessageEvent {message: $message}';
 }

@@ -1,10 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
-import 'package:snschat_flutter/objects/index.dart';
 
 import 'bloc.dart';
 import 'package:bloc/bloc.dart';
@@ -99,7 +97,6 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
         GoogleSignIn googleSignIn = (state as GoogleInfoLoaded).googleSignIn;
         FirebaseAuth firebaseAuth = (state as GoogleInfoLoaded).firebaseAuth;
         FirebaseUser firebaseUser = (state as GoogleInfoLoaded).firebaseUser;
-
 
         if (!isObjectEmpty(event)) {
           event.callback(googleSignIn, firebaseAuth, firebaseUser);

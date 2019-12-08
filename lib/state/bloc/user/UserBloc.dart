@@ -20,9 +20,9 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       yield* _initializeUserToState(event);
     } else if (event is AddUserEvent) {
       yield* _addUser(event);
-    } else if (event is EditUserToStateEvent) {
+    } else if (event is EditUserEvent) {
       yield* _editUserToState(event);
-    } else if (event is DeleteUserFromStateEvent) {
+    } else if (event is DeleteUserEvent) {
       yield* _deleteUserFromState(event);
     } else if (event is GetOwnUserEvent) {
       yield* _getOwnUser(event);
@@ -37,16 +37,12 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     try {
       // Bloc-to-bloc communication. https://bloclibrary.dev/#/architecture
 
-      print('event.googleSignIn.currentUser.id: ' + event.googleSignIn.currentUser.id.toString());
       User userFromDB = await userDBService.getUserByGoogleAccountId(event.googleSignIn.currentUser.id);
 
       if (!isObjectEmpty(userFromDB)) {
-        print('UserBloc.dart if (!isObjectEmpty(userFromDB))');
-        print('UserBloc.dart userFromDB' + userFromDB.toString());
         yield UserLoaded(userFromDB);
         functionCallback(event, true);
       } else {
-        print('UserBloc.dart if (isObjectEmpty(userFromDB))');
         yield UserNotLoaded();
         functionCallback(event, false);
       }
@@ -61,16 +57,14 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     User userFromServer;
     bool userSaved = false;
 
-    if (state is UserLoaded) {
-      userFromServer = await userAPIService.addUser(event.user);
+    userFromServer = await userAPIService.addUser(event.user);
 
-      if (!isObjectEmpty(userFromServer)) {
-        userSaved = await userDBService.addUser(userFromServer);
+    if (!isObjectEmpty(userFromServer)) {
+      userSaved = await userDBService.addUser(userFromServer);
 
-        if (userSaved) {
-          functionCallback(event, userFromServer);
-          yield UserLoaded(userFromServer);
-        }
+      if (userSaved) {
+        functionCallback(event, userFromServer);
+        yield UserLoaded(userFromServer);
       }
     }
 
@@ -81,7 +75,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   // Change User information in API, DB, and State
-  Stream<UserState> _editUserToState(EditUserToStateEvent event) async* {
+  Stream<UserState> _editUserToState(EditUserEvent event) async* {
     bool updatedInREST = false;
     bool userSaved = false;
     if (state is UserLoaded) {
@@ -103,7 +97,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   // Remove User from DB, and BLOC state
-  Stream<UserState> _deleteUserFromState(DeleteUserFromStateEvent event) async* {
+  Stream<UserState> _deleteUserFromState(DeleteUserEvent event) async* {
     bool deletedFromREST = false;
     bool deleted = false;
     if (state is UserLoaded) {
@@ -135,6 +129,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   Stream<UserState> _checkUserSignedUp(CheckUserSignedUpEvent event) async* {
+
     bool isSignedUp = false;
     User existingUser;
 

@@ -28,7 +28,7 @@ class AddUserContactEvent extends UserContactEvent {
   List<Object> get props => [userContact];
 
   @override
-  String toString() => 'AddUserContactToStateEvent {userContact: $userContact}';
+  String toString() => 'AddUserContactEvent {userContact: $userContact}';
 }
 
 class EditUserContactEvent extends UserContactEvent {
@@ -41,7 +41,7 @@ class EditUserContactEvent extends UserContactEvent {
   List<Object> get props => [userContact];
 
   @override
-  String toString() => 'EditUserContactToStateEvent {userContact: $userContact}';
+  String toString() => 'EditUserContactEvent {userContact: $userContact}';
 }
 
 class DeleteUserContactEvent extends UserContactEvent {
@@ -54,7 +54,7 @@ class DeleteUserContactEvent extends UserContactEvent {
   List<Object> get props => [userContact];
 
   @override
-  String toString() => 'DeleteUserContactToStateEvent {userContact: $userContact}';
+  String toString() => 'DeleteUserContactEvent {userContact: $userContact}';
 }
 
 class GetOwnUserContactEvent extends UserContactEvent {

@@ -17,11 +17,11 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     if (event is InitializeUserContactsEvent) {
       yield* _initializeUserContactsToState(event);
     } else if (event is AddUserContactEvent) {
-      yield* _addUserContactToState(event);
+      yield* _addUserContact(event);
     } else if (event is EditUserContactEvent) {
-      yield* _editUserContactToState(event);
+      yield* _editUserContact(event);
     } else if (event is DeleteUserContactEvent) {
-      yield* _deleteUserContactToState(event);
+      yield* _deleteUserContact(event);
     } else if (event is GetOwnUserContactEvent) {
       yield* _getOwnUserContact(event);
     }
@@ -31,8 +31,6 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     try {
       List<UserContact> userContactListFromDB = await userContactDBService.getAllUserContacts();
 
-      print("userContactListFromDB.length: " + userContactListFromDB.length.toString());
-
       yield UserContactsLoaded(userContactListFromDB);
 
       functionCallback(event, true);
@@ -41,24 +39,25 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     }
   }
 
-  Stream<UserContactState> _addUserContactToState(AddUserContactEvent event) async* {
+  Stream<UserContactState> _addUserContact(AddUserContactEvent event) async* {
     UserContact newUserContact;
-    bool userContactAdded;
-    if (state is UserContactsLoaded) {
-      UserContact newUserContact = await userContactAPIService.addUserContact(event.userContact);
+    bool userContactAdded = false;
 
-      if (!isObjectEmpty(newUserContact)) {
-        bool userContactAdded = await userContactDBService.addUserContact(newUserContact);
-        if (userContactAdded) {
-          List<UserContact> existingUserContactList = (state as UserContactsLoaded).userContactList;
+    newUserContact = await userContactAPIService.addUserContact(event.userContact);
 
-          existingUserContactList.removeWhere((UserContact existingUserContact) => existingUserContact.id == event.userContact.id);
+    if (!isObjectEmpty(newUserContact)) {
+      userContactAdded = await userContactDBService.addUserContact(newUserContact);
+      if (userContactAdded) {
+        List<UserContact> existingUserContactList = [];
 
-          existingUserContactList.add(event.userContact);
-
-          functionCallback(event, event.userContact);
-          yield UserContactsLoaded(existingUserContactList);
+        if(state is UserContactsLoaded) {
+          existingUserContactList = (state as UserContactsLoaded).userContactList;
         }
+
+        existingUserContactList.add(event.userContact);
+
+        functionCallback(event, event.userContact);
+        yield UserContactsLoaded(existingUserContactList);
       }
     }
 
@@ -67,7 +66,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     }
   }
 
-  Stream<UserContactState> _editUserContactToState(EditUserContactEvent event) async* {
+  Stream<UserContactState> _editUserContact(EditUserContactEvent event) async* {
     bool updatedInREST = false;
     bool userContactEdited = false;
 
@@ -95,7 +94,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     }
   }
 
-  Stream<UserContactState> _deleteUserContactToState(DeleteUserContactEvent event) async* {
+  Stream<UserContactState> _deleteUserContact(DeleteUserContactEvent event) async* {
     bool deletedInREST = false;
     bool deleted = false;
 

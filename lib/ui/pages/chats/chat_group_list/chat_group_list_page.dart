@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -65,7 +63,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     return BlocListener<GoogleInfoBloc, GoogleInfoState>(
       listener: (context, googleInfoState) {
         if (googleInfoState is GoogleInfoLoaded) {
-          print('Coming here?');
           BlocProvider.of<UserBloc>(context).add(InitializeUserEvent(googleSignIn: googleInfoState.googleSignIn));
           BlocProvider.of<IPGeoLocationBloc>(context).add(GetIPGeoLocationEvent());
         }
@@ -80,7 +77,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
       },
       child: BlocBuilder<GoogleInfoBloc, GoogleInfoState>(
         builder: (context, googleInfoState) {
-          print('chat_group_list_page.dart googleInfoState: ' + googleInfoState.toString());
 
           if (googleInfoState is GoogleInfoLoading) {
             BlocProvider.of<GoogleInfoBloc>(context).add(InitializeGoogleInfoEvent(callback: (bool initialized) {}));
@@ -96,7 +92,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
               },
               child: BlocBuilder<UserBloc, UserState>(
                 builder: (context, userState) {
-                  print('chat_group_list_page.dart userState: ' + userState.toString());
                   if (userState is UserLoading) {
                     BlocProvider.of<UserBloc>(context).add(InitializeUserEvent(googleSignIn: googleInfoState.googleSignIn,
                         callback: (bool initialized) {}));
@@ -112,7 +107,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                       },
                       child: BlocBuilder<ConversationGroupBloc, ConversationGroupState>(
                         builder: (context, conversationGroupState) {
-                          print('chat_group_list_page.dart conversationGroupState: ' + conversationGroupState.toString());
                           return Center(child: Text('Checkpoint!'),);
                         },
                       ),

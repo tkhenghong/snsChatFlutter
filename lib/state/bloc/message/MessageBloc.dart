@@ -16,12 +16,12 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
   Stream<MessageState> mapEventToState(MessageEvent event) async* {
     if (event is InitializeMessagesEvent) {
       yield* _initializeMessagesToState(event);
-    } else if (event is AddMessageToStateEvent) {
-      yield* _addMessageToState(event);
-    } else if (event is EditMessageToStateEvent) {
-      yield* _editMessageToState(event);
-    } else if (event is DeleteMessageToStateEvent) {
-      yield* _deleteMessageToState(event);
+    } else if (event is AddMessageEvent) {
+      yield* _addMessage(event);
+    } else if (event is EditMessageEvent) {
+      yield* _editMessage(event);
+    } else if (event is DeleteMessageEvent) {
+      yield* _deleteMessage(event);
     }
   }
 
@@ -39,7 +39,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     }
   }
 
-  Stream<MessageState> _addMessageToState(AddMessageToStateEvent event) async* {
+  Stream<MessageState> _addMessage(AddMessageEvent event) async* {
     Message messageFromServer;
     bool savedIntoDB = false;
     if (state is MessagesLoaded) {
@@ -63,7 +63,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     }
   }
 
-  Stream<MessageState> _editMessageToState(EditMessageToStateEvent event) async* {
+  Stream<MessageState> _editMessage(EditMessageEvent event) async* {
     bool updatedInREST = false;
     bool updated = false;
     if (state is MessagesLoaded) {
@@ -88,7 +88,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     }
   }
 
-  Stream<MessageState> _deleteMessageToState(DeleteMessageToStateEvent event) async* {
+  Stream<MessageState> _deleteMessage(DeleteMessageEvent event) async* {
     bool deletedInREST = false;
     bool deleted = false;
     if (state is MessagesLoaded) {
