@@ -1,3 +1,3 @@
 export 'MessageBloc.dart';
-export 'MultimediaEvent.dart';
+export 'MessageEvent.dart';
 export 'MessageState.dart';

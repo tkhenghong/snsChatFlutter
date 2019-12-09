@@ -1,4 +1,4 @@
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
@@ -10,7 +10,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/objects/index.dart';
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/sign_up/sign_up_page.dart';
 import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number_page.dart';
@@ -28,7 +27,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  WholeAppBloc wholeAppBloc;
   final _formKey = GlobalKey<FormState>();
   TextEditingController mobileNoTextController = new TextEditingController();
 
@@ -55,46 +53,54 @@ class LoginPageState extends State<LoginPage> {
 
   _signIn(BuildContext context) async {
     if (_formKey.currentState.validate()) {
-
       showCenterLoadingIndicator(context);
 
-      BlocProvider.of<GoogleInfoBloc>(context).add(InitializeGoogleInfoEvent(callback: (GoogleSignIn googleSignIn) {
-        if (!isObjectEmpty(googleSignIn)) {
-          BlocProvider.of<UserBloc>(context).add(CheckUserSignedUpEvent(
-              mobileNo: getPhoneNumber(),
-              googleSignIn: googleSignIn,
-              callback: (bool isSignedUp) {
-                if (isSignedUp) {
-                  BlocProvider.of<UserBloc>(context).add(UserSignInEvent(
-                      googleSignIn: googleSignIn,
-                      mobileNo: getPhoneNumber(),
-                      callback: (User user2) {
-                        if (!isObjectEmpty(user2)) {
-                          BlocProvider.of<SettingsBloc>(context).add(GetUserSettingsEvent(user: user2, callback: (Settings settings) {
-                            if(!isObjectEmpty(settings)) {
-                              Navigator.pop(context);
-                              goToVerifyPhoneNumber(getPhoneNumber());
-                            } else {
-                              Fluttertoast.showToast(
-                                  msg: 'Invalid Mobile No./matching Google account. Please try again!', toastLength: Toast.LENGTH_SHORT);
-                              BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
-                              Navigator.pop(context);
-                            }
-                          }));
-                        } else {
-                          Fluttertoast.showToast(
-                              msg: 'Invalid Mobile No./matching Google account. Please try again!', toastLength: Toast.LENGTH_SHORT);
-                          BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
-                          Navigator.pop(context);
-                        }
-                      }));
-                } else {
-                  Fluttertoast.showToast(
-                      msg: 'Unregconized phone number/Google Account. Please sign up first.', toastLength: Toast.LENGTH_SHORT);
-                  BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
-                  Navigator.pop(context);
-                }
-              }));
+      BlocProvider.of<GoogleInfoBloc>(context).add(InitializeGoogleInfoEvent(callback: (bool initialized) {
+        if (initialized) {
+          BlocProvider.of<GoogleInfoBloc>(context)
+              .add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn, FirebaseAuth firebaseAuth, FirebaseUser firebaseUser) {
+            BlocProvider.of<UserBloc>(context).add(CheckUserSignedUpEvent(
+                mobileNo: getPhoneNumber(),
+                googleSignIn: googleSignIn,
+                callback: (bool isSignedUp) {
+                  if (isSignedUp) {
+                    BlocProvider.of<UserBloc>(context).add(UserSignInEvent(
+                        googleSignIn: googleSignIn,
+                        mobileNo: getPhoneNumber(),
+                        callback: (User user2) {
+                          if (!isObjectEmpty(user2)) {
+                            BlocProvider.of<SettingsBloc>(context).add(GetUserSettingsEvent(
+                                user: user2,
+                                callback: (Settings settings) {
+                                  if (!isObjectEmpty(settings)) {
+                                    print('login_page.dart if (!isObjectEmpty(settings))');
+                                    Navigator.pop(context);
+                                    goToVerifyPhoneNumber(getPhoneNumber());
+                                  } else {
+                                    print('login_page.dart if (isObjectEmpty(settings))');
+                                    Fluttertoast.showToast(
+                                        msg: 'Invalid Mobile No./matching Google account. Please try again.',
+                                        toastLength: Toast.LENGTH_SHORT);
+                                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+                                    Navigator.pop(context);
+                                  };
+                                }));
+                          } else {
+                            print('login_page.dart if (isObjectEmpty(user2))');
+                            Fluttertoast.showToast(
+                                msg: 'Invalid Mobile No./matching Google account. Please try again.', toastLength: Toast.LENGTH_SHORT);
+                            BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+                            Navigator.pop(context);
+                          }
+                        }));
+                  } else {
+                    Fluttertoast.showToast(
+                        msg: 'Unregconized phone number/Google Account. Please sign up first.', toastLength: Toast.LENGTH_SHORT);
+                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+                    Navigator.pop(context);
+                  }
+                }));
+          }));
         } else {
           Fluttertoast.showToast(msg: 'Please sign into your Google Account first.', toastLength: Toast.LENGTH_SHORT);
           BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
@@ -153,8 +159,7 @@ class LoginPageState extends State<LoginPage> {
             listener: (context, state) {},
           ),
           BlocListener<UserBloc, UserState>(
-            listener: (context, state) {
-            },
+            listener: (context, state) {},
           ),
         ],
         child: GestureDetector(

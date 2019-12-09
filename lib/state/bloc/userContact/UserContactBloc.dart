@@ -24,6 +24,8 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       yield* _deleteUserContact(event);
     } else if (event is GetOwnUserContactEvent) {
       yield* _getOwnUserContact(event);
+    } else if (event is GetUserPreviousUserContactsEvent) {
+      yield* _getUserPreviousUserContactsEvent(event);
     }
   }
 
@@ -50,7 +52,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       if (userContactAdded) {
         List<UserContact> existingUserContactList = [];
 
-        if(state is UserContactsLoaded) {
+        if (state is UserContactsLoaded) {
           existingUserContactList = (state as UserContactsLoaded).userContactList;
         }
 
@@ -127,6 +129,33 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       functionCallback(event, userContactFromDB);
     } else {
       functionCallback(event, null);
+    }
+  }
+
+  Stream<UserContactState> _getUserPreviousUserContactsEvent(GetUserPreviousUserContactsEvent event) async* {
+    List<UserContact> userContactListFromServer = await userContactAPIService.getUserContactsByUserId(event.user.id);
+
+    if (state is UserContactsLoaded) {
+      List<UserContact> existingUserContactList = (state as UserContactsLoaded).userContactList;
+
+      if (!isObjectEmpty(userContactListFromServer) && userContactListFromServer.length > 0) {
+        for (UserContact userContactFromServer in userContactListFromServer) {
+          bool userContactExist =
+              existingUserContactList.contains((UserContact userContactFromDB) => userContactFromDB.id == userContactFromServer.id);
+
+          if (userContactExist) {
+            existingUserContactList.removeWhere((UserContact existingUserContact) => existingUserContact.id == userContactFromServer.id);
+            userContactDBService.editUserContact(userContactFromServer);
+          } else {
+            userContactDBService.addUserContact(userContactFromServer);
+          }
+
+          existingUserContactList.add(userContactFromServer);
+        }
+      }
+
+      yield UserContactsLoaded(existingUserContactList);
+      functionCallback(event, true);
     }
   }
 

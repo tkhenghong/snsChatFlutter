@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:snschat_flutter/objects/conversationGroup/conversation_group.dart';
+import 'package:snschat_flutter/objects/index.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial
@@ -39,7 +40,7 @@ class EditConversationGroupEvent extends ConversationGroupEvent {
   final ConversationGroup conversationGroup;
   final Function callback;
 
-  EditConversationGroupEvent({this.conversationGroup, this.callback});
+  const EditConversationGroupEvent({this.conversationGroup, this.callback});
 
   @override
   List<Object> get props => [conversationGroup];
@@ -52,11 +53,24 @@ class DeleteConversationGroupEvent extends ConversationGroupEvent {
   final ConversationGroup conversationGroup;
   final Function callback;
 
-  DeleteConversationGroupEvent(this.conversationGroup, this.callback);
+  const DeleteConversationGroupEvent(this.conversationGroup, this.callback);
 
   @override
   List<Object> get props => [conversationGroup];
 
   @override
   String toString() => 'DeleteConversationGroupEvent {conversationGroup: $conversationGroup}';
+}
+
+class GetUserPreviousConversationGroupsEvent extends ConversationGroupEvent {
+  final User user;
+  final Function callback;
+
+  const GetUserPreviousConversationGroupsEvent({this.user, this.callback});
+
+  @override
+  List<Object> get props => [user];
+
+  @override
+  String toString() => 'GetUserPreviousConversationGroupsEvent {user: $user}';
 }

@@ -69,3 +69,16 @@ class GetOwnUserContactEvent extends UserContactEvent {
   @override
   String toString() => 'GetOwnUserContactEvent';
 }
+
+class GetUserPreviousUserContactsEvent extends UserContactEvent {
+  final User user;
+  final Function callback;
+
+  GetUserPreviousUserContactsEvent({this.user, this.callback});
+
+  @override
+  List<Object> get props => [user];
+
+  @override
+  String toString() => 'GetUserPreviousUserContactsEvent {user: $user}';
+}

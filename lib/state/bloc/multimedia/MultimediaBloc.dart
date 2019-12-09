@@ -24,14 +24,18 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
       yield* _deleteMultimedia(event);
     } else if (event is SendMultimediaEvent) {
       yield* _uploadMultimedia(event);
+    } else if (event is GetUserProfilePictureMultimediaEvent) {
+      yield* _getUserProfilePictureMultimediaEvent(event);
+    } else if (event is GetConversationGroupsMultimediaEvent) {
+      yield* _getConversationGroupsMultimediaEvent(event);
+    } else if (event is GetUserContactsMultimediaEvent) {
+      yield* _getUserContactsMultimediaEvent(event);
     }
   }
 
   Stream<MultimediaState> _initializeMultimediaToState(InitializeMultimediaEvent event) async* {
     try {
       List<Multimedia> multimediaListFromDB = await multimediaDBService.getAllMultimedia();
-
-      print("multimediaListFromDB.length: " + multimediaListFromDB.length.toString());
 
       yield MultimediaLoaded(multimediaListFromDB);
 
@@ -51,7 +55,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
       saved = await multimediaDBService.addMultimedia(multimediaFromServer);
       if (saved) {
         List<Multimedia> existingMultimediaList = [];
-        if(state is MultimediaLoaded) {
+        if (state is MultimediaLoaded) {
           existingMultimediaList = (state as MultimediaLoaded).multimediaList;
         }
 
@@ -134,6 +138,66 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     }
 
     add(AddMultimediaEvent(multimedia: newMultimedia, callback: (Multimedia multimedia) {}));
+  }
+
+  Stream<MultimediaState> _getUserProfilePictureMultimediaEvent(GetUserProfilePictureMultimediaEvent event) async* {
+    List<Multimedia> multimediaList = [];
+
+    if (state is MultimediaLoaded) {
+      multimediaList = (state as MultimediaLoaded).multimediaList;
+    }
+
+    // Get user profile picture
+    Multimedia multimediaFromServer = await multimediaAPIService.getMultimediaOfAUser(event.user.id);
+
+    if (!isObjectEmpty(multimediaFromServer)) {
+      multimediaList.add(multimediaFromServer);
+    }
+
+    yield MultimediaLoaded(multimediaList);
+    functionCallback(event, true);
+  }
+
+  Stream<MultimediaState> _getConversationGroupsMultimediaEvent(GetConversationGroupsMultimediaEvent event) async* {
+    List<Multimedia> multimediaList = [];
+
+    if (state is MultimediaLoaded) {
+      multimediaList = (state as MultimediaLoaded).multimediaList;
+    }
+
+    if (!isObjectEmpty(event.conversationGroupList) && event.conversationGroupList.length > 0) {
+      for (ConversationGroup conversationGroup in event.conversationGroupList) {
+        List<Multimedia> multimediaListFromServer = await multimediaAPIService.getAllMultimediaOfAConversationGroup(conversationGroup.id);
+
+        if (!isObjectEmpty(multimediaListFromServer) && multimediaListFromServer.length > 0) {
+          multimediaList = [multimediaList, multimediaListFromServer].expand((x) => x).toList();
+        }
+      }
+    }
+
+    yield MultimediaLoaded(multimediaList);
+    functionCallback(event, true);
+  }
+
+  Stream<MultimediaState> _getUserContactsMultimediaEvent(GetUserContactsMultimediaEvent event) async* {
+    List<Multimedia> multimediaList = [];
+
+    if (state is MultimediaLoaded) {
+      multimediaList = (state as MultimediaLoaded).multimediaList;
+    }
+
+    if (!isObjectEmpty(event.userContactList) && event.userContactList.length > 0) {
+      for (UserContact userContact in event.userContactList) {
+        Multimedia userContactMultimedia = await multimediaAPIService.getMultimediaOfAUserContact(userContact.id);
+
+        if (!isObjectEmpty(userContactMultimedia)) {
+          multimediaList.add(userContactMultimedia);
+        }
+      }
+    }
+
+    yield MultimediaLoaded(multimediaList);
+    functionCallback(event, true);
   }
 
   // To send response to those dispatched Actions

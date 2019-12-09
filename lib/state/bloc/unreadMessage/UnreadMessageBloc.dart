@@ -22,14 +22,14 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
       yield* _editUnreadMessage(event);
     } else if (event is DeleteUnreadMessageEvent) {
       yield* _deleteUnreadMessage(event);
+    } else if (event is GetUserPreviousUnreadMessagesEvent) {
+      yield* _getPreviousUnreadMessages(event);
     }
   }
 
   Stream<UnreadMessageState> _initializeUnreadMessagesToState(InitializeUnreadMessagesEvent event) async* {
     try {
       List<UnreadMessage> unreadMessageListFromDB = await unreadMessageDBService.getAllUnreadMessage();
-
-      print("unreadMessageListFromDB.length: " + unreadMessageListFromDB.length.toString());
 
       yield UnreadMessagesLoaded(unreadMessageListFromDB);
 
@@ -119,6 +119,36 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
 
     if (!deletedInREST || !unreadMessageDeleted) {
       functionCallback(event, false);
+    }
+  }
+
+  Stream<UnreadMessageState> _getPreviousUnreadMessages(GetUserPreviousUnreadMessagesEvent event) async* {
+    List<UnreadMessage> unreadMessageListFromServer = await unreadMessageAPIService.getUnreadMessagesOfAUser(event.user.id);
+
+    if (state is UnreadMessagesLoaded) {
+      List<UnreadMessage> existingUnreadMessageList = (state as UnreadMessagesLoaded).unreadMessageList;
+
+      if (unreadMessageListFromServer != null && unreadMessageListFromServer.length > 0) {
+        // Update the current info of the unreadMessage to latest information
+
+        for (UnreadMessage unreadMessageFromServer in unreadMessageListFromServer) {
+          bool unreadMessageExist = existingUnreadMessageList
+              .contains((UnreadMessage unreadMessageFromDB) => unreadMessageFromDB.id == unreadMessageFromServer.id);
+
+          if (unreadMessageExist) {
+            unreadMessageDBService.editUnreadMessage(unreadMessageFromServer);
+
+            existingUnreadMessageList
+                .removeWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.id == unreadMessageFromServer.id);
+          } else {
+            unreadMessageDBService.addUnreadMessage(unreadMessageFromServer);
+          }
+
+          existingUnreadMessageList.add(unreadMessageFromServer);
+        }
+      }
+      yield UnreadMessagesLoaded(existingUnreadMessageList);
+      functionCallback(event, true);
     }
   }
 

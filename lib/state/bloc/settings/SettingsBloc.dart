@@ -36,7 +36,6 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       if (!isObjectEmpty(event.user)) {
         // TODO: get user from state using better way
         settingsFromDB = await settingsDBService.getSettingsOfAUser(event.user.id);
-        print("settingsFromDB.userId: " + settingsFromDB.userId);
 
         if (!isObjectEmpty(settingsFromDB)) {
           functionCallback(event, true);

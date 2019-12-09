@@ -17,7 +17,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   @override
   Stream<UserState> mapEventToState(UserEvent event) async* {
     if (event is InitializeUserEvent) {
-      yield* _initializeUserToState(event);
+      yield* _initializeUser(event);
     } else if (event is AddUserEvent) {
       yield* _addUser(event);
     } else if (event is EditUserEvent) {
@@ -33,7 +33,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     }
   }
 
-  Stream<UserState> _initializeUserToState(InitializeUserEvent event) async* {
+  Stream<UserState> _initializeUser(InitializeUserEvent event) async* {
     try {
       // Bloc-to-bloc communication. https://bloclibrary.dev/#/architecture
 
@@ -147,21 +147,27 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   Stream<UserState> _signIn(UserSignInEvent event) async* {
-    bool isSignedIn;
+    bool isSignedIn = false;
     User userFromServer;
+    bool saved = false;
     if (!isObjectEmpty(event.googleSignIn)) {
       isSignedIn = await event.googleSignIn.isSignedIn();
       if (isSignedIn) {
         userFromServer = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
 
         if (!isObjectEmpty(userFromServer)) {
-          yield UserLoaded(userFromServer);
-          functionCallback(event, userFromServer);
+
+          saved = await userDBService.addUser(userFromServer);
+
+          if(saved) {
+            yield UserLoaded(userFromServer);
+            functionCallback(event, userFromServer);
+          }
         }
       }
     }
 
-    if (!isSignedIn || !isObjectEmpty(userFromServer)) {
+    if (!isSignedIn || isObjectEmpty(userFromServer) || !saved) {
       yield UserNotLoaded();
       functionCallback(event, null);
     }

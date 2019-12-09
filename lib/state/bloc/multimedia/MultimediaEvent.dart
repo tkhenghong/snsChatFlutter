@@ -69,3 +69,42 @@ class SendMultimediaEvent extends MultimediaEvent {
   @override
   String toString() => 'SendMultimediaEvent {multimedia: $multimedia}';
 }
+
+class GetUserProfilePictureMultimediaEvent extends MultimediaEvent {
+  final User user;
+  final Function callback;
+
+  GetUserProfilePictureMultimediaEvent({this.user, this.callback});
+
+  @override
+  List<Object> get props => [user];
+
+  @override
+  String toString() => 'GetUserProfilePictureMultimediaEvent {user: $user}';
+}
+
+class GetConversationGroupsMultimediaEvent extends MultimediaEvent {
+  final List<ConversationGroup> conversationGroupList;
+  final Function callback;
+
+  GetConversationGroupsMultimediaEvent({this.conversationGroupList, this.callback});
+
+  @override
+  List<Object> get props => [conversationGroupList];
+
+  @override
+  String toString() => 'GetConversationGroupsMultimediaEvent {conversationGroupList: $conversationGroupList}';
+}
+
+class GetUserContactsMultimediaEvent extends MultimediaEvent {
+  final List<UserContact> userContactList;
+  final Function callback;
+
+  GetUserContactsMultimediaEvent({this.userContactList, this.callback});
+
+  @override
+  List<Object> get props => [userContactList];
+
+  @override
+  String toString() => 'GetUserContactsMultimediaEvent {userContactList: $userContactList}';
+}

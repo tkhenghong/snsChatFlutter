@@ -25,14 +25,14 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       yield* _editConversationGroup(event);
     } else if (event is DeleteConversationGroupEvent) {
       yield* _deleteConversationGroup(event);
+    } else if(event is GetUserPreviousConversationGroupsEvent) {
+      yield* _getUserPreviousConversationGroups(event);
     }
   }
 
   Stream<ConversationGroupState> _mapInitializeConversationGroup(InitializeConversationGroupsEvent event) async* {
     try {
       List<ConversationGroup> conversationGroupListFromDB = await conversationGroupDBService.getAllConversationGroups();
-
-      print("conversationGroupListFromDB.length: " + conversationGroupListFromDB.length.toString());
 
       yield ConversationGroupsLoaded(conversationGroupListFromDB);
 
@@ -118,6 +118,39 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
 
     if(!deletedInREST || !deleted) {
       functionCallback(event, false);
+    }
+  }
+
+  Stream<ConversationGroupState> _getUserPreviousConversationGroups(GetUserPreviousConversationGroupsEvent event) async* {
+    List<ConversationGroup> conversationGroupListFromServer =
+    await conversationGroupAPIService.getConversationGroupsForUserByMobileNo(event.user.mobileNo);
+
+    if(state is ConversationGroupsLoaded) {
+
+      List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
+
+      if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0) {
+        // Update the current info of the conversationGroup to latest information
+        for(ConversationGroup conversationGroupFromServer in conversationGroupListFromServer) {
+
+          bool conversationGroupExist = existingConversationGroupList
+              .contains((ConversationGroup conversationGroupFromDB) => conversationGroupFromDB.id == conversationGroupFromServer.id);
+
+          if (conversationGroupExist) {
+            conversationGroupDBService.editConversationGroup(conversationGroupFromServer);
+
+            existingConversationGroupList
+                .removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == conversationGroupFromServer.id);
+          } else {
+            conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
+          }
+
+          existingConversationGroupList.add(conversationGroupFromServer);
+        }
+      }
+
+      yield ConversationGroupsLoaded(existingConversationGroupList);
+      functionCallback(event, true);
     }
   }
 

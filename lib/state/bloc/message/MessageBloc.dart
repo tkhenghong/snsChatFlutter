@@ -29,8 +29,6 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     try {
       List<Message> messageListFromDB = await messageDBService.getAllMessages();
 
-      print("messageListFromDB.length: " + messageListFromDB.length.toString());
-
       functionCallback(event, true);
       yield MessagesLoaded(messageListFromDB);
     } catch (e) {

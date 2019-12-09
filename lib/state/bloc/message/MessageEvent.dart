@@ -56,3 +56,17 @@ class DeleteMessageEvent extends MessageEvent {
   @override
   String toString() => 'DeleteMessageEvent {message: $message}';
 }
+
+
+class GetUserPreviousMessagesEvent extends MessageEvent {
+  final User user;
+  final Function callback;
+
+  GetUserPreviousMessagesEvent({this.user, this.callback});
+
+  @override
+  List<Object> get props => [user];
+
+  @override
+  String toString() => 'GetUserPreviousMessagesEvent {user: $user}';
+}
