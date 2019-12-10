@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 // Import package
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
@@ -15,9 +14,7 @@ import 'package:snschat_flutter/objects/conversationGroup/conversation_group.dar
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
-import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
 import 'package:snschat_flutter/ui/pages/group_name/group_name_page.dart';
 
 import 'CustomSearchDelegate.dart';

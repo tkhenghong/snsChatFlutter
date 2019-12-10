@@ -9,3 +9,4 @@ export 'unreadMessage/bloc.dart';
 export 'user/bloc.dart';
 export 'userContact/bloc.dart';
 export 'webSocket/bloc.dart';
+export 'phoneStorageContacts/bloc.dart';
