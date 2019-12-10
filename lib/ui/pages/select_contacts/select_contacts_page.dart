@@ -13,8 +13,7 @@ import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/objects/conversationGroup/conversation_group.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppState.dart';
+import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/group_name/group_name_page.dart';
 
 import 'CustomSearchDelegate.dart';
@@ -33,7 +32,6 @@ class SelectContactsPage extends StatefulWidget {
 class SelectContactsPageState extends State<SelectContactsPage> {
   bool isLoading = true;
   bool contactLoaded = false;
-  WholeAppBloc wholeAppBloc;
   PermissionStatus permissionStatus;
   List<Contact> selectedContacts = [];
   Map<String, bool> contactCheckBoxes = {};
@@ -47,39 +45,20 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     super.initState();
     _refreshController = new RefreshController();
     scrollController = new ScrollController();
+    getContacts();
+    setConversationType(widget.chatGroupType);
   }
 
-  setupCheckBoxes() {
-    // Set up checkboxes first
-//    wholeAppBloc.currentState.phoneContactList.forEach((contact) {
-//      contactCheckBoxes[contact.displayName] = false;
-//    });
+  setupCheckBoxes(List<Contact> phoneStorageContactList) {
+    phoneStorageContactList.forEach((contact) {
+      contactCheckBoxes[contact.displayName] = false;
+    });
+
     contactLoaded = true;
   }
 
   getContacts() async {
-//    if (wholeAppBloc.currentState.phoneContactList.length == 0) {
-//      wholeAppBloc.dispatch(GetPhoneStorageContactsEvent(callback: (bool getContactsSuccess) {
-//        if (getContactsSuccess) {
-//          // Set up checkboxes first
-//          setupCheckBoxes();
-//          // Rerender the page
-//          setState(() {
-//            isLoading = false;
-//          });
-//        } else {
-//          setState(() {
-//            isLoading = false;
-//          });
-//        }
-//      }));
-//    } else if (!contactLoaded) {
-//      // need to add _wholeAppBloc.currentState.phoneContactList.length == 0 together
-//      setupCheckBoxes();
-//      setState(() {
-//        isLoading = false;
-//      });
-//    }
+    BlocProvider.of<PhoneStorageContactBloc>(context).add(GetPhoneStorageContactsEvent(callback: (bool success) {}));
   }
 
   setConversationType(String chatGroupType) async {
@@ -105,44 +84,65 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _refreshController.dispose();
+    scrollController.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
-    wholeAppBloc = _wholeAppBloc;
-
-    if (isLoading) {
-      getContacts();
-      setConversationType(widget.chatGroupType);
-    }
-
-    return new Scaffold(
+    return Scaffold(
       appBar: appBar(context),
-      body: isLoading
-          ? showLoadingContactsPage(context)
-//          : wholeAppBloc.currentState.phoneContactList.length > 0
-          : true
-              ? BlocBuilder(
-                  bloc: _wholeAppBloc,
-                  builder: (context, WholeAppState state) {
-                    return ListView(
-                      controller: scrollController,
-                      physics: BouncingScrollPhysics(),
-                      children: state.phoneContactList.map((Contact contact) {
-                        return Container(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: <Widget>[
-                              needSelectMultipleContacts()
-                                  ? showMultiContactSelectPage(context, contact)
-                                  : showSingleContactSelectPage(context, contact)
-                            ],
-                          ),
-                        );
-                      }).toList(),
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<PhoneStorageContactBloc, PhoneStorageContactState>(
+            listener: (context, phoneStorageContactState) {
+              if (phoneStorageContactState is PhoneStorageContactsLoaded) {
+                setupCheckBoxes(phoneStorageContactState.phoneStorageContactList);
+              }
+            },
+          ),
+        ],
+        child: BlocBuilder<PhoneStorageContactBloc, PhoneStorageContactState>(
+          builder: (context, phoneStorageContactState) {
+            if (phoneStorageContactState is PhoneStorageContactLoading) {
+              return showLoadingContactsPage(context);
+            }
+
+            if (phoneStorageContactState is PhoneStorageContactsLoaded) {
+              if (phoneStorageContactState.phoneStorageContactList.length == 0) {
+                return showNoContactPage(context);
+              } else {
+                return ListView(
+                  controller: scrollController,
+                  physics: BouncingScrollPhysics(),
+                  children: phoneStorageContactState.phoneStorageContactList.map((Contact contact) {
+                    return Container(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          needSelectMultipleContacts()
+                              ? showMultiContactSelectPage(context, contact)
+                              : showSingleContactSelectPage(context, contact)
+                        ],
+                      ),
                     );
-                  },
-                )
-              : contactLoaded ? showNoContactPage(context) : showNoContactPermissionPage(context),
+                  }).toList(),
+                );
+              }
+            }
+
+            if (phoneStorageContactState is PhoneStorageContactsNotLoaded) {
+              return showNoContactPermissionPage(context);
+            }
+
+            return showErrorPage(context);
+          },
+        ),
+      ),
       bottomNavigationBar: _bottomAppBar(context),
       floatingActionButton: _floatingActionButton(context),
     );
@@ -254,6 +254,21 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     );
   }
 
+  Widget showErrorPage(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            'Error in getting phone storage contacts. Please try again.',
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget showNoContactPage(BuildContext context) {
     return Center(
       child: Column(
@@ -284,10 +299,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         ),
         RaisedButton(
           onPressed: () {
-            // Restart the process
-            setState(() {
-              isLoading = true;
-            });
+            getContacts(); // Reload
           },
           child: Text("Grant Contact Permission"),
         )

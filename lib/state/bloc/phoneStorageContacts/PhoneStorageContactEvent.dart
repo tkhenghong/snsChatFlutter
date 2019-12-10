@@ -15,5 +15,16 @@ class GetPhoneStorageContactsEvent extends PhoneStorageContactEvent {
   const GetPhoneStorageContactsEvent({this.callback});
 
   @override
-  String toString() => 'InitializePhoneStorageContactsEvent';
+  String toString() => 'GetPhoneStorageContactsEvent';
+}
+
+// SearchPhoneStorageContactEvent
+class SearchPhoneStorageContactEvent extends PhoneStorageContactEvent {
+  final String searchTerm;
+  final Function callback;
+
+  const SearchPhoneStorageContactEvent({this.searchTerm, this.callback});
+
+  @override
+  String toString() => 'SearchPhoneStorageContactEvent - searchTerm: ${searchTerm}';
 }

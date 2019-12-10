@@ -13,11 +13,12 @@ class PhoneStorageContactLoading extends PhoneStorageContactState {}
 
 class PhoneStorageContactsLoaded extends PhoneStorageContactState {
   final List<Contact> phoneStorageContactList;
+  final List<Contact> searchResults;
 
-  const PhoneStorageContactsLoaded([this.phoneStorageContactList = const []]);
+  const PhoneStorageContactsLoaded([this.phoneStorageContactList = const [], this.searchResults = const []]);
 
   @override
-  List<Object> get props => [phoneStorageContactList];
+  List<Object> get props => [phoneStorageContactList, searchResults];
 
   @override
   String toString() => 'PhoneStorageContactsLoaded {phoneStorageContactList: $phoneStorageContactList}';

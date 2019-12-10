@@ -5,7 +5,6 @@ import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/service/permissions/PermissionService.dart';
 import 'package:snschat_flutter/state/bloc/phoneStorageContacts/bloc.dart';
 
-// TODO: To be used in select contact page
 class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorageContactState> {
   PermissionService permissionService = PermissionService();
 
@@ -16,6 +15,8 @@ class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorag
   Stream<PhoneStorageContactState> mapEventToState(PhoneStorageContactEvent event) async* {
     if (event is GetPhoneStorageContactsEvent) {
       yield* _initializePhoneStorageContactsToState(event);
+    } else if (event is SearchPhoneStorageContactEvent) {
+      yield* _searchPhoneStorageContactEvent(event);
     }
   }
 
@@ -61,6 +62,44 @@ class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorag
       yield PhoneStorageContactsNotLoaded();
       event.callback(false);
     }
+  }
+
+  Stream<PhoneStorageContactState> _searchPhoneStorageContactEvent(SearchPhoneStorageContactEvent event) async* {
+    List<Contact> phoneStorageContactList = [];
+    List<Contact> contactSearchResultList = [];
+
+    if (state is PhoneStorageContactsLoaded) {
+      phoneStorageContactList = (state as PhoneStorageContactsLoaded).phoneStorageContactList;
+    }
+
+    List<Contact> searchResultBasedOnName = phoneStorageContactList.where((Contact contact) {
+      return contact.displayName == event.searchTerm.toString() ||
+          contact.givenName == event.searchTerm.toString() ||
+          contact.middleName == event.searchTerm.toString() ||
+          contact.familyName == event.searchTerm.toString() ||
+          contact.company == event.searchTerm.toString() ||
+          contact.jobTitle == event.searchTerm.toString();
+    }).toList();
+
+    contactSearchResultList = [contactSearchResultList, searchResultBasedOnName].expand((x) => x).toList();
+
+    yield PhoneStorageContactsLoaded(
+        phoneStorageContactList, contactSearchResultList); // display current found results first (appear faster)
+
+    List<Contact> searchResultBasedOnPhoneNumber = phoneStorageContactList.where((Contact contact) {
+      bool phoneFound = false;
+      contact.phones.forEach((phone) {
+        if (phone.value == event.searchTerm.toString()) {
+          phoneFound = true;
+          return;
+        }
+      });
+      return phoneFound;
+    }).toList();
+
+    contactSearchResultList = [contactSearchResultList, searchResultBasedOnName, searchResultBasedOnPhoneNumber].expand((x) => x).toList();
+
+    yield PhoneStorageContactsLoaded(phoneStorageContactList, contactSearchResultList); // again
   }
 
   // To send response to those dispatched Actions
