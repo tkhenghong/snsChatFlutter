@@ -68,28 +68,36 @@ class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorag
     List<Contact> phoneStorageContactList = [];
     List<Contact> contactSearchResultList = [];
 
+    String searchString = event.searchTerm.toString().toLowerCase();
+
     if (state is PhoneStorageContactsLoaded) {
       phoneStorageContactList = (state as PhoneStorageContactsLoaded).phoneStorageContactList;
     }
 
+    print('PhoneStorageContactBloc.dart phoneStorageContactList: ' + phoneStorageContactList.toString());
+    print('PhoneStorageContactBloc.dart searchString: ' + searchString);
+
     List<Contact> searchResultBasedOnName = phoneStorageContactList.where((Contact contact) {
-      return contact.displayName == event.searchTerm.toString() ||
-          contact.givenName == event.searchTerm.toString() ||
-          contact.middleName == event.searchTerm.toString() ||
-          contact.familyName == event.searchTerm.toString() ||
-          contact.company == event.searchTerm.toString() ||
-          contact.jobTitle == event.searchTerm.toString();
+      print('PhoneStorageContactBloc.dart contact.displayName: ' + contact.displayName.toString());
+      return contact.displayName.toString().toLowerCase().contains(searchString) ||
+          contact.givenName.toString().toLowerCase().contains(searchString) ||
+          contact.middleName.toString().toLowerCase().contains(searchString) ||
+          contact.familyName.toString().toLowerCase().contains(searchString) ||
+          contact.company.toString().toLowerCase().contains(searchString) ||
+          contact.jobTitle.toString().toLowerCase().contains(searchString);
     }).toList();
+
+    print('PhoneStorageContactBloc.dart searchResultBasedOnName: ' + searchResultBasedOnName.toString());
 
     contactSearchResultList = [contactSearchResultList, searchResultBasedOnName].expand((x) => x).toList();
 
     yield PhoneStorageContactsLoaded(
         phoneStorageContactList, contactSearchResultList); // display current found results first (appear faster)
-
+    print('PhoneStorageContactBloc.dart Checkpoint 2');
     List<Contact> searchResultBasedOnPhoneNumber = phoneStorageContactList.where((Contact contact) {
       bool phoneFound = false;
       contact.phones.forEach((phone) {
-        if (phone.value == event.searchTerm.toString()) {
+        if (phone.value.toString().toLowerCase().contains(searchString)) {
           phoneFound = true;
           return;
         }
@@ -97,7 +105,9 @@ class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorag
       return phoneFound;
     }).toList();
 
-    contactSearchResultList = [contactSearchResultList, searchResultBasedOnName, searchResultBasedOnPhoneNumber].expand((x) => x).toList();
+    print('PhoneStorageContactBloc.dart searchResultBasedOnPhoneNumber: ' + searchResultBasedOnPhoneNumber.toString());
+
+    contactSearchResultList = [contactSearchResultList, searchResultBasedOnPhoneNumber].expand((x) => x).toList();
 
     yield PhoneStorageContactsLoaded(phoneStorageContactList, contactSearchResultList); // again
   }

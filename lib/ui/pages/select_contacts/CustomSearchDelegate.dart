@@ -52,12 +52,14 @@ class CustomSearchDelegate extends SearchDelegate {
         BlocBuilder<PhoneStorageContactBloc, PhoneStorageContactState>(
           builder: (context, phoneStorageContactState) {
             if (phoneStorageContactState is PhoneStorageContactsLoaded) {
-              if (phoneStorageContactState.phoneStorageContactList.length == 0) {
+              if (phoneStorageContactState.searchResults.length == 0) {
                 return Column(
                   children: <Widget>[
-                    Text(
-                      "No Results Found.",
-                    ),
+                    Center(
+                      child: Text(
+                        "Invalid Search term.",
+                      ),
+                    )
                   ],
                 );
               } else {
@@ -66,11 +68,14 @@ class CustomSearchDelegate extends SearchDelegate {
                     Container(
                       child: ListView.builder(
                         physics: BouncingScrollPhysics(),
-                        itemCount: phoneStorageContactState.phoneStorageContactList.length,
+                        itemCount: phoneStorageContactState.searchResults.length,
                         itemBuilder: (context, index) {
-                          var result = phoneStorageContactState.phoneStorageContactList[index];
+                          var result = phoneStorageContactState.searchResults[index];
                           return ListTile(
                             title: Text(result.displayName),
+                            onTap: () {
+
+                            },
                           );
                         },
                       ),
