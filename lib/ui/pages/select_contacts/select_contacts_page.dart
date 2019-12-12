@@ -364,6 +364,16 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         notificationExpireDate: 0,
       );
 
+      UnreadMessage unreadMessage = UnreadMessage(
+        id: null,
+        conversationId: null,
+        count: 0,
+        date: DateTime.now().millisecondsSinceEpoch,
+        lastMessage: "",
+        userId: null,
+      );
+
+
       Multimedia groupMultiMedia = Multimedia(
           id: null,
           localFullFileUrl: null,
@@ -414,7 +424,17 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           .id);
 
       // TODO: AddConversationGroupEvent
-
+      BlocProvider.of<ConversationGroupBloc>(context).add(AddConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup2) {
+        if(!isObjectEmpty(conversationGroup2)) {
+          groupMultiMedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
+          unreadMessage.userId = conversationGroup2.creatorUserId;
+          BlocProvider.of<UnreadMessageBloc>(context).add(AddUnreadMessageEvent(unreadMessage: unreadMessage, callback: (UnreadMessage unreadMessage2){
+            if(!isObjectEmpty(unreadMessage2)) {
+              
+            }
+          }));
+        }
+      }));
 
 //    wholeAppBloc.dispatch(CreateConversationGroupEvent(
 //        multimedia: groupMultiMedia,
