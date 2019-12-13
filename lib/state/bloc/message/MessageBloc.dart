@@ -29,8 +29,10 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     try {
       List<Message> messageListFromDB = await messageDBService.getAllMessages();
 
-      functionCallback(event, true);
+      print('messageListFromDB: ' + messageListFromDB.length.toString());
+
       yield MessagesLoaded(messageListFromDB);
+      functionCallback(event, true);
     } catch (e) {
       functionCallback(event, false);
       yield MessagesNotLoaded();
@@ -51,8 +53,8 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
 
           existingMessageList.add(messageFromServer);
 
-          functionCallback(event, messageFromServer);
           yield MessagesLoaded(existingMessageList);
+          functionCallback(event, messageFromServer);
         }
       }
       if (isObjectEmpty(messageFromServer) || !savedIntoDB) {
@@ -75,8 +77,8 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
 
           existingMessageList.add(event.message);
 
-          functionCallback(event, event.message);
           yield MessagesLoaded(existingMessageList);
+          functionCallback(event, event.message);
         }
       }
     }
@@ -98,8 +100,8 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
 
           existingMessageList.removeWhere((Message existingMessage) => existingMessage.id == event.message.id);
 
-          functionCallback(event, true);
           yield MessagesLoaded(existingMessageList);
+          functionCallback(event, true);
         }
       }
     }

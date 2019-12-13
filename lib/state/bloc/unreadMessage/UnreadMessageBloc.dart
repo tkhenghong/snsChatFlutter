@@ -32,7 +32,6 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
       List<UnreadMessage> unreadMessageListFromDB = await unreadMessageDBService.getAllUnreadMessage();
 
       yield UnreadMessagesLoaded(unreadMessageListFromDB);
-
       functionCallback(event, true);
     } catch (e) {
       functionCallback(event, false);
@@ -57,8 +56,8 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
 
           existingUnreadMessageList.add(event.unreadMessage);
 
-          functionCallback(event, event.unreadMessage);
           yield UnreadMessagesLoaded(existingUnreadMessageList);
+          functionCallback(event, event.unreadMessage);
         }
       }
     }
@@ -86,8 +85,8 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
 
           existingUnreadMessageList.add(event.unreadMessage);
 
-          functionCallback(event, event.unreadMessage);
           yield UnreadMessagesLoaded(existingUnreadMessageList);
+          functionCallback(event, event.unreadMessage);
         }
       }
     }
@@ -111,8 +110,8 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
           existingUnreadMessageList
               .removeWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.id == event.unreadMessage.id);
 
-          functionCallback(event, true);
           yield UnreadMessagesLoaded(existingUnreadMessageList);
+          functionCallback(event, true);
         }
       }
     }

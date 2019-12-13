@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:snschat_flutter/objects/index.dart';
 
 abstract class WebSocketEvent extends Equatable {
   @override
@@ -39,4 +40,17 @@ class GetOwnWebSocketEvent extends WebSocketEvent {
 
   @override
   String toString() => 'GetOwnWebSocketEvent';
+}
+
+class SendWebSocketMessageEvent extends WebSocketEvent {
+  final WebSocketMessage webSocketMessage;
+  final Function callback;
+
+  const SendWebSocketMessageEvent({this.webSocketMessage, this.callback});
+
+  @override
+  List<Object> get props => [webSocketMessage];
+
+  @override
+  String toString() => 'SendWebSocketMessageEvent {webSocketMessage: $webSocketMessage}';
 }

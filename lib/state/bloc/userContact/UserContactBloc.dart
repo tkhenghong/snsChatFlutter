@@ -60,8 +60,8 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
 
         existingUserContactList.add(event.userContact);
 
-        functionCallback(event, event.userContact);
         yield UserContactsLoaded(existingUserContactList);
+        functionCallback(event, event.userContact);
       }
     }
 
@@ -99,8 +99,8 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
 
     existingUserContactList = [existingUserContactList, newUserContactList].expand((x) => x).toList();
 
-    functionCallback(event, newUserContactList);
     yield UserContactsLoaded(existingUserContactList);
+    functionCallback(event, newUserContactList);
   }
 
   Stream<UserContactState> _editUserContact(EditUserContactEvent event) async* {
@@ -120,8 +120,8 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
 
           existingUserContactList.add(event.userContact);
 
-          functionCallback(event, event.userContact);
           yield UserContactsLoaded(existingUserContactList);
+          functionCallback(event, event.userContact);
         }
       }
     }

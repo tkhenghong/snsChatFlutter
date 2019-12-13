@@ -63,14 +63,14 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       userSaved = await userDBService.addUser(userFromServer);
 
       if (userSaved) {
-        functionCallback(event, userFromServer);
         yield UserLoaded(userFromServer);
+        functionCallback(event, userFromServer);
       }
     }
 
     if (isObjectEmpty(userFromServer) || !userSaved) {
-      functionCallback(event, null);
       yield UserNotLoaded();
+      functionCallback(event, null);
     }
   }
 
@@ -85,8 +85,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         userSaved = await userDBService.editUser(event.user);
 
         if (userSaved) {
-          functionCallback(event, event.user);
           yield UserLoaded(event.user);
+          functionCallback(event, event.user);
         }
       }
     }

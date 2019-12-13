@@ -37,9 +37,9 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       List<ConversationGroup> conversationGroupListFromDB = await conversationGroupDBService.getAllConversationGroups();
 
       yield ConversationGroupsLoaded(conversationGroupListFromDB);
-
       functionCallback(event, true);
     } catch (e) {
+      yield ConversationGroupsNotLoaded();
       functionCallback(event, false);
     }
   }
@@ -57,8 +57,8 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
 
           existingConversationGroupList.add(newConversationGroup);
 
-          functionCallback(event, newConversationGroup);
           yield ConversationGroupsLoaded(existingConversationGroupList);
+          functionCallback(event, newConversationGroup);
         }
       }
     }
@@ -84,8 +84,8 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
 
           existingConversationGroupList.add(event.conversationGroup);
 
-          functionCallback(event, event.conversationGroup);
           yield ConversationGroupsLoaded(existingConversationGroupList);
+          functionCallback(event, event.conversationGroup);
         }
       }
     }
@@ -110,8 +110,8 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
           existingConversationGroupList
               .removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == event.conversationGroup.id);
 
-          functionCallback(event, true);
           yield ConversationGroupsLoaded(existingConversationGroupList);
+          functionCallback(event, true);
         }
       }
     }

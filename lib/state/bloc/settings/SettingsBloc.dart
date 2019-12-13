@@ -38,21 +38,21 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         settingsFromDB = await settingsDBService.getSettingsOfAUser(event.user.id);
 
         if (!isObjectEmpty(settingsFromDB)) {
-          functionCallback(event, true);
           yield SettingsLoaded(settingsFromDB);
+          functionCallback(event, true);
         }
       } else {
-        functionCallback(event, false);
         yield SettingsNotLoaded();
+        functionCallback(event, false);
       }
     } catch (e) {
-      functionCallback(event, false);
       yield SettingsNotLoaded();
+      functionCallback(event, false);
     }
 
     if (isObjectEmpty(settingsFromDB)) {
-      functionCallback(event, false);
       yield SettingsNotLoaded();
+      functionCallback(event, false);
     }
   }
 
@@ -67,14 +67,14 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       settingsSaved = await settingsDBService.addSettings(newSettings);
 
       if (settingsSaved) {
-        functionCallback(event, newSettings);
         yield SettingsLoaded(newSettings);
+        functionCallback(event, newSettings);
       }
     }
 
     if (isObjectEmpty(newSettings) || !settingsSaved) {
-      functionCallback(event, null);
       yield SettingsNotLoaded();
+      functionCallback(event, null);
     }
   }
 
@@ -88,8 +88,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         updated = await settingsDBService.editSettings(event.settings);
 
         if (updated) {
-          functionCallback(event, event.settings);
           yield SettingsLoaded(event.settings);
+          functionCallback(event, event.settings);
         }
 
         functionCallback(event, false);
@@ -108,8 +108,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       if (!settingsDeleted) {
         functionCallback(event, false);
       } else {
-        functionCallback(event, true);
         yield SettingsNotLoaded();
+        functionCallback(event, true);
       }
     }
   }
@@ -130,7 +130,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       }
     }
 
-    if(isObjectEmpty(settingsFromREST) || !savedIntoDB) {
+    if (isObjectEmpty(settingsFromREST) || !savedIntoDB) {
       yield SettingsNotLoaded();
       functionCallback(event, null);
     }

@@ -18,6 +18,8 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
       yield* _reconnectWebSocket(event);
     } else if (event is GetOwnWebSocketEvent) {
       yield* _getOwnWebSocket(event);
+    } else if (event is SendWebSocketMessageEvent) {
+      yield* _sendWebSocketMessage(event);
     }
   }
 
@@ -25,11 +27,11 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
     try {
       webSocketService.connectWebSocket();
 
-      functionCallback(event, true);
       yield WebSocketLoaded(webSocketService.getWebSocketStream());
+      functionCallback(event, true);
     } catch (e) {
-      functionCallback(event, false);
       yield WebSocketNotLoaded();
+      functionCallback(event, false);
     }
   }
 
@@ -39,10 +41,23 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
       webSocketService.reconnnectWebSocket();
 
       yield WebSocketLoaded(webSocketService.getWebSocketStream());
+      functionCallback(event, true);
+    } else {
+      functionCallback(event, false);
     }
   }
 
   Stream<WebSocketState> _getOwnWebSocket(GetOwnWebSocketEvent event) async* {
+    if (state is WebSocketLoaded) {
+      Stream<dynamic> webSocketStream = (state as WebSocketLoaded).webSocketStream;
+
+      functionCallback(event, webSocketStream);
+    } else {
+      functionCallback(event, null);
+    }
+  }
+
+  Stream<WebSocketState> _sendWebSocketMessage(SendWebSocketMessageEvent event) async* {
     if (state is WebSocketLoaded) {
       Stream<dynamic> webSocketStream = (state as WebSocketLoaded).webSocketStream;
 

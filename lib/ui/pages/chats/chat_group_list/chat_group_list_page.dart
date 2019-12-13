@@ -42,12 +42,12 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   initialize() async {
-    BlocProvider.of<ConversationGroupBloc>(context).add(InitializeConversationGroupsEvent());
-    BlocProvider.of<MessageBloc>(context).add(InitializeMessagesEvent());
-    BlocProvider.of<MultimediaBloc>(context).add(InitializeMultimediaEvent());
-    BlocProvider.of<UnreadMessageBloc>(context).add(InitializeUnreadMessagesEvent());
-    BlocProvider.of<UserContactBloc>(context).add(InitializeUserContactsEvent());
-    BlocProvider.of<WebSocketBloc>(context).add(InitializeWebSocketEvent());
+    BlocProvider.of<ConversationGroupBloc>(context).add(InitializeConversationGroupsEvent(callback: (bool done) {}));
+    BlocProvider.of<MessageBloc>(context).add(InitializeMessagesEvent(callback: (bool done) {}));
+    BlocProvider.of<MultimediaBloc>(context).add(InitializeMultimediaEvent(callback: (bool done) {}));
+    BlocProvider.of<UnreadMessageBloc>(context).add(InitializeUnreadMessagesEvent(callback: (bool done) {}));
+    BlocProvider.of<UserContactBloc>(context).add(InitializeUserContactsEvent(callback: (bool done) {}));
+    BlocProvider.of<WebSocketBloc>(context).add(InitializeWebSocketEvent(callback: (bool done) {}));
   }
 
   goToLoginPage() {

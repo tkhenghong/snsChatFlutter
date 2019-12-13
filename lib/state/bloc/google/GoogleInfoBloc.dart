@@ -48,6 +48,7 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
         if (isObjectEmpty(googleSignInAccount)) {
           Fluttertoast.showToast(msg: 'Google sign in canceled.', toastLength: Toast.LENGTH_SHORT);
           yield GoogleInfoNotLoaded();
+          functionCallback(event, false);
         }
 
         GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;

@@ -38,7 +38,6 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
       List<Multimedia> multimediaListFromDB = await multimediaDBService.getAllMultimedia();
 
       yield MultimediaLoaded(multimediaListFromDB);
-
       functionCallback(event, true);
     } catch (e) {
       functionCallback(event, false);
@@ -87,8 +86,8 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
 
           existingMultimediaList.add(event.multimedia);
 
-          functionCallback(event, event.multimedia);
           yield MultimediaLoaded(existingMultimediaList);
+          functionCallback(event, event.multimedia);
         }
       }
     }
@@ -112,8 +111,8 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
 
           existingMultimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == event.multimedia.id);
 
-          functionCallback(event, true);
           yield MultimediaLoaded(existingMultimediaList);
+          functionCallback(event, true);
         }
       }
     }
