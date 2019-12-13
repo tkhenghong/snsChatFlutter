@@ -31,6 +31,19 @@ class AddUserContactEvent extends UserContactEvent {
   String toString() => 'AddUserContactEvent {userContact: $userContact}';
 }
 
+class AddMultipleUserContactEvent extends UserContactEvent {
+  final List<UserContact> userContactList;
+  final Function callback;
+
+  AddMultipleUserContactEvent({this.userContactList, this.callback});
+
+  @override
+  List<Object> get props => [userContactList];
+
+  @override
+  String toString() => 'AddMultipleUserContactEvent {userContactList: $userContactList}';
+}
+
 class EditUserContactEvent extends UserContactEvent {
   final UserContact userContact;
   final Function callback;

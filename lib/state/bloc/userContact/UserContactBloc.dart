@@ -26,6 +26,8 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       yield* _getOwnUserContact(event);
     } else if (event is GetUserPreviousUserContactsEvent) {
       yield* _getUserPreviousUserContactsEvent(event);
+    } else if (event is AddMultipleUserContactEvent) {
+      yield* _addMultipleUserContact(event);
     }
   }
 
@@ -66,6 +68,39 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     if (isObjectEmpty(newUserContact) || !userContactAdded) {
       functionCallback(event, null);
     }
+  }
+
+  Stream<UserContactState> _addMultipleUserContact(AddMultipleUserContactEvent event) async* {
+    List<UserContact> existingUserContactList = [];
+    List<UserContact> newUserContactList = [];
+
+    if (state is UserContactsLoaded) {
+      existingUserContactList = (state as UserContactsLoaded).userContactList;
+    }
+
+    for (UserContact userContact in event.userContactList) {
+      UserContact newUserContact;
+      bool userContactAdded = false;
+
+      newUserContact = await userContactAPIService.addUserContact(userContact);
+
+      if (!isObjectEmpty(newUserContact)) {
+        userContactAdded = await userContactDBService.addUserContact(newUserContact);
+        if (userContactAdded) {
+          newUserContactList.add(userContact);
+        }
+      }
+
+      if (isObjectEmpty(newUserContact) || !userContactAdded) {
+        functionCallback(event, []);
+        return; // Any error, out
+      }
+    }
+
+    existingUserContactList = [existingUserContactList, newUserContactList].expand((x) => x).toList();
+
+    functionCallback(event, newUserContactList);
+    yield UserContactsLoaded(existingUserContactList);
   }
 
   Stream<UserContactState> _editUserContact(EditUserContactEvent event) async* {

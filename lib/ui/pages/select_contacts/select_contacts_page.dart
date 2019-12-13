@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 // Import package
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
@@ -14,7 +15,9 @@ import 'package:snschat_flutter/objects/conversationGroup/conversation_group.dar
 import 'package:snschat_flutter/objects/index.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
+import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
+import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
 import 'package:snschat_flutter/ui/pages/group_name/group_name_page.dart';
 
 import 'CustomSearchDelegate.dart';
@@ -42,6 +45,9 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   String subtitle = "";
   RefreshController _refreshController;
   ScrollController scrollController;
+
+  FileService fileService = FileService();
+  ImageService imageService = ImageService();
 
   @override
   initState() {
@@ -358,8 +364,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         type: "Personal",
         block: false,
         description: '',
-        adminMemberIds: [],
-        memberIds: [],
+        adminMemberIds: [], // Add later
+        memberIds: [], // Add later
         // memberIds put UserContact.id. NOT User.id
         notificationExpireDate: 0,
       );
@@ -373,7 +379,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         userId: null,
       );
 
-
       Multimedia groupMultiMedia = Multimedia(
           id: null,
           localFullFileUrl: null,
@@ -381,18 +386,17 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           remoteThumbnailUrl: null,
           remoteFullFileUrl: null,
           userContactId: null,
-          conversationId: null,
-          // Add the conversationId after the conversationGroup object is created in the backend
+          conversationId: null, // Add later
           messageId: null,
           userId: null);
 
       File userContactImage;
       // TODO: Temporary close it because not yet able to convert Uint8List to File
-//    if (!isObjectEmpty(contact.avatar) && contact.avatar.length > 0) {
-//      print("if (!isObjectEmpty(contact.avatar))");
-//      print("contact.avatar.length.toString(): " + contact.avatar.length.toString());
-//      userContactImage = await getUserContactPhoto(contact);
-//    }
+      //    if (!isObjectEmpty(contact.avatar) && contact.avatar.length > 0) {
+      //      print("if (!isObjectEmpty(contact.avatar))");
+      //      print("contact.avatar.length.toString(): " + contact.avatar.length.toString());
+      //      userContactImage = await getUserContactPhoto(contact);
+      //    }
 
       if (!isObjectEmpty(userContactImage)) {
         groupMultiMedia.localFullFileUrl = userContactImage.path;
@@ -400,41 +404,31 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         groupMultiMedia.localThumbnailUrl = userContactImage.path;
       }
 
-      print("Before CreateConversationGroupEvent");
+      BlocProvider.of<ConversationGroupBloc>(context).add(AddConversationGroupEvent(
+          conversationGroup: conversationGroup,
+          callback: (ConversationGroup conversationGroup2) async {
+            if (!isObjectEmpty(conversationGroup2)) {
+              // Go to chat room page first
+              Navigator.pop(context); //pop loading dialog
+              Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
+              Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup2))));
 
-      // TODO: AddUserContactEvent (yourself and the target phone storage contact)
+              uploadUserContactList(contactList, userState.user, conversationGroup2);
 
-      // TODO: AddUnreadMessageEvent
-      // TODO: AddMultimediaEvent
-
-      List<UserContact> newUserContactList = await uploadUserContactList(contactList, userState.user);
-
-      // event.contactList doesn't include yourself, so newUserContactList.length - 1 OR Any UserContact is not added into the list (means not uploaded successfully)
-      if ((contactList.length != newUserContactList.length - 1) || newUserContactList.length == 0) {
-        // That means some UseContact are not uploaded into the REST
-        return null;
-      }
-
-      // Give the list of UserContactIds to memberIds of ConversationGroup
-      conversationGroup.memberIds = newUserContactList.map((newUserContact) => newUserContact.id).toList();
-
-      // Add your own userContact's ID as admin by find the one that has the same mobile number in the userContactList
-      conversationGroup.adminMemberIds.add(newUserContactList
-          .firstWhere((UserContact newUserContact) => newUserContact.mobileNo == userState.user.mobileNo, orElse: () => null)
-          .id);
-
-      // TODO: AddConversationGroupEvent
-      BlocProvider.of<ConversationGroupBloc>(context).add(AddConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup2) {
-        if(!isObjectEmpty(conversationGroup2)) {
-          groupMultiMedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
-          unreadMessage.userId = conversationGroup2.creatorUserId;
-          BlocProvider.of<UnreadMessageBloc>(context).add(AddUnreadMessageEvent(unreadMessage: unreadMessage, callback: (UnreadMessage unreadMessage2){
-            if(!isObjectEmpty(unreadMessage2)) {
-              
+              groupMultiMedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
+              unreadMessage.userId = conversationGroup2.creatorUserId;
+              BlocProvider.of<UnreadMessageBloc>(context).add(AddUnreadMessageEvent(
+                  unreadMessage: unreadMessage,
+                  callback: (UnreadMessage unreadMessage2) {
+                    if (!isObjectEmpty(unreadMessage2)) {
+                      addMultimediaWithUpdateConversationGroup(groupMultiMedia, null, conversationGroup2);
+                    }
+                  }));
+            } else {
+              Navigator.pop(context);
+              Fluttertoast.showToast(msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
             }
           }));
-        }
-      }));
 
 //    wholeAppBloc.dispatch(CreateConversationGroupEvent(
 //        multimedia: groupMultiMedia,
@@ -463,7 +457,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   Future<File> getUserContactPhoto(Contact contact) async {
     if (!isObjectEmpty(contact.avatar)) {
       print("if(!isObjectEmpty(contact.avatar))");
-      FileService fileService = FileService();
+
       File copiedFile =
           await fileService.downloadFileFromUint8List(contact.avatar, DateTime.now().millisecondsSinceEpoch.toString(), "jpg");
       return copiedFile;
@@ -472,13 +466,15 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     }
   }
 
-  Future<List<UserContact>> uploadUserContactList(List<Contact> contactList, User currentUser) async {
+  // 2. Upload UserContactList
+  // Note: Backend already helped you to check any duplicates of the same UserContact
+  uploadUserContactList(List<Contact> contactList, User currentUser, ConversationGroup conversationGroup) async {
     List<UserContact> userContactList = [];
 
     UserContact yourOwnUserContact = UserContact(
       id: null,
-      // userIds: Which User owns this UserContact
       userIds: [currentUser.id],
+      userId: currentUser.id,
       displayName: currentUser.displayName,
       realName: currentUser.realName,
       block: false,
@@ -525,24 +521,51 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       userContactList.add(userContact);
     });
 
-    // 1. Upload UserContactList
-    // Note: Backend already helped you to check any duplicates of the same UserContact
-    List<UserContact> newUserContactList = await uploadUserContactListToREST(userContactList);
-    print("Uploaded and saved uploadUserContactList to REST, DB and State.");
-    print("newUserContactList.length: " + newUserContactList.length.toString());
+    BlocProvider.of<UserContactBloc>(context).add(AddMultipleUserContactEvent(
+        userContactList: userContactList,
+        callback: (List<UserContact> newUserContactList) {
+          if ((contactList.length != newUserContactList.length - 1) || newUserContactList.length == 0) {
+            // event.contactList doesn't include yourself, so newUserContactList.length - 1 OR Any UserContact is not added into the list (means not uploaded successfully)
+            // That means some UseContact are not uploaded into the REST
+            Navigator.pop(context);
+            Fluttertoast.showToast(msg: 'Unable to upload your member list for ${conversationGroup.name.toString()}. Please try again.', toastLength: Toast.LENGTH_SHORT);
+            return null;
+          } else {
+            print("Uploaded and saved uploadUserContactList to REST, DB and State.");
 
-    return newUserContactList;
+            // Give the list of UserContactIds to memberIds of ConversationGroup
+            conversationGroup.memberIds = newUserContactList.map((newUserContact) => newUserContact.id).toList();
+
+            // Add your own userContact's ID as admin by find the one that has the same mobile number in the userContactList
+            conversationGroup.adminMemberIds.add(newUserContactList
+                .firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentUser.mobileNo, orElse: () => null)
+                .id);
+
+            BlocProvider.of<ConversationGroupBloc>(context)
+                .add(EditConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+          }
+        }));
   }
 
-  Future<List<UserContact>> uploadUserContactListToREST(List<UserContact> userContactList) async {
-    List<UserContact> newUserContactList = [];
-    for (UserContact userContact in userContactList) {
-      BlocProvider.of<UserContactBloc>(context).add(AddUserContactEvent(userContact: userContact, callback: (UserContact userContact) {
-        newUserContactList.add(userContact);
-      }));
+  addMultimediaWithUpdateConversationGroup(Multimedia groupMultimedia, File imageFile, ConversationGroup conversationGroup) async {
+    // 4. Upload Group Multimedia
+    // Create thumbnail before upload
+    File thumbnailImageFile;
+    if (!isStringEmpty(groupMultimedia.localFullFileUrl) && !isObjectEmpty(imageFile)) {
+      thumbnailImageFile = await imageService.getImageThumbnail(imageFile);
     }
 
-    return newUserContactList;
-  }
+    if (!isObjectEmpty(thumbnailImageFile)) {
+      groupMultimedia.localThumbnailUrl = thumbnailImageFile.path;
+    }
 
+    BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
+        multimedia: groupMultimedia,
+        callback: (Multimedia multimedia2) {
+          if (!isObjectEmpty(multimedia2)) {
+            BlocProvider.of<ConversationGroupBloc>(context)
+                .add(EditConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+          }
+        }));
+  }
 }

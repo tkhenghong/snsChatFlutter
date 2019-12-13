@@ -25,8 +25,10 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       yield* _editConversationGroup(event);
     } else if (event is DeleteConversationGroupEvent) {
       yield* _deleteConversationGroup(event);
-    } else if(event is GetUserPreviousConversationGroupsEvent) {
+    } else if (event is GetUserPreviousConversationGroupsEvent) {
       yield* _getUserPreviousConversationGroups(event);
+    } else if (event is AddGroupMemberEvent) {
+      yield* _addGroupMember(event);
     }
   }
 
@@ -48,9 +50,9 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     if (state is ConversationGroupsLoaded) {
       newConversationGroup = await conversationGroupAPIService.addConversationGroup(event.conversationGroup);
 
-      if(!isObjectEmpty(newConversationGroup)) {
+      if (!isObjectEmpty(newConversationGroup)) {
         added = await conversationGroupDBService.addConversationGroup(newConversationGroup);
-        if(added) {
+        if (added) {
           List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
           existingConversationGroupList.add(newConversationGroup);
@@ -61,7 +63,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       }
     }
 
-    if(isObjectEmpty(newConversationGroup) || !added) {
+    if (isObjectEmpty(newConversationGroup) || !added) {
       functionCallback(event, null);
     }
   }
@@ -70,12 +72,11 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     bool updatedInREST = false;
     bool saved = false;
     if (state is ConversationGroupsLoaded) {
-
       updatedInREST = await conversationGroupAPIService.editConversationGroup(event.conversationGroup);
 
-      if(updatedInREST) {
+      if (updatedInREST) {
         saved = await conversationGroupDBService.editConversationGroup(event.conversationGroup);
-        if(saved) {
+        if (saved) {
           List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
           existingConversationGroupList
@@ -89,7 +90,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       }
     }
 
-    if(!updatedInREST|| !saved) {
+    if (!updatedInREST || !saved) {
       functionCallback(event, null);
     }
   }
@@ -98,13 +99,12 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     bool deletedInREST = false;
     bool deleted = false;
     if (state is ConversationGroupsLoaded) {
-
       deletedInREST = await conversationGroupAPIService.deleteConversationGroup(event.conversationGroup.id);
 
-      if(deletedInREST) {
+      if (deletedInREST) {
         deleted = await conversationGroupDBService.deleteConversationGroup(event.conversationGroup.id);
 
-        if(deleted) {
+        if (deleted) {
           List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
           existingConversationGroupList
@@ -116,31 +116,29 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       }
     }
 
-    if(!deletedInREST || !deleted) {
+    if (!deletedInREST || !deleted) {
       functionCallback(event, false);
     }
   }
 
   Stream<ConversationGroupState> _getUserPreviousConversationGroups(GetUserPreviousConversationGroupsEvent event) async* {
     List<ConversationGroup> conversationGroupListFromServer =
-    await conversationGroupAPIService.getConversationGroupsForUserByMobileNo(event.user.mobileNo);
+        await conversationGroupAPIService.getConversationGroupsForUserByMobileNo(event.user.mobileNo);
 
-    if(state is ConversationGroupsLoaded) {
-
+    if (state is ConversationGroupsLoaded) {
       List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
       if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0) {
         // Update the current info of the conversationGroup to latest information
-        for(ConversationGroup conversationGroupFromServer in conversationGroupListFromServer) {
-
+        for (ConversationGroup conversationGroupFromServer in conversationGroupListFromServer) {
           bool conversationGroupExist = existingConversationGroupList
               .contains((ConversationGroup conversationGroupFromDB) => conversationGroupFromDB.id == conversationGroupFromServer.id);
 
           if (conversationGroupExist) {
             conversationGroupDBService.editConversationGroup(conversationGroupFromServer);
 
-            existingConversationGroupList
-                .removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == conversationGroupFromServer.id);
+            existingConversationGroupList.removeWhere(
+                (ConversationGroup existingConversationGroup) => existingConversationGroup.id == conversationGroupFromServer.id);
           } else {
             conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
           }
@@ -151,6 +149,19 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
 
       yield ConversationGroupsLoaded(existingConversationGroupList);
       functionCallback(event, true);
+    }
+  }
+
+  Stream<ConversationGroupState> _addGroupMember(AddGroupMemberEvent event) async* {
+    if (state is ConversationGroupsLoaded) {
+      List<ConversationGroup> conversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
+
+      ConversationGroup conversationGroup = conversationGroupList.firstWhere((ConversationGroup existingConversationGroup) {
+        return existingConversationGroup.id == event.conversationGroupId;
+      }, orElse: () => null);
+
+      conversationGroup.memberIds.add(event.userContactId);
+      // TODO: To be continued?
     }
   }
 
