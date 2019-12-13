@@ -27,23 +27,20 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
+  bool deviceLocated = false;
+  String countryCodeString;
+
+  CountryCode countryCode;
+  Color themePrimaryColor;
+
   final _formKey = GlobalKey<FormState>();
   TextEditingController mobileNoTextController = new TextEditingController();
 
-  CountryCode countryCode;
-
-  String countryCodeString;
-
-  bool deviceLocated = false;
-
-  Color themePrimaryColor;
-
-  String getPhoneNumber() {
+  String getPhoneNumber(IPGeoLocation ipGeoLocation) {
     String phoneNoInitials = "";
 
     if (isObjectEmpty(countryCode)) {
-//      phoneNoInitials = wholeAppBloc.currentState.ipGeoLocation.calling_code;
-      phoneNoInitials = '+60';
+      phoneNoInitials = ipGeoLocation.calling_code;
     } else {
       phoneNoInitials = countryCode.dialCode;
     }
@@ -51,7 +48,7 @@ class LoginPageState extends State<LoginPage> {
     return phoneNumber;
   }
 
-  _signIn(BuildContext context) async {
+  _signIn(BuildContext context, IPGeoLocation ipGeoLocation) async {
     if (_formKey.currentState.validate()) {
       showCenterLoadingIndicator(context);
 
@@ -60,13 +57,13 @@ class LoginPageState extends State<LoginPage> {
           BlocProvider.of<GoogleInfoBloc>(context)
               .add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn, FirebaseAuth firebaseAuth, FirebaseUser firebaseUser) {
             BlocProvider.of<UserBloc>(context).add(CheckUserSignedUpEvent(
-                mobileNo: getPhoneNumber(),
+                mobileNo: getPhoneNumber(ipGeoLocation),
                 googleSignIn: googleSignIn,
                 callback: (bool isSignedUp) {
                   if (isSignedUp) {
                     BlocProvider.of<UserBloc>(context).add(UserSignInEvent(
                         googleSignIn: googleSignIn,
-                        mobileNo: getPhoneNumber(),
+                        mobileNo: getPhoneNumber(ipGeoLocation),
                         callback: (User user2) {
                           if (!isObjectEmpty(user2)) {
                             BlocProvider.of<SettingsBloc>(context).add(GetUserSettingsEvent(
@@ -75,13 +72,13 @@ class LoginPageState extends State<LoginPage> {
                                   if (!isObjectEmpty(settings)) {
                                     print('login_page.dart if (!isObjectEmpty(settings))');
                                     Navigator.pop(context);
-                                    goToVerifyPhoneNumber(getPhoneNumber());
+                                    goToVerifyPhoneNumber(getPhoneNumber(ipGeoLocation));
                                   } else {
                                     print('login_page.dart if (isObjectEmpty(settings))');
                                     Fluttertoast.showToast(
                                         msg: 'Invalid Mobile No./matching Google account. Please try again.',
                                         toastLength: Toast.LENGTH_SHORT);
-                                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+                                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
                                     Navigator.pop(context);
                                   };
                                 }));
@@ -89,21 +86,21 @@ class LoginPageState extends State<LoginPage> {
                             print('login_page.dart if (isObjectEmpty(user2))');
                             Fluttertoast.showToast(
                                 msg: 'Invalid Mobile No./matching Google account. Please try again.', toastLength: Toast.LENGTH_SHORT);
-                            BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+                            BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
                             Navigator.pop(context);
                           }
                         }));
                   } else {
                     Fluttertoast.showToast(
                         msg: 'Unregconized phone number/Google Account. Please sign up first.', toastLength: Toast.LENGTH_SHORT);
-                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
                     Navigator.pop(context);
                   }
                 }));
           }));
         } else {
           Fluttertoast.showToast(msg: 'Please sign into your Google Account first.', toastLength: Toast.LENGTH_SHORT);
-          BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+          BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
           Navigator.pop(context);
         }
       }));
@@ -132,8 +129,8 @@ class LoginPageState extends State<LoginPage> {
       },
       builder: (context, ipGeoLocationState) {
         if (ipGeoLocationState is IPGeoLocationLoading) {
-          BlocProvider.of<IPGeoLocationBloc>(context).add(GetIPGeoLocationEvent());
-          return Center();
+          BlocProvider.of<IPGeoLocationBloc>(context).add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
+          return Material(child: Center(child: Text('Loading...'),),);
         }
 
         if (ipGeoLocationState is IPGeoLocationNotLoaded) {
@@ -146,9 +143,7 @@ class LoginPageState extends State<LoginPage> {
           return loginScreen(deviceWidth, deviceHeight);
         }
 
-        return Center(
-          child: Text('Login page error. Please try restart the app.'),
-        );
+        return Material(child: Center(child: Text('Login page error. Please try restart the app.'),),);
       },
     );
   }
@@ -276,7 +271,7 @@ class LoginPageState extends State<LoginPage> {
       );
 
   goToVerifyPhoneNumber(mobileNo) {
-    Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(mobileNo: getPhoneNumber()))));
+    Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(mobileNo: mobileNo))));
   }
 
   goToSignUp() {

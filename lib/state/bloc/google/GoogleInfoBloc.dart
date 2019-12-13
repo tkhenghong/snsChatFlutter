@@ -9,7 +9,6 @@ import 'package:bloc/bloc.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial
 class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
-  ConversationDBService conversationGroupDBService = new ConversationDBService();
 
   @override
   GoogleInfoState get initialState => GoogleInfoLoading();

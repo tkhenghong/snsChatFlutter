@@ -8,7 +8,6 @@ import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:snschat_flutter/service/image/ImageService.dart';
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
 import 'package:time_formatter/time_formatter.dart';
@@ -24,7 +23,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   bool getListDone = false;
 
   RefreshController _refreshController;
-  WholeAppBloc wholeAppBloc;
 
   FileService fileService = FileService();
   ImageService imageService = ImageService();
@@ -50,11 +48,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     BlocProvider.of<WebSocketBloc>(context).add(InitializeWebSocketEvent(callback: (bool done) {}));
   }
 
-  goToLoginPage() {
-    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
-    Navigator.of(context).pushNamedAndRemoveUntil("login_page", (Route<dynamic> route) => false);
-  }
-
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
@@ -62,14 +55,13 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         BlocListener<GoogleInfoBloc, GoogleInfoState>(
           listener: (context, googleInfoState) {
             if (googleInfoState is GoogleInfoLoaded) {
-              BlocProvider.of<UserBloc>(context).add(InitializeUserEvent(googleSignIn: googleInfoState.googleSignIn, callback: (bool initialized) {
-                if(initialized) {
-                  print('chat_group_list_page.dart if(initialized)');
-                } else {
-                  print('chat_group_list_page.dart if(!initialized)');
-                  goToLoginPage();
-                }
-              }));
+              BlocProvider.of<UserBloc>(context).add(InitializeUserEvent(
+                  googleSignIn: googleInfoState.googleSignIn,
+                  callback: (bool initialized) {
+                    if (!initialized) {
+                      goToLoginPage();
+                    }
+                  }));
               BlocProvider.of<UserContactBloc>(context).add(InitializeUserContactsEvent(callback: (bool done) {}));
               BlocProvider.of<IPGeoLocationBloc>(context).add(GetIPGeoLocationEvent());
             }
@@ -218,7 +210,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                 }
 
                 // User Not Loaded Event
-                goToLoginPage();
                 return Center(child: Text("Error. User is not loaded."));
               },
             );
@@ -269,5 +260,10 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           // Send argument need to use the old way
           Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
         });
+  }
+
+  goToLoginPage() {
+    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
+    Navigator.of(context).pushNamedAndRemoveUntil("login_page", (Route<dynamic> route) => false);
   }
 }

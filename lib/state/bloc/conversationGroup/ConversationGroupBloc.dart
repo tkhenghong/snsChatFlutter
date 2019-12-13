@@ -55,6 +55,9 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
         if (added) {
           List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
+          print('ConversationGroupBloc.dart existingConversationGroupList: ' + existingConversationGroupList.toString());
+          print('ConversationGroupBloc.dart existingConversationGroupList: ' + existingConversationGroupList.length.toString());
+
           existingConversationGroupList.add(newConversationGroup);
 
           yield ConversationGroupsLoaded(existingConversationGroupList);

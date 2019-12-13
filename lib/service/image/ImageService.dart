@@ -57,7 +57,8 @@ class ImageService {
   Widget loadImageThumbnailCircleAvatar(Multimedia multimedia, String type, BuildContext context) {
     Color appBarTextTitleColor = Theme.of(context).appBarTheme.textTheme.title.color;
 //    Color appBarTextTitleColor = Colors.white;
-
+    print('ImageService.dart isObjectEmpty(multimedia): ' + isObjectEmpty(multimedia).toString());
+    print('ImageService.dart multimedia.remoteThumbnailUrl.toString(): ' + multimedia.remoteThumbnailUrl.toString());
     return isObjectEmpty(multimedia)
         ? CircleAvatar(
             backgroundColor: appBarTextTitleColor,
@@ -74,7 +75,7 @@ class ImageService {
                   );
                 },
                 useOldImageOnUrlChange: true,
-                imageUrl: multimedia.remoteThumbnailUrl,
+                imageUrl: multimedia.remoteThumbnailUrl.toString(),
                 placeholder: (context, url) => new CircularProgressIndicator(),
                 errorWidget: (context, url, error) => Image.asset(
                   fileService.getDefaultImagePath(type),
