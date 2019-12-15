@@ -63,7 +63,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                     }
                   }));
               BlocProvider.of<UserContactBloc>(context).add(InitializeUserContactsEvent(callback: (bool done) {}));
-              BlocProvider.of<IPGeoLocationBloc>(context).add(GetIPGeoLocationEvent());
+              BlocProvider.of<IPGeoLocationBloc>(context).add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
             }
 
             if (googleInfoState is GoogleInfoLoading) {

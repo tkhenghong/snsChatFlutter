@@ -56,16 +56,11 @@ class ImageService {
 
   Widget loadImageThumbnailCircleAvatar(Multimedia multimedia, String type, BuildContext context) {
     Color appBarTextTitleColor = Theme.of(context).appBarTheme.textTheme.title.color;
-//    Color appBarTextTitleColor = Colors.white;
-    print('ImageService.dart isObjectEmpty(multimedia): ' + isObjectEmpty(multimedia).toString());
-    print('ImageService.dart multimedia.remoteThumbnailUrl.toString(): ' + multimedia.remoteThumbnailUrl.toString());
+
     return isObjectEmpty(multimedia)
-        ? CircleAvatar(
-            backgroundColor: appBarTextTitleColor,
-            backgroundImage: AssetImage(fileService.getDefaultImagePath(type)),
-          )
+        ? defaultImage(appBarTextTitleColor, type)
         : isStringEmpty(multimedia.remoteThumbnailUrl)
-            ? Image.asset(fileService.getDefaultImagePath(type))
+            ? defaultImage(appBarTextTitleColor, type)
             : CachedNetworkImage(
                 // Note: imageBuilder is a place that tell CachedNetworkImage how the image should be displayed
                 imageBuilder: (BuildContext context, ImageProvider<dynamic> imageProvider) {
@@ -82,6 +77,13 @@ class ImageService {
                   color: appBarTextTitleColor,
                 ),
               );
+  }
+
+  Widget defaultImage(Color appBarTextTitleColor, String type) {
+    return CircleAvatar(
+      backgroundColor: appBarTextTitleColor,
+      backgroundImage: AssetImage(fileService.getDefaultImagePath(type)),
+    );
   }
 
   Widget loadFullImage(Multimedia multimedia, String type) {

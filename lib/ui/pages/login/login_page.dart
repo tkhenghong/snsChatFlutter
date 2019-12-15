@@ -52,18 +52,19 @@ class LoginPageState extends State<LoginPage> {
     if (_formKey.currentState.validate()) {
       showCenterLoadingIndicator(context);
 
+      String mobileNo = getPhoneNumber(ipGeoLocation);
       BlocProvider.of<GoogleInfoBloc>(context).add(InitializeGoogleInfoEvent(callback: (bool initialized) {
         if (initialized) {
           BlocProvider.of<GoogleInfoBloc>(context)
               .add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn, FirebaseAuth firebaseAuth, FirebaseUser firebaseUser) {
             BlocProvider.of<UserBloc>(context).add(CheckUserSignedUpEvent(
-                mobileNo: getPhoneNumber(ipGeoLocation),
+                mobileNo: mobileNo,
                 googleSignIn: googleSignIn,
                 callback: (bool isSignedUp) {
                   if (isSignedUp) {
                     BlocProvider.of<UserBloc>(context).add(UserSignInEvent(
                         googleSignIn: googleSignIn,
-                        mobileNo: getPhoneNumber(ipGeoLocation),
+                        mobileNo: mobileNo,
                         callback: (User user2) {
                           if (!isObjectEmpty(user2)) {
                             BlocProvider.of<SettingsBloc>(context).add(GetUserSettingsEvent(
@@ -72,7 +73,7 @@ class LoginPageState extends State<LoginPage> {
                                   if (!isObjectEmpty(settings)) {
                                     print('login_page.dart if (!isObjectEmpty(settings))');
                                     Navigator.pop(context);
-                                    goToVerifyPhoneNumber(getPhoneNumber(ipGeoLocation));
+                                    goToVerifyPhoneNumber(mobileNo);
                                   } else {
                                     print('login_page.dart if (isObjectEmpty(settings))');
                                     Fluttertoast.showToast(
@@ -80,7 +81,8 @@ class LoginPageState extends State<LoginPage> {
                                         toastLength: Toast.LENGTH_SHORT);
                                     BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
                                     Navigator.pop(context);
-                                  };
+                                  }
+                                  ;
                                 }));
                           } else {
                             print('login_page.dart if (isObjectEmpty(user2))');
@@ -130,25 +132,33 @@ class LoginPageState extends State<LoginPage> {
       builder: (context, ipGeoLocationState) {
         if (ipGeoLocationState is IPGeoLocationLoading) {
           BlocProvider.of<IPGeoLocationBloc>(context).add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
-          return Material(child: Center(child: Text('Loading...'),),);
+          return Material(
+            child: Center(
+              child: Text('Loading...'),
+            ),
+          );
         }
 
         if (ipGeoLocationState is IPGeoLocationNotLoaded) {
           countryCodeString = 'US';
-          return loginScreen(deviceWidth, deviceHeight);
+          return loginScreen(deviceWidth, deviceHeight, null);
         }
 
         if (ipGeoLocationState is IPGeoLocationLoaded) {
           countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? "US" : ipGeoLocationState.ipGeoLocation.country_code2;
-          return loginScreen(deviceWidth, deviceHeight);
+          return loginScreen(deviceWidth, deviceHeight, ipGeoLocationState.ipGeoLocation);
         }
 
-        return Material(child: Center(child: Text('Login page error. Please try restart the app.'),),);
+        return Material(
+          child: Center(
+            child: Text('Login page error. Please try restart the app.'),
+          ),
+        );
       },
     );
   }
 
-  loginScreen(deviceWidth, deviceHeight) => MultiBlocListener(
+  loginScreen(deviceWidth, deviceHeight, IPGeoLocation ipGeoLocation) => MultiBlocListener(
         listeners: [
           BlocListener<IPGeoLocationBloc, IPGeoLocationState>(
             listener: (context, state) {},
@@ -222,7 +232,7 @@ class LoginPageState extends State<LoginPage> {
                         ],
                       )),
                   RaisedButton(
-                    onPressed: () => _signIn(context),
+                    onPressed: () => _signIn(context, ipGeoLocation),
                     textColor: Colors.white,
                     splashColor: Colors.grey,
                     animationDuration: Duration(milliseconds: 500),

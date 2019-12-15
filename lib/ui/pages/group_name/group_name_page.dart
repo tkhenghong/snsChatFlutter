@@ -2,20 +2,22 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:contacts_service/contacts_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/objects/conversationGroup/conversation_group.dart';
+import 'package:snschat_flutter/objects/index.dart';
 import 'package:snschat_flutter/objects/userContact/userContact.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
-import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
+import 'package:snschat_flutter/service/image/ImageService.dart';
 
 import 'package:image_picker/image_picker.dart';
+import 'package:snschat_flutter/state/bloc/bloc.dart';
+import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
 
 class GroupNamePage extends StatefulWidget {
   final List<Contact> selectedContacts;
@@ -29,24 +31,25 @@ class GroupNamePage extends StatefulWidget {
 }
 
 class GroupNamePageState extends State<GroupNamePage> {
-  TextEditingController textEditingController = new TextEditingController();
-  File imageFile;
   bool imageExists = false;
-  WholeAppBloc wholeAppBloc;
   List<UserContact> userContactList = [];
-  FileService fileService;
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    fileService = FileService();
-  }
+  Color themePrimaryColor;
+  Color appBarThemeTextColor;
+  TextStyle circleAvatarTextStyle;
+  BorderRadius circleAvatarCirleRadius = BorderRadius.circular(20.0);
+
+  File imageFile;
+  TextEditingController textEditingController = new TextEditingController();
+
+  FileService fileService = FileService();
+  ImageService imageService = ImageService();
 
   @override
   Widget build(BuildContext context) {
-    final WholeAppBloc _wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
-    wholeAppBloc = _wholeAppBloc;
+    themePrimaryColor = Theme.of(context).textTheme.title.color;
+    appBarThemeTextColor = Theme.of(context).appBarTheme.textTheme.title.color;
+    circleAvatarTextStyle = TextStyle(color: appBarThemeTextColor);
     return Scaffold(
         appBar: AppBar(
             title: Row(
@@ -103,9 +106,19 @@ class GroupNamePageState extends State<GroupNamePage> {
 //                              showOptionsDialog(context);
                               getImage();
                             },
-                            borderRadius: BorderRadius.circular(20.0),
+                            borderRadius: circleAvatarCirleRadius,
                             child: CircleAvatar(
-                              backgroundImage: imageExists ? FileImage(imageFile) : AssetImage('lib/ui/icons/default_blank_photo.png'),
+                              backgroundColor: themePrimaryColor,
+                              // AssetImage('lib/ui/icons/default_blank_photo.png')
+//                              backgroundImage: FileImage(imageFile),
+                              child: !imageExists
+                                  ? Icon(
+                                      Icons.camera_alt,
+                                      color: appBarThemeTextColor,
+                                    ) : ClipRRect(
+                                borderRadius: circleAvatarCirleRadius,
+                                child: Image.file(imageFile, fit: BoxFit.cover,),
+                              ),
                             ),
                           )),
                       Container(
@@ -115,9 +128,7 @@ class GroupNamePageState extends State<GroupNamePage> {
                           children: <Widget>[
                             TextField(
                               controller: textEditingController,
-                              decoration: InputDecoration(
-                                hintText: "Type group subject here..."
-                              ),
+                              decoration: InputDecoration(hintText: "Type group subject here..."),
                             ),
                             Text(
                               "Provide a group subject and optional group icon.",
@@ -177,56 +188,77 @@ class GroupNamePageState extends State<GroupNamePage> {
     print("createGroupConversation()");
     showLoading(context, "Creating conversation...");
 
-    ConversationGroup conversationGroup = new ConversationGroup(
-        id: null,
-        notificationExpireDate: 0,
+    UserState userState = BlocProvider.of<UserBloc>(context).state;
+    if (userState is UserLoaded) {
+      ConversationGroup conversationGroup = new ConversationGroup(
+          id: null,
+          notificationExpireDate: 0,
 //        creatorUserId: wholeAppBloc.currentState.userState.id,
-        creatorUserId: 'Test creatorUserId',
-        createdDate: new DateTime.now().millisecondsSinceEpoch,
-        name: textEditingController.text,
-        type: "Group",
-        block: false,
-        description: '',
-        adminMemberIds: [],
-        memberIds: []);
+          creatorUserId: userState.user.id,
+          createdDate: new DateTime.now().millisecondsSinceEpoch,
+          name: textEditingController.text,
+          type: "Group",
+          block: false,
+          description: '',
+          adminMemberIds: [],
+          memberIds: []);
 
-    File copiedImageFile;
-    if (!isObjectEmpty(imageFile) && !isStringEmpty(imageFile.path)) {
-      // Copy full file to our directory. Create thumbnail of this image and copy this to our directory as well.
-      copiedImageFile = await fileService.copyFile(imageFile, "ApplicationDocumentDirectory");
+      UnreadMessage unreadMessage = UnreadMessage(
+        id: null,
+        conversationId: null,
+        count: 0,
+        date: DateTime.now().millisecondsSinceEpoch,
+        lastMessage: "",
+        userId: null,
+      );
+
+      File copiedImageFile;
+      if (!isObjectEmpty(imageFile) && !isStringEmpty(imageFile.path)) {
+        // Copy full file to our directory. Create thumbnail of this image and copy this to our directory as well.
+        copiedImageFile = await fileService.copyFile(imageFile, "ApplicationDocumentDirectory");
+      }
+
+      // Multimedia for group chat
+      Multimedia groupMultiMedia = Multimedia(
+        id: null,
+        localFullFileUrl: isObjectEmpty(copiedImageFile) ? null : copiedImageFile.path,
+        localThumbnailUrl: null,
+        remoteThumbnailUrl: null,
+        remoteFullFileUrl: null,
+        messageId: null,
+        userContactId: null,
+        conversationId: conversationGroup.id,
+      );
+
+      BlocProvider.of<ConversationGroupBloc>(context).add(AddConversationGroupEvent(
+          conversationGroup: conversationGroup,
+          callback: (ConversationGroup conversationGroup2) async {
+            if (!isObjectEmpty(conversationGroup2)) {
+              // Go to chat room page first
+              Navigator.pop(context); //pop loading dialog
+              Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
+              Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup2))));
+
+              uploadUserContactList(widget.selectedContacts, userState.user, conversationGroup2, context);
+
+              groupMultiMedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
+              unreadMessage.userId = conversationGroup2.creatorUserId;
+              BlocProvider.of<UnreadMessageBloc>(context).add(AddUnreadMessageEvent(
+                  unreadMessage: unreadMessage,
+                  callback: (UnreadMessage unreadMessage2) {
+                    if (!isObjectEmpty(unreadMessage2)) {
+                      addMultimediaWithUpdateConversationGroup(groupMultiMedia, null, conversationGroup2);
+                    }
+                  }));
+            } else {
+              Navigator.pop(context);
+              Fluttertoast.showToast(msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
+            }
+          }));
+      return conversationGroup;
+    } else {
+      return null;
     }
-
-    // Multimedia for group chat
-    Multimedia groupMultiMedia = Multimedia(
-      id: null,
-      localFullFileUrl: isObjectEmpty(copiedImageFile) ? null : copiedImageFile.path,
-      localThumbnailUrl: null,
-      remoteThumbnailUrl: null,
-      remoteFullFileUrl: null,
-      messageId: null,
-      userContactId: null,
-      conversationId: conversationGroup.id,
-    );
-
-//    wholeAppBloc.dispatch(CreateConversationGroupEvent(
-//        multimedia: groupMultiMedia,
-//        imageFile: imageFile,
-//        contactList: widget.selectedContacts,
-//        conversationGroup: conversationGroup,
-//        type: "Group",
-//        callback: (ConversationGroup newConversationGroup) {
-//          print("CreateConversationGroupEvent callback success! ");
-//          Navigator.pop(context);
-//          if (newConversationGroup != null) {
-//            print("if(newConversationGroup != null)");
-//            Navigator.pop(context); //pop loading dialog
-//            Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
-//            Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(newConversationGroup))));
-//          } else {
-//            Fluttertoast.showToast(msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
-//          }
-//        }));
-    return conversationGroup;
   }
 
   Future getImage() async {
@@ -236,6 +268,112 @@ class GroupNamePageState extends State<GroupNamePage> {
     }
     setState(() {
       imageFile = image;
+      imageExists = true;
     });
+  }
+
+  // 2. Upload UserContactList
+  // Note: Backend already helped you to check any duplicates of the same UserContact
+  uploadUserContactList(List<Contact> contactList, User currentUser, ConversationGroup conversationGroup, BuildContext context) async {
+    List<UserContact> userContactList = [];
+
+    UserContact yourOwnUserContact = UserContact(
+      id: null,
+      userIds: [currentUser.id],
+      userId: currentUser.id,
+      displayName: currentUser.displayName,
+      realName: currentUser.realName,
+      block: false,
+      lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
+      // make unknown time, let server decide
+      mobileNo: currentUser.mobileNo,
+    );
+
+    userContactList.add(yourOwnUserContact);
+
+    contactList.forEach((contact) {
+      List<String> primaryNo = [];
+      if (contact.phones.length > 0) {
+        contact.phones.forEach((phoneNo) {
+          primaryNo.add(phoneNo.value);
+        });
+      } else {
+        // No phone number and the display name is the phone number itself
+        // Reason: No contact.phones when the mobile number doesn't have a name on it
+        String mobileNo = contact.displayName.replaceAll(new RegExp(r"\s+\b|\b\s|\s|\b"), "");
+        print("mobileNo with whitespaces removed: " + mobileNo);
+        primaryNo.add(mobileNo);
+      }
+
+      UserContact userContact = UserContact(
+        id: null,
+        // So this contact number is mine. Later send it to backend and merge with other UserContact who got the same number
+        userIds: [currentUser.id],
+        displayName: contact.displayName,
+        realName: contact.displayName,
+        block: false,
+        lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
+      );
+
+      userContact.mobileNo = primaryNo.length == 0 ? "" : primaryNo[0];
+
+      // If got Malaysia number
+      if (primaryNo[0].contains("+60")) {
+        print("If Malaysian Number: ");
+        String trimmedString = primaryNo[0].substring(3);
+        print("trimmedString: " + trimmedString);
+      }
+
+      userContactList.add(userContact);
+    });
+
+    BlocProvider.of<UserContactBloc>(context).add(AddMultipleUserContactEvent(
+        userContactList: userContactList,
+        callback: (List<UserContact> newUserContactList) {
+          if ((contactList.length != newUserContactList.length - 1) || newUserContactList.length == 0) {
+            // event.contactList doesn't include yourself, so newUserContactList.length - 1 OR Any UserContact is not added into the list (means not uploaded successfully)
+            // That means some UseContact are not uploaded into the REST
+            Navigator.pop(context);
+            Fluttertoast.showToast(
+                msg: 'Unable to upload your member list for ${conversationGroup.name.toString()}. Please try again.',
+                toastLength: Toast.LENGTH_SHORT);
+            return null;
+          } else {
+            print("Uploaded and saved uploadUserContactList to REST, DB and State.");
+
+            // Give the list of UserContactIds to memberIds of ConversationGroup
+            conversationGroup.memberIds = newUserContactList.map((newUserContact) => newUserContact.id).toList();
+
+            // Add your own userContact's ID as admin by find the one that has the same mobile number in the userContactList
+            conversationGroup.adminMemberIds.add(newUserContactList
+                .firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentUser.mobileNo, orElse: () => null)
+                .id);
+
+            BlocProvider.of<ConversationGroupBloc>(context)
+                .add(EditConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+          }
+        }));
+  }
+
+  addMultimediaWithUpdateConversationGroup(Multimedia groupMultimedia, File imageFile, ConversationGroup conversationGroup) async {
+    // 4. Upload Group Multimedia
+    // Create thumbnail before upload
+    File thumbnailImageFile;
+    if (!isStringEmpty(groupMultimedia.localFullFileUrl) && !isObjectEmpty(imageFile)) {
+      thumbnailImageFile = await imageService.getImageThumbnail(imageFile);
+    }
+
+    if (!isObjectEmpty(thumbnailImageFile)) {
+      groupMultimedia.localThumbnailUrl = thumbnailImageFile.path;
+    }
+
+    BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
+        multimedia: groupMultimedia,
+        callback: (Multimedia multimedia2) {
+          if (!isObjectEmpty(multimedia2)) {
+            BlocProvider.of<ConversationGroupBloc>(context)
+                .add(EditConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+          }
+        }));
   }
 }

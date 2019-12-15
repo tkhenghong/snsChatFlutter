@@ -38,11 +38,17 @@ class SelectContactsPage extends StatefulWidget {
 class SelectContactsPageState extends State<SelectContactsPage> {
   bool isLoading = true;
   bool contactLoaded = false;
-  PermissionStatus permissionStatus;
-  List<Contact> selectedContacts = [];
-  Map<String, bool> contactCheckBoxes = {};
+
   String title = "";
   String subtitle = "";
+
+  List<Contact> selectedContacts = [];
+  Map<String, bool> contactCheckBoxes = {};
+
+  Color themePrimaryColor;
+  Color appBarThemeTextColor;
+  TextStyle circleAvatarTextStyle;
+
   RefreshController _refreshController;
   ScrollController scrollController;
 
@@ -102,6 +108,9 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   @override
   Widget build(BuildContext context) {
+    themePrimaryColor = Theme.of(context).textTheme.title.color;
+    appBarThemeTextColor = Theme.of(context).appBarTheme.textTheme.title.color;
+    circleAvatarTextStyle = TextStyle(color: appBarThemeTextColor);
     return Scaffold(
       appBar: appBar(context),
       body: MultiBlocListener(
@@ -241,8 +250,17 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         });
       },
       secondary: CircleAvatar(
+        backgroundColor: themePrimaryColor,
         backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
-        child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
+        child: contact.avatar.isEmpty
+            ? Text(
+                contact.displayName[0],
+                style: circleAvatarTextStyle,
+              )
+            : Text(
+                '',
+                style: circleAvatarTextStyle,
+              ),
         radius: 20.0,
       ),
     );
@@ -260,12 +278,21 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       ),
       onTap: () {
         if (widget.chatGroupType == "Personal") {
-          createPersonalConversation(contact);
+          createPersonalConversation(contact, context);
         }
       },
       leading: CircleAvatar(
+        backgroundColor: themePrimaryColor,
         backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
-        child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
+        child: contact.avatar.isEmpty
+            ? Text(
+                contact.displayName[0],
+                style: circleAvatarTextStyle,
+              )
+            : Text(
+                '',
+                style: circleAvatarTextStyle,
+              ),
         radius: 20.0,
       ),
     );
@@ -348,7 +375,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   }
 
   // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
-  Future<ConversationGroup> createPersonalConversation(Contact contact) async {
+  Future<ConversationGroup> createPersonalConversation(Contact contact, BuildContext context) async {
     // TODO: create loading that cannot be dismissed to prevent exit, and make it faster
     showLoading(context, "Loading conversation...");
     UserState userState = BlocProvider.of<UserBloc>(context).state;
@@ -364,8 +391,10 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         type: "Personal",
         block: false,
         description: '',
-        adminMemberIds: [], // Add later
-        memberIds: [], // Add later
+        adminMemberIds: [],
+        // Add later
+        memberIds: [],
+        // Add later
         // memberIds put UserContact.id. NOT User.id
         notificationExpireDate: 0,
       );
@@ -386,7 +415,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           remoteThumbnailUrl: null,
           remoteFullFileUrl: null,
           userContactId: null,
-          conversationId: null, // Add later
+          conversationId: null,
+          // Add later
           messageId: null,
           userId: null);
 
@@ -413,7 +443,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
               Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
               Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup2))));
 
-              uploadUserContactList(contactList, userState.user, conversationGroup2);
+              uploadUserContactList(contactList, userState.user, conversationGroup2, context);
 
               groupMultiMedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
               unreadMessage.userId = conversationGroup2.creatorUserId;
@@ -429,24 +459,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
               Fluttertoast.showToast(msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
             }
           }));
-
-//    wholeAppBloc.dispatch(CreateConversationGroupEvent(
-//        multimedia: groupMultiMedia,
-//        contactList: contactList,
-//        conversationGroup: conversationGroup,
-//        type: widget.chatGroupType,
-//        callback: (ConversationGroup newConversationGroup) {
-//          print("CreateConversationGroupEvent callback success! ");
-//          Navigator.pop(context);
-//          if (newConversationGroup != null) {
-//            print("if(newConversationGroup != null)");
-//            Navigator.pop(context); //pop loading dialog
-//            Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
-//            Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(newConversationGroup))));
-//          } else {
-//            Fluttertoast.showToast(msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
-//          }
-//        }));
       return conversationGroup;
     } else {
       return null;
@@ -468,7 +480,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   // 2. Upload UserContactList
   // Note: Backend already helped you to check any duplicates of the same UserContact
-  uploadUserContactList(List<Contact> contactList, User currentUser, ConversationGroup conversationGroup) async {
+  uploadUserContactList(List<Contact> contactList, User currentUser, ConversationGroup conversationGroup, BuildContext context) async {
     List<UserContact> userContactList = [];
 
     UserContact yourOwnUserContact = UserContact(
@@ -528,7 +540,9 @@ class SelectContactsPageState extends State<SelectContactsPage> {
             // event.contactList doesn't include yourself, so newUserContactList.length - 1 OR Any UserContact is not added into the list (means not uploaded successfully)
             // That means some UseContact are not uploaded into the REST
             Navigator.pop(context);
-            Fluttertoast.showToast(msg: 'Unable to upload your member list for ${conversationGroup.name.toString()}. Please try again.', toastLength: Toast.LENGTH_SHORT);
+            Fluttertoast.showToast(
+                msg: 'Unable to upload your member list for ${conversationGroup.name.toString()}. Please try again.',
+                toastLength: Toast.LENGTH_SHORT);
             return null;
           } else {
             print("Uploaded and saved uploadUserContactList to REST, DB and State.");
