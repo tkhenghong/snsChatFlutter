@@ -53,7 +53,7 @@ class LoginPageState extends State<LoginPage> {
       showCenterLoadingIndicator(context);
 
       String mobileNo = getPhoneNumber(ipGeoLocation);
-      BlocProvider.of<GoogleInfoBloc>(context).add(InitializeGoogleInfoEvent(callback: (bool initialized) {
+      BlocProvider.of<GoogleInfoBloc>(context).add(SignInGoogleInfoEvent(callback: (bool initialized) {
         if (initialized) {
           BlocProvider.of<GoogleInfoBloc>(context)
               .add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn, FirebaseAuth firebaseAuth, FirebaseUser firebaseUser) {

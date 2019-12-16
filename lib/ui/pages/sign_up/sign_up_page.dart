@@ -215,7 +215,7 @@ class SignUpPageState extends State<SignUpPage> {
     if (_formKey.currentState.validate()) {
       showCenterLoadingIndicator(context);
 
-      BlocProvider.of<GoogleInfoBloc>(context).add(InitializeGoogleInfoEvent(callback: (bool initialized) {
+      BlocProvider.of<GoogleInfoBloc>(context).add(SignInGoogleInfoEvent(callback: (bool initialized) {
         if (initialized) {
           BlocProvider.of<GoogleInfoBloc>(context)
               .add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn2, FirebaseAuth firebaseAuth2, FirebaseUser firebaseUser2) {

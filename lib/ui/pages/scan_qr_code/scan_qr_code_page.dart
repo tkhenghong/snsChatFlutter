@@ -32,8 +32,8 @@ class ScanQrCodePageState extends State<ScanQrCodePage> {
         QrImage(
           data: "651uytjn1t5hn41rt53ghb1t5j4etuj5t1ed3hdu1tyj4edty56j416r5jh4r5yt",
           size: 0.5 * bodyHeight,
-          onError: (ex) {
-            print("[QR] ERROR - $ex");
+          errorStateBuilder: (context, obj) {
+            print("[QR] ERROR - ${obj.toString()}");
           },
         ),
         RaisedButton(

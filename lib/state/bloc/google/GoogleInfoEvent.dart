@@ -19,6 +19,15 @@ class InitializeGoogleInfoEvent extends GoogleInfoEvent {
   String toString() => 'InitializeGoogleInfoEvent';
 }
 
+class SignInGoogleInfoEvent extends GoogleInfoEvent {
+  final Function callback;
+
+  const SignInGoogleInfoEvent({this.callback});
+
+  @override
+  String toString() => 'SignInGoogleInfoEvent';
+}
+
 class RemoveGoogleInfoEvent extends GoogleInfoEvent {
   final Function callback;
 

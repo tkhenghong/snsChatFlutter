@@ -21,6 +21,8 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
       yield* _removeGoogleInfoFromState(event);
     } else if (event is GetOwnGoogleInfoEvent) {
       yield* _getOwnGoogleInfo(event);
+    } else if (event is SignInGoogleInfoEvent) {
+      yield* _signIntoGoogle(event);
     }
 
     // GetOwnGoogleInfoEvent
@@ -37,32 +39,32 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
         GoogleSignInAccount googleSignInAccount;
 
         if (!await googleSignIn.isSignedIn()) {
-          // For login page
-          googleSignInAccount = await googleSignIn.signIn();
-        } else {
-          // For chat group list page
-          googleSignInAccount = await googleSignIn.signInSilently(suppressErrors: false);
-        }
-
-        if (isObjectEmpty(googleSignInAccount)) {
           Fluttertoast.showToast(msg: 'Google sign in canceled.', toastLength: Toast.LENGTH_SHORT);
           yield GoogleInfoNotLoaded();
           functionCallback(event, false);
+        } else {
+          // For chat group list page
+          googleSignInAccount = await googleSignIn.signInSilently(suppressErrors: false);
+
+          if (isObjectEmpty(googleSignInAccount)) {
+            Fluttertoast.showToast(msg: 'Google sign in canceled.', toastLength: Toast.LENGTH_SHORT);
+            yield GoogleInfoNotLoaded();
+            functionCallback(event, false);
+          } else {
+            GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+
+            AuthCredential credential = GoogleAuthProvider.getCredential(
+                idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
+
+            AuthResult authResult = await firebaseAuth.signInWithCredential(credential);
+            firebaseUser = authResult.user;
+
+            yield GoogleInfoLoaded(googleSignIn, firebaseAuth, firebaseUser);
+            if (!isObjectEmpty(event)) {
+              event.callback(true);
+            }
+          }
         }
-
-        GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
-
-        AuthCredential credential = GoogleAuthProvider.getCredential(
-            idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
-
-        AuthResult authResult = await firebaseAuth.signInWithCredential(credential);
-        firebaseUser = authResult.user;
-
-        yield GoogleInfoLoaded(googleSignIn, firebaseAuth, firebaseUser);
-        if (!isObjectEmpty(event)) {
-          event.callback(true);
-        }
-
       } catch (e) {
         yield GoogleInfoNotLoaded();
         functionCallback(event, false);
@@ -108,6 +110,48 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
         print('Error: ' + e);
       }
 
+    }
+  }
+
+  Stream<GoogleInfoState> _signIntoGoogle(SignInGoogleInfoEvent event) async* {
+    if(state is GoogleInfoNotLoaded || state is GoogleInfoLoading) {
+      try {
+        print('GoogleInfoBloc.dart SignInGoogleInfoEvent()');
+        GoogleSignIn googleSignIn = new GoogleSignIn();
+        FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+        FirebaseUser firebaseUser;
+
+        GoogleSignInAccount googleSignInAccount;
+
+        if (!await googleSignIn.isSignedIn()) {
+          // For login page
+          googleSignInAccount = await googleSignIn.signIn();
+        } else {
+          // For chat group list page
+          googleSignInAccount = await googleSignIn.signInSilently(suppressErrors: false);
+        }
+
+        if (isObjectEmpty(googleSignInAccount)) {
+          yield GoogleInfoNotLoaded();
+          functionCallback(event, false);
+        }
+
+        GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+
+        AuthCredential credential = GoogleAuthProvider.getCredential(
+            idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
+
+        AuthResult authResult = await firebaseAuth.signInWithCredential(credential);
+        firebaseUser = authResult.user;
+
+        yield GoogleInfoLoaded(googleSignIn, firebaseAuth, firebaseUser);
+        if (!isObjectEmpty(event)) {
+          event.callback(true);
+        }
+      } catch (e) {
+        yield GoogleInfoNotLoaded();
+        functionCallback(event, false);
+      }
     }
   }
 
