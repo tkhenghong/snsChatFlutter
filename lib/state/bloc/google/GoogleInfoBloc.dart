@@ -24,8 +24,6 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
     } else if (event is SignInGoogleInfoEvent) {
       yield* _signIntoGoogle(event);
     }
-
-    // GetOwnGoogleInfoEvent
   }
 
   Stream<GoogleInfoState> _mapInitializeGoogleInfoToState(InitializeGoogleInfoEvent event) async* {
