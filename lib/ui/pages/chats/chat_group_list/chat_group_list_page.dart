@@ -120,6 +120,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
             }
 
             if (conversationGroupState is ConversationGroupsLoaded) {
+              print('chat_group_list_page.dart context: ' + context.toString());
               BlocProvider.of<MultimediaBloc>(context).add(GetConversationGroupsMultimediaEvent(
                   conversationGroupList: conversationGroupState.conversationGroupList, callback: (bool done) {}));
             }

@@ -438,11 +438,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           conversationGroup: conversationGroup,
           callback: (ConversationGroup conversationGroup2) async {
             if (!isObjectEmpty(conversationGroup2)) {
-              // Go to chat room page first
-              Navigator.pop(context); //pop loading dialog
-              Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
-              Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup2))));
-
               uploadUserContactList(contactList, userState.user, conversationGroup2, context);
 
               groupMultiMedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
@@ -454,6 +449,11 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                       addMultimediaWithUpdateConversationGroup(groupMultiMedia, null, conversationGroup2);
                     }
                   }));
+
+              // Go to chat room page first
+              Navigator.pop(context); //pop loading dialog
+              Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
+              Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup2))));
             } else {
               Navigator.pop(context);
               Fluttertoast.showToast(msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
