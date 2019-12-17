@@ -101,11 +101,11 @@ class SignUpPageState extends State<SignUpPage> {
           },
         ),
       ],
-      child: signUpScreen(deviceHeight, deviceWidth),
+      child: signUpScreen(deviceHeight, deviceWidth, context),
     );
   }
 
-  signUpScreen(deviceHeight, deviceWidth) => Material(
+  signUpScreen(deviceHeight, deviceWidth, BuildContext context) => Material(
       child: GestureDetector(
           // call this method here to hide soft keyboard
           onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
@@ -199,7 +199,7 @@ class SignUpPageState extends State<SignUpPage> {
                   ),
                 ),
                 RaisedButton(
-                  onPressed: () => signUp(),
+                  onPressed: () => signUp(context),
                   textColor: Colors.white,
                   animationDuration: Duration(milliseconds: 500),
                   padding: EdgeInsets.only(left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
@@ -211,7 +211,7 @@ class SignUpPageState extends State<SignUpPage> {
             ),
           )));
 
-  signUp() async {
+  signUp(BuildContext context) async {
     if (_formKey.currentState.validate()) {
       showCenterLoadingIndicator(context);
 
@@ -280,7 +280,7 @@ class SignUpPageState extends State<SignUpPage> {
                                                         msg: 'Sign up success. Please verify your phone number.',
                                                         toastLength: Toast.LENGTH_SHORT);
                                                     Navigator.pop(context);
-                                                    goToVerifyPhoneNumber();
+                                                    goToVerifyPhoneNumber(context);
                                                   }
                                                 }));
                                           } else {
@@ -349,7 +349,7 @@ class SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  goToVerifyPhoneNumber() {
+  goToVerifyPhoneNumber(BuildContext context) {
     Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(mobileNo: getPhoneNumber()))));
   }
 }

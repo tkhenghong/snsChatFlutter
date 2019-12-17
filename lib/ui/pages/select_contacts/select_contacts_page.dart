@@ -446,7 +446,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                   unreadMessage: unreadMessage,
                   callback: (UnreadMessage unreadMessage2) {
                     if (!isObjectEmpty(unreadMessage2)) {
-                      addMultimediaWithUpdateConversationGroup(groupMultiMedia, null, conversationGroup2);
+                      addMultimediaWithUpdateConversationGroup(groupMultiMedia, null, conversationGroup2, context);
                     }
                   }));
 
@@ -561,7 +561,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         }));
   }
 
-  addMultimediaWithUpdateConversationGroup(Multimedia groupMultimedia, File imageFile, ConversationGroup conversationGroup) async {
+  addMultimediaWithUpdateConversationGroup(Multimedia groupMultimedia, File imageFile, ConversationGroup conversationGroup, BuildContext context) async {
     // 4. Upload Group Multimedia
     // Create thumbnail before upload
     File thumbnailImageFile;

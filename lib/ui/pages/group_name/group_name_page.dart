@@ -81,7 +81,7 @@ class GroupNamePageState extends State<GroupNamePage> {
                   child: Icon(Icons.check),
                 ),
                 onTap: () {
-                  createGroupConversation(widget.selectedContacts);
+                  createGroupConversation(widget.selectedContacts, context);
                 },
               ),
             ),
@@ -184,7 +184,7 @@ class GroupNamePageState extends State<GroupNamePage> {
         ));
   }
 
-  Future<ConversationGroup> createGroupConversation(List<Contact> contact) async {
+  Future<ConversationGroup> createGroupConversation(List<Contact> contact, BuildContext context) async {
     print("createGroupConversation()");
     showLoading(context, "Creating conversation...");
 
