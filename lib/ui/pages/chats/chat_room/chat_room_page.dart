@@ -188,7 +188,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     child: imageService.loadImageThumbnailCircleAvatar(multimedia, conversationGroup.type, context),
                   ),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 50.0),
+                    padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 30.0),
                   ),
                 ],
               ),
