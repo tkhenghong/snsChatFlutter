@@ -169,7 +169,8 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
 
   Stream<UserContactState> _getUserPreviousUserContactsEvent(GetUserPreviousUserContactsEvent event) async* {
     List<UserContact> userContactListFromServer = await userContactAPIService.getUserContactsByUserId(event.user.id);
-
+    print('UserContactBloc.dart userContactListFromServer: ' + userContactListFromServer.toString());
+    print('UserContactBloc.dart userContactListFromServer.length: ' + userContactListFromServer.length.toString());
     if (state is UserContactsLoaded) {
       List<UserContact> existingUserContactList = (state as UserContactsLoaded).userContactList;
 

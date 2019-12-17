@@ -16,8 +16,7 @@ class IPGeoLocationBloc extends Bloc<IPGeoLocationEvent, IPGeoLocationState> {
     // TODO: implement mapEventToState
     if(event is InitializeIPGeoLocationEvent) {
       yield* _initIPGeoLocationToState(event);
-    }
-    if (event is GetIPGeoLocationEvent) {
+    } else if (event is GetIPGeoLocationEvent) {
       yield* _mapIPGeoLocationToState(event);
     }
   }

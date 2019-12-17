@@ -127,7 +127,8 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
   Stream<ConversationGroupState> _getUserPreviousConversationGroups(GetUserPreviousConversationGroupsEvent event) async* {
     List<ConversationGroup> conversationGroupListFromServer =
         await conversationGroupAPIService.getConversationGroupsForUserByMobileNo(event.user.mobileNo);
-
+    print('ConversationGroupBloc.dart conversationGroupListFromServer: ' + conversationGroupListFromServer.toString());
+    print('ConversationGroupBloc.dart conversationGroupListFromServer.length: ' + conversationGroupListFromServer.length.toString());
     if (state is ConversationGroupsLoaded) {
       List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 

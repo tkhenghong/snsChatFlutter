@@ -148,7 +148,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
 
     // Get user profile picture
     Multimedia multimediaFromServer = await multimediaAPIService.getMultimediaOfAUser(event.user.id);
-
+    print('MultimediaBloc.dart multimediaFromServer: ' + multimediaFromServer.toString());
     if (!isObjectEmpty(multimediaFromServer)) {
       multimediaList.add(multimediaFromServer);
     }

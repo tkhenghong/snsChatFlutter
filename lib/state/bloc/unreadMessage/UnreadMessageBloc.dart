@@ -123,7 +123,8 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
 
   Stream<UnreadMessageState> _getPreviousUnreadMessages(GetUserPreviousUnreadMessagesEvent event) async* {
     List<UnreadMessage> unreadMessageListFromServer = await unreadMessageAPIService.getUnreadMessagesOfAUser(event.user.id);
-
+    print('UnreadMessageBloc.dart unreadMessageListFromServer: ' + unreadMessageListFromServer.toString());
+    print('UnreadMessageBloc.dart unreadMessageListFromServer.length: ' + unreadMessageListFromServer.length.toString());
     if (state is UnreadMessagesLoaded) {
       List<UnreadMessage> existingUnreadMessageList = (state as UnreadMessagesLoaded).unreadMessageList;
 

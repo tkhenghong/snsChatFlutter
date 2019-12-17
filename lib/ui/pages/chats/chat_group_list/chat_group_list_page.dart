@@ -106,9 +106,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                   .add(GetUserProfilePictureMultimediaEvent(user: userState.user, callback: (bool done) {}));
               BlocProvider.of<UserContactBloc>(context)
                   .add(GetUserPreviousUserContactsEvent(user: userState.user, callback: (bool done) {}));
-
-              BlocProvider.of<MultimediaBloc>(context)
-                  .add(GetUserProfilePictureMultimediaEvent(user: userState.user, callback: (bool done) {}));
             }
           },
         ),
