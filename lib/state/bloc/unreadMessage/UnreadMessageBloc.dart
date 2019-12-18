@@ -28,13 +28,21 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
   }
 
   Stream<UnreadMessageState> _initializeUnreadMessagesToState(InitializeUnreadMessagesEvent event) async* {
-    try {
-      List<UnreadMessage> unreadMessageListFromDB = await unreadMessageDBService.getAllUnreadMessage();
+    if (state is UnreadMessageLoading || state is UnreadMessagesNotLoaded) {
+      try {
+        List<UnreadMessage> unreadMessageListFromDB = await unreadMessageDBService.getAllUnreadMessage();
 
-      yield UnreadMessagesLoaded(unreadMessageListFromDB);
-      functionCallback(event, true);
-    } catch (e) {
-      functionCallback(event, false);
+        if (isObjectEmpty(unreadMessageListFromDB)) {
+          yield UnreadMessagesNotLoaded();
+          functionCallback(event, false);
+        } else {
+          yield UnreadMessagesLoaded(unreadMessageListFromDB);
+          functionCallback(event, true);
+        }
+      } catch (e) {
+        yield UnreadMessagesNotLoaded();
+        functionCallback(event, false);
+      }
     }
   }
 

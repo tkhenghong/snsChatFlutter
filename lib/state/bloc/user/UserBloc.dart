@@ -34,21 +34,21 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   Stream<UserState> _initializeUser(InitializeUserEvent event) async* {
-    try {
-      // Bloc-to-bloc communication. https://bloclibrary.dev/#/architecture
+    if (state is UserLoading || state is UserNotLoaded) {
+      try {
+        User userFromDB = await userDBService.getUserByGoogleAccountId(event.googleSignIn.currentUser.id);
 
-      User userFromDB = await userDBService.getUserByGoogleAccountId(event.googleSignIn.currentUser.id);
-
-      if (!isObjectEmpty(userFromDB)) {
-        yield UserLoaded(userFromDB);
-        functionCallback(event, true);
-      } else {
+        if (!isObjectEmpty(userFromDB)) {
+          yield UserLoaded(userFromDB);
+          functionCallback(event, true);
+        } else {
+          yield UserNotLoaded();
+          functionCallback(event, false);
+        }
+      } catch (e) {
         yield UserNotLoaded();
         functionCallback(event, false);
       }
-    } catch (e) {
-      yield UserNotLoaded();
-      functionCallback(event, false);
     }
   }
 
@@ -129,20 +129,17 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   Stream<UserState> _checkUserSignedUp(CheckUserSignedUpEvent event) async* {
-
     bool isSignedUp = false;
     User existingUserUsingMobileNo;
     User existingUserUsingGoogleAccount;
-
 
     if (!isStringEmpty(event.mobileNo)) {
       existingUserUsingMobileNo = await userAPIService.getUserByUsingMobileNo(event.mobileNo);
     }
 
-    if(!isObjectEmpty(event.googleSignIn) && !isStringEmpty(event.googleSignIn.currentUser.id)) {
+    if (!isObjectEmpty(event.googleSignIn) && !isStringEmpty(event.googleSignIn.currentUser.id)) {
       existingUserUsingGoogleAccount = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
     }
-
 
     isSignedUp = !isObjectEmpty(existingUserUsingMobileNo) || !isObjectEmpty(existingUserUsingGoogleAccount);
 
@@ -161,10 +158,9 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         userFromServer = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
 
         if (!isObjectEmpty(userFromServer)) {
-
           saved = await userDBService.addUser(userFromServer);
 
-          if(saved) {
+          if (saved) {
             yield UserLoaded(userFromServer);
             functionCallback(event, userFromServer);
           }

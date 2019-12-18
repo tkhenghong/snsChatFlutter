@@ -31,28 +31,28 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   }
 
   Stream<SettingsState> _initializeSettingsToState(InitializeSettingsEvent event) async* {
-    Settings settingsFromDB;
-    try {
-      if (!isObjectEmpty(event.user)) {
-        // TODO: get user from state using better way
-        settingsFromDB = await settingsDBService.getSettingsOfAUser(event.user.id);
+    if (state is SettingsLoading || state is SettingsNotLoaded) {
+      Settings settingsFromDB;
+      try {
+        if (!isObjectEmpty(event.user)) {
+          // TODO: get user from state using better way
+          settingsFromDB = await settingsDBService.getSettingsOfAUser(event.user.id);
 
-        if (!isObjectEmpty(settingsFromDB)) {
-          yield SettingsLoaded(settingsFromDB);
-          functionCallback(event, true);
+          if (!isObjectEmpty(settingsFromDB)) {
+            yield SettingsLoaded(settingsFromDB);
+            functionCallback(event, true);
+          } else {
+            yield SettingsNotLoaded();
+            functionCallback(event, false);
+          }
+        } else {
+          yield SettingsNotLoaded();
+          functionCallback(event, false);
         }
-      } else {
+      } catch (e) {
         yield SettingsNotLoaded();
         functionCallback(event, false);
       }
-    } catch (e) {
-      yield SettingsNotLoaded();
-      functionCallback(event, false);
-    }
-
-    if (isObjectEmpty(settingsFromDB)) {
-      yield SettingsNotLoaded();
-      functionCallback(event, false);
     }
   }
 

@@ -34,13 +34,21 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
   }
 
   Stream<MultimediaState> _initializeMultimediaToState(InitializeMultimediaEvent event) async* {
-    try {
-      List<Multimedia> multimediaListFromDB = await multimediaDBService.getAllMultimedia();
+    if (state is MultimediaLoading || state is MultimediaNotLoaded) {
+      try {
+        List<Multimedia> multimediaListFromDB = await multimediaDBService.getAllMultimedia();
 
-      yield MultimediaLoaded(multimediaListFromDB);
-      functionCallback(event, true);
-    } catch (e) {
-      functionCallback(event, false);
+        if (isObjectEmpty(multimediaListFromDB)) {
+          yield MultimediaNotLoaded();
+          functionCallback(event, false);
+        } else {
+          yield MultimediaLoaded(multimediaListFromDB);
+          functionCallback(event, true);
+        }
+      } catch (e) {
+        yield MultimediaNotLoaded();
+        functionCallback(event, false);
+      }
     }
   }
 

@@ -22,4 +22,10 @@ class MultimediaLoaded extends MultimediaState {
   String toString() => 'MultimediaLoaded {multimediaList: $multimediaList}';
 }
 
-class MultimediasNotLoaded extends MultimediaState {}
+class MultimediaNotLoaded extends MultimediaState {
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'MultimediaNotLoaded';
+}

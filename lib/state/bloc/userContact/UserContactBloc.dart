@@ -32,14 +32,21 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
   }
 
   Stream<UserContactState> _initializeUserContactsToState(InitializeUserContactsEvent event) async* {
-    try {
-      List<UserContact> userContactListFromDB = await userContactDBService.getAllUserContacts();
+    if (state is UserContactsLoading || state is UserContactsNotLoaded) {
+      try {
+        List<UserContact> userContactListFromDB = await userContactDBService.getAllUserContacts();
 
-      yield UserContactsLoaded(userContactListFromDB);
-
-      functionCallback(event, true);
-    } catch (e) {
-      functionCallback(event, false);
+        if (isObjectEmpty(userContactListFromDB)) {
+          yield UserContactsNotLoaded();
+          functionCallback(event, false);
+        } else {
+          yield UserContactsLoaded(userContactListFromDB);
+          functionCallback(event, true);
+        }
+      } catch (e) {
+        yield UserContactsNotLoaded();
+        functionCallback(event, false);
+      }
     }
   }
 

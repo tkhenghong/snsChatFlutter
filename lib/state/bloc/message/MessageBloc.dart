@@ -26,16 +26,22 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
   }
 
   Stream<MessageState> _initializeMessagesToState(InitializeMessagesEvent event) async* {
-    try {
-      List<Message> messageListFromDB = await messageDBService.getAllMessages();
+    if (state is MessageLoading || state is MessagesNotLoaded) {
+      try {
+        List<Message> messageListFromDB = await messageDBService.getAllMessages();
 
-      print('messageListFromDB: ' + messageListFromDB.length.toString());
-
-      yield MessagesLoaded(messageListFromDB);
-      functionCallback(event, true);
-    } catch (e) {
-      functionCallback(event, false);
-      yield MessagesNotLoaded();
+        if (isObjectEmpty(messageListFromDB)) {
+          functionCallback(event, false);
+          yield MessagesNotLoaded();
+        } else {
+          print('messageListFromDB: ' + messageListFromDB.length.toString());
+          yield MessagesLoaded(messageListFromDB);
+          functionCallback(event, true);
+        }
+      } catch (e) {
+        functionCallback(event, false);
+        yield MessagesNotLoaded();
+      }
     }
   }
 
