@@ -331,17 +331,20 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   Widget showSingleMessagePage(String message) {
-    return Flexible(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              message,
-              textAlign: TextAlign.center,
-            ),
-          ],
+    return Material(
+      color: Colors.white,
+      child: Flexible(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                message,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );

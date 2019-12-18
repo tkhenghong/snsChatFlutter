@@ -35,11 +35,19 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
   Stream<ConversationGroupState> _mapInitializeConversationGroup(InitializeConversationGroupsEvent event) async* {
     try {
       List<ConversationGroup> conversationGroupListFromDB = await conversationGroupDBService.getAllConversationGroups();
-
       if (isObjectEmpty(conversationGroupListFromDB)) {
         yield ConversationGroupsNotLoaded();
         functionCallback(event, false);
       } else {
+        print('ConversationGroupBloc.dart conversationGroupListFromDB: ' + conversationGroupListFromDB.toString());
+        print('ConversationGroupBloc.dart conversationGroupListFromDB.length: ' + conversationGroupListFromDB.length.toString());
+        conversationGroupListFromDB.forEach((ConversationGroup conversationGroup) {
+          print('ConversationGroupBloc.dart conversationGroup.id.toString(): ' + conversationGroup.id.toString());
+          print('ConversationGroupBloc.dart conversationGroup.name.toString(): ' + conversationGroup.name.toString());
+          print('ConversationGroupBloc.dart conversationGroup.type.toString(): ' + conversationGroup.type.toString());
+          print('ConversationGroupBloc.dart conversationGroup.memberIds.toString(): ' + conversationGroup.memberIds.toString());
+          print('ConversationGroupBloc.dart conversationGroup.adminMemberIds.toString(): ' + conversationGroup.adminMemberIds.toString());
+        });
         yield ConversationGroupsLoaded(conversationGroupListFromDB);
         functionCallback(event, true);
       }
