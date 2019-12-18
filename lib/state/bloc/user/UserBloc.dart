@@ -131,15 +131,20 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   Stream<UserState> _checkUserSignedUp(CheckUserSignedUpEvent event) async* {
 
     bool isSignedUp = false;
-    User existingUser;
+    User existingUserUsingMobileNo;
+    User existingUserUsingGoogleAccount;
+
 
     if (!isStringEmpty(event.mobileNo)) {
-      existingUser = await userAPIService.getUserByUsingMobileNo(event.mobileNo);
-    } else {
-      existingUser = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
+      existingUserUsingMobileNo = await userAPIService.getUserByUsingMobileNo(event.mobileNo);
     }
 
-    isSignedUp = !isObjectEmpty(existingUser);
+    if(!isObjectEmpty(event.googleSignIn) && !isStringEmpty(event.googleSignIn.currentUser.id)) {
+      existingUserUsingGoogleAccount = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
+    }
+
+
+    isSignedUp = !isObjectEmpty(existingUserUsingMobileNo) || !isObjectEmpty(existingUserUsingGoogleAccount);
 
     if (!isObjectEmpty(event)) {
       event.callback(isSignedUp);

@@ -307,7 +307,7 @@ class SignUpPageState extends State<SignUpPage> {
                     Fluttertoast.showToast(
                         msg: 'Registered Mobile No./Google Account. Please use another Mobile No./Google Account to register.',
                         toastLength: Toast.LENGTH_SHORT);
-                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
                     Navigator.pop(context);
                   }
                 }));
