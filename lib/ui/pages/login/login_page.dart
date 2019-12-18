@@ -140,6 +140,7 @@ class LoginPageState extends State<LoginPage> {
         }
 
         if (ipGeoLocationState is IPGeoLocationNotLoaded) {
+          print('login_page.dart if (ipGeoLocationState is IPGeoLocationNotLoaded)');
           countryCodeString = 'US';
           return loginScreen(deviceWidth, deviceHeight, null);
         }
