@@ -31,7 +31,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   initState() {
     super.initState();
     _refreshController = new RefreshController();
-    initialize();
+
   }
 
   void dispose() {
@@ -39,17 +39,19 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     super.dispose();
   }
 
-  initialize() async {
+  initialize(BuildContext context) async {
     BlocProvider.of<ConversationGroupBloc>(context).add(InitializeConversationGroupsEvent(callback: (bool done) {}));
     BlocProvider.of<MessageBloc>(context).add(InitializeMessagesEvent(callback: (bool done) {}));
     BlocProvider.of<MultimediaBloc>(context).add(InitializeMultimediaEvent(callback: (bool done) {}));
     BlocProvider.of<UnreadMessageBloc>(context).add(InitializeUnreadMessagesEvent(callback: (bool done) {}));
     BlocProvider.of<UserContactBloc>(context).add(InitializeUserContactsEvent(callback: (bool done) {}));
     BlocProvider.of<WebSocketBloc>(context).add(InitializeWebSocketEvent(callback: (bool done) {}));
+    BlocProvider.of<IPGeoLocationBloc>(context).add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
   }
 
   @override
   Widget build(BuildContext context) {
+    initialize(context);
     return MultiBlocListener(
       listeners: [
         BlocListener<GoogleInfoBloc, GoogleInfoState>(
@@ -63,7 +65,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                     }
                   }));
               BlocProvider.of<UserContactBloc>(context).add(InitializeUserContactsEvent(callback: (bool done) {}));
-              BlocProvider.of<IPGeoLocationBloc>(context).add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
             }
 
             if (googleInfoState is GoogleInfoLoading) {
