@@ -73,7 +73,7 @@ class LoginPageState extends State<LoginPage> {
                                   if (!isObjectEmpty(settings)) {
                                     print('login_page.dart if (!isObjectEmpty(settings))');
                                     Navigator.pop(context);
-                                    goToVerifyPhoneNumber(mobileNo);
+                                    goToVerifyPhoneNumber(mobileNo, context);
                                   } else {
                                     print('login_page.dart if (isObjectEmpty(settings))');
                                     Fluttertoast.showToast(
@@ -122,16 +122,8 @@ class LoginPageState extends State<LoginPage> {
     themePrimaryColor = Theme.of(context).textTheme.title.color;
 
     return BlocBuilder<IPGeoLocationBloc, IPGeoLocationState>(
-      condition: (previousIpGeoLocationState, ipGeoLocationState) {
-        if (ipGeoLocationState is IPGeoLocationLoaded) {
-          countryCodeString = 'US';
-          return true;
-        }
-        return false;
-      },
       builder: (context, ipGeoLocationState) {
         if (ipGeoLocationState is IPGeoLocationLoading) {
-          BlocProvider.of<IPGeoLocationBloc>(context).add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
           return Material(
             child: Center(
               child: Text('Loading...'),
@@ -142,12 +134,12 @@ class LoginPageState extends State<LoginPage> {
         if (ipGeoLocationState is IPGeoLocationNotLoaded) {
           print('login_page.dart if (ipGeoLocationState is IPGeoLocationNotLoaded)');
           countryCodeString = 'US';
-          return loginScreen(deviceWidth, deviceHeight, null);
+          return loginScreen(deviceWidth, deviceHeight, null, context);
         }
 
         if (ipGeoLocationState is IPGeoLocationLoaded) {
           countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? "US" : ipGeoLocationState.ipGeoLocation.country_code2;
-          return loginScreen(deviceWidth, deviceHeight, ipGeoLocationState.ipGeoLocation);
+          return loginScreen(deviceWidth, deviceHeight, ipGeoLocationState.ipGeoLocation, context);
         }
 
         return Material(
@@ -159,7 +151,7 @@ class LoginPageState extends State<LoginPage> {
     );
   }
 
-  loginScreen(deviceWidth, deviceHeight, IPGeoLocation ipGeoLocation) => MultiBlocListener(
+  loginScreen(deviceWidth, deviceHeight, IPGeoLocation ipGeoLocation, BuildContext context) => MultiBlocListener(
         listeners: [
           BlocListener<IPGeoLocationBloc, IPGeoLocationState>(
             listener: (context, state) {},
@@ -244,7 +236,7 @@ class LoginPageState extends State<LoginPage> {
                   Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
                   Text("Don't have account yet?"),
                   FlatButton(
-                      onPressed: () => goToSignUp(),
+                      onPressed: () => goToSignUp(context),
                       child: Text(
                         "Sign Up Now",
                         style: TextStyle(color: themePrimaryColor),
@@ -265,7 +257,7 @@ class LoginPageState extends State<LoginPage> {
                         TextSpan(
                             text: "Terms and Conditions",
                             style: TextStyle(color: themePrimaryColor),
-                            recognizer: TapGestureRecognizer()..onTap = () => goToTermsAndConditions())
+                            recognizer: TapGestureRecognizer()..onTap = () => goToTermsAndConditions(context))
                       ])),
                   Padding(padding: EdgeInsets.symmetric(vertical: 5.00)),
                   RichText(
@@ -274,18 +266,18 @@ class LoginPageState extends State<LoginPage> {
                         TextSpan(
                             text: "Privacy Notice",
                             style: TextStyle(color: themePrimaryColor),
-                            recognizer: TapGestureRecognizer()..onTap = () => goToPrivacyNotice())
+                            recognizer: TapGestureRecognizer()..onTap = () => goToPrivacyNotice(context))
                       ])),
                 ],
               ),
             )),
       );
 
-  goToVerifyPhoneNumber(mobileNo) {
+  goToVerifyPhoneNumber(mobileNo, BuildContext context) {
     Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(mobileNo: mobileNo))));
   }
 
-  goToSignUp() {
+  goToSignUp(BuildContext context) {
     Navigator.push(
         context,
         MaterialPageRoute(
@@ -311,11 +303,11 @@ class LoginPageState extends State<LoginPage> {
     }
   }
 
-  goToTermsAndConditions() {
+  goToTermsAndConditions(BuildContext context) {
     Navigator.of(context).pushNamed("terms_and_conditions_page");
   }
 
-  goToPrivacyNotice() {
+  goToPrivacyNotice(BuildContext context) {
     Navigator.of(context).pushNamed("privacy_notice_page");
   }
 }
