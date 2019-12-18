@@ -141,7 +141,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       existingUserUsingGoogleAccount = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
     }
 
-    isSignedUp = !isObjectEmpty(existingUserUsingMobileNo) || !isObjectEmpty(existingUserUsingGoogleAccount);
+    // Must have both not empty then only considered it as sign up
+    isSignedUp = !isObjectEmpty(existingUserUsingMobileNo) && !isObjectEmpty(existingUserUsingGoogleAccount);
 
     if (!isObjectEmpty(event)) {
       event.callback(isSignedUp);

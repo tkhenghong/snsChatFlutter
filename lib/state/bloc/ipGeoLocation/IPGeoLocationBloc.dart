@@ -35,7 +35,6 @@ class IPGeoLocationBloc extends Bloc<IPGeoLocationEvent, IPGeoLocationState> {
   }
 
   Stream<IPGeoLocationState> _mapIPGeoLocationToState(GetIPGeoLocationEvent event) async* {
-
     if(state is IPGeoLocationLoaded) {
       IPGeoLocation ipGeoLocation = (state as IPGeoLocationLoaded).ipGeoLocation;
       functionCallback(event, ipGeoLocation);

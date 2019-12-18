@@ -2,19 +2,15 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/FirebaseStorage/FirebaseStorageService.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:image/image.dart' as CustomImage;
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppBloc.dart';
-import 'package:snschat_flutter/state/bloc/WholeApp/WholeAppEvent.dart';
 
 class ImageService {
   FileService fileService = FileService();
   FirebaseStorageService firebaseStorageService = FirebaseStorageService();
-  WholeAppBloc wholeAppBloc;
 
   // TODO: Stop using this, use cachedNetworkImage widget, but need to know
   // Returns ImageProvider object
@@ -109,7 +105,7 @@ class ImageService {
     fileService.downloadFile(multimedia.remoteThumbnailUrl, true, true).then((File file) {
       if (!isObjectEmpty(file)) {
         multimedia.localThumbnailUrl = file.path;
-        wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
+//        wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
         // Don't update it in REST
 
 //        wholeAppBloc.dispatch(EditMultimediaEvent(

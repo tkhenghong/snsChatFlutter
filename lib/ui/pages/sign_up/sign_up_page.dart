@@ -158,7 +158,7 @@ class SignUpPageState extends State<SignUpPage> {
                                 maxLength: 15,
                                 decoration: InputDecoration(hintText: "Mobile Number"),
                                 autofocus: true,
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.left,
                                 keyboardType: TextInputType.phone,
                                 focusNode: nodeOne,
                                 onFieldSubmitted: (value) {

@@ -31,7 +31,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   initState() {
     super.initState();
     _refreshController = new RefreshController();
-
   }
 
   void dispose() {
@@ -95,10 +94,9 @@ class ChatGroupListState extends State<ChatGroupListPage> {
             if (userState is UserLoaded) {
               print('chat_group_list_page.dart if (userState is UserLoaded)');
               print('chat_group_list_page.dart Get user previous data');
+
               // Restore previous data
-
               BlocProvider.of<SettingsBloc>(context).add(GetUserSettingsEvent(user: userState.user));
-
               BlocProvider.of<ConversationGroupBloc>(context)
                   .add(GetUserPreviousConversationGroupsEvent(user: userState.user, callback: (bool done) {}));
               BlocProvider.of<UnreadMessageBloc>(context)
