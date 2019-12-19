@@ -25,8 +25,6 @@ class MyselfPageState extends State<MyselfPage> {
           title: Text("Logout"),
           leading: Icon(Icons.exit_to_app),
           onTap: (context, object) {
-            BlocProvider.of<IPGeoLocationBloc>(context2).add(InitializeIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {}));
-            BlocProvider.of<GoogleInfoBloc>(context2).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
             logOut(context2);
           }),
     ];
@@ -34,13 +32,13 @@ class MyselfPageState extends State<MyselfPage> {
     return PageListView(array: listItems, context: context);
   }
 
-
-
   static goToSettingsPage(BuildContext context) {
     return Navigator.of(context).pushNamed("settings_page");
   }
 
   static logOut(BuildContext context) {
+    BlocProvider.of<IPGeoLocationBloc>(context).add(InitializeIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {}));
+    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
     return Navigator.of(context).pushReplacementNamed("login_page");
   }
 }

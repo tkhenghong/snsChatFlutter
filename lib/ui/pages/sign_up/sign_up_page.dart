@@ -50,12 +50,14 @@ class SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-  String getPhoneNumber() {
+  String getPhoneNumber(BuildContext context) {
     String phoneNoInitials = "";
 //    if (isObjectEmpty(countryCode) && !isObjectEmpty(wholeAppBloc.currentState.ipGeoLocation)) {
     if (isObjectEmpty(countryCode)) {
-//      phoneNoInitials = wholeAppBloc.currentState.ipGeoLocation.calling_code;
-      phoneNoInitials = '+60';
+      IPGeoLocationState ipGeoLocationState = BlocProvider.of<IPGeoLocationBloc>(context).state;
+      if (ipGeoLocationState is IPGeoLocationLoaded) {
+        phoneNoInitials = ipGeoLocationState.ipGeoLocation.calling_code;
+      }
     } else {
       phoneNoInitials = countryCode.dialCode;
     }
@@ -221,12 +223,12 @@ class SignUpPageState extends State<SignUpPage> {
               .add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn2, FirebaseAuth firebaseAuth2, FirebaseUser firebaseUser2) {
             BlocProvider.of<UserBloc>(context).add(CheckUserSignedUpEvent(
                 googleSignIn: googleSignIn2,
-                mobileNo: getPhoneNumber(),
+                mobileNo: getPhoneNumber(context),
                 callback: (bool isSignedUp) {
                   if (!isSignedUp) {
                     User user = User(
                         id: null,
-                        mobileNo: getPhoneNumber(),
+                        mobileNo: getPhoneNumber(context),
                         countryCode: widget.countryCodeString,
                         effectivePhoneNumber: mobileNoTextController.value.text.toString(),
                         displayName: firebaseUser2.displayName.toString(),
@@ -245,7 +247,7 @@ class SignUpPageState extends State<SignUpPage> {
                     UserContact userContact = UserContact(
                         id: null,
                         multimediaId: null,
-                        mobileNo: getPhoneNumber(),
+                        mobileNo: getPhoneNumber(context),
                         displayName: firebaseUser2.displayName,
                         realName: nameTextController.value.text.toString(),
                         lastSeenDate: DateTime.now().millisecondsSinceEpoch,
@@ -258,6 +260,7 @@ class SignUpPageState extends State<SignUpPage> {
                       BlocProvider.of<UserBloc>(context).add(AddUserEvent(
                           user: user,
                           callback: (User user2) {
+                            // TODO: Error Handling
                             userContact.userId = multimedia.userId = settings.userId = user2.id;
                             userContact.userIds.add(user2.id);
                             BlocProvider.of<SettingsBloc>(context).add(AddSettingsEvent(
@@ -267,7 +270,7 @@ class SignUpPageState extends State<SignUpPage> {
                                     BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
                                         multimedia: multimedia,
                                         callback: (Multimedia multimedia) {
-                                          if(!isObjectEmpty(multimedia)) {
+                                          if (!isObjectEmpty(multimedia)) {
                                             userContact.multimediaId = multimedia.id;
                                             BlocProvider.of<UserContactBloc>(context).add(AddUserContactEvent(
                                                 userContact: userContact,
@@ -285,14 +288,11 @@ class SignUpPageState extends State<SignUpPage> {
                                                 }));
                                           } else {
                                             Fluttertoast.showToast(
-                                                msg: 'Sign up error. Please try again.',
-                                                toastLength: Toast.LENGTH_SHORT);
+                                                msg: 'Sign up error. Please try again.', toastLength: Toast.LENGTH_SHORT);
                                           }
                                         }));
                                   } else {
-                                    Fluttertoast.showToast(
-                                        msg: 'Sign up error. Please try again.',
-                                        toastLength: Toast.LENGTH_SHORT);
+                                    Fluttertoast.showToast(msg: 'Sign up error. Please try again.', toastLength: Toast.LENGTH_SHORT);
                                     BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
                                     Navigator.pop(context);
                                   }
@@ -350,6 +350,6 @@ class SignUpPageState extends State<SignUpPage> {
   }
 
   goToVerifyPhoneNumber(BuildContext context) {
-    Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(mobileNo: getPhoneNumber()))));
+    Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(mobileNo: getPhoneNumber(context)))));
   }
 }
