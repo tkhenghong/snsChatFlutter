@@ -375,17 +375,18 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   }
 
   // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
-  Future<ConversationGroup> createPersonalConversation(Contact contact, BuildContext context) async {
+  createPersonalConversation(Contact contact, BuildContext context) async {
     // TODO: create loading that cannot be dismissed to prevent exit, and make it faster
     showLoading(context, "Loading conversation...");
     UserState userState = BlocProvider.of<UserBloc>(context).state;
     if (userState is UserLoaded) {
+      User currentUser = userState.user;
       List<Contact> contactList = [];
       contactList.add(contact);
 
       ConversationGroup conversationGroup = new ConversationGroup(
         id: null,
-        creatorUserId: userState.user.id,
+        creatorUserId: currentUser.id,
         createdDate: new DateTime.now().millisecondsSinceEpoch,
         name: contact.displayName,
         type: "Personal",
@@ -434,134 +435,114 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         groupMultiMedia.localThumbnailUrl = userContactImage.path;
       }
 
-      BlocProvider.of<ConversationGroupBloc>(context).add(AddConversationGroupEvent(
-          conversationGroup: conversationGroup,
-          callback: (ConversationGroup conversationGroup2) async {
-            if (!isObjectEmpty(conversationGroup2)) {
-              uploadUserContactList(contactList, userState.user, conversationGroup2, context);
+// 2. Upload UserContactList
+      // Note: Backend already helped you to check any duplicates of the same UserContact
+      List<UserContact> userContactList = [];
 
-              groupMultiMedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
-              unreadMessage.userId = conversationGroup2.creatorUserId;
-              BlocProvider.of<UnreadMessageBloc>(context).add(AddUnreadMessageEvent(
-                  unreadMessage: unreadMessage,
-                  callback: (UnreadMessage unreadMessage2) {
-                    if (!isObjectEmpty(unreadMessage2)) {
-                      addMultimediaWithUpdateConversationGroup(groupMultiMedia, null, conversationGroup2, context);
-                    }
-                  }));
-
-              // Go to chat room page first
-              Navigator.pop(context); //pop loading dialog
-              Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
-              Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup2))));
-            } else {
-              Navigator.pop(context);
-              Fluttertoast.showToast(msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
-            }
-          }));
-      return conversationGroup;
-    } else {
-      return null;
-    }
-  }
-
-  // Used to get UserContact Photo from Phone Storage
-  Future<File> getUserContactPhoto(Contact contact) async {
-    if (!isObjectEmpty(contact.avatar)) {
-      print("if(!isObjectEmpty(contact.avatar))");
-
-      File copiedFile =
-          await fileService.downloadFileFromUint8List(contact.avatar, DateTime.now().millisecondsSinceEpoch.toString(), "jpg");
-      return copiedFile;
-    } else {
-      return null;
-    }
-  }
-
-  // 2. Upload UserContactList
-  // Note: Backend already helped you to check any duplicates of the same UserContact
-  uploadUserContactList(List<Contact> contactList, User currentUser, ConversationGroup conversationGroup, BuildContext context) async {
-    List<UserContact> userContactList = [];
-
-    UserContact yourOwnUserContact = UserContact(
-      id: null,
-      userIds: [currentUser.id],
-      userId: currentUser.id,
-      displayName: currentUser.displayName,
-      realName: currentUser.realName,
-      block: false,
-      lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
-      // make unknown time, let server decide
-      mobileNo: currentUser.mobileNo,
-    );
-
-    userContactList.add(yourOwnUserContact);
-
-    contactList.forEach((contact) {
-      List<String> primaryNo = [];
-      if (contact.phones.length > 0) {
-        contact.phones.forEach((phoneNo) {
-          primaryNo.add(phoneNo.value);
-        });
-      } else {
-        // No phone number and the display name is the phone number itself
-        // Reason: No contact.phones when the mobile number doesn't have a name on it
-        String mobileNo = contact.displayName.replaceAll(new RegExp(r"\s+\b|\b\s|\s|\b"), "");
-        print("mobileNo with whitespaces removed: " + mobileNo);
-        primaryNo.add(mobileNo);
-      }
-
-      UserContact userContact = UserContact(
+      UserContact yourOwnUserContact = UserContact(
         id: null,
-        // So this contact number is mine. Later send it to backend and merge with other UserContact who got the same number
         userIds: [currentUser.id],
-        displayName: contact.displayName,
-        realName: contact.displayName,
+        userId: currentUser.id,
+        displayName: currentUser.displayName,
+        realName: currentUser.realName,
         block: false,
         lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
+        // make unknown time, let server decide
+        mobileNo: currentUser.mobileNo,
       );
 
-      userContact.mobileNo = primaryNo.length == 0 ? "" : primaryNo[0];
+      userContactList.add(yourOwnUserContact);
 
-      // If got Malaysia number
-      if (primaryNo[0].contains("+60")) {
-        print("If Malaysian Number: ");
-        String trimmedString = primaryNo[0].substring(3);
-        print("trimmedString: " + trimmedString);
-      }
+      contactList.forEach((contact) {
+        List<String> primaryNo = [];
+        if (contact.phones.length > 0) {
+          contact.phones.forEach((phoneNo) {
+            primaryNo.add(phoneNo.value);
+          });
+        } else {
+          // No phone number and the display name is the phone number itself
+          // Reason: No contact.phones when the mobile number doesn't have a name on it
+          String mobileNo = contact.displayName.replaceAll(new RegExp(r"\s+\b|\b\s|\s|\b"), "");
+          print("mobileNo with whitespaces removed: " + mobileNo);
+          primaryNo.add(mobileNo);
+        }
 
-      userContactList.add(userContact);
-    });
+        UserContact userContact = UserContact(
+          id: null,
+          // So this contact number is mine. Later send it to backend and merge with other UserContact who got the same number
+          userIds: [currentUser.id],
+          displayName: contact.displayName,
+          realName: contact.displayName,
+          block: false,
+          lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
+        );
 
-    BlocProvider.of<UserContactBloc>(context).add(AddMultipleUserContactEvent(
-        userContactList: userContactList,
-        callback: (List<UserContact> newUserContactList) {
-          if ((contactList.length != newUserContactList.length - 1) || newUserContactList.length == 0) {
-            // event.contactList doesn't include yourself, so newUserContactList.length - 1 OR Any UserContact is not added into the list (means not uploaded successfully)
-            // That means some UseContact are not uploaded into the REST
-            Navigator.pop(context);
-            Fluttertoast.showToast(
-                msg: 'Unable to upload your member list for ${conversationGroup.name.toString()}. Please try again.',
-                toastLength: Toast.LENGTH_SHORT);
-            return null;
-          } else {
-            print("Uploaded and saved uploadUserContactList to REST, DB and State.");
+        userContact.mobileNo = primaryNo.length == 0 ? "" : primaryNo[0];
 
-            // Give the list of UserContactIds to memberIds of ConversationGroup
-            conversationGroup.memberIds = newUserContactList.map((newUserContact) => newUserContact.id).toList();
+        // If got Malaysia number
+        if (primaryNo[0].contains("+60")) {
+          print("If Malaysian Number: ");
+          String trimmedString = primaryNo[0].substring(3);
+          print("trimmedString: " + trimmedString);
+        }
 
-            // Add your own userContact's ID as admin by find the one that has the same mobile number in the userContactList
-            conversationGroup.adminMemberIds.add(newUserContactList
-                .firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentUser.mobileNo, orElse: () => null)
-                .id);
+        userContactList.add(userContact);
+      });
 
-            BlocProvider.of<ConversationGroupBloc>(context)
-                .add(EditConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
-          }
-        }));
+      BlocProvider.of<UserContactBloc>(context).add(AddMultipleUserContactEvent(
+          userContactList: userContactList,
+          callback: (List<UserContact> newUserContactList) {
+            if ((contactList.length != newUserContactList.length - 1) || newUserContactList.length == 0) {
+              // event.contactList doesn't include yourself, so newUserContactList.length - 1 OR Any UserContact is not added into the list (means not uploaded successfully)
+              // That means some UseContact are not uploaded into the REST
+              Navigator.pop(context);
+              Fluttertoast.showToast(msg: 'Unable to upload your member list. Please try again.', toastLength: Toast.LENGTH_SHORT);
+              return null;
+            } else {
+              print("Uploaded and saved uploadUserContactList to REST, DB and State.");
+
+              // Give the list of UserContactIds to memberIds of ConversationGroup
+              conversationGroup.memberIds = newUserContactList.map((newUserContact) => newUserContact.id).toList();
+
+              // Add your own userContact's ID as admin by find the one that has the same mobile number in the userContactList
+              conversationGroup.adminMemberIds.add(newUserContactList
+                  .firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentUser.mobileNo, orElse: () => null)
+                  .id);
+
+              print('select_contacts.page.dart conversationGroup.memberIds: ' + conversationGroup.memberIds.toString());
+              print('select_contacts.page.dart conversationGroup.adminMemberIds: ' + conversationGroup.adminMemberIds.toString());
+
+              BlocProvider.of<ConversationGroupBloc>(context).add(AddConversationGroupEvent(
+                  conversationGroup: conversationGroup,
+                  callback: (ConversationGroup conversationGroup2) async {
+                    if (!isObjectEmpty(conversationGroup2)) {
+                      groupMultiMedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
+                      unreadMessage.userId = conversationGroup2.creatorUserId;
+                      BlocProvider.of<UnreadMessageBloc>(context).add(AddUnreadMessageEvent(
+                          unreadMessage: unreadMessage,
+                          callback: (UnreadMessage unreadMessage2) {
+                            if (!isObjectEmpty(unreadMessage2)) {
+                              addMultimediaWithUpdateConversationGroup(groupMultiMedia, null, conversationGroup2, context);
+                            }
+                          }));
+
+                      // Go to chat room page first
+                      Navigator.pop(context); //pop loading dialog
+                      Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
+                      Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup2))));
+                    } else {
+                      Navigator.pop(context);
+                      Fluttertoast.showToast(
+                          msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
+                    }
+                  }));
+            }
+          }));
+    }
   }
 
-  addMultimediaWithUpdateConversationGroup(Multimedia groupMultimedia, File imageFile, ConversationGroup conversationGroup, BuildContext context) async {
+  addMultimediaWithUpdateConversationGroup(
+      Multimedia groupMultimedia, File imageFile, ConversationGroup conversationGroup, BuildContext context) async {
     // 4. Upload Group Multimedia
     // Create thumbnail before upload
     File thumbnailImageFile;
