@@ -34,6 +34,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
 
   Stream<ConversationGroupState> _mapInitializeConversationGroup(InitializeConversationGroupsEvent event) async* {
     if(state is ConversationGroupsLoading || state is ConversationGroupsNotLoaded) {
+      print('ConversationGroupBloc.dart if(state is ConversationGroupsLoading || state is ConversationGroupsNotLoaded)');
       try {
         List<ConversationGroup> conversationGroupListFromDB = await conversationGroupDBService.getAllConversationGroups();
         if (isObjectEmpty(conversationGroupListFromDB)) {
@@ -67,7 +68,6 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
         print('ConversationGroupBloc.dart conversationGroup.memberIds.toString(): ' + conversationGroup.memberIds.toString());
         print('ConversationGroupBloc.dart conversationGroup.adminMemberIds.toString(): ' + conversationGroup.adminMemberIds.toString());
       });
-
     }
   }
 
@@ -82,8 +82,8 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
         if (added) {
           List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
-          print('ConversationGroupBloc.dart existingConversationGroupList: ' + existingConversationGroupList.toString());
-          print('ConversationGroupBloc.dart existingConversationGroupList: ' + existingConversationGroupList.length.toString());
+          existingConversationGroupList
+              .removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == event.conversationGroup.id);
 
           existingConversationGroupList.add(newConversationGroup);
 
@@ -154,22 +154,31 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
   Stream<ConversationGroupState> _getUserPreviousConversationGroups(GetUserPreviousConversationGroupsEvent event) async* {
     List<ConversationGroup> conversationGroupListFromServer =
         await conversationGroupAPIService.getConversationGroupsForUserByMobileNo(event.user.mobileNo);
-    print('ConversationGroupBloc.dart conversationGroupListFromServer: ' + conversationGroupListFromServer.toString());
-    print('ConversationGroupBloc.dart conversationGroupListFromServer.length: ' + conversationGroupListFromServer.length.toString());
     if (state is ConversationGroupsLoaded) {
       List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
       if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0) {
+
         // Update the current info of the conversationGroup to latest information
         for (ConversationGroup conversationGroupFromServer in conversationGroupListFromServer) {
-          bool conversationGroupExist = existingConversationGroupList
-              .contains((ConversationGroup conversationGroupFromDB) => conversationGroupFromDB.id == conversationGroupFromServer.id);
+
+          // Unable to use contains() method here. Will cause concurrent modification during iteration problem.
+          // Link: https://stackoverflow.com/questions/22409666/exception-concurrent-modification-during-iteration-instancelength17-of-gr
+          bool conversationGroupExist = false;
+
+          for(ConversationGroup existingConversationGroup in existingConversationGroupList) {
+            if(existingConversationGroup.id == conversationGroupFromServer.id) {
+              conversationGroupExist = true;
+            }
+          }
+
 
           if (conversationGroupExist) {
             conversationGroupDBService.editConversationGroup(conversationGroupFromServer);
 
             existingConversationGroupList.removeWhere(
                 (ConversationGroup existingConversationGroup) => existingConversationGroup.id == conversationGroupFromServer.id);
+
           } else {
             conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
           }

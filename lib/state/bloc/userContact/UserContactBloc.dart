@@ -65,6 +65,8 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
           existingUserContactList = (state as UserContactsLoaded).userContactList;
         }
 
+        existingUserContactList.removeWhere((UserContact existingUserContact) => existingUserContact.id == event.userContact.id);
+
         existingUserContactList.add(event.userContact);
 
         yield UserContactsLoaded(existingUserContactList);

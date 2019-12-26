@@ -134,13 +134,17 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         child: BlocBuilder<PhoneStorageContactBloc, PhoneStorageContactState>(
           builder: (context, phoneStorageContactState) {
             if (phoneStorageContactState is PhoneStorageContactLoading) {
+              print('select-contect-page.dart if (phoneStorageContactState is PhoneStorageContactLoading)');
               return showLoadingContactsPage(context);
             }
 
             if (phoneStorageContactState is PhoneStorageContactsLoaded) {
+              print('select-contect-page.dart if (phoneStorageContactState is PhoneStorageContactsLoaded)');
               if (phoneStorageContactState.phoneStorageContactList.length == 0) {
+                print('select-contect-page.dart showNoContactPage');
                 return showNoContactPage(context);
               } else {
+                print('select-contect-page.dart show contacts');
                 return ListView(
                   controller: scrollController,
                   physics: BouncingScrollPhysics(),
@@ -162,9 +166,11 @@ class SelectContactsPageState extends State<SelectContactsPage> {
             }
 
             if (phoneStorageContactState is PhoneStorageContactsNotLoaded) {
+              print('select-contect-page.dart if (phoneStorageContactState is PhoneStorageContactsNotLoaded)');
               return showNoContactPermissionPage(context);
             }
 
+            print('select-contect-page.dart showErrorPage()');
             return showErrorPage(context);
           },
         ),
@@ -497,7 +503,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
               // That means some UseContact are not uploaded into the REST
               Navigator.pop(context);
               Fluttertoast.showToast(msg: 'Unable to upload your member list. Please try again.', toastLength: Toast.LENGTH_SHORT);
-              return null;
             } else {
               print("Uploaded and saved uploadUserContactList to REST, DB and State.");
 
@@ -522,7 +527,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                           unreadMessage: unreadMessage,
                           callback: (UnreadMessage unreadMessage2) {
                             if (!isObjectEmpty(unreadMessage2)) {
-                              addMultimediaWithUpdateConversationGroup(groupMultiMedia, null, conversationGroup2, context);
+                              addMultimedia(groupMultiMedia, null, conversationGroup2, context);
                             }
                           }));
 
@@ -541,8 +546,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     }
   }
 
-  addMultimediaWithUpdateConversationGroup(
-      Multimedia groupMultimedia, File imageFile, ConversationGroup conversationGroup, BuildContext context) async {
+  addMultimedia(Multimedia groupMultimedia, File imageFile, ConversationGroup conversationGroup, BuildContext context) async {
     // 4. Upload Group Multimedia
     // Create thumbnail before upload
     File thumbnailImageFile;
@@ -557,10 +561,10 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
         multimedia: groupMultimedia,
         callback: (Multimedia multimedia2) {
-          if (!isObjectEmpty(multimedia2)) {
-            BlocProvider.of<ConversationGroupBloc>(context)
-                .add(EditConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
-          }
+//          if (!isObjectEmpty(multimedia2)) {
+//            BlocProvider.of<ConversationGroupBloc>(context)
+//                .add(EditConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+//          }
         }));
   }
 }

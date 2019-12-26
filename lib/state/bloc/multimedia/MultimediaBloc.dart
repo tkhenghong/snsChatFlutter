@@ -66,6 +66,8 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
           existingMultimediaList = (state as MultimediaLoaded).multimediaList;
         }
 
+        existingMultimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == event.multimedia.id);
+
         existingMultimediaList.add(event.multimedia);
 
         yield MultimediaLoaded(existingMultimediaList);

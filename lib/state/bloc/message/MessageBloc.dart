@@ -57,6 +57,8 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
         if (savedIntoDB) {
           List<Message> existingMessageList = (state as MessagesLoaded).messageList;
 
+          existingMessageList.removeWhere((Message existingMessage) => existingMessage.id == event.message.id);
+
           existingMessageList.add(messageFromServer);
 
           yield MessagesLoaded(existingMessageList);

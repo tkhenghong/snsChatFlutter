@@ -20,7 +20,6 @@ class ChatGroupListPage extends StatefulWidget {
 }
 
 class ChatGroupListState extends State<ChatGroupListPage> {
-  bool getListDone = false;
 
   RefreshController _refreshController;
 
@@ -50,7 +49,10 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   @override
   Widget build(BuildContext context) {
-    initialize(context);
+    if(BlocProvider.of<GoogleInfoBloc>(context).state is GoogleInfoLoading) {
+      initialize(context);
+    }
+
     return MultiBlocListener(
       listeners: [
         BlocListener<GoogleInfoBloc, GoogleInfoState>(
@@ -71,7 +73,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
             }
 
             if (googleInfoState is GoogleInfoNotLoaded) {
-              print('chat_group_list_page.dart if (googleInfoState is GoogleInfoNotLoaded)');
               goToLoginPage();
             }
           },
@@ -87,7 +88,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         BlocListener<UserBloc, UserState>(
           listener: (context, userState) {
             if (userState is UserNotLoaded) {
-              print('chat_group_list_page.dart if (userState is UserNotLoaded)');
               goToLoginPage();
             }
 
@@ -111,14 +111,12 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         BlocListener<ConversationGroupBloc, ConversationGroupState>(
           listener: (context, conversationGroupState) {
             if (conversationGroupState is ConversationGroupsNotLoaded) {
-              print('chat_group_list_page.dart if (conversationGroupState is ConversationGroupsNotLoaded)');
               goToLoginPage();
             }
 
             if (conversationGroupState is ConversationGroupsLoaded) {
-              print('chat_group_list_page.dart context: ' + context.toString());
-              BlocProvider.of<MultimediaBloc>(context).add(GetConversationGroupsMultimediaEvent(
-                  conversationGroupList: conversationGroupState.conversationGroupList, callback: (bool done) {}));
+//              BlocProvider.of<MultimediaBloc>(context).add(GetConversationGroupsMultimediaEvent(
+//                  conversationGroupList: conversationGroupState.conversationGroupList, callback: (bool done) {}));
             }
           },
         ),
@@ -133,7 +131,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         builder: (context, googleInfoState) {
           if (googleInfoState is GoogleInfoLoading) {
             BlocProvider.of<GoogleInfoBloc>(context).add(InitializeGoogleInfoEvent(callback: (bool initialized) {}));
-            print('chat_group_list_page.dart if (googleInfoState is GoogleInfoLoading)');
             return showLoading();
           }
 
@@ -143,7 +140,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                 if (userState is UserLoading) {
                   BlocProvider.of<UserBloc>(context)
                       .add(InitializeUserEvent(googleSignIn: googleInfoState.googleSignIn, callback: (bool initialized) {}));
-                  print('chat_group_list_page.dart if (userState is UserLoading)');
                   return showLoading();
                 }
 
@@ -151,7 +147,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                   return BlocBuilder<ConversationGroupBloc, ConversationGroupState>(
                     builder: (context, conversationGroupState) {
                       if (conversationGroupState is ConversationGroupsLoading) {
-                        print('chat_group_list_page.dart if (conversationGroupState is ConversationGroupsLoading)');
                         return showLoading();
                       }
 
@@ -159,14 +154,12 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                         return BlocBuilder<UnreadMessageBloc, UnreadMessageState>(
                           builder: (context, unreadMessageState) {
                             if (unreadMessageState is UnreadMessageLoading) {
-                              print('chat_group_list_page.dart if (unreadMessageState is UnreadMessageLoading)');
                               return showLoading();
                             }
                             if (unreadMessageState is UnreadMessagesLoaded) {
                               return BlocBuilder<MultimediaBloc, MultimediaState>(
                                 builder: (context, multimediaState) {
                                   if (multimediaState is MultimediaLoading) {
-                                    print('chat_group_list_page.dart if (multimediaState is MultimediaLoading)');
                                     return showLoading();
                                   }
 
