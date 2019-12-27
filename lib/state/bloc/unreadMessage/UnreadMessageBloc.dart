@@ -140,8 +140,15 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
         // Update the current info of the unreadMessage to latest information
 
         for (UnreadMessage unreadMessageFromServer in unreadMessageListFromServer) {
-          bool unreadMessageExist = existingUnreadMessageList
-              .contains((UnreadMessage unreadMessageFromDB) => unreadMessageFromDB.id == unreadMessageFromServer.id);
+          // Unable to use contains() method here. Will cause concurrent modification during iteration problem.
+          // Link: https://stackoverflow.com/questions/22409666/exception-concurrent-modification-during-iteration-instancelength17-of-gr
+          bool unreadMessageExist = false;
+
+          for (UnreadMessage existingUnreadMessage in existingUnreadMessageList) {
+            if (existingUnreadMessage.id == unreadMessageFromServer.id) {
+              unreadMessageExist = true;
+            }
+          }
 
           if (unreadMessageExist) {
             unreadMessageDBService.editUnreadMessage(unreadMessageFromServer);

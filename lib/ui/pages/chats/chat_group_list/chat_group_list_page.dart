@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -20,7 +21,6 @@ class ChatGroupListPage extends StatefulWidget {
 }
 
 class ChatGroupListState extends State<ChatGroupListPage> {
-
   RefreshController _refreshController;
 
   FileService fileService = FileService();
@@ -29,7 +29,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   @override
   initState() {
     super.initState();
-    _refreshController = new RefreshController();
+    _refreshController = new RefreshController(initialRefresh: false);
   }
 
   void dispose() {
@@ -49,7 +49,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   @override
   Widget build(BuildContext context) {
-    if(BlocProvider.of<GoogleInfoBloc>(context).state is GoogleInfoLoading) {
+    if (BlocProvider.of<GoogleInfoBloc>(context).state is GoogleInfoLoading) {
       initialize(context);
     }
 
@@ -115,8 +115,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
             }
 
             if (conversationGroupState is ConversationGroupsLoaded) {
-//              BlocProvider.of<MultimediaBloc>(context).add(GetConversationGroupsMultimediaEvent(
-//                  conversationGroupList: conversationGroupState.conversationGroupList, callback: (bool done) {}));
+              BlocProvider.of<MultimediaBloc>(context).add(GetConversationGroupsMultimediaEvent(
+                  conversationGroupList: conversationGroupState.conversationGroupList, callback: (bool done) {}));
             }
           },
         ),
@@ -168,16 +168,22 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                                         conversationGroupState.conversationGroupList.length == 0) {
                                       return Center(child: Text("No conversations. Tap \"+\" to create one!"));
                                     } else {
-                                      return ListView.builder(
-                                          scrollDirection: Axis.vertical,
-                                          shrinkWrap: true,
-                                          physics: BouncingScrollPhysics(),
-                                          itemCount: conversationGroupState.conversationGroupList.length,
-                                          itemBuilder: (context, index) {
-                                            PageListItem pageListItem = mapConversationToPageListTile(
-                                                conversationGroupState.conversationGroupList[index], multimediaState, unreadMessageState);
-                                            return PageListTile(pageListItem, context);
-                                          });
+                                      return SmartRefresher(
+                                        controller: _refreshController,
+                                        onRefresh: () => onRefresh(context),
+                                        enablePullDown: true,
+                                        physics: BouncingScrollPhysics(),
+                                        header: ClassicHeader(),
+                                        child: ListView.builder(
+                                            scrollDirection: Axis.vertical,
+                                            shrinkWrap: true,
+                                            itemCount: conversationGroupState.conversationGroupList.length,
+                                            itemBuilder: (context, index) {
+                                              PageListItem pageListItem = mapConversationToPageListTile(
+                                                  conversationGroupState.conversationGroupList[index], multimediaState, unreadMessageState);
+                                              return PageListTile(pageListItem, context);
+                                            }),
+                                      );
                                     }
                                   }
 
@@ -223,6 +229,25 @@ class ChatGroupListState extends State<ChatGroupListPage> {
             existingMultimedia.conversationId.toString() == conversationGroup.id && isStringEmpty(existingMultimedia.messageId),
         orElse: () => null);
 
+    if (!isObjectEmpty(conversationGroup)) {
+      print('chat_group_list_page.dart if(!isObjectEmpty(conversationGroup))');
+      print('chat_group_list_page.dart conversationGroup.id.toString(): ' + conversationGroup.id.toString());
+      print('chat_group_list_page.dart conversationGroup.name.toString(): ' + conversationGroup.name.toString());
+    } else {
+      print('chat_group_list_page.dart if(isObjectEmpty(conversationGroup))');
+    }
+
+    if (!isObjectEmpty(multimedia)) {
+      print('chat_group_list_page.dart if(!isObjectEmpty(multimedia))');
+      print('chat_group_list_page.dart multimedia.id.toString(): ' + multimedia.id.toString());
+      print('chat_group_list_page.dart multimedia.conversationId.toString(): ' + multimedia.conversationId.toString());
+      print('chat_group_list_page.dart multimedia.remoteThumbnailUrl.toString(): ' + multimedia.remoteThumbnailUrl.toString());
+      print('chat_group_list_page.dart multimedia.remoteFullFileUrl.toString(): ' + multimedia.remoteFullFileUrl.toString());
+      print('chat_group_list_page.dart multimedia.localThumbnailUrl.toString(): ' + multimedia.localThumbnailUrl.toString());
+    } else {
+      print('chat_group_list_page.dart if(isObjectEmpty(multimedia))');
+    }
+
     UnreadMessage unreadMessage = (unreadMessageState as UnreadMessagesLoaded).unreadMessageList.firstWhere(
         (UnreadMessage existingUnreadMessage) => existingUnreadMessage.conversationId.toString() == conversationGroup.id,
         orElse: () => null);
@@ -250,6 +275,13 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           // Send argument need to use the old way
           Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
         });
+  }
+
+  onRefresh(BuildContext context) async {
+    await Future.delayed(Duration(milliseconds: 500));
+    setState(() {
+      _refreshController.refreshCompleted();
+    });
   }
 
   goToLoginPage() {

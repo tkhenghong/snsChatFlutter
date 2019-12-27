@@ -8,9 +8,13 @@ import 'package:snschat_flutter/service/FirebaseStorage/FirebaseStorageService.d
 import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:image/image.dart' as CustomImage;
 
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
+
 class ImageService {
   FileService fileService = FileService();
   FirebaseStorageService firebaseStorageService = FirebaseStorageService();
+
+  int imageThumbnailWidthSize = globals.imageThumbnailWidthSize;
 
   // TODO: Stop using this, use cachedNetworkImage widget, but need to know
   // Returns ImageProvider object
@@ -114,13 +118,14 @@ class ImageService {
     });
   }
 
+  // Isolate solution: https://stackoverflow.com/questions/49701654/how-can-i-read-from-disk-and-resize-an-image-in-flutter-dart#comment86417931_49701775
   Future<File> getImageThumbnail(File imageFile) async {
     print("getImageThumbnail()");
     try {
       // Convert to Image plugin format
       CustomImage.Image image = CustomImage.decodeImage(imageFile.readAsBytesSync());
       // Create thumbnail
-      CustomImage.Image thumbnail = CustomImage.copyResize(image, width: 50);
+      CustomImage.Image thumbnail = CustomImage.copyResize(image, width: imageThumbnailWidthSize);
 
       String fullThumbnailDirectory = await fileService.getApplicationDocumentDirectory() +
           "/" +

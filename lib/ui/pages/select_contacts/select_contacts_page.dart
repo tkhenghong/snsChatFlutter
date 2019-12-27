@@ -145,22 +145,27 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                 return showNoContactPage(context);
               } else {
                 print('select-contect-page.dart show contacts');
-                return ListView(
-                  controller: scrollController,
+                return SmartRefresher(
+                  controller: _refreshController,
+                  enablePullDown: true,
                   physics: BouncingScrollPhysics(),
-                  children: phoneStorageContactState.phoneStorageContactList.map((Contact contact) {
-                    return Container(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          needSelectMultipleContacts()
-                              ? showContactWithCheckBox(context, contact)
-                              : showContactWithoutCheckbox(context, contact)
-                        ],
-                      ),
-                    );
-                  }).toList(),
+                  onRefresh: () => onRefresh(context),
+                  child: ListView(
+                    controller: scrollController,
+                    children: phoneStorageContactState.phoneStorageContactList.map((Contact contact) {
+                      return Container(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            needSelectMultipleContacts()
+                                ? showContactWithCheckBox(context, contact)
+                                : showContactWithoutCheckbox(context, contact)
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 );
               }
             }
@@ -376,9 +381,12 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   }
 
   bool needSelectMultipleContacts() {
-//    return widget.chatGroupType == ChatGroupType.Group || widget.chatGroupType == ChatGroupType.Broadcast;
-    return widget.chatGroupType == "Group" || widget.chatGroupType == "Broadcast";
+    // return widget.chatGroupType == ChatGroupType.Group || widget.chatGroupType == ChatGroupType.Broadcast;
+    // return widget.chatGroupType == "Group" || widget.chatGroupType == "Broadcast";
+    return widget.chatGroupType != "Personal";
   }
+
+  onRefresh(BuildContext context) async {}
 
   // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
   createPersonalConversation(Contact contact, BuildContext context) async {
@@ -415,7 +423,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         userId: null,
       );
 
-      Multimedia groupMultiMedia = Multimedia(
+      Multimedia groupMultimedia = Multimedia(
           id: null,
           localFullFileUrl: null,
           localThumbnailUrl: null,
@@ -436,12 +444,12 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       //    }
 
       if (!isObjectEmpty(userContactImage)) {
-        groupMultiMedia.localFullFileUrl = userContactImage.path;
+        groupMultimedia.localFullFileUrl = userContactImage.path;
         // TODO: What if this userContact is known user in REST?
-        groupMultiMedia.localThumbnailUrl = userContactImage.path;
+        groupMultimedia.localThumbnailUrl = userContactImage.path;
       }
 
-// 2. Upload UserContactList
+      // 2. Upload UserContactList
       // Note: Backend already helped you to check any duplicates of the same UserContact
       List<UserContact> userContactList = [];
 
@@ -521,20 +529,15 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                   conversationGroup: conversationGroup,
                   callback: (ConversationGroup conversationGroup2) async {
                     if (!isObjectEmpty(conversationGroup2)) {
-                      groupMultiMedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
+                      groupMultimedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
                       unreadMessage.userId = conversationGroup2.creatorUserId;
                       BlocProvider.of<UnreadMessageBloc>(context).add(AddUnreadMessageEvent(
                           unreadMessage: unreadMessage,
                           callback: (UnreadMessage unreadMessage2) {
                             if (!isObjectEmpty(unreadMessage2)) {
-                              addMultimedia(groupMultiMedia, null, conversationGroup2, context);
+                              addMultimedia(groupMultimedia, null, conversationGroup2, context);
                             }
                           }));
-
-                      // Go to chat room page first
-                      Navigator.pop(context); //pop loading dialog
-                      Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
-                      Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup2))));
                     } else {
                       Navigator.pop(context);
                       Fluttertoast.showToast(
@@ -561,10 +564,10 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
         multimedia: groupMultimedia,
         callback: (Multimedia multimedia2) {
-//          if (!isObjectEmpty(multimedia2)) {
-//            BlocProvider.of<ConversationGroupBloc>(context)
-//                .add(EditConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
-//          }
+          // Go to chat room page
+          Navigator.pop(context); //pop loading dialog
+          Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
+          Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
         }));
   }
 }

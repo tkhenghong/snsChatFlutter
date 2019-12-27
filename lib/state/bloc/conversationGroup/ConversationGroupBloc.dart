@@ -33,7 +33,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
   }
 
   Stream<ConversationGroupState> _mapInitializeConversationGroup(InitializeConversationGroupsEvent event) async* {
-    if(state is ConversationGroupsLoading || state is ConversationGroupsNotLoaded) {
+    if (state is ConversationGroupsLoading || state is ConversationGroupsNotLoaded) {
       print('ConversationGroupBloc.dart if(state is ConversationGroupsLoading || state is ConversationGroupsNotLoaded)');
       try {
         List<ConversationGroup> conversationGroupListFromDB = await conversationGroupDBService.getAllConversationGroups();
@@ -158,27 +158,23 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
       if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0) {
-
         // Update the current info of the conversationGroup to latest information
         for (ConversationGroup conversationGroupFromServer in conversationGroupListFromServer) {
-
           // Unable to use contains() method here. Will cause concurrent modification during iteration problem.
           // Link: https://stackoverflow.com/questions/22409666/exception-concurrent-modification-during-iteration-instancelength17-of-gr
           bool conversationGroupExist = false;
 
-          for(ConversationGroup existingConversationGroup in existingConversationGroupList) {
-            if(existingConversationGroup.id == conversationGroupFromServer.id) {
+          for (ConversationGroup existingConversationGroup in existingConversationGroupList) {
+            if (existingConversationGroup.id == conversationGroupFromServer.id) {
               conversationGroupExist = true;
             }
           }
-
 
           if (conversationGroupExist) {
             conversationGroupDBService.editConversationGroup(conversationGroupFromServer);
 
             existingConversationGroupList.removeWhere(
                 (ConversationGroup existingConversationGroup) => existingConversationGroup.id == conversationGroupFromServer.id);
-
           } else {
             conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
           }

@@ -84,6 +84,15 @@ class LoginPageState extends State<LoginPage> {
                                   }
                                   ;
                                 }));
+                            // Get previous data
+                            BlocProvider.of<ConversationGroupBloc>(context)
+                                .add(GetUserPreviousConversationGroupsEvent(user: user2, callback: (bool done) {}));
+                            BlocProvider.of<UnreadMessageBloc>(context)
+                                .add(GetUserPreviousUnreadMessagesEvent(user: user2, callback: (bool done) {}));
+                            BlocProvider.of<MultimediaBloc>(context)
+                                .add(GetUserProfilePictureMultimediaEvent(user: user2, callback: (bool done) {}));
+                            BlocProvider.of<UserContactBloc>(context)
+                                .add(GetUserPreviousUserContactsEvent(user: user2, callback: (bool done) {}));
                           } else {
                             print('login_page.dart if (isObjectEmpty(user2))');
                             Fluttertoast.showToast(

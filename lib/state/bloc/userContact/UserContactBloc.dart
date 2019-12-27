@@ -94,7 +94,22 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       newUserContact = await userContactAPIService.addUserContact(userContact);
 
       if (!isObjectEmpty(newUserContact)) {
-        userContactAdded = await userContactDBService.addUserContact(newUserContact);
+        bool userContactExist = false;
+
+        for(UserContact existingUserContact in existingUserContactList) {
+          if(existingUserContact.id == newUserContact.id) {
+            userContactExist = true;
+          }
+        }
+        if(userContactExist) {
+          userContactAdded = await userContactDBService.editUserContact(newUserContact);
+        } else {
+          userContactAdded = await userContactDBService.addUserContact(newUserContact);
+        }
+
+        existingUserContactList.removeWhere(
+                (UserContact existingUserContact) => existingUserContact.id == newUserContact.id);
+
         if (userContactAdded) {
           newUserContactList.add(userContact);
         }

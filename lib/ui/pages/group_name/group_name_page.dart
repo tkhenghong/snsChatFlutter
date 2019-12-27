@@ -1,23 +1,28 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
-import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:contacts_service/contacts_service.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
+
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
-import 'package:snschat_flutter/objects/conversationGroup/conversation_group.dart';
-import 'package:snschat_flutter/objects/index.dart';
-import 'package:snschat_flutter/objects/userContact/userContact.dart';
-import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
+
 import 'package:snschat_flutter/service/file/FileService.dart';
+import 'package:snschat_flutter/service/firebaseStorage/FirebaseStorageService.dart';
 import 'package:snschat_flutter/service/image/ImageService.dart';
 
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
+import 'package:snschat_flutter/objects/index.dart';
+
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
+
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 
 class GroupNamePage extends StatefulWidget {
   final List<Contact> selectedContacts;
@@ -44,6 +49,9 @@ class GroupNamePageState extends State<GroupNamePage> {
 
   FileService fileService = FileService();
   ImageService imageService = ImageService();
+  FirebaseStorageService firebaseStorageService = FirebaseStorageService();
+
+  int imageThumbnailWidthSize = globals.imagePickerQuality;
 
   @override
   Widget build(BuildContext context) {
@@ -229,7 +237,7 @@ class GroupNamePageState extends State<GroupNamePage> {
       }
 
       // Multimedia for group chat
-      Multimedia groupMultiMedia = Multimedia(
+      Multimedia groupMultimedia = Multimedia(
           id: null,
           localFullFileUrl: isObjectEmpty(copiedImageFile) ? null : copiedImageFile.path,
           localThumbnailUrl: null,
@@ -321,24 +329,17 @@ class GroupNamePageState extends State<GroupNamePage> {
                   conversationGroup: conversationGroup,
                   callback: (ConversationGroup conversationGroup2) async {
                     if (!isObjectEmpty(conversationGroup2)) {
-                      groupMultiMedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
+                      groupMultimedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
                       unreadMessage.userId = conversationGroup2.creatorUserId;
                       BlocProvider.of<UnreadMessageBloc>(context).add(AddUnreadMessageEvent(
                           unreadMessage: unreadMessage,
-                          callback: (UnreadMessage unreadMessage2) {
+                          callback: (UnreadMessage unreadMessage2) async {
                             if (!isObjectEmpty(unreadMessage2)) {
-                              if (!isObjectEmpty(copiedImageFile)) {
-                                addMultimedia(groupMultiMedia, copiedImageFile, conversationGroup2, context);
-                              } else {
-                                addMultimedia(groupMultiMedia, null, conversationGroup2, context);
-                              }
+                              Navigator.pop(context); // close create conversation group loading
+                              addMultimedia(
+                                  groupMultimedia, !isObjectEmpty(copiedImageFile) ? copiedImageFile : null, conversationGroup2, context);
                             }
                           }));
-
-                      // Go to chat room page first
-                      Navigator.pop(context); //pop loading dialog
-                      Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
-                      Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup2))));
                     } else {
                       Navigator.pop(context);
                       Fluttertoast.showToast(
@@ -364,16 +365,47 @@ class GroupNamePageState extends State<GroupNamePage> {
 
     BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
         multimedia: groupMultimedia,
+        callback: (Multimedia multimedia2) async {
+          updateMultimediaContent(context, multimedia2, conversationGroup);
+        }));
+  }
+
+  // Actually shouldn't be here
+  updateMultimediaContent(BuildContext context, Multimedia multimedia, ConversationGroup conversationGroup) async {
+    showLoading(context, 'Uploading group photo...');
+    String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
+    print("chat_room_page.dart remoteUrl: " + remoteUrl.toString());
+    String remoteThumbnailUrl =
+    await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
+    print("chat_room_page.dart remoteThumbnailUrl: " + remoteThumbnailUrl.toString());
+
+    if(!isStringEmpty(remoteUrl)) {
+      multimedia.remoteFullFileUrl = remoteUrl;
+    }
+
+    if(!isStringEmpty(remoteThumbnailUrl)) {
+      multimedia.remoteThumbnailUrl = remoteThumbnailUrl;
+    }
+
+    BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(
+        multimedia: multimedia,
         callback: (Multimedia multimedia2) {
-//          if (!isObjectEmpty(multimedia2)) {
-//            BlocProvider.of<ConversationGroupBloc>(context)
-//                .add(EditConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
-//          }
+          if(!isObjectEmpty(multimedia2)) {
+            print('chat_room_page.dart EditMultimediaEvent success');
+            print('chat_room_page.dart multimedia2.remoteFullFileUrl == multimedia.remoteFullFileUrl: ' + multimedia2.remoteFullFileUrl == multimedia.remoteFullFileUrl);
+            print('chat_room_page.dart multimedia2.remoteThumbnailUrl == multimedia.remoteThumbnailUrl: ' + multimedia2.remoteThumbnailUrl == multimedia.remoteThumbnailUrl);
+            // Go to chat room page
+            Navigator.pop(context); //pop loading dialog
+            Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
+            Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
+          } else {
+            print('chat_room_page.dart EditMultimediaEvent failed.');
+          }
         }));
   }
 
   Future getImage() async {
-    File image = await ImagePicker.pickImage(source: ImageSource.camera);
+    File image = await ImagePicker.pickImage(source: ImageSource.camera, imageQuality: imageThumbnailWidthSize);
     if (await image.exists()) {
       imageExists = true;
     }
