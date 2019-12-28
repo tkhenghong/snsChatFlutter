@@ -7,19 +7,23 @@ class CustomDialogs {
   final String value;
   final BuildContext context;
 
+  Color themePrimaryColor;
+  TextStyle textStyle;
+
   CustomDialogs({this.context, this.title, this.description, this.value});
 
   TextEditingController textEditingController;
 
   showConfirmationDialog() {
     textEditingController = new TextEditingController();
+    themePrimaryColor = Theme.of(context).textTheme.title.color;
+    textStyle = TextStyle(color: themePrimaryColor);
     return showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return Dialog(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
             child: GestureDetector(
               onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
               child: Container(
@@ -30,10 +34,7 @@ class CustomDialogs {
                       automaticallyImplyLeading: false,
                       titleSpacing: 0.0,
                       title: Row(
-                        children: <Widget>[
-                          Padding(padding: EdgeInsets.only(left: 10.0)),
-                          Text(title)
-                        ],
+                        children: <Widget>[Padding(padding: EdgeInsets.only(left: 10.0)), Text(title)],
                       ),
                     ),
                     body: Center(
@@ -49,13 +50,10 @@ class CustomDialogs {
                             controller: textEditingController,
                             textCapitalization: TextCapitalization.words,
                             decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10.0)),
-                              focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(width: 2.0),
-                                  borderRadius: BorderRadius.circular(10.0)),
-                              hintText:
-                                  value.isEmpty ? "Enter value here" : value,
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                              focusedBorder:
+                                  OutlineInputBorder(borderSide: BorderSide(width: 2.0), borderRadius: BorderRadius.circular(10.0)),
+                              hintText: value.isEmpty ? "Enter value here" : value,
                             ),
                           )
                         ],
@@ -69,22 +67,23 @@ class CustomDialogs {
                             print("Clicked");
                             Navigator.of(context).pop(value);
                           },
-                          child: Text("Cancel"),
+                          child: Text("Cancel", style: textStyle),
                         ),
                         FlatButton(
                           onPressed: () {
                             print("Clicked");
                             print("value: " + value);
-                            print(
-                                "The value is: " + textEditingController.text);
+                            print("The value is: " + textEditingController.text);
                             if (isStringEmpty(textEditingController.text)) {
                               Navigator.of(context).pop(value);
                             } else {
-                              Navigator.of(context)
-                                  .pop(textEditingController.text);
+                              Navigator.of(context).pop(textEditingController.text);
                             }
                           },
-                          child: Text("OK"),
+                          child: Text(
+                            "OK",
+                            style: textStyle,
+                          ),
                         ),
                       ],
                     ),

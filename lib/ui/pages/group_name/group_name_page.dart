@@ -177,8 +177,14 @@ class GroupNamePageState extends State<GroupNamePage> {
                                   padding: EdgeInsets.all(10.0),
                                   child: Row(children: [
                                     CircleAvatar(
+                                      backgroundColor: themePrimaryColor,
                                       backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
-                                      child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
+                                      child: contact.avatar.isEmpty
+                                          ? Text(
+                                              contact.displayName[0],
+                                              style: circleAvatarTextStyle,
+                                            )
+                                          : Text(''),
                                     ),
                                     Container(
                                       padding: EdgeInsets.only(left: 5.0),

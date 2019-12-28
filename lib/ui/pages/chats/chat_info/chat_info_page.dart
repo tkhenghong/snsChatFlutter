@@ -81,7 +81,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 String groupName = await customDialog.showConfirmationDialog();
                                 if (conversationGroup.name != groupName) {
                                   conversationGroup.name = groupName;
-                                  BlocProvider.of<ConversationGroupBloc>(context).add(EditConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+                                  BlocProvider.of<ConversationGroupBloc>(context).add(EditConversationGroupEvent(
+                                      conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
                                 }
                               },
                               child: Container(
@@ -139,7 +140,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                   String groupDescription = await customDialog.showConfirmationDialog();
                                   if (conversationGroup.description != groupDescription) {
                                     conversationGroup.description = groupDescription;
-                                    BlocProvider.of<ConversationGroupBloc>(context).add(EditConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+                                    BlocProvider.of<ConversationGroupBloc>(context).add(EditConversationGroupEvent(
+                                        conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
                                   }
                                 },
                                 child: Padding(
@@ -287,7 +289,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                               print('chat_info_page.dart if (userContactState is UserContactsLoaded)');
                               List<UserContact> userContactList = userContactState.userContactList;
 
-                              if(!isObjectEmpty(userContactList)) {
+                              if (!isObjectEmpty(userContactList)) {
                                 print('chat_info_page.dart userContactList.length: ' + userContactList.length.toString());
                                 userContactList.forEach((UserContact userContact) {
                                   print('chat_info_page.dart userContact.toString(): ' + userContact.toString());
@@ -310,9 +312,10 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 builder: (BuildContext context, MultimediaState multimediaState) {
                                   if (multimediaState is MultimediaLoaded) {
                                     List<Multimedia> conversationGroupMemberMultimediaList = [];
-                                    conversationGroupMemberMultimediaList = multimediaState.multimediaList.where(
-                                        (Multimedia existingMultimedia) => conversationGroupMemberList
-                                            .contains((UserContact userContact) => userContact.id == existingMultimedia.userContactId)).toList();
+                                    conversationGroupMemberMultimediaList = multimediaState.multimediaList
+                                        .where((Multimedia existingMultimedia) => conversationGroupMemberList
+                                            .contains((UserContact userContact) => userContact.id == existingMultimedia.userContactId))
+                                        .toList();
                                     return showGroupMemberParticipants(
                                         context, conversationGroupMemberList, conversationGroupMemberMultimediaList);
                                   }
@@ -483,40 +486,44 @@ class ChatInfoPageState extends State<ChatInfoPage> {
     );
   }
 
-  List<UserContact> getConversationGroupMembers(BuildContext context, List<UserContact> userContactList, ConversationGroup conversationGroup) {
+  List<UserContact> getConversationGroupMembers(
+      BuildContext context, List<UserContact> userContactList, ConversationGroup conversationGroup) {
     List<UserContact> conversationGroupMemberList = [];
     List<String> notFoundMemberId = [];
-    if(!isObjectEmpty(userContactList)) {
+    if (!isObjectEmpty(userContactList)) {
       print('chat_info_page.dart if(!isObjectEmpty(userContactList))');
       print('chat_info_page.dart if userContactList.toString(): ' + userContactList.toString());
       print('chat_info_page.dart if userContactList.length.toString(): ' + userContactList.length.toString());
     }
 
-    for(String memberId in conversationGroup.memberIds) {
+    for (String memberId in conversationGroup.memberIds) {
       bool userContactFound = false;
-      for(UserContact existingUserContact in userContactList) {
-        if(existingUserContact.id == memberId) {
+      for (UserContact existingUserContact in userContactList) {
+        if (existingUserContact.id == memberId) {
           userContactFound = true;
           conversationGroupMemberList.add(existingUserContact);
         }
       }
       // Warning: Bad practice as it will cause more and more loop in this page
       // In case not found. Get the userContact from backend and add it into local DB. Then, BlocBuilder triggers and all userContacts will be found.
-      if(!userContactFound) {
+      if (!userContactFound) {
         notFoundMemberId.add(memberId);
       }
     }
 
     // Get userContacts from server
-    for(String memberId in notFoundMemberId) {
-      BlocProvider.of<UserContactBloc>(context).add(GetUserContactEvent(userContactId: memberId, callback: (UserContact userContact) {
-        if(!isObjectEmpty(userContact)) {
-          BlocProvider.of<UserContactBloc>(context).add(AddUserContactEvent(userContact: userContact, callback: (UserContact userContact2) {}));
-        }
-      }));
+    for (String memberId in notFoundMemberId) {
+      BlocProvider.of<UserContactBloc>(context).add(GetUserContactEvent(
+          userContactId: memberId,
+          callback: (UserContact userContact) {
+            if (!isObjectEmpty(userContact)) {
+              BlocProvider.of<UserContactBloc>(context)
+                  .add(AddUserContactEvent(userContact: userContact, callback: (UserContact userContact2) {}));
+            }
+          }));
     }
 
-    if(!isObjectEmpty(conversationGroupMemberList)) {
+    if (!isObjectEmpty(conversationGroupMemberList)) {
       print('chat_info_page.dart if(!isObjectEmpty(conversationGroupMemberList))');
       print('chat_info_page.dart if conversationGroupMemberList.toString(): ' + conversationGroupMemberList.toString());
       print('chat_info_page.dart if conversationGroupMemberList.length.toString(): ' + conversationGroupMemberList.length.toString());
