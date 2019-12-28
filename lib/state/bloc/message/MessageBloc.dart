@@ -49,7 +49,10 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     Message messageFromServer;
     bool savedIntoDB = false;
     if (state is MessagesLoaded) {
-      messageFromServer = await messageAPIService.addMessage(event.message);
+      // Avoid readding existing message
+      if(isStringEmpty(event.message.id)) {
+        messageFromServer = await messageAPIService.addMessage(event.message);
+      }
 
       if (!isObjectEmpty(messageFromServer)) {
         savedIntoDB = await messageDBService.addMessage(messageFromServer);

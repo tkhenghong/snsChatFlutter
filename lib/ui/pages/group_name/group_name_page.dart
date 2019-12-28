@@ -58,142 +58,147 @@ class GroupNamePageState extends State<GroupNamePage> {
     themePrimaryColor = Theme.of(context).textTheme.title.color;
     appBarThemeTextColor = Theme.of(context).appBarTheme.textTheme.title.color;
     circleAvatarTextStyle = TextStyle(color: appBarThemeTextColor);
-    return Scaffold(
-        appBar: AppBar(
-            title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(top: 10.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    "New Group",
-                    style: TextStyle(fontSize: 18.0),
-                  ),
-                  Text(
-                    "Add group name below",
-                    style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.w300),
-                  )
-                ],
-              ),
-            ),
-            Tooltip(
-              message: "Next",
-              child: InkWell(
-                borderRadius: BorderRadius.circular(30.0),
-                child: Padding(
-                  padding: EdgeInsets.all(15.0),
-                  child: Icon(Icons.check),
-                ),
-                onTap: () {
-                  createGroupConversation(widget.selectedContacts, context);
-                },
-              ),
-            ),
-          ],
-        )),
-        body: Container(
-          child: Material(
-            color: Colors.white,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
+      child: Material(
+        child: Scaffold(
+            appBar: AppBar(
+                title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Container(
-                  padding: EdgeInsets.only(top: 50.0, left: 20.0),
-                  child: Row(
+                Padding(
+                  padding: EdgeInsets.only(top: 10.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Container(
-                          height: 65.0,
-                          width: 65.0,
-                          child: InkWell(
-                            onTap: () {
-                              //TODO: Add group photo from gallery/ take photo
-//                              showOptionsDialog(context);
-                              getImage();
-                            },
-                            borderRadius: circleAvatarCirleRadius,
-                            child: CircleAvatar(
-                              backgroundColor: themePrimaryColor,
-                              // AssetImage('lib/ui/icons/default_blank_photo.png')
-//                              backgroundImage: FileImage(imageFile),
-                              child: !imageExists
-                                  ? Icon(
-                                      Icons.camera_alt,
-                                      color: appBarThemeTextColor,
-                                    )
-                                  : ClipRRect(
-                                      borderRadius: circleAvatarCirleRadius,
-                                      child: Image.file(
-                                        imageFile,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                            ),
-                          )),
-                      Container(
-                        width: 230.0,
-                        padding: EdgeInsets.only(left: 10.0),
-                        child: Column(
-                          children: <Widget>[
-                            TextField(
-                              controller: textEditingController,
-                              decoration: InputDecoration(hintText: "Type group subject here..."),
-                            ),
-                            Text(
-                              "Provide a group subject and optional group icon.",
-                              style: TextStyle(color: Colors.grey, fontSize: 12.0),
-                            )
-                          ],
-                        ),
+                      Text(
+                        "New Group",
+                        style: TextStyle(fontSize: 18.0),
                       ),
-                      Icon(Icons.tag_faces),
+                      Text(
+                        "Add group name below",
+                        style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.w300),
+                      )
                     ],
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.only(top: 20.0, left: 20.0, bottom: 20.0),
-                  child: Text(
-                    "Group Members: " + widget.selectedContacts.length.toString(),
-                    style: TextStyle(color: Colors.grey, fontSize: 14.0),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                Container(
-                  height: 380.0,
-                  child: ListView(
-                    physics: BouncingScrollPhysics(),
-                    children: widget.selectedContacts.map((Contact contact) {
-                      return Card(
-                          elevation: 5.0,
-                          child: InkWell(
-                            onTap: () {},
-                            child: Container(
-                              padding: EdgeInsets.all(10.0),
-                              child: Row(children: [
-                                CircleAvatar(
-                                  backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
-                                  child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
-                                ),
-                                Container(
-                                  padding: EdgeInsets.only(left: 5.0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[Text(contact.displayName, overflow: TextOverflow.ellipsis)],
-                                  ),
-                                )
-                              ]),
-                            ),
-                          ));
-                    }).toList(),
+                Tooltip(
+                  message: "Next",
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(30.0),
+                    child: Padding(
+                      padding: EdgeInsets.all(15.0),
+                      child: Icon(Icons.check),
+                    ),
+                    onTap: () {
+                      createGroupConversation(widget.selectedContacts, context);
+                    },
                   ),
                 ),
               ],
-            ),
-          ),
-        ));
+            )),
+            body: Container(
+              child: Material(
+                color: Colors.white,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      padding: EdgeInsets.only(top: 50.0, left: 20.0),
+                      child: Row(
+                        children: <Widget>[
+                          Container(
+                              height: 65.0,
+                              width: 65.0,
+                              child: InkWell(
+                                onTap: () {
+                                  //TODO: Add group photo from gallery/ take photo
+                                  // showOptionsDialog(context);
+                                  getImage();
+                                },
+                                borderRadius: circleAvatarCirleRadius,
+                                child: CircleAvatar(
+                                  backgroundColor: themePrimaryColor,
+                                  // AssetImage('lib/ui/icons/default_blank_photo.png')
+                                  // backgroundImage: FileImage(imageFile),
+                                  child: !imageExists
+                                      ? Icon(
+                                          Icons.camera_alt,
+                                          color: appBarThemeTextColor,
+                                        )
+                                      : ClipRRect(
+                                          borderRadius: circleAvatarCirleRadius,
+                                          child: Image.file(
+                                            imageFile,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                ),
+                              )),
+                          Container(
+                            width: 230.0,
+                            padding: EdgeInsets.only(left: 10.0),
+                            child: Column(
+                              children: <Widget>[
+                                TextField(
+                                  controller: textEditingController,
+                                  decoration: InputDecoration(hintText: "Type group subject here..."),
+                                ),
+                                Text(
+                                  "Provide a group subject and optional group icon.",
+                                  style: TextStyle(color: Colors.grey, fontSize: 12.0),
+                                )
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.tag_faces),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(top: 20.0, left: 20.0, bottom: 20.0),
+                      child: Text(
+                        "Group Members: " + widget.selectedContacts.length.toString(),
+                        style: TextStyle(color: Colors.grey, fontSize: 14.0),
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                    Container(
+                      height: 380.0,
+                      child: ListView(
+                        physics: BouncingScrollPhysics(),
+                        children: widget.selectedContacts.map((Contact contact) {
+                          return Card(
+                              elevation: 5.0,
+                              child: InkWell(
+                                onTap: () {},
+                                child: Container(
+                                  padding: EdgeInsets.all(10.0),
+                                  child: Row(children: [
+                                    CircleAvatar(
+                                      backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
+                                      child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.only(left: 5.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: <Widget>[Text(contact.displayName, overflow: TextOverflow.ellipsis)],
+                                      ),
+                                    )
+                                  ]),
+                                ),
+                              ));
+                        }).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )),
+      ),
+    );
   }
 
   // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
@@ -376,24 +381,27 @@ class GroupNamePageState extends State<GroupNamePage> {
     String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
     print("chat_room_page.dart remoteUrl: " + remoteUrl.toString());
     String remoteThumbnailUrl =
-    await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
+        await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
     print("chat_room_page.dart remoteThumbnailUrl: " + remoteThumbnailUrl.toString());
 
-    if(!isStringEmpty(remoteUrl)) {
+    if (!isStringEmpty(remoteUrl)) {
       multimedia.remoteFullFileUrl = remoteUrl;
     }
 
-    if(!isStringEmpty(remoteThumbnailUrl)) {
+    if (!isStringEmpty(remoteThumbnailUrl)) {
       multimedia.remoteThumbnailUrl = remoteThumbnailUrl;
     }
 
     BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(
         multimedia: multimedia,
         callback: (Multimedia multimedia2) {
-          if(!isObjectEmpty(multimedia2)) {
+          if (!isObjectEmpty(multimedia2)) {
             print('chat_room_page.dart EditMultimediaEvent success');
-            print('chat_room_page.dart multimedia2.remoteFullFileUrl == multimedia.remoteFullFileUrl: ' + multimedia2.remoteFullFileUrl == multimedia.remoteFullFileUrl);
-            print('chat_room_page.dart multimedia2.remoteThumbnailUrl == multimedia.remoteThumbnailUrl: ' + multimedia2.remoteThumbnailUrl == multimedia.remoteThumbnailUrl);
+            print('chat_room_page.dart multimedia2.remoteFullFileUrl == multimedia.remoteFullFileUrl: ' + multimedia2.remoteFullFileUrl ==
+                multimedia.remoteFullFileUrl);
+            print(
+                'chat_room_page.dart multimedia2.remoteThumbnailUrl == multimedia.remoteThumbnailUrl: ' + multimedia2.remoteThumbnailUrl ==
+                    multimedia.remoteThumbnailUrl);
             // Go to chat room page
             Navigator.pop(context); //pop loading dialog
             Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);

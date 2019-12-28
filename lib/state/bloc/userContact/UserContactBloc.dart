@@ -22,6 +22,8 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       yield* _editUserContact(event);
     } else if (event is DeleteUserContactEvent) {
       yield* _deleteUserContact(event);
+    } else if (event is GetUserContactEvent) {
+      _getUserContact(event);
     } else if (event is GetOwnUserContactEvent) {
       yield* _getOwnUserContact(event);
     } else if (event is GetUserPreviousUserContactsEvent) {
@@ -54,7 +56,10 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     UserContact newUserContact;
     bool userContactAdded = false;
 
-    newUserContact = await userContactAPIService.addUserContact(event.userContact);
+    // Avoid readding existing userContact
+    if(isStringEmpty(event.userContact.id)) {
+      newUserContact = await userContactAPIService.addUserContact(event.userContact);
+    }
 
     if (!isObjectEmpty(newUserContact)) {
       userContactAdded = await userContactDBService.addUserContact(newUserContact);
@@ -91,7 +96,10 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       UserContact newUserContact;
       bool userContactAdded = false;
 
-      newUserContact = await userContactAPIService.addUserContact(userContact);
+      // Avoid readding existing userContact
+      if(isStringEmpty(userContact.id)) {
+        newUserContact = await userContactAPIService.addUserContact(userContact);
+      }
 
       if (!isObjectEmpty(newUserContact)) {
         bool userContactExist = false;
@@ -181,6 +189,18 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     }
   }
 
+  Stream<UserContactState> _getUserContact(GetUserContactEvent event) async* {
+    if(!isStringEmpty(event.userContactId)) {
+      UserContact userContactFromServer = await userContactAPIService.getUserContact(event.userContactId);
+
+      if(!isObjectEmpty(userContactFromServer)) {
+        functionCallback(event, userContactFromServer);
+      } else {
+        functionCallback(event, null);
+      }
+    }
+  }
+
   Stream<UserContactState> _getOwnUserContact(GetOwnUserContactEvent event) async* {
     if (!isObjectEmpty(event.user)) {
       UserContact userContactFromDB = await userContactDBService.getUserContactByUserId(event.user.id);
@@ -200,8 +220,14 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
 
       if (!isObjectEmpty(userContactListFromServer) && userContactListFromServer.length > 0) {
         for (UserContact userContactFromServer in userContactListFromServer) {
-          bool userContactExist =
-              existingUserContactList.contains((UserContact userContactFromDB) => userContactFromDB.id == userContactFromServer.id);
+          // Unable to use contains() method here. Will cause concurrent modification during iteration problem.
+          // Link: https://stackoverflow.com/questions/22409666/exception-concurrent-modification-during-iteration-instancelength17-of-gr
+          bool userContactExist = false;
+          for(UserContact existingUserContact in existingUserContactList) {
+            if(existingUserContact.id == userContactFromServer.id) {
+              userContactExist = true;
+            }
+          }
 
           if (userContactExist) {
             existingUserContactList.removeWhere((UserContact existingUserContact) => existingUserContact.id == userContactFromServer.id);

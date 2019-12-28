@@ -56,7 +56,10 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     Multimedia multimediaFromServer;
     bool saved = false;
 
-    multimediaFromServer = await multimediaAPIService.addMultimedia(event.multimedia);
+    // Avoid readding existing multimedia
+    if(isStringEmpty(event.multimedia.id)) {
+      multimediaFromServer = await multimediaAPIService.addMultimedia(event.multimedia);
+    }
 
     if (!isObjectEmpty(multimediaFromServer)) {
       saved = await multimediaDBService.addMultimedia(multimediaFromServer);

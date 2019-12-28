@@ -36,93 +36,6 @@ class LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController mobileNoTextController = new TextEditingController();
 
-  String getPhoneNumber(IPGeoLocation ipGeoLocation) {
-    String phoneNoInitials = "";
-
-    if (isObjectEmpty(countryCode)) {
-      phoneNoInitials = ipGeoLocation.calling_code;
-    } else {
-      phoneNoInitials = countryCode.dialCode;
-    }
-    String phoneNumber = phoneNoInitials + mobileNoTextController.value.text;
-    return phoneNumber;
-  }
-
-  _signIn(BuildContext context, IPGeoLocation ipGeoLocation) async {
-    if (_formKey.currentState.validate()) {
-      showCenterLoadingIndicator(context);
-
-      String mobileNo = getPhoneNumber(ipGeoLocation);
-      BlocProvider.of<GoogleInfoBloc>(context).add(SignInGoogleInfoEvent(callback: (bool initialized) {
-        if (initialized) {
-          BlocProvider.of<GoogleInfoBloc>(context)
-              .add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn, FirebaseAuth firebaseAuth, FirebaseUser firebaseUser) {
-            BlocProvider.of<UserBloc>(context).add(CheckUserSignedUpEvent(
-                mobileNo: mobileNo,
-                googleSignIn: googleSignIn,
-                callback: (bool isSignedUp) {
-                  if (isSignedUp) {
-                    BlocProvider.of<UserBloc>(context).add(UserSignInEvent(
-                        googleSignIn: googleSignIn,
-                        mobileNo: mobileNo,
-                        callback: (User user2) {
-                          if (!isObjectEmpty(user2)) {
-                            BlocProvider.of<SettingsBloc>(context).add(GetUserSettingsEvent(
-                                user: user2,
-                                callback: (Settings settings) {
-                                  if (!isObjectEmpty(settings)) {
-                                    print('login_page.dart if (!isObjectEmpty(settings))');
-                                    Navigator.pop(context);
-                                    goToVerifyPhoneNumber(mobileNo, context);
-                                  } else {
-                                    print('login_page.dart if (isObjectEmpty(settings))');
-                                    Fluttertoast.showToast(
-                                        msg: 'Invalid Mobile No./matching Google account. Please try again.',
-                                        toastLength: Toast.LENGTH_SHORT);
-                                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
-                                    Navigator.pop(context);
-                                  }
-                                  ;
-                                }));
-                            // Get previous data
-                            BlocProvider.of<ConversationGroupBloc>(context)
-                                .add(GetUserPreviousConversationGroupsEvent(user: user2, callback: (bool done) {}));
-                            BlocProvider.of<UnreadMessageBloc>(context)
-                                .add(GetUserPreviousUnreadMessagesEvent(user: user2, callback: (bool done) {}));
-                            BlocProvider.of<MultimediaBloc>(context)
-                                .add(GetUserProfilePictureMultimediaEvent(user: user2, callback: (bool done) {}));
-                            BlocProvider.of<UserContactBloc>(context)
-                                .add(GetUserPreviousUserContactsEvent(user: user2, callback: (bool done) {}));
-                          } else {
-                            print('login_page.dart if (isObjectEmpty(user2))');
-                            Fluttertoast.showToast(
-                                msg: 'Invalid Mobile No./matching Google account. Please try again.', toastLength: Toast.LENGTH_SHORT);
-                            BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
-                            Navigator.pop(context);
-                          }
-                        }));
-                  } else {
-                    Fluttertoast.showToast(
-                        msg: 'Unregconized phone number/Google Account. Please sign up first.', toastLength: Toast.LENGTH_SHORT);
-                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
-                    Navigator.pop(context);
-                  }
-                }));
-          }));
-        } else {
-          Fluttertoast.showToast(msg: 'Please sign into your Google Account first.', toastLength: Toast.LENGTH_SHORT);
-          BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
-          Navigator.pop(context);
-        }
-      }));
-    }
-  }
-
-  onCountryPickerChanged(CountryCode countryCode) {
-    this.countryCode = countryCode;
-    this.countryCodeString = countryCode.code.toString();
-  }
-
   @override
   Widget build(BuildContext context) {
     final deviceWidth = MediaQuery.of(context).size.width;
@@ -281,6 +194,93 @@ class LoginPageState extends State<LoginPage> {
               ),
             )),
       );
+
+  _signIn(BuildContext context, IPGeoLocation ipGeoLocation) async {
+    if (_formKey.currentState.validate()) {
+      showCenterLoadingIndicator(context);
+
+      String mobileNo = getPhoneNumber(ipGeoLocation);
+      BlocProvider.of<GoogleInfoBloc>(context).add(SignInGoogleInfoEvent(callback: (bool initialized) {
+        if (initialized) {
+          BlocProvider.of<GoogleInfoBloc>(context)
+              .add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn, FirebaseAuth firebaseAuth, FirebaseUser firebaseUser) {
+            BlocProvider.of<UserBloc>(context).add(CheckUserSignedUpEvent(
+                mobileNo: mobileNo,
+                googleSignIn: googleSignIn,
+                callback: (bool isSignedUp) {
+                  if (isSignedUp) {
+                    BlocProvider.of<UserBloc>(context).add(UserSignInEvent(
+                        googleSignIn: googleSignIn,
+                        mobileNo: mobileNo,
+                        callback: (User user2) {
+                          if (!isObjectEmpty(user2)) {
+                            BlocProvider.of<SettingsBloc>(context).add(GetUserSettingsEvent(
+                                user: user2,
+                                callback: (Settings settings) {
+                                  if (!isObjectEmpty(settings)) {
+                                    print('login_page.dart if (!isObjectEmpty(settings))');
+                                    Navigator.pop(context);
+                                    goToVerifyPhoneNumber(mobileNo, context);
+                                  } else {
+                                    print('login_page.dart if (isObjectEmpty(settings))');
+                                    Fluttertoast.showToast(
+                                        msg: 'Invalid Mobile No./matching Google account. Please try again.',
+                                        toastLength: Toast.LENGTH_SHORT);
+                                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
+                                    Navigator.pop(context);
+                                  }
+                                  ;
+                                }));
+                            // Get previous data
+                            BlocProvider.of<ConversationGroupBloc>(context)
+                                .add(GetUserPreviousConversationGroupsEvent(user: user2, callback: (bool done) {}));
+                            BlocProvider.of<UnreadMessageBloc>(context)
+                                .add(GetUserPreviousUnreadMessagesEvent(user: user2, callback: (bool done) {}));
+                            BlocProvider.of<MultimediaBloc>(context)
+                                .add(GetUserProfilePictureMultimediaEvent(user: user2, callback: (bool done) {}));
+                            BlocProvider.of<UserContactBloc>(context)
+                                .add(GetUserPreviousUserContactsEvent(user: user2, callback: (bool done) {}));
+                          } else {
+                            print('login_page.dart if (isObjectEmpty(user2))');
+                            Fluttertoast.showToast(
+                                msg: 'Invalid Mobile No./matching Google account. Please try again.', toastLength: Toast.LENGTH_SHORT);
+                            BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
+                            Navigator.pop(context);
+                          }
+                        }));
+                  } else {
+                    Fluttertoast.showToast(
+                        msg: 'Unregconized phone number/Google Account. Please sign up first.', toastLength: Toast.LENGTH_SHORT);
+                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
+                    Navigator.pop(context);
+                  }
+                }));
+          }));
+        } else {
+          Fluttertoast.showToast(msg: 'Please sign into your Google Account first.', toastLength: Toast.LENGTH_SHORT);
+          BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
+          Navigator.pop(context);
+        }
+      }));
+    }
+  }
+
+  onCountryPickerChanged(CountryCode countryCode) {
+    this.countryCode = countryCode;
+    this.countryCodeString = countryCode.code.toString();
+  }
+
+  String getPhoneNumber(IPGeoLocation ipGeoLocation) {
+    String phoneNoInitials = "";
+
+    if (isObjectEmpty(countryCode)) {
+      phoneNoInitials = ipGeoLocation.calling_code;
+    } else {
+      phoneNoInitials = countryCode.dialCode;
+    }
+    String phoneNumber = phoneNoInitials + mobileNoTextController.value.text;
+    return phoneNumber;
+  }
 
   goToVerifyPhoneNumber(mobileNo, BuildContext context) {
     Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(mobileNo: mobileNo))));

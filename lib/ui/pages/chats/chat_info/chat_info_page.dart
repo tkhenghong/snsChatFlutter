@@ -25,6 +25,7 @@ class ChatInfoPage extends StatefulWidget {
 
 class ChatInfoPageState extends State<ChatInfoPage> {
   bool messageListDone;
+  List<UserContact> conversationGroupMemberList = [];
 
   TextEditingController textEditingController;
   ScrollController scrollController;
@@ -45,38 +46,6 @@ class ChatInfoPageState extends State<ChatInfoPage> {
   @override
   Widget build(BuildContext context) {
     Color textSelectionColor = Theme.of(context).textSelectionColor;
-
-//    Multimedia multimedia = wholeAppBloc.findMultimediaByConversationId(widget._conversationGroup.id);
-//    List<UserContact> userContactList = wholeAppBloc.getUserContactsByConversationId(widget._conversationGroup.id);
-//    List<Multimedia> multimediaList =
-//        userContactList.map((UserContact userContact) => wholeAppBloc.findMultimediaByUserContactId(userContact.id)).toList();
-//
-//    print("userContactList.length:" + userContactList.length.toString());
-//    print("multimediaList.length:" + multimediaList.length.toString());
-//
-//    userContactList.forEach((UserContact userContact) {
-//      if (!isObjectEmpty(userContact)) {
-//        print("UserContact");
-//        print("userContact.id: " + userContact.id.toString());
-//        print("userContact.mobileNo: " + userContact.mobileNo.toString());
-//        print("userContact.block: " + userContact.block.toString());
-//        print("userContact.displayName: " + userContact.displayName.toString());
-//        print("userContact.realName: " + userContact.realName.toString());
-//        print("userContact.lastSeenDate: " + userContact.lastSeenDate.toString());
-//        print("userContact.multimediaId: " + userContact.multimediaId.toString());
-//      }
-//    });
-//
-//    multimediaList.forEach((Multimedia multimedia) {
-//      if (!isObjectEmpty(multimedia)) {
-//        print("Multimedia");
-//        print("multimedia.id: " + multimedia.id.toString());
-//        print("multimedia.userContactId: " + multimedia.userContactId.toString());
-//        print("multimedia.userId: " + multimedia.userId.toString());
-//        print("multimedia.conversationId: " + multimedia.conversationId.toString());
-//        print("multimedia.messageId: " + multimedia.messageId.toString());
-//      }
-//    });
 
     return MultiBlocListener(
       listeners: [],
@@ -315,9 +284,19 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                         BlocBuilder<UserContactBloc, UserContactState>(
                           builder: (BuildContext context, UserContactState userContactState) {
                             if (userContactState is UserContactsLoaded) {
+                              print('chat_info_page.dart if (userContactState is UserContactsLoaded)');
                               List<UserContact> userContactList = userContactState.userContactList;
-                              List<UserContact> conversationGroupMemberList = userContactList.where((UserContact existingUserContact) =>
-                                  conversationGroup.memberIds.contains((String memberId) => existingUserContact.id == memberId));
+
+                              if(!isObjectEmpty(userContactList)) {
+                                print('chat_info_page.dart userContactList.length: ' + userContactList.length.toString());
+                                userContactList.forEach((UserContact userContact) {
+                                  print('chat_info_page.dart userContact.toString(): ' + userContact.toString());
+                                  print('chat_info_page.dart userContact.id: ' + userContact.id);
+                                  print('chat_info_page.dart userContact.displayName: ' + userContact.displayName);
+                                });
+                              }
+                              conversationGroupMemberList = getConversationGroupMembers(context, userContactList, conversationGroup);
+
                               return showGroupMemberNumber(context, conversationGroupMemberList);
                             }
                             return showGroupMemberNumber(context, []);
@@ -327,9 +306,6 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                         BlocBuilder<UserContactBloc, UserContactState>(
                           builder: (BuildContext context, UserContactState userContactState) {
                             if (userContactState is UserContactsLoaded) {
-                              List<UserContact> userContactList = userContactState.userContactList;
-                              List<UserContact> conversationGroupMemberList = userContactList.where((UserContact existingUserContact) =>
-                                  conversationGroup.memberIds.contains((String memberId) => existingUserContact.id == memberId)).toList();
                               return BlocBuilder<MultimediaBloc, MultimediaState>(
                                 builder: (BuildContext context, MultimediaState multimediaState) {
                                   if (multimediaState is MultimediaLoaded) {
@@ -505,5 +481,47 @@ class ChatInfoPageState extends State<ChatInfoPage> {
             .toList(),
       ),
     );
+  }
+
+  List<UserContact> getConversationGroupMembers(BuildContext context, List<UserContact> userContactList, ConversationGroup conversationGroup) {
+    List<UserContact> conversationGroupMemberList = [];
+    List<String> notFoundMemberId = [];
+    if(!isObjectEmpty(userContactList)) {
+      print('chat_info_page.dart if(!isObjectEmpty(userContactList))');
+      print('chat_info_page.dart if userContactList.toString(): ' + userContactList.toString());
+      print('chat_info_page.dart if userContactList.length.toString(): ' + userContactList.length.toString());
+    }
+
+    for(String memberId in conversationGroup.memberIds) {
+      bool userContactFound = false;
+      for(UserContact existingUserContact in userContactList) {
+        if(existingUserContact.id == memberId) {
+          userContactFound = true;
+          conversationGroupMemberList.add(existingUserContact);
+        }
+      }
+      // Warning: Bad practice as it will cause more and more loop in this page
+      // In case not found. Get the userContact from backend and add it into local DB. Then, BlocBuilder triggers and all userContacts will be found.
+      if(!userContactFound) {
+        notFoundMemberId.add(memberId);
+      }
+    }
+
+    // Get userContacts from server
+    for(String memberId in notFoundMemberId) {
+      BlocProvider.of<UserContactBloc>(context).add(GetUserContactEvent(userContactId: memberId, callback: (UserContact userContact) {
+        if(!isObjectEmpty(userContact)) {
+          BlocProvider.of<UserContactBloc>(context).add(AddUserContactEvent(userContact: userContact, callback: (UserContact userContact2) {}));
+        }
+      }));
+    }
+
+    if(!isObjectEmpty(conversationGroupMemberList)) {
+      print('chat_info_page.dart if(!isObjectEmpty(conversationGroupMemberList))');
+      print('chat_info_page.dart if conversationGroupMemberList.toString(): ' + conversationGroupMemberList.toString());
+      print('chat_info_page.dart if conversationGroupMemberList.length.toString(): ' + conversationGroupMemberList.length.toString());
+    }
+
+    return conversationGroupMemberList;
   }
 }

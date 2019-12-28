@@ -51,7 +51,11 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
     bool unreadMessageSaved = false;
 
     if (state is UnreadMessagesLoaded) {
-      newUnreadMessage = await unreadMessageAPIService.addUnreadMessage(event.unreadMessage);
+
+      // Avoid readding existed unreadMessage object
+      if(isStringEmpty(event.unreadMessage.id)) {
+        newUnreadMessage = await unreadMessageAPIService.addUnreadMessage(event.unreadMessage);
+      }
 
       if (!isObjectEmpty(newUnreadMessage)) {
         unreadMessageSaved = await unreadMessageDBService.addUnreadMessage(newUnreadMessage);

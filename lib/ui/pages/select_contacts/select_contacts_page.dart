@@ -60,42 +60,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     super.initState();
     _refreshController = new RefreshController();
     scrollController = new ScrollController();
-    getContacts();
+    getContacts(context);
     setConversationType(widget.chatGroupType);
-  }
-
-  setupCheckBoxes(List<Contact> phoneStorageContactList) {
-    phoneStorageContactList.forEach((contact) {
-      contactCheckBoxes[contact.displayName] = false;
-    });
-
-    contactLoaded = true;
-  }
-
-  getContacts() async {
-    BlocProvider.of<PhoneStorageContactBloc>(context).add(GetPhoneStorageContactsEvent(callback: (bool success) {}));
-  }
-
-  setConversationType(String chatGroupType) async {
-    print("widget.chatGroupType: " + widget.chatGroupType);
-    switch (chatGroupType) {
-      case "Personal":
-        title = "Create Personal Chat";
-        subtitle = "Select a contact below.";
-        break;
-      case "Group":
-        title = "Create Group Chat";
-        subtitle = "Select a few contacts below.";
-        break;
-      case "Broadcast":
-        title = "Broadcast";
-        subtitle = "Select a few contacts below.";
-        break;
-      default:
-        title = "Unknown Chat";
-        subtitle = "Error. Please go back and select again.";
-        break;
-    }
   }
 
   @override
@@ -111,6 +77,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     themePrimaryColor = Theme.of(context).textTheme.title.color;
     appBarThemeTextColor = Theme.of(context).appBarTheme.textTheme.title.color;
     circleAvatarTextStyle = TextStyle(color: appBarThemeTextColor);
+
     return Scaffold(
       appBar: appBar(context),
       body: MultiBlocListener(
@@ -353,9 +320,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           height: 10.0,
         ),
         RaisedButton(
-          onPressed: () {
-            getContacts(); // Reload
-          },
+          onPressed: () => getContacts(context),
           child: Text("Grant Contact Permission"),
         )
       ],
@@ -386,7 +351,45 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     return widget.chatGroupType != "Personal";
   }
 
-  onRefresh(BuildContext context) async {}
+  setupCheckBoxes(List<Contact> phoneStorageContactList) {
+    phoneStorageContactList.forEach((contact) {
+      contactCheckBoxes[contact.displayName] = false;
+    });
+
+    contactLoaded = true;
+  }
+
+  getContacts(BuildContext context) async {
+    BlocProvider.of<PhoneStorageContactBloc>(context).add(GetPhoneStorageContactsEvent(callback: (bool success) {
+      success ? _refreshController.refreshCompleted() : _refreshController.refreshFailed();
+    }));
+  }
+
+  setConversationType(String chatGroupType) async {
+    print("widget.chatGroupType: " + widget.chatGroupType);
+    switch (chatGroupType) {
+      case "Personal":
+        title = "Create Personal Chat";
+        subtitle = "Select a contact below.";
+        break;
+      case "Group":
+        title = "Create Group Chat";
+        subtitle = "Select a few contacts below.";
+        break;
+      case "Broadcast":
+        title = "Broadcast";
+        subtitle = "Select a few contacts below.";
+        break;
+      default:
+        title = "Unknown Chat";
+        subtitle = "Error. Please go back and select again.";
+        break;
+    }
+  }
+
+  onRefresh(BuildContext context) async {
+    getContacts(context);
+  }
 
   // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
   createPersonalConversation(Contact contact, BuildContext context) async {

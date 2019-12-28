@@ -34,22 +34,21 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
 
   Stream<ConversationGroupState> _mapInitializeConversationGroup(InitializeConversationGroupsEvent event) async* {
     if (state is ConversationGroupsLoading || state is ConversationGroupsNotLoaded) {
-      print('ConversationGroupBloc.dart if(state is ConversationGroupsLoading || state is ConversationGroupsNotLoaded)');
       try {
         List<ConversationGroup> conversationGroupListFromDB = await conversationGroupDBService.getAllConversationGroups();
         if (isObjectEmpty(conversationGroupListFromDB)) {
           yield ConversationGroupsNotLoaded();
           functionCallback(event, false);
         } else {
-          print('ConversationGroupBloc.dart conversationGroupListFromDB: ' + conversationGroupListFromDB.toString());
-          print('ConversationGroupBloc.dart conversationGroupListFromDB.length: ' + conversationGroupListFromDB.length.toString());
-          conversationGroupListFromDB.forEach((ConversationGroup conversationGroup) {
-            print('ConversationGroupBloc.dart conversationGroup.id.toString(): ' + conversationGroup.id.toString());
-            print('ConversationGroupBloc.dart conversationGroup.name.toString(): ' + conversationGroup.name.toString());
-            print('ConversationGroupBloc.dart conversationGroup.type.toString(): ' + conversationGroup.type.toString());
-            print('ConversationGroupBloc.dart conversationGroup.memberIds.toString(): ' + conversationGroup.memberIds.toString());
-            print('ConversationGroupBloc.dart conversationGroup.adminMemberIds.toString(): ' + conversationGroup.adminMemberIds.toString());
-          });
+//          print('ConversationGroupBloc.dart conversationGroupListFromDB: ' + conversationGroupListFromDB.toString());
+//          print('ConversationGroupBloc.dart conversationGroupListFromDB.length: ' + conversationGroupListFromDB.length.toString());
+//          conversationGroupListFromDB.forEach((ConversationGroup conversationGroup) {
+//            print('ConversationGroupBloc.dart conversationGroup.id.toString(): ' + conversationGroup.id.toString());
+//            print('ConversationGroupBloc.dart conversationGroup.name.toString(): ' + conversationGroup.name.toString());
+//            print('ConversationGroupBloc.dart conversationGroup.type.toString(): ' + conversationGroup.type.toString());
+//            print('ConversationGroupBloc.dart conversationGroup.memberIds.toString(): ' + conversationGroup.memberIds.toString());
+//            print('ConversationGroupBloc.dart conversationGroup.adminMemberIds.toString(): ' + conversationGroup.adminMemberIds.toString());
+//          });
           yield ConversationGroupsLoaded(conversationGroupListFromDB);
           functionCallback(event, true);
         }
@@ -58,16 +57,16 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
         functionCallback(event, false);
       }
     } else if (state is ConversationGroupsLoaded) {
-      List<ConversationGroup> conversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
-      print('ConversationGroupBloc.dart conversationGroupList: ' + conversationGroupList.toString());
-      print('ConversationGroupBloc.dart conversationGroupList.length: ' + conversationGroupList.length.toString());
-      conversationGroupList.forEach((ConversationGroup conversationGroup) {
-        print('ConversationGroupBloc.dart conversationGroup.id.toString(): ' + conversationGroup.id.toString());
-        print('ConversationGroupBloc.dart conversationGroup.name.toString(): ' + conversationGroup.name.toString());
-        print('ConversationGroupBloc.dart conversationGroup.type.toString(): ' + conversationGroup.type.toString());
-        print('ConversationGroupBloc.dart conversationGroup.memberIds.toString(): ' + conversationGroup.memberIds.toString());
-        print('ConversationGroupBloc.dart conversationGroup.adminMemberIds.toString(): ' + conversationGroup.adminMemberIds.toString());
-      });
+//      List<ConversationGroup> conversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
+//      print('ConversationGroupBloc.dart conversationGroupList: ' + conversationGroupList.toString());
+//      print('ConversationGroupBloc.dart conversationGroupList.length: ' + conversationGroupList.length.toString());
+//      conversationGroupList.forEach((ConversationGroup conversationGroup) {
+//        print('ConversationGroupBloc.dart conversationGroup.id.toString(): ' + conversationGroup.id.toString());
+//        print('ConversationGroupBloc.dart conversationGroup.name.toString(): ' + conversationGroup.name.toString());
+//        print('ConversationGroupBloc.dart conversationGroup.type.toString(): ' + conversationGroup.type.toString());
+//        print('ConversationGroupBloc.dart conversationGroup.memberIds.toString(): ' + conversationGroup.memberIds.toString());
+//        print('ConversationGroupBloc.dart conversationGroup.adminMemberIds.toString(): ' + conversationGroup.adminMemberIds.toString());
+//      });
     }
   }
 
@@ -75,7 +74,10 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     ConversationGroup newConversationGroup;
     bool added = false;
     if (state is ConversationGroupsLoaded) {
-      newConversationGroup = await conversationGroupAPIService.addConversationGroup(event.conversationGroup);
+      // Avoid readding existing conversationGroup
+      if(isStringEmpty(event.conversationGroup.id)) {
+        newConversationGroup = await conversationGroupAPIService.addConversationGroup(event.conversationGroup);
+      }
 
       if (!isObjectEmpty(newConversationGroup)) {
         added = await conversationGroupDBService.addConversationGroup(newConversationGroup);
