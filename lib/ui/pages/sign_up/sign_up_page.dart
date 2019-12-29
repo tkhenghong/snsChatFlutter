@@ -250,6 +250,7 @@ class SignUpPageState extends State<SignUpPage> {
                         mobileNo: getPhoneNumber(context),
                         displayName: firebaseUser2.displayName,
                         realName: nameTextController.value.text.toString(),
+                        about: 'Hey There! I am using PocketChat.',
                         lastSeenDate: DateTime.now().millisecondsSinceEpoch,
                         block: false,
                         userIds: [],

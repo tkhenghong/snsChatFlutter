@@ -57,8 +57,10 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     bool saved = false;
 
     // Avoid readding existing multimedia
-    if(isStringEmpty(event.multimedia.id)) {
+    if (isStringEmpty(event.multimedia.id)) {
       multimediaFromServer = await multimediaAPIService.addMultimedia(event.multimedia);
+    } else {
+      multimediaFromServer = event.multimedia;
     }
 
     if (!isObjectEmpty(multimediaFromServer)) {
@@ -161,8 +163,19 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
 
     // Get user profile picture
     Multimedia multimediaFromServer = await multimediaAPIService.getMultimediaOfAUser(event.user.id);
+
     print('MultimediaBloc.dart multimediaFromServer: ' + multimediaFromServer.toString());
     if (!isObjectEmpty(multimediaFromServer)) {
+      // Update DB
+      Multimedia userMultimedia = await multimediaDBService.getSingleMultimedia(multimediaFromServer.id);
+      if (!isObjectEmpty(userMultimedia)) {
+        multimediaDBService.addMultimedia(multimediaFromServer);
+      } else {
+        multimediaDBService.editMultimedia(multimediaFromServer);
+      }
+
+      // Update State
+      multimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == multimediaFromServer.id);
       multimediaList.add(multimediaFromServer);
     }
 
@@ -182,6 +195,20 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
         List<Multimedia> multimediaListFromServer = await multimediaAPIService.getAllMultimediaOfAConversationGroup(conversationGroup.id);
 
         if (!isObjectEmpty(multimediaListFromServer) && multimediaListFromServer.length > 0) {
+          // Update DB
+          for (Multimedia multimediaFromServer in multimediaListFromServer) {
+            Multimedia existingConversationGroupMultimedia = await multimediaDBService.getSingleMultimedia(multimediaFromServer.id);
+            if (!isObjectEmpty(existingConversationGroupMultimedia)) {
+              multimediaDBService.editMultimedia(multimediaFromServer);
+            } else {
+              multimediaDBService.addMultimedia(multimediaFromServer);
+            }
+
+            // Update State
+            multimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == existingConversationGroupMultimedia.id);
+          }
+
+          // Update State
           multimediaList = [multimediaList, multimediaListFromServer].expand((x) => x).toList();
         }
       }
@@ -203,6 +230,16 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
         Multimedia userContactMultimedia = await multimediaAPIService.getMultimediaOfAUserContact(userContact.id);
 
         if (!isObjectEmpty(userContactMultimedia)) {
+          // Update DB
+          Multimedia existingUserContactMultimedia = await multimediaDBService.getSingleMultimedia(userContactMultimedia.id);
+          if (!isObjectEmpty(existingUserContactMultimedia)) {
+            multimediaDBService.editMultimedia(userContactMultimedia);
+          } else {
+            multimediaDBService.addMultimedia(userContactMultimedia);
+          }
+
+          // Update State
+          multimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == userContactMultimedia.id);
           multimediaList.add(userContactMultimedia);
         }
       }

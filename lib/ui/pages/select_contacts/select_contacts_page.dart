@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:snschat_flutter/backend/rest/index.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/objects/conversationGroup/conversation_group.dart';
@@ -54,6 +55,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   FileService fileService = FileService();
   ImageService imageService = ImageService();
+  UserContactAPIService userContactAPIService = UserContactAPIService();
 
   @override
   initState() {
@@ -506,6 +508,29 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         userContactList.add(userContact);
       });
 
+      UserContact targetUserContact = userContactList[1];
+
+      // Logic to detect to find same personal conversation group in local state/DB
+      UserContact userContactFromServer = await userContactAPIService.getUserContactByMobileNo(targetUserContact.mobileNo);
+      if (!isObjectEmpty(userContactFromServer)) {
+        UserContactState userContactState = BlocProvider.of<UserContactBloc>(context).state;
+        ConversationGroupState conversationGroupState = BlocProvider.of<ConversationGroupBloc>(context).state;
+
+        if (userContactState is UserContactsLoaded && conversationGroupState is ConversationGroupsLoaded) {
+          List<UserContact> userContactList = userContactState.userContactList;
+          List<ConversationGroup> conversationGroupList = conversationGroupState.conversationGroupList;
+
+          bool personalConversationGroupExist = conversationGroupList.contains((ConversationGroup existingConversationGroup) =>
+              existingConversationGroup.type == 'Personal' &&
+              existingConversationGroup.memberIds.contains((String memberId) => memberId == userContactFromServer.id));
+
+          if (personalConversationGroupExist) {
+            goToChatRoomPage(context, conversationGroup);
+            return;
+          }
+        }
+      }
+
       BlocProvider.of<UserContactBloc>(context).add(AddMultipleUserContactEvent(
           userContactList: userContactList,
           callback: (List<UserContact> newUserContactList) {
@@ -567,10 +592,14 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
         multimedia: groupMultimedia,
         callback: (Multimedia multimedia2) {
-          // Go to chat room page
-          Navigator.pop(context); //pop loading dialog
-          Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
-          Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
+          goToChatRoomPage(context, conversationGroup);
         }));
+  }
+
+  goToChatRoomPage(BuildContext context, ConversationGroup conversationGroup) {
+    // Go to chat room page
+    Navigator.pop(context); //pop loading dialog
+    Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
+    Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
   }
 }

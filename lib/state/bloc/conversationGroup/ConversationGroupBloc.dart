@@ -77,6 +77,8 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       // Avoid readding existing conversationGroup
       if(isStringEmpty(event.conversationGroup.id)) {
         newConversationGroup = await conversationGroupAPIService.addConversationGroup(event.conversationGroup);
+      } else {
+        newConversationGroup = event.conversationGroup;
       }
 
       if (!isObjectEmpty(newConversationGroup)) {

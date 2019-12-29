@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -33,9 +34,14 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   bool isShowSticker = false;
   bool isLoading;
   bool imageFound = false;
+  double deviceWidth;
+  double deviceHeight;
 
   Color appBarTextTitleColor;
   Color appBarThemeColor;
+
+  // This is used to get batch send multiple multimedia in one go, like multiple image and video
+  List<File> fileList = [];
 
   String WEBSOCKET_URL = globals.WEBSOCKET_URL;
 
@@ -69,6 +75,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
     appBarTextTitleColor = Theme.of(context).appBarTheme.textTheme.title.color;
     appBarThemeColor = Theme.of(context).appBarTheme.color;
+
+    deviceWidth = MediaQuery.of(context).size.width;
+    deviceHeight = MediaQuery.of(context).size.height;
 
     // TODO: Send message using WebSocket
     // Do in this order (To allow resend message if anything goes wrong [Send timeout, websocket down, Internet down situations])
@@ -152,9 +161,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                   //UI for message list
                   buildListMessage(context, user),
                   // UI for stickers, gifs
-                  (isShowSticker ? buildSticker(user) : Container()),
+                  (isShowSticker ? buildSticker(context, user) : Container()),
                   // UI for text field
-                  buildInput(user),
+                  buildInput(context, user),
                 ],
               ),
               buildLoading(),
@@ -240,7 +249,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
-  Widget buildInput(User user) {
+  Widget buildInput(BuildContext context, User user) {
     return Container(
       child: Row(
         children: <Widget>[
@@ -250,7 +259,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               margin: EdgeInsets.symmetric(horizontal: 1.0),
               child: IconButton(
                 icon: Icon(Icons.image),
-                onPressed: getImage,
+                onPressed: () => getImage(),
               ),
             ),
             color: Colors.white,
@@ -260,7 +269,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               margin: EdgeInsets.symmetric(horizontal: 1.0),
               child: IconButton(
                 icon: Icon(Icons.face),
-                onPressed: getSticker,
+                onPressed: () => getSticker(),
               ),
             ),
             color: Colors.white,
@@ -287,7 +296,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               margin: EdgeInsets.symmetric(horizontal: 8.0),
               child: IconButton(
                 icon: Icon(Icons.send),
-                onPressed: () => sendChatMessage(textEditingController.text, 0, user),
+                onPressed: () => sendChatMessage(context, textEditingController.text, 0, user),
               ),
             ),
             color: Colors.white,
@@ -301,13 +310,52 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   Widget buildListMessage(BuildContext context, User user) {
+    return BlocBuilder<WebSocketBloc, WebSocketState>(
+      builder: (context, webSocketState) {
+        print('chat_room_page.dart BlocBuilder<WebSocketBloc, WebSocketState>');
+        if (webSocketState is WebSocketNotLoaded) {
+          BlocProvider.of<WebSocketBloc>(context).add(ReconnectWebSocketEvent(callback: (bool done) {}));
+        }
+
+        if (webSocketState is WebSocketLoaded) {
+          print('chat_room_page.dart if (webSocketState is WebSocketLoaded)');
+          processWebSocketMessage(context, webSocketState.webSocketStream, user);
+          return loadMessageList(context, user);
+        }
+        return loadMessageList(context, user);
+      },
+    );
+  }
+
+  processWebSocketMessage(BuildContext context, Stream<dynamic> webSocketStream, User user) {
+    webSocketStream.listen((data) {
+      print("chat_room_page.dart webSocketStream listener is working.");
+      print("chat_room_page.dart data: " + data.toString());
+      Fluttertoast.showToast(msg: "Message confirmed received!", toastLength: Toast.LENGTH_LONG);
+      WebSocketMessage receivedWebSocketMessage = WebSocketMessage.fromJson(json.decode(data));
+      BlocProvider.of<WebSocketBloc>(context)
+          .add(ProcessWebSocketMessageEvent(webSocketMessage: receivedWebSocketMessage, context: context, callback: (bool done) {}));
+    }, onError: (onError) {
+      print("chat_room_page.dart onError listener is working.");
+      print("chat_room_page.dart onError: " + onError.toString());
+      BlocProvider.of<WebSocketBloc>(context).add(ReconnectWebSocketEvent(user: user, callback: (bool done) {}));
+    }, onDone: () {
+      print("chat_room_page.dart onDone listener is working.");
+      // TODO: Show reconnect message
+      BlocProvider.of<WebSocketBloc>(context).add(ReconnectWebSocketEvent(user: user, callback: (bool done) {}));
+    }, cancelOnError: false);
+  }
+
+  Widget loadMessageList(BuildContext context, User user) {
     return BlocBuilder<MessageBloc, MessageState>(
       builder: (context, messageState) {
+        print('chat_room_page.dart BlocBuilder<MessageBloc, MessageState>');
         if (messageState is MessageLoading) {
           return showSingleMessagePage('Loading...');
         }
 
         if (messageState is MessagesLoaded) {
+          print('if (messageState is MessagesLoaded) RUN HERE?');
           // Get current conversation messages and sort them.
           List<Message> conversationGroupMessageList =
               messageState.messageList.where((Message message) => message.conversationId == widget._conversationGroup.id).toList();
@@ -351,9 +399,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   Widget displayChatMessage(int index, Message message, User user) {
-    print("displayChatMessage()");
-    print("message.senderId: " + message.senderId);
-    print("user.id: " + user.id);
+//    print("displayChatMessage()");
+//    print("message.senderId: " + message.senderId);
+//    print("user.id: " + user.id);
     return Column(
       children: <Widget>[
         Text(
@@ -368,7 +416,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
               decoration: BoxDecoration(color: appBarThemeColor, borderRadius: BorderRadius.circular(8.0)),
               margin: EdgeInsets.only(
-                  bottom: 20.0, right: isSenderMessage(message, user) ? 10.0 : 0.0, left: isSenderMessage(message, user) ? 10.0 : 0.0),
+                  bottom: 20.0,
+                  right: isSenderMessage(message, user) ? deviceWidth * 0.01 : 0.0,
+                  left: isSenderMessage(message, user) ? deviceWidth * 0.01 : 0.0),
               child: Row(
                 children: <Widget>[
                   Column(
@@ -396,24 +446,24 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   String messageTimeDisplay(int timestamp) {
     DateTime now = DateTime.now();
     String formattedDate = DateFormat("dd-MM-yyyy").format(now);
-    print("now: " + formattedDate);
+//    print("now: " + formattedDate);
     DateFormat dateFormat = DateFormat("dd-MM-yyyy");
     DateTime today = dateFormat.parse(formattedDate);
     String formattedDate2 = DateFormat("dd-MM-yyyy hh:mm:ss").format(today);
-    print("today: " + formattedDate2);
+//    print("today: " + formattedDate2);
     DateTime messageTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
     String formattedDate3 = DateFormat("hh:mm").format(messageTime);
     return formattedDate3;
   }
 
-  Widget buildSticker(User user) {
+  Widget buildSticker(BuildContext context, User user) {
     return Container(
       child: Column(
         children: <Widget>[
           Row(
             children: <Widget>[
               FlatButton(
-                  onPressed: () => sendChatMessage('mimi1', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi1', 2, user),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi1.gif"),
                     width: 50.0,
@@ -421,7 +471,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => sendChatMessage('mimi2', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi2', 2, user),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi2.gif"),
                     width: 50.0,
@@ -429,7 +479,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => sendChatMessage('mimi3', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi3', 2, user),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi3.gif"),
                     width: 50.0,
@@ -442,7 +492,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           Row(
             children: <Widget>[
               FlatButton(
-                  onPressed: () => sendChatMessage('mimi4', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi4', 2, user),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi4.gif"),
                     width: 50.0,
@@ -450,7 +500,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => sendChatMessage('mimi5', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi5', 2, user),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi5.gif"),
                     width: 50.0,
@@ -458,7 +508,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => sendChatMessage('mimi6', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi6', 2, user),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi6.gif"),
                     width: 50.0,
@@ -471,7 +521,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           Row(
             children: <Widget>[
               FlatButton(
-                  onPressed: () => sendChatMessage('mimi7', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi7', 2, user),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi7.gif"),
                     width: 50.0,
@@ -479,7 +529,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => sendChatMessage('mimi8', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi8', 2, user),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi8.gif"),
                     width: 50.0,
@@ -487,7 +537,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => sendChatMessage('mimi9', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi9', 2, user),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi9.gif"),
                     width: 50.0,
@@ -506,9 +556,11 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
-  void sendChatMessage(String content, int type, User user) async {
+  sendChatMessage(BuildContext context, String content, int type, User user) {
     print("sendChatMessage()");
-    // type: 0 = text, 1 = image, 2 = sticker
+    // type: 0 = text,
+    // 1 = image,
+    // 2 = sticker
     if (content.trim() != '') {
       print("if (content.trim() != '')");
       textEditingController.clear();
@@ -566,12 +618,19 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       }
       print("Checkpoint 1");
       if (!isObjectEmpty(newMessage)) {
-        print('if(!isObjectEmpty(newMessage) && !isObjectEmpty(newMultimedia))');
+        print('if(!isObjectEmpty(newMessage)');
 
         BlocProvider.of<MessageBloc>(context).add(AddMessageEvent(
             message: newMessage,
             callback: (Message message) {
-              BlocProvider.of<WebSocketBloc>(context).add(SendWebSocketMessageEvent());
+              if (isObjectEmpty(message)) {
+                Fluttertoast.showToast(msg: 'Message not sent. Please try again.', toastLength: Toast.LENGTH_SHORT);
+              } else {
+                print('if(!isObjectEmpty(message)');
+                WebSocketMessage webSocketMessage = WebSocketMessage(message: message);
+                BlocProvider.of<WebSocketBloc>(context)
+                    .add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
+              }
             }));
 
 //        wholeAppBloc.dispatch(SendMessageEvent(
@@ -591,9 +650,8 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 //                });
 //              }
 //            }));
-        print("Scroll down.");
       } else {
-        print('if(isObjectEmpty(newMessage) || isObjectEmpty(newMultimedia))');
+        print('if(isObjectEmpty(newMessage)');
       }
     } else {
       Fluttertoast.showToast(msg: 'Nothing to send');

@@ -5,6 +5,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/list-view.dart';
 import 'package:snschat_flutter/objects/conversationGroup/conversation_group.dart';
+import 'package:snschat_flutter/objects/index.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
@@ -82,6 +83,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
             }
 
             if (userState is UserLoaded) {
+              BlocProvider.of<WebSocketBloc>(context).add(InitializeWebSocketEvent(user: userState.user, callback: (bool done) {}));
               restoreUserPreviousData(context);
             }
           },
@@ -267,17 +269,14 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     BlocProvider.of<MultimediaBloc>(context).add(InitializeMultimediaEvent(callback: (bool done) {}));
     BlocProvider.of<UnreadMessageBloc>(context).add(InitializeUnreadMessagesEvent(callback: (bool done) {}));
     BlocProvider.of<UserContactBloc>(context).add(InitializeUserContactsEvent(callback: (bool done) {}));
-    BlocProvider.of<WebSocketBloc>(context).add(InitializeWebSocketEvent(callback: (bool done) {}));
     BlocProvider.of<IPGeoLocationBloc>(context).add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
   }
 
   restoreUserPreviousData(BuildContext context) {
     UserState userState = BlocProvider.of<UserBloc>(context).state;
     if (userState is UserLoaded) {
-      print('chat_group_list_page.dart if (userState is UserLoaded)');
-      print('chat_group_list_page.dart Get user previous data');
       // Restore previous data
-      BlocProvider.of<SettingsBloc>(context).add(GetUserSettingsEvent(user: userState.user));
+      BlocProvider.of<SettingsBloc>(context).add(GetUserSettingsEvent(user: userState.user, callback: (Settings settings) {}));
       BlocProvider.of<ConversationGroupBloc>(context).add(GetUserPreviousConversationGroupsEvent(
           user: userState.user,
           callback: (bool done) {

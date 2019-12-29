@@ -50,8 +50,10 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     bool savedIntoDB = false;
     if (state is MessagesLoaded) {
       // Avoid readding existing message
-      if(isStringEmpty(event.message.id)) {
+      if (isStringEmpty(event.message.id)) {
         messageFromServer = await messageAPIService.addMessage(event.message);
+      } else {
+        messageFromServer = event.message;
       }
 
       if (!isObjectEmpty(messageFromServer)) {
@@ -61,9 +63,10 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
           List<Message> existingMessageList = (state as MessagesLoaded).messageList;
 
           existingMessageList.removeWhere((Message existingMessage) => existingMessage.id == event.message.id);
-
           existingMessageList.add(messageFromServer);
 
+          // Very funny. But must change to another state first and switch it back immediately to trigger changes.
+          yield MessageLoading();
           yield MessagesLoaded(existingMessageList);
           functionCallback(event, messageFromServer);
         }

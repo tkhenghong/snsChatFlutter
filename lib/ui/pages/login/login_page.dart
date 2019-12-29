@@ -29,6 +29,8 @@ class LoginPage extends StatefulWidget {
 class LoginPageState extends State<LoginPage> {
   bool deviceLocated = false;
   String countryCodeString;
+  double deviceWidth;
+  double deviceHeight;
 
   CountryCode countryCode;
   Color themePrimaryColor;
@@ -38,8 +40,8 @@ class LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final deviceWidth = MediaQuery.of(context).size.width;
-    final deviceHeight = MediaQuery.of(context).size.height;
+    deviceWidth = MediaQuery.of(context).size.width;
+    deviceHeight = MediaQuery.of(context).size.height;
 
     themePrimaryColor = Theme.of(context).textTheme.title.color;
 
@@ -56,12 +58,12 @@ class LoginPageState extends State<LoginPage> {
         if (ipGeoLocationState is IPGeoLocationNotLoaded) {
           print('login_page.dart if (ipGeoLocationState is IPGeoLocationNotLoaded)');
           countryCodeString = 'US';
-          return loginScreen(deviceWidth, deviceHeight, null, context);
+          return loginScreen(null, context);
         }
 
         if (ipGeoLocationState is IPGeoLocationLoaded) {
           countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? "US" : ipGeoLocationState.ipGeoLocation.country_code2;
-          return loginScreen(deviceWidth, deviceHeight, ipGeoLocationState.ipGeoLocation, context);
+          return loginScreen(ipGeoLocationState.ipGeoLocation, context);
         }
 
         return Material(
@@ -73,7 +75,7 @@ class LoginPageState extends State<LoginPage> {
     );
   }
 
-  loginScreen(deviceWidth, deviceHeight, IPGeoLocation ipGeoLocation, BuildContext context) => MultiBlocListener(
+  Widget loginScreen(IPGeoLocation ipGeoLocation, BuildContext context) => MultiBlocListener(
         listeners: [
           BlocListener<IPGeoLocationBloc, IPGeoLocationState>(
             listener: (context, state) {},

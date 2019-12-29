@@ -1,6 +1,7 @@
+import 'dart:collection';
 import 'dart:convert';
 
-import 'package:snschat_flutter/objects/websocket/WebSocketMessage.dart';
+import 'package:snschat_flutter/objects/index.dart';
 import 'package:web_socket_channel/io.dart';
 
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
@@ -13,9 +14,13 @@ class WebSocketService {
   WebSocketChannel webSocketChannel;
   Stream<dynamic> webSocketStream;
 
-  connectWebSocket() async {
-    webSocketChannel = IOWebSocketChannel.connect(WEBSOCKET_URL);
+  Future<Stream<dynamic>> connectWebSocket(String userId) async {
+    Map<String, String> headers = new HashMap();
+    headers['userId'] = userId;
+    webSocketChannel = IOWebSocketChannel.connect(WEBSOCKET_URL, headers: headers);
     webSocketStream = webSocketChannel.stream.asBroadcastStream();
+
+    return webSocketStream;
   }
 
   Stream<dynamic> getWebSocketStream() {
@@ -27,12 +32,12 @@ class WebSocketService {
     webSocketChannel.sink.add(json.encode(webSocketMessage.toJson()));
   }
 
-  closeWebSocket() {
-    webSocketChannel.sink.close();
+  Future<dynamic> closeWebSocket() async {
+    return webSocketChannel.sink.close();
   }
 
-  reconnnectWebSocket() {
-    closeWebSocket();
-    connectWebSocket();
+  Future<Stream<dynamic>> reconnnectWebSocket(String userId) async {
+    await closeWebSocket();
+    return connectWebSocket(userId);
   }
 }

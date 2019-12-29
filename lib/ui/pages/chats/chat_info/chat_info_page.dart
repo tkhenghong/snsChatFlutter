@@ -490,43 +490,48 @@ class ChatInfoPageState extends State<ChatInfoPage> {
       BuildContext context, List<UserContact> userContactList, ConversationGroup conversationGroup) {
     List<UserContact> conversationGroupMemberList = [];
     List<String> notFoundMemberId = [];
-    if (!isObjectEmpty(userContactList)) {
-      print('chat_info_page.dart if(!isObjectEmpty(userContactList))');
-      print('chat_info_page.dart if userContactList.toString(): ' + userContactList.toString());
-      print('chat_info_page.dart if userContactList.length.toString(): ' + userContactList.length.toString());
-    }
 
-    for (String memberId in conversationGroup.memberIds) {
-      bool userContactFound = false;
-      for (UserContact existingUserContact in userContactList) {
-        if (existingUserContact.id == memberId) {
-          userContactFound = true;
-          conversationGroupMemberList.add(existingUserContact);
+    UserState userState = BlocProvider.of<UserBloc>(context).state;
+
+    if(userState is UserLoaded) {
+      if (!isObjectEmpty(userContactList)) {
+        print('chat_info_page.dart if(!isObjectEmpty(userContactList))');
+        print('chat_info_page.dart if userContactList.toString(): ' + userContactList.toString());
+        print('chat_info_page.dart if userContactList.length.toString(): ' + userContactList.length.toString());
+      }
+
+      for (String memberId in conversationGroup.memberIds) {
+        bool userContactFound = false;
+        for (UserContact existingUserContact in userContactList) {
+          if (existingUserContact.id == memberId) {
+            userContactFound = true;
+            conversationGroupMemberList.add(existingUserContact);
+          }
+        }
+        // Warning: Bad practice as it will cause more and more loop in this page
+        // In case not found. Get the userContact from backend and add it into local DB. Then, BlocBuilder triggers and all userContacts will be found.
+        if (!userContactFound) {
+          notFoundMemberId.add(memberId);
         }
       }
-      // Warning: Bad practice as it will cause more and more loop in this page
-      // In case not found. Get the userContact from backend and add it into local DB. Then, BlocBuilder triggers and all userContacts will be found.
-      if (!userContactFound) {
-        notFoundMemberId.add(memberId);
+
+      // Get userContacts from server
+      for (String memberId in notFoundMemberId) {
+        BlocProvider.of<UserContactBloc>(context).add(GetUserContactEvent(
+            userContactId: memberId,
+            callback: (UserContact userContact) {
+              if (!isObjectEmpty(userContact)) {
+                BlocProvider.of<UserContactBloc>(context)
+                    .add(AddUserContactEvent(userContact: userContact, callback: (UserContact userContact2) {}));
+              }
+            }));
       }
-    }
 
-    // Get userContacts from server
-    for (String memberId in notFoundMemberId) {
-      BlocProvider.of<UserContactBloc>(context).add(GetUserContactEvent(
-          userContactId: memberId,
-          callback: (UserContact userContact) {
-            if (!isObjectEmpty(userContact)) {
-              BlocProvider.of<UserContactBloc>(context)
-                  .add(AddUserContactEvent(userContact: userContact, callback: (UserContact userContact2) {}));
-            }
-          }));
-    }
-
-    if (!isObjectEmpty(conversationGroupMemberList)) {
-      print('chat_info_page.dart if(!isObjectEmpty(conversationGroupMemberList))');
-      print('chat_info_page.dart if conversationGroupMemberList.toString(): ' + conversationGroupMemberList.toString());
-      print('chat_info_page.dart if conversationGroupMemberList.length.toString(): ' + conversationGroupMemberList.length.toString());
+      if (!isObjectEmpty(conversationGroupMemberList)) {
+        print('chat_info_page.dart if(!isObjectEmpty(conversationGroupMemberList))');
+        print('chat_info_page.dart if conversationGroupMemberList.toString(): ' + conversationGroupMemberList.toString());
+        print('chat_info_page.dart if conversationGroupMemberList.length.toString(): ' + conversationGroupMemberList.length.toString());
+      }
     }
 
     return conversationGroupMemberList;

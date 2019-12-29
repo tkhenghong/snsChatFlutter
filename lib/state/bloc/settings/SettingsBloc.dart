@@ -64,6 +64,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     // Avoid readding existing settings
     if(isStringEmpty(event.settings.id)) {
       newSettings = await settingsAPIService.addSettings(event.settings);
+    } else {
+      newSettings = event.settings;
     }
 
     if (!isObjectEmpty(newSettings)) {

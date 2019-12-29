@@ -7,6 +7,8 @@ class UserContact {
 
   String realName;
 
+  String about;
+
   // TODO: Move it to User, declare it as UserContactIds, which means how many contact does this User own.
   // This UserContact is belonged to which user IN PHONE STORAGE?
   List<String> userIds;
@@ -27,6 +29,7 @@ class UserContact {
       {this.id,
       this.displayName,
       this.realName,
+      this.about,
       this.userIds,
       this.userId,
       this.mobileNo,
@@ -39,6 +42,7 @@ class UserContact {
       id: json['id'],
       displayName: json['displayName'],
       realName: json['realName'],
+      about: json['about'],
       userId: json['userId'],
       mobileNo: json['mobileNo'],
       lastSeenDate: json['lastSeenDate'],
@@ -58,6 +62,7 @@ class UserContact {
         'id': id,
         'displayName': displayName,
         'realName': realName,
+        'about': about,
         'userId': userId,
         'userIds': userIds,
         'mobileNo': mobileNo,

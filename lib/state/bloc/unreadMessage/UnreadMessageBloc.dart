@@ -55,6 +55,8 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
       // Avoid readding existed unreadMessage object
       if(isStringEmpty(event.unreadMessage.id)) {
         newUnreadMessage = await unreadMessageAPIService.addUnreadMessage(event.unreadMessage);
+      } else {
+        newUnreadMessage = event.unreadMessage;
       }
 
       if (!isObjectEmpty(newUnreadMessage)) {

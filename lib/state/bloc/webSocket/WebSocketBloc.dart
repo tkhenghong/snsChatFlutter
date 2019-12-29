@@ -1,6 +1,9 @@
 import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
+import 'package:snschat_flutter/objects/index.dart';
 import 'package:snschat_flutter/service/websocket/WebSocketService.dart';
+import 'package:snschat_flutter/state/bloc/bloc.dart';
 
 import 'bloc.dart';
 
@@ -18,6 +21,8 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
       yield* _reconnectWebSocket(event);
     } else if (event is GetOwnWebSocketEvent) {
       yield* _getOwnWebSocket(event);
+    } else if (event is ProcessWebSocketMessageEvent) {
+      yield* _processWebSocketMessageEvent(event);
     } else if (event is SendWebSocketMessageEvent) {
       yield* _sendWebSocketMessage(event);
     }
@@ -25,9 +30,7 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
 
   Stream<WebSocketState> _initializeWebSocketToState(InitializeWebSocketEvent event) async* {
     try {
-      webSocketService.connectWebSocket();
-
-      yield WebSocketLoaded(webSocketService.getWebSocketStream());
+      yield WebSocketLoaded(await webSocketService.connectWebSocket(event.user.id));
       functionCallback(event, true);
     } catch (e) {
       yield WebSocketNotLoaded();
@@ -36,11 +39,8 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
   }
 
   Stream<WebSocketState> _reconnectWebSocket(ReconnectWebSocketEvent event) async* {
-
     if (state is WebSocketLoaded) {
-      webSocketService.reconnnectWebSocket();
-
-      yield WebSocketLoaded(webSocketService.getWebSocketStream());
+      yield WebSocketLoaded(await webSocketService.reconnnectWebSocket(event.user.id));
       functionCallback(event, true);
     } else {
       functionCallback(event, false);
@@ -57,13 +57,58 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
     }
   }
 
+  Stream<WebSocketState> _processWebSocketMessageEvent(ProcessWebSocketMessageEvent event) async* {
+    try {
+      WebSocketMessage webSocketMessage = event.webSocketMessage;
+      if (!isObjectEmpty(webSocketMessage)) {
+        if (!isObjectEmpty(webSocketMessage.conversationGroup)) {
+          // Conversation Group message
+          BlocProvider.of<ConversationGroupBloc>(event.context).add(AddConversationGroupEvent(
+              conversationGroup: webSocketMessage.conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+        }
+
+        if (!isObjectEmpty(webSocketMessage.message)) {
+          UserState userState = BlocProvider.of<UserBloc>(event.context).state;
+          if (userState is UserLoaded) {
+            if (userState.user.id != webSocketMessage.message.senderId) {
+              // "Message" message
+              BlocProvider.of<MessageBloc>(event.context)
+                  .add(AddMessageEvent(message: webSocketMessage.message, callback: (Message message) {}));
+            } else {
+              // Mark your own message as sent, received status will changed by recipient
+              webSocketMessage.message.status = 'Sent';
+              BlocProvider.of<MessageBloc>(event.context)
+                  .add(EditMessageEvent(message: webSocketMessage.message, callback: (Message message) {}));
+            }
+          }
+        }
+
+        if (!isObjectEmpty(webSocketMessage.multimedia)) {}
+
+        if (!isObjectEmpty(webSocketMessage.unreadMessage)) {}
+
+        if (!isObjectEmpty(webSocketMessage.settings)) {}
+
+        if (!isObjectEmpty(webSocketMessage.user)) {}
+
+        if (!isObjectEmpty(webSocketMessage.userContact)) {}
+        functionCallback(event, true);
+      } else {
+        functionCallback(event, false);
+      }
+    } catch (e) {
+      functionCallback(event, false);
+    }
+  }
+
   Stream<WebSocketState> _sendWebSocketMessage(SendWebSocketMessageEvent event) async* {
     if (state is WebSocketLoaded) {
-      Stream<dynamic> webSocketStream = (state as WebSocketLoaded).webSocketStream;
+//      Stream<dynamic> webSocketStream = (state as WebSocketLoaded).webSocketStream;
+      webSocketService.sendWebSocketMessage(event.webSocketMessage);
 
-      functionCallback(event, webSocketStream);
+      functionCallback(event, true);
     } else {
-      functionCallback(event, null);
+      functionCallback(event, false);
     }
   }
 

@@ -37,6 +37,8 @@ class GroupNamePage extends StatefulWidget {
 
 class GroupNamePageState extends State<GroupNamePage> {
   bool imageExists = false;
+  double deviceWidth;
+  double deviceHeight;
   List<UserContact> userContactList = [];
 
   Color themePrimaryColor;
@@ -55,12 +57,17 @@ class GroupNamePageState extends State<GroupNamePage> {
 
   @override
   Widget build(BuildContext context) {
+    deviceWidth = MediaQuery.of(context).size.width;
+    deviceHeight = MediaQuery.of(context).size.height;
+
     themePrimaryColor = Theme.of(context).textTheme.title.color;
     appBarThemeTextColor = Theme.of(context).appBarTheme.textTheme.title.color;
     circleAvatarTextStyle = TextStyle(color: appBarThemeTextColor);
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Material(
+        color: appBarThemeTextColor,
         child: Scaffold(
             appBar: AppBar(
                 title: Row(
