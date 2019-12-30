@@ -234,8 +234,13 @@ class LoginPageState extends State<LoginPage> {
                                   ;
                                 }));
                             // Get previous data
-                            BlocProvider.of<ConversationGroupBloc>(context)
-                                .add(GetUserPreviousConversationGroupsEvent(user: user2, callback: (bool done) {}));
+                            BlocProvider.of<ConversationGroupBloc>(context).add(GetUserPreviousConversationGroupsEvent(
+                                user: user2,
+                                callback: (bool done) {
+                                  if (done) {
+                                    getConversationGroupsMultimedia(context);
+                                  }
+                                }));
                             BlocProvider.of<UnreadMessageBloc>(context)
                                 .add(GetUserPreviousUnreadMessagesEvent(user: user2, callback: (bool done) {}));
                             BlocProvider.of<MultimediaBloc>(context)
@@ -282,6 +287,14 @@ class LoginPageState extends State<LoginPage> {
     }
     String phoneNumber = phoneNoInitials + mobileNoTextController.value.text;
     return phoneNumber;
+  }
+
+  getConversationGroupsMultimedia(BuildContext context) {
+    ConversationGroupState conversationGroupState = BlocProvider.of<ConversationGroupBloc>(context).state;
+    if (conversationGroupState is ConversationGroupsLoaded) {
+      BlocProvider.of<MultimediaBloc>(context).add(GetConversationGroupsMultimediaEvent(
+          conversationGroupList: conversationGroupState.conversationGroupList, callback: (bool done) {}));
+    }
   }
 
   goToVerifyPhoneNumber(mobileNo, BuildContext context) {

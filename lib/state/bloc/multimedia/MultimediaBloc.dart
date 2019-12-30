@@ -164,7 +164,6 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     // Get user profile picture
     Multimedia multimediaFromServer = await multimediaAPIService.getMultimediaOfAUser(event.user.id);
 
-    print('MultimediaBloc.dart multimediaFromServer: ' + multimediaFromServer.toString());
     if (!isObjectEmpty(multimediaFromServer)) {
       // Update DB
       Multimedia userMultimedia = await multimediaDBService.getSingleMultimedia(multimediaFromServer.id);
@@ -205,7 +204,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
             }
 
             // Update State
-            multimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == existingConversationGroupMultimedia.id);
+            multimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == multimediaFromServer.id);
           }
 
           // Update State

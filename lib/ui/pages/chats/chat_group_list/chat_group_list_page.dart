@@ -208,25 +208,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
             existingMultimedia.conversationId.toString() == conversationGroup.id && isStringEmpty(existingMultimedia.messageId),
         orElse: () => null);
 
-//    if (!isObjectEmpty(conversationGroup)) {
-//      print('chat_group_list_page.dart if(!isObjectEmpty(conversationGroup))');
-//      print('chat_group_list_page.dart conversationGroup.id.toString(): ' + conversationGroup.id.toString());
-//      print('chat_group_list_page.dart conversationGroup.name.toString(): ' + conversationGroup.name.toString());
-//    } else {
-//      print('chat_group_list_page.dart if(isObjectEmpty(conversationGroup))');
-//    }
-//
-//    if (!isObjectEmpty(multimedia)) {
-//      print('chat_group_list_page.dart if(!isObjectEmpty(multimedia))');
-//      print('chat_group_list_page.dart multimedia.id.toString(): ' + multimedia.id.toString());
-//      print('chat_group_list_page.dart multimedia.conversationId.toString(): ' + multimedia.conversationId.toString());
-//      print('chat_group_list_page.dart multimedia.remoteThumbnailUrl.toString(): ' + multimedia.remoteThumbnailUrl.toString());
-//      print('chat_group_list_page.dart multimedia.remoteFullFileUrl.toString(): ' + multimedia.remoteFullFileUrl.toString());
-//      print('chat_group_list_page.dart multimedia.localThumbnailUrl.toString(): ' + multimedia.localThumbnailUrl.toString());
-//    } else {
-//      print('chat_group_list_page.dart if(isObjectEmpty(multimedia))');
-//    }
-
     UnreadMessage unreadMessage = (unreadMessageState as UnreadMessagesLoaded).unreadMessageList.firstWhere(
         (UnreadMessage existingUnreadMessage) => existingUnreadMessage.conversationId.toString() == conversationGroup.id,
         orElse: () => null);
