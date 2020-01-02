@@ -251,61 +251,83 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   Widget buildInput(BuildContext context, User user, ConversationGroup conversationGroup) {
+    print('fileList.length: ' + fileList.length.toString());
+    // fileList.add(null);
     return Container(
-      child: Row(
+      child: Column(
         children: <Widget>[
-          // Button send image
-          Material(
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 1.0),
-              child: IconButton(
-                icon: Icon(Icons.image),
-                onPressed: () => getImage(),
-              ),
-            ),
-            color: Colors.white,
-          ),
-          Material(
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 1.0),
-              child: IconButton(
-                icon: Icon(Icons.face),
-                onPressed: () => getSticker(),
-              ),
-            ),
-            color: Colors.white,
-          ),
-
-          // Edit text
-          Flexible(
-            child: Container(
-              child: TextField(
-                style: TextStyle(fontSize: 17.0),
-                controller: textEditingController,
-                decoration: InputDecoration.collapsed(
-                  hintText: 'Type your message...',
-                  hintStyle: TextStyle(color: Colors.grey),
+          // Use Visibility to control to show widget easily. https://stackoverflow.com/questions/44489804/show-hide-widgets-in-flutter-programmatically
+          Visibility(
+            visible: fileList.length > 0,
+            child: Row(
+              children: <Widget>[
+                Container(
+                  width: deviceWidth,
+                  height: deviceHeight * 0.2,
+                  child: Material(
+                    color: appBarTextTitleColor,
+                    type: MaterialType.canvas,
+                  ),
                 ),
-                focusNode: focusNode,
-              ),
+              ],
             ),
           ),
+          Row(
+            children: <Widget>[
+              // Button send image
+              Material(
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 1.0),
+                  child: IconButton(
+                    icon: Icon(Icons.image),
+                    onPressed: () => getImage(),
+                  ),
+                ),
+                color: Colors.white,
+              ),
+              Material(
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 1.0),
+                  child: IconButton(
+                    icon: Icon(Icons.face),
+                    onPressed: () => getSticker(),
+                  ),
+                ),
+                color: Colors.white,
+              ),
 
-          // Button send message
-          Material(
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 8.0),
-              child: IconButton(
-                icon: Icon(Icons.send),
-                onPressed: () => sendChatMessage(context, textEditingController.text, 0, user, conversationGroup),
+              // Edit text
+              Flexible(
+                child: Container(
+                  child: TextField(
+                    style: TextStyle(fontSize: 17.0),
+                    controller: textEditingController,
+                    decoration: InputDecoration.collapsed(
+                      hintText: 'Type your message...',
+                      hintStyle: TextStyle(color: Colors.grey),
+                    ),
+                    focusNode: focusNode,
+                  ),
+                ),
               ),
-            ),
-            color: Colors.white,
-          ),
+
+              // Button send message
+              Material(
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: IconButton(
+                    icon: Icon(Icons.send),
+                    onPressed: () => sendChatMessage(context, textEditingController.text, 0, user, conversationGroup),
+                  ),
+                ),
+                color: Colors.white,
+              ),
+            ],
+          )
         ],
       ),
       width: double.infinity,
-      height: 50.0,
+//      height: fileList.length > 0 ? deviceHeight * 0.2 : deviceHeight * 0.1,
       decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 0.5)), color: Colors.white),
     );
   }
@@ -395,7 +417,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     padding: EdgeInsets.only(left: lrPadding),
                   ),
                   Text(
-              message.senderName + ", " + messageTimeDisplay(message.timestamp),
+                    message.senderName + ", " + messageTimeDisplay(message.timestamp),
 //                    message.senderName,
                     style: TextStyle(fontSize: 10.0, color: Colors.black38),
                   ),
@@ -556,44 +578,29 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       print("if (content.trim() != '')");
       textEditingController.clear();
 
-      Message newMessage;
+      // Got files to send (Images, Video, Audio, Files)
+      if (fileList.length > 0) {
+        uploadMultimediaFiles(context, user, conversationGroup);
+      } else if (type == 0) {
+        Message newMessage;
 
-      newMessage = Message(
-        id: null,
-        conversationId: widget._conversationGroup.id,
-        messageContent: content,
-        multimediaId: "",
-        // Send to group will not need receiver
-        receiverId: "",
-        receiverMobileNo: "",
-        receiverName: "",
-        senderId: user.id,
-        senderMobileNo: user.mobileNo,
-        senderName: user.displayName,
-        status: "Sent",
-        type: "Text",
-        timestamp: DateTime.now().millisecondsSinceEpoch,
-      );
-//      // Text doesn't need multimedia, so others other than Text needs multimedia
-//      if (type != 0) {
-//        newMultimedia = Multimedia(
-//            id: null,
-//            conversationId: widget._conversationGroup.id,
-//            messageId: "",
-//            // Add after message created
-//            userContactId: "",
-//            localFullFileUrl: "",
-//            localThumbnailUrl: "",
-//            remoteFullFileUrl: "",
-//            remoteThumbnailUrl: "");
-//      }
-      print("Checkpoint 1");
-      if (!isObjectEmpty(newMessage)) {
-        print('if(!isObjectEmpty(newMessage)');
-        // Image
-        if (type == 1) {
-          uploadMultimediaFiles(context, user, conversationGroup);
-        }
+        newMessage = Message(
+          id: null,
+          conversationId: widget._conversationGroup.id,
+          messageContent: content,
+          multimediaId: "",
+          // Send to group will not need receiver
+          receiverId: "",
+          receiverMobileNo: "",
+          receiverName: "",
+          senderId: user.id,
+          senderMobileNo: user.mobileNo,
+          senderName: user.displayName,
+          status: "Sent",
+          type: "Text",
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+        );
+
         BlocProvider.of<MessageBloc>(context).add(AddMessageEvent(
             message: newMessage,
             callback: (Message message) {
@@ -606,26 +613,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     .add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
               }
             }));
-
-//        wholeAppBloc.dispatch(SendMessageEvent(
-//            message: newMessage,
-//            multimedia: newMultimedia,
-//            callback: (Message message) {
-//              if (isObjectEmpty(message)) {
-//                Fluttertoast.showToast(msg: 'Message not sent. Please try again.', toastLength: Toast.LENGTH_SHORT);
-//              } else {
-//                WebSocketMessage webSocketMessage = WebSocketMessage(message: message);
-//                wholeAppBloc.dispatch(
-//                    SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (WebSocketMessage websocketMessage) {}));
-//                Fluttertoast.showToast(msg: 'Message sent!', toastLength: Toast.LENGTH_SHORT);
-//                // Need to do this,or else the message list won't refresh
-//                setState(() {
-//                  // Do nothing
-//                });
-//              }
-//            }));
-      } else {
-        print('if(isObjectEmpty(newMessage)');
       }
     } else {
       Fluttertoast.showToast(msg: 'Nothing to send');
@@ -658,37 +645,39 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           type: "Image",
           timestamp: DateTime.now().millisecondsSinceEpoch,
         );
-        BlocProvider.of<MessageBloc>(context).add(AddMessageEvent(message: message, callback: (Message message2) async {
-          if(!isObjectEmpty(message2)) {
-            Multimedia messageMultimedia = Multimedia(
-                id: null,
-                localFullFileUrl: isObjectEmpty(file) ? null : file.path,
-                localThumbnailUrl: null,
-                remoteThumbnailUrl: null,
-                remoteFullFileUrl: null,
-                userContactId: null,
-                conversationId: conversationGroup.id,
-                // Add later
-                messageId: message.id,
-                userId: null);
+        BlocProvider.of<MessageBloc>(context).add(AddMessageEvent(
+            message: message,
+            callback: (Message message2) async {
+              if (!isObjectEmpty(message2)) {
+                Multimedia messageMultimedia = Multimedia(
+                    id: null,
+                    localFullFileUrl: isObjectEmpty(file) ? null : file.path,
+                    localThumbnailUrl: null,
+                    remoteThumbnailUrl: null,
+                    remoteFullFileUrl: null,
+                    userContactId: null,
+                    conversationId: conversationGroup.id,
+                    // Add later
+                    messageId: message.id,
+                    userId: null);
 
-            // Create thumbnail
-            File thumbnailImageFile;
-            if (!isStringEmpty(messageMultimedia.localFullFileUrl) && !isObjectEmpty(file)) {
-              thumbnailImageFile = await imageService.getImageThumbnail(file);
-            }
+                // Create thumbnail
+                File thumbnailImageFile;
+                if (!isStringEmpty(messageMultimedia.localFullFileUrl) && !isObjectEmpty(file)) {
+                  thumbnailImageFile = await imageService.getImageThumbnail(file);
+                }
 
-            if (!isObjectEmpty(thumbnailImageFile)) {
-              messageMultimedia.localThumbnailUrl = thumbnailImageFile.path;
-            }
+                if (!isObjectEmpty(thumbnailImageFile)) {
+                  messageMultimedia.localThumbnailUrl = thumbnailImageFile.path;
+                }
 
-            BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
-                multimedia: messageMultimedia,
-                callback: (Multimedia multimedia2) async {
-                  updateMultimediaContent(context, multimedia2, message2, conversationGroup);
-                }));
-          }
-        }));
+                BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
+                    multimedia: messageMultimedia,
+                    callback: (Multimedia multimedia2) async {
+                      updateMultimediaContent(context, multimedia2, message2, conversationGroup);
+                    }));
+              }
+            }));
       });
     }
   }
@@ -697,7 +686,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
     print("chat_room_page.dart remoteUrl: " + remoteUrl.toString());
     String remoteThumbnailUrl =
-    await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
+        await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
     print("chat_room_page.dart remoteThumbnailUrl: " + remoteThumbnailUrl.toString());
 
     if (!isStringEmpty(remoteUrl)) {
