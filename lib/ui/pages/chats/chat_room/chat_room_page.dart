@@ -13,6 +13,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
+import 'package:snschat_flutter/service/firebaseStorage/FirebaseStorageService.dart';
 import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
@@ -44,8 +45,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   List<File> fileList = [];
 
   String WEBSOCKET_URL = globals.WEBSOCKET_URL;
-
-  File imageFile;
+  int imagePickerQuality = globals.imagePickerQuality;
 
   TextEditingController textEditingController = new TextEditingController();
   ScrollController listScrollController = new ScrollController();
@@ -53,6 +53,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
   FileService fileService = FileService();
   ImageService imageService = ImageService();
+  FirebaseStorageService firebaseStorageService = FirebaseStorageService();
 
   @override
   void initState() {
@@ -161,9 +162,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                   //UI for message list
                   buildListMessage(context, user),
                   // UI for stickers, gifs
-                  (isShowSticker ? buildSticker(context, user) : Container()),
+                  (isShowSticker ? buildSticker(context, user, selectedConversationGroup) : Container()),
                   // UI for text field
-                  buildInput(context, user),
+                  buildInput(context, user, selectedConversationGroup),
                 ],
               ),
               buildLoading(),
@@ -249,7 +250,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
-  Widget buildInput(BuildContext context, User user) {
+  Widget buildInput(BuildContext context, User user, ConversationGroup conversationGroup) {
     return Container(
       child: Row(
         children: <Widget>[
@@ -296,7 +297,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               margin: EdgeInsets.symmetric(horizontal: 8.0),
               child: IconButton(
                 icon: Icon(Icons.send),
-                onPressed: () => sendChatMessage(context, textEditingController.text, 0, user),
+                onPressed: () => sendChatMessage(context, textEditingController.text, 0, user, conversationGroup),
               ),
             ),
             color: Colors.white,
@@ -319,31 +320,11 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
         if (webSocketState is WebSocketLoaded) {
           print('chat_room_page.dart if (webSocketState is WebSocketLoaded)');
-          processWebSocketMessage(context, webSocketState.webSocketStream, user);
           return loadMessageList(context, user);
         }
         return loadMessageList(context, user);
       },
     );
-  }
-
-  processWebSocketMessage(BuildContext context, Stream<dynamic> webSocketStream, User user) {
-    webSocketStream.listen((data) {
-      print("chat_room_page.dart webSocketStream listener is working.");
-      print("chat_room_page.dart data: " + data.toString());
-      Fluttertoast.showToast(msg: "Message confirmed received!", toastLength: Toast.LENGTH_LONG);
-      WebSocketMessage receivedWebSocketMessage = WebSocketMessage.fromJson(json.decode(data));
-      BlocProvider.of<WebSocketBloc>(context)
-          .add(ProcessWebSocketMessageEvent(webSocketMessage: receivedWebSocketMessage, context: context, callback: (bool done) {}));
-    }, onError: (onError) {
-      print("chat_room_page.dart onError listener is working.");
-      print("chat_room_page.dart onError: " + onError.toString());
-      BlocProvider.of<WebSocketBloc>(context).add(ReconnectWebSocketEvent(user: user, callback: (bool done) {}));
-    }, onDone: () {
-      print("chat_room_page.dart onDone listener is working.");
-      // TODO: Show reconnect message
-      BlocProvider.of<WebSocketBloc>(context).add(ReconnectWebSocketEvent(user: user, callback: (bool done) {}));
-    }, cancelOnError: false);
   }
 
   Widget loadMessageList(BuildContext context, User user) {
@@ -399,54 +380,64 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   Widget displayChatMessage(int index, Message message, User user) {
-//    print("displayChatMessage()");
-//    print("message.senderId: " + message.senderId);
-//    print("user.id: " + user.id);
+    bool isSenderMessage = message.senderId == user.id;
+    double lrPadding = 15.0;
+    double tbPadding = 10.0;
     return Column(
       children: <Widget>[
-        Text(
-          message.senderName + ", " + messageTimeDisplay(message.timestamp),
-          style: TextStyle(fontSize: 10.0, color: Colors.black38),
-        ),
-        Row(
-          crossAxisAlignment: message.senderId == user.id ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-          mainAxisAlignment: isSenderMessage(message, user) ? MainAxisAlignment.end : MainAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-              decoration: BoxDecoration(color: appBarThemeColor, borderRadius: BorderRadius.circular(8.0)),
-              margin: EdgeInsets.only(
-                  bottom: 20.0,
-                  right: isSenderMessage(message, user) ? deviceWidth * 0.01 : 0.0,
-                  left: isSenderMessage(message, user) ? deviceWidth * 0.01 : 0.0),
-              child: Row(
+        isSenderMessage
+            ? Text("")
+            : Row(
+                crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+                mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
                 children: <Widget>[
-                  Column(
-                    children: <Widget>[
-                      Text(
-                        // message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
-                        message.messageContent,
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
+                  Container(
+                    padding: EdgeInsets.only(left: lrPadding),
+                  ),
+                  Text(
+              message.senderName + ", " + messageTimeDisplay(message.timestamp),
+//                    message.senderName,
+                    style: TextStyle(fontSize: 10.0, color: Colors.black38),
                   ),
                 ],
               ),
-            ),
-          ],
-        )
+        Container(
+          padding: EdgeInsets.only(left: 5.0),
+          child: Row(
+            crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+            mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.fromLTRB(lrPadding, tbPadding, lrPadding, tbPadding),
+                decoration: BoxDecoration(color: appBarThemeColor, borderRadius: BorderRadius.circular(32.0)),
+                margin: EdgeInsets.only(
+                    bottom: 20.0, right: isSenderMessage ? deviceWidth * 0.01 : 0.0, left: isSenderMessage ? deviceWidth * 0.01 : 0.0),
+                child: Row(
+                  children: <Widget>[
+                    Column(
+                      children: <Widget>[
+                        Text(
+//                           message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
+                          message.messageContent,
+                          style: TextStyle(color: appBarTextTitleColor),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
 
-  bool isSenderMessage(Message message, User user) {
-    return message.senderId == user.id;
-  }
-
   String messageTimeDisplay(int timestamp) {
+    print("timestamp: " + timestamp.toString());
     DateTime now = DateTime.now();
     String formattedDate = DateFormat("dd-MM-yyyy").format(now);
-//    print("now: " + formattedDate);
+    print("now: " + formattedDate);
     DateFormat dateFormat = DateFormat("dd-MM-yyyy");
     DateTime today = dateFormat.parse(formattedDate);
     String formattedDate2 = DateFormat("dd-MM-yyyy hh:mm:ss").format(today);
@@ -456,14 +447,14 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     return formattedDate3;
   }
 
-  Widget buildSticker(BuildContext context, User user) {
+  Widget buildSticker(BuildContext context, User user, ConversationGroup conversationGroup) {
     return Container(
       child: Column(
         children: <Widget>[
           Row(
             children: <Widget>[
               FlatButton(
-                  onPressed: () => sendChatMessage(context, 'mimi1', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi1', 2, user, conversationGroup),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi1.gif"),
                     width: 50.0,
@@ -471,7 +462,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => sendChatMessage(context, 'mimi2', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi2', 2, user, conversationGroup),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi2.gif"),
                     width: 50.0,
@@ -479,7 +470,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => sendChatMessage(context, 'mimi3', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi3', 2, user, conversationGroup),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi3.gif"),
                     width: 50.0,
@@ -492,7 +483,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           Row(
             children: <Widget>[
               FlatButton(
-                  onPressed: () => sendChatMessage(context, 'mimi4', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi4', 2, user, conversationGroup),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi4.gif"),
                     width: 50.0,
@@ -500,7 +491,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => sendChatMessage(context, 'mimi5', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi5', 2, user, conversationGroup),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi5.gif"),
                     width: 50.0,
@@ -508,7 +499,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => sendChatMessage(context, 'mimi6', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi6', 2, user, conversationGroup),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi6.gif"),
                     width: 50.0,
@@ -521,7 +512,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           Row(
             children: <Widget>[
               FlatButton(
-                  onPressed: () => sendChatMessage(context, 'mimi7', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi7', 2, user, conversationGroup),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi7.gif"),
                     width: 50.0,
@@ -529,7 +520,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => sendChatMessage(context, 'mimi8', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi8', 2, user, conversationGroup),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi8.gif"),
                     width: 50.0,
@@ -537,7 +528,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     fit: BoxFit.cover,
                   )),
               FlatButton(
-                  onPressed: () => sendChatMessage(context, 'mimi9', 2, user),
+                  onPressed: () => sendChatMessage(context, 'mimi9', 2, user, conversationGroup),
                   child: Image(
                     image: AssetImage("lib/ui/images/mimi9.gif"),
                     width: 50.0,
@@ -556,7 +547,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
-  sendChatMessage(BuildContext context, String content, int type, User user) {
+  sendChatMessage(BuildContext context, String content, int type, User user, ConversationGroup conversationGroup) {
     print("sendChatMessage()");
     // type: 0 = text,
     // 1 = image,
@@ -566,57 +557,43 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       textEditingController.clear();
 
       Message newMessage;
-      Multimedia newMultimedia;
 
-      switch (type) {
-        case 0:
-          print("if (type == 0)");
-          // Text
-          print("Checkpoint 2");
-          newMessage = Message(
-            id: null,
-            conversationId: widget._conversationGroup.id,
-            messageContent: content,
-            multimediaId: "",
-            // Send to group will not need receiver
-            receiverId: "",
-            receiverMobileNo: "",
-            receiverName: "",
-            senderId: user.id,
-            senderMobileNo: user.mobileNo,
-            senderName: user.displayName,
-            status: "Sent",
-            type: "Text",
-            timestamp: DateTime.now().millisecondsSinceEpoch,
-          );
-          print("Checkpoint 3");
-          break;
-        case 1:
-          // Image
-          break;
-        case 2:
-          break;
-        default:
-          Fluttertoast.showToast(msg: 'Error. Unable to determine message type.', toastLength: Toast.LENGTH_SHORT);
-          break;
-      }
-      // Text doesn't need multimedia, so others other than Text needs multimedia
-      if (type != 0) {
-        newMultimedia = Multimedia(
-            id: null,
-            conversationId: widget._conversationGroup.id,
-            messageId: "",
-            // Add after message created
-            userContactId: "",
-            localFullFileUrl: "",
-            localThumbnailUrl: "",
-            remoteFullFileUrl: "",
-            remoteThumbnailUrl: "");
-      }
+      newMessage = Message(
+        id: null,
+        conversationId: widget._conversationGroup.id,
+        messageContent: content,
+        multimediaId: "",
+        // Send to group will not need receiver
+        receiverId: "",
+        receiverMobileNo: "",
+        receiverName: "",
+        senderId: user.id,
+        senderMobileNo: user.mobileNo,
+        senderName: user.displayName,
+        status: "Sent",
+        type: "Text",
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+      );
+//      // Text doesn't need multimedia, so others other than Text needs multimedia
+//      if (type != 0) {
+//        newMultimedia = Multimedia(
+//            id: null,
+//            conversationId: widget._conversationGroup.id,
+//            messageId: "",
+//            // Add after message created
+//            userContactId: "",
+//            localFullFileUrl: "",
+//            localThumbnailUrl: "",
+//            remoteFullFileUrl: "",
+//            remoteThumbnailUrl: "");
+//      }
       print("Checkpoint 1");
       if (!isObjectEmpty(newMessage)) {
         print('if(!isObjectEmpty(newMessage)');
-
+        // Image
+        if (type == 1) {
+          uploadMultimediaFiles(context, user, conversationGroup);
+        }
         BlocProvider.of<MessageBloc>(context).add(AddMessageEvent(
             message: newMessage,
             callback: (Message message) {
@@ -656,16 +633,98 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   Future getImage() async {
-    imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
-
-    if (imageFile != null) {
-      setState(() {
-        isLoading = true;
-      });
-
-      // TODO: Will handle image file upload
-      //uploadFile();
+    File imageFile = await ImagePicker.pickImage(source: ImageSource.gallery, imageQuality: imagePickerQuality);
+    if (await imageFile.exists()) {
+      fileList.add(imageFile);
     }
+  }
+
+  uploadMultimediaFiles(BuildContext context, User user, ConversationGroup conversationGroup) {
+    if (fileList.length > 0) {
+      fileList.forEach((File file) {
+        Message message = Message(
+          id: null,
+          conversationId: widget._conversationGroup.id,
+          messageContent: "",
+          multimediaId: "",
+          // Send to group will not need receiver
+          receiverId: "",
+          receiverMobileNo: "",
+          receiverName: "",
+          senderId: user.id,
+          senderMobileNo: user.mobileNo,
+          senderName: user.displayName,
+          status: "Sent",
+          type: "Image",
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+        );
+        BlocProvider.of<MessageBloc>(context).add(AddMessageEvent(message: message, callback: (Message message2) async {
+          if(!isObjectEmpty(message2)) {
+            Multimedia messageMultimedia = Multimedia(
+                id: null,
+                localFullFileUrl: isObjectEmpty(file) ? null : file.path,
+                localThumbnailUrl: null,
+                remoteThumbnailUrl: null,
+                remoteFullFileUrl: null,
+                userContactId: null,
+                conversationId: conversationGroup.id,
+                // Add later
+                messageId: message.id,
+                userId: null);
+
+            // Create thumbnail
+            File thumbnailImageFile;
+            if (!isStringEmpty(messageMultimedia.localFullFileUrl) && !isObjectEmpty(file)) {
+              thumbnailImageFile = await imageService.getImageThumbnail(file);
+            }
+
+            if (!isObjectEmpty(thumbnailImageFile)) {
+              messageMultimedia.localThumbnailUrl = thumbnailImageFile.path;
+            }
+
+            BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
+                multimedia: messageMultimedia,
+                callback: (Multimedia multimedia2) async {
+                  updateMultimediaContent(context, multimedia2, message2, conversationGroup);
+                }));
+          }
+        }));
+      });
+    }
+  }
+
+  updateMultimediaContent(BuildContext context, Multimedia multimedia, Message message, ConversationGroup conversationGroup) async {
+    String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
+    print("chat_room_page.dart remoteUrl: " + remoteUrl.toString());
+    String remoteThumbnailUrl =
+    await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
+    print("chat_room_page.dart remoteThumbnailUrl: " + remoteThumbnailUrl.toString());
+
+    if (!isStringEmpty(remoteUrl)) {
+      multimedia.remoteFullFileUrl = remoteUrl;
+    }
+
+    if (!isStringEmpty(remoteThumbnailUrl)) {
+      multimedia.remoteThumbnailUrl = remoteThumbnailUrl;
+    }
+
+    BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(
+        multimedia: multimedia,
+        callback: (Multimedia multimedia2) {
+          if (!isObjectEmpty(multimedia2)) {
+            print('chat_room_page.dart EditMultimediaEvent success');
+            print('chat_room_page.dart multimedia2.remoteFullFileUrl == multimedia.remoteFullFileUrl: ' + multimedia2.remoteFullFileUrl ==
+                multimedia.remoteFullFileUrl);
+            print(
+                'chat_room_page.dart multimedia2.remoteThumbnailUrl == multimedia.remoteThumbnailUrl: ' + multimedia2.remoteThumbnailUrl ==
+                    multimedia.remoteThumbnailUrl);
+            WebSocketMessage webSocketMessage = WebSocketMessage(message: message, multimedia: multimedia);
+            BlocProvider.of<WebSocketBloc>(context)
+                .add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
+          } else {
+            print('chat_room_page.dart EditMultimediaEvent failed.');
+          }
+        }));
   }
 
   // TODO: Will think about last message is left or right to determine bottom margin between last message and textfield

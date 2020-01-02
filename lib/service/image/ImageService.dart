@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -118,14 +119,18 @@ class ImageService {
     });
   }
 
-  // Isolate solution: https://stackoverflow.com/questions/49701654/how-can-i-read-from-disk-and-resize-an-image-in-flutter-dart#comment86417931_49701775
+  // Isolate solution: https://github.com/brendan-duncan/image/wiki/Examples
+  // Down there, there's an example of using isolate to processing something about the photo so that it won't eat up the UI thread
   Future<File> getImageThumbnail(File imageFile) async {
     print("getImageThumbnail()");
     try {
-      // Convert to Image plugin format
-      CustomImage.Image image = CustomImage.decodeImage(imageFile.readAsBytesSync());
-      // Create thumbnail
-      CustomImage.Image thumbnail = CustomImage.copyResize(image, width: imageThumbnailWidthSize);
+      ReceivePort receivePort = ReceivePort();
+
+      await Isolate.spawn(createThumbnail,
+          DecodeParam(imageFile, receivePort.sendPort));
+
+      // Get the processed image from the isolate.
+      CustomImage.Image thumbnailImage = await receivePort.first;
 
       String fullThumbnailDirectory = await fileService.getApplicationDocumentDirectory() +
           "/" +
@@ -133,8 +138,7 @@ class ImageService {
           new DateTime.now().millisecondsSinceEpoch.toString() +
           ".png";
       // Put it into our directory, set it as temp.png first (File format: FILEPATH/thumbnail-95102006192014.png)
-      File thumbnailFile = new File(fullThumbnailDirectory)..writeAsBytesSync(CustomImage.encodePng(thumbnail));
-
+      File thumbnailFile = new File(fullThumbnailDirectory)..writeAsBytesSync(CustomImage.encodePng(thumbnailImage));
       return thumbnailFile;
     } catch (e) {
       print("Failed to get thumbnail.");
@@ -142,4 +146,22 @@ class ImageService {
       return null;
     }
   }
+
+
+
+  // Create thumbnail
+  void createThumbnail(DecodeParam param) async {
+
+    CustomImage.Image image = CustomImage.decodeImage(param.file.readAsBytesSync());
+
+    CustomImage.Image thumbnail = CustomImage.copyResize(image, width: imageThumbnailWidthSize);
+
+    param.sendPort.send(thumbnail);
+  }
+}
+
+class DecodeParam {
+  final File file;
+  final SendPort sendPort;
+  DecodeParam(this.file, this.sendPort);
 }

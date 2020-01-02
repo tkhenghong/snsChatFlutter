@@ -444,7 +444,7 @@ packages:
     source: hosted
     version: "0.3.3"
   jaguar_orm:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: jaguar_orm
       url: "https://pub.dartlang.org"
@@ -464,13 +464,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.9"
-  jaguar_query_sqflite:
-    dependency: "direct main"
-    description:
-      name: jaguar_query_sqflite
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.2.11"
   js:
     dependency: transitive
     description:
@@ -729,7 +722,7 @@ packages:
     source: hosted
     version: "1.5.5"
   sqflite:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: sqflite
       url: "https://pub.dartlang.org"

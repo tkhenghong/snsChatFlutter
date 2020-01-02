@@ -71,11 +71,6 @@ dependencies:
   cloud_firestore: ^0.13.0+1
   firebase_storage: ^3.1.0
 
-  # Local DB: SQL Solution
-  sqflite: ^1.1.6+3
-  jaguar_orm: ^2.2.6
-  jaguar_query_sqflite: ^2.2.10
-
   # Local DB: NoSQL Solution
   sembast: ^2.1.2
 

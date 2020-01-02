@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/list-view.dart';
@@ -83,7 +86,16 @@ class ChatGroupListState extends State<ChatGroupListPage> {
             }
 
             if (userState is UserLoaded) {
-              BlocProvider.of<WebSocketBloc>(context).add(InitializeWebSocketEvent(user: userState.user, callback: (bool done) {}));
+              BlocProvider.of<WebSocketBloc>(context).add(InitializeWebSocketEvent(user: userState.user, callback: (bool done) {
+                if(done) {
+                  BlocProvider.of<WebSocketBloc>(context).add(GetOwnWebSocketEvent(callback: (Stream<dynamic> webSocketStream) {
+                    if(!isObjectEmpty(webSocketStream)) {
+                      processWebSocketMessage(context, webSocketStream, userState.user);
+                    }
+                  }));
+
+                }
+              }));
               restoreUserPreviousData(context);
             }
           },
@@ -269,6 +281,23 @@ class ChatGroupListState extends State<ChatGroupListPage> {
       BlocProvider.of<MultimediaBloc>(context).add(GetUserProfilePictureMultimediaEvent(user: userState.user, callback: (bool done) {}));
       BlocProvider.of<UserContactBloc>(context).add(GetUserPreviousUserContactsEvent(user: userState.user, callback: (bool done) {}));
     }
+  }
+
+  processWebSocketMessage(BuildContext context, Stream<dynamic> webSocketStream, User user) {
+    webSocketStream.listen((data) {
+      Fluttertoast.showToast(msg: "Message confirmed received!", toastLength: Toast.LENGTH_LONG);
+      WebSocketMessage receivedWebSocketMessage = WebSocketMessage.fromJson(json.decode(data));
+      BlocProvider.of<WebSocketBloc>(context)
+          .add(ProcessWebSocketMessageEvent(webSocketMessage: receivedWebSocketMessage, context: context, callback: (bool done) {}));
+    }, onError: (onError) {
+      print("chat_room_page.dart onError listener is working.");
+      print("chat_room_page.dart onError: " + onError.toString());
+      BlocProvider.of<WebSocketBloc>(context).add(ReconnectWebSocketEvent(user: user, callback: (bool done) {}));
+    }, onDone: () {
+      print("chat_room_page.dart onDone listener is working.");
+      // TODO: Show reconnect message
+      BlocProvider.of<WebSocketBloc>(context).add(ReconnectWebSocketEvent(user: user, callback: (bool done) {}));
+    }, cancelOnError: false);
   }
 
   getConversationGroupsMultimedia(BuildContext context) {
