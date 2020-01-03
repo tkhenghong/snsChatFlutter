@@ -8,6 +8,7 @@ import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/FirebaseStorage/FirebaseStorageService.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:image/image.dart' as CustomImage;
+import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
 
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 
@@ -139,6 +140,11 @@ class ImageService {
           ".png";
       // Put it into our directory, set it as temp.png first (File format: FILEPATH/thumbnail-95102006192014.png)
       File thumbnailFile = new File(fullThumbnailDirectory)..writeAsBytesSync(CustomImage.encodePng(thumbnailImage));
+
+      // Fix thumbnail not rotated properly when created.
+      // Link: https://pub.dev/packages/flutter_exif_rotation
+      thumbnailFile = await FlutterExifRotation.rotateImage(path: thumbnailFile.path);
+
       return thumbnailFile;
     } catch (e) {
       print("Failed to get thumbnail.");
