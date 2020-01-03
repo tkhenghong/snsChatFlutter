@@ -15,7 +15,7 @@ class ImageService {
   FileService fileService = FileService();
   FirebaseStorageService firebaseStorageService = FirebaseStorageService();
 
-  int imageThumbnailWidthSize = globals.imageThumbnailWidthSize;
+  static int imageThumbnailWidthSize = globals.imageThumbnailWidthSize;
 
   // TODO: Stop using this, use cachedNetworkImage widget, but need to know
   // Returns ImageProvider object
@@ -150,7 +150,7 @@ class ImageService {
 
 
   // Create thumbnail
-  void createThumbnail(DecodeParam param) async {
+  static void createThumbnail(DecodeParam param) async {
 
     CustomImage.Image image = CustomImage.decodeImage(param.file.readAsBytesSync());
 
