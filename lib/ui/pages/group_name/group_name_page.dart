@@ -353,7 +353,6 @@ class GroupNamePageState extends State<GroupNamePage> {
                           unreadMessage: unreadMessage,
                           callback: (UnreadMessage unreadMessage2) async {
                             if (!isObjectEmpty(unreadMessage2)) {
-                              Navigator.pop(context); // close create conversation group loading
                               addMultimedia(
                                   groupMultimedia, !isObjectEmpty(copiedImageFile) ? copiedImageFile : null, conversationGroup2, context);
                             }
@@ -390,6 +389,7 @@ class GroupNamePageState extends State<GroupNamePage> {
 
   // Actually shouldn't be here
   updateMultimediaContent(BuildContext context, Multimedia multimedia, ConversationGroup conversationGroup) async {
+    Navigator.pop(context); // close create conversation group loading
     showLoading(context, 'Uploading group photo...');
     String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
     print("chat_room_page.dart remoteUrl: " + remoteUrl.toString());

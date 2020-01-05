@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -43,12 +44,14 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
   // This is used to get batch send multiple multimedia in one go, like multiple image and video
   List<File> fileList = [];
+  List<File> imageThumbnailFileList = [];
 
   String WEBSOCKET_URL = globals.WEBSOCKET_URL;
   int imagePickerQuality = globals.imagePickerQuality;
 
   TextEditingController textEditingController = new TextEditingController();
   ScrollController listScrollController = new ScrollController();
+  ScrollController imageViewScrollController = new ScrollController();
   FocusNode focusNode = new FocusNode();
 
   FileService fileService = FileService();
@@ -262,11 +265,47 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             child: Row(
               children: <Widget>[
                 Container(
+                  height: 150,
                   width: deviceWidth,
-                  height: deviceHeight * 0.2,
-                  child: Material(
-                    color: appBarTextTitleColor,
-                    type: MaterialType.canvas,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    controller: imageViewScrollController,
+                    physics: BouncingScrollPhysics(),
+                    shrinkWrap: true,
+                    reverse: true,
+                    itemCount: fileList.length,
+                    itemBuilder: (BuildContext buildContext2, int index) {
+                      File currentFile = fileList[index];
+                      return Stack(
+                        alignment: AlignmentDirectional.topEnd,
+                        children: <Widget>[
+                          Card(
+                            elevation: 2.0,
+                            color: appBarTextTitleColor,
+                            child: Image.file(currentFile),
+                          ),
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: Container(
+                              padding: EdgeInsets.only(
+                                right: 5.0,
+                                top: 5.0,
+                              ),
+                              child: InkWell(
+                                onTap: () => removeFile(currentFile),
+                                child: Material(
+                                  color: Colors.black,
+                                  child: Icon(Icons.clear, color: Colors.white,),
+                                  elevation: 2.0,
+                                  type: MaterialType.circle,
+                                ),
+                                radius: 15.0,
+                              ),
+                            ),
+                          )
+                        ],
+                      );
+                    },
                   ),
                 ),
               ],
@@ -330,6 +369,15 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 //      height: fileList.length > 0 ? deviceHeight * 0.2 : deviceHeight * 0.1,
       decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 0.5)), color: Colors.white),
     );
+  }
+
+  removeFile(File file) {
+    print('chat_room_page.dart removeFile()');
+    setState(() {
+      bool deleted = fileList.remove(file);
+      print('chat_room_page.dart deleted: ' + deleted.toString());
+      print('chat_room_page.dart after that, fileList.length: ' + fileList.length.toString());
+    });
   }
 
   Widget buildListMessage(BuildContext context, User user) {
@@ -405,6 +453,8 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     bool isSenderMessage = message.senderId == user.id;
     double lrPadding = 15.0;
     double tbPadding = 10.0;
+    bool isText = message.type == 'Text';
+    bool isImage = message.type == 'Image';
     return Column(
       children: <Widget>[
         isSenderMessage
@@ -438,11 +488,13 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                   children: <Widget>[
                     Column(
                       children: <Widget>[
-                        Text(
-//                           message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
-                          message.messageContent,
+                      isText ? Text(
+                            // message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
+                            message.messageContent,
                           style: TextStyle(color: appBarTextTitleColor),
-                        ),
+                        ) : isImage ?
+                          showMessageImage(context, message)
+                      :Text('Unindentified message.', style: TextStyle(color: appBarTextTitleColor),),
                       ],
                     ),
                   ],
@@ -452,6 +504,24 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget showMessageImage(BuildContext context, Message message) {
+    return BlocBuilder<MultimediaBloc, MultimediaState>(
+        builder: (context, multimediaState) {
+          if(multimediaState is MultimediaLoaded) {
+            List<Multimedia> multimediaList = multimediaState.multimediaList;
+            Multimedia messageMultimedia = multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.id, orElse: () => null);
+            return Container(
+              height: deviceHeight * 0.4,
+              width: deviceWidth * 0.3,
+              child: imageService.loadFullImage(messageMultimedia, 'ConversationGroupMessage'),
+            );
+          }
+
+          return imageService.loadFullImage(null, 'ConversationGroupMessage');
+        }
     );
   }
 
@@ -571,20 +641,15 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
   sendChatMessage(BuildContext context, String content, int type, User user, ConversationGroup conversationGroup) {
     print("sendChatMessage()");
-    // type: 0 = text,
+    // Types:
+    // 0 = text,
     // 1 = image,
     // 2 = sticker
-    if (content.trim() != '') {
+    if (type == 0 && content.trim() != '') {
       print("if (content.trim() != '')");
       textEditingController.clear();
 
-      // Got files to send (Images, Video, Audio, Files)
-      if (fileList.length > 0) {
-        uploadMultimediaFiles(context, user, conversationGroup);
-      } else if (type == 0) {
-        Message newMessage;
-
-        newMessage = Message(
+        Message newMessage = Message(
           id: null,
           conversationId: widget._conversationGroup.id,
           messageContent: content,
@@ -613,17 +678,35 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     .add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
               }
             }));
-      }
     } else {
       Fluttertoast.showToast(msg: 'Nothing to send');
+    }
+
+    // Got files to send (Images, Video, Audio, Files)
+    if (fileList.length > 0) {
+      uploadMultimediaFiles(context, user, conversationGroup);
     }
   }
 
   Future getImage() async {
     File imageFile = await ImagePicker.pickImage(source: ImageSource.gallery, imageQuality: imagePickerQuality);
     if (await imageFile.exists()) {
-      fileList.add(imageFile);
+      print('chat_room_page.dart if (await imageFile.exists())');
+      setState(() {
+        fileList.add(imageFile);
+      });
+      scrollToTheEnd();
+    } else {
+      print('chat_room_page.dart if (!await imageFile.exists())');
     }
+  }
+
+  scrollToTheEnd() {
+    // 2 timers. First to delay scrolling, 2nd is the given time to animate scrolling effect
+    Timer(
+        Duration(milliseconds: 1000),
+        () => imageViewScrollController.animateTo(imageViewScrollController.position.maxScrollExtent,
+            duration: Duration(milliseconds: 300), curve: Curves.easeOut));
   }
 
   uploadMultimediaFiles(BuildContext context, User user, ConversationGroup conversationGroup) {
@@ -632,7 +715,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
         Message message = Message(
           id: null,
           conversationId: widget._conversationGroup.id,
-          messageContent: "",
+          messageContent: "Test",
           multimediaId: "",
           // Send to group will not need receiver
           receiverId: "",

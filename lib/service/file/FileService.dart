@@ -185,6 +185,8 @@ class FileService {
       case "Profile":
         return "lib/ui/icons/default_user_icon.png";
         break;
+      case "ConversationGroupMessage":
+        return "lib/ui/icons/conversation_group_message.png";
       default:
 //        return "lib/ui/icons/none.png";
         return "lib/ui/icons/default_user_icon.png";
