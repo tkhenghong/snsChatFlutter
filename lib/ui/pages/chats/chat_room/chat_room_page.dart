@@ -112,7 +112,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               builder: (context, conversationGroupState) {
                 if (conversationGroupState is ConversationGroupsLoaded) {
                   ConversationGroup conversationGroup = conversationGroupState.conversationGroupList.firstWhere(
-                      (ConversationGroup conversationGroup) => conversationGroup.id == widget._conversationGroup.id,
+                          (ConversationGroup conversationGroup) => conversationGroup.id == widget._conversationGroup.id,
                       orElse: () => null);
                   if (!isObjectEmpty(conversationGroup)) {
                     return chatRoomMainBody(context, conversationGroup, userState.user);
@@ -146,7 +146,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             builder: (context, multimediaState) {
               if (multimediaState is MultimediaLoaded) {
                 Multimedia multimedia = multimediaState.multimediaList.firstWhere(
-                    (Multimedia existingMultimedia) => existingMultimedia.conversationId == selectedConversationGroup.id,
+                        (Multimedia existingMultimedia) => existingMultimedia.conversationId == selectedConversationGroup.id,
                     orElse: () => null);
 
                 return chatRoomPageTopBar(context, selectedConversationGroup, multimedia);
@@ -244,11 +244,11 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     return Positioned(
       child: isLoading
           ? Container(
-              child: Center(
-                child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)),
-              ),
-              color: Colors.white.withOpacity(0.8),
-            )
+        child: Center(
+          child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)),
+        ),
+        color: Colors.white.withOpacity(0.8),
+      )
           : Container(),
     );
   }
@@ -295,7 +295,10 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                                 onTap: () => removeFile(currentFile),
                                 child: Material(
                                   color: Colors.black,
-                                  child: Icon(Icons.clear, color: Colors.white,),
+                                  child: Icon(
+                                    Icons.clear,
+                                    color: Colors.white,
+                                  ),
                                   elevation: 2.0,
                                   type: MaterialType.circle,
                                 ),
@@ -409,7 +412,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           print('if (messageState is MessagesLoaded) RUN HERE?');
           // Get current conversation messages and sort them.
           List<Message> conversationGroupMessageList =
-              messageState.messageList.where((Message message) => message.conversationId == widget._conversationGroup.id).toList();
+          messageState.messageList.where((Message message) => message.conversationId == widget._conversationGroup.id).toList();
           conversationGroupMessageList.sort((message1, message2) => message2.timestamp.compareTo(message1.timestamp));
           print("conversationGroupMessageList.length: " + conversationGroupMessageList.length.toString());
 
@@ -419,7 +422,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               itemCount: conversationGroupMessageList.length,
               reverse: true,
               physics: BouncingScrollPhysics(),
-              itemBuilder: (context, index) => displayChatMessage(index, conversationGroupMessageList[index], user),
+              itemBuilder: (context, index) => displayChatMessage(context, index, conversationGroupMessageList[index], user),
             ),
           );
         }
@@ -449,10 +452,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
-  Widget displayChatMessage(int index, Message message, User user) {
+  Widget displayChatMessage(BuildContext context, int index, Message message, User user) {
     bool isSenderMessage = message.senderId == user.id;
     double lrPadding = 15.0;
-    double tbPadding = 10.0;
     bool isText = message.type == 'Text';
     bool isImage = message.type == 'Image';
     return Column(
@@ -460,68 +462,91 @@ class ChatRoomPageState extends State<ChatRoomPage> {
         isSenderMessage
             ? Text("")
             : Row(
-                crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-                mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
-                children: <Widget>[
-                  Container(
-                    padding: EdgeInsets.only(left: lrPadding),
-                  ),
-                  Text(
-                    message.senderName + ", " + messageTimeDisplay(message.timestamp),
+          crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+          mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.only(left: lrPadding),
+            ),
+            Text(
+              message.senderName + ", " + messageTimeDisplay(message.timestamp),
 //                    message.senderName,
-                    style: TextStyle(fontSize: 10.0, color: Colors.black38),
-                  ),
-                ],
-              ),
-        Container(
-          padding: EdgeInsets.only(left: 5.0),
-          child: Row(
-            crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-            mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.fromLTRB(lrPadding, tbPadding, lrPadding, tbPadding),
-                decoration: BoxDecoration(color: appBarThemeColor, borderRadius: BorderRadius.circular(32.0)),
-                margin: EdgeInsets.only(
-                    bottom: 20.0, right: isSenderMessage ? deviceWidth * 0.01 : 0.0, left: isSenderMessage ? deviceWidth * 0.01 : 0.0),
-                child: Row(
-                  children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                      isText ? Text(
-                            // message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
-                            message.messageContent,
-                          style: TextStyle(color: appBarTextTitleColor),
-                        ) : isImage ?
-                          showMessageImage(context, message)
-                      :Text('Unindentified message.', style: TextStyle(color: appBarTextTitleColor),),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+              style: TextStyle(fontSize: 10.0, color: Colors.black38),
+            ),
+          ],
         ),
+        isText
+            ? showMessageText(context, message, isSenderMessage)
+            : isImage ? showMessageImage(context, message) : showUnidentifiedMessageText(context, message, isSenderMessage),
       ],
     );
   }
 
-  Widget showMessageImage(BuildContext context, Message message) {
-    return BlocBuilder<MultimediaBloc, MultimediaState>(
-        builder: (context, multimediaState) {
-          if(multimediaState is MultimediaLoaded) {
-            List<Multimedia> multimediaList = multimediaState.multimediaList;
-            Multimedia messageMultimedia = multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.id, orElse: () => null);
-            return Container(
-              height: deviceHeight * 0.4,
-              width: deviceWidth * 0.3,
-              child: imageService.loadFullImage(messageMultimedia, 'ConversationGroupMessage'),
-            );
-          }
+  Widget showMessageText(BuildContext context, Message message, bool isSenderMessage) {
+    double lrPadding = 15.0;
+    double tbPadding = 10.0;
 
-          return imageService.loadFullImage(null, 'ConversationGroupMessage');
-        }
+    return Container(
+      padding: EdgeInsets.fromLTRB(lrPadding, tbPadding, lrPadding, tbPadding),
+      decoration: BoxDecoration(color: appBarThemeColor, borderRadius: BorderRadius.circular(32.0)),
+      margin: EdgeInsets.only(
+          bottom: 20.0, right: isSenderMessage ? deviceWidth * 0.01 : 0.0, left: isSenderMessage ? deviceWidth * 0.01 : 0.0),
+      child: Row(
+        children: <Widget>[
+          Column(
+            children: <Widget>[
+              Text(
+                // message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
+                message.messageContent,
+                style: TextStyle(color: appBarTextTitleColor),
+              )
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget showMessageImage(BuildContext context, Message message) {
+    return BlocBuilder<MultimediaBloc, MultimediaState>(builder: (context, multimediaState) {
+      if (multimediaState is MultimediaLoaded) {
+        List<Multimedia> multimediaList = multimediaState.multimediaList;
+        Multimedia messageMultimedia =
+        multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.id, orElse: () => null);
+
+        // TODO: Modify imageService.loadFullImage to accept height and width
+        return OverflowBox(
+            maxHeight: double.infinity,
+//            maxWidth: double.infinity,
+            child: imageService.loadFullImage(messageMultimedia, 'ConversationGroupMessage'),
+        );
+      }
+
+      return imageService.loadFullImage(null, 'ConversationGroupMessage');
+    });
+  }
+
+  Widget showUnidentifiedMessageText(BuildContext context, Message message, bool isSenderMessage) {
+    double lrPadding = 15.0;
+    double tbPadding = 10.0;
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(lrPadding, tbPadding, lrPadding, tbPadding),
+      decoration: BoxDecoration(color: appBarThemeColor, borderRadius: BorderRadius.circular(32.0)),
+      margin: EdgeInsets.only(
+          bottom: 20.0, right: isSenderMessage ? deviceWidth * 0.01 : 0.0, left: isSenderMessage ? deviceWidth * 0.01 : 0.0),
+      child: Row(
+        children: <Widget>[
+          Column(
+            children: <Widget>[
+              Text(
+                'Unindentified message.',
+                style: TextStyle(color: appBarTextTitleColor),
+              )
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -649,35 +674,37 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       print("if (content.trim() != '')");
       textEditingController.clear();
 
-        Message newMessage = Message(
-          id: null,
-          conversationId: widget._conversationGroup.id,
-          messageContent: content,
-          multimediaId: "",
-          // Send to group will not need receiver
-          receiverId: "",
-          receiverMobileNo: "",
-          receiverName: "",
-          senderId: user.id,
-          senderMobileNo: user.mobileNo,
-          senderName: user.displayName,
-          status: "Sent",
-          type: "Text",
-          timestamp: DateTime.now().millisecondsSinceEpoch,
-        );
+      Message newMessage = Message(
+        id: null,
+        conversationId: widget._conversationGroup.id,
+        messageContent: content,
+        multimediaId: "",
+        // Send to group will not need receiver
+        receiverId: "",
+        receiverMobileNo: "",
+        receiverName: "",
+        senderId: user.id,
+        senderMobileNo: user.mobileNo,
+        senderName: user.displayName,
+        status: "Sent",
+        type: "Text",
+        timestamp: DateTime
+            .now()
+            .millisecondsSinceEpoch,
+      );
 
-        BlocProvider.of<MessageBloc>(context).add(AddMessageEvent(
-            message: newMessage,
-            callback: (Message message) {
-              if (isObjectEmpty(message)) {
-                Fluttertoast.showToast(msg: 'Message not sent. Please try again.', toastLength: Toast.LENGTH_SHORT);
-              } else {
-                print('if(!isObjectEmpty(message)');
-                WebSocketMessage webSocketMessage = WebSocketMessage(message: message);
-                BlocProvider.of<WebSocketBloc>(context)
-                    .add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
-              }
-            }));
+      BlocProvider.of<MessageBloc>(context).add(AddMessageEvent(
+          message: newMessage,
+          callback: (Message message) {
+            if (isObjectEmpty(message)) {
+              Fluttertoast.showToast(msg: 'Message not sent. Please try again.', toastLength: Toast.LENGTH_SHORT);
+            } else {
+              print('if(!isObjectEmpty(message)');
+              WebSocketMessage webSocketMessage = WebSocketMessage(message: message);
+              BlocProvider.of<WebSocketBloc>(context)
+                  .add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
+            }
+          }));
     } else {
       Fluttertoast.showToast(msg: 'Nothing to send');
     }
@@ -705,8 +732,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     // 2 timers. First to delay scrolling, 2nd is the given time to animate scrolling effect
     Timer(
         Duration(milliseconds: 1000),
-        () => imageViewScrollController.animateTo(imageViewScrollController.position.maxScrollExtent,
-            duration: Duration(milliseconds: 300), curve: Curves.easeOut));
+            () =>
+            imageViewScrollController.animateTo(imageViewScrollController.position.maxScrollExtent,
+                duration: Duration(milliseconds: 300), curve: Curves.easeOut));
   }
 
   uploadMultimediaFiles(BuildContext context, User user, ConversationGroup conversationGroup) {
@@ -726,7 +754,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           senderName: user.displayName,
           status: "Sent",
           type: "Image",
-          timestamp: DateTime.now().millisecondsSinceEpoch,
+          timestamp: DateTime
+              .now()
+              .millisecondsSinceEpoch,
         );
         BlocProvider.of<MessageBloc>(context).add(AddMessageEvent(
             message: message,
@@ -761,6 +791,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     }));
               }
             }));
+        setState(() {
+          fileList.remove(file);
+        });
       });
     }
   }
@@ -769,7 +802,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
     print("chat_room_page.dart remoteUrl: " + remoteUrl.toString());
     String remoteThumbnailUrl =
-        await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
+    await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
     print("chat_room_page.dart remoteThumbnailUrl: " + remoteThumbnailUrl.toString());
 
     if (!isStringEmpty(remoteUrl)) {

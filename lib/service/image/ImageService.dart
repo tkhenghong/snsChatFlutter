@@ -88,11 +88,11 @@ class ImageService {
     );
   }
 
-  Widget loadFullImage(Multimedia multimedia, String type) {
+  Widget loadFullImage(Multimedia multimedia, String type, double height, double width) {
     return isObjectEmpty(multimedia)
-        ? Image.asset(fileService.getDefaultImagePath(type))
+        ? Image.asset(fileService.getDefaultImagePath(type), height: height, width: width,)
         : isStringEmpty(multimedia.remoteThumbnailUrl)
-            ? Image.asset(fileService.getDefaultImagePath(type))
+            ? Image.asset(fileService.getDefaultImagePath(type), height: height, width: width,)
             : CachedNetworkImage(
                 useOldImageOnUrlChange: true,
                 imageUrl: multimedia.remoteFullFileUrl,
@@ -100,9 +100,9 @@ class ImageService {
                   useOldImageOnUrlChange: true,
                   imageUrl: multimedia.remoteThumbnailUrl,
                   placeholder: (context, url) => new CircularProgressIndicator(),
-                  errorWidget: (context, url, error) => Image.asset(fileService.getDefaultImagePath(type)),
+                  errorWidget: (context, url, error) => Image.asset(fileService.getDefaultImagePath(type), height: height, width: width,),
                 ),
-                errorWidget: (context, url, error) => Image.asset(fileService.getDefaultImagePath(type)),
+                errorWidget: (context, url, error) => Image.asset(fileService.getDefaultImagePath(type), fit: BoxFit.cover, height: height, width: width,),
               );
   }
 
