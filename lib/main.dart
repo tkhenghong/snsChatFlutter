@@ -8,6 +8,7 @@ import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_group_list/chat_group_list_page.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
+import 'package:snschat_flutter/ui/pages/photo_view/photo_view_page.dart';
 import 'package:snschat_flutter/ui/pages/select_contacts/select_contacts_page.dart';
 import 'package:snschat_flutter/ui/pages/login/login_page.dart';
 import 'package:snschat_flutter/ui/pages/myself/myself_page.dart';
@@ -115,6 +116,7 @@ class MyAppState extends State<MyApp> {
         "chat_room_page": (_) => new ChatRoomPage(),
         "chat_info_page": (_) => new ChatInfoPage(),
         "contacts_page": (_) => new SelectContactsPage(),
+        "photo_view_page": (_) => new PhotoViewPage(),
       },
     );
   }

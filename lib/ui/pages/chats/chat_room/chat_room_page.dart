@@ -20,6 +20,7 @@ import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
 
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
+import 'package:snschat_flutter/ui/pages/photo_view/photo_view_page.dart';
 
 class ChatRoomPage extends StatefulWidget {
   final ConversationGroup _conversationGroup;
@@ -527,6 +528,8 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
           children: <Widget>[
             Container(
+              width: deviceWidth * 0.45,
+              height: deviceHeight * 0.3,
               padding: EdgeInsets.fromLTRB(lrPadding, tbPadding, lrPadding, tbPadding),
               decoration: BoxDecoration(color: appBarThemeColor, borderRadius: BorderRadius.circular(32.0)),
               margin: EdgeInsets.only(
@@ -535,7 +538,13 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                 children: <Widget>[
                   Column(
                     children: <Widget>[
-                      imageService.loadFullImage(messageMultimedia, 'ConversationGroupMessage')
+                      InkWell(
+                        child: imageService.loadFullImage(messageMultimedia, 'ConversationGroupMessage'),
+                        onTap: () => {
+                          // View photo
+                          Navigator.push(context, MaterialPageRoute(builder: ((context) => PhotoViewPage(messageMultimedia))))
+                        },
+                      )
                     ],
                   ),
                 ],
