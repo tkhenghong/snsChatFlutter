@@ -75,6 +75,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
 
         existingMultimediaList.add(event.multimedia);
 
+        yield MultimediaLoading();
         yield MultimediaLoaded(existingMultimediaList);
         functionCallback(event, multimediaFromServer);
       }

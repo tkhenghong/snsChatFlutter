@@ -3,6 +3,7 @@ import 'dart:isolate';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/FirebaseStorage/FirebaseStorageService.dart';
@@ -88,26 +89,67 @@ class ImageService {
     );
   }
 
-  Widget loadFullImage(Multimedia multimedia, String type) {
-    return isObjectEmpty(multimedia)
-        ? Image.asset(fileService.getDefaultImagePath(type))
-        : isStringEmpty(multimedia.remoteThumbnailUrl)
-            ? Image.asset(fileService.getDefaultImagePath(type))
-            : CachedNetworkImage(
-                useOldImageOnUrlChange: true,
-                imageUrl: multimedia.remoteFullFileUrl,
-                placeholder: (context, url) => CachedNetworkImage(
-                  fit: BoxFit.scaleDown,
-                  // TODO: width and height is not working
-                  width: 100.00,
-                  height: 150.00,
-                  useOldImageOnUrlChange: true,
-                  imageUrl: multimedia.remoteThumbnailUrl,
-                  placeholder: (context, url) => new CircularProgressIndicator(),
-                  errorWidget: (context, url, error) => Image.asset(fileService.getDefaultImagePath(type)),
-                ),
-                errorWidget: (context, url, error) => Image.asset(fileService.getDefaultImagePath(type), fit: BoxFit.cover),
-              );
+  Widget loadFullImage(BuildContext context, Multimedia multimedia, String type) {
+    double deviceWidth = MediaQuery.of(context).size.width;
+    double deviceHeight = MediaQuery.of(context).size.height;
+
+    double width = deviceWidth * 0.65;
+    double height = deviceHeight * 0.4;
+    try {
+      if (isObjectEmpty(multimedia)) {
+        fileService.downloadMultimediaFile(context, multimedia);
+        return Image.asset(
+          fileService.getDefaultImagePath(type),
+          width: width,
+          height: height,
+        );
+      }
+
+      if (!isObjectEmpty(multimedia.localFullFileUrl)) {
+        File localImagefile = File(multimedia.localFullFileUrl);
+
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(16.0),
+          child: Image.file(
+            localImagefile,
+            fit: BoxFit.cover,
+            width: width,
+            height: height,
+          ),
+        );
+      } else {
+        return CachedNetworkImage(
+          useOldImageOnUrlChange: true,
+          imageUrl: multimedia.remoteFullFileUrl,
+          placeholder: (context, url) => CachedNetworkImage(
+            useOldImageOnUrlChange: true,
+            imageUrl: multimedia.remoteThumbnailUrl,
+            width: width,
+            height: height,
+            placeholder: (context, url) => new CircularProgressIndicator(),
+            errorWidget: (context, url, error) => Image.asset(
+              fileService.getDefaultImagePath(type),
+              width: width,
+              height: height,
+            ),
+          ),
+          errorWidget: (context, url, error) => Image.asset(
+            fileService.getDefaultImagePath(type),
+            width: width,
+            height: height,
+          ),
+        );
+      }
+    } catch (e) {
+      print('ImageService.dart loadFullImage() error');
+      print('ImageService.dart e: ' + e.toString());
+      fileService.downloadMultimediaFile(context, multimedia);
+      return Image.asset(
+        fileService.getDefaultImagePath(type),
+        width: width,
+        height: height,
+      );
+    }
   }
 
   // Only handles thumbnail download
@@ -131,8 +173,7 @@ class ImageService {
     try {
       ReceivePort receivePort = ReceivePort();
 
-      await Isolate.spawn(createThumbnail,
-          DecodeParam(imageFile, receivePort.sendPort));
+      await Isolate.spawn(createThumbnail, DecodeParam(imageFile, receivePort.sendPort));
 
       // Get the processed image from the isolate.
       CustomImage.Image thumbnailImage = await receivePort.first;
@@ -157,11 +198,8 @@ class ImageService {
     }
   }
 
-
-
   // Create thumbnail
   static void createThumbnail(DecodeParam param) async {
-
     CustomImage.Image image = CustomImage.decodeImage(param.file.readAsBytesSync());
 
     CustomImage.Image thumbnail = CustomImage.copyResize(image, width: imageThumbnailWidthSize);
@@ -173,5 +211,6 @@ class ImageService {
 class DecodeParam {
   final File file;
   final SendPort sendPort;
+
   DecodeParam(this.file, this.sendPort);
 }

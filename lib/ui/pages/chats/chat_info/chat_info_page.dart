@@ -105,9 +105,11 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                   isStringEmpty(existingMultimedia.messageId));
 
                               return Hero(
-                                  tag: conversationGroup.id + "1", child: imageService.loadFullImage(multimedia, conversationGroup.type));
+                                  tag: conversationGroup.id + "1",
+                                  child: imageService.loadFullImage(context, multimedia, conversationGroup.type));
                             }
-                            return Hero(tag: conversationGroup.id + "1", child: imageService.loadFullImage(null, conversationGroup.type));
+                            return Hero(
+                                tag: conversationGroup.id + "1", child: imageService.loadFullImage(context, null, conversationGroup.type));
                           },
                         ),
                       ),
@@ -493,7 +495,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
 
     UserState userState = BlocProvider.of<UserBloc>(context).state;
 
-    if(userState is UserLoaded) {
+    if (userState is UserLoaded) {
       if (!isObjectEmpty(userContactList)) {
         print('chat_info_page.dart if(!isObjectEmpty(userContactList))');
         print('chat_info_page.dart if userContactList.toString(): ' + userContactList.toString());

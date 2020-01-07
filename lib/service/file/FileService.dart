@@ -1,15 +1,20 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/permissions/PermissionService.dart';
+import 'package:snschat_flutter/state/bloc/bloc.dart';
 
 class FileService {
   PermissionService permissionService = PermissionService();
+  DefaultCacheManager defaultCacheManager = DefaultCacheManager();
 
   // TODO: getApplicationDocumentDirectory should change to getDirectories,
   // TODO: so you can get any directory based on where you want.
@@ -77,6 +82,23 @@ class FileService {
       print("Reason: " + e.toString());
       return null;
     }
+  }
+
+  downloadMultimediaFile(BuildContext context, Multimedia multimedia) async {
+    FileInfo fileInfo = await defaultCacheManager.getFileFromCache(multimedia.remoteFullFileUrl);
+    if (fileInfoIsEmpty(fileInfo)) {
+      FileInfo fileDownloadFromInternet = await defaultCacheManager.downloadFile(multimedia.localFullFileUrl);
+      FileInfo fileThumbnailDownloadedFromInternet = await defaultCacheManager.downloadFile(multimedia.localThumbnailUrl);
+      if (!fileInfoIsEmpty(fileDownloadFromInternet) && !fileInfoIsEmpty(fileThumbnailDownloadedFromInternet)) {
+        multimedia.localFullFileUrl = fileDownloadFromInternet.file.path;
+        multimedia.localThumbnailUrl = fileThumbnailDownloadedFromInternet.file.path;
+        BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(multimedia: multimedia, callback: (bool updated) {}));
+      }
+    }
+  }
+
+  bool fileInfoIsEmpty(FileInfo fileInfo) {
+    return isObjectEmpty(fileInfo) || isObjectEmpty(fileInfo.file);
   }
 
   // Check if file exist
