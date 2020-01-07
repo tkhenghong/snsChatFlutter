@@ -459,9 +459,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     bool isImage = message.type == 'Image';
     return Column(
       children: <Widget>[
-        isSenderMessage
-            ? Text("")
-            : Row(
+        Row(
           crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
           mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
           children: <Widget>[
@@ -477,7 +475,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
         ),
         isText
             ? showMessageText(context, message, isSenderMessage)
-            : isImage ? showMessageImage(context, message) : showUnidentifiedMessageText(context, message, isSenderMessage),
+            : isImage ? showMessageImage(context, message, isSenderMessage) : showUnidentifiedMessageText(context, message, isSenderMessage),
       ],
     );
   }
@@ -486,40 +484,72 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     double lrPadding = 15.0;
     double tbPadding = 10.0;
 
-    return Container(
-      padding: EdgeInsets.fromLTRB(lrPadding, tbPadding, lrPadding, tbPadding),
-      decoration: BoxDecoration(color: appBarThemeColor, borderRadius: BorderRadius.circular(32.0)),
-      margin: EdgeInsets.only(
-          bottom: 20.0, right: isSenderMessage ? deviceWidth * 0.01 : 0.0, left: isSenderMessage ? deviceWidth * 0.01 : 0.0),
-      child: Row(
-        children: <Widget>[
-          Column(
+    return Row(
+      crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+      mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          padding: EdgeInsets.fromLTRB(lrPadding, tbPadding, lrPadding, tbPadding),
+          decoration: BoxDecoration(color: appBarThemeColor, borderRadius: BorderRadius.circular(32.0)),
+          margin: EdgeInsets.only(
+              bottom: 20.0, right: isSenderMessage ? deviceWidth * 0.01 : 0.0, left: isSenderMessage ? deviceWidth * 0.01 : 0.0),
+          child: Row(
             children: <Widget>[
-              Text(
-                // message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
-                message.messageContent,
-                style: TextStyle(color: appBarTextTitleColor),
-              )
+              Column(
+                children: <Widget>[
+                  Text(
+                    // message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
+                    message.messageContent,
+                    style: TextStyle(color: appBarTextTitleColor),
+                  )
+                ],
+              ),
             ],
           ),
-        ],
-      ),
-    );
+        )
+      ],
+    )
+      ;
   }
 
-  Widget showMessageImage(BuildContext context, Message message) {
+  Widget showMessageImage(BuildContext context, Message message, bool isSenderMessage) {
+    double lrPadding = 15.0;
+    double tbPadding = 10.0;
+
     return BlocBuilder<MultimediaBloc, MultimediaState>(builder: (context, multimediaState) {
       if (multimediaState is MultimediaLoaded) {
         List<Multimedia> multimediaList = multimediaState.multimediaList;
         Multimedia messageMultimedia =
         multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.id, orElse: () => null);
 
-        // TODO: Modify imageService.loadFullImage to accept height and width
-        return OverflowBox(
-            maxHeight: double.infinity,
-//            maxWidth: double.infinity,
-            child: imageService.loadFullImage(messageMultimedia, 'ConversationGroupMessage'),
+        return Row(
+          crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+          mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.fromLTRB(lrPadding, tbPadding, lrPadding, tbPadding),
+              decoration: BoxDecoration(color: appBarThemeColor, borderRadius: BorderRadius.circular(32.0)),
+              margin: EdgeInsets.only(
+                  bottom: 20.0, right: isSenderMessage ? deviceWidth * 0.01 : 0.0, left: isSenderMessage ? deviceWidth * 0.01 : 0.0),
+              child: Row(
+                children: <Widget>[
+                  Column(
+                    children: <Widget>[
+                      imageService.loadFullImage(messageMultimedia, 'ConversationGroupMessage')
+                    ],
+                  ),
+                ],
+              ),
+            )
+          ],
         );
+
+        // TODO: Modify imageService.loadFullImage to accept height and width
+//        return Container(
+//          width: 100.00,
+//          height: 100.00,
+//          child: imageService.loadFullImage(messageMultimedia, 'ConversationGroupMessage'),
+//        );
       }
 
       return imageService.loadFullImage(null, 'ConversationGroupMessage');
