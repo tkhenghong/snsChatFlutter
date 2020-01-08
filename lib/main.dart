@@ -19,6 +19,7 @@ import 'package:snschat_flutter/ui/pages/sign_up/sign_up_page.dart';
 import 'package:snschat_flutter/ui/pages/tabs/tabs_page.dart';
 import 'package:snschat_flutter/ui/pages/terms_and_conditions/terms_and_conditions_page.dart';
 import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number_page.dart';
+import 'package:snschat_flutter/ui/pages/video_player/video_player_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -117,6 +118,7 @@ class MyAppState extends State<MyApp> {
         "chat_info_page": (_) => new ChatInfoPage(),
         "contacts_page": (_) => new SelectContactsPage(),
         "photo_view_page": (_) => new PhotoViewPage(),
+        "video_player_page": (_) => new VideoPlayerPage(),
       },
     );
   }

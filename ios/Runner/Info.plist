@@ -40,8 +40,23 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
+    <!-- Add these permissions for ios -->
     <key>NSContactsUsageDescription</key>
         <string>This app requires contacts access to function properly.</string>
 	<false/>
+    	<key>NSCameraUsageDescription</key>
+    	<string>Used to demonstrate image picker plugin</string>
+
+    	<key>NSMicrophoneUsageDescription</key>
+    	<string>Used to capture audio for image picker plugin</string>
+
+    	<key>NSPhotoLibraryUsageDescription</key>
+    	<string>Used to demonstrate image picker plugin</string>
+
+    	<key>UIBackgroundModes</key>
+        <array>
+           <string>fetch</string>
+           <string>remote-notification</string>
+        </array>
 </dict>
 </plist>
