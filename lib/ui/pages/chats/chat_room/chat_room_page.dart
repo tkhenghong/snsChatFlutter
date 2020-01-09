@@ -21,6 +21,7 @@ import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
 
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/ui/pages/photo_view/photo_view_page.dart';
+import 'package:file_picker/file_picker.dart';
 
 class ChatRoomPage extends StatefulWidget {
   final ConversationGroup _conversationGroup;
@@ -37,6 +38,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   bool isShowSticker = false;
   bool isLoading;
   bool imageFound = false;
+  bool openMultimediaTab = false;
   double deviceWidth;
   double deviceHeight;
 
@@ -260,61 +262,8 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     return Container(
       child: Column(
         children: <Widget>[
-          // Use Visibility to control to show widget easily. https://stackoverflow.com/questions/44489804/show-hide-widgets-in-flutter-programmatically
-          Visibility(
-            visible: fileList.length > 0,
-            child: Row(
-              children: <Widget>[
-                Container(
-                  height: 150,
-                  width: deviceWidth,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    controller: imageViewScrollController,
-                    physics: BouncingScrollPhysics(),
-                    shrinkWrap: true,
-                    reverse: true,
-                    itemCount: fileList.length,
-                    itemBuilder: (BuildContext buildContext2, int index) {
-                      File currentFile = fileList[index];
-                      return Stack(
-                        alignment: AlignmentDirectional.topEnd,
-                        children: <Widget>[
-                          Card(
-                            elevation: 2.0,
-                            color: appBarTextTitleColor,
-                            child: Image.file(currentFile),
-                          ),
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: Container(
-                              padding: EdgeInsets.only(
-                                right: 5.0,
-                                top: 5.0,
-                              ),
-                              child: InkWell(
-                                onTap: () => removeFile(currentFile),
-                                child: Material(
-                                  color: Colors.black,
-                                  child: Icon(
-                                    Icons.clear,
-                                    color: Colors.white,
-                                  ),
-                                  elevation: 2.0,
-                                  type: MaterialType.circle,
-                                ),
-                                radius: 15.0,
-                              ),
-                            ),
-                          )
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
+          buildImageListTab(context),
+          buildMultimediaTab(context),
           Row(
             children: <Widget>[
               // Button send image
@@ -322,8 +271,13 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                 child: Container(
                   margin: EdgeInsets.symmetric(horizontal: 1.0),
                   child: IconButton(
-                    icon: Icon(Icons.image),
-                    onPressed: () => getImage(),
+                    icon: Icon(Icons.attach_file),
+//                    onPressed: () => getImage(),
+                    onPressed: () {
+                      setState(() {
+                        openMultimediaTab = !openMultimediaTab;
+                      });
+                    },
                   ),
                 ),
                 color: Colors.white,
@@ -372,6 +326,96 @@ class ChatRoomPageState extends State<ChatRoomPage> {
       width: double.infinity,
 //      height: fileList.length > 0 ? deviceHeight * 0.2 : deviceHeight * 0.1,
       decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 0.5)), color: Colors.white),
+    );
+  }
+
+ Widget buildImageListTab(BuildContext context) {
+    return // Use Visibility to control to show widget easily. https://stackoverflow.com/questions/44489804/show-hide-widgets-in-flutter-programmatically
+      Visibility(
+        visible: fileList.length > 0,
+        child: Row(
+          children: <Widget>[
+            Container(
+              height: 150,
+              width: deviceWidth,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                controller: imageViewScrollController,
+                physics: BouncingScrollPhysics(),
+                shrinkWrap: true,
+                reverse: true,
+                itemCount: fileList.length,
+                itemBuilder: (BuildContext buildContext2, int index) {
+                  File currentFile = fileList[index];
+                  return Stack(
+                    alignment: AlignmentDirectional.topEnd,
+                    children: <Widget>[
+                      Card(
+                        elevation: 2.0,
+                        color: appBarTextTitleColor,
+                        child: Image.file(currentFile),
+                      ),
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: Container(
+                          padding: EdgeInsets.only(
+                            right: 5.0,
+                            top: 5.0,
+                          ),
+                          child: InkWell(
+                            onTap: () => removeFile(currentFile),
+                            child: Material(
+                              color: Colors.black,
+                              child: Icon(
+                                Icons.clear,
+                                color: Colors.white,
+                              ),
+                              elevation: 2.0,
+                              type: MaterialType.circle,
+                            ),
+                            radius: 15.0,
+                          ),
+                        ),
+                      )
+                    ],
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+  }
+
+  Widget buildMultimediaTab(BuildContext context) {
+    return Visibility(
+      visible: openMultimediaTab,
+      child: Row(
+        children: <Widget>[
+          Container(
+            height: 150,
+            width: deviceWidth,
+            child: Row(
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Icon(Icons.image),
+                    Icon(Icons.camera_alt),
+                    Icon(Icons.insert_drive_file),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    Icon(Icons.audiotrack),
+                    Icon(Icons.location_on),
+                    Icon(Icons.contacts),
+                  ],
+                ),
+              ],
+            )
+          ),
+        ],
+      )
     );
   }
 
@@ -535,7 +579,10 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                         Hero(
                           tag: messageMultimedia.id,
                           child: InkWell(
-                            child: imageService.loadFullImage(context, messageMultimedia, 'ConversationGroupMessage'),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16.0),
+                              child: imageService.loadFullImage(context, messageMultimedia, 'ConversationGroupMessage'),
+                            ),
                             onTap: () => {
                               // View photo
                               Navigator.push(context, MaterialPageRoute(builder: ((context) => PhotoViewPage(messageMultimedia))))
@@ -764,7 +811,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 
   Future getImage() async {
     File imageFile = await ImagePicker.pickImage(source: ImageSource.gallery, imageQuality: imagePickerQuality);
-    if (await imageFile.exists()) {
+    if (!isObjectEmpty(imageFile) && await imageFile.exists()) {
       print('chat_room_page.dart if (await imageFile.exists())');
       setState(() {
         fileList.add(imageFile);

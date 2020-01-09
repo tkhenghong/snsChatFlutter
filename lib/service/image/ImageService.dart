@@ -108,14 +108,11 @@ class ImageService {
       if (!isObjectEmpty(multimedia.localFullFileUrl)) {
         File localImagefile = File(multimedia.localFullFileUrl);
 
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(16.0),
-          child: Image.file(
-            localImagefile,
-            fit: BoxFit.cover,
-            width: width,
-            height: height,
-          ),
+        return Image.file(
+          localImagefile,
+          fit: BoxFit.cover,
+          width: width,
+          height: height,
         );
       } else {
         return CachedNetworkImage(
