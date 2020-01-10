@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:path/path.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,7 @@ class ChatRoomPage extends StatefulWidget {
   }
 }
 
-class ChatRoomPageState extends State<ChatRoomPage> {
+class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   bool isShowSticker = false;
   bool isLoading;
   bool imageFound = false;
@@ -46,8 +47,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   Color appBarThemeColor;
 
   // This is used to get batch send multiple multimedia in one go, like multiple image and video
-  List<File> fileList = [];
+  List<File> imageFileList = [];
   List<File> imageThumbnailFileList = [];
+  List<File> documentFileList = [];
 
   String WEBSOCKET_URL = globals.WEBSOCKET_URL;
   int imagePickerQuality = globals.imagePickerQuality;
@@ -55,7 +57,10 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   TextEditingController textEditingController = new TextEditingController();
   ScrollController listScrollController = new ScrollController();
   ScrollController imageViewScrollController = new ScrollController();
+  ScrollController fileViewScrollController = new ScrollController();
   FocusNode focusNode = new FocusNode();
+  AnimationController _animationController, _animationController2;
+  Animation animation;
 
   FileService fileService = FileService();
   ImageService imageService = ImageService();
@@ -67,19 +72,27 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     focusNode.addListener(onFocusChange);
     isLoading = false;
     isShowSticker = false;
+
+    _animationController = new AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _animationController2 = new AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    animation = Tween(begin: 0.0, end: 1.0).animate(_animationController2);
+    _animationController2.forward();
   }
 
   @override
   void dispose() {
     listScrollController.dispose();
     textEditingController.dispose();
+    _animationController.dispose();
+    _animationController2.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    print("widget._conversation.id: " + widget._conversationGroup.id);
-
     appBarTextTitleColor = Theme.of(context).appBarTheme.textTheme.title.color;
     appBarThemeColor = Theme.of(context).appBarTheme.color;
 
@@ -104,7 +117,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
           }
 
           if (userState is UserNotLoaded) {
-            goToLoginPage();
+            goToLoginPage(context);
             return Center(
               child: Text('Unable to load user.'),
             );
@@ -176,7 +189,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               buildLoading(),
             ],
           ),
-          onWillPop: onBackPress,
+          onWillPop: () => onBackPress(context),
         ),
       ),
     );
@@ -257,12 +270,11 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   Widget buildInput(BuildContext context, User user, ConversationGroup conversationGroup) {
-    print('fileList.length: ' + fileList.length.toString());
-    // fileList.add(null);
     return Container(
       child: Column(
         children: <Widget>[
           buildImageListTab(context),
+          buildFileListTab(context),
           buildMultimediaTab(context),
           Row(
             children: <Widget>[
@@ -276,6 +288,11 @@ class ChatRoomPageState extends State<ChatRoomPage> {
                     onPressed: () {
                       setState(() {
                         openMultimediaTab = !openMultimediaTab;
+                        if (openMultimediaTab) {
+                          _animationController2.forward();
+                        } else {
+                          _animationController2.reverse();
+                        }
                       });
                     },
                   ),
@@ -329,115 +346,197 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
- Widget buildImageListTab(BuildContext context) {
+  Widget buildImageListTab(BuildContext context) {
     return // Use Visibility to control to show widget easily. https://stackoverflow.com/questions/44489804/show-hide-widgets-in-flutter-programmatically
-      Visibility(
-        visible: fileList.length > 0,
-        child: Row(
-          children: <Widget>[
-            Container(
-              height: 150,
-              width: deviceWidth,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                controller: imageViewScrollController,
-                physics: BouncingScrollPhysics(),
-                shrinkWrap: true,
-                reverse: true,
-                itemCount: fileList.length,
-                itemBuilder: (BuildContext buildContext2, int index) {
-                  File currentFile = fileList[index];
-                  return Stack(
-                    alignment: AlignmentDirectional.topEnd,
-                    children: <Widget>[
-                      Card(
-                        elevation: 2.0,
-                        color: appBarTextTitleColor,
-                        child: Image.file(currentFile),
-                      ),
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: Container(
-                          padding: EdgeInsets.only(
-                            right: 5.0,
-                            top: 5.0,
-                          ),
-                          child: InkWell(
-                            onTap: () => removeFile(currentFile),
-                            child: Material(
-                              color: Colors.black,
-                              child: Icon(
-                                Icons.clear,
-                                color: Colors.white,
-                              ),
-                              elevation: 2.0,
-                              type: MaterialType.circle,
-                            ),
-                            radius: 15.0,
-                          ),
-                        ),
-                      )
-                    ],
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      );
-  }
-
-  Widget buildMultimediaTab(BuildContext context) {
-    return Visibility(
-      visible: openMultimediaTab,
+        Visibility(
+      visible: imageFileList.length > 0,
       child: Row(
         children: <Widget>[
           Container(
             height: 150,
             width: deviceWidth,
-            child: Row(
-              children: <Widget>[
-                Row(
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              controller: imageViewScrollController,
+              physics: BouncingScrollPhysics(),
+              shrinkWrap: true,
+              reverse: true,
+              itemCount: imageFileList.length,
+              itemBuilder: (BuildContext buildContext2, int index) {
+                File currentFile = imageFileList[index];
+                return Stack(
+                  alignment: AlignmentDirectional.topEnd,
                   children: <Widget>[
-                    Icon(Icons.image),
-                    Icon(Icons.camera_alt),
-                    Icon(Icons.insert_drive_file),
+                    Card(
+                      elevation: 2.0,
+                      color: appBarTextTitleColor,
+                      child: Image.file(currentFile),
+                    ),
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: Container(
+                        padding: EdgeInsets.only(
+                          right: 5.0,
+                          top: 5.0,
+                        ),
+                        child: InkWell(
+                          onTap: () => removeImageFile(currentFile),
+                          child: Material(
+                            color: Colors.black,
+                            child: Icon(
+                              Icons.clear,
+                              color: Colors.white,
+                            ),
+                            elevation: 2.0,
+                            type: MaterialType.circle,
+                          ),
+                          radius: 15.0,
+                        ),
+                      ),
+                    )
                   ],
-                ),
-                Row(
-                  children: <Widget>[
-                    Icon(Icons.audiotrack),
-                    Icon(Icons.location_on),
-                    Icon(Icons.contacts),
-                  ],
-                ),
-              ],
-            )
+                );
+              },
+            ),
           ),
         ],
-      )
+      ),
     );
   }
 
-  removeFile(File file) {
-    print('chat_room_page.dart removeFile()');
+  Widget buildFileListTab(BuildContext context) {
+    return // Use Visibility to control to show widget easily. https://stackoverflow.com/questions/44489804/show-hide-widgets-in-flutter-programmatically
+        Visibility(
+      visible: documentFileList.length > 0,
+      child: Row(
+        children: <Widget>[
+          Container(
+            height: 150,
+            width: deviceWidth,
+            child: ListView.builder(
+              controller: fileViewScrollController,
+              physics: BouncingScrollPhysics(),
+              shrinkWrap: true,
+              reverse: true,
+              itemCount: documentFileList.length,
+              itemBuilder: (BuildContext buildContext2, int index) {
+                File currentFile = documentFileList[index];
+                String fileName = basename(currentFile.path);
+                return Stack(
+                  alignment: AlignmentDirectional.topEnd,
+                  children: <Widget>[
+                    Card(
+                      elevation: 2.0,
+                      color: appBarTextTitleColor,
+                      child: Text(fileName),
+                    ),
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: Container(
+                        padding: EdgeInsets.only(
+                          right: 5.0,
+                          top: 5.0,
+                        ),
+                        child: InkWell(
+                          onTap: () => removeFile(currentFile),
+                          child: Material(
+                            color: Colors.black,
+                            child: Icon(
+                              Icons.clear,
+                              color: Colors.white,
+                            ),
+                            elevation: 2.0,
+                            type: MaterialType.circle,
+                          ),
+                          radius: 15.0,
+                        ),
+                      ),
+                    )
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildMultimediaTab(BuildContext context) {
+    return Material(
+      child: Visibility(
+          visible: openMultimediaTab,
+          child: FadeTransition(
+            opacity: animation,
+            child: Row(
+              children: <Widget>[
+                Container(
+                    height: deviceHeight * 0.3,
+                    width: deviceWidth,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            multimediaButton(context, 'Image', Icons.image, () => getImage()),
+                            multimediaButton(context, 'Camera', Icons.camera_alt, () => openCamera()),
+                            multimediaButton(context, 'File', Icons.insert_drive_file, () => getFiles()),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            multimediaButton(context, 'Audio', Icons.audiotrack, () => {}),
+                            multimediaButton(context, 'Location', Icons.location_on, () => {}),
+                            multimediaButton(context, 'Contact', Icons.contacts, () => {}),
+                          ],
+                        ),
+                      ],
+                    )),
+              ],
+            ),
+          )),
+    );
+  }
+
+  Widget multimediaButton(BuildContext context, String name, IconData iconData, Function function) {
+    return Material(
+      child: InkWell(
+          customBorder: CircleBorder(),
+          onTap: function,
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              children: <Widget>[
+                Text(name),
+                Icon(iconData),
+              ],
+            ),
+          )),
+    );
+  }
+
+  removeImageFile(File file) {
     setState(() {
-      bool deleted = fileList.remove(file);
-      print('chat_room_page.dart deleted: ' + deleted.toString());
-      print('chat_room_page.dart after that, fileList.length: ' + fileList.length.toString());
+      imageFileList.remove(file);
+    });
+  }
+
+  removeFile(File file) {
+    setState(() {
+      documentFileList.remove(file);
     });
   }
 
   Widget buildListMessage(BuildContext context, User user) {
     return BlocBuilder<WebSocketBloc, WebSocketState>(
       builder: (context, webSocketState) {
-        print('chat_room_page.dart BlocBuilder<WebSocketBloc, WebSocketState>');
         if (webSocketState is WebSocketNotLoaded) {
           BlocProvider.of<WebSocketBloc>(context).add(ReconnectWebSocketEvent(callback: (bool done) {}));
         }
 
         if (webSocketState is WebSocketLoaded) {
-          print('chat_room_page.dart if (webSocketState is WebSocketLoaded)');
           return loadMessageList(context, user);
         }
         return loadMessageList(context, user);
@@ -448,18 +547,15 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   Widget loadMessageList(BuildContext context, User user) {
     return BlocBuilder<MessageBloc, MessageState>(
       builder: (context, messageState) {
-        print('chat_room_page.dart BlocBuilder<MessageBloc, MessageState>');
         if (messageState is MessageLoading) {
           return showSingleMessagePage('Loading...');
         }
 
         if (messageState is MessagesLoaded) {
-          print('if (messageState is MessagesLoaded) RUN HERE?');
           // Get current conversation messages and sort them.
           List<Message> conversationGroupMessageList =
               messageState.messageList.where((Message message) => message.conversationId == widget._conversationGroup.id).toList();
           conversationGroupMessageList.sort((message1, message2) => message2.timestamp.compareTo(message1.timestamp));
-          print("conversationGroupMessageList.length: " + conversationGroupMessageList.length.toString());
 
           return Flexible(
             child: ListView.builder(
@@ -596,8 +692,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               ),
             ],
           );
-        } else {
-          print('chat_room_page.dart if(isObjectEmpty(messageMultimedia))');
         }
       }
 
@@ -654,7 +748,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     DateFormat dateFormat = DateFormat("dd-MM-yyyy");
     DateTime today = dateFormat.parse(formattedDate);
     String formattedDate2 = DateFormat("dd-MM-yyyy hh:mm:ss").format(today);
-//    print("today: " + formattedDate2);
+    // print("today: " + formattedDate2);
     DateTime messageTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
     String formattedDate3 = DateFormat("hh:mm").format(messageTime);
     return formattedDate3;
@@ -793,7 +887,6 @@ class ChatRoomPageState extends State<ChatRoomPage> {
             if (isObjectEmpty(message)) {
               Fluttertoast.showToast(msg: 'Message not sent. Please try again.', toastLength: Toast.LENGTH_SHORT);
             } else {
-              print('if(!isObjectEmpty(message)');
               WebSocketMessage webSocketMessage = WebSocketMessage(message: message);
               BlocProvider.of<WebSocketBloc>(context)
                   .add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
@@ -804,7 +897,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     }
 
     // Got files to send (Images, Video, Audio, Files)
-    if (fileList.length > 0) {
+    if (imageFileList.length > 0) {
       uploadMultimediaFiles(context, user, conversationGroup);
     }
   }
@@ -812,13 +905,31 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   Future getImage() async {
     File imageFile = await ImagePicker.pickImage(source: ImageSource.gallery, imageQuality: imagePickerQuality);
     if (!isObjectEmpty(imageFile) && await imageFile.exists()) {
-      print('chat_room_page.dart if (await imageFile.exists())');
       setState(() {
-        fileList.add(imageFile);
+        imageFileList.add(imageFile);
       });
       scrollToTheEnd();
-    } else {
-      print('chat_room_page.dart if (!await imageFile.exists())');
+    }
+  }
+
+  Future openCamera() async {
+    File imageFile = await ImagePicker.pickImage(source: ImageSource.camera, imageQuality: imagePickerQuality);
+    if (await imageFile.exists()) {
+      setState(() {
+        imageFileList.add(imageFile);
+      });
+      scrollToTheEnd();
+    }
+  }
+
+  // Note: Can get any file
+  Future getFiles() async {
+    List<File> fileList = await FilePicker.getMultiFile(type: FileType.ANY);
+    if (!isObjectEmpty(fileList) && fileList.length > 0) {
+      setState(() {
+        documentFileList.addAll(fileList.where((File file) => true));
+      });
+      scrollToTheEnd();
     }
   }
 
@@ -831,8 +942,8 @@ class ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   uploadMultimediaFiles(BuildContext context, User user, ConversationGroup conversationGroup) {
-    if (fileList.length > 0) {
-      fileList.forEach((File file) {
+    if (imageFileList.length > 0) {
+      imageFileList.forEach((File file) {
         Message message = Message(
           id: null,
           conversationId: widget._conversationGroup.id,
@@ -883,7 +994,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
               }
             }));
         setState(() {
-          fileList.remove(file);
+          imageFileList.remove(file);
         });
       });
     }
@@ -908,17 +1019,9 @@ class ChatRoomPageState extends State<ChatRoomPage> {
         multimedia: multimedia,
         callback: (Multimedia multimedia2) {
           if (!isObjectEmpty(multimedia2)) {
-            print('chat_room_page.dart EditMultimediaEvent success');
-            print('chat_room_page.dart multimedia2.remoteFullFileUrl == multimedia.remoteFullFileUrl: ' + multimedia2.remoteFullFileUrl ==
-                multimedia.remoteFullFileUrl);
-            print(
-                'chat_room_page.dart multimedia2.remoteThumbnailUrl == multimedia.remoteThumbnailUrl: ' + multimedia2.remoteThumbnailUrl ==
-                    multimedia.remoteThumbnailUrl);
             WebSocketMessage webSocketMessage = WebSocketMessage(message: message, multimedia: multimedia);
             BlocProvider.of<WebSocketBloc>(context)
                 .add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
-          } else {
-            print('chat_room_page.dart EditMultimediaEvent failed.');
           }
         }));
   }
@@ -934,7 +1037,7 @@ class ChatRoomPageState extends State<ChatRoomPage> {
 //  }
 
   // Hide sticker or back
-  Future<bool> onBackPress() {
+  Future<bool> onBackPress(BuildContext context) {
     if (isShowSticker) {
       setState(() {
         isShowSticker = false;
@@ -962,8 +1065,12 @@ class ChatRoomPageState extends State<ChatRoomPage> {
     }
   }
 
-  goToLoginPage() {
+  goToLoginPage(BuildContext context) {
     BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
     Navigator.of(context).pushNamedAndRemoveUntil("login_page", (Route<dynamic> route) => false);
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => false;
 }
