@@ -251,15 +251,17 @@ class LoginPageState extends State<LoginPage> {
                             print('login_page.dart if (isObjectEmpty(user2))');
                             Fluttertoast.showToast(
                                 msg: 'Invalid Mobile No./matching Google account. Please try again.', toastLength: Toast.LENGTH_SHORT);
-                            BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
-                            Navigator.pop(context);
+                            BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {
+                              Navigator.pop(context);
+                            }));
                           }
                         }));
                   } else {
                     Fluttertoast.showToast(
                         msg: 'Unregconized phone number/Google Account. Please sign up first.', toastLength: Toast.LENGTH_SHORT);
-                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
-                    Navigator.pop(context);
+                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {
+                      Navigator.pop(context);
+                    }));
                   }
                 }));
           }));

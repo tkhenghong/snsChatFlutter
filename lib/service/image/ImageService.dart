@@ -19,44 +19,6 @@ class ImageService {
 
   static int imageThumbnailWidthSize = globals.imageThumbnailWidthSize;
 
-  // TODO: Stop using this, use cachedNetworkImage widget, but need to know
-  // Returns ImageProvider object
-  // Image local thumbnail -> Image remote thumbnail -> Image remote full file
-  // Remember, ONLY load full file when view it in whole screen.
-  // Full file is not as important as thumbnail. (Thumbnails directories MUST be there)
-  // Network file can gone, but thumbnails are always secured in local storage
-  // (In local storage, you're unable to delete it manually, plus,
-  // network storage always have a thumbnail copy of it, full file is removable(except UserContact photo))
-  // @param context: For bring in WholeAppBloc so that it can dispatch events
-  ImageProvider processImageThumbnail(Multimedia multimedia, String type, BuildContext context) {
-    if (isObjectEmpty(multimedia) || isStringEmpty(type)) {
-      return AssetImage(fileService.getDefaultImagePath(type));
-    }
-    try {
-      File file = File(multimedia.localThumbnailUrl); // Image.file(file).image;
-      fileService.getFile(multimedia.localThumbnailUrl).then((File file) {
-        if (isObjectEmpty(file)) {
-          downloadThumbnailFileAndUpdateMultimedia(multimedia, context);
-        }
-      });
-      return FileImage(file);
-    } catch (e) {
-      print("Thumbnail file is missing");
-      print("Reason: " + e.toString());
-      // TODO: Use FileService to download file, get the File object, get it's remoteURL and update the localDB and State of Multimedia object, setState(){}
-      downloadThumbnailFileAndUpdateMultimedia(multimedia, context);
-      try {
-        print("multimedia.remoteFullFileUrl: " + multimedia.remoteThumbnailUrl.toString());
-        return NetworkImage(multimedia.remoteThumbnailUrl); // Image.network(multimedia.remoteFullFileUrl).image
-      } catch (e) {
-        print("Network file is missing too.");
-        print("Reason: " + e.toString());
-        // In case network is empty too
-        return AssetImage(fileService.getDefaultImagePath(type)); // Image.asset(fileService.getDefaultImagePath(type)).image
-      }
-    }
-  }
-
   Widget loadImageThumbnailCircleAvatar(Multimedia multimedia, String type, BuildContext context) {
     Color appBarTextTitleColor = Theme.of(context).appBarTheme.textTheme.title.color;
 
@@ -96,18 +58,14 @@ class ImageService {
     double width = deviceWidth * 0.65;
     double height = deviceHeight * 0.4;
     try {
-      if (isObjectEmpty(multimedia)) {
-        fileService.downloadMultimediaFile(context, multimedia);
-        return Image.asset(
-          fileService.getDefaultImagePath(type),
-          width: width,
-          height: height,
-        );
-      }
-
       if (!isObjectEmpty(multimedia.localFullFileUrl)) {
         File localImagefile = File(multimedia.localFullFileUrl);
 
+        localImagefile.exists().then((bool exist) {
+          if (!exist) {
+            redownloadMultimediaFile(context, multimedia);
+          }
+        });
         return Image.file(
           localImagefile,
           fit: BoxFit.cover,
@@ -115,6 +73,8 @@ class ImageService {
           height: height,
         );
       } else {
+        redownloadMultimediaFile(context, multimedia);
+
         return CachedNetworkImage(
           useOldImageOnUrlChange: true,
           imageUrl: multimedia.remoteFullFileUrl,
@@ -140,7 +100,7 @@ class ImageService {
     } catch (e) {
       print('ImageService.dart loadFullImage() error');
       print('ImageService.dart e: ' + e.toString());
-      fileService.downloadMultimediaFile(context, multimedia);
+      redownloadMultimediaFile(context, multimedia);
       return Image.asset(
         fileService.getDefaultImagePath(type),
         width: width,
@@ -149,24 +109,15 @@ class ImageService {
     }
   }
 
-  // Only handles thumbnail download
-  downloadThumbnailFileAndUpdateMultimedia(Multimedia multimedia, BuildContext context) async {
-    fileService.downloadFile(multimedia.remoteThumbnailUrl, true, true).then((File file) {
-      if (!isObjectEmpty(file)) {
-        multimedia.localThumbnailUrl = file.path;
-//        wholeAppBloc = BlocProvider.of<WholeAppBloc>(context);
-        // Don't update it in REST
-
-//        wholeAppBloc.dispatch(EditMultimediaEvent(
-//            multimedia: multimedia, updateInREST: false, updateInDB: true, updateInState: true, callback: (Multimedia multimedia) {}));
-      }
-    });
+  redownloadMultimediaFile(BuildContext context, Multimedia multimedia) {
+    if (!isObjectEmpty(multimedia) && !isStringEmpty(multimedia.remoteFullFileUrl)) {
+      fileService.downloadMultimediaFile(context, multimedia);
+    }
   }
 
   // Isolate solution: https://github.com/brendan-duncan/image/wiki/Examples
   // Down there, there's an example of using isolate to processing something about the photo so that it won't eat up the UI thread
   Future<File> getImageThumbnail(File imageFile) async {
-    print("getImageThumbnail()");
     try {
       ReceivePort receivePort = ReceivePort();
 
@@ -195,7 +146,6 @@ class ImageService {
     }
   }
 
-  // Create thumbnail
   static void createThumbnail(DecodeParam param) async {
     CustomImage.Image image = CustomImage.decodeImage(param.file.readAsBytesSync());
 

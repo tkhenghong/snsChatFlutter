@@ -20,6 +20,18 @@ class InitializeWebSocketEvent extends WebSocketEvent {
   String toString() => 'InitializeWebSocketEvent';
 }
 
+class DisconnectWebSocketEvent extends WebSocketEvent {
+  final Function callback;
+
+  DisconnectWebSocketEvent({this.callback});
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'DisconnectWebSocketEvent';
+}
+
 class ReconnectWebSocketEvent extends WebSocketEvent {
   final User user;
   final Function callback;

@@ -17,6 +17,8 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
   Stream<WebSocketState> mapEventToState(WebSocketEvent event) async* {
     if (event is InitializeWebSocketEvent) {
       yield* _initializeWebSocketToState(event);
+    } else if (event is DisconnectWebSocketEvent) {
+      yield* _disconnectWebSocket(event);
     } else if (event is ReconnectWebSocketEvent) {
       yield* _reconnectWebSocket(event);
     } else if (event is GetOwnWebSocketEvent) {
@@ -36,6 +38,12 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
       yield WebSocketNotLoaded();
       functionCallback(event, false);
     }
+  }
+
+  Stream<WebSocketState> _disconnectWebSocket(DisconnectWebSocketEvent event) async* {
+    webSocketService.closeWebSocket();
+    yield WebSocketNotLoaded();
+    functionCallback(event, true);
   }
 
   Stream<WebSocketState> _reconnectWebSocket(ReconnectWebSocketEvent event) async* {
@@ -74,6 +82,10 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
               // "Message" message
               BlocProvider.of<MessageBloc>(event.context)
                   .add(AddMessageEvent(message: webSocketMessage.message, callback: (Message message) {}));
+              if(webSocketMessage.message.type != 'Text' && webSocketMessage.message.type != 'Contact' && webSocketMessage.message.type != 'Location') {
+                BlocProvider.of<MultimediaBloc>(event.context)
+                    .add(GetMessageMultimediaEvent(messageId: webSocketMessage.message.id, conversationGroupId: webSocketMessage.message.conversationId, callback: (Multimedia multimedia) {}));
+              }
             } else {
               // Mark your own message as sent, received status will changed by recipient
               webSocketMessage.message.status = 'Sent';

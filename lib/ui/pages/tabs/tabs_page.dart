@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_group_list/chat_group_list_page.dart';
 import 'package:snschat_flutter/ui/pages/select_contacts/select_contacts_page.dart';
 import 'package:snschat_flutter/ui/pages/myself/myself_page.dart';
@@ -12,7 +14,7 @@ class TabsPage extends StatefulWidget {
   }
 }
 
-class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   AnimationController _animationController, _animationController2;
   Animation animation;
   static const List<IconData> icons = const [Icons.person_add, Icons.group_add]; // TODO: Add Broadcast
@@ -25,6 +27,7 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
 
   PageController pageViewController = PageController(initialPage: 0, keepPage: true);
   List<Widget> tabPages;
+//  BuildContext context;
 
   @override
   void initState() {
@@ -37,18 +40,22 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
     _animationController2 = new AnimationController(vsync: this, duration: Duration(milliseconds: 300));
     animation = Tween(begin: 0.0, end: 1.0).animate(_animationController2);
     _animationController2.forward();
+
+    // To detect app is background or foreground state
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
     _animationController.dispose();
     _animationController2.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-
+//    this.context = context;
     themePrimaryColor = Theme.of(context).textTheme.title.color;
 
     print('Tabs Page: build? ');
@@ -62,9 +69,7 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
             title: Text(
               tabTitle,
               textAlign: TextAlign.start,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32.0,
-                  color: themePrimaryColor
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32.0, color: themePrimaryColor),
             ),
           ),
           backgroundColor: Colors.white,
@@ -207,4 +212,28 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
   @override
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      print('tabs_page.dart if (state == AppLifecycleState.resumed)');
+      UserState userState = BlocProvider.of<UserBloc>(context).state;
+      if (userState is UserLoaded) {
+        BlocProvider.of<WebSocketBloc>(context).add(ReconnectWebSocketEvent(user: userState.user, callback: (bool done) {}));
+      }
+    }
+
+    if (state == AppLifecycleState.paused) {
+      print('tabs_page.dart if (state == AppLifecycleState.paused)');
+      BlocProvider.of<WebSocketBloc>(context).add(DisconnectWebSocketEvent(callback: (bool done) {}));
+    }
+
+    if (state == AppLifecycleState.inactive) {
+      print('tabs_page.dart if (state == AppLifecycleState.inactive)');
+    }
+
+    if (state == AppLifecycleState.detached) {
+      print('tabs_page.dart if (state == AppLifecycleState.detached)');
+    }
+  }
 }

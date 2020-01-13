@@ -30,6 +30,8 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
       yield* _getConversationGroupsMultimediaEvent(event);
     } else if (event is GetUserContactsMultimediaEvent) {
       yield* _getUserContactsMultimediaEvent(event);
+    } else if (event is GetMessageMultimediaEvent) {
+      yield* _getMessageMultimediaEvent(event);
     }
   }
 
@@ -247,6 +249,13 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
 
     yield MultimediaLoaded(multimediaList);
     functionCallback(event, true);
+  }
+
+  Stream<MultimediaState> _getMessageMultimediaEvent(GetMessageMultimediaEvent event) async* {
+    Multimedia multimediaFromServer = await multimediaAPIService.getMessageMultimedia(event.conversationGroupId, event.messageId);
+    if(!isObjectEmpty(multimediaFromServer)) {
+      add(AddMultimediaEvent(multimedia: multimediaFromServer, callback: (Multimedia multimedia) {}));
+    }
   }
 
   // To send response to those dispatched Actions

@@ -284,7 +284,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                   margin: EdgeInsets.symmetric(horizontal: 1.0),
                   child: IconButton(
                     icon: Icon(Icons.attach_file),
-//                    onPressed: () => getImage(),
                     onPressed: () {
                       setState(() {
                         openMultimediaTab = !openMultimediaTab;
@@ -598,6 +597,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     double lrPadding = 15.0;
     bool isText = message.type == 'Text';
     bool isImage = message.type == 'Image';
+    bool isFile = message.type == 'Document';
     return Column(
       children: <Widget>[
         Row(
@@ -618,14 +618,60 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
             ? showMessageText(context, message, isSenderMessage)
             : isImage
                 ? showMessageImage(context, message, isSenderMessage)
-                : showUnidentifiedMessageText(context, message, isSenderMessage),
+                : isFile
+                    ? showFileMessage(context, message, isSenderMessage)
+                    : showUnidentifiedMessageText(context, message, isSenderMessage),
       ],
     );
   }
 
   Widget showMessageText(BuildContext context, Message message, bool isSenderMessage) {
+    Widget textMessageContent = Text(
+      // message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
+      message.messageContent,
+      style: TextStyle(color: appBarTextTitleColor),
+    );
+
+    return buildMessageChatBubble(context, message, isSenderMessage, textMessageContent);
+  }
+
+  Widget showMessageImage(BuildContext context, Message message, bool isSenderMessage) {
+    return BlocBuilder<MultimediaBloc, MultimediaState>(builder: (context, multimediaState) {
+      if (multimediaState is MultimediaLoaded) {
+        List<Multimedia> multimediaList = multimediaState.multimediaList;
+        Multimedia messageMultimedia =
+            multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.id, orElse: () => null);
+        if (!isObjectEmpty(messageMultimedia)) {
+          Widget imageMessageContent = Hero(
+            tag: messageMultimedia.id,
+            child: Material(
+              child: InkWell(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16.0),
+                  child: imageService.loadFullImage(context, messageMultimedia, 'ConversationGroupMessage'),
+                ),
+                onTap: () => {
+                  // View photo
+                  Navigator.push(context, MaterialPageRoute(builder: ((context) => PhotoViewPage(messageMultimedia))))
+                },
+              ),
+            ),
+          );
+
+          return buildMessageChatBubble(context, message, isSenderMessage, imageMessageContent);
+        }
+      }
+
+      return buildMessageChatBubble(
+          context, message, isSenderMessage, imageService.loadFullImage(context, null, 'ConversationGroupMessage'));
+    });
+  }
+
+  Widget buildMessageChatBubble(BuildContext context, Message message, bool isSenderMessage, Widget content) {
     double lrPadding = 15.0;
     double tbPadding = 10.0;
+
+    print('chat_room_page.dart buildMessageChatBubble()');
 
     return Row(
       crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
@@ -639,80 +685,25 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
           child: Row(
             children: <Widget>[
               Column(
-                children: <Widget>[
-                  Text(
-                    // message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
-                    message.messageContent,
-                    style: TextStyle(color: appBarTextTitleColor),
-                  )
-                ],
+                children: <Widget>[content],
               ),
             ],
           ),
-        )
+        ),
       ],
     );
   }
 
-  Widget showMessageImage(BuildContext context, Message message, bool isSenderMessage) {
+  Widget showFileMessage(BuildContext context, Message message, bool isSenderMessage) {
     return BlocBuilder<MultimediaBloc, MultimediaState>(builder: (context, multimediaState) {
       if (multimediaState is MultimediaLoaded) {
         List<Multimedia> multimediaList = multimediaState.multimediaList;
         Multimedia messageMultimedia =
             multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.id, orElse: () => null);
-        if (!isObjectEmpty(messageMultimedia)) {
-          return Row(
-            crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-            mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(
-                    bottom: 20.0, right: isSenderMessage ? deviceWidth * 0.01 : 0.0, left: isSenderMessage ? deviceWidth * 0.01 : 0.0),
-                child: Row(
-                  children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        Hero(
-                          tag: messageMultimedia.id,
-                          child: InkWell(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16.0),
-                              child: imageService.loadFullImage(context, messageMultimedia, 'ConversationGroupMessage'),
-                            ),
-                            onTap: () => {
-                              // View photo
-                              Navigator.push(context, MaterialPageRoute(builder: ((context) => PhotoViewPage(messageMultimedia))))
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        }
+        fileService.downloadMultimediaFile(context, messageMultimedia);
       }
 
-      return Row(
-        crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-        mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            margin: EdgeInsets.only(
-                bottom: 20.0, right: isSenderMessage ? deviceWidth * 0.01 : 0.0, left: isSenderMessage ? deviceWidth * 0.01 : 0.0),
-            child: Row(
-              children: <Widget>[
-                Column(
-                  children: <Widget>[imageService.loadFullImage(context, null, 'ConversationGroupMessage')],
-                ),
-              ],
-            ),
-          ),
-        ],
-      );
-      ;
+      return buildMessageChatBubble(context, message, isSenderMessage, Text('Document appears here', style: TextStyle(color: appBarTextTitleColor),));
     });
   }
 
@@ -892,13 +883,15 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                   .add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
             }
           }));
-    } else {
-      Fluttertoast.showToast(msg: 'Nothing to send');
     }
 
     // Got files to send (Images, Video, Audio, Files)
     if (imageFileList.length > 0) {
-      uploadMultimediaFiles(context, user, conversationGroup);
+      uploadMultimediaFiles(context, imageFileList, user, conversationGroup, "Image");
+    }
+
+    if (documentFileList.length > 0) {
+      uploadMultimediaFiles(context, documentFileList, user, conversationGroup, "Document");
     }
   }
 
@@ -941,9 +934,9 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
             duration: Duration(milliseconds: 300), curve: Curves.easeOut));
   }
 
-  uploadMultimediaFiles(BuildContext context, User user, ConversationGroup conversationGroup) {
-    if (imageFileList.length > 0) {
-      imageFileList.forEach((File file) {
+  uploadMultimediaFiles(BuildContext context, List<File> fileList, User user, ConversationGroup conversationGroup, String type) {
+    if (fileList.length > 0) {
+      fileList.forEach((File file) {
         Message message = Message(
           id: null,
           conversationId: widget._conversationGroup.id,
@@ -957,7 +950,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
           senderMobileNo: user.mobileNo,
           senderName: user.displayName,
           status: "Sent",
-          type: "Image",
+          type: type,
           timestamp: DateTime.now().millisecondsSinceEpoch,
         );
         BlocProvider.of<MessageBloc>(context).add(AddMessageEvent(
@@ -976,45 +969,49 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                     messageId: message.id,
                     userId: null);
 
-                // Create thumbnail
-                File thumbnailImageFile;
-                if (!isStringEmpty(messageMultimedia.localFullFileUrl) && !isObjectEmpty(file)) {
-                  thumbnailImageFile = await imageService.getImageThumbnail(file);
-                }
+                if (type == 'Image') {
+                  // Create thumbnail
+                  File thumbnailImageFile;
+                  if (!isStringEmpty(messageMultimedia.localFullFileUrl) && !isObjectEmpty(file)) {
+                    thumbnailImageFile = await imageService.getImageThumbnail(file);
 
-                if (!isObjectEmpty(thumbnailImageFile)) {
-                  messageMultimedia.localThumbnailUrl = thumbnailImageFile.path;
+                    if (!isObjectEmpty(thumbnailImageFile)) {
+                      messageMultimedia.localThumbnailUrl = thumbnailImageFile.path;
+                    }
+                  }
                 }
 
                 BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
                     multimedia: messageMultimedia,
                     callback: (Multimedia multimedia2) async {
-                      updateMultimediaContent(context, multimedia2, message2, conversationGroup);
+                      Multimedia multimedia3 = await uploadMultimediaToCloud(context, multimedia2, conversationGroup);
+
+                      updateMultimediaContent(context, multimedia3, message2, conversationGroup);
                     }));
               }
             }));
         setState(() {
-          imageFileList.remove(file);
+          fileList.remove(file);
         });
       });
     }
   }
 
+  Future<Multimedia> uploadMultimediaToCloud(BuildContext context, Multimedia multimedia, ConversationGroup conversationGroup) async {
+    if (!isStringEmpty(multimedia.localFullFileUrl)) {
+      multimedia.remoteFullFileUrl =
+          await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
+    }
+
+    if (!isStringEmpty(multimedia.localThumbnailUrl)) {
+      multimedia.remoteThumbnailUrl =
+          await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
+    }
+
+    return multimedia;
+  }
+
   updateMultimediaContent(BuildContext context, Multimedia multimedia, Message message, ConversationGroup conversationGroup) async {
-    String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
-    print("chat_room_page.dart remoteUrl: " + remoteUrl.toString());
-    String remoteThumbnailUrl =
-        await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
-    print("chat_room_page.dart remoteThumbnailUrl: " + remoteThumbnailUrl.toString());
-
-    if (!isStringEmpty(remoteUrl)) {
-      multimedia.remoteFullFileUrl = remoteUrl;
-    }
-
-    if (!isStringEmpty(remoteThumbnailUrl)) {
-      multimedia.remoteThumbnailUrl = remoteThumbnailUrl;
-    }
-
     BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(
         multimedia: multimedia,
         callback: (Multimedia multimedia2) {
@@ -1061,6 +1058,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
       // Hide sticker when keyboard appear
       setState(() {
         isShowSticker = false;
+        openMultimediaTab = false;
       });
     }
   }

@@ -87,12 +87,12 @@ class FileService {
   downloadMultimediaFile(BuildContext context, Multimedia multimedia) async {
     FileInfo fileInfo = await defaultCacheManager.getFileFromCache(multimedia.remoteFullFileUrl);
     if (fileInfoIsEmpty(fileInfo)) {
-      FileInfo fileDownloadFromInternet = await defaultCacheManager.downloadFile(multimedia.localFullFileUrl);
-      FileInfo fileThumbnailDownloadedFromInternet = await defaultCacheManager.downloadFile(multimedia.localThumbnailUrl);
+      FileInfo fileDownloadFromInternet = await defaultCacheManager.downloadFile(multimedia.remoteFullFileUrl);
+      FileInfo fileThumbnailDownloadedFromInternet = await defaultCacheManager.downloadFile(multimedia.remoteThumbnailUrl);
       if (!fileInfoIsEmpty(fileDownloadFromInternet) && !fileInfoIsEmpty(fileThumbnailDownloadedFromInternet)) {
         multimedia.localFullFileUrl = fileDownloadFromInternet.file.path;
         multimedia.localThumbnailUrl = fileThumbnailDownloadedFromInternet.file.path;
-        BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(multimedia: multimedia, callback: (bool updated) {}));
+        BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
       }
     }
   }

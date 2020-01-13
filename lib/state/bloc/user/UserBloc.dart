@@ -163,12 +163,19 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       if (isSignedIn) {
         userFromServer = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
 
-        if (!isObjectEmpty(userFromServer)) {
-          saved = await userDBService.addUser(userFromServer);
 
-          if (saved) {
-            yield UserLoaded(userFromServer);
-            functionCallback(event, userFromServer);
+        if (!isObjectEmpty(userFromServer)) {
+          // Check mobile no match with it's googleAccount ID or not.
+          if(userFromServer.mobileNo == event.mobileNo) {
+            saved = await userDBService.addUser(userFromServer);
+
+            if (saved) {
+              yield UserLoaded(userFromServer);
+              functionCallback(event, userFromServer);
+            }
+          } else {
+            yield UserNotLoaded();
+            functionCallback(event, null);
           }
         }
       }

@@ -108,3 +108,17 @@ class GetUserContactsMultimediaEvent extends MultimediaEvent {
   @override
   String toString() => 'GetUserContactsMultimediaEvent {userContactList: $userContactList}';
 }
+
+class GetMessageMultimediaEvent extends MultimediaEvent {
+  final String conversationGroupId;
+  final String messageId;
+  final Function callback;
+
+  GetMessageMultimediaEvent({this.conversationGroupId, this.messageId, this.callback});
+
+  @override
+  List<Object> get props => [messageId, conversationGroupId];
+
+  @override
+  String toString() => 'GetMessageMultimediaEvent {messageId: $messageId, conversationGroupId: $conversationGroupId}';
+}
