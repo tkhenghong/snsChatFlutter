@@ -642,23 +642,39 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         Multimedia messageMultimedia =
             multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.id, orElse: () => null);
         if (!isObjectEmpty(messageMultimedia)) {
-          Widget imageMessageContent = Hero(
-            tag: messageMultimedia.id,
-            child: Material(
-              child: InkWell(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16.0),
-                  child: imageService.loadFullImage(context, messageMultimedia, 'ConversationGroupMessage'),
-                ),
-                onTap: () => {
-                  // View photo
-                  Navigator.push(context, MaterialPageRoute(builder: ((context) => PhotoViewPage(messageMultimedia))))
-                },
-              ),
-            ),
-          );
 
-          return buildMessageChatBubble(context, message, isSenderMessage, imageMessageContent);
+          // Need custom design, so Image doesn't use buildMessageChatBubble() method.
+          return Row(
+            crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+            mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.only(
+                    bottom: 20.0, right: isSenderMessage ? deviceWidth * 0.01 : 0.0, left: isSenderMessage ? deviceWidth * 0.01 : 0.0),
+                child: Row(
+                  children: <Widget>[
+                    Column(
+                      children: <Widget>[
+                        Hero(
+                          tag: messageMultimedia.id,
+                          child: InkWell(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16.0),
+                              child: imageService.loadFullImage(context, messageMultimedia, 'ConversationGroupMessage'),
+                            ),
+                            onTap: () => {
+                              // View photo
+                              Navigator.push(context, MaterialPageRoute(builder: ((context) => PhotoViewPage(messageMultimedia))))
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
         }
       }
 
