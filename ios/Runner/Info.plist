@@ -53,6 +53,10 @@
     	<key>NSPhotoLibraryUsageDescription</key>
     	<string>Used to demonstrate image picker plugin</string>
 
+        <key>FDMaximumConcurrentTasks</key>
+        <integer>5</integer>
+        <key>FDAllFilesDownloadedMessage</key>
+        <string>All files have been downloaded</string>
     	<key>UIBackgroundModes</key>
         <array>
            <string>fetch</string>

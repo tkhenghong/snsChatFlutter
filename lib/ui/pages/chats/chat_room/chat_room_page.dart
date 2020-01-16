@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/gestures.dart';
 import 'package:path/path.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -717,10 +718,24 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         Multimedia messageMultimedia =
             multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.id, orElse: () => null);
         fileService.downloadMultimediaFile(context, messageMultimedia);
+
+        Widget documentMessage = RichText(
+                              text: TextSpan(children: [
+                                TextSpan(
+                                    text: message.messageContent,
+                                    style: TextStyle(color: appBarTextTitleColor),
+                                    recognizer: TapGestureRecognizer()..onTap = () => downloadFile(context, messageMultimedia))
+                              ]));
+        return buildMessageChatBubble(context, message, isSenderMessage, documentMessage);
+
       }
 
       return buildMessageChatBubble(context, message, isSenderMessage, Text('Document appears here', style: TextStyle(color: appBarTextTitleColor),));
     });
+  }
+
+  downloadFile(BuildContext context, Multimedia multimedia) {
+    fileService.downloadFile(multimedia.remoteFullFileUrl, true, true);
   }
 
   Widget showUnidentifiedMessageText(BuildContext context, Message message, bool isSenderMessage) {

@@ -132,9 +132,13 @@ class FileService {
     return null;
   }
 
+  // TODO: bring filename to download the file correctly
   Future<File> downloadFile(String remoteUrl, bool showNotification, bool openFileFromNotification) async {
     print("FileService downloadFile()");
     print("remoteUrl: " + remoteUrl);
+
+    WidgetsFlutterBinding.ensureInitialized();
+    await FlutterDownloader.initialize();
 
     String downloadDirectory = await getApplicationDocumentDirectory() + "/";
     // Create a task
@@ -172,7 +176,7 @@ class FileService {
     print("fileName: " + fileName);
 
     // Get the file's format
-    int lastDot = fileName.lastIndexOf(".");
+    int lastDot = fileName.lastIndexOf("?");
     String fileFormat = fileName.substring(lastDot + 1, fileName.length);
 
     print("lastDot: " + lastDot.toString());
