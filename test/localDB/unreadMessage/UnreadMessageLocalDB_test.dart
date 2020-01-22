@@ -2,7 +2,7 @@ import 'package:snschat_flutter/backend/rest/unreadMessage/UnreadMessageAPIServi
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:snschat_flutter/database/sembast/unread_message/unread_message.dart';
-import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
+import 'package:snschat_flutter/objects/unreadMessage/unread_message.dart';
 
 void main() {
   UnreadMessageAPIService unreadMessageAPIService = UnreadMessageAPIService();

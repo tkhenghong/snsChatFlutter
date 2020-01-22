@@ -3,7 +3,9 @@ import 'package:snschat_flutter/backend/rest/index.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/index.dart';
-import 'package:snschat_flutter/state/bloc/message/bloc.dart';
+
+import 'bloc.dart';
+
 
 class MessageBloc extends Bloc<MessageEvent, MessageState> {
   MessageAPIService messageAPIService = MessageAPIService();

@@ -3,7 +3,9 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/service/permissions/PermissionService.dart';
-import 'package:snschat_flutter/state/bloc/phoneStorageContacts/bloc.dart';
+
+import 'bloc.dart';
+
 
 class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorageContactState> {
   PermissionService permissionService = PermissionService();

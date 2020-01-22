@@ -7,7 +7,7 @@ import 'package:snschat_flutter/general/ui-component/custom_dialogs.dart';
 import 'package:snschat_flutter/objects/conversationGroup/conversation_group.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
-import 'package:snschat_flutter/objects/userContact/userContact.dart';
+import 'package:snschat_flutter/objects/userContact/user_contact.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';

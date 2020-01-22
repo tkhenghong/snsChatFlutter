@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:path/path.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -43,6 +44,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   bool openMultimediaTab = false;
   double deviceWidth;
   double deviceHeight;
+  bool textInField = false;
 
   Color appBarTextTitleColor;
   Color appBarThemeColor;
@@ -321,6 +323,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                       hintStyle: TextStyle(color: Colors.grey),
                     ),
                     focusNode: focusNode,
+                    onChanged: checkTextOnField,
                   ),
                 ),
               ),
@@ -329,7 +332,10 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               Material(
                 child: Container(
                   margin: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: IconButton(
+                  child: !textInField ? IconButton(
+                    icon: Icon(Icons.keyboard_voice),
+                    onPressed: () => sendChatMessage(context, '', 3, user, conversationGroup),
+                  ) : IconButton(
                     icon: Icon(Icons.send),
                     onPressed: () => sendChatMessage(context, textEditingController.text, 0, user, conversationGroup),
                   ),
@@ -344,6 +350,12 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 //      height: fileList.length > 0 ? deviceHeight * 0.2 : deviceHeight * 0.1,
       decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 0.5)), color: Colors.white),
     );
+  }
+
+  checkTextOnField(String text) {
+      setState(() {
+        textInField = !isStringEmpty(textEditingController.text);
+      });
   }
 
   Widget buildImageListTab(BuildContext context) {
@@ -643,7 +655,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         Multimedia messageMultimedia =
             multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.id, orElse: () => null);
         if (!isObjectEmpty(messageMultimedia)) {
-
           // Need custom design, so Image doesn't use buildMessageChatBubble() method.
           return Row(
             crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
@@ -720,22 +731,30 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         fileService.downloadMultimediaFile(context, messageMultimedia);
 
         Widget documentMessage = RichText(
-                              text: TextSpan(children: [
-                                TextSpan(
-                                    text: message.messageContent,
-                                    style: TextStyle(color: appBarTextTitleColor),
-                                    recognizer: TapGestureRecognizer()..onTap = () => downloadFile(context, messageMultimedia))
-                              ]));
+            text: TextSpan(children: [
+          TextSpan(
+              text: message.messageContent,
+              style: TextStyle(color: appBarTextTitleColor),
+              recognizer: TapGestureRecognizer()..onTap = () => downloadFile(context, messageMultimedia, message))
+        ]));
         return buildMessageChatBubble(context, message, isSenderMessage, documentMessage);
-
       }
 
-      return buildMessageChatBubble(context, message, isSenderMessage, Text('Document appears here', style: TextStyle(color: appBarTextTitleColor),));
+      return buildMessageChatBubble(
+          context,
+          message,
+          isSenderMessage,
+          Text(
+            'Document appears here',
+            style: TextStyle(color: appBarTextTitleColor),
+          ));
     });
   }
 
-  downloadFile(BuildContext context, Multimedia multimedia) {
-    fileService.downloadFile(multimedia.remoteFullFileUrl, true, true);
+  downloadFile(BuildContext context, Multimedia multimedia, Message message) {
+    // message.messageContent is the filename
+    Fluttertoast.showToast(msg: 'Your download has started.', toastLength: Toast.LENGTH_LONG);
+    fileService.downloadFile(context, multimedia.remoteFullFileUrl, true, true, message.messageContent);
   }
 
   Widget showUnidentifiedMessageText(BuildContext context, Message message, bool isSenderMessage) {
@@ -882,6 +901,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     // 0 = text,
     // 1 = image,
     // 2 = sticker
+    // 3 = voice
     if (type == 0 && content.trim() != '') {
       print("if (content.trim() != '')");
       textEditingController.clear();
@@ -967,11 +987,13 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   uploadMultimediaFiles(BuildContext context, List<File> fileList, User user, ConversationGroup conversationGroup, String type) {
     if (fileList.length > 0) {
-      fileList.forEach((File file) {
+      fileList.forEach((File file) async {
+        FileStat fileStat = await file.stat();
+
         Message message = Message(
           id: null,
           conversationId: widget._conversationGroup.id,
-          messageContent: "Test",
+          messageContent: basename(file.path),
           multimediaId: "",
           // Send to group will not need receiver
           receiverId: "",
@@ -998,7 +1020,8 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                     conversationId: conversationGroup.id,
                     // Add later
                     messageId: message.id,
-                    userId: null);
+                    userId: null,
+                    size: fileStat.size);
 
                 if (type == 'Image') {
                   // Create thumbnail
@@ -1016,6 +1039,9 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                     multimedia: messageMultimedia,
                     callback: (Multimedia multimedia2) async {
                       Multimedia multimedia3 = await uploadMultimediaToCloud(context, multimedia2, conversationGroup);
+                      if (isObjectEmpty(multimedia3)) {
+                        print('chat_room_page.dart multimedia3: ' + multimedia3.remoteFullFileUrl.toString());
+                      }
 
                       updateMultimediaContent(context, multimedia3, message2, conversationGroup);
                     }));
@@ -1029,12 +1055,15 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   Future<Multimedia> uploadMultimediaToCloud(BuildContext context, Multimedia multimedia, ConversationGroup conversationGroup) async {
+    print('chat_room_page.dart uploadMultimediaToCloud()');
     if (!isStringEmpty(multimedia.localFullFileUrl)) {
+      print('chat_room_page.dart if (!isStringEmpty(multimedia.localFullFileUrl))');
       multimedia.remoteFullFileUrl =
           await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
     }
 
     if (!isStringEmpty(multimedia.localThumbnailUrl)) {
+      print('chat_room_page.dart if (!isStringEmpty(multimedia.localThumbnailUrl))');
       multimedia.remoteThumbnailUrl =
           await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
     }
@@ -1043,13 +1072,18 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   updateMultimediaContent(BuildContext context, Multimedia multimedia, Message message, ConversationGroup conversationGroup) async {
+    print('chat_room_page.dart updateMultimediaContent()');
     BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(
         multimedia: multimedia,
         callback: (Multimedia multimedia2) {
           if (!isObjectEmpty(multimedia2)) {
+            print('chat_room_page.dart if (!isObjectEmpty(multimedia2))');
+
             WebSocketMessage webSocketMessage = WebSocketMessage(message: message, multimedia: multimedia);
             BlocProvider.of<WebSocketBloc>(context)
                 .add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
+          } else {
+            print('chat_room_page.dart if (isObjectEmpty(multimedia2))');
           }
         }));
   }

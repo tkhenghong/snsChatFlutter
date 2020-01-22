@@ -2,7 +2,7 @@ import 'package:snschat_flutter/backend/rest/userContact/UserContactAPIService.d
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:snschat_flutter/database/sembast/userContact/userContact.dart';
-import 'package:snschat_flutter/objects/userContact/userContact.dart';
+import 'package:snschat_flutter/objects/userContact/user_contact.dart';
 
 void main() {
   UserContactAPIService userContactAPIService = UserContactAPIService();

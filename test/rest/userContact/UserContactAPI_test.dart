@@ -1,7 +1,7 @@
 import 'package:snschat_flutter/backend/rest/userContact/UserContactAPIService.dart';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:snschat_flutter/objects/userContact/userContact.dart';
+import 'package:snschat_flutter/objects/userContact/user_contact.dart';
 
 // NOTE: I have made
 void main() {

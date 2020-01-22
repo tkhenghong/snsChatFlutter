@@ -37,9 +37,9 @@
 //}
 // This object is used to get the full details of the IPGeoLocation object returned by https://ipgeolocation.io/
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
-import 'package:snschat_flutter/objects/IPGeoLocation/IPGeoLocationTimeZone/IPGeoLocationTimeZone.dart';
+import 'package:snschat_flutter/objects/IPGeoLocation/IPGeoLocationTimeZone/ip_geo_location_time_zone.dart';
 
-import 'IPGeoLocationCurrency/IPGeoLocationCurrency.dart';
+import 'IPGeoLocationCurrency/ip_geo_location_currency.dart';
 
 import 'dart:convert';
 

@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:snschat_flutter/objects/index.dart';
 
 import 'package:snschat_flutter/state/bloc/bloc.dart';
@@ -23,6 +24,11 @@ import 'package:snschat_flutter/ui/pages/video_player/video_player_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  FlutterDownloader.initialize().then((data) {
+    print('FlutterDownloader.initialize() completed');
+    print('data: ' + data.toString());
+  });
+
   BlocSupervisor.delegate = SimpleBlocDelegate();
   runApp(MultiBlocProvider(providers: [
     BlocProvider<ConversationGroupBloc>(
@@ -57,6 +63,9 @@ void main() {
     ),
     BlocProvider<PhoneStorageContactBloc>(
       create: (context) => PhoneStorageContactBloc(),
+    ),
+    BlocProvider<MultimediaProgressBloc>(
+      create: (context) => MultimediaProgressBloc(),
     ),
   ], child: MyApp()));
 }

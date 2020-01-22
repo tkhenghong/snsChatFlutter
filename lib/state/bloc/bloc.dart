@@ -10,3 +10,4 @@ export 'user/bloc.dart';
 export 'userContact/bloc.dart';
 export 'webSocket/bloc.dart';
 export 'phoneStorageContacts/bloc.dart';
+export 'multimediaProgress/bloc.dart';

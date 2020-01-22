@@ -15,6 +15,7 @@ class Multimedia {
   String userContactId; // Belong to user too. Because 1 User, 1 UserContact.
   String conversationId; // Belong to ConversationGroup group photo
   String userId;
+  int size;
 
   Multimedia(
       {this.id,
@@ -25,7 +26,8 @@ class Multimedia {
       this.messageId,
       this.userContactId,
       this.conversationId,
-      this.userId});
+      this.userId,
+      this.size});
 
   Multimedia.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -36,7 +38,8 @@ class Multimedia {
         messageId = json['messageId'],
         userContactId = json['userContactId'],
         conversationId = json['conversationId'],
-        userId = json['userId'];
+        userId = json['userId'],
+        size = json['size'];
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -48,6 +51,7 @@ class Multimedia {
         'userContactId': userContactId,
         'conversationId': conversationId,
         'userId': userId,
+        'size': size,
       };
 
 // KS put

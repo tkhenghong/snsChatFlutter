@@ -5,9 +5,9 @@ import 'package:snschat_flutter/objects/conversationGroup/conversation_group.dar
 import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/objects/settings/settings.dart';
-import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
+import 'package:snschat_flutter/objects/unreadMessage/unread_message.dart';
 import 'package:snschat_flutter/objects/user/user.dart';
-import 'package:snschat_flutter/objects/userContact/userContact.dart';
+import 'package:snschat_flutter/objects/userContact/user_contact.dart';
 
 class WebSocketMessage {
   ConversationGroup conversationGroup;

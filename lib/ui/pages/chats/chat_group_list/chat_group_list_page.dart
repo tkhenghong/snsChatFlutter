@@ -10,7 +10,7 @@ import 'package:snschat_flutter/general/ui-component/list-view.dart';
 import 'package:snschat_flutter/objects/conversationGroup/conversation_group.dart';
 import 'package:snschat_flutter/objects/index.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
-import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
+import 'package:snschat_flutter/objects/unreadMessage/unread_message.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
@@ -257,6 +257,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   initialize(BuildContext context) async {
+    BlocProvider.of<MultimediaProgressBloc>(context).add(InitializeMultimediaProgressEvent(callback: (bool done) {}));
     BlocProvider.of<ConversationGroupBloc>(context).add(InitializeConversationGroupsEvent(callback: (bool done) {}));
     BlocProvider.of<MessageBloc>(context).add(InitializeMessagesEvent(callback: (bool done) {}));
     BlocProvider.of<MultimediaBloc>(context).add(InitializeMultimediaEvent(callback: (bool done) {}));

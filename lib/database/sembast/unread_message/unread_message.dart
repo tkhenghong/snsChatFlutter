@@ -1,6 +1,6 @@
 import 'package:sembast/sembast.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
-import 'package:snschat_flutter/objects/unreadMessage/UnreadMessage.dart';
+import 'package:snschat_flutter/objects/unreadMessage/unread_message.dart';
 
 import '../SembastDB.dart';
 

@@ -11,10 +11,12 @@ import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/permissions/PermissionService.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
+import 'package:open_file/open_file.dart';
 
 class FileService {
   PermissionService permissionService = PermissionService();
   DefaultCacheManager defaultCacheManager = DefaultCacheManager();
+  List<DownloadTask> tasks = [];
 
   // TODO: getApplicationDocumentDirectory should change to getDirectories,
   // TODO: so you can get any directory based on where you want.
@@ -85,13 +87,29 @@ class FileService {
   }
 
   downloadMultimediaFile(BuildContext context, Multimedia multimedia) async {
-    FileInfo fileInfo = await defaultCacheManager.getFileFromCache(multimedia.remoteFullFileUrl);
-    if (fileInfoIsEmpty(fileInfo)) {
-      FileInfo fileDownloadFromInternet = await defaultCacheManager.downloadFile(multimedia.remoteFullFileUrl);
-      FileInfo fileThumbnailDownloadedFromInternet = await defaultCacheManager.downloadFile(multimedia.remoteThumbnailUrl);
-      if (!fileInfoIsEmpty(fileDownloadFromInternet) && !fileInfoIsEmpty(fileThumbnailDownloadedFromInternet)) {
-        multimedia.localFullFileUrl = fileDownloadFromInternet.file.path;
-        multimedia.localThumbnailUrl = fileThumbnailDownloadedFromInternet.file.path;
+    print('downloadMultimediaFile()');
+    print('multimedia.remoteFullFileUrl: ' + multimedia.remoteFullFileUrl.toString());
+    if(!isStringEmpty(multimedia.remoteFullFileUrl)) {
+      File file = await defaultCacheManager.getSingleFile(multimedia.remoteFullFileUrl);
+      print('can get file from cache');
+      if (isObjectEmpty(file)) {
+        print('if (isObjectEmpty(file))');
+        FileInfo fileDownloadFromInternet = await defaultCacheManager.downloadFile(multimedia.remoteFullFileUrl);
+        FileInfo fileThumbnailDownloadedFromInternet = await defaultCacheManager.downloadFile(multimedia.remoteThumbnailUrl);
+        print('dawdaw Checkpoint 2');
+
+        if (!fileInfoIsEmpty(fileDownloadFromInternet) && !fileInfoIsEmpty(fileThumbnailDownloadedFromInternet)) {
+          print('dawdaw Checkpoint 3');
+          multimedia.localFullFileUrl = fileDownloadFromInternet.file.path;
+          multimedia.localThumbnailUrl = fileThumbnailDownloadedFromInternet.file.path;
+          BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
+        } else {
+          print('dawdaw Checkpoint 4');
+        }
+      } else {
+        print('if (!isObjectEmpty(file))');
+        multimedia.localFullFileUrl = file.path;
+        multimedia.localThumbnailUrl = file.path;
         BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
       }
     }
@@ -132,67 +150,86 @@ class FileService {
     return null;
   }
 
+  Future<String> _findLocalPath(BuildContext context) async {
+    final platform = Theme.of(context).platform;
+    final directory = platform == TargetPlatform.android
+        ? await getExternalStorageDirectory()
+        : await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
+
+
   // TODO: bring filename to download the file correctly
-  Future<File> downloadFile(String remoteUrl, bool showNotification, bool openFileFromNotification) async {
-    print("FileService downloadFile()");
-    print("remoteUrl: " + remoteUrl);
+  downloadFile(BuildContext context, String remoteUrl, bool showNotification, bool openFileFromNotification, String fileName) async {
+    try {
+      print("FileService downloadFile()");
+      print("remoteUrl: " + remoteUrl);
 
-    WidgetsFlutterBinding.ensureInitialized();
-    await FlutterDownloader.initialize();
+//      String downloadDirectory = await getApplicationDocumentDirectory() + "/";
+      String downloadDirectory = await _findLocalPath(context) + "/";
 
-    String downloadDirectory = await getApplicationDocumentDirectory() + "/";
-    // Create a task
-    final taskId = await FlutterDownloader.enqueue(
-      url: remoteUrl,
-      savedDir: downloadDirectory,
-      showNotification: showNotification, // show download progress in status bar (for Android)
-      openFileFromNotification: openFileFromNotification, // click on notification to open downloaded file (for Android)
-    );
+      print("downloadDirectory: " + downloadDirectory.toString());
 
-    print("taskId: " + taskId.toString());
+      tasks = await FlutterDownloader.loadTasks();
 
-    // Execute the tasks
-    List<DownloadTask> tasks = await FlutterDownloader.loadTasks();
+      // Create a task
+      final taskId = await FlutterDownloader.enqueue(
+        url: remoteUrl,
+        savedDir: downloadDirectory,
+        showNotification: showNotification, // show download progress in status bar (for Android)
+        openFileFromNotification: openFileFromNotification, // click on notification to open downloaded file (for Android)
+      );
 
-    print("tasks.length: " + tasks.length.toString());
+      print("taskId: " + taskId.toString());
 
-    tasks.forEach((DownloadTask downloadTask) {
-      print("downloadTask.taskId.toString(): " + downloadTask.taskId.toString());
-      print("downloadTask.filename.toString(): " + downloadTask.filename.toString());
-      print("downloadTask.savedDir.toString(): " + downloadTask.savedDir.toString());
-      print("downloadTask.url.toString(): " + downloadTask.url.toString());
-      print("downloadTask.status.toString(): " + downloadTask.status.toString());
-      print("downloadTask.progress.toString(): " + downloadTask.progress.toString());
-      print("Next!");
-    });
+      FlutterDownloader.registerCallback(flutterDownloaderCallback); // callback is a top-level or static function
 
-    print("tasks: " + tasks.toString());
+      tasks.forEach((DownloadTask downloadTask) {
+        print("downloadTask.taskId.toString(): " + downloadTask.taskId.toString());
+        print("downloadTask.filename.toString(): " + downloadTask.filename.toString());
+        print("downloadTask.savedDir.toString(): " + downloadTask.savedDir.toString());
+        print("downloadTask.url.toString(): " + downloadTask.url.toString());
+        print("downloadTask.status.toString(): " + downloadTask.status.toString());
+        print("downloadTask.progress.toString(): " + downloadTask.progress.toString());
+        print("Next!");
+      });
 
-    // Note: The first element of the taskList contains the full information of the file
-    String fileDirectory = tasks[0].savedDir.toString();
-    String fileName = tasks[0].filename.toString();
-
-    print("fileDirectory: " + fileDirectory);
-    print("fileName: " + fileName);
-
-    // Get the file's format
-    int lastDot = fileName.lastIndexOf("?");
-    String fileFormat = fileName.substring(lastDot + 1, fileName.length);
-
-    print("lastDot: " + lastDot.toString());
-    print("fileFormat: " + fileFormat);
-
-    // Rename the file
-    File renamedFile = await File(fileDirectory + fileName)
-        .rename(downloadDirectory + new DateTime.now().millisecondsSinceEpoch.toString() + "." + fileFormat);
-
-    if (isObjectEmpty(renamedFile) || isStringEmpty(renamedFile.path)) {
-      return null;
+      await FlutterDownloader.open(taskId: taskId);
+//      print("tasks: " + tasks.toString());
+//
+//      // Note: The first element of the taskList contains the full information of the file
+//      String fileDirectory = tasks[0].savedDir.toString();
+//
+//      print("fileDirectory: " + fileDirectory);
+//      print("fileName: " + fileName);
+//
+//      // Rename the file
+//      File renamedFile = await File(fileDirectory + fileName)
+//        .rename(downloadDirectory + fileName);
+//
+//      if (isObjectEmpty(renamedFile) || isStringEmpty(renamedFile.path)) {
+//        return null;
+//      }
+//
+//      print("renamedFile: " + renamedFile.path.toString());
+//
+//      return renamedFile;
+    } catch (e) {
+      print('Error when download a file');
+      print('Error reason: ' + e.toString());
     }
+  }
 
-    print("renamedFile: " + renamedFile.path.toString());
-
-    return renamedFile;
+  static void flutterDownloaderCallback(String id, DownloadTaskStatus downloadTaskStatus, int progress) {
+    print('id: ' + id.toString());
+    print('downloadTaskStatus: ' + downloadTaskStatus.toString());
+    print('downloadTaskStatus.value: ' + downloadTaskStatus.value.toString());
+    print('progress: ' + progress.toString());
+    if(downloadTaskStatus == DownloadTaskStatus.complete) {
+      print("if(downloadTaskStatus == DownloadTaskStatus.complete)");
+      Fluttertoast.showToast(msg: 'File downloaded.', toastLength: Toast.LENGTH_LONG);
+      FlutterDownloader.open(taskId: id);
+    }
   }
 
   // TODO: Make a default Icon Image return method

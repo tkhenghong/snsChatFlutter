@@ -1,6 +1,6 @@
 //// GENERATED CODE - DO NOT MODIFY BY HAND
 //
-//part of 'userContact.dart';
+//part of 'user_contact.dart';
 //
 //// **************************************************************************
 //// BeanGenerator

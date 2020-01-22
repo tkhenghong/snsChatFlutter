@@ -4,7 +4,7 @@
 //import 'package:snschat_flutter/database/sqflite/repositories/settings/settings.dart';
 //import 'package:snschat_flutter/database/sqflite/repositories/unread_message/unread_message.dart';
 //import 'package:snschat_flutter/database/sqflite/repositories/user/user.dart';
-//import 'package:snschat_flutter/database/sqflite/repositories/userContact/userContact.dart';
+//import 'package:snschat_flutter/database/sqflite/repositories/userContact/user_contact.dart';
 //
 //import 'dart:io';
 //import 'dart:async';
