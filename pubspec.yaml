@@ -58,6 +58,7 @@ dependencies:
   pull_to_refresh: ^1.5.7
   contacts_service: ^0.3.10
   permission_handler: ^4.0.0
+  flutter_sound: ^2.0.4
 
   # Handle Image
 #  cached_network_image: ^1.1.3

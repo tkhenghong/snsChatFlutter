@@ -332,13 +332,9 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               Material(
                 child: Container(
                   margin: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: !textInField ? IconButton(
-                    icon: Icon(Icons.keyboard_voice),
-                    onPressed: () => sendChatMessage(context, '', 3, user, conversationGroup),
-                  ) : IconButton(
-                    icon: Icon(Icons.send),
-                    onPressed: () => sendChatMessage(context, textEditingController.text, 0, user, conversationGroup),
-                  ),
+                  child: !textInField
+                      ? recordVoiceMessageButton(context, user, conversationGroup)
+                      : textSendButton(context, user, conversationGroup),
                 ),
                 color: Colors.white,
               ),
@@ -352,10 +348,28 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     );
   }
 
+  Widget recordVoiceMessageButton(BuildContext context, User user, ConversationGroup conversationGroup) {
+    return GestureDetector(
+      onLongPress: () => recordVoiceMessage(context, user, conversationGroup),
+      onLongPressEnd: () => saveVoiceMessage(context, user, conversationGroup),
+      child: IconButton(
+        icon: Icon(Icons.keyboard_voice),
+        onPressed: () => sendChatMessage(context, '', 3, user, conversationGroup),
+      ),
+    );
+  }
+
+  Widget textSendButton(BuildContext context, User user, ConversationGroup conversationGroup) {
+    return IconButton(
+      icon: Icon(Icons.send),
+      onPressed: () => sendChatMessage(context, textEditingController.text, 0, user, conversationGroup),
+    );
+  }
+
   checkTextOnField(String text) {
-      setState(() {
-        textInField = !isStringEmpty(textEditingController.text);
-      });
+    setState(() {
+      textInField = !isStringEmpty(textEditingController.text);
+    });
   }
 
   Widget buildImageListTab(BuildContext context) {
@@ -894,6 +908,12 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
       height: 180.0,
     );
   }
+
+  recordVoiceMessage(BuildContext context, User user, ConversationGroup conversationGroup) async {}
+
+  saveVoiceMessage(BuildContext context, User user, ConversationGroup conversationGroup) async {}
+
+  cancelVoiceMessage(BuildContext context, User user, ConversationGroup conversationGroup) async {}
 
   sendChatMessage(BuildContext context, String content, int type, User user, ConversationGroup conversationGroup) {
     print("sendChatMessage()");
