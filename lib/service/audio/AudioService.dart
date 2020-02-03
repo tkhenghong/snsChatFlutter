@@ -67,14 +67,14 @@ class AudioService {
         print('AudioService.dart flutterSound.onRecorderDbPeakChanged listener activated.');
         print('AudioService.dart value: ' + value.toString());
         this._dbLevel = value;
-        this._isRecording.transform(setStreamBooleanValue(true));
+        this._isRecording.transform(_setStreamBooleanValue(true));
         this.audioFilePath = path;
       });
       return true;
     } catch (err) {
       print('AudioService.dart Failed to start recoring audio.');
       print('AudioService.dart err: ' + err.toString());
-      this._isRecording.transform(setStreamBooleanValue(false));
+      this._isRecording.transform(_setStreamBooleanValue(false));
       return false;
     }
   }
@@ -93,12 +93,12 @@ class AudioService {
         _dbPeakSubscription.cancel();
         _dbPeakSubscription = null;
       }
-      this._isRecording.transform(setStreamBooleanValue(true));
+      this._isRecording.transform(_setStreamBooleanValue(true));
       return true;
     } catch (err) {
       print('AudioService.dart Failed to stop recoring audio.');
       print('AudioService.dart err: ' + err.toString());
-      this._isRecording.transform(setStreamBooleanValue(false));
+      this._isRecording.transform(_setStreamBooleanValue(false));
       return false;
     }
   }
@@ -107,8 +107,8 @@ class AudioService {
   Future<bool> startAudio(String audioUrl) async {
     print('AudioService.dart startAudio()');
     print('AudioService.dart audioUrl: ' + audioUrl);
-    sliderCurrentPosition.transform(setStreamDoubleValue(0.0));
-    audioMaxDuration.transform(setStreamDoubleValue(0.0));
+    sliderCurrentPosition.transform(_setStreamDoubleValue(0.0));
+    audioMaxDuration.transform(_setStreamDoubleValue(0.0));
     try {
       String path = await flutterSound.startPlayer(audioUrl);
 
@@ -127,8 +127,8 @@ class AudioService {
 //          sliderCurrentPosition = e.currentPosition;
 //          audioMaxDuration = e.duration;
 
-          sliderCurrentPosition.transform(setStreamDoubleValue(e.currentPosition));
-          audioMaxDuration.transform(setStreamDoubleValue(e.duration));
+          sliderCurrentPosition.transform(_setStreamDoubleValue(e.currentPosition));
+          audioMaxDuration.transform(_setStreamDoubleValue(e.duration));
 
           print('AudioService.dart sliderCurrentPosition: ' + sliderCurrentPosition.toString());
           print('AudioService.dart audioMaxDuration: ' + audioMaxDuration.toString());
@@ -142,7 +142,7 @@ class AudioService {
     }
   }
 
-  StreamTransformer<bool, bool> setStreamBooleanValue(bool booleanValue) {
+  StreamTransformer<bool, bool> _setStreamBooleanValue(bool booleanValue) {
     print('AudioService.dart setStreamBooleanValue()');
     print('AudioService.dart booleanValue: ' + booleanValue.toString());
     return StreamTransformer<bool, bool>.fromHandlers(handleData: (value, sink) {
@@ -150,7 +150,7 @@ class AudioService {
     });
   }
 
-  StreamTransformer<double, double> setStreamDoubleValue(double doubleValue) {
+  StreamTransformer<double, double> _setStreamDoubleValue(double doubleValue) {
     print('AudioService.dart setStreamDoubleValue()');
     print('AudioService.dart doubleValue: ' + doubleValue.toString());
     return StreamTransformer<double, double>.fromHandlers(handleData: (value, sink) {
@@ -186,7 +186,7 @@ class AudioService {
         _playerSubscription = null;
       }
 
-      sliderCurrentPosition.transform(setStreamDoubleValue(0.0));
+      sliderCurrentPosition.transform(_setStreamDoubleValue(0.0));
 //      sliderCurrentPosition = 0.0;
 
       return true;
@@ -212,7 +212,7 @@ class AudioService {
     }
   }
 
-  Future<bool> stopAllStreams() async {
+  Future<bool> _stopAllStreams() async {
     audioClose = true;
     return true;
   }

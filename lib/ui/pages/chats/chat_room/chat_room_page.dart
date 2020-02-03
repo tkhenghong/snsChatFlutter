@@ -10,12 +10,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
+import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/objects/conversationGroup/conversation_group.dart';
 import 'package:snschat_flutter/objects/index.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
+import 'package:snschat_flutter/service/audio/AudioService.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:snschat_flutter/service/firebaseStorage/FirebaseStorageService.dart';
 import 'package:snschat_flutter/service/image/ImageService.dart';
@@ -25,6 +27,7 @@ import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/ui/pages/photo_view/photo_view_page.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:vibration/vibration.dart';
 
 class ChatRoomPage extends StatefulWidget {
   final ConversationGroup _conversationGroup;
@@ -40,6 +43,7 @@ class ChatRoomPage extends StatefulWidget {
 class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   bool isShowSticker = false;
   bool isLoading;
+  bool isRecording = false;
   bool imageFound = false;
   bool openMultimediaTab = false;
   double deviceWidth;
@@ -67,6 +71,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   FileService fileService = FileService();
   ImageService imageService = ImageService();
+  AudioService audioService = AudioService();
   FirebaseStorageService firebaseStorageService = FirebaseStorageService();
 
   @override
@@ -316,6 +321,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               Flexible(
                 child: Container(
                   child: TextField(
+                    enabled: !isRecording,
                     style: TextStyle(fontSize: 17.0),
                     controller: textEditingController,
                     decoration: InputDecoration.collapsed(
@@ -350,11 +356,87 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   Widget recordVoiceMessageButton(BuildContext context, User user, ConversationGroup conversationGroup) {
     return GestureDetector(
-      onLongPress: () => recordVoiceMessage(context, user, conversationGroup),
-      onLongPressEnd: () => saveVoiceMessage(context, user, conversationGroup),
+//      onLongPress: () => recordVoiceMessage(context, user, conversationGroup),
+//      onLongPressEnd: (LongPressEndDetails longPressEndDetails) => saveVoiceMessage(context, user, conversationGroup, longPressEndDetails),
+//      onLongPress: () {
+//        print('chat_room_page.dart onLongPress()');
+//      },
+//      onLongPressStart: (LongPressStartDetails longPressStartDetails) {
+//        showLoading(context, "Recording....");
+//        print('chat_room_page.dart onLongPressStart()');
+//        print('chat_room_page.dart longPressStartDetails: ' + longPressStartDetails.toString());
+//        print('chat_room_page.dart longPressStartDetails.globalPosition.direction.toString()' + longPressStartDetails.globalPosition.direction.toString());
+//        print('chat_room_page.dart longPressStartDetails.globalPosition.distance.toString()' + longPressStartDetails.globalPosition.distance.toString());
+//        print('chat_room_page.dart longPressStartDetails.globalPosition.distanceSquared.toString()' + longPressStartDetails.globalPosition.distanceSquared.toString());
+//        print('chat_room_page.dart longPressStartDetails.globalPosition.dx.toString()' + longPressStartDetails.globalPosition.dx.toString());
+//        print('chat_room_page.dart longPressStartDetails.globalPosition.dy.toString()' + longPressStartDetails.globalPosition.dy.toString());
+//        print('chat_room_page.dart longPressStartDetails.globalPosition.isFinite.toString()' + longPressStartDetails.globalPosition.isFinite.toString());
+//        print('chat_room_page.dart longPressStartDetails.globalPosition.isInfinite.toString()' + longPressStartDetails.globalPosition.isInfinite.toString());
+//      },
+//      onLongPressEnd: (LongPressEndDetails longPressEndDetails) {
+//        Navigator.pop(context);
+//        print('chat_room_page.dart onLongPressEnd()');
+//        print('chat_room_page.dart longPressEndDetails: ' + longPressEndDetails.toString());
+//        print('chat_room_page.dart longPressEndDetails.globalPosition.direction.toString()' + longPressEndDetails.globalPosition.direction.toString());
+//        print('chat_room_page.dart longPressEndDetails.globalPosition.distance.toString()' + longPressEndDetails.globalPosition.distance.toString());
+//        print('chat_room_page.dart longPressEndDetails.globalPosition.distanceSquared.toString()' + longPressEndDetails.globalPosition.distanceSquared.toString());
+//        print('chat_room_page.dart longPressEndDetails.globalPosition.dx.toString()' + longPressEndDetails.globalPosition.dx.toString());
+//        print('chat_room_page.dart longPressEndDetails.globalPosition.dy.toString()' + longPressEndDetails.globalPosition.dy.toString());
+//        print('chat_room_page.dart longPressEndDetails.globalPosition.isFinite.toString()' + longPressEndDetails.globalPosition.isFinite.toString());
+//        print('chat_room_page.dart longPressEndDetails.globalPosition.isInfinite.toString()' + longPressEndDetails.globalPosition.isInfinite.toString());
+//      },
+      onTapDown: (TapDownDetails tapDownDetails) async {
+        Vibration.vibrate(duration: 100);
+        print('chat_room_page.dart onTapDown()');
+        print('chat_room_page.dart tapDownDetails: ' + tapDownDetails.toString());
+        print('chat_room_page.dart tapDownDetails.globalPosition.direction.toString()' + tapDownDetails.globalPosition.direction.toString());
+        print('chat_room_page.dart tapDownDetails.globalPosition.distance.toString()' + tapDownDetails.globalPosition.distance.toString());
+        print('chat_room_page.dart tapDownDetails.globalPosition.distanceSquared.toString()' + tapDownDetails.globalPosition.distanceSquared.toString());
+        print('chat_room_page.dart tapDownDetails.globalPosition.dx.toString()' + tapDownDetails.globalPosition.dx.toString());
+        print('chat_room_page.dart tapDownDetails.globalPosition.dy.toString()' + tapDownDetails.globalPosition.dy.toString());
+        print('chat_room_page.dart tapDownDetails.globalPosition.isFinite.toString()' + tapDownDetails.globalPosition.isFinite.toString());
+        print('chat_room_page.dart tapDownDetails.globalPosition.isInfinite.toString()' + tapDownDetails.globalPosition.isInfinite.toString());
+        bool startRecordSuccessful = await this.audioService.startRecorder();
+        print('chat_room_page.dart startRecordSuccessful: ' + startRecordSuccessful.toString());
+        setState(() {
+          isRecording = true;
+        });
+      },
+      onTapUp: (TapUpDetails tapUpDetails) async {
+        Vibration.vibrate(duration: 100);
+        print('chat_room_page.dart onTapDown()');
+        print('chat_room_page.dart tapUpDetails: ' + tapUpDetails.toString());
+        print('chat_room_page.dart tapUpDetails.globalPosition.direction.toString()' + tapUpDetails.globalPosition.direction.toString());
+        print('chat_room_page.dart tapUpDetails.globalPosition.distance.toString()' + tapUpDetails.globalPosition.distance.toString());
+        print('chat_room_page.dart tapUpDetails.globalPosition.distanceSquared.toString()' + tapUpDetails.globalPosition.distanceSquared.toString());
+        print('chat_room_page.dart tapUpDetails.globalPosition.dx.toString()' + tapUpDetails.globalPosition.dx.toString());
+        print('chat_room_page.dart tapUpDetails.globalPosition.dy.toString()' + tapUpDetails.globalPosition.dy.toString());
+        print('chat_room_page.dart tapUpDetails.globalPosition.isFinite.toString()' + tapUpDetails.globalPosition.isFinite.toString());
+        print('chat_room_page.dart tapUpDetails.globalPosition.isInfinite.toString()' + tapUpDetails.globalPosition.isInfinite.toString());
+        bool stopRecordSuccessful = await this.audioService.stopRecorder();
+        print('chat_room_page.dart stopRecordSuccessful: ' + stopRecordSuccessful.toString());
+        setState(() {
+          isRecording = false;
+        });
+      },
+      onLongPressMoveUpdate: (LongPressMoveUpdateDetails longPressMoveUpdateDetails) {
+        print('chat_room_page.dart onLongPressMoveUpdate()');
+        print('chat_room_page.dart longPressMoveUpdateDetails: ' + longPressMoveUpdateDetails.toString());
+        print('chat_room_page.dart longPressMoveUpdateDetails.globalPosition.direction.toString()' + longPressMoveUpdateDetails.globalPosition.direction.toString());
+        print('chat_room_page.dart longPressMoveUpdateDetails.globalPosition.distance.toString()' + longPressMoveUpdateDetails.globalPosition.distance.toString());
+        print('chat_room_page.dart longPressMoveUpdateDetails.globalPosition.distanceSquared.toString()' + longPressMoveUpdateDetails.globalPosition.distanceSquared.toString());
+        print('chat_room_page.dart longPressMoveUpdateDetails.globalPosition.dx.toString()' + longPressMoveUpdateDetails.globalPosition.dx.toString());
+        print('chat_room_page.dart longPressMoveUpdateDetails.globalPosition.dy.toString()' + longPressMoveUpdateDetails.globalPosition.dy.toString());
+        print('chat_room_page.dart longPressMoveUpdateDetails.globalPosition.isFinite.toString()' + longPressMoveUpdateDetails.globalPosition.isFinite.toString());
+        print('chat_room_page.dart longPressMoveUpdateDetails.globalPosition.isInfinite.toString()' + longPressMoveUpdateDetails.globalPosition.isInfinite.toString());
+      },
       child: IconButton(
         icon: Icon(Icons.keyboard_voice),
-        onPressed: () => sendChatMessage(context, '', 3, user, conversationGroup),
+//        onPressed: () => sendChatMessage(context, '', 3, user, conversationGroup),
+      onPressed: () {
+        print('chat_room_page.dart onPressed()');
+        Vibration.vibrate(duration: 100);
+      },
       ),
     );
   }
@@ -909,11 +991,17 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     );
   }
 
-  recordVoiceMessage(BuildContext context, User user, ConversationGroup conversationGroup) async {}
+  recordVoiceMessage(BuildContext context, User user, ConversationGroup conversationGroup) async {
+    print('chat_room_page.dart recordVoiceMessage()');
+  }
 
-  saveVoiceMessage(BuildContext context, User user, ConversationGroup conversationGroup) async {}
+  saveVoiceMessage(BuildContext context, User user, ConversationGroup conversationGroup, LongPressEndDetails longPressEndDetails) async {
+    print('chat_room_page.dart saveVoiceMessage()');
+  }
 
-  cancelVoiceMessage(BuildContext context, User user, ConversationGroup conversationGroup) async {}
+  cancelVoiceMessage(BuildContext context, User user, ConversationGroup conversationGroup) async {
+    print('chat_room_page.dart cancelVoiceMessage()');
+  }
 
   sendChatMessage(BuildContext context, String content, int type, User user, ConversationGroup conversationGroup) {
     print("sendChatMessage()");
