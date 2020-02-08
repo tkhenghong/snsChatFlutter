@@ -1,15 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter_sound/flutter_sound.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
 
-// Used for Record and play audio?
+// Used for Record and play audio
 class AudioService {
   String AUDIO_DIRECTORY = globals.AUDIO_DIRECTORY;
-  Stream<bool> _isRecording = new Stream.value(false);
+  Stream<bool> _isRecording = Stream.value(false);
   String dateText;
   double _dbLevel;
   String audioFilePath;
@@ -34,38 +35,27 @@ class AudioService {
   Stream<String> playerCurrentDuration;
 
   initService() {
-    print('AudioService.dart initService()');
     flutterSound = new FlutterSound();
     fileService = new FileService();
     flutterSound.setSubscriptionDuration(0.01);
     flutterSound.setDbPeakLevelUpdate(0.8);
     flutterSound.setDbLevelEnabled(true);
-    _isRecording.takeWhile((bool value) => audioClose);
-    sliderCurrentPosition.takeWhile((double value) => audioClose);
-    audioMaxDuration.takeWhile((double value) => audioClose);
-    playerCurrentDuration.takeWhile((String value) => audioClose);
+    initializeDateFormatting();
   }
 
   Future<bool> startRecorder() async {
-    print('AudioService.dart startRecorder()');
     try {
       initService();
       String path = await flutterSound.startRecorder(
         codec: _codec,
       );
-      print('startRecorder: $path');
 
       _recorderSubscription = flutterSound.onRecorderStateChanged.listen((e) {
-        print('AudioService.dart flutterSound.onRecorderStateChanged listener activated.');
-        print('AudioService.dart e: ' + e.toString());
         DateTime date = new DateTime.fromMillisecondsSinceEpoch(e.currentPosition.toInt(), isUtc: true);
-        String dateText = DateFormat('mm:ss:SS', 'en_GB').format(date);
-        print('AudioService.dart dateText: ' + dateText);
+        String dateText = DateFormat('mm:ss:SS', 'en_GB').format(date); // Here got problem
         this.dateText = dateText;
       });
       _dbPeakSubscription = flutterSound.onRecorderDbPeakChanged.listen((value) {
-        print('AudioService.dart flutterSound.onRecorderDbPeakChanged listener activated.');
-        print('AudioService.dart value: ' + value.toString());
         this._dbLevel = value;
         this._isRecording.transform(_setStreamBooleanValue(true));
         this.audioFilePath = path;
@@ -80,10 +70,8 @@ class AudioService {
   }
 
   Future<bool> stopRecorder() async {
-    print('AudioService.dart stopRecorder()');
     try {
       String result = await flutterSound.stopRecorder();
-      print('stopRecorder: $result');
 
       if (_recorderSubscription != null) {
         _recorderSubscription.cancel();
@@ -105,10 +93,8 @@ class AudioService {
 
   // Assuming local URL
   Future<bool> startAudio(String audioUrl) async {
-    print('AudioService.dart startAudio()');
-    print('AudioService.dart audioUrl: ' + audioUrl);
-    sliderCurrentPosition.transform(_setStreamDoubleValue(0.0));
-    audioMaxDuration.transform(_setStreamDoubleValue(0.0));
+    sliderCurrentPosition = Stream.value(0.0);
+    audioMaxDuration = Stream.value(0.0);
     try {
       String path = await flutterSound.startPlayer(audioUrl);
 
@@ -116,16 +102,12 @@ class AudioService {
         return false;
       }
 
-      print('AudioService.dart path: ' + path.toString());
-
       await flutterSound.setVolume(1.0);
 
       _playerSubscription = flutterSound.onPlayerStateChanged.listen((e) {
         print('AudioService.dart flutterSound.onPlayerStateChanged listener activated.');
         if (e != null) {
           print('AudioService.dart if (e != null)');
-//          sliderCurrentPosition = e.currentPosition;
-//          audioMaxDuration = e.duration;
 
           sliderCurrentPosition.transform(_setStreamDoubleValue(e.currentPosition));
           audioMaxDuration.transform(_setStreamDoubleValue(e.duration));
@@ -140,22 +122,6 @@ class AudioService {
       print('AudioService.dart err: ' + err.toString());
       return false;
     }
-  }
-
-  StreamTransformer<bool, bool> _setStreamBooleanValue(bool booleanValue) {
-    print('AudioService.dart setStreamBooleanValue()');
-    print('AudioService.dart booleanValue: ' + booleanValue.toString());
-    return StreamTransformer<bool, bool>.fromHandlers(handleData: (value, sink) {
-      sink.add(booleanValue);
-    });
-  }
-
-  StreamTransformer<double, double> _setStreamDoubleValue(double doubleValue) {
-    print('AudioService.dart setStreamDoubleValue()');
-    print('AudioService.dart doubleValue: ' + doubleValue.toString());
-    return StreamTransformer<double, double>.fromHandlers(handleData: (value, sink) {
-      sink.add(doubleValue);
-    });
   }
 
   Future<bool> pauseAudio() async {
@@ -210,6 +176,22 @@ class AudioService {
       print('AudioService.dart err: ' + err.toString());
       return false;
     }
+  }
+
+  StreamTransformer<bool, bool> _setStreamBooleanValue(bool booleanValue) {
+    print('AudioService.dart setStreamBooleanValue()');
+    print('AudioService.dart booleanValue: ' + booleanValue.toString());
+    return StreamTransformer<bool, bool>.fromHandlers(handleData: (value, sink) {
+      sink.add(booleanValue);
+    });
+  }
+
+  StreamTransformer<double, double> _setStreamDoubleValue(double doubleValue) {
+    print('AudioService.dart setStreamDoubleValue()');
+    print('AudioService.dart doubleValue: ' + doubleValue.toString());
+    return StreamTransformer<double, double>.fromHandlers(handleData: (value, sink) {
+      sink.add(doubleValue);
+    });
   }
 
   Future<bool> _stopAllStreams() async {

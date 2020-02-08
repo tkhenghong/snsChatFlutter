@@ -11,7 +11,6 @@ import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/permissions/PermissionService.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
-import 'package:open_file/open_file.dart';
 
 class FileService {
   PermissionService permissionService = PermissionService();
@@ -89,7 +88,7 @@ class FileService {
   downloadMultimediaFile(BuildContext context, Multimedia multimedia) async {
     print('downloadMultimediaFile()');
     print('multimedia.remoteFullFileUrl: ' + multimedia.remoteFullFileUrl.toString());
-    if(!isStringEmpty(multimedia.remoteFullFileUrl)) {
+    if (!isStringEmpty(multimedia.remoteFullFileUrl)) {
       File file = await defaultCacheManager.getSingleFile(multimedia.remoteFullFileUrl);
       print('can get file from cache');
       if (isObjectEmpty(file)) {
@@ -152,12 +151,9 @@ class FileService {
 
   Future<String> _findLocalPath(BuildContext context) async {
     final platform = Theme.of(context).platform;
-    final directory = platform == TargetPlatform.android
-        ? await getExternalStorageDirectory()
-        : await getApplicationDocumentsDirectory();
+    final directory = platform == TargetPlatform.android ? await getExternalStorageDirectory() : await getApplicationDocumentsDirectory();
     return directory.path;
   }
-
 
   // TODO: bring filename to download the file correctly
   downloadFile(BuildContext context, String remoteUrl, bool showNotification, bool openFileFromNotification, String fileName) async {
@@ -225,7 +221,7 @@ class FileService {
     print('downloadTaskStatus: ' + downloadTaskStatus.toString());
     print('downloadTaskStatus.value: ' + downloadTaskStatus.value.toString());
     print('progress: ' + progress.toString());
-    if(downloadTaskStatus == DownloadTaskStatus.complete) {
+    if (downloadTaskStatus == DownloadTaskStatus.complete) {
       print("if(downloadTaskStatus == DownloadTaskStatus.complete)");
       Fluttertoast.showToast(msg: 'File downloaded.', toastLength: Toast.LENGTH_LONG);
       FlutterDownloader.open(taskId: id);
@@ -255,5 +251,14 @@ class FileService {
         return "lib/ui/icons/default_user_icon.png";
         break;
     }
+  }
+
+  Future<bool> deleteFile(String url) async {
+    File fileToBeDeleted = new File(url);
+    if (await fileToBeDeleted.exists()) {
+      FileSystemEntity fileSystemEntity = await fileToBeDeleted.delete(recursive: true);
+      return await fileSystemEntity.exists();
+    }
+    return false; // Means file is not deleted
   }
 }
