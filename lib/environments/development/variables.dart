@@ -16,3 +16,9 @@ String IP_GEOLOCATION_API_KEY  = "219609b60fdd4898a14c3f23a097aeea";
 
 int imagePickerQuality = 50;
 int imageThumbnailWidthSize = 50;
+int minimumRecordingLength = 500; // in miliseconds unit
+
+String IMAGE_DIRECTORY = '';
+String VIDEO_DIRECTORY = '';
+String FILE_DIRECTORY = '';
+String AUDIO_DIRECTORY = '';
