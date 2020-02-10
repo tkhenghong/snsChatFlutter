@@ -1,11 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_group_list/chat_group_list_page.dart';
-import 'package:snschat_flutter/ui/pages/select_contacts/select_contacts_page.dart';
 import 'package:snschat_flutter/ui/pages/myself/myself_page.dart';
 import 'package:snschat_flutter/ui/pages/scan_qr_code/scan_qr_code_page.dart';
-import 'dart:math' as math;
+import 'package:snschat_flutter/ui/pages/select_contacts/select_contacts_page.dart';
 
 class TabsPage extends StatefulWidget {
   @override

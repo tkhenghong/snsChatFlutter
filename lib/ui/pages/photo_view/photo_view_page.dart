@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/index.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
 import 'package:snschat_flutter/service/image/ImageService.dart';
 

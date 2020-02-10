@@ -1,6 +1,5 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:equatable/equatable.dart';
-import 'package:snschat_flutter/objects/index.dart';
 
 abstract class PhoneStorageContactState extends Equatable {
   const PhoneStorageContactState();

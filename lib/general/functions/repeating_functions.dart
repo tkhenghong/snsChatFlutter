@@ -1,16 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
-import 'package:http/http.dart' as http;
-
-// Read directories
-import 'package:path_provider/path_provider.dart';
-
-import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
-import 'package:flutter/material.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 
 
 

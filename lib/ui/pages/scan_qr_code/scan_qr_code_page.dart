@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'package:flutter/services.dart'; // For PlatformException
 
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
-
-//import 'package:qr_flutter/qr_flutter.dart'; Not yet used
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart'; // For PlatformException
 import 'package:qr_flutter/qr_flutter.dart';
 
 class ScanQrCodePage extends StatefulWidget {

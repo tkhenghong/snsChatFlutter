@@ -1,23 +1,20 @@
+import 'package:country_code_picker/country_code_picker.dart';
+import 'package:date_format/date_format.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/objects/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/sign_up/sign_up_page.dart';
 import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number_page.dart';
-
 import 'package:url_launcher/url_launcher.dart';
-import 'package:date_format/date_format.dart';
-
-import 'package:country_code_picker/country_code_picker.dart';
 
 class LoginPage extends StatefulWidget {
   @override

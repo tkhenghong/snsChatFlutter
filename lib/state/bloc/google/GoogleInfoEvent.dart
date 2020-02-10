@@ -1,6 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial
 abstract class GoogleInfoEvent extends Equatable {

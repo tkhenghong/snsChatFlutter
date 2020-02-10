@@ -1,14 +1,10 @@
-import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
-
-// Import package
 import 'package:contacts_service/contacts_service.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:snschat_flutter/backend/rest/index.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';

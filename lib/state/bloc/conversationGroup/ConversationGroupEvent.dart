@@ -1,10 +1,6 @@
-import 'dart:io';
-
-import 'package:contacts_service/contacts_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:snschat_flutter/objects/conversationGroup/conversation_group.dart';
 import 'package:snschat_flutter/objects/index.dart';
-import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial
 abstract class ConversationGroupEvent extends Equatable {

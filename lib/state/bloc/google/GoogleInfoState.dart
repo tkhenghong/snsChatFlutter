@@ -1,9 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:snschat_flutter/objects/index.dart';
-import 'package:meta/meta.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial
 abstract class GoogleInfoState extends Equatable {

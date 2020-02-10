@@ -1,10 +1,10 @@
+import 'package:bloc/bloc.dart';
 import 'package:snschat_flutter/backend/rest/chat/ConversationGroupAPIService.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/index.dart';
 
 import 'bloc.dart';
-import 'package:bloc/bloc.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial
 class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGroupState> {

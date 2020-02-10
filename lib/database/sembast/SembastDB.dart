@@ -2,14 +2,11 @@ import 'dart:async';
 
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
-import 'package:snschat_flutter/service/permissions/PermissionService.dart';
 
 // Video tutorial: https://www.youtube.com/watch?v=LcaOULash7s
 // Make a class to connect your DB file in Android/iOS and make it singleton which can be instantiated only once

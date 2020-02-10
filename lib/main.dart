@@ -2,19 +2,16 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:snschat_flutter/objects/index.dart';
-
 import 'package:snschat_flutter/state/bloc/bloc.dart';
-
 import 'package:snschat_flutter/ui/pages/chats/chat_group_list/chat_group_list_page.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room_page.dart';
-import 'package:snschat_flutter/ui/pages/photo_view/photo_view_page.dart';
-import 'package:snschat_flutter/ui/pages/select_contacts/select_contacts_page.dart';
 import 'package:snschat_flutter/ui/pages/login/login_page.dart';
 import 'package:snschat_flutter/ui/pages/myself/myself_page.dart';
+import 'package:snschat_flutter/ui/pages/photo_view/photo_view_page.dart';
 import 'package:snschat_flutter/ui/pages/privacy_notice/privacy_notice_page.dart';
 import 'package:snschat_flutter/ui/pages/scan_qr_code/scan_qr_code_page.dart';
+import 'package:snschat_flutter/ui/pages/select_contacts/select_contacts_page.dart';
 import 'package:snschat_flutter/ui/pages/settings/settings_page.dart';
 import 'package:snschat_flutter/ui/pages/sign_up/sign_up_page.dart';
 import 'package:snschat_flutter/ui/pages/tabs/tabs_page.dart';

@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:snschat_flutter/objects/index.dart';
 
 abstract class WebSocketState extends Equatable {
   const WebSocketState();

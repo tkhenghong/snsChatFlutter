@@ -1,8 +1,8 @@
 // Combinations. If the multimedia object contains
 // conversationId only: Conversation Group's photo
-// userContactId only: User Contact's ID
+// userContactId only: User Contact's Photo
 // conversationId + messageId = A Multimedia message, belonged to a conversation
-// userId = User's multmedia;
+// userId = User's multimedia photo;
 
 class Multimedia {
   // Image, Video, Gifs, Sticker, Recording, links

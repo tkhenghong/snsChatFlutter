@@ -1,10 +1,9 @@
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/objects/index.dart';
 import 'package:web_socket_channel/io.dart';
-
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 // Not using it right now, currently testing it inside chat room page.

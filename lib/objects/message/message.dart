@@ -5,12 +5,12 @@ class Message {
 
 //  String recipientId; // Recipient
   // Sender
-  String senderId;
+  String senderId; // Use UserContactId
   String senderName;
   String senderMobileNo;
 
   // Receiver
-  String receiverId;
+  String receiverId; // Use UserContactId
   String receiverName;
   String receiverMobileNo;
 

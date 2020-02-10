@@ -1,18 +1,21 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/gestures.dart';
-import 'package:path/path.dart';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart';
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
+import 'package:snschat_flutter/general/ui-component/message_audio_player.dart';
 import 'package:snschat_flutter/objects/conversationGroup/conversation_group.dart';
 import 'package:snschat_flutter/objects/index.dart';
 import 'package:snschat_flutter/objects/message/message.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/audio/AudioService.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
@@ -20,10 +23,7 @@ import 'package:snschat_flutter/service/firebaseStorage/FirebaseStorageService.d
 import 'package:snschat_flutter/service/image/ImageService.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info_page.dart';
-
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/ui/pages/photo_view/photo_view_page.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:vibration/vibration.dart';
 
 class ChatRoomPage extends StatefulWidget {
@@ -45,7 +45,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   bool openMultimediaTab = false;
   double deviceWidth;
   double deviceHeight;
-  bool textInField = false;
+  bool textFieldHasValue = false;
 
   String inputFieldText = 'Type your message...';
   DateTime recordStartTime;
@@ -61,6 +61,8 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   List<File> documentFileList = [];
 
   String WEBSOCKET_URL = globals.WEBSOCKET_URL;
+  int minimumRecordingLength = globals.minimumRecordingLength;
+
   int imagePickerQuality = globals.imagePickerQuality;
 
   TextEditingController textEditingController = new TextEditingController();
@@ -211,7 +213,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Tooltip(
-          message: "Back",
+          message: 'Back',
           child: Material(
             color: appBarThemeColor,
             child: InkWell(
@@ -223,7 +225,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                 children: <Widget>[
                   Icon(Icons.arrow_back),
                   Hero(
-                    tag: conversationGroup.id + "1",
+                    tag: conversationGroup.id + '1',
                     child: imageService.loadImageThumbnailCircleAvatar(multimedia, conversationGroup.type, context),
                   ),
                   Padding(
@@ -256,7 +258,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                     ),
                   ),
                   Text(
-                    "Tap here for more details",
+                    'Tap here for more details',
                     style: TextStyle(color: appBarTextTitleColor, fontSize: 13.0),
                   )
                 ],
@@ -340,7 +342,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               Material(
                 child: Container(
                   margin: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: !textInField
+                  child: !textFieldHasValue
                       ? recordVoiceMessageButton(context, user, conversationGroup)
                       : textSendButton(context, user, conversationGroup),
                 ),
@@ -374,8 +376,9 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   checkTextOnField(String text) {
+    print('chat_room_page.dart text: ' + text);
     setState(() {
-      textInField = !isStringEmpty(textEditingController.text);
+      textFieldHasValue = !isStringEmpty(textEditingController.text);
     });
   }
 
@@ -632,6 +635,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     bool isText = message.type == 'Text';
     bool isImage = message.type == 'Image';
     bool isFile = message.type == 'Document';
+    bool isAudio = message.type == 'Audio';
     return Column(
       children: <Widget>[
         Row(
@@ -642,24 +646,26 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               padding: EdgeInsets.only(left: lrPadding),
             ),
             Text(
-              message.senderName + ", " + messageTimeDisplay(message.timestamp),
+              message.senderName + ', ' + messageTimeDisplay(message.timestamp),
 //                    message.senderName,
               style: TextStyle(fontSize: 10.0, color: Colors.black38),
             ),
           ],
         ),
         isText
-            ? showMessageText(context, message, isSenderMessage)
+            ? showTextMessage(context, message, isSenderMessage)
             : isImage
-                ? showMessageImage(context, message, isSenderMessage)
+                ? showImageMessage(context, message, isSenderMessage)
                 : isFile
                     ? showFileMessage(context, message, isSenderMessage)
-                    : showUnidentifiedMessageText(context, message, isSenderMessage),
+                    : isAudio
+                        ? showAudioMessage(context, message, isSenderMessage)
+                        : showUnidentifiedMessageText(context, message, isSenderMessage),
       ],
     );
   }
 
-  Widget showMessageText(BuildContext context, Message message, bool isSenderMessage) {
+  Widget showTextMessage(BuildContext context, Message message, bool isSenderMessage) {
     Widget textMessageContent = Text(
       // message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
       message.messageContent,
@@ -669,7 +675,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     return buildMessageChatBubble(context, message, isSenderMessage, textMessageContent);
   }
 
-  Widget showMessageImage(BuildContext context, Message message, bool isSenderMessage) {
+  Widget showImageMessage(BuildContext context, Message message, bool isSenderMessage) {
     return BlocBuilder<MultimediaBloc, MultimediaState>(builder: (context, multimediaState) {
       if (multimediaState is MultimediaLoaded) {
         List<Multimedia> multimediaList = multimediaState.multimediaList;
@@ -719,8 +725,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   Widget buildMessageChatBubble(BuildContext context, Message message, bool isSenderMessage, Widget content) {
     double lrPadding = 15.0;
     double tbPadding = 10.0;
-
-    print('chat_room_page.dart buildMessageChatBubble()');
 
     return Row(
       crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
@@ -772,10 +776,33 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     });
   }
 
-  downloadFile(BuildContext context, Multimedia multimedia, Message message) {
-    // message.messageContent is the filename
-    Fluttertoast.showToast(msg: 'Your download has started.', toastLength: Toast.LENGTH_LONG);
-    fileService.downloadFile(context, multimedia.remoteFullFileUrl, true, true, message.messageContent);
+  Widget showAudioMessage(BuildContext context, Message message, bool isSenderMessage) {
+    return BlocBuilder<MultimediaBloc, MultimediaState>(
+      builder: (context, multimediaState) {
+        Multimedia messageMultimedia, userContactMultimedia;
+        if (multimediaState is MultimediaLoaded) {
+          List<Multimedia> multimediaList = multimediaState.multimediaList;
+          messageMultimedia =
+              multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.id, orElse: () => null);
+
+          UserContactState userContactState = BlocProvider.of<UserContactBloc>(context).state;
+          if (userContactState is UserContactsLoaded) {
+            List<UserContact> userContactList = userContactState.userContactList;
+            UserContact userContact = userContactList.firstWhere((UserContact userContact) => userContact.id == message.senderId, orElse: () => null);
+          }
+
+          userContactMultimedia =
+          multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.senderId, orElse: () => null);
+          fileService.downloadMultimediaFile(context, messageMultimedia);
+          Widget content = messageAudioPlayer(context, message,userContactMultimedia, messageMultimedia, audioService);
+          return buildMessageChatBubble(context, message, isSenderMessage, content);
+        }
+
+        Widget content = messageAudioPlayer(context, message, userContactMultimedia, null, audioService);
+
+        return buildMessageChatBubble(context, message, isSenderMessage, content);
+      },
+    );
   }
 
   Widget showUnidentifiedMessageText(BuildContext context, Message message, bool isSenderMessage) {
@@ -803,16 +830,16 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   String messageTimeDisplay(int timestamp) {
-    print("timestamp: " + timestamp.toString());
+    print('timestamp: ' + timestamp.toString());
     DateTime now = DateTime.now();
-    String formattedDate = DateFormat("dd-MM-yyyy").format(now);
-    print("now: " + formattedDate);
-    DateFormat dateFormat = DateFormat("dd-MM-yyyy");
+    String formattedDate = DateFormat('dd-MM-yyyy').format(now);
+    print('now: ' + formattedDate);
+    DateFormat dateFormat = DateFormat('dd-MM-yyyy');
     DateTime today = dateFormat.parse(formattedDate);
-    String formattedDate2 = DateFormat("dd-MM-yyyy hh:mm:ss").format(today);
-    // print("today: " + formattedDate2);
+    String formattedDate2 = DateFormat('dd-MM-yyyy hh:mm:ss').format(today);
+    // print('today: ' + formattedDate2);
     DateTime messageTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    String formattedDate3 = DateFormat("hh:mm").format(messageTime);
+    String formattedDate3 = DateFormat('hh:mm').format(messageTime);
     return formattedDate3;
   }
 
@@ -825,7 +852,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               FlatButton(
                   onPressed: () => sendChatMessage(context, 'mimi1', 2, user, conversationGroup),
                   child: Image(
-                    image: AssetImage("lib/ui/images/mimi1.gif"),
+                    image: AssetImage('lib/ui/images/mimi1.gif'),
                     width: 50.0,
                     height: 50.0,
                     fit: BoxFit.cover,
@@ -833,7 +860,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               FlatButton(
                   onPressed: () => sendChatMessage(context, 'mimi2', 2, user, conversationGroup),
                   child: Image(
-                    image: AssetImage("lib/ui/images/mimi2.gif"),
+                    image: AssetImage('lib/ui/images/mimi2.gif'),
                     width: 50.0,
                     height: 50.0,
                     fit: BoxFit.cover,
@@ -841,7 +868,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               FlatButton(
                   onPressed: () => sendChatMessage(context, 'mimi3', 2, user, conversationGroup),
                   child: Image(
-                    image: AssetImage("lib/ui/images/mimi3.gif"),
+                    image: AssetImage('lib/ui/images/mimi3.gif'),
                     width: 50.0,
                     height: 50.0,
                     fit: BoxFit.cover,
@@ -854,7 +881,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               FlatButton(
                   onPressed: () => sendChatMessage(context, 'mimi4', 2, user, conversationGroup),
                   child: Image(
-                    image: AssetImage("lib/ui/images/mimi4.gif"),
+                    image: AssetImage('lib/ui/images/mimi4.gif'),
                     width: 50.0,
                     height: 50.0,
                     fit: BoxFit.cover,
@@ -862,7 +889,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               FlatButton(
                   onPressed: () => sendChatMessage(context, 'mimi5', 2, user, conversationGroup),
                   child: Image(
-                    image: AssetImage("lib/ui/images/mimi5.gif"),
+                    image: AssetImage('lib/ui/images/mimi5.gif'),
                     width: 50.0,
                     height: 50.0,
                     fit: BoxFit.cover,
@@ -870,7 +897,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               FlatButton(
                   onPressed: () => sendChatMessage(context, 'mimi6', 2, user, conversationGroup),
                   child: Image(
-                    image: AssetImage("lib/ui/images/mimi6.gif"),
+                    image: AssetImage('lib/ui/images/mimi6.gif'),
                     width: 50.0,
                     height: 50.0,
                     fit: BoxFit.cover,
@@ -883,7 +910,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               FlatButton(
                   onPressed: () => sendChatMessage(context, 'mimi7', 2, user, conversationGroup),
                   child: Image(
-                    image: AssetImage("lib/ui/images/mimi7.gif"),
+                    image: AssetImage('lib/ui/images/mimi7.gif'),
                     width: 50.0,
                     height: 50.0,
                     fit: BoxFit.cover,
@@ -891,7 +918,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               FlatButton(
                   onPressed: () => sendChatMessage(context, 'mimi8', 2, user, conversationGroup),
                   child: Image(
-                    image: AssetImage("lib/ui/images/mimi8.gif"),
+                    image: AssetImage('lib/ui/images/mimi8.gif'),
                     width: 50.0,
                     height: 50.0,
                     fit: BoxFit.cover,
@@ -899,7 +926,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               FlatButton(
                   onPressed: () => sendChatMessage(context, 'mimi9', 2, user, conversationGroup),
                   child: Image(
-                    image: AssetImage("lib/ui/images/mimi9.gif"),
+                    image: AssetImage('lib/ui/images/mimi9.gif'),
                     width: 50.0,
                     height: 50.0,
                     fit: BoxFit.cover,
@@ -934,10 +961,12 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
       startRecordingTimer();
       Vibration.vibrate(duration: 100);
       bool startRecordSuccessful = await this.audioService.startRecorder();
-      setState(() {
-        isRecording = true;
-        inputFieldText = 'Recording...';
-      });
+      if (startRecordSuccessful) {
+        setState(() {
+          isRecording = true;
+          inputFieldText = 'Recording...';
+        });
+      }
     } else {
       Vibration.vibrate(duration: 100);
       bool stopRecordSuccessful = await this.audioService.stopRecorder();
@@ -948,8 +977,8 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
       });
       if (stopRecordSuccessful) {
         String audioFilePath = this.audioService.audioFilePath;
-        bool recordingIsTooShort = isRecordngTooShort();
-        if(!recordingIsTooShort) {
+        bool recordingIsTooShort = await recordngIsTooShort();
+        if (!recordingIsTooShort) {
           String secondsRecorded = recordingTimer.tick.toString();
           sendChatMessage(context, 'Audio (${secondsRecorded} second(s))', 3, user, conversationGroup);
           this.audioService.startAudio(this.audioService.audioFilePath);
@@ -958,6 +987,8 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
           this.fileService.deleteFile(audioFilePath);
           Fluttertoast.showToast(msg: 'Voice message is too short.', toastLength: Toast.LENGTH_SHORT);
         }
+
+        this.audioService.durationsInMiliseconds = 0;
       }
     }
   }
@@ -971,8 +1002,11 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     });
   }
 
-  bool isRecordngTooShort() {
-
+  Future<bool> recordngIsTooShort() async {
+    int recordDuration = this.audioService.durationsInMiliseconds;
+    print('chat_room_page.dart minimumRecordingLength: ' + minimumRecordingLength.toString());
+    print('chat_room_page.dart recordDuration: ' + recordDuration.toString());
+    return recordDuration < minimumRecordingLength;
   }
 
   sendChatMessage(BuildContext context, String content, int type, User user, ConversationGroup conversationGroup) {
@@ -983,21 +1017,24 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     // 3 = voice
     if (type == 0 && content.trim() != '') {
       textEditingController.clear();
+      setState(() {
+        textFieldHasValue = false;
+      });
 
       Message newMessage = Message(
         id: null,
         conversationId: widget._conversationGroup.id,
         messageContent: content,
-        multimediaId: "",
+        multimediaId: '',
         // Send to group will not need receiver
-        receiverId: "",
-        receiverMobileNo: "",
-        receiverName: "",
+        receiverId: '',
+        receiverMobileNo: '',
+        receiverName: '',
         senderId: user.id,
         senderMobileNo: user.mobileNo,
         senderName: user.displayName,
-        status: "Sent",
-        type: "Text",
+        status: 'Sent',
+        type: 'Text',
         timestamp: DateTime.now().millisecondsSinceEpoch,
       );
 
@@ -1016,11 +1053,19 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
     // Got files to send (Images, Video, Audio, Files)
     if (imageFileList.length > 0) {
-      uploadMultimediaFiles(context, imageFileList, user, conversationGroup, "Image");
+      uploadMultimediaFiles(context, imageFileList, user, conversationGroup, 'Image');
     }
 
     if (documentFileList.length > 0) {
-      uploadMultimediaFiles(context, documentFileList, user, conversationGroup, "Document");
+      uploadMultimediaFiles(context, documentFileList, user, conversationGroup, 'Document');
+    }
+
+    if(type == 3 && !isStringEmpty(audioService.audioFilePath)) {
+      List<File> fileList = [];
+      File audioFile = File(audioService.audioFilePath);
+      fileList.add(audioFile);
+      uploadMultimediaFiles(context, fileList, user, conversationGroup, 'Audio');
+      audioService.audioFilePath = null;
     }
   }
 
@@ -1055,6 +1100,12 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     }
   }
 
+  downloadFile(BuildContext context, Multimedia multimedia, Message message) {
+    // message.messageContent is the filename
+    Fluttertoast.showToast(msg: 'Your download has started.', toastLength: Toast.LENGTH_LONG);
+    fileService.downloadFile(context, multimedia.remoteFullFileUrl, true, true, message.messageContent);
+  }
+
   scrollToTheEnd() {
     // 2 timers. First to delay scrolling, 2nd is the given time to animate scrolling effect
     Timer(
@@ -1064,6 +1115,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   uploadMultimediaFiles(BuildContext context, List<File> fileList, User user, ConversationGroup conversationGroup, String type) {
+
     if (fileList.length > 0) {
       fileList.forEach((File file) async {
         FileStat fileStat = await file.stat();
@@ -1072,15 +1124,15 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
           id: null,
           conversationId: widget._conversationGroup.id,
           messageContent: basename(file.path),
-          multimediaId: "",
+          multimediaId: '',
           // Send to group will not need receiver
-          receiverId: "",
-          receiverMobileNo: "",
-          receiverName: "",
+          receiverId: '',
+          receiverMobileNo: '',
+          receiverName: '',
           senderId: user.id,
           senderMobileNo: user.mobileNo,
           senderName: user.displayName,
-          status: "Sent",
+          status: 'Sent',
           type: type,
           timestamp: DateTime.now().millisecondsSinceEpoch,
         );
@@ -1208,7 +1260,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   goToLoginPage(BuildContext context) {
     BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
-    Navigator.of(context).pushNamedAndRemoveUntil("login_page", (Route<dynamic> route) => false);
+    Navigator.of(context).pushNamedAndRemoveUntil('login_page', (Route<dynamic> route) => false);
   }
 
   @override

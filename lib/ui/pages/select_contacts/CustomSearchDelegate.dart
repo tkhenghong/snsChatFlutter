@@ -1,8 +1,5 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 
 // Resource: https://medium.com/flutterpub/implementing-search-in-flutter-17dc5aa72018

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 // To show either take photo from camera or select photo from Gallery
 showOptionsDialog(BuildContext context) {

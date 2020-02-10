@@ -270,22 +270,28 @@ class SignUpPageState extends State<SignUpPage> {
                                   if (!isObjectEmpty(settings2)) {
                                     BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
                                         multimedia: multimedia,
-                                        callback: (Multimedia multimedia) {
-                                          if (!isObjectEmpty(multimedia)) {
+                                        callback: (Multimedia multimedia2) {
+                                          if (!isObjectEmpty(multimedia2)) {
                                             userContact.multimediaId = multimedia.id;
+                                            multimedia2.userContactId = userContact.id;
                                             BlocProvider.of<UserContactBloc>(context).add(AddUserContactEvent(
                                                 userContact: userContact,
                                                 callback: (UserContact userContact2) {
-                                                  if (!isObjectEmpty(googleSignIn2) &&
-                                                      !isObjectEmpty(user2) &&
-                                                      !isObjectEmpty(settings2) &&
-                                                      !isObjectEmpty(userContact2)) {
-                                                    Fluttertoast.showToast(
-                                                        msg: 'Sign up success. Please verify your phone number.',
-                                                        toastLength: Toast.LENGTH_SHORT);
-                                                    Navigator.pop(context);
-                                                    goToVerifyPhoneNumber(context);
-                                                  }
+                                                  BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(
+                                                      multimedia: multimedia2,
+                                                      callback: (Multimedia multimedia3) {
+                                                        if (!isObjectEmpty(googleSignIn2) &&
+                                                            !isObjectEmpty(user2) &&
+                                                            !isObjectEmpty(settings2) &&
+                                                            !isObjectEmpty(userContact2) &&
+                                                            !isObjectEmpty(multimedia3)) {
+                                                          Fluttertoast.showToast(
+                                                              msg: 'Sign up success. Please verify your phone number.',
+                                                              toastLength: Toast.LENGTH_SHORT);
+                                                          Navigator.pop(context);
+                                                          goToVerifyPhoneNumber(context);
+                                                        }
+                                                      }));
                                                 }));
                                           } else {
                                             Fluttertoast.showToast(

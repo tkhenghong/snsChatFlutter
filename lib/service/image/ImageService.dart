@@ -4,14 +4,13 @@ import 'dart:isolate';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
+import 'package:image/image.dart' as CustomImage;
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
 import 'package:snschat_flutter/service/FirebaseStorage/FirebaseStorageService.dart';
 import 'package:snschat_flutter/service/file/FileService.dart';
-import 'package:image/image.dart' as CustomImage;
-import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
-
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 
 class ImageService {
   FileService fileService = FileService();
