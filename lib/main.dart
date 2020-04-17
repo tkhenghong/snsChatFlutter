@@ -18,12 +18,14 @@ import 'package:snschat_flutter/ui/pages/tabs/tabs_page.dart';
 import 'package:snschat_flutter/ui/pages/terms_and_conditions/terms_and_conditions_page.dart';
 import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number_page.dart';
 import 'package:snschat_flutter/ui/pages/video_player/video_player_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-void main() {
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  FlutterDownloader.initialize().then((data) {
-    print('FlutterDownloader.initialize() completed');
-    print('data: ' + data.toString());
+  await FlutterDownloader.initialize().then((data) {
+//    print('FlutterDownloader.initialize() completed');
+//    print('data: ' + data.toString());
   });
 
   BlocSupervisor.delegate = SimpleBlocDelegate();
@@ -88,6 +90,7 @@ class MyAppState extends State<MyApp> {
       title: 'PocketChat',
       theme: ThemeData(
 //        fontFamily: 'OpenSans',
+      textTheme: GoogleFonts.latoTextTheme(Theme.of(context).textTheme),
         brightness: primaryBrightness,
         primaryColor: primaryColor,
         accentColor: primaryColor,

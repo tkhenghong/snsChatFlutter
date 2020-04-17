@@ -295,7 +295,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
       print("chat_room_page.dart onError: " + onError.toString());
       BlocProvider.of<WebSocketBloc>(context).add(ReconnectWebSocketEvent(user: user, callback: (bool done) {}));
     }, onDone: () {
-      print("chat_room_page.dart onDone listener is working.");
       // TODO: Show reconnect message
       BlocProvider.of<WebSocketBloc>(context).add(ReconnectWebSocketEvent(user: user, callback: (bool done) {}));
     }, cancelOnError: false);

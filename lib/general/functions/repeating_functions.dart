@@ -24,13 +24,10 @@ int generateNewId() {
 // No local thumbnail, get remote thumbnail (3rd fastest, can assume not local download)
 // TODO: Put it into File I/O service
 Future<File> loadImageHandler(Multimedia multimedia) async {
-  print("loadImageHandler()");
   // Local
   Directory extDirectory = await getExternalStorageDirectory();
-  print("extDirectory.path: " + extDirectory.path);
   String localFullFileUrl = extDirectory.path + multimedia.localFullFileUrl;
   String localThumbnailUrl = extDirectory.path + multimedia.localThumbnailUrl;
-  print("localFullFileUrl: " + localFullFileUrl);
 
   File localFullFile = new File(localFullFileUrl);
   File localThumbnailFile = new File(localThumbnailUrl);
@@ -40,19 +37,16 @@ Future<File> loadImageHandler(Multimedia multimedia) async {
   bool localThumbnailFileExist = await localThumbnailFile.exists();
 
   if (localFullFileExist) {
-    print('if (localFullFileExist)');
     return localFullFile;
   } else {
     // Thumbnail
     if (localThumbnailFileExist) {
-      print('if (!localThumbnailFileExist)');
       return localThumbnailFile;
     }
   }
 
 
   if (!localThumbnailFileExist) {
-    print('if (!localThumbnailFileExist)');
     // Both file not exist means not yet download
 
     return getImageFromNetwork(multimedia.remoteThumbnailUrl);

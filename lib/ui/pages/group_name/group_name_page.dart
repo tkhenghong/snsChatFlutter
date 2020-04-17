@@ -217,7 +217,6 @@ class GroupNamePageState extends State<GroupNamePage> {
   // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
   createGroupConversation(List<Contact> contactList, BuildContext context) async {
     // TODO: create loading that cannot be dismissed to prevent exit, and make it faster
-    print("createGroupConversation()");
     showLoading(context, "Creating conversation...");
 
     UserState userState = BlocProvider.of<UserBloc>(context).state;
@@ -295,7 +294,6 @@ class GroupNamePageState extends State<GroupNamePage> {
           // No phone number and the display name is the phone number itself
           // Reason: No contact.phones when the mobile number doesn't have a name on it
           String mobileNo = contact.displayName.replaceAll(new RegExp(r"\s+\b|\b\s|\s|\b"), "");
-          print("mobileNo with whitespaces removed: " + mobileNo);
           primaryNo.add(mobileNo);
         }
 
@@ -330,8 +328,6 @@ class GroupNamePageState extends State<GroupNamePage> {
               Navigator.pop(context);
               Fluttertoast.showToast(msg: 'Unable to upload your member list. Please try again.', toastLength: Toast.LENGTH_SHORT);
             } else {
-              print("Uploaded and saved uploadUserContactList to REST, DB and State.");
-
               // Give the list of UserContactIds to memberIds of ConversationGroup
               conversationGroup.memberIds = newUserContactList.map((newUserContact) => newUserContact.id).toList();
 
@@ -339,9 +335,6 @@ class GroupNamePageState extends State<GroupNamePage> {
               conversationGroup.adminMemberIds.add(newUserContactList
                   .firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentUser.mobileNo, orElse: () => null)
                   .id);
-
-              print('select_contacts.page.dart conversationGroup.memberIds: ' + conversationGroup.memberIds.toString());
-              print('select_contacts.page.dart conversationGroup.adminMemberIds: ' + conversationGroup.adminMemberIds.toString());
 
               BlocProvider.of<ConversationGroupBloc>(context).add(AddConversationGroupEvent(
                   conversationGroup: conversationGroup,
@@ -392,10 +385,8 @@ class GroupNamePageState extends State<GroupNamePage> {
     Navigator.pop(context); // close create conversation group loading
     showLoading(context, 'Uploading group photo...');
     String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
-    print("chat_room_page.dart remoteUrl: " + remoteUrl.toString());
     String remoteThumbnailUrl =
         await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
-    print("chat_room_page.dart remoteThumbnailUrl: " + remoteThumbnailUrl.toString());
 
     if (!isStringEmpty(remoteUrl)) {
       multimedia.remoteFullFileUrl = remoteUrl;
@@ -409,18 +400,10 @@ class GroupNamePageState extends State<GroupNamePage> {
         multimedia: multimedia,
         callback: (Multimedia multimedia2) {
           if (!isObjectEmpty(multimedia2)) {
-            print('chat_room_page.dart EditMultimediaEvent success');
-            print('chat_room_page.dart multimedia2.remoteFullFileUrl == multimedia.remoteFullFileUrl: ' + multimedia2.remoteFullFileUrl ==
-                multimedia.remoteFullFileUrl);
-            print(
-                'chat_room_page.dart multimedia2.remoteThumbnailUrl == multimedia.remoteThumbnailUrl: ' + multimedia2.remoteThumbnailUrl ==
-                    multimedia.remoteThumbnailUrl);
             // Go to chat room page
             Navigator.pop(context); //pop loading dialog
             Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
             Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
-          } else {
-            print('chat_room_page.dart EditMultimediaEvent failed.');
           }
         }));
   }

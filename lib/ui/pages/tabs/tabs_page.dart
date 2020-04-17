@@ -59,7 +59,6 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
 //    this.context = context;
     themePrimaryColor = Theme.of(context).textTheme.title.color;
 
-    print('Tabs Page: build? ');
     return Material(
       color: Colors.white,
       child: Scaffold(
@@ -205,7 +204,6 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
         _animationController2.reverse();
         break;
       default:
-        print("No such page.");
         break;
     }
   }

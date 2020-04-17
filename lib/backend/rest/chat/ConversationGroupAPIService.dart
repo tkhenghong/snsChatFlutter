@@ -51,8 +51,6 @@ class ConversationGroupAPIService {
       Iterable list = json.decode(httpResponse.body);
       List<ConversationGroup> conversationList = list.map((model) => ConversationGroup.fromJson(model)).toList();
       return conversationList;
-    } else {
-      print("if (!httpResponseIsOK(httpResponse))");
     }
     return null;
   }

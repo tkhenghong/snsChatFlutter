@@ -1,7 +1,7 @@
 library snsChatFlutter.globals;
 
-String REST_URL = "http://192.168.88.188:8080";
-String WEBSOCKET_URL = "ws://192.168.88.188:8080/socket";
+String REST_URL = "http://192.168.0.195:8080";
+String WEBSOCKET_URL = "ws://192.168.0.195:8080/socket";
 //String REST_URL = "http://35.184.11.203:8080";
 //String WEBSOCKET_URL = "ws://35.184.11.203:8080/socket";
 // At Home: http://192.168.0.139:8080

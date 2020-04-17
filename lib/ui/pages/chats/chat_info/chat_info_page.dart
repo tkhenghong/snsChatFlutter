@@ -185,7 +185,6 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                               height: 60.0,
                               child: InkWell(
                                 onTap: () {
-                                  print("Tapped.");
                                   // TODO: Set notificationExpireDate
                                 },
                                 child: Padding(
@@ -222,7 +221,6 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                               height: 60.0,
                               child: InkWell(
                                 onTap: () {
-                                  print("Tapped.");
                                 },
                                 child: Padding(
                                   padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
@@ -256,7 +254,6 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                               height: 60.0,
                               child: InkWell(
                                 onTap: () {
-                                  print("Tapped.");
                                 },
                                 child: Padding(
                                   padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
@@ -288,17 +285,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                         BlocBuilder<UserContactBloc, UserContactState>(
                           builder: (BuildContext context, UserContactState userContactState) {
                             if (userContactState is UserContactsLoaded) {
-                              print('chat_info_page.dart if (userContactState is UserContactsLoaded)');
                               List<UserContact> userContactList = userContactState.userContactList;
 
-                              if (!isObjectEmpty(userContactList)) {
-                                print('chat_info_page.dart userContactList.length: ' + userContactList.length.toString());
-                                userContactList.forEach((UserContact userContact) {
-                                  print('chat_info_page.dart userContact.toString(): ' + userContact.toString());
-                                  print('chat_info_page.dart userContact.id: ' + userContact.id);
-                                  print('chat_info_page.dart userContact.displayName: ' + userContact.displayName);
-                                });
-                              }
                               conversationGroupMemberList = getConversationGroupMembers(context, userContactList, conversationGroup);
 
                               return showGroupMemberNumber(context, conversationGroupMemberList);
@@ -337,7 +325,6 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                               height: 60.0,
                               child: InkWell(
                                 onTap: () {
-                                  print("Tapped.");
                                 },
                                 child: Padding(
                                   padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
@@ -371,7 +358,6 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                               height: 60.0,
                               child: InkWell(
                                 onTap: () {
-                                  print("Tapped.");
                                 },
                                 child: Padding(
                                   padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
@@ -469,7 +455,6 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                           softWrap: true,
                         ),
                         onTap: () {
-                          print("Tapped!");
                         },
                         leading: imageService.loadImageThumbnailCircleAvatar(null, "UserContact", context),
 //                                        leading: imageService.loadImageThumbnailCircleAvatar(
@@ -496,12 +481,6 @@ class ChatInfoPageState extends State<ChatInfoPage> {
     UserState userState = BlocProvider.of<UserBloc>(context).state;
 
     if (userState is UserLoaded) {
-      if (!isObjectEmpty(userContactList)) {
-        print('chat_info_page.dart if(!isObjectEmpty(userContactList))');
-        print('chat_info_page.dart if userContactList.toString(): ' + userContactList.toString());
-        print('chat_info_page.dart if userContactList.length.toString(): ' + userContactList.length.toString());
-      }
-
       for (String memberId in conversationGroup.memberIds) {
         bool userContactFound = false;
         for (UserContact existingUserContact in userContactList) {
@@ -527,12 +506,6 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                     .add(AddUserContactEvent(userContact: userContact, callback: (UserContact userContact2) {}));
               }
             }));
-      }
-
-      if (!isObjectEmpty(conversationGroupMemberList)) {
-        print('chat_info_page.dart if(!isObjectEmpty(conversationGroupMemberList))');
-        print('chat_info_page.dart if conversationGroupMemberList.toString(): ' + conversationGroupMemberList.toString());
-        print('chat_info_page.dart if conversationGroupMemberList.length.toString(): ' + conversationGroupMemberList.length.toString());
       }
     }
 

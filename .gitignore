@@ -37,3 +37,5 @@ generated-sources
 .DS_Store
 Thumbs.db
 UserInterfaceState.xcuserstate
+
+.flutter-plugins-dependencies

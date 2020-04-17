@@ -112,7 +112,6 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
   Stream<GoogleInfoState> _signIntoGoogle(SignInGoogleInfoEvent event) async* {
     if(state is GoogleInfoNotLoaded || state is GoogleInfoLoading) {
       try {
-        print('GoogleInfoBloc.dart SignInGoogleInfoEvent()');
         GoogleSignIn googleSignIn = new GoogleSignIn();
         FirebaseAuth firebaseAuth = FirebaseAuth.instance;
         FirebaseUser firebaseUser;

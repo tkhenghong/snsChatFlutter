@@ -376,7 +376,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   checkTextOnField(String text) {
-    print('chat_room_page.dart text: ' + text);
     setState(() {
       textFieldHasValue = !isStringEmpty(textEditingController.text);
     });
@@ -830,14 +829,11 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   String messageTimeDisplay(int timestamp) {
-    print('timestamp: ' + timestamp.toString());
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('dd-MM-yyyy').format(now);
-    print('now: ' + formattedDate);
     DateFormat dateFormat = DateFormat('dd-MM-yyyy');
     DateTime today = dateFormat.parse(formattedDate);
     String formattedDate2 = DateFormat('dd-MM-yyyy hh:mm:ss').format(today);
-    // print('today: ' + formattedDate2);
     DateTime messageTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
     String formattedDate3 = DateFormat('hh:mm').format(messageTime);
     return formattedDate3;
@@ -1091,7 +1087,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   // Note: Can get any file
   Future getFiles() async {
-    List<File> fileList = await FilePicker.getMultiFile(type: FileType.ANY);
+    List<File> fileList = await FilePicker.getMultiFile(type: FileType.any);
     if (!isObjectEmpty(fileList) && fileList.length > 0) {
       setState(() {
         documentFileList.addAll(fileList.where((File file) => true));
@@ -1169,9 +1165,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                     multimedia: messageMultimedia,
                     callback: (Multimedia multimedia2) async {
                       Multimedia multimedia3 = await uploadMultimediaToCloud(context, multimedia2, conversationGroup);
-                      if (isObjectEmpty(multimedia3)) {
-                        print('chat_room_page.dart multimedia3: ' + multimedia3.remoteFullFileUrl.toString());
-                      }
 
                       updateMultimediaContent(context, multimedia3, message2, conversationGroup);
                     }));
@@ -1185,15 +1178,12 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   Future<Multimedia> uploadMultimediaToCloud(BuildContext context, Multimedia multimedia, ConversationGroup conversationGroup) async {
-    print('chat_room_page.dart uploadMultimediaToCloud()');
     if (!isStringEmpty(multimedia.localFullFileUrl)) {
-      print('chat_room_page.dart if (!isStringEmpty(multimedia.localFullFileUrl))');
       multimedia.remoteFullFileUrl =
           await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
     }
 
     if (!isStringEmpty(multimedia.localThumbnailUrl)) {
-      print('chat_room_page.dart if (!isStringEmpty(multimedia.localThumbnailUrl))');
       multimedia.remoteThumbnailUrl =
           await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
     }
@@ -1202,18 +1192,13 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   updateMultimediaContent(BuildContext context, Multimedia multimedia, Message message, ConversationGroup conversationGroup) async {
-    print('chat_room_page.dart updateMultimediaContent()');
     BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(
         multimedia: multimedia,
         callback: (Multimedia multimedia2) {
           if (!isObjectEmpty(multimedia2)) {
-            print('chat_room_page.dart if (!isObjectEmpty(multimedia2))');
-
             WebSocketMessage webSocketMessage = WebSocketMessage(message: message, multimedia: multimedia);
             BlocProvider.of<WebSocketBloc>(context)
                 .add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
-          } else {
-            print('chat_room_page.dart if (isObjectEmpty(multimedia2))');
           }
         }));
   }

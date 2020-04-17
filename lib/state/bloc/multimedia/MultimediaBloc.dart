@@ -95,23 +95,16 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     bool updated = false;
 
     if (state is MultimediaLoaded) {
-      print('MultimediaBloc.dart if (state is MultimediaLoaded)');
       updatedInREST = await multimediaAPIService.editMultimedia(event.multimedia);
-      print('MultimediaBloc.dart updatedInREST: ' + updatedInREST.toString());
       if (updatedInREST) {
-        print('MultimediaBloc.dart if (updatedInREST)');
         updated = await multimediaDBService.editMultimedia(event.multimedia);
-        print('MultimediaBloc.dart updated: ' + updated.toString());
         if (updated) {
-          print('MultimediaBloc.dart if (updated)');
           List<Multimedia> existingMultimediaList = (state as MultimediaLoaded).multimediaList;
 
           existingMultimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == event.multimedia.id);
 
           existingMultimediaList.add(event.multimedia);
 
-          print('MultimediaBloc.dart existingMultimediaList.length: ' + existingMultimediaList.length.toString());
-          print('MultimediaBloc.dart existingMultimediaList.toString(): ' + existingMultimediaList.toString());
           yield MultimediaLoaded(existingMultimediaList);
           functionCallback(event, event.multimedia);
         }

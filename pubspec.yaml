@@ -1,5 +1,5 @@
 name: snschat_flutter
-description: A new Flutter application.
+description: Real-time message app created using Flutter.
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -84,6 +84,8 @@ dependencies:
   # Connect to backend/Get Images, Video and etc...
   http: ^0.12.0+2
 
+  google_fonts: 0.5.0+1
+
   # Testings
 #  test: ^1.6.5
 
@@ -116,30 +118,6 @@ flutter:
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
-
-  #fonts:
-  #- family: OpenSans
-  #  fonts:
-  #  - asset: fonts/OpenSans-Bold.ttf
-  #    style: bold
-  #  - asset: fonts/OpenSans-BoldItalic.ttf
-  #    style: bolditalic
-  #  - asset: fonts/OpenSans-ExtraBold.ttf
-  #    style: extrabold
-  #  - asset: fonts/OpenSans-ExtraBoldItalic.ttf
-  #    style: extrabolditalic
-  #  - asset: fonts/OpenSans-Italic.ttf
-  #    style: italic
-  #  - asset: fonts/OpenSans-Light.ttf
-  #    style: light
-  #  - asset: fonts/OpenSans-LightItalic.ttf
-  #    style: lightitalic
-  #  - asset: fonts/OpenSans-Regular.ttf
-  #    style: regular
-  #  - asset: fonts/OpenSans-SemiBold.ttf
-  #    style: semibold
-  #  - asset: fonts/OpenSans-SemiBoldItalic.ttf
-  #    style: semibolditalic
 
   #- family: RobotoMono
   #  fonts:

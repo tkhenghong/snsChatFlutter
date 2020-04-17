@@ -86,27 +86,18 @@ class FileService {
   }
 
   downloadMultimediaFile(BuildContext context, Multimedia multimedia) async {
-    print('downloadMultimediaFile()');
-    print('multimedia.remoteFullFileUrl: ' + multimedia.remoteFullFileUrl.toString());
     if (!isStringEmpty(multimedia.remoteFullFileUrl)) {
       File file = await defaultCacheManager.getSingleFile(multimedia.remoteFullFileUrl);
-      print('can get file from cache');
       if (isObjectEmpty(file)) {
-        print('if (isObjectEmpty(file))');
         FileInfo fileDownloadFromInternet = await defaultCacheManager.downloadFile(multimedia.remoteFullFileUrl);
         FileInfo fileThumbnailDownloadedFromInternet = await defaultCacheManager.downloadFile(multimedia.remoteThumbnailUrl);
-        print('dawdaw Checkpoint 2');
 
         if (!fileInfoIsEmpty(fileDownloadFromInternet) && !fileInfoIsEmpty(fileThumbnailDownloadedFromInternet)) {
-          print('dawdaw Checkpoint 3');
           multimedia.localFullFileUrl = fileDownloadFromInternet.file.path;
           multimedia.localThumbnailUrl = fileThumbnailDownloadedFromInternet.file.path;
           BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
-        } else {
-          print('dawdaw Checkpoint 4');
         }
       } else {
-        print('if (!isObjectEmpty(file))');
         multimedia.localFullFileUrl = file.path;
         multimedia.localThumbnailUrl = file.path;
         BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
@@ -158,13 +149,8 @@ class FileService {
   // TODO: bring filename to download the file correctly
   downloadFile(BuildContext context, String remoteUrl, bool showNotification, bool openFileFromNotification, String fileName) async {
     try {
-      print("FileService downloadFile()");
-      print("remoteUrl: " + remoteUrl);
-
 //      String downloadDirectory = await getApplicationDocumentDirectory() + "/";
       String downloadDirectory = await _findLocalPath(context) + "/";
-
-      print("downloadDirectory: " + downloadDirectory.toString());
 
       tasks = await FlutterDownloader.loadTasks();
 
@@ -191,25 +177,6 @@ class FileService {
       });
 
       await FlutterDownloader.open(taskId: taskId);
-//      print("tasks: " + tasks.toString());
-//
-//      // Note: The first element of the taskList contains the full information of the file
-//      String fileDirectory = tasks[0].savedDir.toString();
-//
-//      print("fileDirectory: " + fileDirectory);
-//      print("fileName: " + fileName);
-//
-//      // Rename the file
-//      File renamedFile = await File(fileDirectory + fileName)
-//        .rename(downloadDirectory + fileName);
-//
-//      if (isObjectEmpty(renamedFile) || isStringEmpty(renamedFile.path)) {
-//        return null;
-//      }
-//
-//      print("renamedFile: " + renamedFile.path.toString());
-//
-//      return renamedFile;
     } catch (e) {
       print('Error when download a file');
       print('Error reason: ' + e.toString());
@@ -217,12 +184,7 @@ class FileService {
   }
 
   static void flutterDownloaderCallback(String id, DownloadTaskStatus downloadTaskStatus, int progress) {
-    print('id: ' + id.toString());
-    print('downloadTaskStatus: ' + downloadTaskStatus.toString());
-    print('downloadTaskStatus.value: ' + downloadTaskStatus.value.toString());
-    print('progress: ' + progress.toString());
     if (downloadTaskStatus == DownloadTaskStatus.complete) {
-      print("if(downloadTaskStatus == DownloadTaskStatus.complete)");
       Fluttertoast.showToast(msg: 'File downloaded.', toastLength: Toast.LENGTH_LONG);
       FlutterDownloader.open(taskId: id);
     }

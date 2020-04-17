@@ -64,16 +64,12 @@ class CustomDialogs {
                       children: <Widget>[
                         FlatButton(
                           onPressed: () {
-                            print("Clicked");
                             Navigator.of(context).pop(value);
                           },
                           child: Text("Cancel", style: textStyle),
                         ),
                         FlatButton(
                           onPressed: () {
-                            print("Clicked");
-                            print("value: " + value);
-                            print("The value is: " + textEditingController.text);
                             if (isStringEmpty(textEditingController.text)) {
                               Navigator.of(context).pop(value);
                             } else {

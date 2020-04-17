@@ -53,7 +53,6 @@ class LoginPageState extends State<LoginPage> {
         }
 
         if (ipGeoLocationState is IPGeoLocationNotLoaded) {
-          print('login_page.dart if (ipGeoLocationState is IPGeoLocationNotLoaded)');
           countryCodeString = 'US';
           return loginScreen(null, context);
         }
@@ -217,11 +216,9 @@ class LoginPageState extends State<LoginPage> {
                                 user: user2,
                                 callback: (Settings settings) {
                                   if (!isObjectEmpty(settings)) {
-                                    print('login_page.dart if (!isObjectEmpty(settings))');
                                     Navigator.pop(context);
                                     goToVerifyPhoneNumber(mobileNo, context);
                                   } else {
-                                    print('login_page.dart if (isObjectEmpty(settings))');
                                     Fluttertoast.showToast(
                                         msg: 'Invalid Mobile No./matching Google account. Please try again.',
                                         toastLength: Toast.LENGTH_SHORT);
@@ -245,7 +242,6 @@ class LoginPageState extends State<LoginPage> {
                             BlocProvider.of<UserContactBloc>(context)
                                 .add(GetUserPreviousUserContactsEvent(user: user2, callback: (bool done) {}));
                           } else {
-                            print('login_page.dart if (isObjectEmpty(user2))');
                             Fluttertoast.showToast(
                                 msg: 'Invalid Mobile No./matching Google account. Please try again.', toastLength: Toast.LENGTH_SHORT);
                             BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {

@@ -89,27 +89,19 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           ),
           BlocListener<UserBloc, UserState>(
             listener: (context, userState) {
-              print('select_contacts_page.dart UserBloc listener worklng.');
-              if (userState is UserLoaded) {
-                print('select_contacts_page.dart User state is loaded detected.');
-              }
             },
           ),
         ],
         child: BlocBuilder<PhoneStorageContactBloc, PhoneStorageContactState>(
           builder: (context, phoneStorageContactState) {
             if (phoneStorageContactState is PhoneStorageContactLoading) {
-              print('select-contect-page.dart if (phoneStorageContactState is PhoneStorageContactLoading)');
               return showLoadingContactsPage(context);
             }
 
             if (phoneStorageContactState is PhoneStorageContactsLoaded) {
-              print('select-contect-page.dart if (phoneStorageContactState is PhoneStorageContactsLoaded)');
               if (phoneStorageContactState.phoneStorageContactList.length == 0) {
-                print('select-contect-page.dart showNoContactPage');
                 return showNoContactPage(context);
               } else {
-                print('select-contect-page.dart show contacts');
                 return SmartRefresher(
                   controller: _refreshController,
                   enablePullDown: true,
@@ -136,11 +128,9 @@ class SelectContactsPageState extends State<SelectContactsPage> {
             }
 
             if (phoneStorageContactState is PhoneStorageContactsNotLoaded) {
-              print('select-contect-page.dart if (phoneStorageContactState is PhoneStorageContactsNotLoaded)');
               return showNoContactPermissionPage(context);
             }
 
-            print('select-contect-page.dart showErrorPage()');
             return showErrorPage(context);
           },
         ),
@@ -364,7 +354,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   }
 
   setConversationType(String chatGroupType) async {
-    print("widget.chatGroupType: " + widget.chatGroupType);
     switch (chatGroupType) {
       case "Personal":
         title = "Create Personal Chat";
@@ -478,7 +467,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           // No phone number and the display name is the phone number itself
           // Reason: No contact.phones when the mobile number doesn't have a name on it
           String mobileNo = contact.displayName.replaceAll(new RegExp(r"\s+\b|\b\s|\s|\b"), "");
-          print("mobileNo with whitespaces removed: " + mobileNo);
           primaryNo.add(mobileNo);
         }
 
@@ -536,8 +524,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
               Navigator.pop(context);
               Fluttertoast.showToast(msg: 'Unable to upload your member list. Please try again.', toastLength: Toast.LENGTH_SHORT);
             } else {
-              print("Uploaded and saved uploadUserContactList to REST, DB and State.");
-
               // Give the list of UserContactIds to memberIds of ConversationGroup
               conversationGroup.memberIds = newUserContactList.map((newUserContact) => newUserContact.id).toList();
 
@@ -545,9 +531,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
               conversationGroup.adminMemberIds.add(newUserContactList
                   .firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentUser.mobileNo, orElse: () => null)
                   .id);
-
-              print('select_contacts.page.dart conversationGroup.memberIds: ' + conversationGroup.memberIds.toString());
-              print('select_contacts.page.dart conversationGroup.adminMemberIds: ' + conversationGroup.adminMemberIds.toString());
 
               BlocProvider.of<ConversationGroupBloc>(context).add(AddConversationGroupEvent(
                   conversationGroup: conversationGroup,
