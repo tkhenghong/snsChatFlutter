@@ -8,7 +8,6 @@ import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 
-
 class PhotoViewPage extends StatefulWidget {
   final Multimedia multimedia;
 

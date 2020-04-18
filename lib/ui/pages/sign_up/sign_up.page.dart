@@ -5,11 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:snschat_flutter/general/functions/validation_functions.dart';
-import 'package:snschat_flutter/general/ui-component/loading.dart';
+
+import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/ui/pages/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
-import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number.page.dart';
 
 class SignUpPage extends StatefulWidget {
   String mobileNo;

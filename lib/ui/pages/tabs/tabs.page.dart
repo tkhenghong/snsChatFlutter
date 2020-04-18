@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:snschat_flutter/general/enums/conversation_group_type.dart';
-import 'package:snschat_flutter/state/bloc/bloc.dart';
 
+import 'package:snschat_flutter/general/index.dart';
+import 'package:snschat_flutter/state/bloc/bloc.dart';
 import '../index.dart';
 
 class TabsPage extends StatefulWidget {

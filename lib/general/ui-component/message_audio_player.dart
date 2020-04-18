@@ -20,7 +20,8 @@ Widget messageAudioPlayer(BuildContext context, ChatMessage message, Multimedia 
           },
         ),
         Slider.adaptive(
-          value: audioService.sliderCurrentPosition,
+//          value: audioService.sliderCurrentPosition,
+          value: 0.0,
           label: message.messageContent,
 //          max: audioService.audioMaxDuration,
           max: 5.0,

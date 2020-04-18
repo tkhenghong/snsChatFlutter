@@ -70,6 +70,8 @@ dependencies {
     // To solve firestore problem: https://stackoverflow.com/questions/52459533/flutter-unable-to-merge-dex
     implementation 'com.google.firebase:firebase-core:16.0.9'
     implementation 'com.google.firebase:firebase-storage:19.0.0'
+    // https://stackoverflow.com/questions/56639529/duplicate-class-com-google-common-util-concurrent-listenablefuture-found-in-modu
+    implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -8,13 +8,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:snschat_flutter/general/functions/validation_functions.dart';
-import 'package:snschat_flutter/general/ui-component/loading.dart';
-import 'package:snschat_flutter/objects/index.dart';
-import 'package:snschat_flutter/state/bloc/bloc.dart';
-import 'package:snschat_flutter/ui/pages/sign_up/sign_up.page.dart';
-import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number.page.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'package:snschat_flutter/state/bloc/bloc.dart';
+import 'package:snschat_flutter/ui/pages/index.dart';
+import 'package:snschat_flutter/general/index.dart';
+import 'package:snschat_flutter/objects/index.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -108,6 +107,15 @@ class LoginPageState extends State<LoginPage> {
                               Padding(
                                 padding: EdgeInsets.only(left: 20.0),
                               ),
+                              CountryCodePicker(
+                                initialSelection: countryCodeString,
+                                alignLeft: false,
+                                showCountryOnly: false,
+                                showFlag: true,
+                                showOnlyCountryWhenClosed: false,
+                                favorite: [countryCodeString],
+                                onChanged: onCountryPickerChanged,
+                              ),
                               Container(
                                 width: deviceWidth * 0.5,
                                 margin: EdgeInsetsDirectional.only(
@@ -198,7 +206,6 @@ class LoginPageState extends State<LoginPage> {
 
     return null;
   }
-
 
   onCountryPickerChanged(CountryCode countryCode) {
     this.countryCode = countryCode;

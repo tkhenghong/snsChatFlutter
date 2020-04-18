@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:snschat_flutter/general/ui-component/list-view.dart';
+import 'package:snschat_flutter/general/index.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
