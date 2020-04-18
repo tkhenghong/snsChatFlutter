@@ -1,12 +1,13 @@
 import 'dart:async';
-
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
-import 'package:snschat_flutter/general/functions/validation_functions.dart';
-import 'package:snschat_flutter/service/file/FileService.dart';
+
+import 'package:snschat_flutter/environments/development/variables.dart'
+    as globals;
+import 'package:snschat_flutter/general/index.dart';
+import 'package:snschat_flutter/service/index.dart';
 
 // Video tutorial: https://www.youtube.com/watch?v=LcaOULash7s
 // Make a class to connect your DB file in Android/iOS and make it singleton which can be instantiated only once
@@ -33,7 +34,8 @@ class SembastDB {
     }
 
     // Otherwize, return the value of the function again straight back to the caller.
-    return _dbOpenCompleter.future; // Returns the last value emitted from the function that linked to this completer instance.
+    return _dbOpenCompleter
+        .future; // Returns the last value emitted from the function that linked to this completer instance.
   }
 
   Future _startSembastDatabase() async {
@@ -42,26 +44,26 @@ class SembastDB {
     var dbPath = "";
 
     bool storageAccessGranted = false;
+
     switch (ENVIRONMENT) {
       case "DEVELOPMENT":
         dbPath = 'pocketChat.db';
         storageAccessGranted = true;
         break;
       default:
-        FileService fileService = FileService();
+        CustomFileService fileService = CustomFileService();
         // get the application documents directory
         String path = await fileService.getApplicationDocumentDirectory();
-        if(isStringEmpty(path)) {
+        if (isStringEmpty(path)) {
           storageAccessGranted = false;
         } else {
           // build the database path
-          dbPath = join(path, 'pocketChat.db'); // join method comes from path.dart
+          dbPath =
+              join(path, 'pocketChat.db'); // join method comes from path.dart
           storageAccessGranted = true;
         }
         break;
     }
-
-
 
     if (storageAccessGranted) {
       // open the database

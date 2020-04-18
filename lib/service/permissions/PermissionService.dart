@@ -1,38 +1,32 @@
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionService {
-  // Implementing easiest get permissions
   Future<bool> requestContactPermission() async {
-    Map<PermissionGroup, PermissionStatus> permissions =
-        await PermissionHandler().requestPermissions([
-      PermissionGroup.contacts,
-    ]);
-
-    bool contactAccessGranted = false;
-    permissions.forEach(
-        (PermissionGroup permissionGroup, PermissionStatus permissionStatus) {
-      if (permissionGroup == PermissionGroup.contacts &&
-          permissionStatus == PermissionStatus.granted) {
-        contactAccessGranted = true;
-      }
-    });
-    return contactAccessGranted;
+    return await Permission.contacts.request() == PermissionStatus.granted;
   }
 
   Future<bool> requestStoragePermission() async {
-    Map<PermissionGroup, PermissionStatus> permissions =
-    await PermissionHandler().requestPermissions([
-      PermissionGroup.storage,
-    ]);
+    return await Permission.storage.request() == PermissionStatus.granted;
+  }
 
-    bool storageAccessGranted = false;
-    permissions.forEach(
-            (PermissionGroup permissionGroup, PermissionStatus permissionStatus) {
-          if (permissionGroup == PermissionGroup.storage &&
-              permissionStatus == PermissionStatus.granted) {
-            storageAccessGranted = true;
-          }
-        });
-    return storageAccessGranted;
+  Future<bool> requestCameraPermission() async {
+    return await Permission.camera.request() == PermissionStatus.granted;
+  }
+
+  Future<bool> requestMicrophonePermission() async {
+    return await Permission.microphone.request() == PermissionStatus.granted;
+  }
+
+  Future<bool> requestSMSPermission() async {
+    return await Permission.sms.request() == PermissionStatus.granted;
+  }
+
+  Future<bool> requestLocationWhenInUsePermission() async {
+    return await Permission.locationWhenInUse.request() ==
+        PermissionStatus.granted;
+  }
+
+  Future<bool> requestPhotosPermission() async {
+    return await Permission.photos.request() == PermissionStatus.granted;
   }
 }

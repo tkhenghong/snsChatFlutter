@@ -1,7 +1,7 @@
-import 'package:snschat_flutter/backend/rest/multimedia/MultimediaAPIService.dart';
-
 import 'package:flutter_test/flutter_test.dart';
-import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
+
+import 'package:snschat_flutter/rest/index.dart';
+import 'package:snschat_flutter/objects/index.dart';
 
 void main() {
   MultimediaAPIService multimediaAPIService = MultimediaAPIService();

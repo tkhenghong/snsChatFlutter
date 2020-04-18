@@ -1,7 +1,7 @@
 import 'package:sembast/sembast.dart';
-import 'package:snschat_flutter/general/functions/validation_functions.dart';
-import 'package:snschat_flutter/objects/settings/settings.dart';
 
+import 'package:snschat_flutter/general/index.dart';
+import 'package:snschat_flutter/objects/index.dart';
 import '../SembastDB.dart';
 
 class SettingsDBService {
@@ -18,7 +18,9 @@ class SettingsDBService {
     }
 
     Settings existingSettings = await getSingleSettings(settings.id);
-    var key = existingSettings == null ? await _settingsStore.add(await _db, settings.toJson()) : null;
+    var key = existingSettings == null
+        ? await _settingsStore.add(await _db, settings.toJson())
+        : null;
 
     return !isStringEmpty(key.toString());
   }
@@ -29,7 +31,8 @@ class SettingsDBService {
     }
     final finder = Finder(filter: Filter.equals("id", settings.id));
 
-    var noOfUpdated = await _settingsStore.update(await _db, settings.toJson(), finder: finder);
+    var noOfUpdated = await _settingsStore.update(await _db, settings.toJson(),
+        finder: finder);
 
     return noOfUpdated == 1;
   }
@@ -50,8 +53,11 @@ class SettingsDBService {
       return null;
     }
     final finder = Finder(filter: Filter.equals("id", settingsId));
-    final recordSnapshot = await _settingsStore.findFirst(await _db, finder: finder);
-    return !isObjectEmpty(recordSnapshot) ? Settings.fromJson(recordSnapshot.value) : null;
+    final recordSnapshot =
+        await _settingsStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot)
+        ? Settings.fromJson(recordSnapshot.value)
+        : null;
   }
 
   Future<Settings> getSettingsOfAUser(String userId) async {
@@ -59,8 +65,11 @@ class SettingsDBService {
       return null;
     }
     final finder = Finder(filter: Filter.equals("userId", userId));
-    final recordSnapshot = await _settingsStore.findFirst(await _db, finder: finder);
-    return !isObjectEmpty(recordSnapshot) ? Settings.fromJson(recordSnapshot.value) : null;
+    final recordSnapshot =
+        await _settingsStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot)
+        ? Settings.fromJson(recordSnapshot.value)
+        : null;
   }
 
   // Possible usage when doing like Facebook multiple users login

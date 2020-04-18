@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:snschat_flutter/objects/conversationGroup/conversation_group.dart';
 import 'package:snschat_flutter/objects/index.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial

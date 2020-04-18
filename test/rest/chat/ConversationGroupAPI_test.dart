@@ -1,6 +1,7 @@
-import 'package:snschat_flutter/backend/rest/chat/ConversationGroupAPIService.dart';
-
 import 'package:flutter_test/flutter_test.dart';
+import 'package:snschat_flutter/general/enums/conversation_group_type.dart';
+
+import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/objects/index.dart';
 
 void main() {
@@ -11,7 +12,7 @@ void main() {
       id: null,
       name: "Testing Group 1",
       description: "Testing description",
-      type: "Personal",
+      type: ConversationGroupType.Personal,
       createdDate: new DateTime.now().millisecondsSinceEpoch,
       notificationExpireDate: new DateTime(0).millisecondsSinceEpoch,
       creatorUserId: "65421654654651",
@@ -33,7 +34,7 @@ void main() {
     ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(conversationGroup);
     ConversationGroup editedConversationGroup = newConversationGroup;
     editedConversationGroup.name = "Test Group 2";
-    editedConversationGroup.type = "Group";
+    editedConversationGroup.type = ConversationGroupType.Group;
     editedConversationGroup.description = "Edited Description";
     bool edited = await conversationGroupAPIService.editConversationGroup(editedConversationGroup);
     print("edited:" + edited.toString());

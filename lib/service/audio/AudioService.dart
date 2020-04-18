@@ -1,87 +1,214 @@
 import 'dart:async';
-
-import 'package:flutter_sound/flutter_sound.dart';
-import 'package:intl/date_symbol_data_local.dart';
+import 'dart:io';
+import 'dart:math';
+import 'dart:typed_data';
+import 'package:flutter_sound/flauto.dart';
+import 'package:flutter_sound/flutter_sound_player.dart';
+import 'package:flutter_sound/flutter_sound_recorder.dart';
+import 'package:flutter_sound/track_player.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
-import 'package:snschat_flutter/general/functions/validation_functions.dart';
-import 'package:snschat_flutter/service/file/FileService.dart';
+import 'package:flutter/services.dart' show rootBundle;
+
+import 'package:snschat_flutter/environments/development/variables.dart'
+    as globals;
+import 'package:snschat_flutter/general/index.dart';
+import 'package:snschat_flutter/service/index.dart';
+
+enum t_MEDIA {
+  FILE,
+  BUFFER,
+  ASSET,
+  STREAM,
+  REMOTE_EXAMPLE_FILE,
+}
 
 // Used for Record and play audio
 class AudioService {
-  String AUDIO_DIRECTORY = globals.AUDIO_DIRECTORY;
+  bool REENTRANCE_CONCURENCY = false;
+  final exampleAudioFilePath =
+      "https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_700KB.mp3";
+  final albumArtPath =
+      "https://file-examples.com/wp-content/uploads/2017/10/file_example_PNG_500kB.png";
+
   bool _isRecording = false;
-  bool isPlaying = false;
-  String dateText;
-  double _dbLevel;
-  String audioFilePath;
-  bool audioClose = false;
-
-  t_CODEC _codec = t_CODEC.CODEC_AAC;
-
+  List<String> _path = [null, null, null, null, null, null, null];
   StreamSubscription _recorderSubscription;
   StreamSubscription _dbPeakSubscription;
   StreamSubscription _playerSubscription;
+  StreamSubscription _playbackStateSubscription;
 
-  FlutterSound flutterSound;
-  FileService fileService;
+  FlutterSoundPlayer playerModule;
+  FlutterSoundRecorder recorderModule;
+  FlutterSoundPlayer playerModule_2; // Used if REENTRANCE_CONCURENCY
+  FlutterSoundRecorder recorderModule_2; // Used if REENTRANCE_CONCURENCY
 
-  int durationsInMiliseconds;
+  String _recorderTxt = '00:00:00';
+  String _playerTxt = '00:00:00';
+  double _dbLevel;
 
-  // A value for your Widget Slider so that it will point to that position when you move the pointer in the slider or load back the position of the slider
-  double sliderCurrentPosition;
+  double sliderCurrentPosition = 0.0;
+  double maxDuration = 1.0;
+  t_MEDIA _media = t_MEDIA.FILE;
+  t_CODEC _codec = t_CODEC.CODEC_AAC;
 
-  // Show audio file max duration
-  double audioMaxDuration;
+  bool _encoderSupported = true; // Optimist
+  bool _decoderSupported = true; // Optimist
 
-  // Show current player duration
-  String playerCurrentDuration;
+  // Whether the user wants to use the audio player features
+  bool _isAudioPlayer = false;
+  bool _duckOthers = false;
 
-  initService() {
-    flutterSound = new FlutterSound();
-    fileService = new FileService();
-    flutterSound.setSubscriptionDuration(0.01);
-    flutterSound.setDbPeakLevelUpdate(0.8);
-    flutterSound.setDbLevelEnabled(true);
-    initializeDateFormatting();
+  double _duration = null;
+
+  static const List<String> paths = [
+    'flutter_sound_example.aac', // DEFAULT
+    'flutter_sound_example.aac', // CODEC_AAC
+    'flutter_sound_example.opus', // CODEC_OPUS
+    'flutter_sound_example.caf', // CODEC_CAF_OPUS
+    'flutter_sound_example.mp3', // CODEC_MP3
+    'flutter_sound_example.ogg', // CODEC_VORBIS
+    'flutter_sound_example.pcm', // CODEC_PCM
+  ];
+
+  List<String> assetSample = [
+    'assets/samples/sample.aac',
+    'assets/samples/sample.aac',
+    'assets/samples/sample.opus',
+    'assets/samples/sample.caf',
+    'assets/samples/sample.mp3',
+    'assets/samples/sample.ogg',
+    'assets/samples/sample.pcm',
+  ];
+
+  Future<bool> fileExists(String path) async {
+    return await File(path).exists();
   }
 
-  Future<bool> startRecorder() async {
-    dateText = '0:00:00';
-    durationsInMiliseconds = 0;
+  initService() async {
+    playerModule = await FlutterSoundPlayer().initialize();
+    recorderModule = await FlutterSoundRecorder().initialize();
 
-    try {
-      initService();
-      String path = await flutterSound.startRecorder(
-        codec: _codec,
-      );
+    await recorderModule.setDbPeakLevelUpdate(0.8);
+    await recorderModule.setDbLevelEnabled(true);
+    await recorderModule.setDbLevelEnabled(true);
+    if (REENTRANCE_CONCURENCY) {
+      playerModule_2 = await FlutterSoundPlayer().initialize();
+      await playerModule_2.setSubscriptionDuration(0.01);
+      await playerModule_2.setSubscriptionDuration(0.01);
 
-      _recorderSubscription = flutterSound.onRecorderStateChanged.listen((e) {
-        DateTime date = new DateTime.fromMillisecondsSinceEpoch(e.currentPosition.toInt(), isUtc: true);
-        print('e.currentPosition: ' + e.currentPosition.toString());
-        dateText = DateFormat('mm:ss:SS', 'en_GB').format(date);
-        print('date.toString(): ' + date.toString());
-        print('dateText.toString(): ' + dateText.toString());
-        durationsInMiliseconds = e.currentPosition.toInt();
-      });
-      _dbPeakSubscription = flutterSound.onRecorderDbPeakChanged.listen((value) {
-        this._dbLevel = value;
-        this._isRecording = true;
-        this.audioFilePath = path;
-      });
-      return true;
-    } catch (err) {
-      print('AudioService.dart Failed to start recoring audio.');
-      print('AudioService.dart err: ' + err.toString());
-      this._isRecording = false;
-      return false;
+      recorderModule_2 = await FlutterSoundRecorder().initialize();
+      await recorderModule_2.setSubscriptionDuration(0.01);
+      await recorderModule_2.setDbPeakLevelUpdate(0.8);
+      await recorderModule_2.setDbLevelEnabled(true);
     }
+  }
+
+  Future<void> getDuration() async {
+    switch (_media) {
+      case t_MEDIA.FILE:
+      case t_MEDIA.BUFFER:
+        int d = await flutterSoundHelper.duration(this._path[_codec.index]);
+        _duration = d != null ? d / 1000.0 : null;
+        break;
+      case t_MEDIA.ASSET:
+        _duration = null;
+        break;
+      case t_MEDIA.STREAM:
+      case t_MEDIA.REMOTE_EXAMPLE_FILE:
+        _duration = null;
+        break;
+    }
+    // setState(() {});
   }
 
   Future<bool> stopRecorder() async {
     try {
-      String result = await flutterSound.stopRecorder();
+      String result = await recorderModule.stopRecorder();
+      print('stopRecorder: $result');
+      cancelRecorderSubscriptions();
+      if (REENTRANCE_CONCURENCY) {
+        await recorderModule_2.stopRecorder();
+        await playerModule_2.stopPlayer();
+      }
+      getDuration();
+    } catch (err) {
+      print('stopRecorder error: $err');
+    }
+    // this.setState(() {
+    this._isRecording = false;
+    // });
+  }
 
+  Future<bool> startRecorder() async {
+    try {
+      // String path = await flutterSoundModule.startRecorder
+      // (
+      //   paths[_codec.index],
+      //   codec: _codec,
+      //   sampleRate: 16000,
+      //   bitRate: 16000,
+      //   numChannels: 1,
+      //   androidAudioSource: AndroidAudioSource.MIC,
+      // );
+      Directory tempDir = await getTemporaryDirectory();
+
+      String path = await recorderModule.startRecorder(
+        uri: '${tempDir.path}/${recorderModule.slotNo}-${paths[_codec.index]}',
+        codec: _codec,
+      );
+      print('startRecorder: $path');
+
+      _recorderSubscription = recorderModule.onRecorderStateChanged.listen((e) {
+        if (e != null && e.currentPosition != null) {
+          DateTime date = new DateTime.fromMillisecondsSinceEpoch(
+              e.currentPosition.toInt(),
+              isUtc: true);
+          String txt = DateFormat('mm:ss:SS', 'en_GB').format(date);
+
+          // this.setState(() {
+          this._recorderTxt = txt.substring(0, 8);
+          // });
+        }
+      });
+      _dbPeakSubscription =
+          recorderModule.onRecorderDbPeakChanged.listen((value) {
+        print("got update -> $value");
+        // setState(() {
+        this._dbLevel = value;
+        // });
+      });
+      if (REENTRANCE_CONCURENCY) {
+        try {
+          Uint8List dataBuffer =
+              (await rootBundle.load(assetSample[_codec.index]))
+                  .buffer
+                  .asUint8List();
+          await playerModule_2.startPlayerFromBuffer(dataBuffer, codec: _codec,
+              whenFinished: () {
+            //await playerModule_2.startPlayer(exampleAudioFilePath, codec: t_CODEC.CODEC_MP3, whenFinished: () {
+            print('Secondary Play finished');
+          });
+        } catch (e) {
+          print('startRecorder error: $e');
+        }
+        await recorderModule_2.startRecorder(
+          uri: '${tempDir.path}/flutter_sound_recorder2.aac',
+          codec: t_CODEC.CODEC_AAC,
+        );
+        print(
+            "Secondary record is '${tempDir.path}/flutter_sound_recorder2.aac'");
+      }
+
+      // this.setState(() {
+      this._isRecording = true;
+      this._path[_codec.index] = path;
+      // });
+    } catch (err) {
+      print('startRecorder error: $err');
+      // setState(() {
+      stopRecorder();
+      this._isRecording = false;
       if (_recorderSubscription != null) {
         _recorderSubscription.cancel();
         _recorderSubscription = null;
@@ -90,107 +217,286 @@ class AudioService {
         _dbPeakSubscription.cancel();
         _dbPeakSubscription = null;
       }
-      this._isRecording = true;
-      return true;
-    } catch (err) {
-      print('AudioService.dart Failed to stop recoring audio.');
-      print('AudioService.dart err: ' + err.toString());
-      this._isRecording = false;
-      return false;
+      // });
     }
   }
 
-  // Assuming local URL
-  Future<bool> startAudio(String audioUrl) async {
-    isPlaying = true;
-    sliderCurrentPosition = 0.0;
-    audioMaxDuration = 0.0;
-    try {
-      String path = await flutterSound.startPlayer(audioUrl);
-
-      if (isStringEmpty(path)) {
-        return false;
+  pauseResumeRecorder() {
+    if (recorderModule.isPaused) {
+      {
+        recorderModule.resumeRecorder();
+        if (REENTRANCE_CONCURENCY) {
+          recorderModule_2.resumeRecorder();
+        }
       }
+    } else {
+      recorderModule.pauseRecorder();
+      if (REENTRANCE_CONCURENCY) {
+        recorderModule_2.pauseRecorder();
+      }
+    }
 
-      await flutterSound.setVolume(1.0);
-
-      _playerSubscription = flutterSound.onPlayerStateChanged.listen((e) {
-        print('AudioService.dart flutterSound.onPlayerStateChanged listener activated.');
+    void _addListeners() {
+      cancelPlayerSubscriptions();
+      _playerSubscription = playerModule.onPlayerStateChanged.listen((e) {
         if (e != null) {
-          print('AudioService.dart if (e != null)');
+          maxDuration = e.duration;
+          if (maxDuration <= 0) maxDuration = 0.0;
 
-          sliderCurrentPosition = e.currentPosition;
-          audioMaxDuration = e.duration;
+          sliderCurrentPosition = min(e.currentPosition, maxDuration);
+          if (sliderCurrentPosition < 0.0) {
+            sliderCurrentPosition = 0.0;
+          }
 
-          print('AudioService.dart sliderCurrentPosition: ' + sliderCurrentPosition.toString());
-          print('AudioService.dart audioMaxDuration: ' + audioMaxDuration.toString());
+          DateTime date = new DateTime.fromMillisecondsSinceEpoch(
+              e.currentPosition.toInt(),
+              isUtc: true);
+          String txt = DateFormat('mm:ss:SS', 'en_GB').format(date);
+//          this.setState(() {
+          //this._isPlaying = true;
+          this._playerTxt = txt.substring(0, 8);
+//          });
         }
       });
-      return true;
-    } catch (err) {
-      print('AudioService.dart Failed to start audio.');
-      print('AudioService.dart err: ' + err.toString());
-      return false;
     }
-  }
 
-  Future<bool> pauseAudio() async {
-    isPlaying = false;
-    print('AudioService.dart pauseAudio()');
-    String result;
-    try {
-      if (flutterSound.audioState == t_AUDIO_STATE.IS_PAUSED) {
-        result = await flutterSound.resumePlayer();
-        print('resumePlayer: $result');
+    Future<bool> stopPlayer() async {
+      try {
+        String result = await playerModule.stopPlayer();
+        print('stopPlayer: $result');
+        if (_playerSubscription != null) {
+          _playerSubscription.cancel();
+          _playerSubscription = null;
+        }
+        sliderCurrentPosition = 0.0;
+      } catch (err) {
+        print('error: $err');
+      }
+      if (REENTRANCE_CONCURENCY) {
+        try {
+          String result = await playerModule_2.stopPlayer();
+          print('stopPlayer_2: $result');
+        } catch (err) {
+          print('error: $err');
+        }
+      }
+
+      // this.setState(() {
+      //this._isPlaying = false;
+      // });
+    }
+
+    // In this simple example, we just load a file in memory.This is stupid but just for demonstration  of startPlayerFromBuffer()
+    Future<Uint8List> makeBuffer(String path) async {
+      try {
+        if (!await fileExists(path)) return null;
+        File file = File(path);
+        file.openRead();
+        var contents = await file.readAsBytes();
+        print('The file is ${contents.length} bytes long.');
+        return contents;
+      } catch (e) {
+        print(e);
+        return null;
+      }
+    }
+
+    // Assuming local URL
+    Future<bool> startPlayer(String audioUrl) async {
+      try {
+        //final albumArtPath =
+        //"https://file-examples.com/wp-content/uploads/2017/10/file_example_PNG_500kB.png";
+
+        String path;
+        Uint8List dataBuffer;
+        String audioFilePath;
+        if (_media == t_MEDIA.ASSET) {
+          dataBuffer = (await rootBundle.load(assetSample[_codec.index]))
+              .buffer
+              .asUint8List();
+        } else if (_media == t_MEDIA.FILE) {
+          // Do we want to play from buffer or from file ?
+          if (await fileExists(_path[_codec.index]))
+            audioFilePath = this._path[_codec.index];
+        } else if (_media == t_MEDIA.BUFFER) {
+          // Do we want to play from buffer or from file ?
+          if (await fileExists(_path[_codec.index])) {
+            dataBuffer = await makeBuffer(this._path[_codec.index]);
+            if (dataBuffer == null) {
+              throw Exception('Unable to create the buffer');
+            }
+          }
+        } else if (_media == t_MEDIA.REMOTE_EXAMPLE_FILE) {
+          // We have to play an example audio file loaded via a URL
+          audioFilePath = exampleAudioFilePath;
+        }
+
+        // Check whether the user wants to use the audio player features
+        if (_isAudioPlayer) {
+          String albumArtUrl;
+          String albumArtAsset;
+          if (_media == t_MEDIA.REMOTE_EXAMPLE_FILE)
+            albumArtUrl = albumArtPath;
+          else {
+            if (Platform.isIOS) {
+              albumArtAsset = 'AppIcon';
+            } else if (Platform.isAndroid) {
+              albumArtAsset = 'AppIcon.png';
+            }
+          }
+
+          final track = Track(
+            trackPath: audioFilePath,
+            dataBuffer: dataBuffer,
+            codec: _codec,
+            trackTitle: "This is a record",
+            trackAuthor: "from flutter_sound",
+            albumArtUrl: albumArtUrl,
+            albumArtAsset: albumArtAsset,
+          );
+
+          TrackPlayer f = playerModule;
+          path = await f.startPlayerFromTrack(
+            track,
+            /*canSkipForward:true, canSkipBackward:true,*/
+            whenFinished: () {
+              print('I hope you enjoyed listening to this song');
+              // setState(() {});
+            },
+            onSkipBackward: () {
+              print('Skip backward');
+              stopPlayer();
+              startPlayer(audioUrl);
+            },
+            onSkipForward: () {
+              print('Skip forward');
+              stopPlayer();
+              startPlayer(audioUrl);
+            },
+          );
+        } else {
+          if (audioFilePath != null) {
+            path = await playerModule.startPlayer(audioFilePath, codec: _codec,
+                whenFinished: () {
+              print('Play finished');
+              // setState(() {});
+            });
+          } else if (dataBuffer != null) {
+            path = await playerModule.startPlayerFromBuffer(dataBuffer,
+                codec: _codec, whenFinished: () {
+              print('Play finished');
+              // setState(() {});
+            });
+          }
+
+          if (path == null) {
+            print('Error starting player');
+            return false;
+          }
+        }
+        _addListeners();
+        if (REENTRANCE_CONCURENCY && _media != t_MEDIA.REMOTE_EXAMPLE_FILE) {
+          Uint8List dataBuffer =
+              (await rootBundle.load(assetSample[_codec.index]))
+                  .buffer
+                  .asUint8List();
+          await playerModule_2.startPlayerFromBuffer(dataBuffer, codec: _codec,
+              whenFinished: () {
+            //playerModule_2.startPlayer(exampleAudioFilePath, codec: t_CODEC.CODEC_MP3, whenFinished: () {
+            print('Secondary Play finished');
+          });
+        }
+
+        print('startPlayer: $path');
+        // await flutterSoundModule.setVolume(1.0);
+      } catch (err) {
+        print('error: $err');
+      }
+      // setState(() {});
+    }
+
+    Future<bool> pauseResumeAudio() async {
+      if (playerModule.isPlaying) {
+        playerModule.pausePlayer();
+        if (REENTRANCE_CONCURENCY) {
+          playerModule_2.pausePlayer();
+        }
       } else {
-        result = await flutterSound.pausePlayer();
-        print('pausePlayer: $result');
+        playerModule.resumePlayer();
+        if (REENTRANCE_CONCURENCY) {
+          playerModule_2.resumePlayer();
+        }
       }
-      return true;
-    } catch (err) {
-      print('AudioService.dart Failed to pause/resume audio.');
-      print('AudioService.dart err: ' + err.toString());
-      return false;
+    }
+
+    Future<bool> seekAudioPosition(int sliderPositionValue) async {
+      String result = await playerModule.seekToPlayer(sliderPositionValue);
+      print('seekToPlayer: $result');
     }
   }
 
-  Future<bool> stopPlayer() async {
+  void cancelRecorderSubscriptions() {
+    if (_recorderSubscription != null) {
+      _recorderSubscription.cancel();
+      _recorderSubscription = null;
+    }
+    if (_dbPeakSubscription != null) {
+      _dbPeakSubscription.cancel();
+      _dbPeakSubscription = null;
+    }
+  }
+
+  void cancelPlayerSubscriptions() {
+    if (_playerSubscription != null) {
+      _playerSubscription.cancel();
+      _playerSubscription = null;
+    }
+
+    if (_playbackStateSubscription != null) {
+      _playbackStateSubscription.cancel();
+      _playbackStateSubscription = null;
+    }
+  }
+
+  Future<void> releaseFlauto() async {
     try {
-      isPlaying = false;
-      String result = await flutterSound.stopPlayer();
-      print('stopPlayer: $result');
-      if (_playerSubscription != null) {
-        _playerSubscription.cancel();
-        _playerSubscription = null;
-      }
-
-      sliderCurrentPosition = 0.0;
-
-      return true;
-    } catch (err) {
-      print('AudioService.dart Failed to stop audio.');
-      print('AudioService.dart err: ' + err.toString());
-      return false;
+      await playerModule.release();
+      await recorderModule.release();
+      await playerModule_2.release();
+      await recorderModule_2.release();
+    } catch (e) {
+      print('Released unsuccessful');
+      print(e);
     }
   }
 
-  // Only during playing
-  // This will make FlutterSound plugin to find the time from the position value that your have given and play audio from that time.
-  Future<bool> seekAudioPosition(double sliderPositionValue) async {
-    print('AudioService.dart seekAudioPosition()');
-    print('AudioService.dart sliderPositionValue: ' + sliderPositionValue.toString());
-    try {
-      await flutterSound.seekToPlayer(sliderPositionValue.toInt());
-      return true;
-    } catch (err) {
-      print('AudioService.dart Failed to seek Audio position.');
-      print('AudioService.dart err: ' + err.toString());
-      return false;
-    }
+  setCodec(t_CODEC codec) async {
+    _encoderSupported = await recorderModule.isEncoderSupported(codec);
+    _decoderSupported = await playerModule.isDecoderSupported(codec);
+
+    // setState(() {
+    _codec = codec;
+    // });
   }
 
-  Future<bool> _stopAllStreams() async {
-    audioClose = true;
-    return true;
+  Future<void> setDuck() async {
+    if (_duckOthers) {
+      if (Platform.isIOS)
+        await playerModule.iosSetCategory(
+            t_IOS_SESSION_CATEGORY.PLAY_AND_RECORD,
+            t_IOS_SESSION_MODE.DEFAULT,
+            IOS_DUCK_OTHERS | IOS_DEFAULT_TO_SPEAKER);
+      else if (Platform.isAndroid)
+        await playerModule.androidAudioFocusRequest(
+            ANDROID_AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+    } else {
+      if (Platform.isIOS)
+        await playerModule.iosSetCategory(
+            t_IOS_SESSION_CATEGORY.PLAY_AND_RECORD,
+            t_IOS_SESSION_MODE.DEFAULT,
+            IOS_DEFAULT_TO_SPEAKER);
+      else if (Platform.isAndroid)
+        await playerModule.androidAudioFocusRequest(ANDROID_AUDIOFOCUS_GAIN);
+    }
   }
 }

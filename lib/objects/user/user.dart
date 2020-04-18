@@ -1,3 +1,6 @@
+import 'package:lombok/lombok.dart';
+
+@data
 class User {
   String id;
   String displayName;
@@ -7,7 +10,14 @@ class User {
   String countryCode;
   String effectivePhoneNumber;
 
-  User({this.id, this.displayName, this.realName, this.mobileNo, this.googleAccountId, this.countryCode, this.effectivePhoneNumber});
+  User(
+      {this.id,
+      this.displayName,
+      this.realName,
+      this.mobileNo,
+      this.googleAccountId,
+      this.countryCode,
+      this.effectivePhoneNumber});
 
   User.fromJson(Map<String, dynamic> json)
       : id = json['id'],

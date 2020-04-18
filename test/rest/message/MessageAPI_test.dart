@@ -1,19 +1,21 @@
-import 'package:snschat_flutter/backend/rest/message/MessageAPIService.dart';
-
 import 'package:flutter_test/flutter_test.dart';
-import 'package:snschat_flutter/objects/message/message.dart';
+import 'package:snschat_flutter/general/enums/chat_message_status.dart';
+import 'package:snschat_flutter/general/enums/chat_message_type.dart';
+
+import 'package:snschat_flutter/rest/index.dart';
+import 'package:snschat_flutter/objects/index.dart';
 
 void main() {
   MessageAPIService messageAPIService = MessageAPIService();
 
-  Message createTestObject() {
-    return new Message(
+  ChatMessage createTestObject() {
+    return new ChatMessage(
       id: null,
       conversationId: "5d7cc09dfff90a3328bbb8f9",
-      timestamp: new DateTime.now().millisecondsSinceEpoch,
+      createdTime: new DateTime.now().millisecondsSinceEpoch,
       messageContent: "bla bla bla",
-      type: "Message",
-      status: "READ",
+      type: ChatMessageType.Text,
+      status: ChatMessageStatus.Read,
       senderName: "Teoh Kheng Hong",
       senderMobileNo: "+60182262663",
       senderId: "f9g87rd98g7r8e9g7",
@@ -24,19 +26,19 @@ void main() {
     );
   }
 
-  test("Test Create Message", () async {
-    Message message = createTestObject();
-    Message newMessage = await messageAPIService.addMessage(message);
+  test("Test Create ChatMessage", () async {
+    ChatMessage message = createTestObject();
+    ChatMessage newMessage = await messageAPIService.addMessage(message);
     print("newMessage.id:" + newMessage.id.toString());
     expect(newMessage.id, isNotEmpty);
   });
 
-  test("Test Edit Message", () async {
-    Message message = createTestObject();
-    Message newMessage = await messageAPIService.addMessage(message);
-    Message editedMessage = newMessage;
-    editedMessage.messageContent = "Testing Message 2";
-    editedMessage.type = "Video";
+  test("Test Edit ChatMessage", () async {
+    ChatMessage message = createTestObject();
+    ChatMessage newMessage = await messageAPIService.addMessage(message);
+    ChatMessage editedMessage = newMessage;
+    editedMessage.messageContent = "Testing ChatMessage 2";
+    editedMessage.type = ChatMessageType.Video;
     editedMessage.multimediaId = "edited multimedia ID";
     bool edited = await messageAPIService.editMessage(editedMessage);
     print("edited:" + edited.toString());
@@ -44,17 +46,17 @@ void main() {
     expect(edited, isTrue);
   });
 
-  test("Test Get Message", () async {
-    Message message = createTestObject();
-    Message newMessage = await messageAPIService.addMessage(message);
-    Message messageFromServer = await messageAPIService.getSingleMessage(newMessage.id);
+  test("Test Get ChatMessage", () async {
+    ChatMessage message = createTestObject();
+    ChatMessage newMessage = await messageAPIService.addMessage(message);
+    ChatMessage messageFromServer = await messageAPIService.getSingleMessage(newMessage.id);
     print("messageFromServer.id == newMessage.id:" + (messageFromServer.id == newMessage.id).toString());
     expect(messageFromServer.id == newMessage.id, isTrue);
   });
 
-  test("Test Delete Message", () async {
-    Message message = createTestObject();
-    Message newMessage = await messageAPIService.addMessage(message);
+  test("Test Delete ChatMessage", () async {
+    ChatMessage message = createTestObject();
+    ChatMessage newMessage = await messageAPIService.addMessage(message);
     print("newMessage.id: "  + newMessage.id);
     bool deleted = await messageAPIService.deleteMessage(newMessage.id);
     print("deleted:" + deleted.toString());

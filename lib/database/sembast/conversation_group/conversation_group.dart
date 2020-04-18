@@ -1,7 +1,7 @@
 import 'package:sembast/sembast.dart';
-import 'package:snschat_flutter/general/functions/validation_functions.dart';
-import 'package:snschat_flutter/objects/conversationGroup/conversation_group.dart';
 
+import 'package:snschat_flutter/general/index.dart';
+import 'package:snschat_flutter/objects/index.dart';
 import '../SembastDB.dart';
 
 class ConversationDBService {
@@ -9,7 +9,8 @@ class ConversationDBService {
   static const String CONVERSATION_GROUP_STORE_NAME = "conversation_group";
 
   // Create a instance to perform DB operations
-  final _conversationGroupStore = intMapStoreFactory.store(CONVERSATION_GROUP_STORE_NAME);
+  final _conversationGroupStore =
+      intMapStoreFactory.store(CONVERSATION_GROUP_STORE_NAME);
 
   Future<Database> get _db async => await SembastDB.instance.database;
 
@@ -19,20 +20,26 @@ class ConversationDBService {
       return false;
     }
 
-    ConversationGroup existingConversationGroup = await getSingleConversationGroup(conversationGroup.id);
-    var key = isObjectEmpty(existingConversationGroup) ? await _conversationGroupStore.add(await _db, conversationGroup.toJson()) : null;
+    ConversationGroup existingConversationGroup =
+        await getSingleConversationGroup(conversationGroup.id);
+    var key = isObjectEmpty(existingConversationGroup)
+        ? await _conversationGroupStore.add(
+            await _db, conversationGroup.toJson())
+        : null;
 
     // Return added or not added
     return !isStringEmpty(key.toString());
   }
 
-  Future<bool> editConversationGroup(ConversationGroup conversationGroup) async {
+  Future<bool> editConversationGroup(
+      ConversationGroup conversationGroup) async {
     if (isObjectEmpty(await _db)) {
       return false;
     }
     final finder = Finder(filter: Filter.equals("id", conversationGroup.id));
 
-    var noOfUpdated = await _conversationGroupStore.update(await _db, conversationGroup.toJson(), finder: finder);
+    var noOfUpdated = await _conversationGroupStore
+        .update(await _db, conversationGroup.toJson(), finder: finder);
     return noOfUpdated == 1;
   }
 
@@ -42,17 +49,22 @@ class ConversationDBService {
     }
     final finder = Finder(filter: Filter.equals("id", conversationGroupId));
 
-    var noOfDeleted = await _conversationGroupStore.delete(await _db, finder: finder);
+    var noOfDeleted =
+        await _conversationGroupStore.delete(await _db, finder: finder);
     return noOfDeleted == 1;
   }
 
-  Future<ConversationGroup> getSingleConversationGroup(String conversationGroupId) async {
+  Future<ConversationGroup> getSingleConversationGroup(
+      String conversationGroupId) async {
     if (isObjectEmpty(await _db)) {
       return null;
     }
     final finder = Finder(filter: Filter.equals("id", conversationGroupId));
-    final recordSnapshot = await _conversationGroupStore.findFirst(await _db, finder: finder);
-    return !isObjectEmpty(recordSnapshot) ? ConversationGroup.fromJson(recordSnapshot.value) : null;
+    final recordSnapshot =
+        await _conversationGroupStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot)
+        ? ConversationGroup.fromJson(recordSnapshot.value)
+        : null;
   }
 
   Future<List<ConversationGroup>> getAllConversationGroups() async {
@@ -62,7 +74,8 @@ class ConversationDBService {
     // Auto sort by createdDate, but when showing in chat page, sort these conversations using last unread message's date
     final finder = Finder(sortOrders: [SortOrder('createdDate')]);
     // Find all Conversation Groups
-    final recordSnapshots = await _conversationGroupStore.find(await _db, finder: finder);
+    final recordSnapshots =
+        await _conversationGroupStore.find(await _db, finder: finder);
     if (!isObjectEmpty(recordSnapshots)) {
       List<ConversationGroup> conversationGroupList = [];
       recordSnapshots.forEach((snapshot) {

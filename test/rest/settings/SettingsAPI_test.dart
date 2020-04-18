@@ -1,7 +1,7 @@
-import 'package:snschat_flutter/backend/rest/settings/SettingsAPIService.dart';
-
 import 'package:flutter_test/flutter_test.dart';
-import 'package:snschat_flutter/objects/settings/settings.dart';
+
+import 'package:snschat_flutter/rest/index.dart';
+import 'package:snschat_flutter/objects/index.dart';
 
 void main() {
   SettingsAPIService settingsAPIService = SettingsAPIService();
@@ -10,7 +10,7 @@ void main() {
     return new Settings(
       id: null,
       userId: "seoifhsrekjgrdeg5454",
-      notification: true
+      allowNotifications: true
     );
   }
 
@@ -26,7 +26,7 @@ void main() {
     Settings newSettings = await settingsAPIService.addSettings(settings);
     Settings editedSettings = newSettings;
     editedSettings.userId = "Edited userId";
-    editedSettings.notification = false;
+    editedSettings.allowNotifications = false;
     bool edited = await settingsAPIService.editSettings(editedSettings);
     print("edited:" + edited.toString());
 

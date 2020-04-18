@@ -1,7 +1,8 @@
-import 'package:snschat_flutter/backend/rest/chat/ConversationGroupAPIService.dart';
-import 'package:snschat_flutter/database/sembast/conversation_group/conversation_group.dart';
-
 import 'package:flutter_test/flutter_test.dart';
+
+import 'package:snschat_flutter/database/sembast/index.dart';
+import 'package:snschat_flutter/general/index.dart';
+import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/objects/index.dart';
 
 // TODO: These tests will be using both REST API and Local DB
@@ -14,7 +15,7 @@ void main() {
       id: null,
       name: "Testing Group 1",
       description: "Testing description",
-      type: "Personal",
+      type: ConversationGroupType.Personal,
       createdDate: new DateTime.now().millisecondsSinceEpoch,
       notificationExpireDate: 254631654,
       creatorUserId: "65421654654651",
@@ -47,7 +48,7 @@ void main() {
     // Edit
     ConversationGroup editedConversationGroup = newConversationGroup;
     editedConversationGroup.name = "Test Group 2";
-    editedConversationGroup.type = "Group";
+    editedConversationGroup.type = ConversationGroupType.Group;
     editedConversationGroup.description = "Edited Description";
 
     bool edited = await conversationGroupAPIService.editConversationGroup(editedConversationGroup);

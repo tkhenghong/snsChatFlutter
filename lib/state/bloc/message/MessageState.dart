@@ -11,7 +11,7 @@ abstract class MessageState extends Equatable {
 class MessageLoading extends MessageState {}
 
 class MessagesLoaded extends MessageState {
-  final List<Message> messageList;
+  final List<ChatMessage> messageList;
 
   const MessagesLoaded([this.messageList = const []]);
 

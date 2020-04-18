@@ -1,15 +1,18 @@
+import 'package:lombok/lombok.dart';
+
+@data
 class Settings {
   String id;
   String userId;
-  bool notification;
+  bool allowNotifications;
 
-
-  Settings({this.id, this.userId, this.notification});
+  Settings({this.id, this.userId, this.allowNotifications});
 
   Settings.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         userId = json['userId'],
-        notification = json['notification'];
+        allowNotifications = json['allowNotifications'];
 
-  Map<String, dynamic> toJson() => {'id': id, 'userId': userId, 'notification': notification};
+  Map<String, dynamic> toJson() =>
+      {'id': id, 'userId': userId, 'allowNotifications': allowNotifications};
 }

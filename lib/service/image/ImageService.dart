@@ -1,25 +1,27 @@
 import 'dart:io';
 import 'dart:isolate';
-
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
 import 'package:image/image.dart' as CustomImage;
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
-import 'package:snschat_flutter/general/functions/validation_functions.dart';
-import 'package:snschat_flutter/objects/multimedia/multimedia.dart';
-import 'package:snschat_flutter/service/FirebaseStorage/FirebaseStorageService.dart';
-import 'package:snschat_flutter/service/file/FileService.dart';
+
+import 'package:snschat_flutter/environments/development/variables.dart'
+    as globals;
+import 'package:snschat_flutter/general/index.dart';
+import 'package:snschat_flutter/service//index.dart';
+import 'package:snschat_flutter/objects/index.dart';
 
 class ImageService {
-  FileService fileService = FileService();
+  CustomFileService fileService = CustomFileService();
   FirebaseStorageService firebaseStorageService = FirebaseStorageService();
 
   static int imageThumbnailWidthSize = globals.imageThumbnailWidthSize;
 
-  Widget loadImageThumbnailCircleAvatar(Multimedia multimedia, String type, BuildContext context) {
-    Color appBarTextTitleColor = Theme.of(context).appBarTheme.textTheme.title.color;
+  Widget loadImageThumbnailCircleAvatar(
+      Multimedia multimedia, DefaultImagePathType type, BuildContext context) {
+    Color appBarTextTitleColor =
+        Theme.of(context).appBarTheme.textTheme.title.color;
 
     return isObjectEmpty(multimedia)
         ? defaultImage(appBarTextTitleColor, type)
@@ -27,7 +29,8 @@ class ImageService {
             ? defaultImage(appBarTextTitleColor, type)
             : CachedNetworkImage(
                 // Note: imageBuilder is a place that tell CachedNetworkImage how the image should be displayed
-                imageBuilder: (BuildContext context, ImageProvider<dynamic> imageProvider) {
+                imageBuilder: (BuildContext context,
+                    ImageProvider<dynamic> imageProvider) {
                   return CircleAvatar(
                     backgroundColor: appBarTextTitleColor,
                     backgroundImage: imageProvider,
@@ -43,14 +46,15 @@ class ImageService {
               );
   }
 
-  Widget defaultImage(Color appBarTextTitleColor, String type) {
+  Widget defaultImage(Color appBarTextTitleColor, DefaultImagePathType type) {
     return CircleAvatar(
       backgroundColor: appBarTextTitleColor,
       backgroundImage: AssetImage(fileService.getDefaultImagePath(type)),
     );
   }
 
-  Widget loadFullImage(BuildContext context, Multimedia multimedia, String type) {
+  Widget loadFullImage(
+      BuildContext context, Multimedia multimedia, DefaultImagePathType type) {
     double deviceWidth = MediaQuery.of(context).size.width;
     double deviceHeight = MediaQuery.of(context).size.height;
 
@@ -109,7 +113,8 @@ class ImageService {
   }
 
   redownloadMultimediaFile(BuildContext context, Multimedia multimedia) {
-    if (!isObjectEmpty(multimedia) && !isStringEmpty(multimedia.remoteFullFileUrl)) {
+    if (!isObjectEmpty(multimedia) &&
+        !isStringEmpty(multimedia.remoteFullFileUrl)) {
       fileService.downloadMultimediaFile(context, multimedia);
     }
   }
@@ -120,22 +125,26 @@ class ImageService {
     try {
       ReceivePort receivePort = ReceivePort();
 
-      await Isolate.spawn(createThumbnail, DecodeParam(imageFile, receivePort.sendPort));
+      await Isolate.spawn(
+          createThumbnail, DecodeParam(imageFile, receivePort.sendPort));
 
       // Get the processed image from the isolate.
       CustomImage.Image thumbnailImage = await receivePort.first;
 
-      String fullThumbnailDirectory = await fileService.getApplicationDocumentDirectory() +
-          "/" +
-          "thumbnail-" +
-          new DateTime.now().millisecondsSinceEpoch.toString() +
-          ".png";
+      String fullThumbnailDirectory =
+          await fileService.getApplicationDocumentDirectory() +
+              "/" +
+              "thumbnail-" +
+              new DateTime.now().millisecondsSinceEpoch.toString() +
+              ".png";
       // Put it into our directory, set it as temp.png first (File format: FILEPATH/thumbnail-95102006192014.png)
-      File thumbnailFile = new File(fullThumbnailDirectory)..writeAsBytesSync(CustomImage.encodePng(thumbnailImage));
+      File thumbnailFile = new File(fullThumbnailDirectory)
+        ..writeAsBytesSync(CustomImage.encodePng(thumbnailImage));
 
       // Fix thumbnail not rotated properly when created.
       // Link: https://pub.dev/packages/flutter_exif_rotation
-      thumbnailFile = await FlutterExifRotation.rotateImage(path: thumbnailFile.path);
+      thumbnailFile =
+          await FlutterExifRotation.rotateImage(path: thumbnailFile.path);
 
       return thumbnailFile;
     } catch (e) {
@@ -146,9 +155,11 @@ class ImageService {
   }
 
   static void createThumbnail(DecodeParam param) async {
-    CustomImage.Image image = CustomImage.decodeImage(param.file.readAsBytesSync());
+    CustomImage.Image image =
+        CustomImage.decodeImage(param.file.readAsBytesSync());
 
-    CustomImage.Image thumbnail = CustomImage.copyResize(image, width: imageThumbnailWidthSize);
+    CustomImage.Image thumbnail =
+        CustomImage.copyResize(image, width: imageThumbnailWidthSize);
 
     param.sendPort.send(thumbnail);
   }

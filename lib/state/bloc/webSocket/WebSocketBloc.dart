@@ -1,10 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:snschat_flutter/general/functions/validation_functions.dart';
-import 'package:snschat_flutter/objects/index.dart';
-import 'package:snschat_flutter/service/websocket/WebSocketService.dart';
-import 'package:snschat_flutter/state/bloc/bloc.dart';
 
+import 'package:snschat_flutter/general/index.dart';
+import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/service/index.dart';
+import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'bloc.dart';
 
 class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
@@ -81,16 +81,16 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
             if (userState.user.id != webSocketMessage.message.senderId) {
               // "Message" message
               BlocProvider.of<MessageBloc>(event.context)
-                  .add(AddMessageEvent(message: webSocketMessage.message, callback: (Message message) {}));
+                  .add(AddMessageEvent(message: webSocketMessage.message, callback: (ChatMessage message) {}));
               if(webSocketMessage.message.type != 'Text' && webSocketMessage.message.type != 'Contact' && webSocketMessage.message.type != 'Location') {
                 BlocProvider.of<MultimediaBloc>(event.context)
                     .add(GetMessageMultimediaEvent(messageId: webSocketMessage.message.id, conversationGroupId: webSocketMessage.message.conversationId, callback: (Multimedia multimedia) {}));
               }
             } else {
               // Mark your own message as sent, received status will changed by recipient
-              webSocketMessage.message.status = 'Sent';
+              webSocketMessage.message.status = ChatMessageStatus.Sent;
               BlocProvider.of<MessageBloc>(event.context)
-                  .add(EditMessageEvent(message: webSocketMessage.message, callback: (Message message) {}));
+                  .add(EditMessageEvent(message: webSocketMessage.message, callback: (ChatMessage message) {}));
             }
           }
         }

@@ -1,11 +1,8 @@
-// Combinations. If the multimedia object contains
-// conversationId only: Conversation Group's photo
-// userContactId only: User Contact's Photo
-// conversationId + messageId = A Multimedia message, belonged to a conversation
-// userId = User's multimedia photo;
+import 'package:lombok/lombok.dart';
 
+// Image, Video, GIFs, Sticker, Recording, links
+@data
 class Multimedia {
-  // Image, Video, Gifs, Sticker, Recording, links
   String id;
   String localFullFileUrl;
   String localThumbnailUrl;
@@ -15,19 +12,19 @@ class Multimedia {
   String userContactId; // Belong to user too. Because 1 User, 1 UserContact.
   String conversationId; // Belong to ConversationGroup group photo
   String userId;
-  int size;
+  int fileSize;
 
   Multimedia(
       {this.id,
-      this.localFullFileUrl,
-      this.localThumbnailUrl,
-      this.remoteThumbnailUrl,
-      this.remoteFullFileUrl,
-      this.messageId,
-      this.userContactId,
-      this.conversationId,
-      this.userId,
-      this.size});
+        this.localFullFileUrl,
+        this.localThumbnailUrl,
+        this.remoteThumbnailUrl,
+        this.remoteFullFileUrl,
+        this.messageId,
+        this.userContactId,
+        this.conversationId,
+        this.userId,
+        this.fileSize});
 
   Multimedia.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -39,23 +36,25 @@ class Multimedia {
         userContactId = json['userContactId'],
         conversationId = json['conversationId'],
         userId = json['userId'],
-        size = json['size'];
+        fileSize = json['fileSize'];
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'localFullFileUrl': localFullFileUrl,
-        'localThumbnailUrl': localThumbnailUrl,
-        'remoteThumbnailUrl': remoteThumbnailUrl,
-        'remoteFullFileUrl': remoteFullFileUrl,
-        'messageId': messageId,
-        'userContactId': userContactId,
-        'conversationId': conversationId,
-        'userId': userId,
-        'size': size,
-      };
-
-// KS put
-// mediaCheckPoint
-// mediaPercentage
-// But I don't think I really need this, or I need to save this into database
+    'id': id,
+    'localFullFileUrl': localFullFileUrl,
+    'localThumbnailUrl': localThumbnailUrl,
+    'remoteThumbnailUrl': remoteThumbnailUrl,
+    'remoteFullFileUrl': remoteFullFileUrl,
+    'messageId': messageId,
+    'userContactId': userContactId,
+    'conversationId': conversationId,
+    'userId': userId,
+    'fileSize': fileSize,
+  };
 }
+
+/* Combinations:
+ conversationId only: Conversation Group's photo
+ userContactId only: User Contact's Photo
+ conversationId + messageId = A Multimedia message, belonged to a conversation
+ userId = User's multimedia photo;
+*/

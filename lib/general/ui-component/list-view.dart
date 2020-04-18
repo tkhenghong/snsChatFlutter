@@ -59,7 +59,6 @@ class PageListViewState extends State<PageListView> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _refreshController.dispose();
     super.dispose();
   }

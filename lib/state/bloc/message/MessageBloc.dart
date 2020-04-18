@@ -1,15 +1,14 @@
 import 'package:bloc/bloc.dart';
-import 'package:snschat_flutter/backend/rest/index.dart';
+
+import 'package:snschat_flutter/rest/index.dart';
+import 'package:snschat_flutter/objects/index.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
-import 'package:snschat_flutter/objects/index.dart';
-
 import 'bloc.dart';
-
 
 class MessageBloc extends Bloc<MessageEvent, MessageState> {
   MessageAPIService messageAPIService = MessageAPIService();
-  MessageDBService messageDBService = MessageDBService();
+  ChatMessageDBService messageDBService = ChatMessageDBService();
 
   @override
   MessageState get initialState => MessageLoading();
@@ -30,7 +29,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
   Stream<MessageState> _initializeMessagesToState(InitializeMessagesEvent event) async* {
     if (state is MessageLoading || state is MessagesNotLoaded) {
       try {
-        List<Message> messageListFromDB = await messageDBService.getAllMessages();
+        List<ChatMessage> messageListFromDB = await messageDBService.getAllChatMessages();
 
         if (isObjectEmpty(messageListFromDB)) {
           functionCallback(event, false);
@@ -48,7 +47,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
   }
 
   Stream<MessageState> _addMessage(AddMessageEvent event) async* {
-    Message messageFromServer;
+    ChatMessage messageFromServer;
     bool savedIntoDB = false;
     if (state is MessagesLoaded) {
       // Avoid readding existing message
@@ -59,12 +58,12 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
       }
 
       if (!isObjectEmpty(messageFromServer)) {
-        savedIntoDB = await messageDBService.addMessage(messageFromServer);
+        savedIntoDB = await messageDBService.addChatMessage(messageFromServer);
 
         if (savedIntoDB) {
-          List<Message> existingMessageList = (state as MessagesLoaded).messageList;
+          List<ChatMessage> existingMessageList = (state as MessagesLoaded).messageList;
 
-          existingMessageList.removeWhere((Message existingMessage) => existingMessage.id == event.message.id);
+          existingMessageList.removeWhere((ChatMessage existingMessage) => existingMessage.id == event.message.id);
           existingMessageList.add(messageFromServer);
 
           // Very funny. But must change to another state first and switch it back immediately to trigger changes.
@@ -85,11 +84,11 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     if (state is MessagesLoaded) {
       updatedInREST = await messageAPIService.editMessage(event.message);
       if (updatedInREST) {
-        updated = await messageDBService.editMessage(event.message);
+        updated = await messageDBService.editChatMessage(event.message);
         if (updated) {
-          List<Message> existingMessageList = (state as MessagesLoaded).messageList;
+          List<ChatMessage> existingMessageList = (state as MessagesLoaded).messageList;
 
-          existingMessageList.removeWhere((Message existingMessage) => existingMessage.id == event.message.id);
+          existingMessageList.removeWhere((ChatMessage existingMessage) => existingMessage.id == event.message.id);
 
           existingMessageList.add(event.message);
 
@@ -110,11 +109,11 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     if (state is MessagesLoaded) {
       deletedInREST = await messageAPIService.deleteMessage(event.message.id);
       if (deletedInREST) {
-        deleted = await messageDBService.deleteMessage(event.message.id);
+        deleted = await messageDBService.deleteChatMessage(event.message.id);
         if (deleted) {
-          List<Message> existingMessageList = (state as MessagesLoaded).messageList;
+          List<ChatMessage> existingMessageList = (state as MessagesLoaded).messageList;
 
-          existingMessageList.removeWhere((Message existingMessage) => existingMessage.id == event.message.id);
+          existingMessageList.removeWhere((ChatMessage existingMessage) => existingMessage.id == event.message.id);
 
           yield MessagesLoaded(existingMessageList);
           functionCallback(event, true);

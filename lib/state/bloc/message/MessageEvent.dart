@@ -19,7 +19,7 @@ class InitializeMessagesEvent extends MessageEvent {
 }
 
 class AddMessageEvent extends MessageEvent {
-  final Message message;
+  final ChatMessage message;
   final Function callback;
 
   AddMessageEvent({this.message, this.callback});
@@ -32,7 +32,7 @@ class AddMessageEvent extends MessageEvent {
 }
 
 class EditMessageEvent extends MessageEvent {
-  final Message message;
+  final ChatMessage message;
   final Function callback;
 
   EditMessageEvent({this.message, this.callback});
@@ -45,7 +45,7 @@ class EditMessageEvent extends MessageEvent {
 }
 
 class DeleteMessageEvent extends MessageEvent {
-  final Message message;
+  final ChatMessage message;
   final Function callback;
 
   DeleteMessageEvent({this.message, this.callback});

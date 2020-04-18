@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+
 import 'package:snschat_flutter/objects/index.dart';
 
 abstract class UserContactEvent extends Equatable {

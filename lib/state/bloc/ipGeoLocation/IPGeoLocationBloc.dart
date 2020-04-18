@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
-import 'package:snschat_flutter/backend/rest/index.dart';
-import 'package:snschat_flutter/general/functions/validation_functions.dart';
-import 'package:snschat_flutter/objects/index.dart';
 
+import 'package:snschat_flutter/rest/index.dart';
+import 'package:snschat_flutter/general/index.dart';
+import 'package:snschat_flutter/objects/index.dart';
 import 'bloc.dart';
 
 class IPGeoLocationBloc extends Bloc<IPGeoLocationEvent, IPGeoLocationState> {

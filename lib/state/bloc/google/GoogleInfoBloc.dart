@@ -2,8 +2,8 @@ import 'package:bloc/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:snschat_flutter/general/functions/validation_functions.dart';
 
+import 'package:snschat_flutter/general/index.dart';
 import 'bloc.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial

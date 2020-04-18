@@ -1,15 +1,15 @@
-import 'package:snschat_flutter/backend/rest/settings/SettingsAPIService.dart';
-
 import 'package:flutter_test/flutter_test.dart';
+
+import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/database/sembast/settings/settings.dart';
-import 'package:snschat_flutter/objects/settings/settings.dart';
+import 'package:snschat_flutter/objects/index.dart';
 
 void main() {
   SettingsAPIService settingsAPIService = SettingsAPIService();
   SettingsDBService settingsDBService = SettingsDBService();
 
   Settings createTestObject() {
-    return new Settings(id: null, userId: "seoifhsrekjgrdeg5454", notification: true);
+    return new Settings(id: null, userId: "seoifhsrekjgrdeg5454", allowNotifications: true);
   }
 
   test("Test Create Settings Locally", () async {
@@ -34,7 +34,7 @@ void main() {
 
     Settings editedSettings = newSettings;
     editedSettings.userId = "Edited userId";
-    editedSettings.notification = false;
+    editedSettings.allowNotifications = false;
 
     bool edited = await settingsAPIService.editSettings(editedSettings);
     print("edited:" + edited.toString());
@@ -43,7 +43,7 @@ void main() {
 
     expect(settingsFromLocalDB.id, equals(editedSettings.id));
     expect(settingsFromLocalDB.userId, equals(editedSettings.userId));
-    expect(settingsFromLocalDB.notification, equals(editedSettings.notification));
+    expect(settingsFromLocalDB.allowNotifications, equals(editedSettings.allowNotifications));
     expect(edited, isTrue);
   });
 

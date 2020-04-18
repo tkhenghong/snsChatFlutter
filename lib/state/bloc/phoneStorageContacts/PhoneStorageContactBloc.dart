@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:snschat_flutter/general/functions/validation_functions.dart';
-import 'package:snschat_flutter/service/permissions/PermissionService.dart';
 
+import 'package:snschat_flutter/general/index.dart';
+import 'package:snschat_flutter/service/index.dart';
 import 'bloc.dart';
 
 
