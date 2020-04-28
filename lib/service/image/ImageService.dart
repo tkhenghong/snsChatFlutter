@@ -3,7 +3,7 @@ import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
+//import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
 import 'package:image/image.dart' as CustomImage;
 
 import 'package:snschat_flutter/environments/development/variables.dart'
@@ -143,8 +143,8 @@ class ImageService {
 
       // Fix thumbnail not rotated properly when created.
       // Link: https://pub.dev/packages/flutter_exif_rotation
-      thumbnailFile =
-          await FlutterExifRotation.rotateImage(path: thumbnailFile.path);
+//      thumbnailFile =
+//          await FlutterExifRotation.rotateImage(path: thumbnailFile.path);
 
       return thumbnailFile;
     } catch (e) {
