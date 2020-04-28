@@ -3,29 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
-import 'package:snschat_flutter/ui/pages/chats/chat_group_list/chat_group_list.page.dart';
-import 'package:snschat_flutter/ui/pages/chats/chat_info/chat_info.page.dart';
-import 'package:snschat_flutter/ui/pages/chats/chat_room/chat_room.page.dart';
-import 'package:snschat_flutter/ui/pages/login/login.page.dart';
-import 'package:snschat_flutter/ui/pages/myself/myself.page.dart';
-import 'package:snschat_flutter/ui/pages/photo_view/photo_view.page.dart';
-import 'package:snschat_flutter/ui/pages/privacy_notice/privacy_notice.page.dart';
-import 'package:snschat_flutter/ui/pages/scan_qr_code/scan_qr_code.page.dart';
-import 'package:snschat_flutter/ui/pages/select_contacts/select_contacts.page.dart';
-import 'package:snschat_flutter/ui/pages/settings/settings.page.dart';
-import 'package:snschat_flutter/ui/pages/sign_up/sign_up.page.dart';
-import 'package:snschat_flutter/ui/pages/tabs/tabs.page.dart';
-import 'package:snschat_flutter/ui/pages/terms_and_conditions/terms_and_conditions.page.dart';
-import 'package:snschat_flutter/ui/pages/verify_phone_number/verify_phone_number.page.dart';
-import 'package:snschat_flutter/ui/pages/video_player/video_player.page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:snschat_flutter/ui/pages/index.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FlutterDownloader.initialize().then((data) {
-//    print('FlutterDownloader.initialize() completed');
-//    print('data: ' + data.toString());
+    // print('FlutterDownloader.initialize() completed');
+    // print('data: ' + data.toString());
   });
 
   BlocSupervisor.delegate = SimpleBlocDelegate();

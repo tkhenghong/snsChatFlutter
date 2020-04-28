@@ -108,7 +108,7 @@ dependencies:
   # Contacts service
   contacts_service: ^0.3.10
 
-  # Provide lcations of the phone
+  # Provide locations of the phone
   path_provider: ^1.6.5
 
   flutter:

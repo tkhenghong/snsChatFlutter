@@ -256,7 +256,7 @@ class LoginPageState extends State<LoginPage> {
     String now = formatDate(new DateTime.now(), [dd, '/', mm, '/', yyyy]);
     String linebreak = '%0D%0A';
     String url =
-        'mailto:<support@neurogine.com>?subject=Request for Contact Support ' +
+        'mailto:<tkhenghong@gmail.com>?subject=Request for Contact Support ' +
             now +
             ' &body=Name: ' +
             linebreak +
