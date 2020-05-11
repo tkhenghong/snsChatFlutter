@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:snschat_flutter/general/index.dart';
-import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 
@@ -113,12 +113,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                         IconButton(
                             icon: Icon(Icons.share),
                             onPressed: () {
-                              Fluttertoast.showToast(
-                                  msg: "Shared!",
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  gravity: ToastGravity.BOTTOM,
-                                  timeInSecForIosWeb: 1,
-                                  fontSize: 16.0);
+                              showToast('Shared!', Toast.LENGTH_SHORT);
                             })
                       ],
                     ),

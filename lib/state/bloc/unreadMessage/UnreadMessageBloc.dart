@@ -2,7 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
-import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/state/bloc/unreadMessage/bloc.dart';
 
 class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {

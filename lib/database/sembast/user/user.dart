@@ -1,7 +1,7 @@
 import 'package:sembast/sembast.dart';
 
 import 'package:snschat_flutter/general/index.dart';
-import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 import '../SembastDB.dart';
 
 class UserDBService {

@@ -2,7 +2,7 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
-import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -13,7 +13,7 @@ class WebSocketService {
   WebSocketChannel webSocketChannel;
   Stream<dynamic> webSocketStream;
 
-  Future<Stream<dynamic>> connectWebSocket(String userId) async {
+  Future<Stream<dynamic>> connectWebSocket(String userId, {String jwtToken}) async {
     Map<String, String> headers = new HashMap();
     headers['userId'] = userId;
     webSocketChannel = IOWebSocketChannel.connect(WEBSOCKET_URL, headers: headers);

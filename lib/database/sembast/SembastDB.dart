@@ -70,9 +70,7 @@ class SembastDB {
       var db = await databaseFactoryIo.openDatabase(dbPath);
       _dbOpenCompleter.complete(db);
     } else {
-      Fluttertoast.showToast(
-          msg: 'Please enable Storage permission first.',
-          toastLength: Toast.LENGTH_SHORT);
+      showToast('Please enable Storage permission first.', Toast.LENGTH_SHORT);
       _dbOpenCompleter.complete(null);
       _dbOpenCompleter = null;
     }

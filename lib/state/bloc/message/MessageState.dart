@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 
 abstract class MessageState extends Equatable {
   const MessageState();

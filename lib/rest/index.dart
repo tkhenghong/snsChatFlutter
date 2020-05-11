@@ -1,8 +1,8 @@
 export 'chat/ConversationGroupAPIService.dart';
-export 'ipLocation/IPLocationAPIService.dart';
+export 'ip_location/IPLocationAPIService.dart';
 export 'message/MessageAPIService.dart';
 export 'multimedia/MultimediaAPIService.dart';
 export 'settings/SettingsAPIService.dart';
-export 'unreadMessage/UnreadMessageAPIService.dart';
+export 'unread_message/UnreadMessageAPIService.dart';
 export 'user/UserAPIService.dart';
-export 'userContact/UserContactAPIService.dart';
+export 'user_contact/UserContactAPIService.dart';

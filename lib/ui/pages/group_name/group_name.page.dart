@@ -9,7 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:snschat_flutter/general/index.dart';
-import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
@@ -316,7 +316,7 @@ class GroupNamePageState extends State<GroupNamePage> {
               // event.contactList doesn't include yourself, so newUserContactList.length - 1 OR Any UserContact is not added into the list (means not uploaded successfully)
               // That means some UseContact are not uploaded into the REST
               Navigator.pop(context);
-              Fluttertoast.showToast(msg: 'Unable to upload your member list. Please try again.', toastLength: Toast.LENGTH_SHORT);
+              showToast('Unable to upload your member list. Please try again.', Toast.LENGTH_SHORT);
             } else {
               // Give the list of UserContactIds to memberIds of ConversationGroup
               conversationGroup.memberIds = newUserContactList.map((newUserContact) => newUserContact.id).toList();

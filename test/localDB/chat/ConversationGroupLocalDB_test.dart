@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/rest/index.dart';
-import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 
 // TODO: These tests will be using both REST API and Local DB
 void main() {

@@ -43,7 +43,7 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
           googleSignInAccount = await googleSignIn.signInSilently(suppressErrors: false);
 
           if (isObjectEmpty(googleSignInAccount)) {
-            Fluttertoast.showToast(msg: 'Google sign in canceled.', toastLength: Toast.LENGTH_SHORT);
+            showToast('Google sign in canceled.', Toast.LENGTH_SHORT);
             yield GoogleInfoNotLoaded();
             functionCallback(event, false);
           } else {
@@ -127,7 +127,7 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
         }
 
         if (isObjectEmpty(googleSignInAccount)) {
-          Fluttertoast.showToast(msg: 'Google sign in canceled.', toastLength: Toast.LENGTH_SHORT);
+          showToast('Google sign in canceled.', Toast.LENGTH_SHORT);
           yield GoogleInfoNotLoaded();
           functionCallback(event, false);
         }

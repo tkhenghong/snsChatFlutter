@@ -9,11 +9,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
 import 'package:snschat_flutter/general/index.dart';
-import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -143,7 +144,7 @@ class LoginPageState extends State<LoginPage> {
                         ],
                       )),
                   RaisedButton(
-                    onPressed: () => _signIn(context, ipGeoLocation),
+                    onPressed: () => _signInwithGoogle(context, ipGeoLocation),
                     textColor: Colors.white,
                     splashColor: Colors.grey,
                     animationDuration: Duration(milliseconds: 500),
@@ -151,7 +152,24 @@ class LoginPageState extends State<LoginPage> {
                         left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(50.0)),
-                    child: Text("Next"),
+                    child: Text("Sign In"),
+                  ),
+                  Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
+                  GoogleSignInButton(onPressed: () {
+                    _signIn(context);
+                  }),
+                  FacebookSignInButton(onPressed: () {
+                    _signInwithFacebook(context);
+                  }),
+                  AppleSignInButton(
+                    onPressed: () {
+                      _signInwithApple(context);
+                    },
+                  ),
+                  TwitterSignInButton(
+                    onPressed: () {
+                      _signInwithTwitter(context);
+                    },
                   ),
                   Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
                   Text("Don't have account yet?"),
@@ -161,7 +179,7 @@ class LoginPageState extends State<LoginPage> {
                         "Sign Up Now",
                         style: TextStyle(color: themePrimaryColor),
                       )),
-                  Padding(padding: EdgeInsets.symmetric(vertical: 50.00)),
+                  Padding(padding: EdgeInsets.symmetric(vertical: 15.00)),
                   RichText(
                       textAlign: TextAlign.center,
                       text: TextSpan(children: [
@@ -231,7 +249,7 @@ class LoginPageState extends State<LoginPage> {
       BlocProvider.of<MultimediaBloc>(context).add(
           GetConversationGroupsMultimediaEvent(
               conversationGroupList:
-              conversationGroupState.conversationGroupList,
+                  conversationGroupState.conversationGroupList,
               callback: (bool done) {}));
     }
   }
@@ -280,11 +298,11 @@ class LoginPageState extends State<LoginPage> {
     Navigator.of(context).pushNamed("privacy_notice_page");
   }
 
-  showToast(String message, Toast duration) {
-    Fluttertoast.showToast(msg: message, toastLength: duration);
+  _signIn(BuildContext context) async {
+    print('Google Sign In button pressed.');
   }
 
-  _signIn(BuildContext context, IPGeoLocation ipGeoLocation) async {
+  _signInwithGoogle(BuildContext context, IPGeoLocation ipGeoLocation) async {
     if (_formKey.currentState.validate()) {
       showCenterLoadingIndicator(context);
 
@@ -375,4 +393,18 @@ class LoginPageState extends State<LoginPage> {
     }
   }
 
+  _signInwithFacebook(BuildContext context) {
+    print('Sign in using Facebook');
+    showToast("Coming soon.", Toast.LENGTH_SHORT);
+  }
+
+  _signInwithApple(BuildContext context) {
+    print('Sign in using Apple');
+    showToast("Coming soon.", Toast.LENGTH_SHORT);
+  }
+
+  _signInwithTwitter(BuildContext context) {
+    print('Sign in using Twitter');
+    showToast("Coming soon.", Toast.LENGTH_SHORT);
+  }
 }

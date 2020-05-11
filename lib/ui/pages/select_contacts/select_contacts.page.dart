@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:snschat_flutter/rest/index.dart';
-import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import '../index.dart';
 import 'CustomSearchDelegate.dart';
@@ -516,7 +516,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
               // event.contactList doesn't include yourself, so newUserContactList.length - 1 OR Any UserContact is not added into the list (means not uploaded successfully)
               // That means some UseContact are not uploaded into the REST
               Navigator.pop(context);
-              Fluttertoast.showToast(msg: 'Unable to upload your member list. Please try again.', toastLength: Toast.LENGTH_SHORT);
+              showToast('Unable to upload your member list. Please try again.', Toast.LENGTH_SHORT);
             } else {
               // Give the list of UserContactIds to memberIds of ConversationGroup
               conversationGroup.memberIds = newUserContactList.map((newUserContact) => newUserContact.id).toList();
@@ -541,8 +541,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                           }));
                     } else {
                       Navigator.pop(context);
-                      Fluttertoast.showToast(
-                          msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
+                      showToast('Unable to create conversation group. Please try again.', Toast.LENGTH_SHORT);
                     }
                   }));
             }

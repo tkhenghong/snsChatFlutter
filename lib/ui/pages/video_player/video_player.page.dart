@@ -5,7 +5,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:video_player/video_player.dart';
 
-import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 
 class VideoPlayerPage extends StatefulWidget {

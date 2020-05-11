@@ -13,7 +13,7 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 
 import 'package:snschat_flutter/general/index.dart';
-import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
 import 'package:snschat_flutter/environments/development/variables.dart'
@@ -144,9 +144,7 @@ class ChatRoomPageState extends State<ChatRoomPage>
                     return chatRoomMainBody(
                         context, conversationGroup, userState.user);
                   } else {
-                    Fluttertoast.showToast(
-                        msg: 'Error. Conversation Group not found.',
-                        toastLength: Toast.LENGTH_LONG);
+                    showToast('Error. Conversation Group not found.', Toast.LENGTH_LONG);
                     Navigator.pop(context);
                   }
                 }
@@ -1163,9 +1161,7 @@ class ChatRoomPageState extends State<ChatRoomPage>
           message: newMessage,
           callback: (ChatMessage message) {
             if (isObjectEmpty(message)) {
-              Fluttertoast.showToast(
-                  msg: 'ChatMessage not sent. Please try again.',
-                  toastLength: Toast.LENGTH_SHORT);
+              showToast('ChatMessage not sent. Please try again.', Toast.LENGTH_SHORT);
             } else {
               WebSocketMessage webSocketMessage =
                   WebSocketMessage(message: message);
@@ -1233,8 +1229,7 @@ class ChatRoomPageState extends State<ChatRoomPage>
   downloadFile(
       BuildContext context, Multimedia multimedia, ChatMessage message) {
     // message.messageContent is the filename
-    Fluttertoast.showToast(
-        msg: 'Your download has started.', toastLength: Toast.LENGTH_LONG);
+    showToast('Your download has started.', Toast.LENGTH_SHORT);
     fileService.downloadFile(context, multimedia.remoteFullFileUrl, true, true,
         message.messageContent);
   }

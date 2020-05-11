@@ -1,7 +1,7 @@
 library snsChatFlutter.globals;
 
 String REST_URL = "https://192.168.0.195:8888";
-String WEBSOCKET_URL = "wss://192.168.0.195:8888/socket";
+String WEBSOCKET_URL = "wss://192.168.0.195:8888/socket/websocket";
 // In Google Cloud: http://35.184.11.203:8080
 String ENVIRONMENT = "PRODUCTION"; //DEVELOPMENT, PRODUCTION
 

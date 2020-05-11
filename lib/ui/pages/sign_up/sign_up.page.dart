@@ -7,7 +7,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:snschat_flutter/general/index.dart';
-import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 
@@ -205,7 +205,7 @@ class SignUpPageState extends State<SignUpPage> {
                   animationDuration: Duration(milliseconds: 500),
                   padding: EdgeInsets.only(left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
-                  child: Text("Submit"),
+                  child: Text("Sign Up"),
                 ),
                 Padding(padding: EdgeInsets.symmetric(vertical: 50.00)),
               ],
@@ -213,146 +213,116 @@ class SignUpPageState extends State<SignUpPage> {
           )));
 
   signUp(BuildContext context) async {
-    if (_formKey.currentState.validate()) {
-      showCenterLoadingIndicator(context);
+    if (!_formKey.currentState.validate()) {
+      return;
+    }
 
-      BlocProvider.of<GoogleInfoBloc>(context).add(SignInGoogleInfoEvent(callback: (bool initialized) {
-        if (initialized) {
-          BlocProvider.of<GoogleInfoBloc>(context)
-              .add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn2, FirebaseAuth firebaseAuth2, FirebaseUser firebaseUser2) {
-            BlocProvider.of<UserBloc>(context).add(CheckUserSignedUpEvent(
-                googleSignIn: googleSignIn2,
-                mobileNo: getPhoneNumber(context),
-                callback: (bool isSignedUp) {
-                  if (!isSignedUp) {
-                    User user = User(
-                        id: null,
-                        mobileNo: getPhoneNumber(context),
-                        countryCode: widget.countryCodeString,
-                        effectivePhoneNumber: mobileNoTextController.value.text.toString(),
-                        displayName: firebaseUser2.displayName.toString(),
-                        googleAccountId: googleSignIn2.currentUser.id.toString(),
-                        realName: nameTextController.value.text.toString());
-                    Settings settings = Settings(id: null, allowNotifications: true, userId: null);
-                    Multimedia multimedia = Multimedia(
-                        id: null,
-                        conversationId: null,
-                        localFullFileUrl: null,
-                        localThumbnailUrl: null,
-                        remoteFullFileUrl: googleSignIn2.currentUser.photoUrl.toString(),
-                        remoteThumbnailUrl: googleSignIn2.currentUser.photoUrl.toString(),
-                        messageId: null,
-                        userContactId: null);
-                    UserContact userContact = UserContact(
-                        id: null,
-                        multimediaId: null,
-                        mobileNo: getPhoneNumber(context),
-                        displayName: firebaseUser2.displayName,
-                        realName: nameTextController.value.text.toString(),
-                        about: 'Hey There! I am using PocketChat.',
-                        lastSeenDate: DateTime.now().millisecondsSinceEpoch,
-                        block: false,
-                        userIds: [],
-                        // Add userId into it after User is Created
-                        userId: null);
+    showCenterLoadingIndicator(context);
+    //
 
-                    if (!isObjectEmpty(googleSignIn2)) {
-                      BlocProvider.of<UserBloc>(context).add(AddUserEvent(
-                          user: user,
-                          callback: (User user2) {
-                            // TODO: Error Handling
-                            userContact.userId = multimedia.userId = settings.userId = user2.id;
-                            userContact.userIds.add(user2.id);
-                            BlocProvider.of<SettingsBloc>(context).add(AddSettingsEvent(
-                                settings: settings,
-                                callback: (Settings settings2) {
-                                  if (!isObjectEmpty(settings2)) {
-                                    BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
-                                        multimedia: multimedia,
-                                        callback: (Multimedia multimedia2) {
-                                          if (!isObjectEmpty(multimedia2)) {
-                                            userContact.multimediaId = multimedia.id;
-                                            multimedia2.userContactId = userContact.id;
-                                            BlocProvider.of<UserContactBloc>(context).add(AddUserContactEvent(
-                                                userContact: userContact,
-                                                callback: (UserContact userContact2) {
-                                                  BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(
-                                                      multimedia: multimedia2,
-                                                      callback: (Multimedia multimedia3) {
-                                                        if (!isObjectEmpty(googleSignIn2) &&
-                                                            !isObjectEmpty(user2) &&
-                                                            !isObjectEmpty(settings2) &&
-                                                            !isObjectEmpty(userContact2) &&
-                                                            !isObjectEmpty(multimedia3)) {
-                                                          Fluttertoast.showToast(
-                                                              msg: 'Sign up success. Please verify your phone number.',
-                                                              toastLength: Toast.LENGTH_SHORT);
-                                                          Navigator.pop(context);
-                                                          goToVerifyPhoneNumber(context);
-                                                        }
-                                                      }));
-                                                }));
-                                          } else {
-                                            Fluttertoast.showToast(
-                                                msg: 'Sign up error. Please try again.', toastLength: Toast.LENGTH_SHORT);
-                                          }
-                                        }));
-                                  } else {
-                                    Fluttertoast.showToast(msg: 'Sign up error. Please try again.', toastLength: Toast.LENGTH_SHORT);
-                                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
-                                    Navigator.pop(context);
-                                  }
-                                }));
-                          }));
-                    } else {
-                      Fluttertoast.showToast(msg: 'Google Sign in error. Please try again.', toastLength: Toast.LENGTH_SHORT);
-                      BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
-                      Navigator.pop(context);
-                    }
+    BlocProvider.of<GoogleInfoBloc>(context).add(SignInGoogleInfoEvent(callback: (bool initialized) {
+      if (initialized) {
+        BlocProvider.of<GoogleInfoBloc>(context)
+            .add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn2, FirebaseAuth firebaseAuth2, FirebaseUser firebaseUser2) {
+          BlocProvider.of<UserBloc>(context).add(CheckUserSignedUpEvent(
+              googleSignIn: googleSignIn2,
+              mobileNo: getPhoneNumber(context),
+              callback: (bool isSignedUp) {
+                if (!isSignedUp) {
+                  User user = User(
+                      id: null,
+                      mobileNo: getPhoneNumber(context),
+                      countryCode: widget.countryCodeString,
+                      effectivePhoneNumber: mobileNoTextController.value.text.toString(),
+                      displayName: firebaseUser2.displayName.toString(),
+                      googleAccountId: googleSignIn2.currentUser.id.toString(),
+                      realName: nameTextController.value.text.toString());
+                  Settings settings = Settings(id: null, allowNotifications: true, userId: null);
+                  Multimedia multimedia = Multimedia(
+                      id: null,
+                      conversationId: null,
+                      localFullFileUrl: null,
+                      localThumbnailUrl: null,
+                      remoteFullFileUrl: googleSignIn2.currentUser.photoUrl.toString(),
+                      remoteThumbnailUrl: googleSignIn2.currentUser.photoUrl.toString(),
+                      messageId: null,
+                      userContactId: null);
+                  UserContact userContact = UserContact(
+                      id: null,
+                      multimediaId: null,
+                      mobileNo: getPhoneNumber(context),
+                      displayName: firebaseUser2.displayName,
+                      realName: nameTextController.value.text.toString(),
+                      about: 'Hey There! I am using PocketChat.',
+                      lastSeenDate: DateTime.now().millisecondsSinceEpoch,
+                      block: false,
+                      userIds: [],
+                      // Add userId into it after User is Created
+                      userId: null);
+
+                  if (!isObjectEmpty(googleSignIn2)) {
+                    BlocProvider.of<UserBloc>(context).add(AddUserEvent(
+                        user: user,
+                        callback: (User user2) {
+                          // TODO: Error Handling
+                          userContact.userId = multimedia.userId = settings.userId = user2.id;
+                          userContact.userIds.add(user2.id);
+                          BlocProvider.of<SettingsBloc>(context).add(AddSettingsEvent(
+                              settings: settings,
+                              callback: (Settings settings2) {
+                                if (!isObjectEmpty(settings2)) {
+                                  BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
+                                      multimedia: multimedia,
+                                      callback: (Multimedia multimedia2) {
+                                        if (!isObjectEmpty(multimedia2)) {
+                                          userContact.multimediaId = multimedia.id;
+                                          multimedia2.userContactId = userContact.id;
+                                          BlocProvider.of<UserContactBloc>(context).add(AddUserContactEvent(
+                                              userContact: userContact,
+                                              callback: (UserContact userContact2) {
+                                                BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(
+                                                    multimedia: multimedia2,
+                                                    callback: (Multimedia multimedia3) {
+                                                      if (!isObjectEmpty(googleSignIn2) &&
+                                                          !isObjectEmpty(user2) &&
+                                                          !isObjectEmpty(settings2) &&
+                                                          !isObjectEmpty(userContact2) &&
+                                                          !isObjectEmpty(multimedia3)) {
+                                                        showToast('Sign up success. Please verify your phone number.', Toast.LENGTH_SHORT);
+                                                        Navigator.pop(context);
+                                                        goToVerifyPhoneNumber(context);
+                                                      }
+                                                    }));
+                                              }));
+                                        } else {
+                                          showToast('Sign up error. Please try again.', Toast.LENGTH_SHORT);
+                                        }
+                                      }));
+                                } else {
+                                  showToast('Sign up error. Please try again.', Toast.LENGTH_SHORT);
+                                  BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+                                  Navigator.pop(context);
+                                }
+                              }));
+                        }));
                   } else {
-                    Fluttertoast.showToast(
-                        msg: 'Registered Mobile No./Google Account. Please use another Mobile No./Google Account to register.',
-                        toastLength: Toast.LENGTH_SHORT);
-                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
+                    showToast('Google Sign in error. Please try again.', Toast.LENGTH_SHORT);
+                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
                     Navigator.pop(context);
                   }
-                }));
-          }));
-        } else {
-          Fluttertoast.showToast(msg: 'Please sign into your Google account first. Please try again.', toastLength: Toast.LENGTH_LONG);
-          BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
-          Navigator.pop(context);
-        }
-      }));
-
-//      wholeAppBloc.dispatch(UserSignUpEvent(
-//          callback: (bool isSignedUp) {
-//            if (isSignedUp) {
-//              wholeAppBloc.dispatch(UserSignInEvent(
-//                  callback: (bool signInSuccessful) {
-//                    if (signInSuccessful) {
-//                      Navigator.pop(context);
-//                      goToVerifyPhoneNumber();
-//                    } else {
-//                      Navigator.pop(context); // Pop loading indicator
-//                      Fluttertoast.showToast(msg: 'Unable to login. Please try again.', toastLength: Toast.LENGTH_SHORT);
-//                      wholeAppBloc.dispatch(UserSignOutEvent()); // Reset everything to initial state first
-//                      Navigator.pop(context);
-//                    }
-//                  },
-//                  mobileNo: getPhoneNumber()));
-//            } else {
-//              Navigator.pop(context); // Pop loading indicator
-//              Fluttertoast.showToast(msg: 'Unable to sign up. Please try again.', toastLength: Toast.LENGTH_SHORT);
-//              wholeAppBloc.dispatch(UserSignOutEvent()); // Reset everything to initial state first
-//              Navigator.pop(context);
-//            }
-//          },
-//          mobileNo: getPhoneNumber(),
-//          effectivePhoneNumber: mobileNoTextController.value.text.toString(),
-//          countryCode: widget.countryCodeString,
-//          displayName: nameTextController.value.text.toString()));
-    }
+                } else {
+                  showToast('Registered Mobile No./Google Account. Please use another Mobile No./Google Account to register.', Toast.LENGTH_SHORT);
+                  BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
+                  Navigator.pop(context);
+                }
+              }));
+        }));
+      } else {
+        showToast('Please sign into your Google account first. Please try again.', Toast.LENGTH_LONG);
+        BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
+        Navigator.pop(context);
+      }
+    }));
   }
 
   goToVerifyPhoneNumber(BuildContext context) {

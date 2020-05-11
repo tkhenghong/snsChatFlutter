@@ -5,7 +5,7 @@ import 'package:http/http.dart';
 
 import '../RestRequestUtils.dart';
 import '../RestResponseUtils.dart';
-import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/environments/development/variables.dart'
     as globals;
 

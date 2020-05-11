@@ -17,6 +17,9 @@ dependencies:
   # Database
   sembast: ^2.4.2
 
+  # Short term storage for storing small values
+  shared_preferences: ^0.5.7+1
+
   # State
   #  provider: ^4.0.5
   bloc: ^3.0.0
@@ -45,6 +48,9 @@ dependencies:
   # Sign In
   google_sign_in: ^4.4.4
   firebase_auth: ^0.16.0
+
+  # Auth buttons
+  flutter_auth_buttons: ^0.8.0
 
   # Password Text Field
   pin_input_text_field: ^3.0.1

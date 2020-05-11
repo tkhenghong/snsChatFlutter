@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:snschat_flutter/objects/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial
 abstract class ConversationGroupState extends Equatable {
