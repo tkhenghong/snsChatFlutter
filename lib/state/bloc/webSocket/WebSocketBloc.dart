@@ -1,10 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
+
 import 'bloc.dart';
 
 class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
@@ -71,8 +71,7 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
       if (!isObjectEmpty(webSocketMessage)) {
         if (!isObjectEmpty(webSocketMessage.conversationGroup)) {
           // Conversation Group message
-          BlocProvider.of<ConversationGroupBloc>(event.context).add(AddConversationGroupEvent(
-              conversationGroup: webSocketMessage.conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+          BlocProvider.of<ConversationGroupBloc>(event.context).add(AddConversationGroupEvent(conversationGroup: webSocketMessage.conversationGroup, callback: (ConversationGroup conversationGroup) {}));
         }
 
         if (!isObjectEmpty(webSocketMessage.message)) {
@@ -80,17 +79,14 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
           if (userState is UserLoaded) {
             if (userState.user.id != webSocketMessage.message.senderId) {
               // "Message" message
-              BlocProvider.of<MessageBloc>(event.context)
-                  .add(AddMessageEvent(message: webSocketMessage.message, callback: (ChatMessage message) {}));
-              if(webSocketMessage.message.type != 'Text' && webSocketMessage.message.type != 'Contact' && webSocketMessage.message.type != 'Location') {
-                BlocProvider.of<MultimediaBloc>(event.context)
-                    .add(GetMessageMultimediaEvent(messageId: webSocketMessage.message.id, conversationGroupId: webSocketMessage.message.conversationId, callback: (Multimedia multimedia) {}));
+              BlocProvider.of<MessageBloc>(event.context).add(AddMessageEvent(message: webSocketMessage.message, callback: (ChatMessage message) {}));
+              if (webSocketMessage.message.type != 'Text' && webSocketMessage.message.type != 'Contact' && webSocketMessage.message.type != 'Location') {
+                BlocProvider.of<MultimediaBloc>(event.context).add(GetMessageMultimediaEvent(messageId: webSocketMessage.message.id, conversationGroupId: webSocketMessage.message.conversationId, callback: (Multimedia multimedia) {}));
               }
             } else {
               // Mark your own message as sent, received status will changed by recipient
               webSocketMessage.message.status = ChatMessageStatus.Sent;
-              BlocProvider.of<MessageBloc>(event.context)
-                  .add(EditMessageEvent(message: webSocketMessage.message, callback: (ChatMessage message) {}));
+              BlocProvider.of<MessageBloc>(event.context).add(EditMessageEvent(message: webSocketMessage.message, callback: (ChatMessage message) {}));
             }
           }
         }

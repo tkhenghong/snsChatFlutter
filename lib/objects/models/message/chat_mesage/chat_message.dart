@@ -1,5 +1,4 @@
 import 'package:lombok/lombok.dart';
-
 import 'package:snschat_flutter/general/enums/index.dart';
 
 @data

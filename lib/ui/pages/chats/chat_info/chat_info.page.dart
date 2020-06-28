@@ -1,8 +1,8 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
@@ -54,9 +54,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
               if (conversationGroupState is ConversationGroupsLoaded) {
                 List<ConversationGroup> conversationGroupList = conversationGroupState.conversationGroupList;
 
-                ConversationGroup conversationGroup = conversationGroupList.firstWhere(
-                    (ConversationGroup existingConversationGroup) => existingConversationGroup.id == widget._conversationGroup.id,
-                    orElse: null);
+                ConversationGroup conversationGroup = conversationGroupList.firstWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == widget._conversationGroup.id, orElse: null);
                 return CustomScrollView(
                   physics: BouncingScrollPhysics(),
                   slivers: <Widget>[
@@ -69,16 +67,11 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                           tag: conversationGroup.id,
                           child: FlatButton(
                               onPressed: () async {
-                                CustomDialogs customDialog = new CustomDialogs(
-                                    context: context,
-                                    title: "Edit Group Name",
-                                    description: "Edit the group name below. Press OK to save.",
-                                    value: conversationGroup.name);
+                                CustomDialogs customDialog = new CustomDialogs(context: context, title: "Edit Group Name", description: "Edit the group name below. Press OK to save.", value: conversationGroup.name);
                                 String groupName = await customDialog.showConfirmationDialog();
                                 if (conversationGroup.name != groupName) {
                                   conversationGroup.name = groupName;
-                                  BlocProvider.of<ConversationGroupBloc>(context).add(EditConversationGroupEvent(
-                                      conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+                                  BlocProvider.of<ConversationGroupBloc>(context).add(EditConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
                                 }
                               },
                               child: Container(
@@ -96,16 +89,11 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             if (multimediaState is MultimediaLoaded) {
                               List<Multimedia> multimediaList = multimediaState.multimediaList;
 
-                              Multimedia multimedia = multimediaList.firstWhere((Multimedia existingMultimedia) =>
-                                  existingMultimedia.conversationId.toString() == widget._conversationGroup.id &&
-                                  isStringEmpty(existingMultimedia.messageId));
+                              Multimedia multimedia = multimediaList.firstWhere((Multimedia existingMultimedia) => existingMultimedia.conversationId.toString() == widget._conversationGroup.id && isStringEmpty(existingMultimedia.messageId));
 
-                              return Hero(
-                                  tag: conversationGroup.id + "1",
-                                  child: imageService.loadFullImage(context, multimedia, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.type)));
+                              return Hero(tag: conversationGroup.id + "1", child: imageService.loadFullImage(context, multimedia, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.type)));
                             }
-                            return Hero(
-                                tag: conversationGroup.id + "1", child: imageService.loadFullImage(context, null, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.type)));
+                            return Hero(tag: conversationGroup.id + "1", child: imageService.loadFullImage(context, null, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.type)));
                           },
                         ),
                       ),
@@ -125,16 +113,11 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                               height: 60.0,
                               child: InkWell(
                                 onTap: () async {
-                                  CustomDialogs customDialog = new CustomDialogs(
-                                      context: context,
-                                      title: "Edit Group Description",
-                                      description: "Edit the group description below. Press OK to save.",
-                                      value: conversationGroup.description);
+                                  CustomDialogs customDialog = new CustomDialogs(context: context, title: "Edit Group Description", description: "Edit the group description below. Press OK to save.", value: conversationGroup.description);
                                   String groupDescription = await customDialog.showConfirmationDialog();
                                   if (conversationGroup.description != groupDescription) {
                                     conversationGroup.description = groupDescription;
-                                    BlocProvider.of<ConversationGroupBloc>(context).add(EditConversationGroupEvent(
-                                        conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+                                    BlocProvider.of<ConversationGroupBloc>(context).add(EditConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
                                   }
                                 },
                                 child: Padding(
@@ -154,9 +137,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                         padding: EdgeInsets.only(top: 5.0),
                                       ),
                                       Text(
-                                        isStringEmpty(conversationGroup.description)
-                                            ? "Add Group description"
-                                            : conversationGroup.description,
+                                        isStringEmpty(conversationGroup.description) ? "Add Group description" : conversationGroup.description,
                                         style: TextStyle(
                                           fontSize: 17.0,
                                           color: textSelectionColor,
@@ -211,8 +192,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             child: Container(
                               height: 60.0,
                               child: InkWell(
-                                onTap: () {
-                                },
+                                onTap: () {},
                                 child: Padding(
                                   padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
                                   child: Column(
@@ -244,8 +224,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             child: Container(
                               height: 60.0,
                               child: InkWell(
-                                onTap: () {
-                                },
+                                onTap: () {},
                                 child: Padding(
                                   padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
                                   child: Column(
@@ -293,12 +272,9 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                 builder: (BuildContext context, MultimediaState multimediaState) {
                                   if (multimediaState is MultimediaLoaded) {
                                     List<Multimedia> conversationGroupMemberMultimediaList = [];
-                                    conversationGroupMemberMultimediaList = multimediaState.multimediaList
-                                        .where((Multimedia existingMultimedia) => conversationGroupMemberList
-                                            .contains((UserContact userContact) => userContact.id == existingMultimedia.userContactId))
-                                        .toList();
-                                    return showGroupMemberParticipants(
-                                        context, conversationGroupMemberList, conversationGroupMemberMultimediaList);
+                                    conversationGroupMemberMultimediaList =
+                                        multimediaState.multimediaList.where((Multimedia existingMultimedia) => conversationGroupMemberList.contains((UserContact userContact) => userContact.id == existingMultimedia.userContactId)).toList();
+                                    return showGroupMemberParticipants(context, conversationGroupMemberList, conversationGroupMemberMultimediaList);
                                   }
 
                                   return showGroupMemberParticipants(context, conversationGroupMemberList, []);
@@ -315,8 +291,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             child: Container(
                               height: 60.0,
                               child: InkWell(
-                                onTap: () {
-                                },
+                                onTap: () {},
                                 child: Padding(
                                   padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
                                   child: Column(
@@ -348,8 +323,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                             child: Container(
                               height: 60.0,
                               child: InkWell(
-                                onTap: () {
-                                },
+                                onTap: () {},
                                 child: Padding(
                                   padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
                                   child: Column(
@@ -445,8 +419,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                           'Hey There! I am using PocketChat.',
                           softWrap: true,
                         ),
-                        onTap: () {
-                        },
+                        onTap: () {},
                         leading: imageService.loadImageThumbnailCircleAvatar(null, DefaultImagePathType.UserContact, context),
 //                                        leading: imageService.loadImageThumbnailCircleAvatar(
 //                                            multimediaList.firstWhere(
@@ -464,8 +437,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
     );
   }
 
-  List<UserContact> getConversationGroupMembers(
-      BuildContext context, List<UserContact> userContactList, ConversationGroup conversationGroup) {
+  List<UserContact> getConversationGroupMembers(BuildContext context, List<UserContact> userContactList, ConversationGroup conversationGroup) {
     List<UserContact> conversationGroupMemberList = [];
     List<String> notFoundMemberId = [];
 
@@ -493,8 +465,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
             userContactId: memberId,
             callback: (UserContact userContact) {
               if (!isObjectEmpty(userContact)) {
-                BlocProvider.of<UserContactBloc>(context)
-                    .add(AddUserContactEvent(userContact: userContact, callback: (UserContact userContact2) {}));
+                BlocProvider.of<UserContactBloc>(context).add(AddUserContactEvent(userContact: userContact, callback: (UserContact userContact2) {}));
               }
             }));
       }

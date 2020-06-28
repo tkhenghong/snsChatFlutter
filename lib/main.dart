@@ -1,18 +1,34 @@
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:snschat_flutter/state/bloc/bloc.dart';
+import 'package:snschat_flutter/state/bloc/network/bloc.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
 
-void main() async {
+// Sets a platform override for desktop to avoid exceptions. See
+// https://flutter.dev/desktop#target-platform-override for more info.
+void _enablePlatformOverrideForDesktop() {
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  }
+}
+
+void initializeFlutterDownloader() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FlutterDownloader.initialize().then((data) {
     // print('FlutterDownloader.initialize() completed');
     // print('data: ' + data.toString());
   });
+}
+
+void main() async {
+  _enablePlatformOverrideForDesktop();
+  initializeFlutterDownloader();
 
   BlocSupervisor.delegate = SimpleBlocDelegate();
   runApp(MultiBlocProvider(providers: [
@@ -52,6 +68,9 @@ void main() async {
     BlocProvider<MultimediaProgressBloc>(
       create: (context) => MultimediaProgressBloc(),
     ),
+    BlocProvider<NetworkBloc>(
+      create: (context) => NetworkBloc(),
+    ),
   ], child: MyApp()));
 }
 
@@ -76,7 +95,7 @@ class MyAppState extends State<MyApp> {
       title: 'PocketChat',
       theme: ThemeData(
 //        fontFamily: 'OpenSans',
-      textTheme: GoogleFonts.latoTextTheme(Theme.of(context).textTheme),
+        textTheme: GoogleFonts.latoTextTheme(Theme.of(context).textTheme),
         brightness: primaryBrightness,
         primaryColor: primaryColor,
         accentColor: primaryColor,

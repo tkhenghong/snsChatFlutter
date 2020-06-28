@@ -1,9 +1,10 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
+
 import '../index.dart';
 
 class TabsPage extends StatefulWidget {
@@ -26,6 +27,7 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
 
   PageController pageViewController = PageController(initialPage: 0, keepPage: true);
   List<Widget> tabPages;
+
   // BuildContext context;
 
   @override
@@ -141,16 +143,13 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
                         curve: Interval(0.0, 1.0 - index / icons.length / 2.0, curve: Curves.easeOut),
                       ),
                       child: Tooltip(
-                        message: index == 0
-                            ? "Create Personal Conversation"
-                            : index == 1 ? "Create Group Conversation" : index == 2 ? "Create Broadcast Group" : "Create Others...",
+                        message: index == 0 ? "Create Personal Conversation" : index == 1 ? "Create Group Conversation" : index == 2 ? "Create Broadcast Group" : "Create Others...",
                         child: FloatingActionButton(
                           heroTag: null,
                           mini: true,
                           child: Icon(icons[index], color: foregroundColor),
                           onPressed: () {
-                            Navigator.of(context)
-                                .push(MaterialPageRoute(builder: (context) => SelectContactsPage(chatGroupType: chatTitles[index])));
+                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => SelectContactsPage(chatGroupType: chatTitles[index])));
                             _animationController.reverse();
                           },
                         ),

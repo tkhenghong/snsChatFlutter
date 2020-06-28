@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
-
-import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/rest/index.dart';
+
 import 'bloc.dart';
 
 class IPGeoLocationBloc extends Bloc<IPGeoLocationEvent, IPGeoLocationState> {
@@ -14,7 +14,7 @@ class IPGeoLocationBloc extends Bloc<IPGeoLocationEvent, IPGeoLocationState> {
   @override
   Stream<IPGeoLocationState> mapEventToState(event) async* {
     // TODO: implement mapEventToState
-    if(event is InitializeIPGeoLocationEvent) {
+    if (event is InitializeIPGeoLocationEvent) {
       yield* _initIPGeoLocationToState(event);
     } else if (event is GetIPGeoLocationEvent) {
       yield* _mapIPGeoLocationToState(event);
@@ -35,7 +35,7 @@ class IPGeoLocationBloc extends Bloc<IPGeoLocationEvent, IPGeoLocationState> {
   }
 
   Stream<IPGeoLocationState> _mapIPGeoLocationToState(GetIPGeoLocationEvent event) async* {
-    if(state is IPGeoLocationLoaded) {
+    if (state is IPGeoLocationLoaded) {
       IPGeoLocation ipGeoLocation = (state as IPGeoLocationLoaded).ipGeoLocation;
       functionCallback(event, ipGeoLocation);
     } else {

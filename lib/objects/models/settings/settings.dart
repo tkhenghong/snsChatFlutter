@@ -13,6 +13,5 @@ class Settings {
         userId = json['userId'],
         allowNotifications = json['allowNotifications'];
 
-  Map<String, dynamic> toJson() =>
-      {'id': id, 'userId': userId, 'allowNotifications': allowNotifications};
+  Map<String, dynamic> toJson() => {'id': id, 'userId': userId, 'allowNotifications': allowNotifications};
 }

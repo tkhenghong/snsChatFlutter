@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
-import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/unreadMessage/bloc.dart';
 
 class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
@@ -51,9 +51,8 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
     bool unreadMessageSaved = false;
 
     if (state is UnreadMessagesLoaded) {
-
       // Avoid readding existed unreadMessage object
-      if(isStringEmpty(event.unreadMessage.id)) {
+      if (isStringEmpty(event.unreadMessage.id)) {
         newUnreadMessage = await unreadMessageAPIService.addUnreadMessage(event.unreadMessage);
       } else {
         newUnreadMessage = event.unreadMessage;
@@ -65,8 +64,7 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
         if (unreadMessageSaved) {
           List<UnreadMessage> existingUnreadMessageList = (state as UnreadMessagesLoaded).unreadMessageList;
 
-          existingUnreadMessageList
-              .removeWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.id == event.unreadMessage.id);
+          existingUnreadMessageList.removeWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.id == event.unreadMessage.id);
 
           existingUnreadMessageList.add(event.unreadMessage);
 
@@ -94,8 +92,7 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
         if (unreadMessageSaved) {
           List<UnreadMessage> existingUnreadMessageList = (state as UnreadMessagesLoaded).unreadMessageList;
 
-          existingUnreadMessageList
-              .removeWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.id == event.unreadMessage.id);
+          existingUnreadMessageList.removeWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.id == event.unreadMessage.id);
 
           existingUnreadMessageList.add(event.unreadMessage);
 
@@ -121,8 +118,7 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
 
         if (unreadMessageDeleted) {
           List<UnreadMessage> existingUnreadMessageList = (state as UnreadMessagesLoaded).unreadMessageList;
-          existingUnreadMessageList
-              .removeWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.id == event.unreadMessage.id);
+          existingUnreadMessageList.removeWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.id == event.unreadMessage.id);
 
           yield UnreadMessagesLoaded(existingUnreadMessageList);
           functionCallback(event, true);
@@ -157,8 +153,7 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
           if (unreadMessageExist) {
             unreadMessageDBService.editUnreadMessage(unreadMessageFromServer);
 
-            existingUnreadMessageList
-                .removeWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.id == unreadMessageFromServer.id);
+            existingUnreadMessageList.removeWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.id == unreadMessageFromServer.id);
           } else {
             unreadMessageDBService.addUnreadMessage(unreadMessageFromServer);
           }

@@ -2,13 +2,12 @@ import 'package:bloc/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
 import 'package:snschat_flutter/general/index.dart';
+
 import 'bloc.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial
 class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
-
   @override
   GoogleInfoState get initialState => GoogleInfoLoading();
 
@@ -26,7 +25,7 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
   }
 
   Stream<GoogleInfoState> _mapInitializeGoogleInfoToState(InitializeGoogleInfoEvent event) async* {
-    if(state is GoogleInfoNotLoaded || state is GoogleInfoLoading) {
+    if (state is GoogleInfoNotLoaded || state is GoogleInfoLoading) {
       try {
         // TODO: Google Sign in
         GoogleSignIn googleSignIn = new GoogleSignIn();
@@ -49,8 +48,7 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
           } else {
             GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
 
-            AuthCredential credential = GoogleAuthProvider.getCredential(
-                idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
+            AuthCredential credential = GoogleAuthProvider.getCredential(idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
 
             AuthResult authResult = await firebaseAuth.signInWithCredential(credential);
             firebaseUser = authResult.user;
@@ -77,7 +75,6 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
         firebaseAuth.signOut();
         googleSignIn.disconnect();
         googleSignIn.signOut();
-
       } catch (e) {
         print('RemoveGoogleInfoEvent error.');
         print('Error: ' + e);
@@ -105,12 +102,11 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
         print('GetOwnGoogleInfoEvent error.');
         print('Error: ' + e);
       }
-
     }
   }
 
   Stream<GoogleInfoState> _signIntoGoogle(SignInGoogleInfoEvent event) async* {
-    if(state is GoogleInfoNotLoaded || state is GoogleInfoLoading) {
+    if (state is GoogleInfoNotLoaded || state is GoogleInfoLoading) {
       try {
         GoogleSignIn googleSignIn = new GoogleSignIn();
         FirebaseAuth firebaseAuth = FirebaseAuth.instance;
@@ -134,8 +130,7 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
 
         GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
 
-        AuthCredential credential = GoogleAuthProvider.getCredential(
-            idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
 
         AuthResult authResult = await firebaseAuth.signInWithCredential(credential);
         firebaseUser = authResult.user;
@@ -150,8 +145,6 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
       }
     }
   }
-
-
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {

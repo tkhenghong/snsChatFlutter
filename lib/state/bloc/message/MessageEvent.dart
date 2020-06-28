@@ -57,7 +57,6 @@ class DeleteMessageEvent extends MessageEvent {
   String toString() => 'DeleteMessageEvent {message: $message}';
 }
 
-
 class GetUserPreviousMessagesEvent extends MessageEvent {
   final User user;
   final Function callback;

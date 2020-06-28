@@ -5,11 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
-import 'package:snschat_flutter/ui/pages/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
+import 'package:snschat_flutter/ui/pages/index.dart';
 
 class SignUpPage extends StatefulWidget {
   String mobileNo;
@@ -222,8 +221,7 @@ class SignUpPageState extends State<SignUpPage> {
 
     BlocProvider.of<GoogleInfoBloc>(context).add(SignInGoogleInfoEvent(callback: (bool initialized) {
       if (initialized) {
-        BlocProvider.of<GoogleInfoBloc>(context)
-            .add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn2, FirebaseAuth firebaseAuth2, FirebaseUser firebaseUser2) {
+        BlocProvider.of<GoogleInfoBloc>(context).add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn2, FirebaseAuth firebaseAuth2, FirebaseUser firebaseUser2) {
           BlocProvider.of<UserBloc>(context).add(CheckUserSignedUpEvent(
               googleSignIn: googleSignIn2,
               mobileNo: getPhoneNumber(context),
@@ -283,11 +281,7 @@ class SignUpPageState extends State<SignUpPage> {
                                                 BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(
                                                     multimedia: multimedia2,
                                                     callback: (Multimedia multimedia3) {
-                                                      if (!isObjectEmpty(googleSignIn2) &&
-                                                          !isObjectEmpty(user2) &&
-                                                          !isObjectEmpty(settings2) &&
-                                                          !isObjectEmpty(userContact2) &&
-                                                          !isObjectEmpty(multimedia3)) {
+                                                      if (!isObjectEmpty(googleSignIn2) && !isObjectEmpty(user2) && !isObjectEmpty(settings2) && !isObjectEmpty(userContact2) && !isObjectEmpty(multimedia3)) {
                                                         showToast('Sign up success. Please verify your phone number.', Toast.LENGTH_SHORT);
                                                         Navigator.pop(context);
                                                         goToVerifyPhoneNumber(context);

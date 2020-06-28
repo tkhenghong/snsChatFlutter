@@ -1,9 +1,9 @@
 import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:photo_view/photo_view.dart';
-
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
@@ -34,15 +34,11 @@ class PhotoViewState extends State<PhotoViewPage> {
     if (!isObjectEmpty(widget.multimedia.localFullFileUrl)) {
       displayingFile = File(widget.multimedia.localFullFileUrl);
       return PhotoView(
-          heroAttributes: PhotoViewHeroAttributes(tag: widget.multimedia.id),
-          loadingChild: Image.asset(customfileService.getDefaultImagePath(DefaultImagePathType.ConversationGroupMessage)),
-          imageProvider: FileImage(displayingFile));
+          heroAttributes: PhotoViewHeroAttributes(tag: widget.multimedia.id), loadingChild: Image.asset(customfileService.getDefaultImagePath(DefaultImagePathType.ConversationGroupMessage)), imageProvider: FileImage(displayingFile));
     } else {
       customfileService.downloadMultimediaFile(context, widget.multimedia);
 
-      return PhotoView(
-          loadingChild: Image.asset(customfileService.getDefaultImagePath(DefaultImagePathType.ConversationGroupMessage)),
-          imageProvider: NetworkImage(widget.multimedia.remoteThumbnailUrl));
+      return PhotoView(loadingChild: Image.asset(customfileService.getDefaultImagePath(DefaultImagePathType.ConversationGroupMessage)), imageProvider: NetworkImage(widget.multimedia.remoteThumbnailUrl));
     }
   }
 

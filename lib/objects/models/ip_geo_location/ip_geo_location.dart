@@ -1,6 +1,6 @@
-import 'package:lombok/lombok.dart';
 import 'dart:convert';
 
+import 'package:lombok/lombok.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 
 import '../index.dart';
@@ -88,10 +88,8 @@ class IPGeoLocation {
     var timeZoneFromJson = json['time_zone'];
     var currencyFromJson = json['currency'];
 
-    IPGeoLocationTimeZone timeZone =
-        IPGeoLocationTimeZone.fromJson(timeZoneFromJson);
-    IPGeoLocationCurrency currency =
-        IPGeoLocationCurrency.fromJson(currencyFromJson);
+    IPGeoLocationTimeZone timeZone = IPGeoLocationTimeZone.fromJson(timeZoneFromJson);
+    IPGeoLocationCurrency currency = IPGeoLocationCurrency.fromJson(currencyFromJson);
 
     ipGeoLocation.timeZone = timeZone;
     ipGeoLocation.currency = currency;
@@ -122,10 +120,8 @@ class IPGeoLocation {
         'isp': isp,
         'connection_type': connection_type,
         'organization': organization,
-        'currency':
-            isObjectEmpty(currency) ? null : json.encode(currency.toJson()),
-        'time_zone':
-            isObjectEmpty(timeZone) ? null : json.encode(timeZone.toJson()),
+        'currency': isObjectEmpty(currency) ? null : json.encode(currency.toJson()),
+        'time_zone': isObjectEmpty(timeZone) ? null : json.encode(timeZone.toJson()),
       };
 }
 

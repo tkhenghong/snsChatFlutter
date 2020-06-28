@@ -45,9 +45,6 @@ class SettingsPageState extends State<SettingsPage> {
         leading: Icon(Icons.lock),
         // Friend confirmation, Find Contact in storage, Blocked list, Methods of Adding me, Sync Contacts, Suggest Frequent Contacts
         onTap: (context) => {}),
-    PageListItem(
-        title: Text("Security"),
-        leading: Icon(Icons.security),
-        onTap: (context) => {}),
+    PageListItem(title: Text("Security"), leading: Icon(Icons.security), onTap: (context) => {}),
   ];
 }

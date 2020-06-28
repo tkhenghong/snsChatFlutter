@@ -1,7 +1,7 @@
 import 'package:sembast/sembast.dart';
-
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+
 import '../SembastDB.dart';
 
 class UserDBService {
@@ -18,9 +18,7 @@ class UserDBService {
     }
 
     User existingUser = await getSingleUser(user.id);
-    var key = isObjectEmpty(existingUser)
-        ? await _userStore.add(await _db, user.toJson())
-        : null;
+    var key = isObjectEmpty(existingUser) ? await _userStore.add(await _db, user.toJson()) : null;
 
     return !isStringEmpty(key.toString());
   }
@@ -31,8 +29,7 @@ class UserDBService {
     }
     final finder = Finder(filter: Filter.equals("id", user.id));
 
-    var noOfUpdated =
-        await _userStore.update(await _db, user.toJson(), finder: finder);
+    var noOfUpdated = await _userStore.update(await _db, user.toJson(), finder: finder);
 
     return noOfUpdated == 1;
   }
@@ -53,11 +50,8 @@ class UserDBService {
       return null;
     }
     final finder = Finder(filter: Filter.equals("id", userId));
-    final recordSnapshot =
-        await _userStore.findFirst(await _db, finder: finder);
-    return !isObjectEmpty(recordSnapshot)
-        ? User.fromJson(recordSnapshot.value)
-        : null;
+    final recordSnapshot = await _userStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? User.fromJson(recordSnapshot.value) : null;
   }
 
   // Verify user is in the local DB or not when login
@@ -65,13 +59,9 @@ class UserDBService {
     if (isObjectEmpty(await _db)) {
       return null;
     }
-    final finder =
-        Finder(filter: Filter.equals("googleAccountId", googleAccountId));
-    final recordSnapshot =
-        await _userStore.findFirst(await _db, finder: finder);
-    return !isObjectEmpty(recordSnapshot)
-        ? User.fromJson(recordSnapshot.value)
-        : null;
+    final finder = Finder(filter: Filter.equals("googleAccountId", googleAccountId));
+    final recordSnapshot = await _userStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? User.fromJson(recordSnapshot.value) : null;
   }
 
   // In future, when multiple logins needed

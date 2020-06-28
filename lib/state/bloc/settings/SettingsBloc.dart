@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'package:bloc/bloc.dart';
 
-import 'package:snschat_flutter/rest/index.dart';
+import 'package:bloc/bloc.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/state/bloc/settings/bloc.dart';
 
@@ -62,7 +62,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     bool settingsSaved = false;
 
     // Avoid readding existing settings
-    if(isStringEmpty(event.settings.id)) {
+    if (isStringEmpty(event.settings.id)) {
       newSettings = await settingsAPIService.addSettings(event.settings);
     } else {
       newSettings = event.settings;

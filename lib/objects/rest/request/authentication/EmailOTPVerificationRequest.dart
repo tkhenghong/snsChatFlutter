@@ -8,6 +8,5 @@ class EmailOTPVerificationRequest {
       : emailAddress = json['emailAddress'],
         otpNumber = json['otpNumber'];
 
-  Map<String, dynamic> toJson() =>
-      {'emailAddress': emailAddress, 'otpNumber': otpNumber};
+  Map<String, dynamic> toJson() => {'emailAddress': emailAddress, 'otpNumber': otpNumber};
 }

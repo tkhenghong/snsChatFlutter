@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
-
-import 'package:snschat_flutter/rest/index.dart';
-import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/rest/index.dart';
+
 import 'bloc.dart';
 
 class MessageBloc extends Bloc<MessageEvent, MessageState> {

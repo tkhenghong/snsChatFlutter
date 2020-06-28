@@ -22,8 +22,7 @@ class PermissionService {
   }
 
   Future<bool> requestLocationWhenInUsePermission() async {
-    return await Permission.locationWhenInUse.request() ==
-        PermissionStatus.granted;
+    return await Permission.locationWhenInUse.request() == PermissionStatus.granted;
   }
 
   Future<bool> requestPhotosPermission() async {

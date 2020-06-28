@@ -1,9 +1,8 @@
 import 'package:bloc/bloc.dart';
-
-import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/userContact/bloc.dart';
 
 class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
@@ -58,7 +57,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     bool userContactAdded = false;
 
     // Avoid readding existing userContact
-    if(isStringEmpty(event.userContact.id)) {
+    if (isStringEmpty(event.userContact.id)) {
       newUserContact = await userContactAPIService.addUserContact(event.userContact);
     }
 
@@ -98,26 +97,25 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       bool userContactAdded = false;
 
       // Avoid readding existing userContact
-      if(isStringEmpty(userContact.id)) {
+      if (isStringEmpty(userContact.id)) {
         newUserContact = await userContactAPIService.addUserContact(userContact);
       }
 
       if (!isObjectEmpty(newUserContact)) {
         bool userContactExist = false;
 
-        for(UserContact existingUserContact in existingUserContactList) {
-          if(existingUserContact.id == newUserContact.id) {
+        for (UserContact existingUserContact in existingUserContactList) {
+          if (existingUserContact.id == newUserContact.id) {
             userContactExist = true;
           }
         }
-        if(userContactExist) {
+        if (userContactExist) {
           userContactAdded = await userContactDBService.editUserContact(newUserContact);
         } else {
           userContactAdded = await userContactDBService.addUserContact(newUserContact);
         }
 
-        existingUserContactList.removeWhere(
-                (UserContact existingUserContact) => existingUserContact.id == newUserContact.id);
+        existingUserContactList.removeWhere((UserContact existingUserContact) => existingUserContact.id == newUserContact.id);
 
         if (userContactAdded) {
           newUserContactList.add(userContact);
@@ -191,10 +189,10 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
   }
 
   Stream<UserContactState> _getUserContact(GetUserContactEvent event) async* {
-    if(!isStringEmpty(event.userContactId)) {
+    if (!isStringEmpty(event.userContactId)) {
       UserContact userContactFromServer = await userContactAPIService.getUserContact(event.userContactId);
 
-      if(!isObjectEmpty(userContactFromServer)) {
+      if (!isObjectEmpty(userContactFromServer)) {
         functionCallback(event, userContactFromServer);
       } else {
         functionCallback(event, null);
@@ -222,8 +220,8 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
           // Unable to use contains() method here. Will cause concurrent modification during iteration problem.
           // Link: https://stackoverflow.com/questions/22409666/exception-concurrent-modification-during-iteration-instancelength17-of-gr
           bool userContactExist = false;
-          for(UserContact existingUserContact in existingUserContactList) {
-            if(existingUserContact.id == userContactFromServer.id) {
+          for (UserContact existingUserContact in existingUserContactList) {
+            if (existingUserContact.id == userContactFromServer.id) {
               userContactExist = true;
             }
           }

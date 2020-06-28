@@ -9,13 +9,7 @@ class IPGeoLocationTimeZone {
   bool is_dst;
   int dst_savings;
 
-  IPGeoLocationTimeZone(
-      {this.name,
-      this.current_time,
-      this.current_time_unix,
-      this.dst_savings,
-      this.is_dst,
-      this.offset});
+  IPGeoLocationTimeZone({this.name, this.current_time, this.current_time_unix, this.dst_savings, this.is_dst, this.offset});
 
   IPGeoLocationTimeZone.fromJson(Map<String, dynamic> json)
       : name = json['name'],

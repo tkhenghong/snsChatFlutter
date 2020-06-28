@@ -4,7 +4,6 @@ import 'package:url_launcher/url_launcher.dart';
 class ContactSupportPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => ContactSupportPageState();
-
 }
 
 class ContactSupportPageState extends State<ContactSupportPage> {
@@ -21,5 +20,4 @@ class ContactSupportPageState extends State<ContactSupportPage> {
       throw 'Could not launch $url';
     }
   }
-
 }

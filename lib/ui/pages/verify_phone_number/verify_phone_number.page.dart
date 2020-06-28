@@ -73,8 +73,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
               controller: textEditingController,
               enabled: true,
               keyboardType: TextInputType.number,
-              decoration: UnderlineDecoration(
-                  textStyle: TextStyle(color: Colors.black, fontSize: 20.0, fontWeight: FontWeight.bold), color: Colors.black),
+              decoration: UnderlineDecoration(textStyle: TextStyle(color: Colors.black, fontSize: 20.0, fontWeight: FontWeight.bold), color: Colors.black),
               onSubmit: (pin) {
                 showLoading(context, "Verifying PIN...");
                 Future.delayed(Duration(milliseconds: 1000), () {

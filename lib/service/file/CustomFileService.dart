@@ -7,7 +7,6 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
-
 import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
@@ -22,8 +21,7 @@ class CustomFileService {
   // TODO: getApplicationDocumentDirectory should change to getDirectories,
   // TODO: so you can get any directory based on where you want.
   Future<String> getApplicationDocumentDirectory() async {
-    bool storageAccessGranted =
-        await permissionService.requestStoragePermission();
+    bool storageAccessGranted = await permissionService.requestStoragePermission();
     if (storageAccessGranted) {
       // get the application documents directory
 
@@ -46,8 +44,7 @@ class CustomFileService {
 
     // Retrieve file name
     int lastSlash = fileToBeCopied.path.lastIndexOf("/");
-    String fileName = fileToBeCopied.path
-        .substring(lastSlash + 1, fileToBeCopied.path.length);
+    String fileName = fileToBeCopied.path.substring(lastSlash + 1, fileToBeCopied.path.length);
 
     String destinationFilePath = "";
 
@@ -74,8 +71,7 @@ class CustomFileService {
     }
   }
 
-  Future<File> downloadFileFromUint8List(
-      Uint8List rawFile, String fileName, String fileFormat) async {
+  Future<File> downloadFileFromUint8List(Uint8List rawFile, String fileName, String fileFormat) async {
     try {
       String path = await getApplicationDocumentDirectory() + "/";
       String fileFullPath = path + fileName + "." + fileFormat;
@@ -92,27 +88,20 @@ class CustomFileService {
 
   downloadMultimediaFile(BuildContext context, Multimedia multimedia) async {
     if (!isStringEmpty(multimedia.remoteFullFileUrl)) {
-      File file =
-          await defaultCacheManager.getSingleFile(multimedia.remoteFullFileUrl);
+      File file = await defaultCacheManager.getSingleFile(multimedia.remoteFullFileUrl);
       if (isObjectEmpty(file)) {
-        FileInfo fileDownloadFromInternet = await defaultCacheManager
-            .downloadFile(multimedia.remoteFullFileUrl);
-        FileInfo fileThumbnailDownloadedFromInternet = await defaultCacheManager
-            .downloadFile(multimedia.remoteThumbnailUrl);
+        FileInfo fileDownloadFromInternet = await defaultCacheManager.downloadFile(multimedia.remoteFullFileUrl);
+        FileInfo fileThumbnailDownloadedFromInternet = await defaultCacheManager.downloadFile(multimedia.remoteThumbnailUrl);
 
-        if (!fileInfoIsEmpty(fileDownloadFromInternet) &&
-            !fileInfoIsEmpty(fileThumbnailDownloadedFromInternet)) {
+        if (!fileInfoIsEmpty(fileDownloadFromInternet) && !fileInfoIsEmpty(fileThumbnailDownloadedFromInternet)) {
           multimedia.localFullFileUrl = fileDownloadFromInternet.file.path;
-          multimedia.localThumbnailUrl =
-              fileThumbnailDownloadedFromInternet.file.path;
-          BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(
-              multimedia: multimedia, callback: (Multimedia multimedia) {}));
+          multimedia.localThumbnailUrl = fileThumbnailDownloadedFromInternet.file.path;
+          BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
         }
       } else {
         multimedia.localFullFileUrl = file.path;
         multimedia.localThumbnailUrl = file.path;
-        BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(
-            multimedia: multimedia, callback: (Multimedia multimedia) {}));
+        BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
       }
     }
   }
@@ -154,15 +143,12 @@ class CustomFileService {
 
   Future<String> _findLocalPath(BuildContext context) async {
     final platform = Theme.of(context).platform;
-    final directory = platform == TargetPlatform.android
-        ? await getExternalStorageDirectory()
-        : await getApplicationDocumentsDirectory();
+    final directory = platform == TargetPlatform.android ? await getExternalStorageDirectory() : await getApplicationDocumentsDirectory();
     return directory.path;
   }
 
   // TODO: bring filename to download the file correctly
-  downloadFile(BuildContext context, String remoteUrl, bool showNotification,
-      bool openFileFromNotification, String fileName) async {
+  downloadFile(BuildContext context, String remoteUrl, bool showNotification, bool openFileFromNotification, String fileName) async {
     try {
 //      String downloadDirectory = await getApplicationDocumentDirectory() + "/";
       String downloadDirectory = await _findLocalPath(context) + "/";
@@ -175,27 +161,20 @@ class CustomFileService {
         savedDir: downloadDirectory,
         showNotification: showNotification,
         // show download progress in status bar (for Android)
-        openFileFromNotification:
-            openFileFromNotification, // click on notification to open downloaded file (for Android)
+        openFileFromNotification: openFileFromNotification, // click on notification to open downloaded file (for Android)
       );
 
       print("taskId: " + taskId.toString());
 
-      FlutterDownloader.registerCallback(
-          flutterDownloaderCallback); // callback is a top-level or static function
+      FlutterDownloader.registerCallback(flutterDownloaderCallback); // callback is a top-level or static function
 
       tasks.forEach((DownloadTask downloadTask) {
-        print("downloadTask.taskId.toString(): " +
-            downloadTask.taskId.toString());
-        print("downloadTask.filename.toString(): " +
-            downloadTask.filename.toString());
-        print("downloadTask.savedDir.toString(): " +
-            downloadTask.savedDir.toString());
+        print("downloadTask.taskId.toString(): " + downloadTask.taskId.toString());
+        print("downloadTask.filename.toString(): " + downloadTask.filename.toString());
+        print("downloadTask.savedDir.toString(): " + downloadTask.savedDir.toString());
         print("downloadTask.url.toString(): " + downloadTask.url.toString());
-        print("downloadTask.status.toString(): " +
-            downloadTask.status.toString());
-        print("downloadTask.progress.toString(): " +
-            downloadTask.progress.toString());
+        print("downloadTask.status.toString(): " + downloadTask.status.toString());
+        print("downloadTask.progress.toString(): " + downloadTask.progress.toString());
         print("Next!");
       });
 
@@ -206,11 +185,9 @@ class CustomFileService {
     }
   }
 
-  static void flutterDownloaderCallback(
-      String id, DownloadTaskStatus downloadTaskStatus, int progress) {
+  static void flutterDownloaderCallback(String id, DownloadTaskStatus downloadTaskStatus, int progress) {
     if (downloadTaskStatus == DownloadTaskStatus.complete) {
-      Fluttertoast.showToast(
-          msg: 'File downloaded.', toastLength: Toast.LENGTH_LONG);
+      Fluttertoast.showToast(msg: 'File downloaded.', toastLength: Toast.LENGTH_LONG);
       FlutterDownloader.open(taskId: id);
     }
   }
@@ -243,8 +220,7 @@ class CustomFileService {
   Future<bool> deleteFile(String url) async {
     File fileToBeDeleted = new File(url);
     if (await fileToBeDeleted.exists()) {
-      FileSystemEntity fileSystemEntity =
-          await fileToBeDeleted.delete(recursive: true);
+      FileSystemEntity fileSystemEntity = await fileToBeDeleted.delete(recursive: true);
       return await fileSystemEntity.exists();
     }
     return false; // Means file is not deleted

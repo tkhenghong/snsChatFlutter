@@ -10,13 +10,7 @@ class MultimediaProgress {
   int progress = 0;
   DownloadTaskStatus status = DownloadTaskStatus.undefined;
 
-  MultimediaProgress(
-      {this.multimediaId,
-      this.name,
-      this.remoteUrl,
-      this.taskId,
-      this.progress,
-      this.status});
+  MultimediaProgress({this.multimediaId, this.name, this.remoteUrl, this.taskId, this.progress, this.status});
 
   MultimediaProgress.fromJson(Map<String, dynamic> json)
       : multimediaId = json['multimediaId'],

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
-
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 
@@ -29,7 +28,6 @@ Widget messageAudioPlayer(BuildContext context, ChatMessage message, Multimedia 
 //            audioService.seekAudioPosition(sliderPositionValue);
           },
         ),
-
       ],
     );
   } else {

@@ -13,17 +13,7 @@ class UserContact {
   bool block;
   String multimediaId;
 
-  UserContact(
-      {this.id,
-      this.displayName,
-      this.realName,
-      this.about,
-      this.userIds,
-      this.userId,
-      this.mobileNo,
-      this.lastSeenDate,
-      this.block,
-      this.multimediaId});
+  UserContact({this.id, this.displayName, this.realName, this.about, this.userIds, this.userId, this.mobileNo, this.lastSeenDate, this.block, this.multimediaId});
 
   factory UserContact.fromJson(Map<String, dynamic> json) {
     UserContact userContact = UserContact(

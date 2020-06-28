@@ -1,7 +1,7 @@
 import 'package:sembast/sembast.dart';
-
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+
 import '../SembastDB.dart';
 
 class ChatMessageDBService {
@@ -18,9 +18,7 @@ class ChatMessageDBService {
     }
 
     ChatMessage existingChatMessage = await getSingleChatMessage(message.id);
-    var key = existingChatMessage == null
-        ? await _messageStore.add(await _db, message.toJson())
-        : null;
+    var key = existingChatMessage == null ? await _messageStore.add(await _db, message.toJson()) : null;
 
     return !isStringEmpty(key.toString());
   }
@@ -31,8 +29,7 @@ class ChatMessageDBService {
     }
     final finder = Finder(filter: Filter.equals("id", message.id));
 
-    var noOfUpdated =
-        await _messageStore.update(await _db, message.toJson(), finder: finder);
+    var noOfUpdated = await _messageStore.update(await _db, message.toJson(), finder: finder);
 
     return noOfUpdated == 1;
   }
@@ -53,20 +50,15 @@ class ChatMessageDBService {
       return null;
     }
     final finder = Finder(filter: Filter.equals("id", messageId));
-    final recordSnapshot =
-        await _messageStore.findFirst(await _db, finder: finder);
-    return !isObjectEmpty(recordSnapshot)
-        ? ChatMessage.fromJson(recordSnapshot.value)
-        : null;
+    final recordSnapshot = await _messageStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? ChatMessage.fromJson(recordSnapshot.value) : null;
   }
 
-  Future<List<ChatMessage>> getChatMessagesOfAConversationGroup(
-      String conversationGroupId) async {
+  Future<List<ChatMessage>> getChatMessagesOfAConversationGroup(String conversationGroupId) async {
     if (isObjectEmpty(await _db)) {
       return null;
     }
-    final finder = Finder(
-        filter: Filter.equals("conversationGroupId", conversationGroupId));
+    final finder = Finder(filter: Filter.equals("conversationGroupId", conversationGroupId));
     final recordSnapshots = await _messageStore.find(await _db, finder: finder);
     if (!isObjectEmpty(recordSnapshots)) {
       List<ChatMessage> messageList = [];

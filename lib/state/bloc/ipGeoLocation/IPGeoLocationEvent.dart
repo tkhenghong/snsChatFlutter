@@ -16,7 +16,6 @@ class InitializeIPGeoLocationEvent extends IPGeoLocationEvent {
   String toString() => 'InitializeIPGeoLocationEvent';
 }
 
-
 class GetIPGeoLocationEvent extends IPGeoLocationEvent {
   final Function callback;
 

@@ -51,8 +51,7 @@ class CustomDialogs {
                             textCapitalization: TextCapitalization.words,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-                              focusedBorder:
-                                  OutlineInputBorder(borderSide: BorderSide(width: 2.0), borderRadius: BorderRadius.circular(10.0)),
+                              focusedBorder: OutlineInputBorder(borderSide: BorderSide(width: 2.0), borderRadius: BorderRadius.circular(10.0)),
                               hintText: value.isEmpty ? "Enter value here" : value,
                             ),
                           )

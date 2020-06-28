@@ -29,7 +29,6 @@ class CustomSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-
     final deviceWidth = MediaQuery.of(context).size.width;
     final deviceHeight = MediaQuery.of(context).size.height;
 
@@ -70,13 +69,11 @@ class CustomSearchDelegate extends SearchDelegate {
                           var result = phoneStorageContactState.searchResults[index];
                           return ListTile(
                             title: Text(result.displayName),
-                            onTap: () {
-
-                            },
+                            onTap: () {},
                           );
                         },
                       ),
-                      height: deviceHeight *0.8,
+                      height: deviceHeight * 0.8,
                     ),
                   ],
                 );

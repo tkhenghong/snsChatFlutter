@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
-
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
+
 import 'bloc.dart';
 
 class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaProgressState> {
@@ -56,8 +56,7 @@ class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaPro
         multimediaProgressSaved = await multimediaProgressDBService.addMultimediaProgress(newMultimediaProgress);
 
         if (multimediaProgressSaved) {
-          multimediaProgressList.removeWhere(
-              (MultimediaProgress existingMultimediaProgress) => existingMultimediaProgress.multimediaId == event.multimediaProgress.multimediaId);
+          multimediaProgressList.removeWhere((MultimediaProgress existingMultimediaProgress) => existingMultimediaProgress.multimediaId == event.multimediaProgress.multimediaId);
 
           multimediaProgressList.add(event.multimediaProgress);
 
@@ -84,8 +83,7 @@ class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaPro
         multimediaProgressSaved = await multimediaProgressDBService.addMultimediaProgress(newMultimediaProgress);
 
         if (multimediaProgressSaved) {
-          multimediaProgressList.removeWhere(
-                  (MultimediaProgress existingMultimediaProgress) => existingMultimediaProgress.multimediaId == event.multimediaProgress.multimediaId);
+          multimediaProgressList.removeWhere((MultimediaProgress existingMultimediaProgress) => existingMultimediaProgress.multimediaId == event.multimediaProgress.multimediaId);
 
           multimediaProgressList.add(event.multimediaProgress);
 
@@ -102,8 +100,7 @@ class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaPro
     }
   }
 
-  Stream<MultimediaProgressState> _searchMultimediaProgressEvent(SearchMultimediaProgressEvent event) async* {
-  }
+  Stream<MultimediaProgressState> _searchMultimediaProgressEvent(SearchMultimediaProgressEvent event) async* {}
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {

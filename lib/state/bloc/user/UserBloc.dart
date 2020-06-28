@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/user/bloc.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
@@ -58,7 +58,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     bool userSaved = false;
 
     // Avoid readding existed user object
-    if(isStringEmpty(event.user.id)) {
+    if (isStringEmpty(event.user.id)) {
       userFromServer = await userAPIService.addUser(event.user);
     } else {
       userFromServer = event.user;
@@ -163,10 +163,9 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       if (isSignedIn) {
         userFromServer = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
 
-
         if (!isObjectEmpty(userFromServer)) {
           // Check mobile no match with it's googleAccount ID or not.
-          if(userFromServer.mobileNo == event.mobileNo) {
+          if (userFromServer.mobileNo == event.mobileNo) {
             saved = await userDBService.addUser(userFromServer);
 
             if (saved) {

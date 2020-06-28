@@ -14,17 +14,7 @@ class Multimedia {
   String userId;
   int fileSize;
 
-  Multimedia(
-      {this.id,
-        this.localFullFileUrl,
-        this.localThumbnailUrl,
-        this.remoteThumbnailUrl,
-        this.remoteFullFileUrl,
-        this.messageId,
-        this.userContactId,
-        this.conversationId,
-        this.userId,
-        this.fileSize});
+  Multimedia({this.id, this.localFullFileUrl, this.localThumbnailUrl, this.remoteThumbnailUrl, this.remoteFullFileUrl, this.messageId, this.userContactId, this.conversationId, this.userId, this.fileSize});
 
   Multimedia.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -39,17 +29,17 @@ class Multimedia {
         fileSize = json['fileSize'];
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'localFullFileUrl': localFullFileUrl,
-    'localThumbnailUrl': localThumbnailUrl,
-    'remoteThumbnailUrl': remoteThumbnailUrl,
-    'remoteFullFileUrl': remoteFullFileUrl,
-    'messageId': messageId,
-    'userContactId': userContactId,
-    'conversationId': conversationId,
-    'userId': userId,
-    'fileSize': fileSize,
-  };
+        'id': id,
+        'localFullFileUrl': localFullFileUrl,
+        'localThumbnailUrl': localThumbnailUrl,
+        'remoteThumbnailUrl': remoteThumbnailUrl,
+        'remoteFullFileUrl': remoteFullFileUrl,
+        'messageId': messageId,
+        'userContactId': userContactId,
+        'conversationId': conversationId,
+        'userId': userId,
+        'fileSize': fileSize,
+      };
 }
 
 /* Combinations:

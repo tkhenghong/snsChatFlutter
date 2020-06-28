@@ -1,11 +1,10 @@
 import 'dart:async';
+
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
-
-import 'package:snschat_flutter/environments/development/variables.dart'
-    as globals;
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 
@@ -34,8 +33,7 @@ class SembastDB {
     }
 
     // Otherwize, return the value of the function again straight back to the caller.
-    return _dbOpenCompleter
-        .future; // Returns the last value emitted from the function that linked to this completer instance.
+    return _dbOpenCompleter.future; // Returns the last value emitted from the function that linked to this completer instance.
   }
 
   Future _startSembastDatabase() async {
@@ -58,8 +56,7 @@ class SembastDB {
           storageAccessGranted = false;
         } else {
           // build the database path
-          dbPath =
-              join(path, 'pocketChat.db'); // join method comes from path.dart
+          dbPath = join(path, 'pocketChat.db'); // join method comes from path.dart
           storageAccessGranted = true;
         }
         break;

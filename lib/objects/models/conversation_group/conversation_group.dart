@@ -1,5 +1,4 @@
 import 'package:lombok/lombok.dart';
-
 import 'package:snschat_flutter/general/enums/index.dart';
 
 @data
@@ -15,17 +14,7 @@ class ConversationGroup {
   bool block;
   int notificationExpireDate; // 0 = unblocked, > 0 = blocked until specific time
 
-  ConversationGroup(
-      {this.id,
-      this.creatorUserId,
-      this.createdDate,
-      this.name,
-      this.type,
-      this.block,
-      this.description,
-      this.memberIds,
-      this.adminMemberIds,
-      this.notificationExpireDate});
+  ConversationGroup({this.id, this.creatorUserId, this.createdDate, this.name, this.type, this.block, this.description, this.memberIds, this.adminMemberIds, this.notificationExpireDate});
 
   // fromMap in SembastDB tutorial
   factory ConversationGroup.fromJson(Map<String, dynamic> json) {

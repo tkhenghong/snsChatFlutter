@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:snschat_flutter/state/bloc/bloc.dart';
-
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
+import 'package:snschat_flutter/state/bloc/bloc.dart';
 
 class MyselfPage extends StatefulWidget {
   @override
@@ -26,7 +25,6 @@ class MyselfPageState extends State<MyselfPage> {
 
   @override
   Widget build(BuildContext context) {
-
     deviceWidth = MediaQuery.of(context).size.width;
     deviceHeight = MediaQuery.of(context).size.height;
 
@@ -58,16 +56,13 @@ class MyselfPageState extends State<MyselfPage> {
                 if (userContactState is UserContactsLoaded) {
                   List<UserContact> userContactList = userContactState.userContactList;
 
-                  UserContact userContact = userContactList.firstWhere(
-                      (UserContact existingUserContact) => user.id == existingUserContact.userId.toString(),
-                      orElse: () => null);
+                  UserContact userContact = userContactList.firstWhere((UserContact existingUserContact) => user.id == existingUserContact.userId.toString(), orElse: () => null);
                   if (!isObjectEmpty(userContact)) {
                     return BlocBuilder<MultimediaBloc, MultimediaState>(
                       builder: (context, multimediaState) {
                         if (multimediaState is MultimediaLoaded) {
                           List<Multimedia> multimediaList = multimediaState.multimediaList;
-                          Multimedia multimedia =
-                              multimediaList.firstWhere((Multimedia existingMultimedia) => user.id == existingMultimedia.userId, orElse: null);
+                          Multimedia multimedia = multimediaList.firstWhere((Multimedia existingMultimedia) => user.id == existingMultimedia.userId, orElse: null);
                           if (!isObjectEmpty(multimedia)) {
                             return showMyselfPage(context, user, userContact, multimedia, listItems);
                           }
@@ -98,9 +93,7 @@ class MyselfPageState extends State<MyselfPage> {
     );
     listItems.insert(0, pageListItem);
     return Column(
-      children: <Widget>[
-        PageListView(array: listItems, context: context)
-      ],
+      children: <Widget>[PageListView(array: listItems, context: context)],
     );
   }
 

@@ -8,6 +8,5 @@ class MobileNumberOTPVerificationRequest {
       : mobileNo = json['mobileNo'],
         otpNumber = json['otpNumber'];
 
-  Map<String, dynamic> toJson() =>
-      {'mobileNo': mobileNo, 'otpNumber': otpNumber};
+  Map<String, dynamic> toJson() => {'mobileNo': mobileNo, 'otpNumber': otpNumber};
 }

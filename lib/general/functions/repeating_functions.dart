@@ -9,8 +9,7 @@ int generateNewId() {
   return newId;
 }
 
-DefaultImagePathType convertConversationGroupTypeToDefaultImagePathType(
-    ConversationGroupType conversationGroupType) {
+DefaultImagePathType convertConversationGroupTypeToDefaultImagePathType(ConversationGroupType conversationGroupType) {
   switch (conversationGroupType) {
     case ConversationGroupType.Personal:
       return DefaultImagePathType.Personal;

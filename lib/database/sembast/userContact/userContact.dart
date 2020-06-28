@@ -1,7 +1,7 @@
 import 'package:sembast/sembast.dart';
-
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+
 import '../SembastDB.dart';
 
 class UserContactDBService {
@@ -17,11 +17,8 @@ class UserContactDBService {
       return false;
     }
 
-    UserContact existingUserContact =
-        await getSingleUserContact(userContact.id);
-    var key = isObjectEmpty(existingUserContact)
-        ? await _userContactStore.add(await _db, userContact.toJson())
-        : null;
+    UserContact existingUserContact = await getSingleUserContact(userContact.id);
+    var key = isObjectEmpty(existingUserContact) ? await _userContactStore.add(await _db, userContact.toJson()) : null;
 
     return !isStringEmpty(key.toString());
   }
@@ -32,8 +29,7 @@ class UserContactDBService {
     }
     final finder = Finder(filter: Filter.equals("id", userContact.id));
 
-    var noOfUpdated = await _userContactStore
-        .update(await _db, userContact.toJson(), finder: finder);
+    var noOfUpdated = await _userContactStore.update(await _db, userContact.toJson(), finder: finder);
 
     return noOfUpdated == 1;
   }
@@ -54,11 +50,8 @@ class UserContactDBService {
       return null;
     }
     final finder = Finder(filter: Filter.equals("id", userContactId));
-    final recordSnapshot =
-        await _userContactStore.findFirst(await _db, finder: finder);
-    return !isObjectEmpty(recordSnapshot)
-        ? UserContact.fromJson(recordSnapshot.value)
-        : null;
+    final recordSnapshot = await _userContactStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? UserContact.fromJson(recordSnapshot.value) : null;
   }
 
   // Used for retreiving your own UserContact
@@ -67,26 +60,18 @@ class UserContactDBService {
       return null;
     }
     final finder = Finder(filter: Filter.equals("userId", userId));
-    final recordSnapshot =
-        await _userContactStore.findFirst(await _db, finder: finder);
-    return !isObjectEmpty(recordSnapshot)
-        ? UserContact.fromJson(recordSnapshot.value)
-        : null;
+    final recordSnapshot = await _userContactStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? UserContact.fromJson(recordSnapshot.value) : null;
   }
 
   // Verify userContact is in the local DB or not when login
-  Future<UserContact> getUserContactByConversationGroup(
-      String googleAccountId) async {
+  Future<UserContact> getUserContactByConversationGroup(String googleAccountId) async {
     if (isObjectEmpty(await _db)) {
       return null;
     }
-    final finder =
-        Finder(filter: Filter.equals("googleAccountId", googleAccountId));
-    final recordSnapshot =
-        await _userContactStore.findFirst(await _db, finder: finder);
-    return !isObjectEmpty(recordSnapshot)
-        ? UserContact.fromJson(recordSnapshot.value)
-        : null;
+    final finder = Finder(filter: Filter.equals("googleAccountId", googleAccountId));
+    final recordSnapshot = await _userContactStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? UserContact.fromJson(recordSnapshot.value) : null;
   }
 
   Future<UserContact> getUserContactByMobileNo(String mobileNo) async {
@@ -94,11 +79,8 @@ class UserContactDBService {
       return null;
     }
     final finder = Finder(filter: Filter.equals("mobileNo", mobileNo));
-    final recordSnapshot =
-        await _userContactStore.findFirst(await _db, finder: finder);
-    return !isObjectEmpty(recordSnapshot)
-        ? UserContact.fromJson(recordSnapshot.value)
-        : null;
+    final recordSnapshot = await _userContactStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? UserContact.fromJson(recordSnapshot.value) : null;
   }
 
   // In future, when multiple logins needed

@@ -1,9 +1,8 @@
 import 'package:bloc/bloc.dart';
-import 'package:snschat_flutter/rest/chat/ConversationGroupAPIService.dart';
-
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/rest/chat/ConversationGroupAPIService.dart';
 
 import 'bloc.dart';
 
@@ -41,7 +40,6 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
           yield ConversationGroupsNotLoaded();
           functionCallback(event, false);
         } else {
-
           yield ConversationGroupsLoaded(conversationGroupListFromDB);
           functionCallback(event, true);
         }
@@ -57,7 +55,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     bool added = false;
     if (state is ConversationGroupsLoaded) {
       // Avoid readding existing conversationGroup
-      if(isStringEmpty(event.conversationGroup.id)) {
+      if (isStringEmpty(event.conversationGroup.id)) {
         newConversationGroup = await conversationGroupAPIService.addConversationGroup(event.conversationGroup);
       } else {
         newConversationGroup = event.conversationGroup;
@@ -68,8 +66,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
         if (added) {
           List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
-          existingConversationGroupList
-              .removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == event.conversationGroup.id);
+          existingConversationGroupList.removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == event.conversationGroup.id);
 
           existingConversationGroupList.add(newConversationGroup);
 
@@ -95,8 +92,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
         if (saved) {
           List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
-          existingConversationGroupList
-              .removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == event.conversationGroup.id);
+          existingConversationGroupList.removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == event.conversationGroup.id);
 
           existingConversationGroupList.add(event.conversationGroup);
 
@@ -123,8 +119,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
         if (deleted) {
           List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
-          existingConversationGroupList
-              .removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == event.conversationGroup.id);
+          existingConversationGroupList.removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == event.conversationGroup.id);
 
           yield ConversationGroupsLoaded(existingConversationGroupList);
           functionCallback(event, true);
@@ -138,8 +133,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
   }
 
   Stream<ConversationGroupState> _getUserPreviousConversationGroups(GetUserPreviousConversationGroupsEvent event) async* {
-    List<ConversationGroup> conversationGroupListFromServer =
-        await conversationGroupAPIService.getConversationGroupsForUserByMobileNo(event.user.mobileNo);
+    List<ConversationGroup> conversationGroupListFromServer = await conversationGroupAPIService.getConversationGroupsForUserByMobileNo(event.user.mobileNo);
     if (state is ConversationGroupsLoaded) {
       List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
@@ -159,8 +153,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
           if (conversationGroupExist) {
             conversationGroupDBService.editConversationGroup(conversationGroupFromServer);
 
-            existingConversationGroupList.removeWhere(
-                (ConversationGroup existingConversationGroup) => existingConversationGroup.id == conversationGroupFromServer.id);
+            existingConversationGroupList.removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == conversationGroupFromServer.id);
           } else {
             conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
           }

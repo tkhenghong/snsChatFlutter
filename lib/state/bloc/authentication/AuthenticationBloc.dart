@@ -1,27 +1,21 @@
 import 'package:bloc/bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/rest/authentication/AuthenticationAPIService.dart';
-
-import 'package:snschat_flutter/database/sembast/index.dart';
-import 'package:snschat_flutter/general/index.dart';
-import 'package:snschat_flutter/objects/models/index.dart';
 
 import 'bloc.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial
-class AuthenticationBloc
-    extends Bloc<AuthenticationEvent, AuthenticationState> {
-  AuthenticationAPIService authenticationAPIService =
-      AuthenticationAPIService();
+class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> {
+  AuthenticationAPIService authenticationAPIService = AuthenticationAPIService();
 
   @override
   AuthenticationState get initialState => AuthenticationsLoading();
 
   @override
-  Stream<AuthenticationState> mapEventToState(
-      AuthenticationEvent event) async* {
+  Stream<AuthenticationState> mapEventToState(AuthenticationEvent event) async* {
     // TODO: implement mapEventToState
     if (event is InitializeAuthenticationsEvent) {
       yield* _mapInitializeAuthentication(event);
@@ -40,12 +34,10 @@ class AuthenticationBloc
     }
   }
 
-  Stream<AuthenticationState> _mapInitializeAuthentication(
-      InitializeAuthenticationsEvent event) async* {
+  Stream<AuthenticationState> _mapInitializeAuthentication(InitializeAuthenticationsEvent event) async* {
     if (state is AuthenticationsLoading || state is AuthenticationsNotLoaded) {
       try {
-        SharedPreferences sharedPreferences =
-            await SharedPreferences.getInstance();
+        SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
         String jwtToken = sharedPreferences.getString("jwtToken");
         yield AuthenticationsLoaded(jwtToken);
         functionCallback(event, true);
@@ -56,15 +48,10 @@ class AuthenticationBloc
     }
   }
 
-  Stream<AuthenticationState> _requestAuthenticationUsingEmail(
-      RequestAuthenticationUsingEmailAddressEvent event) async* {
-    OTPResponse otpResponse =
-        await authenticationAPIService.requestToAuthenticateWithEmailAddress(
-            new EmailAddressAuthenticationRequest(
-                emailAddress: event.emailAddress));
+  Stream<AuthenticationState> _requestAuthenticationUsingEmail(RequestAuthenticationUsingEmailAddressEvent event) async* {
+    OTPResponse otpResponse = await authenticationAPIService.requestToAuthenticateWithEmailAddress(new EmailAddressAuthenticationRequest(emailAddress: event.emailAddress));
     if (!isObjectEmpty(otpResponse)) {
-      String toastContent =
-          'Verification code has been sent to email address: ${event.emailAddress} successfully! Please check your email.';
+      String toastContent = 'Verification code has been sent to email address: ${event.emailAddress} successfully! Please check your email.';
       showToast(toastContent, Toast.LENGTH_SHORT);
       yield AuthenticationsLoaded(null, otpResponse.otpExpirationDateTime);
     } else {
@@ -73,15 +60,10 @@ class AuthenticationBloc
     }
   }
 
-  Stream<AuthenticationState> _verifyAuthenticationUsingEmail(
-      VerifyAuthenticationUsingEmailAddressEvent event) async* {
-    AuthenticationResponse authenticationResponse =
-        await authenticationAPIService.emailAuthentication(
-            new EmailOTPVerificationRequest(
-                emailAddress: event.emailAddress, otpNumber: event.otpNumber));
+  Stream<AuthenticationState> _verifyAuthenticationUsingEmail(VerifyAuthenticationUsingEmailAddressEvent event) async* {
+    AuthenticationResponse authenticationResponse = await authenticationAPIService.emailAuthentication(new EmailOTPVerificationRequest(emailAddress: event.emailAddress, otpNumber: event.otpNumber));
     if (!isObjectEmpty(authenticationResponse)) {
-      SharedPreferences sharedPreferences =
-          await SharedPreferences.getInstance();
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences.setString("jwtToken", authenticationResponse.jwt);
       yield AuthenticationsLoaded(authenticationResponse.jwt, null);
     } else {
@@ -89,14 +71,10 @@ class AuthenticationBloc
     }
   }
 
-  Stream<AuthenticationState> _requestAuthenticationUsingMobileNo(
-      RequestAuthenticationUsingMobileNoEvent event) async* {
-    OTPResponse otpResponse =
-        await authenticationAPIService.requestToAuthenticateWithMobileNo(
-            new MobileNoAuthenticationRequest(mobileNo: event.mobileNumber));
+  Stream<AuthenticationState> _requestAuthenticationUsingMobileNo(RequestAuthenticationUsingMobileNoEvent event) async* {
+    OTPResponse otpResponse = await authenticationAPIService.requestToAuthenticateWithMobileNo(new MobileNoAuthenticationRequest(mobileNo: event.mobileNumber));
     if (!isObjectEmpty(otpResponse)) {
-      String toastContent =
-          'Verification code has been sent to mobile no.: ${event.mobileNumber} successfully! Please check your email.';
+      String toastContent = 'Verification code has been sent to mobile no.: ${event.mobileNumber} successfully! Please check your email.';
       showToast(toastContent, Toast.LENGTH_SHORT);
       yield AuthenticationsLoaded(null, otpResponse.otpExpirationDateTime);
     } else {
@@ -105,15 +83,10 @@ class AuthenticationBloc
     }
   }
 
-  Stream<AuthenticationState> _verifyAuthenticationUsingMobileNo(
-      VerifyAuthenticationUsingMobileNoEvent event) async* {
-    AuthenticationResponse authenticationResponse =
-        await authenticationAPIService.mobileNumberAuthentication(
-            new MobileNumberOTPVerificationRequest(
-                mobileNo: event.mobileNumber, otpNumber: event.otpNumber));
+  Stream<AuthenticationState> _verifyAuthenticationUsingMobileNo(VerifyAuthenticationUsingMobileNoEvent event) async* {
+    AuthenticationResponse authenticationResponse = await authenticationAPIService.mobileNumberAuthentication(new MobileNumberOTPVerificationRequest(mobileNo: event.mobileNumber, otpNumber: event.otpNumber));
     if (!isObjectEmpty(authenticationResponse)) {
-      SharedPreferences sharedPreferences =
-          await SharedPreferences.getInstance();
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences.setString("jwtToken", authenticationResponse.jwt);
       yield AuthenticationsLoaded(authenticationResponse.jwt, null);
     } else {
@@ -121,8 +94,7 @@ class AuthenticationBloc
     }
   }
 
-  Stream<AuthenticationState> _editAuthentication(
-      EditAuthenticationEvent event) async* {
+  Stream<AuthenticationState> _editAuthentication(EditAuthenticationEvent event) async* {
     //    bool updatedInREST = false;
     //    bool saved = false;
     //    if (state is AuthenticationsLoaded) {
@@ -153,8 +125,7 @@ class AuthenticationBloc
     //    }
   }
 
-  Stream<AuthenticationState> _deleteAuthentication(
-      DeleteAuthenticationEvent event) async* {
+  Stream<AuthenticationState> _deleteAuthentication(DeleteAuthenticationEvent event) async* {
     //    bool deletedInREST = false;
     //    bool deleted = false;
     //    if (state is AuthenticationsLoaded) {

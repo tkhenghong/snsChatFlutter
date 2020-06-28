@@ -1,7 +1,7 @@
 import 'package:sembast/sembast.dart';
-
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+
 import '../SembastDB.dart';
 
 class MultimediaDBService {
@@ -18,9 +18,7 @@ class MultimediaDBService {
     }
 
     Multimedia existingMultimedia = await getSingleMultimedia(multimedia.id);
-    var key = isObjectEmpty(existingMultimedia)
-        ? await _multimediaStore.add(await _db, multimedia.toJson())
-        : null;
+    var key = isObjectEmpty(existingMultimedia) ? await _multimediaStore.add(await _db, multimedia.toJson()) : null;
 
     return !isStringEmpty(key.toString());
   }
@@ -31,8 +29,7 @@ class MultimediaDBService {
     }
     final finder = Finder(filter: Filter.equals("id", multimedia.id));
 
-    var noOfUpdated = await _multimediaStore
-        .update(await _db, multimedia.toJson(), finder: finder);
+    var noOfUpdated = await _multimediaStore.update(await _db, multimedia.toJson(), finder: finder);
 
     return noOfUpdated == 1;
   }
@@ -53,22 +50,16 @@ class MultimediaDBService {
       return null;
     }
     final finder = Finder(filter: Filter.equals("id", multimediaId));
-    final recordSnapshot =
-        await _multimediaStore.findFirst(await _db, finder: finder);
-    return !isObjectEmpty(recordSnapshot)
-        ? Multimedia.fromJson(recordSnapshot.value)
-        : null;
+    final recordSnapshot = await _multimediaStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? Multimedia.fromJson(recordSnapshot.value) : null;
   }
 
-  Future<List<Multimedia>> getMultimediaOfAConversationGroup(
-      String conversationGroupId) async {
+  Future<List<Multimedia>> getMultimediaOfAConversationGroup(String conversationGroupId) async {
     if (isObjectEmpty(await _db)) {
       return null;
     }
-    final finder = Finder(
-        filter: Filter.equals("conversationGroupId", conversationGroupId));
-    final recordSnapshots =
-        await _multimediaStore.find(await _db, finder: finder);
+    final finder = Finder(filter: Filter.equals("conversationGroupId", conversationGroupId));
+    final recordSnapshots = await _multimediaStore.find(await _db, finder: finder);
     if (!isObjectEmpty(recordSnapshots)) {
       List<Multimedia> multimediaList = [];
       recordSnapshots.forEach((snapshot) {

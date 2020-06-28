@@ -1,11 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
-
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/service/index.dart';
-import 'bloc.dart';
 
+import 'bloc.dart';
 
 class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorageContactState> {
   PermissionService permissionService = PermissionService();
@@ -76,7 +75,6 @@ class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorag
       phoneStorageContactList = (state as PhoneStorageContactsLoaded).phoneStorageContactList;
     }
 
-
     List<Contact> searchResultBasedOnName = phoneStorageContactList.where((Contact contact) {
       return contact.displayName.toString().toLowerCase().contains(searchString) ||
           contact.givenName.toString().toLowerCase().contains(searchString) ||
@@ -88,8 +86,7 @@ class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorag
 
     contactSearchResultList = [contactSearchResultList, searchResultBasedOnName].expand((x) => x).toList();
 
-    yield PhoneStorageContactsLoaded(
-        phoneStorageContactList, contactSearchResultList); // display current found results first (appear faster)
+    yield PhoneStorageContactsLoaded(phoneStorageContactList, contactSearchResultList); // display current found results first (appear faster)
     List<Contact> searchResultBasedOnPhoneNumber = phoneStorageContactList.where((Contact contact) {
       bool phoneFound = false;
       contact.phones.forEach((phone) {

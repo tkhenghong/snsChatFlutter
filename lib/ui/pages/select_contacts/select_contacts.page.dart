@@ -1,15 +1,16 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:snschat_flutter/service/index.dart';
-import 'package:snschat_flutter/state/bloc/bloc.dart';
+
 import 'package:contacts_service/contacts_service.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
-import 'package:snschat_flutter/rest/index.dart';
-import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/general/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/rest/index.dart';
+import 'package:snschat_flutter/service/index.dart';
+import 'package:snschat_flutter/state/bloc/bloc.dart';
+
 import '../index.dart';
 import 'CustomSearchDelegate.dart';
 
@@ -82,8 +83,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
             },
           ),
           BlocListener<UserBloc, UserState>(
-            listener: (context, userState) {
-            },
+            listener: (context, userState) {},
           ),
         ],
         child: BlocBuilder<PhoneStorageContactBloc, PhoneStorageContactState>(
@@ -108,11 +108,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            needSelectMultipleContacts()
-                                ? showContactWithCheckBox(context, contact)
-                                : showContactWithoutCheckbox(context, contact)
-                          ],
+                          children: <Widget>[needSelectMultipleContacts() ? showContactWithCheckBox(context, contact) : showContactWithoutCheckbox(context, contact)],
                         ),
                       );
                     }).toList(),
@@ -498,9 +494,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           List<UserContact> userContactList = userContactState.userContactList;
           List<ConversationGroup> conversationGroupList = conversationGroupState.conversationGroupList;
 
-          bool personalConversationGroupExist = conversationGroupList.contains((ConversationGroup existingConversationGroup) =>
-              existingConversationGroup.type == 'Personal' &&
-              existingConversationGroup.memberIds.contains((String memberId) => memberId == userContactFromServer.id));
+          bool personalConversationGroupExist = conversationGroupList
+              .contains((ConversationGroup existingConversationGroup) => existingConversationGroup.type == 'Personal' && existingConversationGroup.memberIds.contains((String memberId) => memberId == userContactFromServer.id));
 
           if (personalConversationGroupExist) {
             goToChatRoomPage(context, conversationGroup);
@@ -522,9 +517,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
               conversationGroup.memberIds = newUserContactList.map((newUserContact) => newUserContact.id).toList();
 
               // Add your own userContact's ID as admin by find the one that has the same mobile number in the userContactList
-              conversationGroup.adminMemberIds.add(newUserContactList
-                  .firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentUser.mobileNo, orElse: () => null)
-                  .id);
+              conversationGroup.adminMemberIds.add(newUserContactList.firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentUser.mobileNo, orElse: () => null).id);
 
               BlocProvider.of<ConversationGroupBloc>(context).add(AddConversationGroupEvent(
                   conversationGroup: conversationGroup,

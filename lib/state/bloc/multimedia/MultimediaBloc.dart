@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
-
-import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/rest/index.dart';
+
 import 'bloc.dart';
 
 class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
@@ -253,7 +253,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
 
   Stream<MultimediaState> _getMessageMultimediaEvent(GetMessageMultimediaEvent event) async* {
     Multimedia multimediaFromServer = await multimediaAPIService.getMessageMultimedia(event.conversationGroupId, event.messageId);
-    if(!isObjectEmpty(multimediaFromServer)) {
+    if (!isObjectEmpty(multimediaFromServer)) {
       add(AddMultimediaEvent(multimedia: multimediaFromServer, callback: (Multimedia multimedia) {}));
     }
   }

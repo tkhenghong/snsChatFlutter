@@ -1,18 +1,18 @@
 import 'dart:async';
 import 'dart:io';
+
+import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:snschat_flutter/state/bloc/bloc.dart';
-import 'package:contacts_service/contacts_service.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
+import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 
 class GroupNamePage extends StatefulWidget {
   final List<Contact> selectedContacts;
@@ -322,9 +322,7 @@ class GroupNamePageState extends State<GroupNamePage> {
               conversationGroup.memberIds = newUserContactList.map((newUserContact) => newUserContact.id).toList();
 
               // Add your own userContact's ID as admin by find the one that has the same mobile number in the userContactList
-              conversationGroup.adminMemberIds.add(newUserContactList
-                  .firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentUser.mobileNo, orElse: () => null)
-                  .id);
+              conversationGroup.adminMemberIds.add(newUserContactList.firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentUser.mobileNo, orElse: () => null).id);
 
               BlocProvider.of<ConversationGroupBloc>(context).add(AddConversationGroupEvent(
                   conversationGroup: conversationGroup,
@@ -336,14 +334,12 @@ class GroupNamePageState extends State<GroupNamePage> {
                           unreadMessage: unreadMessage,
                           callback: (UnreadMessage unreadMessage2) async {
                             if (!isObjectEmpty(unreadMessage2)) {
-                              addMultimedia(
-                                  groupMultimedia, !isObjectEmpty(copiedImageFile) ? copiedImageFile : null, conversationGroup2, context);
+                              addMultimedia(groupMultimedia, !isObjectEmpty(copiedImageFile) ? copiedImageFile : null, conversationGroup2, context);
                             }
                           }));
                     } else {
                       Navigator.pop(context);
-                      Fluttertoast.showToast(
-                          msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
+                      Fluttertoast.showToast(msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);
                     }
                   }));
             }
@@ -375,8 +371,7 @@ class GroupNamePageState extends State<GroupNamePage> {
     Navigator.pop(context); // close create conversation group loading
     showLoading(context, 'Uploading group photo...');
     String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
-    String remoteThumbnailUrl =
-        await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
+    String remoteThumbnailUrl = await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
 
     if (!isStringEmpty(remoteUrl)) {
       multimedia.remoteFullFileUrl = remoteUrl;
