@@ -1,3 +1,1 @@
-enum DefaultImagePathType {
-  Personal, UserContact, Group, Broadcast, Profile, ConversationGroupMessage
-}
+enum DefaultImagePathType { Personal, UserContact, Group, Broadcast, Profile, ConversationGroupMessage }

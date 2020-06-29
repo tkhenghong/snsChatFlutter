@@ -1,3 +1,1 @@
-enum ConversationGroupType {
-  Personal, Group, Broadcast
-}
+enum ConversationGroupType { Personal, Group, Broadcast }

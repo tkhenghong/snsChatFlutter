@@ -1,3 +1,1 @@
-enum ChatMessageStatus {
-  Sending, Sent, Received, Read
-}
+enum ChatMessageStatus { Sending, Sent, Received, Read }
