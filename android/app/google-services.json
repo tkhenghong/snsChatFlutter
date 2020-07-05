@@ -15,30 +15,6 @@
       },
       "oauth_client": [
         {
-          "client_id": "352395986856-nfe264jd3p0ququk77aa9n8f8cgkrg7p.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "flutter.snschat.com.snschatflutter",
-            "certificate_hash": "a94ae792dda5aff0b6b2a3529b65c155de60f524"
-          }
-        },
-        {
-          "client_id": "352395986856-7lo8l11g3sn5u4n3qo6oigem4ovlq7at.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "flutter.snschat.com.snschatflutter",
-            "certificate_hash": "f35f93202fc07a4fa0170114752eb26969d6a81d"
-          }
-        },
-        {
-          "client_id": "352395986856-c63m3i32vn1akme90sra0g7s0h854ms7.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "flutter.snschat.com.snschatflutter",
-            "certificate_hash": "a127362d88965bd531c7fcf9383286d3ca3edb28"
-          }
-        },
-        {
           "client_id": "352395986856-kn8u8j42ur53drr6937fai2od6i6rnmd.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -52,7 +28,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "352395986856-kn8u8j42ur53drr6937fai2od6i6rnmd.apps.googleusercontent.com",
+              "client_id": "352395986856-mr5vreouklkvlg0l0frcddhp4ajp16lv.apps.googleusercontent.com",
               "client_type": 3
             },
             {
