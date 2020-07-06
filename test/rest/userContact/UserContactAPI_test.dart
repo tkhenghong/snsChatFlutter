@@ -17,7 +17,7 @@ void main() {
 //        mobileNo: "+1-202-555-0118",
         userIds: ["5847rth54rt4h56sr4h", "5d7385f079d3941d808f7e30"],
         block: false,
-        lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
+        lastSeenDate: new DateTime.now(),
         multimediaId: "54rdgr54gfrae5747486r");
   }
 
@@ -46,7 +46,7 @@ void main() {
     UserContact userContact = createTestObject();
     print("Before send to server");
     print("userContact.lastSeenDate: " + userContact.lastSeenDate.toString());
-    DateTime lastSeenDateDT = new DateTime.fromMicrosecondsSinceEpoch(userContact.lastSeenDate);
+    DateTime lastSeenDateDT = new DateTime.fromMicrosecondsSinceEpoch(userContact.lastSeenDate.millisecondsSinceEpoch);
     print("lastSeenDateDT.toIso8601String(): " + lastSeenDateDT.toIso8601String());
     UserContact newUserContact = await userContactAPIService.addUserContact(userContact);
     UserContact userContactFromServer = await userContactAPIService.getUserContact(newUserContact.id);

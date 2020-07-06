@@ -6,3 +6,10 @@ export 'settings/SettingsAPIService.dart';
 export 'unread_message/UnreadMessageAPIService.dart';
 export 'user/UserAPIService.dart';
 export 'user_contact/UserContactAPIService.dart';
+
+
+// HTTP Client General methods
+export 'httpClient/HttpClient.dart';
+
+// Exceptions
+export 'exceptions/NetworkExceptions.dart';

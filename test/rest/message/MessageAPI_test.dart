@@ -12,7 +12,7 @@ void main() {
     return new ChatMessage(
       id: null,
       conversationId: "5d7cc09dfff90a3328bbb8f9",
-      createdTime: new DateTime.now().millisecondsSinceEpoch,
+      createdTime: new DateTime.now(),
       messageContent: "bla bla bla",
       type: ChatMessageType.Text,
       status: ChatMessageStatus.Read,

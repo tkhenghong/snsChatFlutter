@@ -630,7 +630,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               padding: EdgeInsets.only(left: lrPadding),
             ),
             Text(
-              message.senderName + ', ' + messageTimeDisplay(message.createdTime),
+              message.senderName + ', ' + messageTimeDisplay(message.createdTime.millisecondsSinceEpoch),
 //                    message.senderName,
               style: TextStyle(fontSize: 10.0, color: Colors.black38),
             ),
@@ -1000,7 +1000,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         senderName: user.displayName,
         status: ChatMessageStatus.Sent,
         type: ChatMessageType.Text,
-        createdTime: DateTime.now().millisecondsSinceEpoch,
+        createdTime: DateTime.now(),
       );
 
       BlocProvider.of<MessageBloc>(context).add(AddMessageEvent(
@@ -1094,7 +1094,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
           senderName: user.displayName,
           status: ChatMessageStatus.Sent,
           type: type,
-          createdTime: DateTime.now().millisecondsSinceEpoch,
+          createdTime: DateTime.now(),
         );
         BlocProvider.of<MessageBloc>(context).add(AddMessageEvent(
             message: message,

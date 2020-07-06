@@ -1,27 +1,55 @@
+import 'package:json_annotation/json_annotation.dart';
 import 'package:lombok/lombok.dart';
 import 'package:snschat_flutter/general/enums/index.dart';
 
+part 'chat_message.g.dart';
+
 @data
+@JsonSerializable()
 class ChatMessage {
+  @JsonKey(name: 'id')
   String id;
+
+  @JsonKey(name: 'conversationId')
   String conversationId;
+
+  @JsonKey(name: 'type')
   ChatMessageType type;
+
+  @JsonKey(name: 'status')
   ChatMessageStatus status;
+
+  @JsonKey(name: 'messageContent')
   String messageContent;
+
+  @JsonKey(name: 'multimediaId')
   String multimediaId;
 
   // Sender
+  @JsonKey(name: 'senderId')
   String senderId; // UserContactId
+
+  @JsonKey(name: 'senderName')
   String senderName;
+
+  @JsonKey(name: 'senderMobileNo')
   String senderMobileNo;
 
   // Receiver
+  @JsonKey(name: 'receiverId')
   String receiverId; // UserContactId
+
+  @JsonKey(name: 'receiverName')
   String receiverName;
+
+  @JsonKey(name: 'receiverMobileNo')
   String receiverMobileNo;
 
-  int createdTime;
-  int sentTime;
+  @JsonKey(name: 'createdTime')
+  DateTime createdTime;
+
+  @JsonKey(name: 'sentTime')
+  DateTime sentTime;
 
   ChatMessage(
       {this.id,
@@ -39,36 +67,7 @@ class ChatMessage {
       this.createdTime,
       this.sentTime});
 
-  ChatMessage.fromJson(Map<String, dynamic> json)
-      : id = json['id'],
-        conversationId = json['conversationId'],
-        senderId = json['senderId'],
-        senderName = json['senderName'],
-        senderMobileNo = json['senderMobileNo'],
-        receiverId = json['receiverId'],
-        receiverName = json['receiverName'],
-        receiverMobileNo = json['receiverMobileNo'],
-        type = json['type'],
-        status = json['status'],
-        messageContent = json['messageContent'],
-        multimediaId = json['multimediaId'],
-        createdTime = json['createdTime'],
-        sentTime = json['sentTime'];
+  factory ChatMessage.fromJson(Map<String, dynamic> json) => _$ChatMessageFromJson(json);
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'conversationId': conversationId,
-        'senderId': senderId,
-        'senderName': senderName,
-        'senderMobileNo': senderMobileNo,
-        'receiverId': receiverId,
-        'receiverName': receiverName,
-        'receiverMobileNo': receiverMobileNo,
-        'type': type,
-        'status': status,
-        'messageContent': messageContent,
-        'multimediaId': multimediaId,
-        'createdTime': createdTime,
-        'sentTime': sentTime,
-      };
+  Map<String, dynamic> toJson() => _$ChatMessageToJson(this);
 }

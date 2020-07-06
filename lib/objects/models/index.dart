@@ -9,4 +9,4 @@ export './multimedia_progress/multimedia_progress.dart';
 export './settings/settings.dart';
 export './unread_message/unread_message.dart';
 export './user/user.dart';
-export './user_contact/ussr_contact.dart';
+export './user_contact/user_contact.dart';

@@ -16,7 +16,7 @@ void main() {
         mobileNo: "+60182262663",
         userIds: ["5847rth54rt4h56sr4h"],
         block: false,
-        lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
+        lastSeenDate: new DateTime.now(),
         multimediaId: "54rdgr54gfrae5747486r");
   }
 

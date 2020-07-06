@@ -216,7 +216,7 @@ class GroupNamePageState extends State<GroupNamePage> {
       ConversationGroup conversationGroup = new ConversationGroup(
         id: null,
         creatorUserId: currentUser.id,
-        createdDate: new DateTime.now().millisecondsSinceEpoch,
+        createdDate: new DateTime.now(),
         name: textEditingController.text,
         type: ConversationGroupType.Group,
         block: false,
@@ -226,14 +226,14 @@ class GroupNamePageState extends State<GroupNamePage> {
         memberIds: [],
         // Add later
         // memberIds put UserContact.id. NOT User.id
-        notificationExpireDate: 0,
+        notificationExpireDate: null,
       );
 
       UnreadMessage unreadMessage = UnreadMessage(
         id: null,
         conversationId: null,
         count: 0,
-        date: DateTime.now().millisecondsSinceEpoch,
+        date: DateTime.now(),
         lastMessage: '${userState.user.displayName.toString()} has created the group.',
         userId: currentUser.id,
       );
@@ -267,7 +267,7 @@ class GroupNamePageState extends State<GroupNamePage> {
         displayName: currentUser.displayName,
         realName: currentUser.realName,
         block: false,
-        lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
+        lastSeenDate: new DateTime.now(),
         // make unknown time, let server decide
         mobileNo: currentUser.mobileNo,
       );
@@ -294,7 +294,7 @@ class GroupNamePageState extends State<GroupNamePage> {
           displayName: contact.displayName,
           realName: contact.displayName,
           block: false,
-          lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
+          lastSeenDate: new DateTime.now(),
         );
 
         userContact.mobileNo = primaryNo.length == 0 ? "" : primaryNo[0];

@@ -37,91 +37,21 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
-    if (BlocProvider.of<GoogleInfoBloc>(context).state is GoogleInfoLoading) {
+    if (BlocProvider
+        .of<GoogleInfoBloc>(context)
+        .state is GoogleInfoLoading) {
       initialize(context);
     }
 
     return MultiBlocListener(
       listeners: [
-        BlocListener<GoogleInfoBloc, GoogleInfoState>(
-          listener: (context, googleInfoState) {
-            if (googleInfoState is GoogleInfoLoaded) {
-              BlocProvider.of<UserBloc>(context).add(InitializeUserEvent(
-                  googleSignIn: googleInfoState.googleSignIn,
-                  callback: (bool initialized) {
-                    if (!initialized) {
-                      goToLoginPage(context);
-                    }
-                  }));
-              BlocProvider.of<UserContactBloc>(context)
-                  .add(InitializeUserContactsEvent(callback: (bool done) {}));
-            }
-
-            if (googleInfoState is GoogleInfoLoading) {
-              BlocProvider.of<GoogleInfoBloc>(context).add(
-                  InitializeGoogleInfoEvent(callback: (bool initialized) {}));
-            }
-
-            if (googleInfoState is GoogleInfoNotLoaded) {
-              goToLoginPage(context);
-            }
-          },
-        ),
-        BlocListener<UserContactBloc, UserContactState>(
-          listener: (context, userContactState) {
-            if (userContactState is UserContactsLoaded) {
-              BlocProvider.of<MultimediaBloc>(context).add(
-                  GetUserContactsMultimediaEvent(
-                      userContactList: userContactState.userContactList,
-                      callback: (bool done) {}));
-            }
-          },
-        ),
-        BlocListener<UserBloc, UserState>(
-          listener: (context, userState) {
-            if (userState is UserNotLoaded) {
-              goToLoginPage(context);
-            }
-
-            if (userState is UserLoaded) {
-              BlocProvider.of<WebSocketBloc>(context)
-                  .add(InitializeWebSocketEvent(
-                      user: userState.user,
-                      callback: (bool done) {
-                        if (done) {
-                          BlocProvider.of<WebSocketBloc>(context).add(
-                              GetOwnWebSocketEvent(
-                                  callback: (Stream<dynamic> webSocketStream) {
-                            if (!isObjectEmpty(webSocketStream)) {
-                              processWebSocketMessage(
-                                  context, webSocketStream, userState.user);
-                            }
-                          }));
-                        }
-                      }));
-              restoreUserPreviousData(context);
-            }
-          },
-        ),
-        BlocListener<ConversationGroupBloc, ConversationGroupState>(
-          listener: (context, conversationGroupState) {
-            if (conversationGroupState is ConversationGroupsNotLoaded) {
-              goToLoginPage(context);
-            }
-
-            if (conversationGroupState is ConversationGroupsLoaded) {
-              getConversationGroupsMultimedia(context);
-            }
-          },
-        ),
-        BlocListener<UnreadMessageBloc, UnreadMessageState>(
-          listener: (context, unreadMessageState) {},
-        ),
-        BlocListener<MultimediaBloc, MultimediaState>(
-          listener: (context, multimediaState) {},
-        ),
+        googleBlocListener(),
+        userContactBlocListener(),
+        userBlocListener(),
+        conversationGroupBlocListener(),
       ],
       child: BlocBuilder<GoogleInfoBloc, GoogleInfoState>(
         builder: (context, googleInfoState) {
@@ -166,9 +96,9 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
                                   if (multimediaState is MultimediaLoaded) {
                                     if (isObjectEmpty(conversationGroupState
-                                            .conversationGroupList) ||
+                                        .conversationGroupList) ||
                                         conversationGroupState
-                                                .conversationGroupList.length ==
+                                            .conversationGroupList.length ==
                                             0) {
                                       return Center(
                                           child: Text(
@@ -187,12 +117,12 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                                                 .conversationGroupList.length,
                                             itemBuilder: (context, index) {
                                               PageListItem pageListItem =
-                                                  mapConversationToPageListTile(
-                                                      conversationGroupState
-                                                              .conversationGroupList[
-                                                          index],
-                                                      multimediaState,
-                                                      unreadMessageState);
+                                              mapConversationToPageListTile(
+                                                  conversationGroupState
+                                                      .conversationGroupList[
+                                                  index],
+                                                  multimediaState,
+                                                  unreadMessageState);
                                               return PageListTile(
                                                   pageListItem, context);
                                             }),
@@ -237,30 +167,116 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     );
   }
 
+  googleBlocListener() {
+    return BlocListener<GoogleInfoBloc, GoogleInfoState>(
+      listener: (context, googleInfoState) {
+        if (googleInfoState is GoogleInfoLoaded) {
+          BlocProvider.of<UserBloc>(context).add(InitializeUserEvent(
+              googleSignIn: googleInfoState.googleSignIn,
+              callback: (bool initialized) {
+                if (!initialized) {
+                  goToLoginPage(context);
+                }
+              }));
+          BlocProvider.of<UserContactBloc>(context)
+              .add(InitializeUserContactsEvent(callback: (bool done) {}));
+        }
+
+        if (googleInfoState is GoogleInfoLoading) {
+          BlocProvider.of<GoogleInfoBloc>(context).add(
+              InitializeGoogleInfoEvent(callback: (bool initialized) {}));
+        }
+
+        if (googleInfoState is GoogleInfoNotLoaded) {
+          goToLoginPage(context);
+        }
+      },
+    );
+  }
+
+  userContactBlocListener() {
+    return BlocListener<UserContactBloc, UserContactState>(
+      listener: (context, userContactState) {
+        if (userContactState is UserContactsLoaded) {
+          BlocProvider.of<MultimediaBloc>(context).add(
+              GetUserContactsMultimediaEvent(
+                  userContactList: userContactState.userContactList,
+                  callback: (bool done) {}));
+        }
+      },
+    );
+  }
+
+  userBlocListener() {
+    return BlocListener<UserBloc, UserState>(
+      listener: (context, userState) {
+        if (userState is UserNotLoaded) {
+          goToLoginPage(context);
+        }
+
+        if (userState is UserLoaded) {
+          BlocProvider.of<WebSocketBloc>(context)
+              .add(InitializeWebSocketEvent(
+              user: userState.user,
+              callback: (bool done) {}));
+          restoreUserPreviousData(context);
+        }
+      },
+    );
+  }
+
+  webSocketBlocListener() {
+    return BlocListener<WebSocketBloc, WebSocketState>(
+      listener: (context, websocketState) {
+        if (websocketState is WebSocketLoaded) {
+          BlocProvider.of<WebSocketBloc>(context).add(
+              GetOwnWebSocketEvent(
+                  callback: (Stream<dynamic> webSocketStream) {
+                    if (!isObjectEmpty(webSocketStream)) {
+//                      processWebSocketMessage(
+//                          context, webSocketStream, userState.user);
+                    }
+                  }));
+        }
+      },
+    );
+  }
+
+
+  conversationGroupBlocListener() {
+    return BlocListener<ConversationGroupBloc, ConversationGroupState>(
+      listener: (context, conversationGroupState) {
+        if (conversationGroupState is ConversationGroupsLoaded) {
+          getConversationGroupsMultimedia(context);
+        }
+      },
+    );
+  }
+
+
   Widget showLoading() {
     return Center(child: Text("Loading..."));
   }
 
-  PageListItem mapConversationToPageListTile(
-      ConversationGroup conversationGroup,
+  PageListItem mapConversationToPageListTile(ConversationGroup conversationGroup,
       MultimediaState multimediaState,
       UnreadMessageState unreadMessageState) {
     Multimedia multimedia = (multimediaState as MultimediaLoaded)
         .multimediaList
         .firstWhere(
             (Multimedia existingMultimedia) =>
-                existingMultimedia.conversationId.toString() ==
-                    conversationGroup.id &&
-                isStringEmpty(existingMultimedia.messageId),
-            orElse: () => null);
+        existingMultimedia.conversationId.toString() ==
+            conversationGroup.id &&
+            isStringEmpty(existingMultimedia.messageId),
+        orElse: () => null);
 
     UnreadMessage unreadMessage = (unreadMessageState as UnreadMessagesLoaded)
         .unreadMessageList
         .firstWhere(
             (UnreadMessage existingUnreadMessage) =>
-                existingUnreadMessage.conversationId.toString() ==
-                conversationGroup.id,
-            orElse: () => null);
+        existingUnreadMessage.conversationId.toString() ==
+            conversationGroup.id,
+        orElse: () => null);
 
     return PageListItem(
         title: Hero(
@@ -268,7 +284,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           child: Text(conversationGroup.name),
         ),
         subtitle:
-            Text(isObjectEmpty(unreadMessage) ? "" : unreadMessage.lastMessage),
+        Text(isObjectEmpty(unreadMessage) ? "" : unreadMessage.lastMessage),
         leading: Hero(
           tag: conversationGroup.id + "1",
           child: imageService.loadImageThumbnailCircleAvatar(
@@ -284,14 +300,14 @@ class ChatGroupListState extends State<ChatGroupListPage> {
               child: Text(
                   isObjectEmpty(unreadMessage)
                       ? ""
-                      : formatTime(unreadMessage.date),
+                      : formatTime(unreadMessage.date.millisecondsSinceEpoch),
                   style: TextStyle(fontSize: 9.0)),
             ),
             Text(isObjectEmpty(unreadMessage)
                 ? ""
                 : unreadMessage.count.toString() == "0"
-                    ? ""
-                    : unreadMessage.count.toString())
+                ? ""
+                : unreadMessage.count.toString())
           ],
         ),
         onTap: (BuildContext context, object) {
@@ -328,19 +344,21 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   restoreUserPreviousData(BuildContext context) {
-    UserState userState = BlocProvider.of<UserBloc>(context).state;
+    UserState userState = BlocProvider
+        .of<UserBloc>(context)
+        .state;
     if (userState is UserLoaded) {
       // Restore previous data
       BlocProvider.of<SettingsBloc>(context).add(GetUserSettingsEvent(
           user: userState.user, callback: (Settings settings) {}));
       BlocProvider.of<ConversationGroupBloc>(context)
           .add(GetUserPreviousConversationGroupsEvent(
-              user: userState.user,
-              callback: (bool done) {
-                if (done) {
-                  getConversationGroupsMultimedia(context);
-                }
-              }));
+          user: userState.user,
+          callback: (bool done) {
+            if (done) {
+              getConversationGroupsMultimedia(context);
+            }
+          }));
       BlocProvider.of<UnreadMessageBloc>(context).add(
           GetUserPreviousUnreadMessagesEvent(
               user: userState.user, callback: (bool done) {}));
@@ -353,13 +371,13 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     }
   }
 
-  processWebSocketMessage(
-      BuildContext context, Stream<dynamic> webSocketStream, User user) {
+  // TODO: ProcessWebSocketMessage event should be completely inside Bloc, don't put it here.
+  processWebSocketMessage(BuildContext context, Stream<dynamic> webSocketStream, User user) {
     webSocketStream.listen((data) {
       Fluttertoast.showToast(
           msg: "Message confirmed received!", toastLength: Toast.LENGTH_LONG);
       WebSocketMessage receivedWebSocketMessage =
-          WebSocketMessage.fromJson(json.decode(data));
+      WebSocketMessage.fromJson(json.decode(data));
       BlocProvider.of<WebSocketBloc>(context).add(ProcessWebSocketMessageEvent(
           webSocketMessage: receivedWebSocketMessage,
           context: context,
@@ -378,12 +396,14 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   getConversationGroupsMultimedia(BuildContext context) {
     ConversationGroupState conversationGroupState =
-        BlocProvider.of<ConversationGroupBloc>(context).state;
+        BlocProvider
+            .of<ConversationGroupBloc>(context)
+            .state;
     if (conversationGroupState is ConversationGroupsLoaded) {
       BlocProvider.of<MultimediaBloc>(context).add(
           GetConversationGroupsMultimediaEvent(
               conversationGroupList:
-                  conversationGroupState.conversationGroupList,
+              conversationGroupState.conversationGroupList,
               callback: (bool done) {}));
     }
   }

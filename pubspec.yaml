@@ -31,6 +31,8 @@ dependencies:
   # JSON, Data & Serialization
   # dart_json_mapper: ^1.5.9
   lombok: ^0.0.5
+  json_annotation: ^3.0.1
+  json_serializable: ^3.3.0
 
   # Download a file
   flutter_downloader: ^1.4.4
@@ -38,12 +40,6 @@ dependencies:
   # Format date/time
   time_formatter: ^1.0.0+5
   date_format: ^1.0.8
-
-  # Data Object JSON Mapper (Unusable, conflict with a lot of other core dependencies)
-
-  # Things required by dart_json_mapper
-  #  reflectable: ^2.2.4
-  #  build_runner: ^1.8.1
 
   # Sign In
   google_sign_in: ^4.4.4
@@ -103,6 +99,9 @@ dependencies:
   # HTTP Client
   http: ^0.12.1
 
+  # HTTP Client Interceptor
+  dio: ^3.0.9
+
   # Network
   connectivity: ^0.4.8+6
 
@@ -121,6 +120,9 @@ dependencies:
   # Provide locations of the phone
   path_provider: ^1.6.11
 
+  # Build runner for json_annotation and json_serializable
+  build_runner: ^1.10.0
+
   flutter:
     sdk: flutter
 
@@ -131,12 +133,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-  # General needed lib
-  build_runner: 1.2.3
-
-  jaguar_orm_gen: ^2.2.27
-#  build_runner: ^0.10.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec

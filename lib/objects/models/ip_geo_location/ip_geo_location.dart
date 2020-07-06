@@ -1,35 +1,83 @@
-import 'dart:convert';
-
+import 'package:json_annotation/json_annotation.dart';
 import 'package:lombok/lombok.dart';
-import 'package:snschat_flutter/general/functions/validation_functions.dart';
 
 import '../index.dart';
 
+part 'ip_geo_location.g.dart';
+
 @data
+@JsonSerializable()
 class IPGeoLocation {
+  @JsonKey(name: 'ip')
   String ip;
+
+  @JsonKey(name: 'continent_code')
   String continent_code;
+
+  @JsonKey(name: 'continent_name')
   String continent_name;
+
+  @JsonKey(name: 'country_code2')
   String country_code2;
+
+  @JsonKey(name: 'country_code3')
   String country_code3;
+
+  @JsonKey(name: 'country_name')
   String country_name;
+
+  @JsonKey(name: 'country_capital')
   String country_capital;
+
+  @JsonKey(name: 'state_prov')
   String state_prov;
+
+  @JsonKey(name: 'district')
   String district;
+
+  @JsonKey(name: 'city')
   String city;
+
+  @JsonKey(name: 'zipcode')
   String zipcode;
+
+  @JsonKey(name: 'latitude')
   String latitude;
+
+  @JsonKey(name: 'longitude')
   String longitude;
+
+  @JsonKey(name: 'is_eu')
   bool is_eu;
+
+  @JsonKey(name: 'calling_code')
   String calling_code;
+
+  @JsonKey(name: 'country_tld')
   String country_tld;
+
+  @JsonKey(name: 'languages')
   String languages;
+
+  @JsonKey(name: 'country_flag')
   String country_flag;
+
+  @JsonKey(name: 'geoname_id')
   String geoname_id;
+
+  @JsonKey(name: 'isp')
   String isp;
+
+  @JsonKey(name: 'connection_type')
   String connection_type;
+
+  @JsonKey(name: 'organization')
   String organization;
+
+  @JsonKey(name: 'currency')
   IPGeoLocationCurrency currency;
+
+  @JsonKey(name: 'timeZone')
   IPGeoLocationTimeZone timeZone;
 
   IPGeoLocation(
@@ -58,71 +106,9 @@ class IPGeoLocation {
       this.state_prov,
       this.zipcode});
 
-  factory IPGeoLocation.fromJson(Map<String, dynamic> json) {
-    IPGeoLocation ipGeoLocation = IPGeoLocation(
-        // timeZone : json['time_zone'],
-        calling_code: json['calling_code'],
-        city: json['city'],
-        connection_type: json['connection_type'],
-        continent_code: json['continent_code'],
-        continent_name: json['continent_name'],
-        country_capital: json['country_capital'],
-        country_code2: json['country_code2'],
-        country_code3: json['country_code3'],
-        country_flag: json['country_flag'],
-        country_name: json['country_name'],
-        country_tld: json['country_tld'],
-        // currency : json['currency'],
-        district: json['district'],
-        geoname_id: json['geoname_id'],
-        ip: json['ip'],
-        is_eu: json['is_eu'],
-        isp: json['isp'],
-        languages: json['languages'],
-        latitude: json['latitude'],
-        longitude: json['longitude'],
-        organization: json['organization'],
-        state_prov: json['state_prov'],
-        zipcode: json['zipcode']);
+  factory IPGeoLocation.fromJson(Map<String, dynamic> json) => _$IPGeoLocationFromJson(json);
 
-    var timeZoneFromJson = json['time_zone'];
-    var currencyFromJson = json['currency'];
-
-    IPGeoLocationTimeZone timeZone = IPGeoLocationTimeZone.fromJson(timeZoneFromJson);
-    IPGeoLocationCurrency currency = IPGeoLocationCurrency.fromJson(currencyFromJson);
-
-    ipGeoLocation.timeZone = timeZone;
-    ipGeoLocation.currency = currency;
-
-    return ipGeoLocation;
-  }
-
-  Map<String, dynamic> toJson() => {
-        'ip': ip,
-        'continent_code': continent_code,
-        'continent_name': continent_name,
-        'country_code2': country_code2,
-        'country_code3': country_code3,
-        'country_name': country_name,
-        'country_capital': country_capital,
-        'state_prov': state_prov,
-        'district': district,
-        'city': city,
-        'zipcode': zipcode,
-        'latitude': latitude,
-        'longitude': longitude,
-        'is_eu': is_eu,
-        'calling_code': calling_code,
-        'country_tld': country_tld,
-        'languages': languages,
-        'country_flag': country_flag,
-        'geoname_id': geoname_id,
-        'isp': isp,
-        'connection_type': connection_type,
-        'organization': organization,
-        'currency': isObjectEmpty(currency) ? null : json.encode(currency.toJson()),
-        'time_zone': isObjectEmpty(timeZone) ? null : json.encode(timeZone.toJson()),
-      };
+  Map<String, dynamic> toJson() => _$IPGeoLocationToJson(this);
 }
 
 // {

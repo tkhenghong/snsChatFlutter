@@ -1,31 +1,33 @@
 import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:lombok/lombok.dart';
 
+part 'multimedia_progress.g.dart';
+
 @data
+@JsonSerializable()
 class MultimediaProgress {
-  final String multimediaId;
-  final String name;
-  final String remoteUrl;
+  @JsonKey(name: 'multimediaId')
+  String multimediaId;
+
+  @JsonKey(name: 'name')
+  String name;
+
+  @JsonKey(name: 'remoteUrl')
+  String remoteUrl;
+
+  @JsonKey(name: 'taskId')
   String taskId;
+
+  @JsonKey(name: 'progress')
   int progress = 0;
-  DownloadTaskStatus status = DownloadTaskStatus.undefined;
+
+  @JsonKey(name: 'status')
+  String status = DownloadTaskStatus.undefined.toString();
 
   MultimediaProgress({this.multimediaId, this.name, this.remoteUrl, this.taskId, this.progress, this.status});
 
-  MultimediaProgress.fromJson(Map<String, dynamic> json)
-      : multimediaId = json['multimediaId'],
-        remoteUrl = json['remoteUrl'],
-        name = json['name'],
-        taskId = json['taskId'],
-        progress = json['progress'],
-        status = json['status'];
+  factory MultimediaProgress.fromJson(Map<String, dynamic> json) => _$MultimediaProgressFromJson(json);
 
-  Map<String, dynamic> toJson() => {
-        'multimediaId': multimediaId,
-        'remoteUrl': remoteUrl,
-        'name': name,
-        'taskId': taskId,
-        'progress': progress,
-        'status': status,
-      };
+  Map<String, dynamic> toJson() => _$MultimediaProgressToJson(this);
 }

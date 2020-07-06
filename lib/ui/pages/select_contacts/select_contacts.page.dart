@@ -381,7 +381,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       ConversationGroup conversationGroup = new ConversationGroup(
         id: null,
         creatorUserId: currentUser.id,
-        createdDate: new DateTime.now().millisecondsSinceEpoch,
+        createdDate: new DateTime.now(),
         name: contact.displayName,
         type: ConversationGroupType.Personal,
         block: false,
@@ -391,14 +391,14 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         memberIds: [],
         // Add later
         // memberIds put UserContact.id. NOT User.id
-        notificationExpireDate: 0,
+        notificationExpireDate: null,
       );
 
       UnreadMessage unreadMessage = UnreadMessage(
         id: null,
         conversationId: null,
         count: 0,
-        date: DateTime.now().millisecondsSinceEpoch,
+        date: DateTime.now(),
         lastMessage: "",
         userId: null,
       );
@@ -440,7 +440,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         displayName: currentUser.displayName,
         realName: currentUser.realName,
         block: false,
-        lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
+        lastSeenDate: new DateTime.now(),
         // make unknown time, let server decide
         mobileNo: currentUser.mobileNo,
       );
@@ -467,7 +467,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           displayName: contact.displayName,
           realName: contact.displayName,
           block: false,
-          lastSeenDate: new DateTime.now().millisecondsSinceEpoch,
+          lastSeenDate: new DateTime.now(),
         );
 
         userContact.mobileNo = primaryNo.length == 0 ? "" : primaryNo[0];

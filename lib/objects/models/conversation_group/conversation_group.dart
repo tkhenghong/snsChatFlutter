@@ -1,59 +1,46 @@
+import 'package:json_annotation/json_annotation.dart';
 import 'package:lombok/lombok.dart';
 import 'package:snschat_flutter/general/enums/index.dart';
 
+part 'conversation_group.g.dart';
+
+// https://www.thedroidsonroids.com/blog/how-to-build-an-app-with-flutter-networking-and-connecting-to-api
 @data
+@JsonSerializable()
 class ConversationGroup {
+  @JsonKey(name: 'id')
   String id;
+
+  @JsonKey(name: 'creatorUserId')
   String creatorUserId;
-  int createdDate;
+
+  @JsonKey(name: 'createdDate')
+  DateTime createdDate;
+
+  @JsonKey(name: 'name')
   String name;
+
+  @JsonKey(name: 'type')
   ConversationGroupType type;
+
+  @JsonKey(name: 'description')
   String description;
+
+  @JsonKey(name: 'memberIds')
   List<String> memberIds; // UserContactIds
+
+  @JsonKey(name: 'adminMemberIds')
   List<String> adminMemberIds;
+
+  @JsonKey(name: 'block')
   bool block;
-  int notificationExpireDate; // 0 = unblocked, > 0 = blocked until specific time
+
+  @JsonKey(name: 'notificationExpireDate')
+  DateTime notificationExpireDate; // 0 = unblocked, > 0 = blocked until specific time
 
   ConversationGroup({this.id, this.creatorUserId, this.createdDate, this.name, this.type, this.block, this.description, this.memberIds, this.adminMemberIds, this.notificationExpireDate});
 
-  // fromMap in SembastDB tutorial
-  factory ConversationGroup.fromJson(Map<String, dynamic> json) {
-    ConversationGroup conversationGroup = new ConversationGroup(
-        id: json['id'],
-        creatorUserId: json['creatorUserId'],
-        createdDate: json['createdDate'],
-        name: json['name'],
-        type: json['type'],
-        block: json['block'],
-        description: json['description'],
-        // memberIds: json['memberIds'],
-        // adminMemberIds: json['adminMemberIds'],
-        notificationExpireDate: json['notificationExpireDate']);
+  factory ConversationGroup.fromJson(Map<String, dynamic> json) => _$ConversationGroupFromJson(json);
 
-    // ****Special case: For Lists, you need to convert memberIds
-    // and adminMemberIds from List<dynamic> to List<String>****
-    var memberIdsFromJson = json['memberIds'];
-    var adminMemberIdsFromJson = json['adminMemberIds'];
-
-    List<String> memberIds = new List<String>.from(memberIdsFromJson);
-    List<String> adminMemberIds = new List<String>.from(adminMemberIdsFromJson);
-    conversationGroup.memberIds = memberIds;
-    conversationGroup.adminMemberIds = adminMemberIds;
-
-    return conversationGroup;
-  }
-
-  // toMap in SembastDB Tutorial
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'creatorUserId': creatorUserId,
-        'createdDate': createdDate,
-        'name': name,
-        'type': type,
-        'block': block,
-        'description': description,
-        'memberIds': memberIds,
-        'adminMemberIds': adminMemberIds,
-        'notificationExpireDate': notificationExpireDate,
-      };
+  Map<String, dynamic> toJson() => _$ConversationGroupToJson(this);
 }

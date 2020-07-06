@@ -252,7 +252,7 @@ class SignUpPageState extends State<SignUpPage> {
                       displayName: firebaseUser2.displayName,
                       realName: nameTextController.value.text.toString(),
                       about: 'Hey There! I am using PocketChat.',
-                      lastSeenDate: DateTime.now().millisecondsSinceEpoch,
+                      lastSeenDate: DateTime.now(),
                       block: false,
                       userIds: [],
                       // Add userId into it after User is Created

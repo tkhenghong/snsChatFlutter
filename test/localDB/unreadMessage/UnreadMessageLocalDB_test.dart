@@ -14,7 +14,7 @@ void main() {
         userId: "r5tf4h5t4h654tsr",
         conversationId: "td54tf564hrsth",
         lastMessage: "568rt4ghrt54hts4rh",
-        date: new DateTime.now().millisecondsSinceEpoch,
+        date: new DateTime.now(),
         count: 99);
   }
 
@@ -41,7 +41,7 @@ void main() {
     editedUnreadMessage.userId = "999999999";
     editedUnreadMessage.conversationId = "88888888";
     editedUnreadMessage.lastMessage = "Edited Last Message";
-    editedUnreadMessage.date = 111111111;
+    editedUnreadMessage.date = new DateTime.now();
 
     bool edited = await unreadMessageAPIService.editUnreadMessage(editedUnreadMessage);
     print("edited:" + edited.toString());
