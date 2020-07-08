@@ -1,20 +1,20 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'EmailAddressAuthenticationRequest.dart';
+part of 'EmailAddressUserAuthenticationRequest.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-EmailAddressAuthenticationRequest _$EmailAddressAuthenticationRequestFromJson(
-    Map<String, dynamic> json) {
-  return EmailAddressAuthenticationRequest(
+EmailAddressUserAuthenticationRequest
+    _$EmailAddressUserAuthenticationRequestFromJson(Map<String, dynamic> json) {
+  return EmailAddressUserAuthenticationRequest(
     emailAddress: json['emailAddress'] as String,
   );
 }
 
-Map<String, dynamic> _$EmailAddressAuthenticationRequestToJson(
-        EmailAddressAuthenticationRequest instance) =>
+Map<String, dynamic> _$EmailAddressUserAuthenticationRequestToJson(
+        EmailAddressUserAuthenticationRequest instance) =>
     <String, dynamic>{
       'emailAddress': instance.emailAddress,
     };
@@ -23,7 +23,7 @@ Map<String, dynamic> _$EmailAddressAuthenticationRequestToJson(
 // DataGenerator
 // **************************************************************************
 
-abstract class _$EmailAddressAuthenticationRequestLombok {
+abstract class _$EmailAddressUserAuthenticationRequestLombok {
   /// Field
   String emailAddress;
 

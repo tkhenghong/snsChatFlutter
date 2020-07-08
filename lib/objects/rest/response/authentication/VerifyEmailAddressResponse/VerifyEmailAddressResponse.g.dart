@@ -1,20 +1,20 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'AuthenticationResponse.dart';
+part of 'VerifyEmailAddressResponse.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-AuthenticationResponse _$AuthenticationResponseFromJson(
+VerifyEmailAddressResponse _$VerifyEmailAddressResponseFromJson(
     Map<String, dynamic> json) {
-  return AuthenticationResponse(
+  return VerifyEmailAddressResponse(
     jwt: json['jwt'] as String,
   );
 }
 
-Map<String, dynamic> _$AuthenticationResponseToJson(
-        AuthenticationResponse instance) =>
+Map<String, dynamic> _$VerifyEmailAddressResponseToJson(
+        VerifyEmailAddressResponse instance) =>
     <String, dynamic>{
       'jwt': instance.jwt,
     };
@@ -23,7 +23,7 @@ Map<String, dynamic> _$AuthenticationResponseToJson(
 // DataGenerator
 // **************************************************************************
 
-abstract class _$AuthenticationResponseLombok {
+abstract class _$VerifyEmailAddressResponseLombok {
   /// Field
   String jwt;
 

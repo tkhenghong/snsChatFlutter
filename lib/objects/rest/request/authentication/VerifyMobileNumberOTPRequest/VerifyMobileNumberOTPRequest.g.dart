@@ -1,34 +1,37 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'MobileNumberOTPVerificationRequest.dart';
+part of 'VerifyMobileNumberOTPRequest.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-MobileNumberOTPVerificationRequest _$MobileNumberOTPVerificationRequestFromJson(
+VerifyMobileNumberOTPRequest _$VerifyMobileNumberOTPRequestFromJson(
     Map<String, dynamic> json) {
-  return MobileNumberOTPVerificationRequest(
+  return VerifyMobileNumberOTPRequest(
     mobileNo: json['mobileNo'] as String,
     otpNumber: json['otpNumber'] as String,
+    secureKeyword: json['secureKeyword'] as String,
   );
 }
 
-Map<String, dynamic> _$MobileNumberOTPVerificationRequestToJson(
-        MobileNumberOTPVerificationRequest instance) =>
+Map<String, dynamic> _$VerifyMobileNumberOTPRequestToJson(
+        VerifyMobileNumberOTPRequest instance) =>
     <String, dynamic>{
       'mobileNo': instance.mobileNo,
       'otpNumber': instance.otpNumber,
+      'secureKeyword': instance.secureKeyword,
     };
 
 // **************************************************************************
 // DataGenerator
 // **************************************************************************
 
-abstract class _$MobileNumberOTPVerificationRequestLombok {
+abstract class _$VerifyMobileNumberOTPRequestLombok {
   /// Field
   String mobileNo;
   String otpNumber;
+  String secureKeyword;
 
   /// Setter
 
@@ -40,6 +43,10 @@ abstract class _$MobileNumberOTPVerificationRequestLombok {
     this.otpNumber = otpNumber;
   }
 
+  void setSecureKeyword(String secureKeyword) {
+    this.secureKeyword = secureKeyword;
+  }
+
   /// Getter
   String getMobileNo() {
     return mobileNo;
@@ -47,5 +54,9 @@ abstract class _$MobileNumberOTPVerificationRequestLombok {
 
   String getOtpNumber() {
     return otpNumber;
+  }
+
+  String getSecureKeyword() {
+    return secureKeyword;
   }
 }

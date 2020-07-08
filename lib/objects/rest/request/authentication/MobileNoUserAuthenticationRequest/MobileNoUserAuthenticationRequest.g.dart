@@ -1,20 +1,20 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'MobileNoAuthenticationRequest.dart';
+part of 'MobileNoUserAuthenticationRequest.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-MobileNoAuthenticationRequest _$MobileNoAuthenticationRequestFromJson(
+MobileNoUserAuthenticationRequest _$MobileNoUserAuthenticationRequestFromJson(
     Map<String, dynamic> json) {
-  return MobileNoAuthenticationRequest(
+  return MobileNoUserAuthenticationRequest(
     mobileNo: json['mobileNo'] as String,
   );
 }
 
-Map<String, dynamic> _$MobileNoAuthenticationRequestToJson(
-        MobileNoAuthenticationRequest instance) =>
+Map<String, dynamic> _$MobileNoUserAuthenticationRequestToJson(
+        MobileNoUserAuthenticationRequest instance) =>
     <String, dynamic>{
       'mobileNo': instance.mobileNo,
     };
@@ -23,7 +23,7 @@ Map<String, dynamic> _$MobileNoAuthenticationRequestToJson(
 // DataGenerator
 // **************************************************************************
 
-abstract class _$MobileNoAuthenticationRequestLombok {
+abstract class _$MobileNoUserAuthenticationRequestLombok {
   /// Field
   String mobileNo;
 

@@ -25,8 +25,6 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
       yield* _deleteAuthentication(event);
     } else if (event is RequestAuthenticationUsingEmailAddressEvent) {
       yield* _requestAuthenticationUsingEmail(event);
-    } else if (event is VerifyAuthenticationUsingEmailAddressEvent) {
-      yield* _verifyAuthenticationUsingEmail(event);
     } else if (event is RequestAuthenticationUsingMobileNoEvent) {
       yield* _requestAuthenticationUsingMobileNo(event);
     } else if (event is VerifyAuthenticationUsingMobileNoEvent) {
@@ -49,7 +47,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
   }
 
   Stream<AuthenticationState> _requestAuthenticationUsingEmail(RequestAuthenticationUsingEmailAddressEvent event) async* {
-    OTPResponse otpResponse = await authenticationAPIService.requestToAuthenticateWithEmailAddress(new EmailAddressAuthenticationRequest(emailAddress: event.emailAddress));
+    OTPResponse otpResponse = await authenticationAPIService.requestToAuthenticateWithEmailAddress(new EmailAddressUserAuthenticationRequest(emailAddress: event.emailAddress));
     if (!isObjectEmpty(otpResponse)) {
       String toastContent = 'Verification code has been sent to email address: ${event.emailAddress} successfully! Please check your email.';
       showToast(toastContent, Toast.LENGTH_SHORT);
@@ -60,19 +58,8 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     }
   }
 
-  Stream<AuthenticationState> _verifyAuthenticationUsingEmail(VerifyAuthenticationUsingEmailAddressEvent event) async* {
-    AuthenticationResponse authenticationResponse = await authenticationAPIService.emailAuthentication(new EmailOTPVerificationRequest(emailAddress: event.emailAddress, otpNumber: event.otpNumber));
-    if (!isObjectEmpty(authenticationResponse)) {
-      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-      sharedPreferences.setString("jwtToken", authenticationResponse.jwt);
-      yield AuthenticationsLoaded(authenticationResponse.jwt, null);
-    } else {
-      showToast("Error when request OTP.", Toast.LENGTH_SHORT);
-    }
-  }
-
   Stream<AuthenticationState> _requestAuthenticationUsingMobileNo(RequestAuthenticationUsingMobileNoEvent event) async* {
-    OTPResponse otpResponse = await authenticationAPIService.requestToAuthenticateWithMobileNo(new MobileNoAuthenticationRequest(mobileNo: event.mobileNumber));
+    OTPResponse otpResponse = await authenticationAPIService.requestToAuthenticateWithMobileNo(new MobileNoUserAuthenticationRequest(mobileNo: event.mobileNumber));
     if (!isObjectEmpty(otpResponse)) {
       String toastContent = 'Verification code has been sent to mobile no.: ${event.mobileNumber} successfully! Please check your email.';
       showToast(toastContent, Toast.LENGTH_SHORT);
@@ -84,7 +71,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
   }
 
   Stream<AuthenticationState> _verifyAuthenticationUsingMobileNo(VerifyAuthenticationUsingMobileNoEvent event) async* {
-    AuthenticationResponse authenticationResponse = await authenticationAPIService.mobileNumberAuthentication(new MobileNumberOTPVerificationRequest(mobileNo: event.mobileNumber, otpNumber: event.otpNumber));
+    UserAuthenticationResponse authenticationResponse = await authenticationAPIService.mobileNumberAuthentication(new VerifyMobileNumberOTPRequest(mobileNo: event.mobileNumber, otpNumber: event.otpNumber));
     if (!isObjectEmpty(authenticationResponse)) {
       SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences.setString("jwtToken", authenticationResponse.jwt);

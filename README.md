@@ -54,4 +54,8 @@ Used plugins:
 
 12. Flutter Downloader
 
+13. JSON Annotation and JSON Serializable (For convert between object and JSON strings)
+Refer to tutorial: https://www.thedroidsonroids.com/blog/how-to-build-an-app-with-flutter-networking-and-connecting-to-api
+NOTE: When created the object, please run `flutter packages pub run build_runner build --delete-conflicting-outputs` to generate proper files for the objects. 
+
 13. And some other plugins but not yet implemented...

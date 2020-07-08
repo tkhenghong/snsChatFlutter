@@ -10,43 +10,46 @@ class AuthenticationAPIService {
 
   HttpClient httpClient = new HttpClient();
 
-  Future<OTPResponse> requestToAuthenticateWithMobileNo(MobileNoAuthenticationRequest mobileNoAuthenticationRequest) async {
+  Future<UserAuthenticationResponse> addUsernamePasswordAuthenticationRequest(UsernamePasswordUserAuthenticationRequest mobileNoAuthenticationRequest) async {
+    String wholeURL = "$REST_URL/$authenticationAPI/";
+    UserAuthenticationResponse authenticationResponse = await httpClient.postRequest(wholeURL, requestBody: mobileNoAuthenticationRequest);
+    return authenticationResponse;
+  }
+
+  Future<OTPResponse> requestToAuthenticateWithMobileNo(MobileNoUserAuthenticationRequest mobileNoAuthenticationRequest) async {
     String wholeURL = "$REST_URL/$authenticationAPI/request/mobileNumber";
     OTPResponse otpResponse = await httpClient.postRequest(wholeURL, requestBody: mobileNoAuthenticationRequest);
     return otpResponse;
   }
 
-  Future<OTPResponse> requestToAuthenticateWithEmailAddress(EmailAddressAuthenticationRequest emailAddressAuthenticationRequest) async {
+  Future<OTPResponse> requestToAuthenticateWithEmailAddress(EmailAddressUserAuthenticationRequest emailAddressUserAuthenticationRequest) async {
     String wholeURL = "$REST_URL/$authenticationAPI/request/emailAddress";
-    OTPResponse otpResponse = await httpClient.postRequest(wholeURL, requestBody: emailAddressAuthenticationRequest);
+    OTPResponse otpResponse = await httpClient.postRequest(wholeURL, requestBody: emailAddressUserAuthenticationRequest);
     return otpResponse;
   }
 
-  Future<AuthenticationResponse> emailAuthentication(EmailOTPVerificationRequest emailOTPVerificationRequest) async {
-    String wholeURL = "$REST_URL/$authenticationAPI/emailAddress/authenticate";
-    AuthenticationResponse authenticationResponse = await httpClient.postRequest(wholeURL, requestBody: emailOTPVerificationRequest);
+  Future<UserAuthenticationResponse> usernamePasswordAuthentication(UsernamePasswordUserAuthenticationRequest mobileNoAuthenticationRequest) async {
+    String wholeURL = "$REST_URL/$authenticationAPI/usernamePassword";
+    UserAuthenticationResponse authenticationResponse = await httpClient.postRequest(wholeURL, requestBody: mobileNoAuthenticationRequest);
     return authenticationResponse;
   }
 
-  Future<AuthenticationResponse> mobileNumberAuthentication(MobileNumberOTPVerificationRequest mobileNumberOTPVerificationRequest) async {
+  Future<PreVerifyMobileNumberOTPResponse> preVerifyMobileNumber(PreVerifyMobileNumberOTPRequest preVerifyMobileNumberOTPRequest) async {
+    String wholeURL = "$REST_URL/$authenticationAPI/mobileNumber/preAuthenticate";
+    PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse = await httpClient.postRequest(wholeURL, requestBody: preVerifyMobileNumberOTPRequest);
+    return preVerifyMobileNumberOTPResponse;
+  }
+
+  Future<UserAuthenticationResponse> mobileNumberAuthentication(VerifyMobileNumberOTPRequest verifyMobileNumberOTPRequest) async {
     String wholeURL = "$REST_URL/$authenticationAPI/mobileNumber/authenticate";
-    AuthenticationResponse authenticationResponse = await httpClient.postRequest(wholeURL, requestBody: mobileNumberOTPVerificationRequest);
+    UserAuthenticationResponse authenticationResponse = await httpClient.postRequest(wholeURL, requestBody: verifyMobileNumberOTPRequest);
     return authenticationResponse;
   }
 
-//  OTPResponse getOTPResponseBody(Response httpResponse) {
-//    if (httpResponseIsOK(httpResponse)) {
-//      OTPResponse otpResponse = new OTPResponse.fromJson(json.decode(httpResponse.body));
-//      return otpResponse;
-//    }
-//    return null;
-//  }
-//
-//  AuthenticationResponse getAuthenticationResponseBody(Response httpResponse) {
-//    if (httpResponseIsOK(httpResponse)) {
-//      AuthenticationResponse authenticationResponse = new AuthenticationResponse.fromJson(json.decode(httpResponse.body));
-//      return authenticationResponse;
-//    }
-//    return null;
-//  }
+  Future<VerifyEmailAddressResponse> requestVerifyEmailAddress(VerifyEmailAddressRequest verifyMobileNumberOTPRequest) async {
+    String wholeURL = "$REST_URL/$authenticationAPI/mobileNumber/authenticate";
+    VerifyEmailAddressResponse verifyEmailAddressResponse = await httpClient.postRequest(wholeURL, requestBody: verifyMobileNumberOTPRequest);
+    return verifyEmailAddressResponse;
+  }
+
 }

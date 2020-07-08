@@ -1,4 +1,3 @@
-
 import 'package:json_annotation/json_annotation.dart';
 import 'package:lombok/lombok.dart';
 
@@ -9,7 +8,6 @@ part 'OTPResponse.g.dart';
 class OTPResponse {
   @JsonKey(name: 'otpExpirationDateTime')
   DateTime otpExpirationDateTime;
-
 
   OTPResponse({this.otpExpirationDateTime});
 

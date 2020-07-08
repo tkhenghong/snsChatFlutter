@@ -57,20 +57,6 @@ class RequestAuthenticationUsingEmailAddressEvent extends AuthenticationEvent {
   String toString() => 'GetAuthenticationEventUsingMobileNo {emailAddress: $emailAddress}';
 }
 
-class VerifyAuthenticationUsingEmailAddressEvent extends AuthenticationEvent {
-  final String emailAddress;
-  final String otpNumber;
-  final Function callback;
-
-  const VerifyAuthenticationUsingEmailAddressEvent({this.emailAddress, this.otpNumber, this.callback});
-
-  @override
-  List<Object> get props => [emailAddress, otpNumber];
-
-  @override
-  String toString() => 'GetAuthenticationEventUsingMobileNo {emailAddress: $emailAddress, otpNumber: $otpNumber}';
-}
-
 class AddAuthenticationEvent extends AuthenticationEvent {
   final String jwtToken;
   final Function callback;
