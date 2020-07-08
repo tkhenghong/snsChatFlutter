@@ -3,13 +3,13 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
-import 'package:snschat_flutter/rest/authentication/AuthenticationAPIService.dart';
+import 'package:snschat_flutter/rest/models/user_authentication/UserAuthenticationAPIService.dart';
 
 import 'bloc.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial
 class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> {
-  AuthenticationAPIService authenticationAPIService = AuthenticationAPIService();
+  UserAuthenticationAPIService authenticationAPIService = UserAuthenticationAPIService();
 
   @override
   AuthenticationState get initialState => AuthenticationsLoading();

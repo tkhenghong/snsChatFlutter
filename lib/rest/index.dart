@@ -1,15 +1,16 @@
-export 'chat/ConversationGroupAPIService.dart';
-export 'ip_location/IPLocationAPIService.dart';
-export 'message/MessageAPIService.dart';
-export 'multimedia/MultimediaAPIService.dart';
-export 'settings/SettingsAPIService.dart';
-export 'unread_message/UnreadMessageAPIService.dart';
-export 'user/UserAPIService.dart';
-export 'user_contact/UserContactAPIService.dart';
+// API Services
+export 'models/conversation_group/ConversationGroupAPIService.dart';
+export 'models/ip_location/IPLocationAPIService.dart';
+export 'models/message/MessageAPIService.dart';
+export 'models/multimedia/MultimediaAPIService.dart';
+export 'models/settings/SettingsAPIService.dart';
+export 'models/unread_message/UnreadMessageAPIService.dart';
+export 'models/user/UserAPIService.dart';
+export 'models/user_contact/UserContactAPIService.dart';
 
 
 // HTTP Client General methods
-export 'httpClient/HttpClient.dart';
+export 'customhttpClient/CustomHttpClient.dart';
 
 // Exceptions
 export 'exceptions/NetworkExceptions.dart';

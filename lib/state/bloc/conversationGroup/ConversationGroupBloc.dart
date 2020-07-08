@@ -2,7 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
-import 'package:snschat_flutter/rest/chat/ConversationGroupAPIService.dart';
+import 'package:snschat_flutter/rest/models/conversation_group/ConversationGroupAPIService.dart';
 
 import 'bloc.dart';
 
