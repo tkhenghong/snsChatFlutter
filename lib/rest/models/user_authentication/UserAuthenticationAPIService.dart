@@ -11,30 +11,30 @@ class UserAuthenticationAPIService {
   CustomHttpClient httpClient = new CustomHttpClient();
 
   Future<UserAuthenticationResponse> addUsernamePasswordAuthenticationRequest(UsernamePasswordUserAuthenticationRequest mobileNoAuthenticationRequest) async {
-    return await httpClient.postRequest("$REST_URL/$authenticationAPI/", requestBody: mobileNoAuthenticationRequest);
+    return UserAuthenticationResponse.fromJson(await httpClient.postRequest("$REST_URL/$authenticationAPI/", requestBody: mobileNoAuthenticationRequest));
   }
 
   Future<OTPResponse> requestToAuthenticateWithMobileNo(MobileNoUserAuthenticationRequest mobileNoAuthenticationRequest) async {
-    return await httpClient.postRequest("$REST_URL/$authenticationAPI/request/mobileNumber", requestBody: mobileNoAuthenticationRequest);
+    return OTPResponse.fromJson(await httpClient.postRequest("$REST_URL/$authenticationAPI/request/mobileNumber", requestBody: mobileNoAuthenticationRequest));
   }
 
   Future<OTPResponse> requestToAuthenticateWithEmailAddress(EmailAddressUserAuthenticationRequest emailAddressUserAuthenticationRequest) async {
-    return await httpClient.postRequest("$REST_URL/$authenticationAPI/request/emailAddress", requestBody: emailAddressUserAuthenticationRequest);
+    return OTPResponse.fromJson(await httpClient.postRequest("$REST_URL/$authenticationAPI/request/emailAddress", requestBody: emailAddressUserAuthenticationRequest));
   }
 
   Future<UserAuthenticationResponse> usernamePasswordAuthentication(UsernamePasswordUserAuthenticationRequest mobileNoAuthenticationRequest) async {
-    return await httpClient.postRequest("$REST_URL/$authenticationAPI/usernamePassword", requestBody: mobileNoAuthenticationRequest);;
+    return UserAuthenticationResponse.fromJson(await httpClient.postRequest("$REST_URL/$authenticationAPI/usernamePassword", requestBody: mobileNoAuthenticationRequest));
   }
 
   Future<PreVerifyMobileNumberOTPResponse> preVerifyMobileNumber(PreVerifyMobileNumberOTPRequest preVerifyMobileNumberOTPRequest) async {
-    return await httpClient.postRequest("$REST_URL/$authenticationAPI/mobileNumber/preAuthenticate", requestBody: preVerifyMobileNumberOTPRequest);
+    return PreVerifyMobileNumberOTPResponse.fromJson(await httpClient.postRequest("$REST_URL/$authenticationAPI/mobileNumber/preAuthenticate", requestBody: preVerifyMobileNumberOTPRequest));
   }
 
   Future<UserAuthenticationResponse> mobileNumberAuthentication(VerifyMobileNumberOTPRequest verifyMobileNumberOTPRequest) async {
-    return await httpClient.postRequest("$REST_URL/$authenticationAPI/mobileNumber/authenticate", requestBody: verifyMobileNumberOTPRequest);
+    return UserAuthenticationResponse.fromJson(await httpClient.postRequest("$REST_URL/$authenticationAPI/mobileNumber/authenticate", requestBody: verifyMobileNumberOTPRequest));
   }
 
   Future<VerifyEmailAddressResponse> requestVerifyEmailAddress(VerifyEmailAddressRequest verifyMobileNumberOTPRequest) async {
-    return await httpClient.postRequest("$REST_URL/$authenticationAPI/mobileNumber/authenticate", requestBody: verifyMobileNumberOTPRequest);
+    return VerifyEmailAddressResponse.fromJson(await httpClient.postRequest("$REST_URL/$authenticationAPI/mobileNumber/authenticate", requestBody: verifyMobileNumberOTPRequest));
   }
 }

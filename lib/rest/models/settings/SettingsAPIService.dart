@@ -11,7 +11,7 @@ class SettingsAPIService {
   CustomHttpClient httpClient = new CustomHttpClient();
 
   Future<Settings> addSettings(Settings settings) async {
-    return await httpClient.postRequest("$REST_URL/$settingsAPI", requestBody: settings);
+    return Settings.fromJson(await httpClient.postRequest("$REST_URL/$settingsAPI", requestBody: settings));
   }
 
   Future<bool> editSettings(Settings settings) async {
@@ -23,10 +23,10 @@ class SettingsAPIService {
   }
 
   Future<Settings> getSingleSettings(String settingsId) async {
-    return await httpClient.getRequest("$REST_URL/$settingsAPI/$settingsId");
+    return Settings.fromJson(await httpClient.getRequest("$REST_URL/$settingsAPI/$settingsId"));
   }
 
   Future<Settings> getSettingsOfAUser(String userId) async {
-    return await httpClient.getRequest("$REST_URL/$settingsAPI/user/$userId");
+    return Settings.fromJson(await httpClient.getRequest("$REST_URL/$settingsAPI/user/$userId"));
   }
 }

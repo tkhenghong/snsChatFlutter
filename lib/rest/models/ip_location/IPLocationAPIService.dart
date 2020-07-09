@@ -12,6 +12,6 @@ class IPLocationAPIService {
   CustomHttpClient httpClient = new CustomHttpClient();
 
   Future<IPGeoLocation> getIPGeolocation() async {
-    return await httpClient.getRequest("https://api.ipgeolocation.io/ipgeo?apiKey=$IP_GEOLOCATION_API_KEY");
+    return IPGeoLocation.fromJson(await httpClient.getRequest("https://api.ipgeolocation.io/ipgeo?apiKey=$IP_GEOLOCATION_API_KEY"));
   }
 }

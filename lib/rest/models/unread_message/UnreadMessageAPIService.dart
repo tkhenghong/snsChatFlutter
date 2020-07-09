@@ -11,7 +11,7 @@ class UnreadMessageAPIService {
   CustomHttpClient httpClient = new CustomHttpClient();
 
   Future<UnreadMessage> addUnreadMessage(UnreadMessage unreadMessage) async {
-    return await httpClient.postRequest("$REST_URL/$unreadMessageAPI", requestBody: unreadMessage);
+    return UnreadMessage.fromJson(await httpClient.postRequest("$REST_URL/$unreadMessageAPI", requestBody: unreadMessage));
   }
 
   Future<bool> editUnreadMessage(UnreadMessage unreadMessage) async {
@@ -23,10 +23,11 @@ class UnreadMessageAPIService {
   }
 
   Future<UnreadMessage> getSingleUnreadMessage(String messageId) async {
-    return await httpClient.getRequest("$REST_URL/$unreadMessageAPI/$messageId");
+    return UnreadMessage.fromJson(await httpClient.getRequest("$REST_URL/$unreadMessageAPI/$messageId"));
   }
 
   Future<List<UnreadMessage>> getUnreadMessagesOfAUser(String userId) async {
-    return await httpClient.getRequest("$REST_URL/$unreadMessageAPI/user/$userId");
+    List<dynamic> unreadMessageListRaw = await httpClient.getRequest("$REST_URL/$unreadMessageAPI/user/$userId");
+    return unreadMessageListRaw.map((e) => UnreadMessage.fromJson(e)).toList();
   }
 }

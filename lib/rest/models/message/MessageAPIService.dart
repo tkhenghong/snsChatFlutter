@@ -11,7 +11,7 @@ class MessageAPIService {
   CustomHttpClient httpClient = new CustomHttpClient();
 
   Future<ChatMessage> addMessage(ChatMessage message) async {
-    return await httpClient.postRequest("$REST_URL/$messageAPI", requestBody: message);
+    return ChatMessage.fromJson(await httpClient.postRequest("$REST_URL/$messageAPI", requestBody: message));
   }
 
   Future<bool> editMessage(ChatMessage message) async {
@@ -23,10 +23,11 @@ class MessageAPIService {
   }
 
   Future<ChatMessage> getSingleMessage(String messageId) async {
-    return await httpClient.getRequest("$REST_URL/$messageAPI/$messageId");
+    return ChatMessage.fromJson(await httpClient.getRequest("$REST_URL/$messageAPI/$messageId"));
   }
 
   Future<List<ChatMessage>> getMessagesOfAConversation(String conversationId) async {
-    return await httpClient.getRequest("$REST_URL/$messageAPI/conversation/$conversationId");
+    List<dynamic> chatMesageListRaw =  await httpClient.getRequest("$REST_URL/$messageAPI/conversation/$conversationId");
+    return chatMesageListRaw.map((e) => ChatMessage.fromJson(e)).toList();
   }
 }

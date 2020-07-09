@@ -28,7 +28,7 @@ class CustomHttpClient {
   Future<dynamic> postRequest(String path, {var requestBody, Map<String, String> additionalHeaders}) async {
     Map<String, String> headers = handleHTTPHeaders(additionalHeaders);
     try {
-      return handleResponse(await post(path, body: requestBody, headers: headers));
+      return handleResponse(await post(path, body: requestBody.toJson(), headers: headers));
     } on SocketException {
       throw ConnectionException();
     }
@@ -37,13 +37,13 @@ class CustomHttpClient {
   Future<dynamic> putRequest(String path, {var requestBody, Map<String, String> additionalHeaders}) async {
     Map<String, String> headers = handleHTTPHeaders(additionalHeaders);
     try {
-      return handleResponse(await put(path, body: requestBody, headers: headers));
+      return handleResponse(await put(path, body: requestBody.toJson(), headers: headers));
     } on SocketException {
       throw ConnectionException();
     }
   }
 
-  Future<dynamic> deleteRequest(String path, {var requestBody, Map<String, String> additionalHeaders}) async {
+  Future<dynamic> deleteRequest(String path, {Map<String, String> additionalHeaders}) async {
     Map<String, String> headers = handleHTTPHeaders(additionalHeaders);
     try {
       return handleResponse(await delete(path, headers: headers));

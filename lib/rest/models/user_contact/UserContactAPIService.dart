@@ -11,7 +11,7 @@ class UserContactAPIService {
   CustomHttpClient httpClient = new CustomHttpClient();
 
   Future<UserContact> addUserContact(UserContact userContact) async {
-    return await httpClient.postRequest("$REST_URL/$userContactAPI", requestBody: userContact);
+    return UserContact.fromJson(await httpClient.postRequest("$REST_URL/$userContactAPI", requestBody: userContact));
   }
 
   Future<bool> editUserContact(UserContact userContact) async {
@@ -23,14 +23,15 @@ class UserContactAPIService {
   }
 
   Future<UserContact> getUserContact(String userContactId) async {
-    return await httpClient.getRequest("$REST_URL/$userContactAPI/$userContactId");
+    return UserContact.fromJson(await httpClient.getRequest("$REST_URL/$userContactAPI/$userContactId"));
   }
 
   Future<UserContact> getUserContactByMobileNo(String mobileNo) async {
-    return await httpClient.getRequest("$REST_URL/$userContactAPI/mobileNo/$mobileNo");
+    return UserContact.fromJson(await httpClient.getRequest("$REST_URL/$userContactAPI/mobileNo/$mobileNo"));
   }
 
   Future<List<UserContact>> getUserContactsByUserId(String userId) async {
-    return await httpClient.getRequest("$REST_URL/$userContactAPI/user/$userId");
+    List<dynamic> userContactListRaw = await httpClient.getRequest("$REST_URL/$userContactAPI/user/$userId");
+    return userContactListRaw.map((e) => UserContact.fromJson(e)).toList();
   }
 }
