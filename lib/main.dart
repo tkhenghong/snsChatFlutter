@@ -68,6 +68,9 @@ void main() async {
     BlocProvider<MultimediaProgressBloc>(
       create: (context) => MultimediaProgressBloc(),
     ),
+    BlocProvider<AuthenticationBloc>(
+      create: (context) => AuthenticationBloc(),
+    ),
     BlocProvider<NetworkBloc>(
       create: (context) => NetworkBloc(),
     ),
