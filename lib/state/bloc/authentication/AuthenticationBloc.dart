@@ -29,6 +29,10 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
       yield* _requestAuthenticationUsingMobileNo(event);
     } else if (event is VerifyAuthenticationUsingMobileNoEvent) {
       yield* _verifyAuthenticationUsingMobileNo(event);
+    } else if (event is PreVerifyMobileNoEvent) {
+      yield* _preVerifyMobileNo(event);
+    } else if (event is VerifyMobileNoEvent) {
+      yield* _verifyMobileNo(event);
     }
   }
 
@@ -37,7 +41,8 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
       try {
         SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
         String jwtToken = sharedPreferences.getString("jwtToken");
-        yield AuthenticationsLoaded(jwtToken);
+        String userId = sharedPreferences.getString("userId");
+        yield AuthenticationsLoaded(jwtToken, userId);
         functionCallback(event, true);
       } catch (e) {
         yield AuthenticationsNotLoaded();
@@ -51,7 +56,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     if (!isObjectEmpty(otpResponse)) {
       String toastContent = 'Verification code has been sent to email address: ${event.emailAddress} successfully! Please check your email.';
       showToast(toastContent, Toast.LENGTH_SHORT);
-      yield AuthenticationsLoaded(null, otpResponse.otpExpirationDateTime);
+      yield AuthenticationsLoaded(null, null, otpResponse.otpExpirationDateTime);
     } else {
       showToast("Error when request OTP.", Toast.LENGTH_SHORT);
       yield AuthenticationsLoaded(null, null);
@@ -63,7 +68,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     if (!isObjectEmpty(otpResponse)) {
       String toastContent = 'Verification code has been sent to mobile no.: ${event.mobileNumber} successfully! Please check your email.';
       showToast(toastContent, Toast.LENGTH_SHORT);
-      yield AuthenticationsLoaded(null, otpResponse.otpExpirationDateTime);
+      yield AuthenticationsLoaded(null, null, otpResponse.otpExpirationDateTime);
     } else {
       showToast("Error when request OTP.", Toast.LENGTH_SHORT);
       yield AuthenticationsLoaded(null, null);
@@ -79,6 +84,17 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     } else {
       showToast("Error when request OTP.", Toast.LENGTH_SHORT);
     }
+  }
+
+  Stream<AuthenticationState> _preVerifyMobileNo(PreVerifyMobileNoEvent event) async* {
+    PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse = await authenticationAPIService.preVerifyMobileNumber(new PreVerifyMobileNumberOTPRequest(mobileNumber: event.mobileNo));
+    functionCallback(event, preVerifyMobileNumberOTPResponse);
+  }
+
+  Stream<AuthenticationState> _verifyMobileNo(VerifyMobileNoEvent event) async* {
+    UserAuthenticationResponse userAuthenticationResponse =
+        await authenticationAPIService.mobileNumberAuthentication(new VerifyMobileNumberOTPRequest(mobileNo: event.mobileNo, otpNumber: event.otpNumber, secureKeyword: event.secureKeyword));
+    functionCallback(event, userAuthenticationResponse);
   }
 
   Stream<AuthenticationState> _editAuthentication(EditAuthenticationEvent event) async* {

@@ -11,15 +11,16 @@ class AuthenticationsLoading extends AuthenticationState {}
 
 class AuthenticationsLoaded extends AuthenticationState {
   final String jwtToken;
+  final String userId;
   final DateTime otpExpirationTime;
 
-  const AuthenticationsLoaded([this.jwtToken, this.otpExpirationTime]);
+  const AuthenticationsLoaded([this.jwtToken, this.userId, this.otpExpirationTime]);
 
   @override
-  List<Object> get props => [jwtToken, otpExpirationTime];
+  List<Object> get props => [jwtToken, userId, otpExpirationTime];
 
   @override
-  String toString() => 'AuthenticationsLoaded {jwtToken: $jwtToken, otpExpirationTime: $otpExpirationTime}';
+  String toString() => 'AuthenticationsLoaded {jwtToken: $jwtToken, userId: $userId, otpExpirationTime: $otpExpirationTime}';
 }
 
 class AuthenticationsNotLoaded extends AuthenticationState {}

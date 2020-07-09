@@ -11,3 +11,5 @@ export 'unreadMessage/bloc.dart';
 export 'user/bloc.dart';
 export 'userContact/bloc.dart';
 export 'webSocket/bloc.dart';
+export 'authentication/bloc.dart';
+export 'network/bloc.dart';

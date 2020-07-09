@@ -7,8 +7,11 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
+
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 
 class SignUpPage extends StatefulWidget {
   String mobileNo;
@@ -27,10 +30,15 @@ class SignUpPageState extends State<SignUpPage> {
   TextEditingController nameTextController = new TextEditingController();
   TextEditingController mobileNoTextController = new TextEditingController();
 
+  String DEFAULT_COUNTRY_CODE = globals.DEFAULT_COUNTRY_CODE;
+
   FocusNode nodeOne = FocusNode();
   FocusNode nodeTwo = FocusNode();
 
+  IPGeoLocation ipGeoLocation;
   CountryCode countryCode;
+  String countryCodeString;
+  String mobileNumber;
 
   bool deviceLocated = false;
 
@@ -49,18 +57,15 @@ class SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-  String getPhoneNumber(BuildContext context) {
+  getPhoneNumber(String phoneNumber) {
     String phoneNoInitials = "";
+
     if (isObjectEmpty(countryCode)) {
-      IPGeoLocationState ipGeoLocationState = BlocProvider.of<IPGeoLocationBloc>(context).state;
-      if (ipGeoLocationState is IPGeoLocationLoaded) {
-        phoneNoInitials = ipGeoLocationState.ipGeoLocation.calling_code;
-      }
+      phoneNoInitials = ipGeoLocation.calling_code;
     } else {
       phoneNoInitials = countryCode.dialCode;
     }
-    String phoneNumber = phoneNoInitials + mobileNoTextController.value.text;
-    return phoneNumber;
+    mobileNumber = phoneNoInitials + mobileNoTextController.value.text;
   }
 
   onCountryPickerChanged(CountryCode countryCode) {
@@ -99,7 +104,16 @@ class SignUpPageState extends State<SignUpPage> {
           listener: (context, userContactState) {
             if (userContactState is UserContactsLoaded) {}
           },
+
         ),
+        BlocListener<IPGeoLocationBloc, IPGeoLocationState>(
+          listener: (context, ipGeoLocationState) {
+             if (ipGeoLocationState is IPGeoLocationLoaded) {
+                      countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? DEFAULT_COUNTRY_CODE : ipGeoLocationState.ipGeoLocation.country_code2;
+                      ipGeoLocation = ipGeoLocationState.ipGeoLocation;
+                    }
+          },
+        )
       ],
       child: signUpScreen(deviceHeight, deviceWidth, context),
     );
@@ -161,6 +175,7 @@ class SignUpPageState extends State<SignUpPage> {
                                 textAlign: TextAlign.left,
                                 keyboardType: TextInputType.phone,
                                 focusNode: nodeOne,
+                                onChanged: getPhoneNumber,
                                 onFieldSubmitted: (value) {
                                   FocusScope.of(context).requestFocus(nodeTwo);
                                 },
@@ -224,12 +239,12 @@ class SignUpPageState extends State<SignUpPage> {
         BlocProvider.of<GoogleInfoBloc>(context).add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn2, FirebaseAuth firebaseAuth2, FirebaseUser firebaseUser2) {
           BlocProvider.of<UserBloc>(context).add(CheckUserSignedUpEvent(
               googleSignIn: googleSignIn2,
-              mobileNo: getPhoneNumber(context),
+              mobileNo: mobileNumber,
               callback: (bool isSignedUp) {
                 if (!isSignedUp) {
                   User user = User(
                       id: null,
-                      mobileNo: getPhoneNumber(context),
+                      mobileNo: mobileNumber,
                       countryCode: widget.countryCodeString,
                       effectivePhoneNumber: mobileNoTextController.value.text.toString(),
                       displayName: firebaseUser2.displayName.toString(),
@@ -248,7 +263,7 @@ class SignUpPageState extends State<SignUpPage> {
                   UserContact userContact = UserContact(
                       id: null,
                       multimediaId: null,
-                      mobileNo: getPhoneNumber(context),
+                      mobileNo: mobileNumber,
                       displayName: firebaseUser2.displayName,
                       realName: nameTextController.value.text.toString(),
                       about: 'Hey There! I am using PocketChat.',
@@ -284,7 +299,9 @@ class SignUpPageState extends State<SignUpPage> {
                                                       if (!isObjectEmpty(googleSignIn2) && !isObjectEmpty(user2) && !isObjectEmpty(settings2) && !isObjectEmpty(userContact2) && !isObjectEmpty(multimedia3)) {
                                                         showToast('Sign up success. Please verify your phone number.', Toast.LENGTH_SHORT);
                                                         Navigator.pop(context);
-                                                        goToVerifyPhoneNumber(context);
+                                                        goToVerifyPhoneNumber(
+                                                            PreVerifyMobileNumberOTPResponse(mobileNumber: mobileNumber),
+                                                            context);
                                                       }
                                                     }));
                                               }));
@@ -319,7 +336,7 @@ class SignUpPageState extends State<SignUpPage> {
     }));
   }
 
-  goToVerifyPhoneNumber(BuildContext context) {
-    Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(mobileNo: getPhoneNumber(context)))));
+  goToVerifyPhoneNumber(PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse, BuildContext context) {
+    Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(preVerifyMobileNumberOTPResponse: preVerifyMobileNumberOTPResponse))));
   }
 }

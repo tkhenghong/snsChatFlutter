@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/rest/index.dart';
@@ -10,6 +11,8 @@ import 'package:snschat_flutter/state/bloc/user/bloc.dart';
 class UserBloc extends Bloc<UserEvent, UserState> {
   UserAPIService userAPIService = UserAPIService();
   UserDBService userDBService = UserDBService();
+
+  String ENVIRONMENT = globals.ENVIRONMENT;
 
   @override
   UserState get initialState => UserLoading();
@@ -133,27 +136,33 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     }
   }
 
+  // TODO: Moved to AuthenticationBloc
   Stream<UserState> _checkUserSignedUp(CheckUserSignedUpEvent event) async* {
     bool isSignedUp = false;
     User existingUserUsingMobileNo;
     User existingUserUsingGoogleAccount;
 
     if (!isStringEmpty(event.mobileNo)) {
-      existingUserUsingMobileNo = await userAPIService.getUserByUsingMobileNo(event.mobileNo);
+//      existingUserUsingMobileNo = await userAPIService.getUserByUsingMobileNo(event.mobileNo);
     }
 
     if (!isObjectEmpty(event.googleSignIn) && !isStringEmpty(event.googleSignIn.currentUser.id)) {
-      existingUserUsingGoogleAccount = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
+//      existingUserUsingGoogleAccount = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
     }
 
     // Must have both not empty then only considered it as sign up
     isSignedUp = !isObjectEmpty(existingUserUsingMobileNo) && !isObjectEmpty(existingUserUsingGoogleAccount);
+
+    if (ENVIRONMENT != 'PRODUCTION') {
+      isSignedUp = true;
+    }
 
     if (!isObjectEmpty(event)) {
       event.callback(isSignedUp);
     }
   }
 
+  // TODO: Moved to AuthenticationBloc
   Stream<UserState> _signIn(UserSignInEvent event) async* {
     bool isSignedIn = false;
     User userFromServer;
@@ -161,7 +170,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     if (!isObjectEmpty(event.googleSignIn)) {
       isSignedIn = await event.googleSignIn.isSignedIn();
       if (isSignedIn) {
-        userFromServer = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
+//        userFromServer = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
 
         if (!isObjectEmpty(userFromServer)) {
           // Check mobile no match with it's googleAccount ID or not.

@@ -5,12 +5,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/objects/rest/index.dart';
+import 'package:snschat_flutter/state/bloc/authentication/AuthenticationBloc.dart';
+import 'package:snschat_flutter/state/bloc/authentication/AuthenticationEvent.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -24,22 +27,34 @@ class LoginPage extends StatefulWidget {
 
 class LoginPageState extends State<LoginPage> {
   bool deviceLocated = false;
-  String countryCodeString;
+
   double deviceWidth;
   double deviceHeight;
 
+  String DEFAULT_COUNTRY_CODE = globals.DEFAULT_COUNTRY_CODE;
+
+  IPGeoLocation ipGeoLocation;
   CountryCode countryCode;
+  String countryCodeString;
+  String mobileNumber;
+
   Color themePrimaryColor;
 
   final _formKey = GlobalKey<FormState>();
   TextEditingController mobileNoTextController = new TextEditingController();
 
   @override
-  Widget build(BuildContext context) {
-    deviceWidth = MediaQuery.of(context).size.width;
-    deviceHeight = MediaQuery.of(context).size.height;
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
-    themePrimaryColor = Theme.of(context).textTheme.title.color;
+  @override
+  Widget build(BuildContext buildContext) {
+    deviceWidth = MediaQuery.of(buildContext).size.width;
+    deviceHeight = MediaQuery.of(buildContext).size.height;
+
+    themePrimaryColor = Theme.of(buildContext).textTheme.title.color;
 
     return BlocBuilder<IPGeoLocationBloc, IPGeoLocationState>(
       builder: (context, ipGeoLocationState) {
@@ -52,13 +67,14 @@ class LoginPageState extends State<LoginPage> {
         }
 
         if (ipGeoLocationState is IPGeoLocationNotLoaded) {
-          countryCodeString = 'US';
-          return loginScreen(null, context);
+          countryCodeString = DEFAULT_COUNTRY_CODE;
+          return loginScreen(buildContext);
         }
 
         if (ipGeoLocationState is IPGeoLocationLoaded) {
-          countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? "US" : ipGeoLocationState.ipGeoLocation.country_code2;
-          return loginScreen(ipGeoLocationState.ipGeoLocation, context);
+          countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? DEFAULT_COUNTRY_CODE : ipGeoLocationState.ipGeoLocation.country_code2;
+          ipGeoLocation = ipGeoLocationState.ipGeoLocation;
+          return loginScreen(buildContext);
         }
 
         return Material(
@@ -70,7 +86,7 @@ class LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget loginScreen(IPGeoLocation ipGeoLocation, BuildContext context) => MultiBlocListener(
+  Widget loginScreen(BuildContext buildContext) => MultiBlocListener(
         listeners: [
           BlocListener<IPGeoLocationBloc, IPGeoLocationState>(
             listener: (context, state) {},
@@ -81,7 +97,7 @@ class LoginPageState extends State<LoginPage> {
         ],
         child: GestureDetector(
             // Detect user touch out of the text fields
-            onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
+            onTap: () => FocusScope.of(buildContext).requestFocus(FocusNode()),
             // Focuses on nothing, means disable focus and hide keyboard
             child: Material(
               child: Column(
@@ -128,6 +144,7 @@ class LoginPageState extends State<LoginPage> {
                                     autofocus: true,
                                     textAlign: TextAlign.left,
                                     keyboardType: TextInputType.number,
+                                    onChanged: getPhoneNumber(),
                                   ),
                                 ),
                               ),
@@ -136,7 +153,7 @@ class LoginPageState extends State<LoginPage> {
                         ],
                       )),
                   RaisedButton(
-                    onPressed: () => _signInwithGoogle(context, ipGeoLocation),
+                    onPressed: () => _signIn(buildContext),
                     textColor: Colors.white,
                     splashColor: Colors.grey,
                     animationDuration: Duration(milliseconds: 500),
@@ -145,26 +162,26 @@ class LoginPageState extends State<LoginPage> {
                     child: Text("Sign In"),
                   ),
                   Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
-                  GoogleSignInButton(onPressed: () {
-                    _signIn(context);
-                  }),
-                  FacebookSignInButton(onPressed: () {
-                    _signInwithFacebook(context);
-                  }),
-                  AppleSignInButton(
-                    onPressed: () {
-                      _signInwithApple(context);
-                    },
-                  ),
-                  TwitterSignInButton(
-                    onPressed: () {
-                      _signInwithTwitter(context);
-                    },
-                  ),
+                  // GoogleSignInButton(onPressed: () {
+                  //   _signIn(mainBuildContext);
+                  // }),
+                  // FacebookSignInButton(onPressed: () {
+                  //   _signInwithFacebook(mainBuildContext);
+                  // }),
+                  // AppleSignInButton(
+                  //   onPressed: () {
+                  //     _signInwithApple(mainBuildContext);
+                  //   },
+                  // ),
+                  // TwitterSignInButton(
+                  //   onPressed: () {
+                  //     _signInwithTwitter(mainBuildContext);
+                  //   },
+                  // ),
                   Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
                   Text("Don't have account yet?"),
                   FlatButton(
-                      onPressed: () => goToSignUp(context),
+                      onPressed: () => goToSignUp(buildContext),
                       child: Text(
                         "Sign Up Now",
                         style: TextStyle(color: themePrimaryColor),
@@ -195,10 +212,10 @@ class LoginPageState extends State<LoginPage> {
 
   onCountryPickerChanged(CountryCode countryCode) {
     this.countryCode = countryCode;
-    this.countryCodeString = countryCode.code.toString();
+    this.countryCodeString = countryCode.code;
   }
 
-  String getPhoneNumber(IPGeoLocation ipGeoLocation) {
+  getPhoneNumber() {
     String phoneNoInitials = "";
 
     if (isObjectEmpty(countryCode)) {
@@ -206,8 +223,7 @@ class LoginPageState extends State<LoginPage> {
     } else {
       phoneNoInitials = countryCode.dialCode;
     }
-    String phoneNumber = phoneNoInitials + mobileNoTextController.value.text;
-    return phoneNumber;
+    mobileNumber = phoneNoInitials + mobileNoTextController.value.text;
   }
 
   getConversationGroupsMultimedia(BuildContext context) {
@@ -217,8 +233,8 @@ class LoginPageState extends State<LoginPage> {
     }
   }
 
-  goToVerifyPhoneNumber(mobileNo, BuildContext context) {
-    Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(mobileNo: mobileNo))));
+  goToVerifyPhoneNumber(PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse, BuildContext context) {
+    Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(preVerifyMobileNumberOTPResponse: preVerifyMobileNumberOTPResponse))));
   }
 
   goToSignUp(BuildContext context) {
@@ -245,25 +261,31 @@ class LoginPageState extends State<LoginPage> {
   }
 
   _signIn(BuildContext context) async {
-    print('Google Sign In button pressed.');
+    getPhoneNumber();
+    BlocProvider.of<AuthenticationBloc>(context).add(PreVerifyMobileNoEvent(
+        mobileNo: mobileNumber,
+        callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {
+          if (!isObjectEmpty(preVerifyMobileNumberOTPResponse)) {
+            goToVerifyPhoneNumber(preVerifyMobileNumberOTPResponse, context);
+          }
+        }));
   }
 
   _signInwithGoogle(BuildContext context, IPGeoLocation ipGeoLocation) async {
     if (_formKey.currentState.validate()) {
       showCenterLoadingIndicator(context);
 
-      String mobileNo = getPhoneNumber(ipGeoLocation);
       BlocProvider.of<GoogleInfoBloc>(context).add(SignInGoogleInfoEvent(callback: (bool initialized) {
         if (initialized) {
           BlocProvider.of<GoogleInfoBloc>(context).add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn, FirebaseAuth firebaseAuth, FirebaseUser firebaseUser) {
             BlocProvider.of<UserBloc>(context).add(CheckUserSignedUpEvent(
-                mobileNo: mobileNo,
+                mobileNo: mobileNumber,
                 googleSignIn: googleSignIn,
                 callback: (bool isSignedUp) {
                   if (isSignedUp) {
                     BlocProvider.of<UserBloc>(context).add(UserSignInEvent(
                         googleSignIn: googleSignIn,
-                        mobileNo: mobileNo,
+                        mobileNo: mobileNumber,
                         callback: (User user2) {
                           if (!isObjectEmpty(user2)) {
                             BlocProvider.of<SettingsBloc>(context).add(GetUserSettingsEvent(
@@ -271,7 +293,8 @@ class LoginPageState extends State<LoginPage> {
                                 callback: (Settings settings) {
                                   if (!isObjectEmpty(settings)) {
                                     Navigator.pop(context);
-                                    goToVerifyPhoneNumber(mobileNo, context);
+                                    // TODO: Go to verify Phone Number using sign in with Google
+                                    // goToVerifyPhoneNumber(mobileNumber, context);
                                   } else {
                                     showToast('Invalid Mobile No./matching Google account. Please try again.', Toast.LENGTH_SHORT);
                                     BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
