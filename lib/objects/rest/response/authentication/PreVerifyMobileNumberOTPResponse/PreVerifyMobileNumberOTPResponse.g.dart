@@ -14,6 +14,7 @@ PreVerifyMobileNumberOTPResponse _$PreVerifyMobileNumberOTPResponseFromJson(
         : DateTime.parse(json['tokenExpiryTime'] as String),
     mobileNumber: json['mobileNumber'] as String,
     emailAddress: json['emailAddress'] as String,
+    secureKeyword: json['secureKeyword'] as String,
   );
 }
 
@@ -23,6 +24,7 @@ Map<String, dynamic> _$PreVerifyMobileNumberOTPResponseToJson(
       'tokenExpiryTime': instance.tokenExpiryTime?.toIso8601String(),
       'mobileNumber': instance.mobileNumber,
       'emailAddress': instance.emailAddress,
+      'secureKeyword': instance.secureKeyword,
     };
 
 // **************************************************************************
@@ -34,6 +36,7 @@ abstract class _$PreVerifyMobileNumberOTPResponseLombok {
   DateTime tokenExpiryTime;
   String mobileNumber;
   String emailAddress;
+  String secureKeyword;
 
   /// Setter
 
@@ -49,6 +52,10 @@ abstract class _$PreVerifyMobileNumberOTPResponseLombok {
     this.emailAddress = emailAddress;
   }
 
+  void setSecureKeyword(String secureKeyword) {
+    this.secureKeyword = secureKeyword;
+  }
+
   /// Getter
   DateTime getTokenExpiryTime() {
     return tokenExpiryTime;
@@ -60,5 +67,9 @@ abstract class _$PreVerifyMobileNumberOTPResponseLombok {
 
   String getEmailAddress() {
     return emailAddress;
+  }
+
+  String getSecureKeyword() {
+    return secureKeyword;
   }
 }

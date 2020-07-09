@@ -15,7 +15,10 @@ class PreVerifyMobileNumberOTPResponse {
   @JsonKey(name: 'emailAddress')
   String emailAddress;
 
-  PreVerifyMobileNumberOTPResponse({this.tokenExpiryTime, this.mobileNumber, this.emailAddress});
+  @JsonKey(name: 'secureKeyword')
+  String secureKeyword;
+
+  PreVerifyMobileNumberOTPResponse({this.tokenExpiryTime, this.mobileNumber, this.emailAddress, this.secureKeyword});
 
   factory PreVerifyMobileNumberOTPResponse.fromJson(Map<String, dynamic> json) => _$PreVerifyMobileNumberOTPResponseFromJson(json);
 

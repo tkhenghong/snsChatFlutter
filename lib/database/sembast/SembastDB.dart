@@ -44,10 +44,11 @@ class SembastDB {
     bool storageAccessGranted = false;
 
     switch (ENVIRONMENT) {
-      case "DEVELOPMENT":
+      case "LOCAL_COMPUTER":
         dbPath = 'pocketChat.db';
         storageAccessGranted = true;
         break;
+      case "DEVELOPMENT":
       default:
         CustomFileService fileService = CustomFileService();
         // get the application documents directory
