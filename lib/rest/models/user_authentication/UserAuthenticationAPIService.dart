@@ -10,6 +10,10 @@ class UserAuthenticationAPIService {
 
   CustomHttpClient httpClient = new CustomHttpClient();
 
+  Future<PreVerifyMobileNumberOTPResponse> registerUsingMobileNumber(RegisterUsingMobileNumberRequest registerUsingMobileNumberRequest) async {
+    return PreVerifyMobileNumberOTPResponse.fromJson(await httpClient.postRequest("$REST_URL/$authenticationAPI/register/mobileNumber", requestBody: registerUsingMobileNumberRequest));
+  }
+
   Future<UserAuthenticationResponse> addUsernamePasswordAuthenticationRequest(UsernamePasswordUserAuthenticationRequest mobileNoAuthenticationRequest) async {
     return UserAuthenticationResponse.fromJson(await httpClient.postRequest("$REST_URL/$authenticationAPI/", requestBody: mobileNoAuthenticationRequest));
   }

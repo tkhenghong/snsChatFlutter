@@ -18,3 +18,6 @@ String IMAGE_DIRECTORY = '';
 String VIDEO_DIRECTORY = '';
 String FILE_DIRECTORY = '';
 String AUDIO_DIRECTORY = '';
+
+// Support Email
+String supportEmail = 'tkhenghong@gmail.com';

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/state/bloc/network/bloc.dart';
@@ -19,11 +20,15 @@ void _enablePlatformOverrideForDesktop() {
 }
 
 void initializeFlutterDownloader() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await FlutterDownloader.initialize().then((data) {
-    // print('FlutterDownloader.initialize() completed');
-    // print('data: ' + data.toString());
-  });
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    await FlutterDownloader.initialize().then((data) {
+      // print('FlutterDownloader.initialize() completed');
+      // print('data: ' + data.toString());
+    });
+  } catch (e) {
+    print('Flutter Downloader plugin initialization failed.');
+  }
 }
 
 void main() async {
@@ -31,7 +36,11 @@ void main() async {
   initializeFlutterDownloader();
 
   BlocSupervisor.delegate = SimpleBlocDelegate();
-  runApp(MultiBlocProvider(providers: [
+  runApp(GetMaterialApp(home: initializeBlocProviders()));
+}
+
+Widget initializeBlocProviders() {
+  return MultiBlocProvider(providers: [
     BlocProvider<ConversationGroupBloc>(
       create: (context) => ConversationGroupBloc(),
     ),
@@ -74,7 +83,7 @@ void main() async {
     BlocProvider<NetworkBloc>(
       create: (context) => NetworkBloc(),
     ),
-  ], child: MyApp()));
+  ], child: MyApp());
 }
 
 class MyApp extends StatefulWidget {

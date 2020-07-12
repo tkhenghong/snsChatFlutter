@@ -1,4 +1,5 @@
 // Requests
+export 'request/authentication/RegisterUsingMobileNumberRequest/RegisterUsingMobileNumberRequest.dart';
 export 'request/authentication/EmailAddressUserAuthenticationRequest/EmailAddressUserAuthenticationRequest.dart';
 export 'request/authentication/MobileNoUserAuthenticationRequest/MobileNoUserAuthenticationRequest.dart';
 export 'request/authentication/PreVerifyMobileNumberOTPRequest/PreVerifyMobileNumberOTPRequest.dart';

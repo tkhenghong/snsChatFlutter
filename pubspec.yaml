@@ -25,6 +25,9 @@ dependencies:
   bloc: ^4.0.0
   flutter_bloc: ^4.0.1
 
+  # Latest State Management
+  get: ^3.2.2
+
   # Things that required by bloc
   equatable: ^1.2.0
 

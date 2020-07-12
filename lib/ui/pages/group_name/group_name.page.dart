@@ -207,7 +207,7 @@ class GroupNamePageState extends State<GroupNamePage> {
   // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
   createGroupConversation(List<Contact> contactList, BuildContext context) async {
     // TODO: create loading that cannot be dismissed to prevent exit, and make it faster
-    showLoading(context, "Creating conversation...");
+    showLoading("Creating conversation...");
 
     UserState userState = BlocProvider.of<UserBloc>(context).state;
     if (userState is UserLoaded) {
@@ -369,7 +369,7 @@ class GroupNamePageState extends State<GroupNamePage> {
   // Actually shouldn't be here
   updateMultimediaContent(BuildContext context, Multimedia multimedia, ConversationGroup conversationGroup) async {
     Navigator.pop(context); // close create conversation group loading
-    showLoading(context, 'Uploading group photo...');
+    showLoading('Uploading group photo...');
     String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
     String remoteThumbnailUrl = await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
 

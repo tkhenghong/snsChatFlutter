@@ -5,13 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
-
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 
 class SignUpPage extends StatefulWidget {
   String mobileNo;
@@ -27,13 +26,11 @@ class SignUpPage extends StatefulWidget {
 
 class SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController nameTextController = new TextEditingController();
   TextEditingController mobileNoTextController = new TextEditingController();
 
   String DEFAULT_COUNTRY_CODE = globals.DEFAULT_COUNTRY_CODE;
 
   FocusNode nodeOne = FocusNode();
-  FocusNode nodeTwo = FocusNode();
 
   IPGeoLocation ipGeoLocation;
   CountryCode countryCode;
@@ -41,6 +38,11 @@ class SignUpPageState extends State<SignUpPage> {
   String mobileNumber;
 
   bool deviceLocated = false;
+
+  double screenWidth;
+  double screenHeight;
+
+  BuildContext mBuildContext;
 
   @override
   void initState() {
@@ -53,82 +55,27 @@ class SignUpPageState extends State<SignUpPage> {
   void dispose() {
     // TODO: implement dispose
     nodeOne.dispose();
-    nodeTwo.dispose();
     super.dispose();
-  }
-
-  getPhoneNumber(String phoneNumber) {
-    String phoneNoInitials = "";
-
-    if (isObjectEmpty(countryCode)) {
-      phoneNoInitials = ipGeoLocation.calling_code;
-    } else {
-      phoneNoInitials = countryCode.dialCode;
-    }
-    mobileNumber = phoneNoInitials + mobileNoTextController.value.text;
-  }
-
-  onCountryPickerChanged(CountryCode countryCode) {
-    this.countryCode = countryCode;
-    widget.countryCodeString = countryCode.code.toString();
   }
 
   @override
   Widget build(BuildContext context) {
-    final deviceWidth = MediaQuery.of(context).size.width;
-    final deviceHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
+    mBuildContext = context;
 
     return MultiBlocListener(
-      listeners: [
-        BlocListener<GoogleInfoBloc, GoogleInfoState>(
-          listener: (context, googleInfoState) {
-            if (googleInfoState is GoogleInfoLoaded) {}
-          },
-        ),
-        BlocListener<UserBloc, UserState>(
-          listener: (context, userState) {
-            if (userState is UserLoaded) {}
-          },
-        ),
-        BlocListener<MultimediaBloc, MultimediaState>(
-          listener: (context, multimediaState) {
-            if (multimediaState is MultimediaLoaded) {}
-          },
-        ),
-        BlocListener<SettingsBloc, SettingsState>(
-          listener: (context, settingsState) {
-            if (settingsState is SettingsLoaded) {}
-          },
-        ),
-        BlocListener<UserContactBloc, UserContactState>(
-          listener: (context, userContactState) {
-            if (userContactState is UserContactsLoaded) {}
-          },
-
-        ),
-        BlocListener<IPGeoLocationBloc, IPGeoLocationState>(
-          listener: (context, ipGeoLocationState) {
-             if (ipGeoLocationState is IPGeoLocationLoaded) {
-                      countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? DEFAULT_COUNTRY_CODE : ipGeoLocationState.ipGeoLocation.country_code2;
-                      ipGeoLocation = ipGeoLocationState.ipGeoLocation;
-                    }
-          },
-        )
-      ],
-      child: signUpScreen(deviceHeight, deviceWidth, context),
+      listeners: [ipGeoLocationBlocListener()],
+      child: signUpScreen(),
     );
   }
 
-  signUpScreen(deviceHeight, deviceWidth, BuildContext context) => Material(
+  signUpScreen() => Material(
       child: GestureDetector(
           // call this method here to hide soft keyboard
-          onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
+          onTap: () => FocusScope.of(mBuildContext).requestFocus(new FocusNode()),
           child: Scaffold(
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0, //Set Shadow
-              iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
-            ),
+            appBar: appBar(),
             body: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -152,104 +99,165 @@ class SignUpPageState extends State<SignUpPage> {
                       children: [
                         Row(
                           children: <Widget>[
-                            CountryCodePicker(
-                              initialSelection: widget.countryCodeString,
-                              alignLeft: false,
-                              showCountryOnly: false,
-                              showFlag: true,
-                              showOnlyCountryWhenClosed: false,
-                              favorite: [widget.countryCodeString],
-                              onChanged: onCountryPickerChanged,
-                            ),
-                            Container(
-                              width: deviceWidth * 0.6,
-                              margin: EdgeInsetsDirectional.only(top: deviceHeight * 0.03),
-                              child: TextFormField(
-                                controller: mobileNoTextController,
-                                inputFormatters: [
-                                  BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
-                                ],
-                                maxLength: 15,
-                                decoration: InputDecoration(hintText: "Mobile Number"),
-                                autofocus: true,
-                                textAlign: TextAlign.left,
-                                keyboardType: TextInputType.phone,
-                                focusNode: nodeOne,
-                                onChanged: getPhoneNumber,
-                                onFieldSubmitted: (value) {
-                                  FocusScope.of(context).requestFocus(nodeTwo);
-                                },
-                                validator: (value) {
-                                  if (value.isEmpty) {
-                                    return "Mobile number is empty";
-                                  }
-
-                                  return null;
-                                },
-                              ),
-                            ),
+                            countryPicker(),
+                            mobileNoTextField(),
                           ],
-                        ),
-                        TextFormField(
-                          controller: nameTextController,
-                          textCapitalization: TextCapitalization.words,
-                          maxLength: 100,
-                          decoration: InputDecoration(hintText: "Name"),
-                          autofocus: true,
-                          textAlign: TextAlign.center,
-                          keyboardType: TextInputType.text,
-                          focusNode: nodeTwo,
-                          textInputAction: TextInputAction.done,
-                          onFieldSubmitted: (value) {},
-                          validator: (value) {
-                            if (value.isEmpty) {
-                              return "Name is empty";
-                            }
-
-                            return null;
-                          },
                         ),
                       ],
                     ),
                   ),
                 ),
-                RaisedButton(
-                  onPressed: () => signUp(context),
-                  textColor: Colors.white,
-                  animationDuration: Duration(milliseconds: 500),
-                  padding: EdgeInsets.only(left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
-                  child: Text("Sign Up"),
-                ),
+                signUpButton(),
                 Padding(padding: EdgeInsets.symmetric(vertical: 50.00)),
               ],
             ),
           )));
 
-  signUp(BuildContext context) async {
+  BlocListener ipGeoLocationBlocListener() {
+    return BlocListener<IPGeoLocationBloc, IPGeoLocationState>(
+      listener: (context, ipGeoLocationState) {
+        print('ipGeoLocationState listener is working.');
+        if (ipGeoLocationState is IPGeoLocationLoaded) {
+          countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? DEFAULT_COUNTRY_CODE : ipGeoLocationState.ipGeoLocation.country_code2;
+          ipGeoLocation = ipGeoLocationState.ipGeoLocation;
+        }
+      },
+    );
+  }
+
+  Widget appBar() {
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0, //Set Shadow
+      iconTheme: IconThemeData(color: Theme.of(mBuildContext).primaryColor),
+    );
+  }
+
+  Widget countryPicker() {
+    return BlocBuilder<IPGeoLocationBloc, IPGeoLocationState>(
+      builder: (context, ipGeoLocationState) {
+        if (ipGeoLocationState is IPGeoLocationLoading) {
+          return Material(
+            child: Center(
+              child: Text('Loading...'),
+            ),
+          );
+        }
+
+        if (ipGeoLocationState is IPGeoLocationLoaded) {
+          countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? DEFAULT_COUNTRY_CODE : ipGeoLocationState.ipGeoLocation.country_code2;
+          ipGeoLocation = ipGeoLocationState.ipGeoLocation;
+          return CountryCodePicker(
+            initialSelection: widget.countryCodeString,
+            alignLeft: false,
+            showCountryOnly: false,
+            showFlag: true,
+            showOnlyCountryWhenClosed: false,
+            favorite: [widget.countryCodeString],
+            onChanged: onCountryPickerChanged,
+          );
+        }
+
+        return Material(
+          child: Center(
+            child: Text('Sign Up page error. Please try restart the app.'),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget mobileNoTextField() {
+    return Container(
+      width: screenWidth * 0.6,
+      margin: EdgeInsetsDirectional.only(top: screenHeight * 0.03),
+      child: TextFormField(
+        controller: mobileNoTextController,
+        inputFormatters: [
+          BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
+        ],
+        maxLength: 15,
+        decoration: InputDecoration(hintText: "Mobile Number"),
+        autofocus: true,
+        textAlign: TextAlign.left,
+        keyboardType: TextInputType.phone,
+        focusNode: nodeOne,
+        validator: (value) {
+          if (value.isEmpty) {
+            return "Mobile number is empty";
+          }
+
+          return null;
+        },
+      ),
+    );
+  }
+
+  Widget signUpButton() {
+    return RaisedButton(
+      onPressed: () => signUp(),
+      textColor: Colors.white,
+      animationDuration: Duration(milliseconds: 500),
+      padding: EdgeInsets.only(left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
+      child: Text("Sign Up"),
+    );
+  }
+
+  getPhoneNumber() {
+    print('sign_up_page.dart getPhoneNumber()');
+    String phoneNoInitials = "";
+
+    if (isObjectEmpty(countryCode)) {
+      phoneNoInitials = ipGeoLocation.calling_code;
+    } else {
+      phoneNoInitials = countryCode.dialCode;
+    }
+    mobileNumber = phoneNoInitials + mobileNoTextController.value.text;
+  }
+
+  onCountryPickerChanged(CountryCode countryCode) {
+    this.countryCode = countryCode;
+    widget.countryCodeString = countryCode.code;
+  }
+
+  signUp() async {
     if (!_formKey.currentState.validate()) {
       return;
     }
 
-    showCenterLoadingIndicator(context);
-    //
+    getPhoneNumber();
 
-    BlocProvider.of<GoogleInfoBloc>(context).add(SignInGoogleInfoEvent(callback: (bool initialized) {
+    showCenterLoadingIndicator();
+
+    try {
+      BlocProvider.of<AuthenticationBloc>(mBuildContext).add(RegisterUsingMobileNoEvent(
+          mobileNo: mobileNumber,
+          countryCode: !isObjectEmpty(countryCode) ? countryCode.code : countryCodeString,
+          callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {
+            print('RegisterUsingMobileNoEvent response.');
+            Navigator.pop(mBuildContext); //pop loading dialog
+            if (!isObjectEmpty(preVerifyMobileNumberOTPResponse)) {
+              goToVerifyPhoneNumber(preVerifyMobileNumberOTPResponse);
+            }
+          }));
+    } catch (e) {
+      print('ERROR CATCHED HERE?');
+    }
+  }
+
+  /// NOTE: sign up using Google is deprecated */
+  @deprecated
+  signUpUsingGoogle() {
+    BlocProvider.of<GoogleInfoBloc>(mBuildContext).add(SignInGoogleInfoEvent(callback: (bool initialized) {
       if (initialized) {
-        BlocProvider.of<GoogleInfoBloc>(context).add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn2, FirebaseAuth firebaseAuth2, FirebaseUser firebaseUser2) {
-          BlocProvider.of<UserBloc>(context).add(CheckUserSignedUpEvent(
+        BlocProvider.of<GoogleInfoBloc>(mBuildContext).add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn2, FirebaseAuth firebaseAuth2, FirebaseUser firebaseUser2) {
+          BlocProvider.of<UserBloc>(mBuildContext).add(CheckUserSignedUpEvent(
               googleSignIn: googleSignIn2,
               mobileNo: mobileNumber,
               callback: (bool isSignedUp) {
                 if (!isSignedUp) {
-                  User user = User(
-                      id: null,
-                      mobileNo: mobileNumber,
-                      countryCode: widget.countryCodeString,
-                      effectivePhoneNumber: mobileNoTextController.value.text.toString(),
-                      displayName: firebaseUser2.displayName.toString(),
-                      googleAccountId: googleSignIn2.currentUser.id.toString(),
-                      realName: nameTextController.value.text.toString());
+                  User user = User(id: null, mobileNo: mobileNumber, countryCode: widget.countryCodeString, displayName: firebaseUser2.displayName.toString(), googleAccountId: googleSignIn2.currentUser.id.toString(), realName: null);
                   Settings settings = Settings(id: null, allowNotifications: true, userId: null);
                   Multimedia multimedia = Multimedia(
                       id: null,
@@ -265,7 +273,7 @@ class SignUpPageState extends State<SignUpPage> {
                       multimediaId: null,
                       mobileNo: mobileNumber,
                       displayName: firebaseUser2.displayName,
-                      realName: nameTextController.value.text.toString(),
+                      realName: null,
                       about: 'Hey There! I am using PocketChat.',
                       lastSeenDate: DateTime.now(),
                       block: false,
@@ -274,34 +282,32 @@ class SignUpPageState extends State<SignUpPage> {
                       userId: null);
 
                   if (!isObjectEmpty(googleSignIn2)) {
-                    BlocProvider.of<UserBloc>(context).add(AddUserEvent(
+                    BlocProvider.of<UserBloc>(mBuildContext).add(AddUserEvent(
                         user: user,
                         callback: (User user2) {
                           // TODO: Error Handling
                           userContact.userId = multimedia.userId = settings.userId = user2.id;
                           userContact.userIds.add(user2.id);
-                          BlocProvider.of<SettingsBloc>(context).add(AddSettingsEvent(
+                          BlocProvider.of<SettingsBloc>(mBuildContext).add(AddSettingsEvent(
                               settings: settings,
                               callback: (Settings settings2) {
                                 if (!isObjectEmpty(settings2)) {
-                                  BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
+                                  BlocProvider.of<MultimediaBloc>(mBuildContext).add(AddMultimediaEvent(
                                       multimedia: multimedia,
                                       callback: (Multimedia multimedia2) {
                                         if (!isObjectEmpty(multimedia2)) {
                                           userContact.multimediaId = multimedia.id;
                                           multimedia2.userContactId = userContact.id;
-                                          BlocProvider.of<UserContactBloc>(context).add(AddUserContactEvent(
+                                          BlocProvider.of<UserContactBloc>(mBuildContext).add(AddUserContactEvent(
                                               userContact: userContact,
                                               callback: (UserContact userContact2) {
-                                                BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(
+                                                BlocProvider.of<MultimediaBloc>(mBuildContext).add(EditMultimediaEvent(
                                                     multimedia: multimedia2,
                                                     callback: (Multimedia multimedia3) {
                                                       if (!isObjectEmpty(googleSignIn2) && !isObjectEmpty(user2) && !isObjectEmpty(settings2) && !isObjectEmpty(userContact2) && !isObjectEmpty(multimedia3)) {
                                                         showToast('Sign up success. Please verify your phone number.', Toast.LENGTH_SHORT);
-                                                        Navigator.pop(context);
-                                                        goToVerifyPhoneNumber(
-                                                            PreVerifyMobileNumberOTPResponse(mobileNumber: mobileNumber),
-                                                            context);
+                                                        Navigator.pop(mBuildContext);
+                                                        goToVerifyPhoneNumber(PreVerifyMobileNumberOTPResponse(mobileNumber: mobileNumber));
                                                       }
                                                     }));
                                               }));
@@ -311,32 +317,32 @@ class SignUpPageState extends State<SignUpPage> {
                                       }));
                                 } else {
                                   showToast('Sign up error. Please try again.', Toast.LENGTH_SHORT);
-                                  BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
-                                  Navigator.pop(context);
+                                  BlocProvider.of<GoogleInfoBloc>(mBuildContext).add(RemoveGoogleInfoEvent());
+                                  Navigator.pop(mBuildContext);
                                 }
                               }));
                         }));
                   } else {
                     showToast('Google Sign in error. Please try again.', Toast.LENGTH_SHORT);
-                    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
-                    Navigator.pop(context);
+                    BlocProvider.of<GoogleInfoBloc>(mBuildContext).add(RemoveGoogleInfoEvent());
+                    Navigator.pop(mBuildContext);
                   }
                 } else {
                   showToast('Registered Mobile No./Google Account. Please use another Mobile No./Google Account to register.', Toast.LENGTH_SHORT);
-                  BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
-                  Navigator.pop(context);
+                  BlocProvider.of<GoogleInfoBloc>(mBuildContext).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
+                  Navigator.pop(mBuildContext);
                 }
               }));
         }));
       } else {
         showToast('Please sign into your Google account first. Please try again.', Toast.LENGTH_LONG);
-        BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent());
-        Navigator.pop(context);
+        BlocProvider.of<GoogleInfoBloc>(mBuildContext).add(RemoveGoogleInfoEvent());
+        Navigator.pop(mBuildContext);
       }
     }));
   }
 
-  goToVerifyPhoneNumber(PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse, BuildContext context) {
-    Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(preVerifyMobileNumberOTPResponse: preVerifyMobileNumberOTPResponse))));
+  goToVerifyPhoneNumber(PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {
+    Navigator.push(mBuildContext, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(preVerifyMobileNumberOTPResponse: preVerifyMobileNumberOTPResponse))));
   }
 }

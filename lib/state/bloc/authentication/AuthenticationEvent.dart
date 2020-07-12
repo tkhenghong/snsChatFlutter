@@ -57,6 +57,20 @@ class RequestAuthenticationUsingEmailAddressEvent extends AuthenticationEvent {
   String toString() => 'GetAuthenticationEventUsingMobileNo {emailAddress: $emailAddress}';
 }
 
+class RegisterUsingMobileNoEvent extends AuthenticationEvent {
+  final String mobileNo;
+  final String countryCode;
+  final Function callback;
+
+  const RegisterUsingMobileNoEvent({this.mobileNo, this.countryCode, this.callback});
+
+  @override
+  List<Object> get props => [mobileNo, countryCode];
+
+  @override
+  String toString() => 'RegisterUsingMobileNoEvent {mobileNo: $mobileNo, countryCode: $countryCode}';
+}
+
 class PreVerifyMobileNoEvent extends AuthenticationEvent {
   final String mobileNo;
   final Function callback;

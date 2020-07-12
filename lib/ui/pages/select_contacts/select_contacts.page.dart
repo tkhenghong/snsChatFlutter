@@ -371,7 +371,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
   createPersonalConversation(Contact contact, BuildContext context) async {
     // TODO: create loading that cannot be dismissed to prevent exit, and make it faster
-    showLoading(context, "Loading conversation...");
+    showLoading("Loading conversation...");
     UserState userState = BlocProvider.of<UserBloc>(context).state;
     if (userState is UserLoaded) {
       User currentUser = userState.user;

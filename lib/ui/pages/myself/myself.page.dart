@@ -19,7 +19,7 @@ class MyselfPageState extends State<MyselfPage> {
   Color appBarThemeTextColor;
   Color themePrimaryColor;
 
-  User blankUser = User(mobileNo: '', realName: '', displayName: '', countryCode: '', effectivePhoneNumber: '', googleAccountId: '');
+  User blankUser = User(mobileNo: '', realName: '', displayName: '', countryCode: '', googleAccountId: '');
 
   ImageService imageService = ImageService();
 

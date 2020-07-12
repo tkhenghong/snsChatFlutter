@@ -29,11 +29,14 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
       yield* _requestAuthenticationUsingMobileNo(event);
     } else if (event is VerifyAuthenticationUsingMobileNoEvent) {
       yield* _verifyAuthenticationUsingMobileNo(event);
+    } else if (event is RegisterUsingMobileNoEvent) {
+      yield* _registerUsingMobileNo(event);
     } else if (event is PreVerifyMobileNoEvent) {
       yield* _preVerifyMobileNo(event);
     } else if (event is VerifyMobileNoEvent) {
       yield* _verifyMobileNo(event);
     }
+    // RegisterUsingMobileNoEvent
   }
 
   Stream<AuthenticationState> _mapInitializeAuthentication(InitializeAuthenticationsEvent event) async* {
@@ -51,6 +54,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     }
   }
 
+  // Only used when changing mobile number
   Stream<AuthenticationState> _requestAuthenticationUsingEmail(RequestAuthenticationUsingEmailAddressEvent event) async* {
     OTPResponse otpResponse = await authenticationAPIService.requestToAuthenticateWithEmailAddress(new EmailAddressUserAuthenticationRequest(emailAddress: event.emailAddress));
     if (!isObjectEmpty(otpResponse)) {
@@ -63,6 +67,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     }
   }
 
+  // Only used when changing email address
   Stream<AuthenticationState> _requestAuthenticationUsingMobileNo(RequestAuthenticationUsingMobileNoEvent event) async* {
     OTPResponse otpResponse = await authenticationAPIService.requestToAuthenticateWithMobileNo(new MobileNoUserAuthenticationRequest(mobileNo: event.mobileNumber));
     if (!isObjectEmpty(otpResponse)) {
@@ -75,6 +80,22 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     }
   }
 
+  // Only used when sign up
+  Stream<AuthenticationState> _registerUsingMobileNo(RegisterUsingMobileNoEvent event) async* {
+    PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse = await authenticationAPIService.registerUsingMobileNumber(new RegisterUsingMobileNumberRequest(mobileNo: event.mobileNo, countryCode: event.countryCode));
+    if (!isObjectEmpty(preVerifyMobileNumberOTPResponse)) {
+      String toastContent = 'A verification code has been sent to your mobile no.: ${event.mobileNo}.';
+      showToast(toastContent, Toast.LENGTH_SHORT);
+      yield Authenticating(preVerifyMobileNumberOTPResponse.mobileNumber, preVerifyMobileNumberOTPResponse.emailAddress, preVerifyMobileNumberOTPResponse.secureKeyword, preVerifyMobileNumberOTPResponse.tokenExpiryTime);
+    } else {
+      showToast("Error when request OTP.", Toast.LENGTH_SHORT);
+      yield AuthenticationsNotLoaded();
+    }
+
+    functionCallback(event, preVerifyMobileNumberOTPResponse);
+  }
+
+  // Only used when sign in
   Stream<AuthenticationState> _verifyAuthenticationUsingMobileNo(VerifyAuthenticationUsingMobileNoEvent event) async* {
     UserAuthenticationResponse authenticationResponse = await authenticationAPIService.mobileNumberAuthentication(new VerifyMobileNumberOTPRequest(mobileNo: event.mobileNumber, otpNumber: event.otpNumber));
     if (!isObjectEmpty(authenticationResponse)) {
@@ -83,6 +104,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
       yield AuthenticationsLoaded(authenticationResponse.jwt, null);
     } else {
       showToast("Error when request OTP.", Toast.LENGTH_SHORT);
+      yield AuthenticationsNotLoaded();
     }
   }
 

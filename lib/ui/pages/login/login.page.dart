@@ -273,7 +273,7 @@ class LoginPageState extends State<LoginPage> {
 
   _signInwithGoogle(BuildContext context, IPGeoLocation ipGeoLocation) async {
     if (_formKey.currentState.validate()) {
-      showCenterLoadingIndicator(context);
+      showCenterLoadingIndicator();
 
       BlocProvider.of<GoogleInfoBloc>(context).add(SignInGoogleInfoEvent(callback: (bool initialized) {
         if (initialized) {

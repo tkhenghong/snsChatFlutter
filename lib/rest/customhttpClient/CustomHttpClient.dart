@@ -21,7 +21,7 @@ class CustomHttpClient {
     try {
       return handleResponse(await get(path, headers: headers));
     } on SocketException {
-      throw ConnectionException();
+      handleError();
     }
   }
 
@@ -30,7 +30,7 @@ class CustomHttpClient {
     try {
       return handleResponse(await post(path, body: requestBody.toJson(), headers: headers));
     } on SocketException {
-      throw ConnectionException();
+      handleError();
     }
   }
 
@@ -39,7 +39,7 @@ class CustomHttpClient {
     try {
       return handleResponse(await put(path, body: requestBody.toJson(), headers: headers));
     } on SocketException {
-      throw ConnectionException();
+      handleError();
     }
   }
 
@@ -48,7 +48,7 @@ class CustomHttpClient {
     try {
       return handleResponse(await delete(path, headers: headers));
     } on SocketException {
-      throw ConnectionException();
+      handleError();
     }
   }
 
@@ -70,11 +70,15 @@ class CustomHttpClient {
         return jsonDecode(response.body);
       }
     } else if (statusCode >= 400 && statusCode < 500) {
-      throw ClientErrorException();
+      throw ClientErrorException('Some invalid request of the client');
     } else if (statusCode >= 500 && statusCode < 600) {
-      throw ServerErrorException();
+      throw ServerErrorException('Server error exception');
     } else {
-      throw UnknownException();
+      throw UnknownException('Unknown exception');
     }
+  }
+
+  void handleError() {
+    throw ConnectionException('Network error.');
   }
 }
