@@ -2,13 +2,27 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart';
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/rest/exceptions/NetworkExceptions.dart';
+import 'package:snschat_flutter/service/index.dart';
 
 import '../RestRequestUtils.dart';
 
 class CustomHttpClient {
   CustomHttpClient._privateConstructor();
+
+  static String ENVIRONMENT = globals.ENVIRONMENT;
+
+  final HttpClient httpClient = HttpClient()
+    ..badCertificateCallback = ((X509Certificate cert, String host, int port) {
+      if (ENVIRONMENT == 'DEVELOPMENT') {
+        return true;
+      }
+      return false;
+    });
+
+  final NetworkService networkService = NetworkService();
 
   static final CustomHttpClient _instance = CustomHttpClient._privateConstructor();
 
@@ -19,6 +33,7 @@ class CustomHttpClient {
   Future<dynamic> getRequest(String path, {Map<String, String> additionalHeaders}) async {
     Map<String, String> headers = handleHTTPHeaders(additionalHeaders);
     try {
+      await checkNetwork();
       return handleResponse(await get(path, headers: headers));
     } on SocketException {
       handleError();
@@ -28,6 +43,7 @@ class CustomHttpClient {
   Future<dynamic> postRequest(String path, {var requestBody, Map<String, String> additionalHeaders}) async {
     Map<String, String> headers = handleHTTPHeaders(additionalHeaders);
     try {
+      await checkNetwork();
       return handleResponse(await post(path, body: requestBody.toJson(), headers: headers));
     } on SocketException {
       handleError();
@@ -37,6 +53,7 @@ class CustomHttpClient {
   Future<dynamic> putRequest(String path, {var requestBody, Map<String, String> additionalHeaders}) async {
     Map<String, String> headers = handleHTTPHeaders(additionalHeaders);
     try {
+      await checkNetwork();
       return handleResponse(await put(path, body: requestBody.toJson(), headers: headers));
     } on SocketException {
       handleError();
@@ -46,6 +63,7 @@ class CustomHttpClient {
   Future<dynamic> deleteRequest(String path, {Map<String, String> additionalHeaders}) async {
     Map<String, String> headers = handleHTTPHeaders(additionalHeaders);
     try {
+      await checkNetwork();
       return handleResponse(await delete(path, headers: headers));
     } on SocketException {
       handleError();
@@ -59,6 +77,21 @@ class CustomHttpClient {
     }
 
     return additionalHeaders;
+  }
+
+  checkNetwork() async {
+    await networkService.initConnectivity();
+    bool connectedThroughMobileData = await networkService.connectedThroughMobileData.stream.last;
+    bool connectedThroughWifi = await networkService.connectedThroughWifi.stream.last;
+    bool hasInternetConnection = await networkService.hasInternetConnection.stream.last;
+
+    print('CustomHttpClient.dart hasInternetConnection: ' + hasInternetConnection.toString());
+    print('CustomHttpClient.dart connectedThroughMobileData: ' + connectedThroughMobileData.toString());
+    print('CustomHttpClient.dart connectedThroughWifi: ' + connectedThroughWifi.toString());
+
+    if (!hasInternetConnection) {
+      throw ConnectionException('No Internet connection.');
+    }
   }
 
   dynamic handleResponse(Response response) {

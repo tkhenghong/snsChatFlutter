@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/services.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:get/get.dart';
 import 'package:snschat_flutter/general/enums/index.dart';
 import 'package:snschat_flutter/general/functions/index.dart';
 
@@ -11,19 +11,35 @@ class NetworkService {
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
-  BehaviorSubject hasInternetConnection = BehaviorSubject<bool>();
-  BehaviorSubject connectedThroughWifi = BehaviorSubject<bool>();
-  BehaviorSubject connectedThroughMobileData = BehaviorSubject<bool>();
-  BehaviorSubject hasLocationEnabled = BehaviorSubject<bool>();
+//  BehaviorSubject hasInternetConnection = BehaviorSubject<bool>();
+//  BehaviorSubject connectedThroughWifi = BehaviorSubject<bool>();
+//  BehaviorSubject connectedThroughMobileData = BehaviorSubject<bool>();
+//  BehaviorSubject hasLocationEnabled = BehaviorSubject<bool>();
 
-  BehaviorSubject connectionType = BehaviorSubject<ConnectionType>();
+//  BehaviorSubject connectionType = BehaviorSubject<ConnectionType>();
 
-  BehaviorSubject wifiName = BehaviorSubject<String>();
-  BehaviorSubject wifiSSID = BehaviorSubject<String>();
-  BehaviorSubject ipAddress = BehaviorSubject<String>();
-  BehaviorSubject connectionStatus = BehaviorSubject<String>();
+//  BehaviorSubject wifiName = BehaviorSubject<String>();
+//  BehaviorSubject wifiSSID = BehaviorSubject<String>();
+//  BehaviorSubject ipAddress = BehaviorSubject<String>();
+//  BehaviorSubject connectionStatus = BehaviorSubject<String>();
+
+  RxBool hasInternetConnection = false.obs;
+  RxBool connectedThroughWifi = false.obs;
+  RxBool connectedThroughMobileData = false.obs;
+  RxBool hasLocationEnabled = false.obs;
+
+  RxInterface<ConnectionType> connectionTypeInterface = null.obs;
+
+  RxString wifiName = ''.obs;
+  RxString wifiSSID = ''.obs;
+  RxString ipAddress = ''.obs;
+  RxString connectionStatus = ''.obs;
 
   String wifiFullName, wifiBSSID, wifiIP;
+
+  NetworkService() {
+    initConnectivity();
+  }
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initConnectivity() async {
@@ -46,29 +62,42 @@ class NetworkService {
   Future<void> _updateConnectionStatus(ConnectivityResult result) async {
     switch (result) {
       case ConnectivityResult.wifi:
-        this.hasInternetConnection.add(true);
-        this.connectionType.add(ConnectionType.Wifi);
-        this.connectedThroughWifi.add(true);
-        this.connectedThroughMobileData.add(false);
+//        hasInternetConnection.add(true);
+        hasInternetConnection.value = true;
+        connectionTypeInterface.subject.add(ConnectionType.Wifi);
+//        connectedThroughWifi.add(true);
+        connectedThroughWifi.value = true;
+//        connectedThroughMobileData.add(false);
+        connectedThroughMobileData.value = false;
+
         tryGetWifiName();
         tryGetWifiSSID();
         tryGetWifiIP();
 
-        this.hasInternetConnection.add(true);
-        this.wifiName.add(wifiFullName);
-        this.wifiSSID.add(wifiBSSID);
-        this.ipAddress.add(wifiIP);
+//        wifiName.add(wifiFullName);
+        wifiName.value = wifiFullName;
+//        wifiSSID.add(wifiBSSID);
+        wifiSSID.value = wifiBSSID;
+//        ipAddress.add(wifiIP);
+        ipAddress.value = wifiIP;
         break;
       case ConnectivityResult.mobile:
+//        connectionType.add(ConnectionType.MobileData);
+//        hasInternetConnection.add(true);
+        hasInternetConnection.value = true;
+//        connectedThroughMobileData.add(true);
+        connectedThroughMobileData.value = true;
+//        connectedThroughWifi.add(false);
+        connectedThroughWifi.value = false;
+        break;
       case ConnectivityResult.none:
-        this.connectionType.add(ConnectionType.MobileData);
-        this.connectedThroughMobileData.add(true);
-        this.connectedThroughWifi.add(false);
-        this.connectionStatus.add(result.toString());
+//        connectionStatus.add(result.toString());
+        connectionStatus.value = result.toString();
         clearSubscriptions();
         break;
       default:
-        this.connectionStatus.add('Failed to get Connectivity.');
+//        connectionStatus.add('Failed to get Connectivity.');
+        connectionStatus.value = 'Failed to get Connectivity.';
         clearSubscriptions();
         break;
     }
@@ -82,16 +111,19 @@ class NetworkService {
           status = await _connectivity.requestLocationServiceAuthorization();
         }
         if (status == LocationAuthorizationStatus.authorizedAlways || status == LocationAuthorizationStatus.authorizedWhenInUse) {
-          this.hasLocationEnabled.add(true);
+//          hasLocationEnabled.add(true);
+          hasLocationEnabled.value = true;
         }
       }
 
       wifiFullName = await _connectivity.getWifiName();
-      this.wifiName.add(wifiName);
+//      wifiName.add(wifiFullName);
+      wifiName.value = wifiFullName;
     } on PlatformException catch (e) {
       print(e.toString());
       wifiFullName = "Failed to get Wifi Name";
-      this.wifiName.add(null);
+//      wifiName.add(null);
+      wifiName.value = null;
     }
   }
 
@@ -111,34 +143,47 @@ class NetworkService {
         wifiBSSID = await _connectivity.getWifiBSSID();
       }
 
-      this.wifiSSID.add(wifiBSSID);
+//      wifiSSID.add(wifiBSSID);
+      wifiSSID.value = wifiBSSID;
     } on PlatformException catch (e) {
       print(e.toString());
       wifiBSSID = "Failed to get Wifi BSSID";
-      this.wifiSSID.add(null);
+//      wifiSSID.add(null);
+      wifiSSID.value = null;
     }
   }
 
   tryGetWifiIP() async {
     try {
       wifiIP = await _connectivity.getWifiIP();
-      this.ipAddress.add(wifiIP);
+//      ipAddress.add(wifiIP);
+      ipAddress.value = wifiIP;
     } on PlatformException catch (e) {
       print(e.toString());
       wifiIP = "Failed to get Wifi IP";
-      this.ipAddress.add(null);
+//      ipAddress.add(null);
+      ipAddress.value = null;
     }
   }
 
   clearSubscriptions() {
-    this.hasInternetConnection.add(false);
-    this.connectionType.add(null);
-    this.connectedThroughWifi.add(false);
-    this.connectedThroughMobileData.add(false);
-    this.hasLocationEnabled.add(false);
-    this.wifiName.add(null);
-    this.wifiSSID.add(null);
-    this.ipAddress.add(null);
-    this.connectionStatus.add(null);
+//    hasInternetConnection.add(false);
+    hasInternetConnection.value = false;
+//    connectionType.add(null);
+    connectionTypeInterface.subject.add(null);
+//    connectedThroughWifi.add(false);
+    connectedThroughWifi.value = false;
+//    connectedThroughMobileData.add(false);
+    connectedThroughMobileData.value = false;
+//    hasLocationEnabled.add(false);
+    hasLocationEnabled.value = false;
+//    wifiName.add(null);
+    wifiName.value = null;
+//    wifiSSID.add(null);
+    wifiSSID.value = null;
+//    ipAddress.add(null);
+    ipAddress.value = null;
+//    connectionStatus.add(null);
+    connectionStatus.value = null;
   }
 }

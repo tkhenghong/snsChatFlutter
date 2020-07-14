@@ -10,32 +10,42 @@ abstract class ApiException implements Exception {
       Get.back();
     }
 
-    Get.dialog(
-        SimpleDialog(
-          title: Text(this.runtimeType.toString()),
-          children: [
-            Center(
-              child: Column(
-                children: <Widget>[
-                  Text(message),
-                  RaisedButton(
-                    child: Text('Send error report'),
-                    onPressed: () {
-                      print('Send Error Report button Pressed.');
-                    },
-                  ),
-                  RaisedButton(
-                    child: Text('OK'),
-                    onPressed: () {
-                      Get.back();
-                    },
-                  )
-                ],
-              ),
-            )
-          ],
-        ),
-        barrierDismissible: false);
+    Get.snackbar(this.runtimeType.toString(), message,
+        snackPosition: SnackPosition.BOTTOM,
+        isDismissible: true,
+        mainButton: FlatButton(
+          onPressed: () {
+            print('Send Error Report button Pressed.');
+          },
+          child: Text('Send error report'),
+        ));
+
+//    Get.dialog(
+//        SimpleDialog(
+//          title: Text(this.runtimeType.toString()),
+//          children: [
+//            Center(
+//              child: Column(
+//                children: <Widget>[
+//                  Text(message),
+//                  RaisedButton(
+//                    child: Text('Send error report'),
+//                    onPressed: () {
+//                      print('Send Error Report button Pressed.');
+//                    },
+//                  ),
+//                  RaisedButton(
+//                    child: Text('OK'),
+//                    onPressed: () {
+//                      Get.back();
+//                    },
+//                  )
+//                ],
+//              ),
+//            )
+//          ],
+//        ),
+//        barrierDismissible: false);
   }
 }
 

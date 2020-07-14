@@ -23,18 +23,18 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
       try {
         await networkService.initConnectivity();
 
-        bool hasInternetConnection = await networkService.hasInternetConnection.last;
+        bool hasInternetConnection = await networkService.hasInternetConnection.value;
 
         if (!hasInternetConnection) {
           yield NetworkNotLoaded();
           functionCallback(event, false);
         } else {
-          String connectionStatus = await networkService.connectionStatus.last;
-          String wifiName = await networkService.wifiName.last;
-          String wifiSSID = await networkService.wifiSSID.last;
-          String wifiIP = await networkService.ipAddress.last;
-          bool connectedThroughWifi = await networkService.connectedThroughWifi.last;
-          bool connectedThroughMobileData = await networkService.connectedThroughMobileData.last;
+          String connectionStatus = await networkService.connectionStatus.value;
+          String wifiName = await networkService.wifiName.value;
+          String wifiSSID = await networkService.wifiSSID.value;
+          String wifiIP = await networkService.ipAddress.value;
+          bool connectedThroughWifi = await networkService.connectedThroughWifi.value;
+          bool connectedThroughMobileData = await networkService.connectedThroughMobileData.value;
 
           yield NetworkLoaded(connectionStatus, wifiName, wifiSSID, wifiIP, connectedThroughWifi, connectedThroughMobileData);
           functionCallback(event, true);
