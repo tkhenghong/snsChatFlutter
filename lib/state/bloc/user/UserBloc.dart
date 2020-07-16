@@ -39,7 +39,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   Stream<UserState> _initializeUser(InitializeUserEvent event) async* {
     if (state is UserLoading || state is UserNotLoaded) {
       try {
-        User userFromDB = await userDBService.getUserByGoogleAccountId(event.googleSignIn.currentUser.id);
+        User userFromDB = await userDBService.getSingleUser(event.userId);
 
         if (!isObjectEmpty(userFromDB)) {
           yield UserLoaded(userFromDB);

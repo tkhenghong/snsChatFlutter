@@ -12,13 +12,13 @@ abstract class UserEvent extends Equatable {
 }
 
 class InitializeUserEvent extends UserEvent {
-  final GoogleSignIn googleSignIn;
+  final String userId;
   final Function callback;
 
-  const InitializeUserEvent({this.googleSignIn, this.callback});
+  const InitializeUserEvent({this.userId, this.callback});
 
   @override
-  String toString() => 'InitializeUsersEvent. {googleSignIn: $googleSignIn}';
+  String toString() => 'InitializeUsersEvent. {userId: $userId}';
 }
 
 class AddUserEvent extends UserEvent {
