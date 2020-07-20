@@ -22,8 +22,8 @@ dependencies:
 
   # State
   #  provider: ^4.0.5
-  bloc: ^4.0.0
-  flutter_bloc: ^4.0.1
+  bloc: ^5.0.1
+  flutter_bloc: ^5.0.1
 
   # Latest State Management
   get: ^3.2.2
@@ -125,6 +125,9 @@ dependencies:
 
   # Build runner for json_annotation and json_serializable
   build_runner: ^1.10.0
+
+  # Phoenix to restart the app programatically
+  flutter_phoenix: ^0.1.0
 
   flutter:
     sdk: flutter

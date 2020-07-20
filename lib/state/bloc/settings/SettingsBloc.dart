@@ -9,11 +9,10 @@ import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/state/bloc/settings/bloc.dart';
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
+  SettingsBloc(): super(SettingsLoading());
+
   SettingsAPIService settingsAPIService = SettingsAPIService();
   SettingsDBService settingsDBService = SettingsDBService();
-
-  @override
-  SettingsState get initialState => SettingsLoading();
 
   @override
   Stream<SettingsState> mapEventToState(SettingsEvent event) async* {

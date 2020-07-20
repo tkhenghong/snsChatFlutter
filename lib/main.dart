@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
@@ -21,7 +22,6 @@ void _enablePlatformOverrideForDesktop() {
 
 void initializeFlutterDownloader() async {
   try {
-    WidgetsFlutterBinding.ensureInitialized();
     await FlutterDownloader.initialize().then((data) {
       // print('FlutterDownloader.initialize() completed');
       // print('data: ' + data.toString());
@@ -31,12 +31,58 @@ void initializeFlutterDownloader() async {
   }
 }
 
+List<NavigationPage> navigationPageList = [
+  NavigationPage(routeName: 'login_page', routePage: LoginPage()),
+  NavigationPage(routeName: 'privacy_notice_page', routePage: PrivacyNoticePage()),
+  NavigationPage(routeName: 'sign_up_page', routePage: SignUpPage()),
+  NavigationPage(routeName: 'terms_and_conditions_page', routePage: TermsAndConditionsPage()),
+  NavigationPage(routeName: 'verify_phone_number_page', routePage: VerifyPhoneNumberPage()),
+  NavigationPage(routeName: 'tabs_page', routePage: TabsPage()),
+  NavigationPage(routeName: 'chat_group_list_page', routePage: ChatGroupListPage()),
+  NavigationPage(routeName: 'scan_qr_code_page', routePage: ScanQrCodePage()),
+  NavigationPage(routeName: 'settings_page', routePage: SettingsPage()),
+  NavigationPage(routeName: 'myself_page', routePage: MyselfPage()),
+  NavigationPage(routeName: 'chat_room_page', routePage: ChatRoomPage()),
+  NavigationPage(routeName: 'chat_info_page', routePage: ChatInfoPage()),
+  NavigationPage(routeName: 'contacts_page', routePage: SelectContactsPage()),
+  NavigationPage(routeName: 'photo_view_page', routePage: PhotoViewPage()),
+  NavigationPage(routeName: 'video_player_page', routePage: VideoPlayerPage()),
+];
+
+List<GetPage> generateGetPageList() {
+  List<GetPage> getPageList = [];
+  navigationPageList.forEach((element) {
+    getPageList.add(GetPage(name: element.routeName, page: () => element.routePage));
+  });
+
+  return getPageList;
+}
+
+final Map<String, WidgetBuilder> routeList = Map();
+
+Map<String, WidgetBuilder> generateRoutes() {
+  if (routeList.length == 0) {
+    navigationPageList.forEach((element) {
+      routeList.putIfAbsent(element.routeName, () => (_) => element.routePage);
+    });
+  }
+
+  return routeList;
+}
+
 void main() async {
   _enablePlatformOverrideForDesktop();
   initializeFlutterDownloader();
 
-  BlocSupervisor.delegate = SimpleBlocDelegate();
-  runApp(GetMaterialApp(home: initializeBlocProviders()));
+  WidgetsFlutterBinding.ensureInitialized();
+
+  Bloc.observer = SimpleBlocObserver();
+  runApp(Phoenix(
+    child: GetMaterialApp(
+      home: initializeBlocProviders(),
+      getPages: generateGetPageList(),
+    ),
+  ));
 }
 
 Widget initializeBlocProviders() {
@@ -86,14 +132,7 @@ Widget initializeBlocProviders() {
   ], child: MyApp());
 }
 
-class MyApp extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() {
-    return MyAppState();
-  }
-}
-
-class MyAppState extends State<MyApp> {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color primaryColor = Colors.black;
@@ -106,7 +145,6 @@ class MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'PocketChat',
       theme: ThemeData(
-//        fontFamily: 'OpenSans',
         textTheme: GoogleFonts.latoTextTheme(Theme.of(context).textTheme),
         brightness: primaryBrightness,
         primaryColor: primaryColor,
@@ -125,32 +163,17 @@ class MyAppState extends State<MyApp> {
             color: primaryColor,
             textTheme: TextTheme(
               button: primaryTextStyleInAppBarText,
-              title: primaryTextStyleInAppBarText,
             )),
       ),
       home: TabsPage(),
-      routes: {
-        "login_page": (_) => new LoginPage(),
-        "privacy_notice_page": (_) => new PrivacyNoticePage(),
-        "sign_up_page": (_) => new SignUpPage(),
-        "terms_and_conditions_page": (_) => TermsAndConditionsPage(),
-        "verify_phone_number_page": (_) => VerifyPhoneNumberPage(),
-        "tabs_page": (_) => TabsPage(),
-        "chat_group_list_page": (_) => new ChatGroupListPage(),
-        "scan_qr_code_page": (_) => new ScanQrCodePage(),
-        "settings_page": (_) => new SettingsPage(),
-        "myself_page": (_) => new MyselfPage(),
-        "chat_room_page": (_) => new ChatRoomPage(),
-        "chat_info_page": (_) => new ChatInfoPage(),
-        "contacts_page": (_) => new SelectContactsPage(),
-        "photo_view_page": (_) => new PhotoViewPage(),
-        "video_player_page": (_) => new VideoPlayerPage(),
-      },
+      routes: generateRoutes(),
     );
   }
+}
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
+class NavigationPage {
+  String routeName;
+  Widget routePage;
+
+  NavigationPage({this.routeName, this.routePage});
 }

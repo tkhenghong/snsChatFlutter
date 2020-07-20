@@ -9,13 +9,13 @@ import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/user/bloc.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
+  UserBloc() : super(UserLoading());
+
   UserAPIService userAPIService = UserAPIService();
   UserDBService userDBService = UserDBService();
 
   String ENVIRONMENT = globals.ENVIRONMENT;
 
-  @override
-  UserState get initialState => UserLoading();
 
   @override
   Stream<UserState> mapEventToState(UserEvent event) async* {

@@ -6,11 +6,10 @@ import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/userContact/bloc.dart';
 
 class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
+  UserContactBloc() : super(UserContactsLoading());
+
   UserContactAPIService userContactAPIService = UserContactAPIService();
   UserContactDBService userContactDBService = UserContactDBService();
-
-  @override
-  UserContactState get initialState => UserContactsLoading();
 
   @override
   Stream<UserContactState> mapEventToState(UserContactEvent event) async* {

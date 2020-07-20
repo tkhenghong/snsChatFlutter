@@ -7,11 +7,10 @@ import 'package:snschat_flutter/rest/index.dart';
 import 'bloc.dart';
 
 class MessageBloc extends Bloc<MessageEvent, MessageState> {
+  MessageBloc() : super(MessageLoading());
+
   MessageAPIService messageAPIService = MessageAPIService();
   ChatMessageDBService messageDBService = ChatMessageDBService();
-
-  @override
-  MessageState get initialState => MessageLoading();
 
   @override
   Stream<MessageState> mapEventToState(MessageEvent event) async* {

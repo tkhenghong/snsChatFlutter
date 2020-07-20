@@ -7,11 +7,10 @@ import 'package:snschat_flutter/service/index.dart';
 import 'bloc.dart';
 
 class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaProgressState> {
+  MultimediaProgressBloc() : super(MultimediaProgressLoading());
+
   PermissionService permissionService = PermissionService();
   MultimediaProgressDBService multimediaProgressDBService = MultimediaProgressDBService();
-
-  @override
-  MultimediaProgressState get initialState => MultimediaProgressLoading();
 
   @override
   Stream<MultimediaProgressState> mapEventToState(MultimediaProgressEvent event) async* {

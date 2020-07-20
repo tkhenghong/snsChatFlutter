@@ -7,11 +7,10 @@ import 'package:snschat_flutter/rest/index.dart';
 import 'bloc.dart';
 
 class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
+  MultimediaBloc() : super(MultimediaLoading());
+
   MultimediaAPIService multimediaAPIService = MultimediaAPIService();
   MultimediaDBService multimediaDBService = MultimediaDBService();
-
-  @override
-  MultimediaState get initialState => MultimediaLoading();
 
   @override
   Stream<MultimediaState> mapEventToState(MultimediaEvent event) async* {

@@ -32,8 +32,10 @@ class CustomHttpClient {
 
   Future<dynamic> getRequest(String path, {Map<String, String> additionalHeaders}) async {
     Map<String, String> headers = handleHTTPHeaders(additionalHeaders);
+    print('CustomHTTPClient getRequest()');
     try {
       await checkNetwork();
+      print('BEFORE getRequest()');
       return handleResponse(await get(path, headers: headers));
     } on SocketException {
       handleError();
@@ -81,9 +83,9 @@ class CustomHttpClient {
 
   checkNetwork() async {
     await networkService.initConnectivity();
-    bool connectedThroughMobileData = await networkService.connectedThroughMobileData.stream.last;
-    bool connectedThroughWifi = await networkService.connectedThroughWifi.stream.last;
-    bool hasInternetConnection = await networkService.hasInternetConnection.stream.last;
+    bool connectedThroughMobileData = networkService.connectedThroughMobileData.value;
+    bool connectedThroughWifi = networkService.connectedThroughWifi.value;
+    bool hasInternetConnection = networkService.hasInternetConnection.value;
 
     print('CustomHttpClient.dart hasInternetConnection: ' + hasInternetConnection.toString());
     print('CustomHttpClient.dart connectedThroughMobileData: ' + connectedThroughMobileData.toString());

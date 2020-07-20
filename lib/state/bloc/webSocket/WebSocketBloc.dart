@@ -8,10 +8,9 @@ import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'bloc.dart';
 
 class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
-  WebSocketService webSocketService = WebSocketService();
+  WebSocketBloc(): super(WebSocketLoading());
 
-  @override
-  WebSocketState get initialState => WebSocketLoading();
+  WebSocketService webSocketService = WebSocketService();
 
   @override
   Stream<WebSocketState> mapEventToState(WebSocketEvent event) async* {

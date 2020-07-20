@@ -8,11 +8,10 @@ import 'bloc.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial
 class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGroupState> {
+  ConversationGroupBloc(): super(ConversationGroupsLoading());
+
   ConversationGroupAPIService conversationGroupAPIService = ConversationGroupAPIService();
   ConversationDBService conversationGroupDBService = ConversationDBService();
-
-  @override
-  ConversationGroupState get initialState => ConversationGroupsLoading();
 
   @override
   Stream<ConversationGroupState> mapEventToState(ConversationGroupEvent event) async* {

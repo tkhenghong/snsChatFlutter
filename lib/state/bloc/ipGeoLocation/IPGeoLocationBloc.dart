@@ -6,10 +6,9 @@ import 'package:snschat_flutter/rest/index.dart';
 import 'bloc.dart';
 
 class IPGeoLocationBloc extends Bloc<IPGeoLocationEvent, IPGeoLocationState> {
-  IPLocationAPIService ipLocationAPIService = IPLocationAPIService();
+  IPGeoLocationBloc() : super(IPGeoLocationLoading());
 
-  @override
-  get initialState => IPGeoLocationLoading();
+  IPLocationAPIService ipLocationAPIService = IPLocationAPIService();
 
   @override
   Stream<IPGeoLocationState> mapEventToState(event) async* {

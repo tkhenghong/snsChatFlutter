@@ -8,8 +8,7 @@ import 'bloc.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial
 class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
-  @override
-  GoogleInfoState get initialState => GoogleInfoLoading();
+  GoogleInfoBloc() : super(GoogleInfoLoading());
 
   @override
   Stream<GoogleInfoState> mapEventToState(GoogleInfoEvent event) async* {

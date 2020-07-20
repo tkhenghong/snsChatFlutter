@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:rxdart/subjects.dart';
 import 'package:snschat_flutter/general/enums/index.dart';
 import 'package:snschat_flutter/general/functions/index.dart';
 
@@ -28,7 +29,8 @@ class NetworkService {
   RxBool connectedThroughMobileData = false.obs;
   RxBool hasLocationEnabled = false.obs;
 
-  RxInterface<ConnectionType> connectionTypeInterface = null.obs;
+//  RxInterface<ConnectionType> connectionTypeInterface = null.obs;
+  final connectionTypeInterface = BehaviorSubject<ConnectionType>();
 
   RxString wifiName = ''.obs;
   RxString wifiSSID = ''.obs;
@@ -64,7 +66,8 @@ class NetworkService {
       case ConnectivityResult.wifi:
 //        hasInternetConnection.add(true);
         hasInternetConnection.value = true;
-        connectionTypeInterface.subject.add(ConnectionType.Wifi);
+//        connectionTypeInterface.subject.add(ConnectionType.Wifi);
+        connectionTypeInterface.add(ConnectionType.Wifi);
 //        connectedThroughWifi.add(true);
         connectedThroughWifi.value = true;
 //        connectedThroughMobileData.add(false);
@@ -83,6 +86,7 @@ class NetworkService {
         break;
       case ConnectivityResult.mobile:
 //        connectionType.add(ConnectionType.MobileData);
+        connectionTypeInterface.add(ConnectionType.MobileData);
 //        hasInternetConnection.add(true);
         hasInternetConnection.value = true;
 //        connectedThroughMobileData.add(true);
@@ -170,7 +174,8 @@ class NetworkService {
 //    hasInternetConnection.add(false);
     hasInternetConnection.value = false;
 //    connectionType.add(null);
-    connectionTypeInterface.subject.add(null);
+//    connectionTypeInterface.subject.add(null);
+    connectionTypeInterface.add(null);
 //    connectedThroughWifi.add(false);
     connectedThroughWifi.value = false;
 //    connectedThroughMobileData.add(false);

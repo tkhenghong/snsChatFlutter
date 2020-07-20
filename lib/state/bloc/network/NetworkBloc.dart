@@ -5,11 +5,11 @@ import 'package:snschat_flutter/service/index.dart';
 import 'bloc.dart';
 
 class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
+
+  NetworkBloc() : super(NetworkLoading());
+
   PermissionService permissionService = PermissionService();
   NetworkService networkService = NetworkService();
-
-  @override
-  NetworkState get initialState => NetworkLoading();
 
   @override
   Stream<NetworkState> mapEventToState(NetworkEvent event) async* {

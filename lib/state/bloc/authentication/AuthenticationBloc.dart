@@ -9,10 +9,9 @@ import 'bloc.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial
 class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> {
-  UserAuthenticationAPIService authenticationAPIService = UserAuthenticationAPIService();
+  AuthenticationBloc() : super(AuthenticationsLoading());
 
-  @override
-  AuthenticationState get initialState => AuthenticationsLoading();
+  UserAuthenticationAPIService authenticationAPIService = UserAuthenticationAPIService();
 
   @override
   Stream<AuthenticationState> mapEventToState(AuthenticationEvent event) async* {
@@ -45,8 +44,14 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
         SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
         String jwtToken = sharedPreferences.getString("jwtToken");
         String userId = sharedPreferences.getString("userId");
-        yield AuthenticationsLoaded(jwtToken, userId);
-        functionCallback(event, true);
+
+        if (!isStringEmpty(jwtToken) && !isStringEmpty(userId)) {
+          yield AuthenticationsLoaded(jwtToken, userId);
+          functionCallback(event, true);
+        } else {
+          yield AuthenticationsNotLoaded();
+          functionCallback(event, false);
+        }
       } catch (e) {
         yield AuthenticationsNotLoaded();
         functionCallback(event, false);

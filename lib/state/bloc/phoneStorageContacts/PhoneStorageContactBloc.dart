@@ -7,10 +7,9 @@ import 'package:snschat_flutter/service/index.dart';
 import 'bloc.dart';
 
 class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorageContactState> {
-  PermissionService permissionService = PermissionService();
+  PhoneStorageContactBloc() : super(PhoneStorageContactLoading());
 
-  @override
-  PhoneStorageContactState get initialState => PhoneStorageContactLoading();
+  PermissionService permissionService = PermissionService();
 
   @override
   Stream<PhoneStorageContactState> mapEventToState(PhoneStorageContactEvent event) async* {
