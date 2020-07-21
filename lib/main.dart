@@ -3,11 +3,13 @@ import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:snschat_flutter/rest/httpOverrides/MyHttpOverrides.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/state/bloc/network/bloc.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
@@ -74,9 +76,13 @@ void main() async {
   _enablePlatformOverrideForDesktop();
   initializeFlutterDownloader();
 
+  ByteData byteData = await rootBundle.load('lib/keystore/keystore.jks');
+  HttpOverrides.global = new MyHttpOverrides(byteData);
+
   WidgetsFlutterBinding.ensureInitialized();
 
   Bloc.observer = SimpleBlocObserver();
+
   runApp(Phoenix(
     child: GetMaterialApp(
       home: initializeBlocProviders(),

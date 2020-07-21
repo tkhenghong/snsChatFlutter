@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/rest/exceptions/NetworkExceptions.dart';
 import 'package:snschat_flutter/service/index.dart';
@@ -11,16 +10,6 @@ import '../RestRequestUtils.dart';
 
 class CustomHttpClient {
   CustomHttpClient._privateConstructor();
-
-  static String ENVIRONMENT = globals.ENVIRONMENT;
-
-  final HttpClient httpClient = HttpClient()
-    ..badCertificateCallback = ((X509Certificate cert, String host, int port) {
-      if (ENVIRONMENT == 'DEVELOPMENT') {
-        return true;
-      }
-      return false;
-    });
 
   final NetworkService networkService = NetworkService();
 
@@ -32,10 +21,8 @@ class CustomHttpClient {
 
   Future<dynamic> getRequest(String path, {Map<String, String> additionalHeaders}) async {
     Map<String, String> headers = handleHTTPHeaders(additionalHeaders);
-    print('CustomHTTPClient getRequest()');
     try {
       await checkNetwork();
-      print('BEFORE getRequest()');
       return handleResponse(await get(path, headers: headers));
     } on SocketException {
       handleError();
