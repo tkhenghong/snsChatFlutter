@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -27,11 +28,33 @@ class CustomFileService {
 
       // var dir = await getApplicationDocumentsDirectory();
       // TODO: Testing directory. Original should be the above code
-      var dir = await getExternalStorageDirectory();
+      // getExternalStoragePath is only available on Android
 
-      // make sure it exists
-      await dir.create(recursive: true);
-      return dir.path; // join method comes from path.dart
+      var dir = null;
+      if(Platform.isAndroid) {
+        dir = await getExternalStorageDirectory();
+        // make sure it exists
+        await dir.create(recursive: true);
+        return dir.path; // join method comes from path.dart
+      } else if(Platform.isIOS) {
+        dir = await getApplicationDocumentDirectory();
+        return dir;
+      } else if(Platform.isWindows) {
+        return 'C:/';
+      } else if (Platform.isMacOS) {
+        return '/tmp/';
+      } else if (Platform.isLinux) {
+        return '/tmp';
+      } else if (Platform.isFuchsia) {
+        return '/tmp';
+      }
+
+      // Is Website mode
+      if(kIsWeb) {
+        // TODO: No directory can be given!
+        return null;
+      }
+
     } else {
       return null;
     }

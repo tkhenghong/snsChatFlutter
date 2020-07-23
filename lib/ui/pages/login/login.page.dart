@@ -42,12 +42,20 @@ class LoginPageState extends State<LoginPage> {
   WebSocketBloc webSocketBloc;
 
   final _formKey = GlobalKey<FormState>();
-  TextEditingController mobileNoTextController = new TextEditingController();
+  TextEditingController mobileNoTextController;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    mobileNoTextController = new TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    mobileNoTextController.dispose();
   }
 
   @override
@@ -305,7 +313,12 @@ class LoginPageState extends State<LoginPage> {
   }
 
   _signIn() async {
+    if (!_formKey.currentState.validate()) {
+      return;
+    }
+
     getPhoneNumber();
+
     authenticationBloc.add(PreVerifyMobileNoEvent(
         mobileNo: mobileNumber,
         callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {

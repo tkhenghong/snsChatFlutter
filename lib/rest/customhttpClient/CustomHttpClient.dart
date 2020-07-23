@@ -85,6 +85,7 @@ class CustomHttpClient {
 
   dynamic handleResponse(Response response) {
     final statusCode = response.statusCode;
+
     if (statusCode >= 200 && statusCode < 299) {
       if (response.body.isEmpty) {
         return null;
@@ -92,15 +93,15 @@ class CustomHttpClient {
         return jsonDecode(response.body);
       }
     } else if (statusCode >= 400 && statusCode < 500) {
-      throw ClientErrorException('Some invalid request of the client');
+      throw ClientErrorException(response.body, statusCode.toString());
     } else if (statusCode >= 500 && statusCode < 600) {
-      throw ServerErrorException('Server error exception');
+      throw ServerErrorException(response.body, statusCode.toString());
     } else {
-      throw UnknownException('Unknown exception');
+      throw UnknownException(response.body, statusCode.toString());
     }
   }
 
   void handleError() {
-    throw ConnectionException('Network error.');
+    throw ConnectionException('Unable to connect to the server.');
   }
 }

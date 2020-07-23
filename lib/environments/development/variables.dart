@@ -1,7 +1,11 @@
 library snsChatFlutter.globals;
+String REST_URL_HOST_IP = '192.168.0.195';
+String REST_URL_HOST_PORT = '8888';
 
-String REST_URL = "https://192.168.0.195:8888";
-String WEBSOCKET_URL = "wss://192.168.0.195:8888/socket/websocket";
+String REST_URL = "https://$REST_URL_HOST_IP:$REST_URL_HOST_PORT";
+String WEBSOCKET_URL = "wss://$REST_URL_HOST_IP:$REST_URL_HOST_PORT/socket/websocket";
+String IP_GEO_LOCATION_HOST_ADDRESS = 'api.ipgeolocation.io';
+List<String> allowedHost = [REST_URL_HOST_IP, IP_GEO_LOCATION_HOST_ADDRESS];
 // In Google Cloud: http://35.184.11.203:8080
 String ENVIRONMENT = "DEVELOPMENT"; //LOCAL_COMPUTER, DEVELOPMENT, PRODUCTION
 

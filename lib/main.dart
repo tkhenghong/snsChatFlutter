@@ -23,14 +23,15 @@ void _enablePlatformOverrideForDesktop() {
 }
 
 void initializeFlutterDownloader() async {
-  try {
-    await FlutterDownloader.initialize().then((data) {
-      // print('FlutterDownloader.initialize() completed');
-      // print('data: ' + data.toString());
-    });
-  } catch (e) {
-    print('Flutter Downloader plugin initialization failed.');
-  }
+  await FlutterDownloader.initialize();
+//  try {
+//    await FlutterDownloader.initialize().then((data) {
+//      // print('FlutterDownloader.initialize() completed');
+//      // print('data: ' + data.toString());
+//    });
+//  } catch (e) {
+//    print('Flutter Downloader plugin initialization failed.');
+//  }
 }
 
 List<NavigationPage> navigationPageList = [
@@ -73,13 +74,11 @@ Map<String, WidgetBuilder> generateRoutes() {
 }
 
 void main() async {
-  _enablePlatformOverrideForDesktop();
-  initializeFlutterDownloader();
-
+  WidgetsFlutterBinding.ensureInitialized();
   ByteData byteData = await rootBundle.load('lib/keystore/keystore.jks');
   HttpOverrides.global = new MyHttpOverrides(byteData);
-
-  WidgetsFlutterBinding.ensureInitialized();
+  _enablePlatformOverrideForDesktop();
+  initializeFlutterDownloader();
 
   Bloc.observer = SimpleBlocObserver();
 
