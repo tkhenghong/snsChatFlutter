@@ -75,7 +75,7 @@ Map<String, WidgetBuilder> generateRoutes() {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  ByteData byteData = await rootBundle.load('lib/keystore/keystore.jks');
+  ByteData byteData = await rootBundle.load('lib/keystore/keystore.p12');
   HttpOverrides.global = new MyHttpOverrides(byteData);
   _enablePlatformOverrideForDesktop();
   initializeFlutterDownloader();

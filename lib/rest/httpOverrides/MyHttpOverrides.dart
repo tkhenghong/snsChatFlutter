@@ -19,9 +19,7 @@ class MyHttpOverrides extends HttpOverrides {
     context.setTrustedCertificatesBytes(this.byteData.buffer.asUint8List(), password: 'password');
     return super.createHttpClient(context)
       ..badCertificateCallback = (X509Certificate cert, String host, int port) {
-        // TODO: Reissue new certificate for HTTPS connection when go to UAT or production.
-        // TODO: Make sure (first name and last name)CN is correct hostname during keystore.jks creation process.
-        if (allowedHost.contains(host) || ENVIRONMENT == 'DEVELOPMENT') {
+        if (allowedHost.contains(host)) {
           return true;
         }
         return false;

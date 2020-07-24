@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
+import 'package:snschat_flutter/general/functions/index.dart';
 
 String supportEmail = globals.supportEmail;
 
@@ -10,7 +11,7 @@ abstract class ApiException implements Exception {
       Get.back();
     }
 
-    if (showDialog) {
+    if (!isObjectEmpty(showDialog) && showDialog) {
       Get.dialog(
           SimpleDialog(
             title: Center(
@@ -36,7 +37,7 @@ abstract class ApiException implements Exception {
           useRootNavigator: true);
     }
 
-    if (showSnackBar) {
+    if (!isObjectEmpty(showSnackBar) && showSnackBar) {
       Get.snackbar(this.runtimeType.toString(), message, snackPosition: SnackPosition.BOTTOM, isDismissible: true, mainButton: sendErrorReportButton());
     }
   }

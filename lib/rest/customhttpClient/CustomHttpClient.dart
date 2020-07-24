@@ -33,7 +33,7 @@ class CustomHttpClient {
     Map<String, String> headers = handleHTTPHeaders(additionalHeaders);
     try {
       await checkNetwork();
-      return handleResponse(await post(path, body: requestBody.toJson(), headers: headers));
+      return handleResponse(await post(path, body: json.encode(requestBody.toJson()), headers: headers));
     } on SocketException {
       handleError();
     }
@@ -43,7 +43,7 @@ class CustomHttpClient {
     Map<String, String> headers = handleHTTPHeaders(additionalHeaders);
     try {
       await checkNetwork();
-      return handleResponse(await put(path, body: requestBody.toJson(), headers: headers));
+      return handleResponse(await put(path, body: json.encode(requestBody.toJson()), headers: headers));
     } on SocketException {
       handleError();
     }
@@ -59,13 +59,12 @@ class CustomHttpClient {
     }
   }
 
-  Map<String, String> handleHTTPHeaders(additionalHeaders) {
+  Map<String, String> handleHTTPHeaders(Map<String, String> additionalHeaders) {
     Map<String, String> headers = createAcceptJSONHeader();
     if (!isObjectEmpty(additionalHeaders)) {
       headers.addAll(additionalHeaders);
     }
-
-    return additionalHeaders;
+    return headers;
   }
 
   checkNetwork() async {
