@@ -283,7 +283,7 @@ class LoginPageState extends State<LoginPage> {
     mobileNumber = phoneNoInitials + mobileNoTextController.value.text;
   }
 
-  goToVerifyPhoneNumber(PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {
+  goToVerifyPhoneNumber() {
     Navigator.of(context).pushNamed('verify_phone_number_page');
   }
 
@@ -321,7 +321,7 @@ class LoginPageState extends State<LoginPage> {
         mobileNo: mobileNumber,
         callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {
           if (!isObjectEmpty(preVerifyMobileNumberOTPResponse)) {
-            goToVerifyPhoneNumber(preVerifyMobileNumberOTPResponse);
+            goToVerifyPhoneNumber();
           }
         }));
   }
