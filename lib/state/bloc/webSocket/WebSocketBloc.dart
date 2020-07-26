@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
@@ -10,7 +11,7 @@ import 'bloc.dart';
 class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
   WebSocketBloc(): super(WebSocketLoading());
 
-  WebSocketService webSocketService = WebSocketService();
+  WebSocketService webSocketService = Get.find();
 
   @override
   Stream<WebSocketState> mapEventToState(WebSocketEvent event) async* {

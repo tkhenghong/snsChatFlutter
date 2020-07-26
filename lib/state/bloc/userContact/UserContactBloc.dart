@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:get/get.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
@@ -8,8 +9,8 @@ import 'package:snschat_flutter/state/bloc/userContact/bloc.dart';
 class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
   UserContactBloc() : super(UserContactsLoading());
 
-  UserContactAPIService userContactAPIService = UserContactAPIService();
-  UserContactDBService userContactDBService = UserContactDBService();
+  UserContactAPIService userContactAPIService = Get.find();
+  UserContactDBService userContactDBService = Get.find();
 
   @override
   Stream<UserContactState> mapEventToState(UserContactEvent event) async* {

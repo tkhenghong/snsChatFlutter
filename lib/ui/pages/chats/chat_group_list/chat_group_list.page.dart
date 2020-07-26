@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
@@ -22,8 +23,8 @@ class ChatGroupListPage extends StatefulWidget {
 class ChatGroupListState extends State<ChatGroupListPage> {
   RefreshController _refreshController;
 
-  CustomFileService fileService = CustomFileService();
-  ImageService imageService = ImageService();
+  CustomFileService fileService = Get.find();
+  ImageService imageService = Get.find();
 
   IPGeoLocationBloc ipGeoLocationBloc;
   AuthenticationBloc authenticationBloc;
@@ -47,8 +48,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   void dispose() {
-    _refreshController.dispose();
     super.dispose();
+    _refreshController.dispose();
   }
 
   @override

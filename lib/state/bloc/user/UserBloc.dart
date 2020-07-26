@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:get/get.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
@@ -11,8 +12,8 @@ import 'package:snschat_flutter/state/bloc/user/bloc.dart';
 class UserBloc extends Bloc<UserEvent, UserState> {
   UserBloc() : super(UserLoading());
 
-  UserAPIService userAPIService = UserAPIService();
-  UserDBService userDBService = UserDBService();
+  UserAPIService userAPIService = Get.find();
+  UserDBService userDBService = Get.find();
 
   String ENVIRONMENT = globals.ENVIRONMENT;
 

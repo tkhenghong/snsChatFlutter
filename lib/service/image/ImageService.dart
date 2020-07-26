@@ -4,16 +4,17 @@ import 'dart:isolate';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:get/get.dart';
 import 'package:image/image.dart' as CustomImage;
 import 'package:snschat_flutter/environments/development/variables.dart'
 as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
-import 'package:snschat_flutter/service//index.dart';
+import 'package:snschat_flutter/service/index.dart';
 
 class ImageService {
-  CustomFileService fileService = CustomFileService();
-  FirebaseStorageService firebaseStorageService = FirebaseStorageService();
+  CustomFileService fileService = Get.find();
+  FirebaseStorageService firebaseStorageService = Get.find();
 
   static int imageThumbnailWidthSize = globals.imageThumbnailWidthSize;
 

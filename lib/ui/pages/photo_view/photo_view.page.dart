@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
@@ -22,8 +23,8 @@ class PhotoViewPage extends StatefulWidget {
 class PhotoViewState extends State<PhotoViewPage> {
   File displayingFile;
 
-  ImageService imageService = ImageService();
-  CustomFileService customfileService = CustomFileService();
+  ImageService imageService = Get.find();
+  CustomFileService customfileService = Get.find();
 
   PhotoViewController photoViewController = PhotoViewController();
 

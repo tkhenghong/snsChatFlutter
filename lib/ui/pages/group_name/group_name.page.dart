@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
@@ -39,9 +40,9 @@ class GroupNamePageState extends State<GroupNamePage> {
   File imageFile;
   TextEditingController textEditingController = new TextEditingController();
 
-  CustomFileService fileService = CustomFileService();
-  ImageService imageService = ImageService();
-  FirebaseStorageService firebaseStorageService = FirebaseStorageService();
+  CustomFileService fileService = Get.find();
+  ImageService imageService = Get.find();
+  FirebaseStorageService firebaseStorageService = Get.find();
 
   int imageThumbnailWidthSize = globals.imagePickerQuality;
 

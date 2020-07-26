@@ -1,18 +1,21 @@
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:snschat_flutter/rest/httpOverrides/MyHttpOverrides.dart';
+import 'package:snschat_flutter/rest/index.dart';
+import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/state/bloc/network/bloc.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
+
+import 'database/sembast/index.dart';
 
 // Sets a platform override for desktop to avoid exceptions. See
 // https://flutter.dev/desktop#target-platform-override for more info.
@@ -20,18 +23,6 @@ void _enablePlatformOverrideForDesktop() {
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   }
-}
-
-void initializeFlutterDownloader() async {
-  await FlutterDownloader.initialize();
-//  try {
-//    await FlutterDownloader.initialize().then((data) {
-//      // print('FlutterDownloader.initialize() completed');
-//      // print('data: ' + data.toString());
-//    });
-//  } catch (e) {
-//    print('Flutter Downloader plugin initialization failed.');
-//  }
 }
 
 List<NavigationPage> navigationPageList = [
@@ -53,15 +44,12 @@ List<NavigationPage> navigationPageList = [
 ];
 
 List<GetPage> generateGetPageList() {
-  List<GetPage> getPageList = [];
   navigationPageList.forEach((element) {
     getPageList.add(GetPage(name: element.routeName, page: () => element.routePage));
   });
 
   return getPageList;
 }
-
-final Map<String, WidgetBuilder> routeList = Map();
 
 Map<String, WidgetBuilder> generateRoutes() {
   if (routeList.length == 0) {
@@ -73,19 +61,24 @@ Map<String, WidgetBuilder> generateRoutes() {
   return routeList;
 }
 
+final List<GetPage> getPageList = [];
+final Map<String, WidgetBuilder> routeList = new Map();
+
 void main() async {
+  generateRoutes();
+  generateGetPageList();
   WidgetsFlutterBinding.ensureInitialized();
   ByteData byteData = await rootBundle.load('lib/keystore/keystore.p12');
   HttpOverrides.global = new MyHttpOverrides(byteData);
   _enablePlatformOverrideForDesktop();
-  initializeFlutterDownloader();
+  initializeServices();
 
   Bloc.observer = SimpleBlocObserver();
 
   runApp(Phoenix(
     child: GetMaterialApp(
       home: initializeBlocProviders(),
-      getPages: generateGetPageList(),
+      getPages: getPageList,
     ),
   ));
 }
@@ -137,7 +130,52 @@ Widget initializeBlocProviders() {
   ], child: MyApp());
 }
 
-class MyApp extends StatelessWidget {
+initializeServices() {
+  // API Services
+  Get.put(CustomHttpClient());
+  Get.put(ConversationGroupAPIService());
+  Get.put(IPLocationAPIService());
+  Get.put(MessageAPIService());
+  Get.put(MultimediaAPIService());
+  Get.put(SettingsAPIService());
+  Get.put(UnreadMessageAPIService());
+  Get.put(UserAPIService());
+  Get.put(UserAuthenticationAPIService());
+  Get.put(UserContactAPIService());
+
+  // DB Services
+  Get.put(ConversationDBService());
+  Get.put(ChatMessageDBService());
+  Get.put(MultimediaDBService());
+  Get.put(MultimediaDBService());
+  Get.put(MultimediaProgressDBService());
+  Get.put(SettingsDBService());
+  Get.put(UnreadMessageDBService());
+  Get.put(UserDBService());
+  Get.put(UserContactDBService());
+
+  // Services
+  Get.put(PermissionService());
+  Get.put(AudioService());
+  Get.put(CustomFileService());
+  Get.put(FirebaseStorageService());
+  Get.put(ImageService());
+  Get.put(NetworkService());
+  Get.put(NetworkService());
+  Get.put(WebSocketService());
+
+  // Dio
+  Get.put(new Dio());
+}
+
+class MyApp extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    return MyAppState();
+  }
+}
+
+class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     Color primaryColor = Colors.black;
@@ -171,7 +209,7 @@ class MyApp extends StatelessWidget {
             )),
       ),
       home: TabsPage(),
-      routes: generateRoutes(),
+      routes: routeList,
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
@@ -44,9 +45,9 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   RefreshController _refreshController;
   ScrollController scrollController;
 
-  CustomFileService fileService = CustomFileService();
-  ImageService imageService = ImageService();
-  UserContactAPIService userContactAPIService = UserContactAPIService();
+  CustomFileService fileService = Get.find();
+  ImageService imageService = Get.find();
+  UserContactAPIService userContactAPIService = Get.find();
 
   @override
   initState() {

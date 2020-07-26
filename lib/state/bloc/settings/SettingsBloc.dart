@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:get/get.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
@@ -11,8 +12,8 @@ import 'package:snschat_flutter/state/bloc/settings/bloc.dart';
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   SettingsBloc(): super(SettingsLoading());
 
-  SettingsAPIService settingsAPIService = SettingsAPIService();
-  SettingsDBService settingsDBService = SettingsDBService();
+  SettingsAPIService settingsAPIService = Get.find();
+  SettingsDBService settingsDBService = Get.find();
 
   @override
   Stream<SettingsState> mapEventToState(SettingsEvent event) async* {

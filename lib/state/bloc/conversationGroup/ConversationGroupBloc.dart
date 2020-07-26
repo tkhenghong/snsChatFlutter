@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:get/get.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
@@ -10,8 +11,8 @@ import 'bloc.dart';
 class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGroupState> {
   ConversationGroupBloc(): super(ConversationGroupsLoading());
 
-  ConversationGroupAPIService conversationGroupAPIService = ConversationGroupAPIService();
-  ConversationDBService conversationGroupDBService = ConversationDBService();
+  ConversationGroupAPIService conversationGroupAPIService = Get.find();
+  ConversationDBService conversationGroupDBService = Get.find();
 
   @override
   Stream<ConversationGroupState> mapEventToState(ConversationGroupEvent event) async* {

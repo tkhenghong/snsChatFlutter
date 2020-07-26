@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:get/get.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
@@ -9,8 +10,8 @@ import 'bloc.dart';
 class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
   MultimediaBloc() : super(MultimediaLoading());
 
-  MultimediaAPIService multimediaAPIService = MultimediaAPIService();
-  MultimediaDBService multimediaDBService = MultimediaDBService();
+  MultimediaAPIService multimediaAPIService = Get.find();
+  MultimediaDBService multimediaDBService = Get.find();
 
   @override
   Stream<MultimediaState> mapEventToState(MultimediaEvent event) async* {

@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:get/get.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
@@ -8,8 +9,8 @@ import 'package:snschat_flutter/state/bloc/unreadMessage/bloc.dart';
 class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
   UnreadMessageBloc(): super(UnreadMessageLoading());
 
-  UnreadMessageAPIService unreadMessageAPIService = UnreadMessageAPIService();
-  UnreadMessageDBService unreadMessageDBService = UnreadMessageDBService();
+  UnreadMessageAPIService unreadMessageAPIService = Get.find();
+  UnreadMessageDBService unreadMessageDBService = Get.find();
 
   @override
   Stream<UnreadMessageState> mapEventToState(UnreadMessageEvent event) async* {

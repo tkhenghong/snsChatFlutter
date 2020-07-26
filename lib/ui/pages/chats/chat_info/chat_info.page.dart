@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
@@ -27,8 +28,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
   ScrollController scrollController;
 
   File imageFile;
-  CustomFileService fileService = CustomFileService();
-  ImageService imageService = ImageService();
+  CustomFileService fileService = Get.find();
+  ImageService imageService = Get.find();
 
   @override
   void initState() {

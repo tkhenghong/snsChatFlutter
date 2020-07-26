@@ -14,7 +14,7 @@ packages:
       name: analyzer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.39.14"
+    version: "0.39.15"
   archive:
     dependency: transitive
     description:
@@ -42,7 +42,7 @@ packages:
       name: bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.1"
+    version: "6.0.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -218,13 +218,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.16.1"
-  cubit:
-    dependency: transitive
-    description:
-      name: cubit
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.2"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -267,6 +260,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.2"
+  expandable:
+    dependency: "direct main"
+    description:
+      name: expandable
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.1.4"
   ffi:
     dependency: transitive
     description:
@@ -287,14 +287,14 @@ packages:
       name: file_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.13.0"
+    version: "1.13.0+1"
   file_picker_platform_interface:
     dependency: transitive
     description:
       name: file_picker_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.0"
+    version: "1.3.1"
   firebase:
     dependency: transitive
     description:
@@ -376,7 +376,7 @@ packages:
       name: flutter_bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.1"
+    version: "6.0.1"
   flutter_cache_manager:
     dependency: "direct main"
     description:
@@ -384,20 +384,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.4.1"
-  flutter_cubit:
-    dependency: transitive
-    description:
-      name: flutter_cubit
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.1"
-  flutter_downloader:
-    dependency: "direct main"
-    description:
-      name: flutter_downloader
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.4.4"
   flutter_phoenix:
     dependency: "direct main"
     description:
@@ -428,7 +414,7 @@ packages:
       name: fluttertoast
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.0.1"
+    version: "7.0.1+1"
   get:
     dependency: "direct main"
     description:

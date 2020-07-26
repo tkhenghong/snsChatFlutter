@@ -12,3 +12,4 @@ export 'response/authentication/UserAuthenticationResponse/UserAuthenticationRes
 export 'response/authentication/OTPResponse/OTPResponse.dart';
 export 'response/authentication/PreVerifyMobileNumberOTPResponse/PreVerifyMobileNumberOTPResponse.dart';
 export 'response/authentication/VerifyEmailAddressResponse/VerifyEmailAddressResponse.dart';
+export 'response/error/ErrorResponse.dart';

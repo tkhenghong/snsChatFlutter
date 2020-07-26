@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:path/path.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
@@ -50,7 +51,7 @@ class SembastDB {
         break;
       case "DEVELOPMENT":
       default:
-        CustomFileService fileService = CustomFileService();
+        CustomFileService fileService = Get.find();
         // get the application documents directory
         String path = await fileService.getApplicationDocumentDirectory();
         if (isStringEmpty(path)) {

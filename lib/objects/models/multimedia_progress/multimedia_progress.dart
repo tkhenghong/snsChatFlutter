@@ -1,4 +1,4 @@
-import 'package:flutter_downloader/flutter_downloader.dart';
+//import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:lombok/lombok.dart';
 
@@ -22,10 +22,10 @@ class MultimediaProgress {
   @JsonKey(name: 'progress')
   int progress = 0;
 
-  @JsonKey(name: 'status')
-  String status = DownloadTaskStatus.undefined.toString();
+//  @JsonKey(name: 'status')
+//  String status = DownloadTaskStatus.undefined.toString();
 
-  MultimediaProgress({this.multimediaId, this.name, this.remoteUrl, this.taskId, this.progress, this.status});
+  MultimediaProgress({this.multimediaId, this.name, this.remoteUrl, this.taskId, this.progress});
 
   factory MultimediaProgress.fromJson(Map<String, dynamic> json) => _$MultimediaProgressFromJson(json);
 

@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
@@ -11,7 +12,7 @@ import 'bloc.dart';
 class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> {
   AuthenticationBloc() : super(AuthenticationsLoading());
 
-  UserAuthenticationAPIService authenticationAPIService = UserAuthenticationAPIService();
+  UserAuthenticationAPIService authenticationAPIService = Get.find();
 
   @override
   Stream<AuthenticationState> mapEventToState(AuthenticationEvent event) async* {

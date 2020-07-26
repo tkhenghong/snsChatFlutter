@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
-import 'package:snschat_flutter/ui/pages/index.dart';
 
 class SignUpPage extends StatefulWidget {
   String mobileNo;
@@ -42,7 +42,13 @@ class SignUpPageState extends State<SignUpPage> {
   double screenWidth;
   double screenHeight;
 
-  BuildContext mBuildContext;
+  IPGeoLocationBloc ipGeoLocationBloc;
+  AuthenticationBloc authenticationBloc;
+  GoogleInfoBloc googleInfoBloc;
+  SettingsBloc settingsBloc;
+  UserBloc userBloc;
+  UserContactBloc userContactBloc;
+  MultimediaBloc multimediaBloc;
 
   @override
   void initState() {
@@ -62,7 +68,14 @@ class SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width;
     screenHeight = MediaQuery.of(context).size.height;
-    mBuildContext = context;
+
+    ipGeoLocationBloc = BlocProvider.of<IPGeoLocationBloc>(context);
+    authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
+    googleInfoBloc = BlocProvider.of<GoogleInfoBloc>(context);
+    settingsBloc = BlocProvider.of<SettingsBloc>(context);
+    userBloc = BlocProvider.of<UserBloc>(context);
+    userContactBloc = BlocProvider.of<UserContactBloc>(context);
+    multimediaBloc = BlocProvider.of<MultimediaBloc>(context);
 
     return MultiBlocListener(
       listeners: [ipGeoLocationBlocListener()],
@@ -73,7 +86,7 @@ class SignUpPageState extends State<SignUpPage> {
   signUpScreen() => Material(
       child: GestureDetector(
           // call this method here to hide soft keyboard
-          onTap: () => FocusScope.of(mBuildContext).requestFocus(new FocusNode()),
+          onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
           child: Scaffold(
             appBar: appBar(),
             body: Column(
@@ -99,7 +112,7 @@ class SignUpPageState extends State<SignUpPage> {
                       children: [
                         Row(
                           children: <Widget>[
-                            countryPicker(),
+                            ipGeoLocationBlocBuilder(),
                             mobileNoTextField(),
                           ],
                         ),
@@ -116,7 +129,6 @@ class SignUpPageState extends State<SignUpPage> {
   BlocListener ipGeoLocationBlocListener() {
     return BlocListener<IPGeoLocationBloc, IPGeoLocationState>(
       listener: (context, ipGeoLocationState) {
-        print('ipGeoLocationState listener is working.');
         if (ipGeoLocationState is IPGeoLocationLoaded) {
           countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? DEFAULT_COUNTRY_CODE : ipGeoLocationState.ipGeoLocation.country_code2;
           ipGeoLocation = ipGeoLocationState.ipGeoLocation;
@@ -129,41 +141,41 @@ class SignUpPageState extends State<SignUpPage> {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0, //Set Shadow
-      iconTheme: IconThemeData(color: Theme.of(mBuildContext).primaryColor),
+      iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
     );
   }
 
-  Widget countryPicker() {
+  Widget ipGeoLocationBlocBuilder() {
     return BlocBuilder<IPGeoLocationBloc, IPGeoLocationState>(
       builder: (context, ipGeoLocationState) {
         if (ipGeoLocationState is IPGeoLocationLoading) {
-          return Material(
-            child: Center(
-              child: Text('Loading...'),
-            ),
+          return Center(
+            child: Text('Loading...'),
           );
         }
 
         if (ipGeoLocationState is IPGeoLocationLoaded) {
           countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? DEFAULT_COUNTRY_CODE : ipGeoLocationState.ipGeoLocation.country_code2;
           ipGeoLocation = ipGeoLocationState.ipGeoLocation;
-          return CountryCodePicker(
-            initialSelection: widget.countryCodeString,
-            alignLeft: false,
-            showCountryOnly: false,
-            showFlag: true,
-            showOnlyCountryWhenClosed: false,
-            favorite: [widget.countryCodeString],
-            onChanged: onCountryPickerChanged,
-          );
+          return countryCodePicker();
         }
 
-        return Material(
-          child: Center(
-            child: Text('Sign Up page error. Please try restart the app.'),
-          ),
+        return Center(
+          child: Text('Sign Up page error. Please try restart the app.'),
         );
       },
+    );
+  }
+
+  Widget countryCodePicker() {
+    return CountryCodePicker(
+      initialSelection: widget.countryCodeString,
+      alignLeft: false,
+      showCountryOnly: false,
+      showFlag: true,
+      showOnlyCountryWhenClosed: false,
+      favorite: [widget.countryCodeString],
+      onChanged: onCountryPickerChanged,
     );
   }
 
@@ -205,7 +217,6 @@ class SignUpPageState extends State<SignUpPage> {
   }
 
   getPhoneNumber() {
-    print('sign_up_page.dart getPhoneNumber()');
     String phoneNoInitials = "";
 
     if (isObjectEmpty(countryCode)) {
@@ -230,29 +241,26 @@ class SignUpPageState extends State<SignUpPage> {
 
     showCenterLoadingIndicator();
 
-    try {
-      BlocProvider.of<AuthenticationBloc>(mBuildContext).add(RegisterUsingMobileNoEvent(
-          mobileNo: mobileNumber,
-          countryCode: !isObjectEmpty(countryCode) ? countryCode.code : countryCodeString,
-          callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {
-            print('RegisterUsingMobileNoEvent response.');
-            Navigator.pop(mBuildContext); //pop loading dialog
-            if (!isObjectEmpty(preVerifyMobileNumberOTPResponse)) {
-              goToVerifyPhoneNumber(preVerifyMobileNumberOTPResponse);
-            }
-          }));
-    } catch (e) {
-      print('ERROR CATCHED HERE?');
-    }
+    authenticationBloc.add(RegisterUsingMobileNoEvent(
+        mobileNo: mobileNumber,
+        countryCode: !isObjectEmpty(countryCode) ? countryCode.code : countryCodeString,
+        callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {
+//          Navigator.pop(context);//pop loading dialog // If you have used Get.showDialog. THen
+          Get.back();
+
+          if (!isObjectEmpty(preVerifyMobileNumberOTPResponse)) {
+            goToVerifyPhoneNumber();
+          }
+        }));
   }
 
   /// NOTE: sign up using Google is deprecated */
   @deprecated
   signUpUsingGoogle() {
-    BlocProvider.of<GoogleInfoBloc>(mBuildContext).add(SignInGoogleInfoEvent(callback: (bool initialized) {
+    googleInfoBloc.add(SignInGoogleInfoEvent(callback: (bool initialized) {
       if (initialized) {
-        BlocProvider.of<GoogleInfoBloc>(mBuildContext).add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn2, FirebaseAuth firebaseAuth2, FirebaseUser firebaseUser2) {
-          BlocProvider.of<UserBloc>(mBuildContext).add(CheckUserSignedUpEvent(
+        googleInfoBloc.add(GetOwnGoogleInfoEvent(callback: (GoogleSignIn googleSignIn2, FirebaseAuth firebaseAuth2, FirebaseUser firebaseUser2) {
+          userBloc.add(CheckUserSignedUpEvent(
               googleSignIn: googleSignIn2,
               mobileNo: mobileNumber,
               callback: (bool isSignedUp) {
@@ -282,32 +290,32 @@ class SignUpPageState extends State<SignUpPage> {
                       userId: null);
 
                   if (!isObjectEmpty(googleSignIn2)) {
-                    BlocProvider.of<UserBloc>(mBuildContext).add(AddUserEvent(
+                    userBloc.add(AddUserEvent(
                         user: user,
                         callback: (User user2) {
                           // TODO: Error Handling
                           userContact.userId = multimedia.userId = settings.userId = user2.id;
                           userContact.userIds.add(user2.id);
-                          BlocProvider.of<SettingsBloc>(mBuildContext).add(AddSettingsEvent(
+                          settingsBloc.add(AddSettingsEvent(
                               settings: settings,
                               callback: (Settings settings2) {
                                 if (!isObjectEmpty(settings2)) {
-                                  BlocProvider.of<MultimediaBloc>(mBuildContext).add(AddMultimediaEvent(
+                                  multimediaBloc.add(AddMultimediaEvent(
                                       multimedia: multimedia,
                                       callback: (Multimedia multimedia2) {
                                         if (!isObjectEmpty(multimedia2)) {
                                           userContact.multimediaId = multimedia.id;
                                           multimedia2.userContactId = userContact.id;
-                                          BlocProvider.of<UserContactBloc>(mBuildContext).add(AddUserContactEvent(
+                                          userContactBloc.add(AddUserContactEvent(
                                               userContact: userContact,
                                               callback: (UserContact userContact2) {
-                                                BlocProvider.of<MultimediaBloc>(mBuildContext).add(EditMultimediaEvent(
+                                                multimediaBloc.add(EditMultimediaEvent(
                                                     multimedia: multimedia2,
                                                     callback: (Multimedia multimedia3) {
                                                       if (!isObjectEmpty(googleSignIn2) && !isObjectEmpty(user2) && !isObjectEmpty(settings2) && !isObjectEmpty(userContact2) && !isObjectEmpty(multimedia3)) {
                                                         showToast('Sign up success. Please verify your phone number.', Toast.LENGTH_SHORT);
-                                                        Navigator.pop(mBuildContext);
-                                                        goToVerifyPhoneNumber(PreVerifyMobileNumberOTPResponse(mobileNumber: mobileNumber));
+                                                        Navigator.pop(context);
+                                                        goToVerifyPhoneNumber();
                                                       }
                                                     }));
                                               }));
@@ -317,32 +325,33 @@ class SignUpPageState extends State<SignUpPage> {
                                       }));
                                 } else {
                                   showToast('Sign up error. Please try again.', Toast.LENGTH_SHORT);
-                                  BlocProvider.of<GoogleInfoBloc>(mBuildContext).add(RemoveGoogleInfoEvent());
-                                  Navigator.pop(mBuildContext);
+                                  googleInfoBloc.add(RemoveGoogleInfoEvent());
+                                  Navigator.pop(context);
                                 }
                               }));
                         }));
                   } else {
                     showToast('Google Sign in error. Please try again.', Toast.LENGTH_SHORT);
-                    BlocProvider.of<GoogleInfoBloc>(mBuildContext).add(RemoveGoogleInfoEvent());
-                    Navigator.pop(mBuildContext);
+                    googleInfoBloc.add(RemoveGoogleInfoEvent());
+                    Navigator.pop(context);
                   }
                 } else {
                   showToast('Registered Mobile No./Google Account. Please use another Mobile No./Google Account to register.', Toast.LENGTH_SHORT);
-                  BlocProvider.of<GoogleInfoBloc>(mBuildContext).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
-                  Navigator.pop(mBuildContext);
+                  googleInfoBloc.add(RemoveGoogleInfoEvent(callback: (bool done) {}));
+                  Navigator.pop(context);
                 }
               }));
         }));
       } else {
         showToast('Please sign into your Google account first. Please try again.', Toast.LENGTH_LONG);
-        BlocProvider.of<GoogleInfoBloc>(mBuildContext).add(RemoveGoogleInfoEvent());
-        Navigator.pop(mBuildContext);
+        googleInfoBloc.add(RemoveGoogleInfoEvent());
+        Navigator.pop(context);
       }
     }));
   }
 
-  goToVerifyPhoneNumber(PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {
-    Navigator.push(mBuildContext, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(preVerifyMobileNumberOTPResponse: preVerifyMobileNumberOTPResponse))));
+  goToVerifyPhoneNumber() {
+    Navigator.of(context).pushNamed('verify_phone_number_page');
+//    Navigator.push(context, MaterialPageRoute(builder: ((context) => BlocProvider.value(value: authenticationBloc, child: VerifyPhoneNumberPage(),))));
   }
 }

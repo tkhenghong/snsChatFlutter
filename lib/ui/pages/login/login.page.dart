@@ -37,7 +37,6 @@ class LoginPageState extends State<LoginPage> {
 
   Color themePrimaryColor;
 
-  IPGeoLocationBloc ipGeoLocationBloc;
   AuthenticationBloc authenticationBloc;
   WebSocketBloc webSocketBloc;
 
@@ -65,7 +64,6 @@ class LoginPageState extends State<LoginPage> {
 
     themePrimaryColor = Theme.of(context).textTheme.title.color;
 
-    ipGeoLocationBloc = BlocProvider.of<IPGeoLocationBloc>(context);
     authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
 
@@ -286,7 +284,7 @@ class LoginPageState extends State<LoginPage> {
   }
 
   goToVerifyPhoneNumber(PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {
-    Navigator.push(context, MaterialPageRoute(builder: ((context) => VerifyPhoneNumberPage(preVerifyMobileNumberOTPResponse: preVerifyMobileNumberOTPResponse))));
+    Navigator.of(context).pushNamed('verify_phone_number_page');
   }
 
   goToSignUp() {

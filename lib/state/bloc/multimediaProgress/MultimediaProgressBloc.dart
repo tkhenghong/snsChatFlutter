@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:get/get.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
@@ -9,8 +10,8 @@ import 'bloc.dart';
 class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaProgressState> {
   MultimediaProgressBloc() : super(MultimediaProgressLoading());
 
-  PermissionService permissionService = PermissionService();
-  MultimediaProgressDBService multimediaProgressDBService = MultimediaProgressDBService();
+  PermissionService permissionService = Get.find();
+  MultimediaProgressDBService multimediaProgressDBService = Get.find();
 
   @override
   Stream<MultimediaProgressState> mapEventToState(MultimediaProgressEvent event) async* {

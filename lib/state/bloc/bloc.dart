@@ -1,4 +1,4 @@
-export 'BlocObserver//SimpleBlocObserver.dart';
+export 'BlocObserver/SimpleBlocObserver.dart';
 export 'conversationGroup/bloc.dart';
 export 'google/bloc.dart';
 export 'ipGeoLocation/bloc.dart';

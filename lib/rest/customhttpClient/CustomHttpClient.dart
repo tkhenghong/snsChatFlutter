@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:http/http.dart';
 import 'package:snschat_flutter/general/functions/index.dart';
+import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/rest/exceptions/NetworkExceptions.dart';
 import 'package:snschat_flutter/service/index.dart';
 
@@ -78,7 +79,7 @@ class CustomHttpClient {
     print('CustomHttpClient.dart connectedThroughWifi: ' + connectedThroughWifi.toString());
 
     if (!hasInternetConnection) {
-      throw ConnectionException('No Internet connection.');
+      throw ConnectionException(ErrorResponse(), 'No Internet connection.');
     }
   }
 
@@ -91,16 +92,19 @@ class CustomHttpClient {
       } else {
         return jsonDecode(response.body);
       }
-    } else if (statusCode >= 400 && statusCode < 500) {
-      throw ClientErrorException(response.body, statusCode.toString());
-    } else if (statusCode >= 500 && statusCode < 600) {
-      throw ServerErrorException(response.body, statusCode.toString());
     } else {
-      throw UnknownException(response.body, statusCode.toString());
+      final ErrorResponse errorResponse = ErrorResponse.fromJson(jsonDecode(response.body));
+      if (statusCode >= 400 && statusCode < 500) {
+        throw ClientErrorException(errorResponse, statusCode.toString());
+      } else if (statusCode >= 500 && statusCode < 600) {
+        throw ServerErrorException(errorResponse, statusCode.toString());
+      } else {
+        throw UnknownException(errorResponse, statusCode.toString());
+      }
     }
   }
 
   void handleError() {
-    throw ConnectionException('Unable to connect to the server.');
+    throw ConnectionException(null, '');
   }
 }

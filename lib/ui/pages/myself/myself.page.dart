@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
@@ -21,7 +22,7 @@ class MyselfPageState extends State<MyselfPage> {
 
   User blankUser = User(mobileNo: '', realName: '', displayName: '', countryCode: '', googleAccountId: '');
 
-  ImageService imageService = ImageService();
+  ImageService imageService = Get.find();
 
   @override
   Widget build(BuildContext context) {

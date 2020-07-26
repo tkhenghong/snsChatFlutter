@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
@@ -65,10 +66,10 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   AnimationController _animationController, _animationController2;
   Animation animation;
 
-  CustomFileService fileService = CustomFileService();
-  ImageService imageService = ImageService();
-  AudioService audioService = AudioService();
-  FirebaseStorageService firebaseStorageService = FirebaseStorageService();
+  CustomFileService fileService = Get.find();
+  ImageService imageService = Get.find();
+  AudioService audioService = Get.find();
+  FirebaseStorageService firebaseStorageService = Get.find();
 
   @override
   void initState() {

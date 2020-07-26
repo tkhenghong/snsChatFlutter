@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 
@@ -9,7 +10,7 @@ import 'bloc.dart';
 class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorageContactState> {
   PhoneStorageContactBloc() : super(PhoneStorageContactLoading());
 
-  PermissionService permissionService = PermissionService();
+  PermissionService permissionService = Get.find();
 
   @override
   Stream<PhoneStorageContactState> mapEventToState(PhoneStorageContactEvent event) async* {
