@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:snschat_flutter/general/index.dart';
 
 abstract class AuthenticationState extends Equatable {
   const AuthenticationState();
@@ -12,31 +13,35 @@ class AuthenticationsLoading extends AuthenticationState {}
 class Authenticating extends AuthenticationState {
   final String mobileNumber;
   final String emailAddress;
+  final String maskedMobileNumber;
+  final String maskedEmailAddress;
   final String secureKeyword;
   final DateTime tokenExpiryTime;
+  final VerificationMode verificationMode;
 
-  const Authenticating([this.mobileNumber, this.emailAddress, this.secureKeyword, this.tokenExpiryTime]);
-
-  @override
-  List<Object> get props => [mobileNumber, emailAddress, secureKeyword, tokenExpiryTime];
+  const Authenticating([this.mobileNumber, this.emailAddress, this.maskedMobileNumber, this.maskedEmailAddress, this.secureKeyword, this.tokenExpiryTime, this.verificationMode]);
 
   @override
-  String toString() => 'Authenticating {mobileNumber: $mobileNumber, emailAddress: $emailAddress, secureKeyword: $secureKeyword, tokenExpiryTime: ${tokenExpiryTime.toIso8601String()}';
+  List<Object> get props => [mobileNumber, emailAddress, secureKeyword, tokenExpiryTime, verificationMode];
+
+  @override
+  String toString() => 'Authenticating {mobileNumber: $mobileNumber, emailAddress: $emailAddress, maskedMobileNumber: $maskedMobileNumber, maskedEmailAddress: $maskedEmailAddress, secureKeyword: $secureKeyword, tokenExpiryTime: '
+      '${tokenExpiryTime.toIso8601String()}, verificationMode: $verificationMode';
 }
 
 // UserAuthenticationVerified
 class AuthenticationsLoaded extends AuthenticationState {
   final String jwtToken;
-  final String userId;
+  final String username;
   final DateTime otpExpirationTime;
 
-  const AuthenticationsLoaded([this.jwtToken, this.userId, this.otpExpirationTime]);
+  const AuthenticationsLoaded([this.jwtToken, this.username, this.otpExpirationTime]);
 
   @override
-  List<Object> get props => [jwtToken, userId, otpExpirationTime];
+  List<Object> get props => [jwtToken, username, otpExpirationTime];
 
   @override
-  String toString() => 'AuthenticationsLoaded {jwtToken: $jwtToken, userId: $userId, otpExpirationTime: $otpExpirationTime}';
+  String toString() => 'AuthenticationsLoaded {jwtToken: $jwtToken, username: $username, otpExpirationTime: $otpExpirationTime}';
 }
 
 // UserAuthenticationNotVerified

@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/rest/models/user_authentication/UserAuthenticationAPIService.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'bloc.dart';
 
@@ -25,14 +26,12 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
       yield* _deleteAuthentication(event);
     } else if (event is RequestAuthenticationUsingEmailAddressEvent) {
       yield* _requestAuthenticationUsingEmail(event);
-    } else if (event is RequestAuthenticationUsingMobileNoEvent) {
+    } else if (event is RegisterUsingMobileNumberEvent) {
       yield* _requestAuthenticationUsingMobileNo(event);
-    } else if (event is VerifyAuthenticationUsingMobileNoEvent) {
-      yield* _verifyAuthenticationUsingMobileNo(event);
     } else if (event is RegisterUsingMobileNoEvent) {
       yield* _registerUsingMobileNo(event);
-    } else if (event is PreVerifyMobileNoEvent) {
-      yield* _preVerifyMobileNo(event);
+    } else if (event is LoginUsingMobileNumberEvent) {
+      yield* _loginUsingMobileNumber(event);
     } else if (event is VerifyMobileNoEvent) {
       yield* _verifyMobileNo(event);
     }
@@ -43,11 +42,13 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     if (state is AuthenticationsLoading || state is AuthenticationsNotLoaded) {
       try {
         SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-        String jwtToken = sharedPreferences.getString("jwtToken");
-        String userId = sharedPreferences.getString("userId");
+        final storage = new FlutterSecureStorage();
+        String jwtToken = await storage.read(key: "jwtToken");
+        String username = sharedPreferences.getString("username");
+        DateTime otpExpirationTime = DateTime.parse(sharedPreferences.getString("otpExpirationTime"));
 
-        if (!isStringEmpty(jwtToken) && !isStringEmpty(userId)) {
-          yield AuthenticationsLoaded(jwtToken, userId);
+        if (!isStringEmpty(jwtToken) && !isStringEmpty(username) && !isObjectEmpty(otpExpirationTime)) {
+          yield AuthenticationsLoaded(jwtToken, username, otpExpirationTime);
           functionCallback(event, true);
         } else {
           yield AuthenticationsNotLoaded();
@@ -66,33 +67,39 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     if (!isObjectEmpty(otpResponse)) {
       String toastContent = 'Verification code has been sent to email address: ${event.emailAddress} successfully! Please check your email.';
       showToast(toastContent, Toast.LENGTH_SHORT);
-      yield AuthenticationsLoaded(null, null, otpResponse.otpExpirationDateTime);
+      yield Authenticating(null, event.emailAddress, null, event.emailAddress, null, otpResponse.otpExpirationDateTime, VerificationMode.ChangeEmailAddress);
     } else {
       showToast("Error when request OTP.", Toast.LENGTH_SHORT);
-      yield AuthenticationsLoaded(null, null);
     }
   }
 
   // Only used when changing email address
-  Stream<AuthenticationState> _requestAuthenticationUsingMobileNo(RequestAuthenticationUsingMobileNoEvent event) async* {
+  Stream<AuthenticationState> _requestAuthenticationUsingMobileNo(RegisterUsingMobileNumberEvent event) async* {
     OTPResponse otpResponse = await authenticationAPIService.requestToAuthenticateWithMobileNo(new MobileNoUserAuthenticationRequest(mobileNo: event.mobileNumber));
     if (!isObjectEmpty(otpResponse)) {
       String toastContent = 'Verification code has been sent to mobile no.: ${event.mobileNumber} successfully! Please check your email.';
       showToast(toastContent, Toast.LENGTH_SHORT);
-      yield AuthenticationsLoaded(null, null, otpResponse.otpExpirationDateTime);
+      yield Authenticating(event.mobileNumber, null, event.mobileNumber, null, null, otpResponse.otpExpirationDateTime, VerificationMode.ChangeEmailAddress);
     } else {
       showToast("Error when request OTP.", Toast.LENGTH_SHORT);
-      yield AuthenticationsLoaded(null, null);
     }
   }
 
-  // Only used when sign up
+  // Register Step 1
   Stream<AuthenticationState> _registerUsingMobileNo(RegisterUsingMobileNoEvent event) async* {
-    PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse = await authenticationAPIService.registerUsingMobileNumber(new RegisterUsingMobileNumberRequest(mobileNo: event.mobileNo, countryCode: event.countryCode));
+    PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse = await authenticationAPIService.registerMobileNumber(new RegisterUsingMobileNumberRequest(mobileNo: event.mobileNo, countryCode: event.countryCode));
     if (!isObjectEmpty(preVerifyMobileNumberOTPResponse)) {
       String toastContent = 'A verification code has been sent to your mobile no.: ${event.mobileNo}.';
       showToast(toastContent, Toast.LENGTH_SHORT);
-      yield Authenticating(preVerifyMobileNumberOTPResponse.mobileNumber, preVerifyMobileNumberOTPResponse.emailAddress, preVerifyMobileNumberOTPResponse.secureKeyword, preVerifyMobileNumberOTPResponse.tokenExpiryTime);
+      yield Authenticating(
+          event.mobileNo,
+          null,
+          preVerifyMobileNumberOTPResponse.maskedMobileNumber,
+          preVerifyMobileNumberOTPResponse.maskedEmailAddress,
+          preVerifyMobileNumberOTPResponse.secureKeyword,
+          preVerifyMobileNumberOTPResponse
+              .tokenExpiryTime,
+          VerificationMode.SignUp);
     } else {
       showToast("Error when request OTP.", Toast.LENGTH_SHORT);
       yield AuthenticationsNotLoaded();
@@ -101,28 +108,58 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     functionCallback(event, preVerifyMobileNumberOTPResponse);
   }
 
-  // Only used when sign in
-  Stream<AuthenticationState> _verifyAuthenticationUsingMobileNo(VerifyAuthenticationUsingMobileNoEvent event) async* {
-    UserAuthenticationResponse authenticationResponse = await authenticationAPIService.mobileNumberAuthentication(new VerifyMobileNumberOTPRequest(mobileNo: event.mobileNumber, otpNumber: event.otpNumber));
-    if (!isObjectEmpty(authenticationResponse)) {
-      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-      sharedPreferences.setString("jwtToken", authenticationResponse.jwt);
-      yield AuthenticationsLoaded(authenticationResponse.jwt, null);
+  // Login Step 1
+  Stream<AuthenticationState> _loginUsingMobileNumber(LoginUsingMobileNumberEvent event) async* {
+    PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse = await authenticationAPIService.loginMobileNumber(new PreVerifyMobileNumberOTPRequest(mobileNumber: event.mobileNo));
+    if (!isObjectEmpty(preVerifyMobileNumberOTPResponse)) {
+      String toastContent = 'A verification code has been sent to your mobile no.: ${event.mobileNo}.';
+      showToast(toastContent, Toast.LENGTH_SHORT);
+      yield Authenticating(
+          event.mobileNo,
+          null,
+          preVerifyMobileNumberOTPResponse.maskedMobileNumber,
+          preVerifyMobileNumberOTPResponse.maskedEmailAddress,
+          preVerifyMobileNumberOTPResponse.secureKeyword,
+          preVerifyMobileNumberOTPResponse
+              .tokenExpiryTime,
+          VerificationMode.Login);
     } else {
       showToast("Error when request OTP.", Toast.LENGTH_SHORT);
       yield AuthenticationsNotLoaded();
     }
-  }
 
-  Stream<AuthenticationState> _preVerifyMobileNo(PreVerifyMobileNoEvent event) async* {
-    PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse = await authenticationAPIService.preVerifyMobileNumber(new PreVerifyMobileNumberOTPRequest(mobileNumber: event.mobileNo));
     functionCallback(event, preVerifyMobileNumberOTPResponse);
   }
 
+  // Login / Register Step 2
   Stream<AuthenticationState> _verifyMobileNo(VerifyMobileNoEvent event) async* {
-    UserAuthenticationResponse userAuthenticationResponse =
-        await authenticationAPIService.mobileNumberAuthentication(new VerifyMobileNumberOTPRequest(mobileNo: event.mobileNo, otpNumber: event.otpNumber, secureKeyword: event.secureKeyword));
-    functionCallback(event, userAuthenticationResponse);
+    if (state is Authenticating) {
+      Authenticating authenticating = state as Authenticating;
+
+      VerifyMobileNumberOTPRequest verifyMobileNumberOTPRequest = new VerifyMobileNumberOTPRequest(mobileNo: event.mobileNo, otpNumber: event.otpNumber, secureKeyword: event.secureKeyword);
+      UserAuthenticationResponse userAuthenticationResponse;
+
+      switch (authenticating.verificationMode) {
+        case VerificationMode.Login:
+          userAuthenticationResponse = await authenticationAPIService.loginMobileNumberOTPVerification(verifyMobileNumberOTPRequest);
+          break;
+        case VerificationMode.SignUp:
+          userAuthenticationResponse = await authenticationAPIService.registerMobileNumberOTPVerification(verifyMobileNumberOTPRequest);
+          break;
+      }
+
+      if (!isObjectEmpty(userAuthenticationResponse)) {
+        SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+        final storage = new FlutterSecureStorage();
+        sharedPreferences.setString("jwtToken", userAuthenticationResponse.jwt);
+        await storage.write(key: "jwtToken", value: userAuthenticationResponse.jwt);
+        sharedPreferences.setString("username", userAuthenticationResponse.username);
+        sharedPreferences.setString("otpExpirationTime", userAuthenticationResponse.otpExpirationTime.toString());
+        yield AuthenticationsLoaded(userAuthenticationResponse.jwt, userAuthenticationResponse.username, userAuthenticationResponse.otpExpirationTime);
+      }
+
+      functionCallback(event, userAuthenticationResponse);
+    }
   }
 
   Stream<AuthenticationState> _editAuthentication(EditAuthenticationEvent event) async* {

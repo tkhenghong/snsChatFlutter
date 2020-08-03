@@ -17,44 +17,17 @@ class InitializeAuthenticationsEvent extends AuthenticationEvent {
   String toString() => 'InitializeAuthenticationsEvent';
 }
 
-class RequestAuthenticationUsingMobileNoEvent extends AuthenticationEvent {
+class RegisterUsingMobileNumberEvent extends AuthenticationEvent {
   final String mobileNumber;
   final Function callback;
 
-  const RequestAuthenticationUsingMobileNoEvent({this.mobileNumber, this.callback});
+  const RegisterUsingMobileNumberEvent({this.mobileNumber, this.callback});
 
   @override
   List<Object> get props => [mobileNumber];
 
   @override
-  String toString() => 'GetAuthenticationUsingMobileNoEvent {mobileNumber: $mobileNumber}';
-}
-
-class VerifyAuthenticationUsingMobileNoEvent extends AuthenticationEvent {
-  final String mobileNumber;
-  final String otpNumber;
-  final Function callback;
-
-  const VerifyAuthenticationUsingMobileNoEvent({this.mobileNumber, this.otpNumber, this.callback});
-
-  @override
-  List<Object> get props => [mobileNumber, otpNumber];
-
-  @override
-  String toString() => 'GetAuthenticationUsingMobileNoEvent {mobileNumber: $mobileNumber, otpNumber: $otpNumber}';
-}
-
-class RequestAuthenticationUsingEmailAddressEvent extends AuthenticationEvent {
-  final String emailAddress;
-  final Function callback;
-
-  const RequestAuthenticationUsingEmailAddressEvent({this.emailAddress, this.callback});
-
-  @override
-  List<Object> get props => [emailAddress];
-
-  @override
-  String toString() => 'GetAuthenticationEventUsingMobileNo {emailAddress: $emailAddress}';
+  String toString() => 'RegisterUsingMobileNumberEvent {mobileNumber: $mobileNumber}';
 }
 
 class RegisterUsingMobileNoEvent extends AuthenticationEvent {
@@ -71,17 +44,17 @@ class RegisterUsingMobileNoEvent extends AuthenticationEvent {
   String toString() => 'RegisterUsingMobileNoEvent {mobileNo: $mobileNo, countryCode: $countryCode}';
 }
 
-class PreVerifyMobileNoEvent extends AuthenticationEvent {
+class LoginUsingMobileNumberEvent extends AuthenticationEvent {
   final String mobileNo;
   final Function callback;
 
-  const PreVerifyMobileNoEvent({this.mobileNo, this.callback});
+  const LoginUsingMobileNumberEvent({this.mobileNo, this.callback});
 
   @override
   List<Object> get props => [mobileNo];
 
   @override
-  String toString() => 'PreVerifyMobileNoEvent {mobileNo: $mobileNo}';
+  String toString() => 'LoginUsingMobileNumberEvent {mobileNo: $mobileNo}';
 }
 
 class VerifyMobileNoEvent extends AuthenticationEvent {
@@ -98,6 +71,20 @@ class VerifyMobileNoEvent extends AuthenticationEvent {
   @override
   String toString() => 'VerifyMobileNoEvent {mobileNo: $mobileNo, secureKeyword: $secureKeyword, otpNumber: $otpNumber}';
 }
+
+class RequestAuthenticationUsingEmailAddressEvent extends AuthenticationEvent {
+  final String emailAddress;
+  final Function callback;
+
+  const RequestAuthenticationUsingEmailAddressEvent({this.emailAddress, this.callback});
+
+  @override
+  List<Object> get props => [emailAddress];
+
+  @override
+  String toString() => 'GetAuthenticationEventUsingMobileNo {emailAddress: $emailAddress}';
+}
+
 
 class AddAuthenticationEvent extends AuthenticationEvent {
   final String jwtToken;

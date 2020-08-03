@@ -190,7 +190,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           goToLoginPage();
         }
         if (authenticationState is AuthenticationsLoaded) {
-          userBloc.add(InitializeUserEvent(userId: authenticationState.userId, callback: (bool initialized) {}));
+          userBloc.add(InitializeUserEvent(userId: authenticationState.username, callback: (bool initialized) {}));
         }
       },
     );

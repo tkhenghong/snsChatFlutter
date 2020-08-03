@@ -7,8 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
@@ -317,7 +317,7 @@ class LoginPageState extends State<LoginPage> {
 
     getPhoneNumber();
 
-    authenticationBloc.add(PreVerifyMobileNoEvent(
+    authenticationBloc.add(LoginUsingMobileNumberEvent(
         mobileNo: mobileNumber,
         callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {
           if (!isObjectEmpty(preVerifyMobileNumberOTPResponse)) {

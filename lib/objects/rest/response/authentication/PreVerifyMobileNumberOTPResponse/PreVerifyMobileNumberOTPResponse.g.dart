@@ -12,8 +12,8 @@ PreVerifyMobileNumberOTPResponse _$PreVerifyMobileNumberOTPResponseFromJson(
     tokenExpiryTime: json['tokenExpiryTime'] == null
         ? null
         : DateTime.parse(json['tokenExpiryTime'] as String),
-    mobileNumber: json['mobileNumber'] as String,
-    emailAddress: json['emailAddress'] as String,
+    maskedMobileNumber: json['maskedMobileNumber'] as String,
+    maskedEmailAddress: json['maskedEmailAddress'] as String,
     secureKeyword: json['secureKeyword'] as String,
   );
 }
@@ -22,8 +22,8 @@ Map<String, dynamic> _$PreVerifyMobileNumberOTPResponseToJson(
         PreVerifyMobileNumberOTPResponse instance) =>
     <String, dynamic>{
       'tokenExpiryTime': instance.tokenExpiryTime?.toIso8601String(),
-      'mobileNumber': instance.mobileNumber,
-      'emailAddress': instance.emailAddress,
+      'maskedMobileNumber': instance.maskedMobileNumber,
+      'maskedEmailAddress': instance.maskedEmailAddress,
       'secureKeyword': instance.secureKeyword,
     };
 
@@ -34,8 +34,8 @@ Map<String, dynamic> _$PreVerifyMobileNumberOTPResponseToJson(
 abstract class _$PreVerifyMobileNumberOTPResponseLombok {
   /// Field
   DateTime tokenExpiryTime;
-  String mobileNumber;
-  String emailAddress;
+  String maskedMobileNumber;
+  String maskedEmailAddress;
   String secureKeyword;
 
   /// Setter
@@ -44,12 +44,12 @@ abstract class _$PreVerifyMobileNumberOTPResponseLombok {
     this.tokenExpiryTime = tokenExpiryTime;
   }
 
-  void setMobileNumber(String mobileNumber) {
-    this.mobileNumber = mobileNumber;
+  void setMaskedMobileNumber(String maskedMobileNumber) {
+    this.maskedMobileNumber = maskedMobileNumber;
   }
 
-  void setEmailAddress(String emailAddress) {
-    this.emailAddress = emailAddress;
+  void setMaskedEmailAddress(String maskedEmailAddress) {
+    this.maskedEmailAddress = maskedEmailAddress;
   }
 
   void setSecureKeyword(String secureKeyword) {
@@ -61,12 +61,12 @@ abstract class _$PreVerifyMobileNumberOTPResponseLombok {
     return tokenExpiryTime;
   }
 
-  String getMobileNumber() {
-    return mobileNumber;
+  String getMaskedMobileNumber() {
+    return maskedMobileNumber;
   }
 
-  String getEmailAddress() {
-    return emailAddress;
+  String getMaskedEmailAddress() {
+    return maskedEmailAddress;
   }
 
   String getSecureKeyword() {

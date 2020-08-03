@@ -78,7 +78,7 @@ class SignUpPageState extends State<SignUpPage> {
     multimediaBloc = BlocProvider.of<MultimediaBloc>(context);
 
     return MultiBlocListener(
-      listeners: [ipGeoLocationBlocListener()],
+      listeners: [ipGeoLocationBlocListener(), userAuthenticationBlocListener()],
       child: signUpScreen(),
     );
   }
@@ -132,6 +132,17 @@ class SignUpPageState extends State<SignUpPage> {
         if (ipGeoLocationState is IPGeoLocationLoaded) {
           countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? DEFAULT_COUNTRY_CODE : ipGeoLocationState.ipGeoLocation.country_code2;
           ipGeoLocation = ipGeoLocationState.ipGeoLocation;
+        }
+      },
+    );
+  }
+
+  BlocListener userAuthenticationBlocListener() {
+    return BlocListener<AuthenticationBloc, AuthenticationState>(
+      listener: (context, authenticationState) {
+        if(authenticationState is Authenticating) { //
+          Get.back();
+          goToVerifyPhoneNumber();
         }
       },
     );
@@ -244,14 +255,7 @@ class SignUpPageState extends State<SignUpPage> {
     authenticationBloc.add(RegisterUsingMobileNoEvent(
         mobileNo: mobileNumber,
         countryCode: !isObjectEmpty(countryCode) ? countryCode.code : countryCodeString,
-        callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {
-//          Navigator.pop(context);//pop loading dialog // If you have used Get.showDialog. THen
-          Get.back();
-
-          if (!isObjectEmpty(preVerifyMobileNumberOTPResponse)) {
-            goToVerifyPhoneNumber();
-          }
-        }));
+        callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
   }
 
   /// NOTE: sign up using Google is deprecated */

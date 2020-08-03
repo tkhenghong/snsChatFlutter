@@ -9,7 +9,13 @@ class UserAuthenticationResponse {
   @JsonKey(name: 'jwt')
   String jwt;
 
-  UserAuthenticationResponse({this.jwt});
+  @JsonKey(name: 'username')
+  String username;
+
+  @JsonKey(name: 'otpExpirationTime')
+  DateTime otpExpirationTime;
+
+  UserAuthenticationResponse({this.jwt, this.username, this.otpExpirationTime});
 
   factory UserAuthenticationResponse.fromJson(Map<String, dynamic> json) => _$UserAuthenticationResponseFromJson(json);
 
