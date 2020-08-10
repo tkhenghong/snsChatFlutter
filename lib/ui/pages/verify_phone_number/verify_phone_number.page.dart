@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:pin_input_text_field/pin_input_text_field.dart';
 import 'package:snschat_flutter/general/functions/toast/show_toast.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
+import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 
 class VerifyPhoneNumberPage extends StatefulWidget {
@@ -38,7 +39,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
 
     authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
 
-    return authenticationBlocBuilder();
+    return multiBlocListener();
   }
 
   Widget multiBlocListener() {
@@ -46,13 +47,16 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
       listeners: [
         authenticationBlocListener()
       ],
+      child: authenticationBlocBuilder(),
     );
   }
 
   Widget authenticationBlocListener() {
     return BlocListener<AuthenticationBloc, AuthenticationState>(
       listener: (context, authenticationState) {
+        print('authenticationBlocListener() works');
         if(authenticationState is AuthenticationsLoaded) { // If verification successful,
+          Get.back();
           showToast('Verification successful.', Toast.LENGTH_SHORT);
           goToChatGroupList();
         }
@@ -157,7 +161,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
         onSubmit: (pin) {
           showLoading("Verifying PIN...");
           // TODO: Verify phone by calling BlocEvent > call UserAuthentication API > goToChatGroupList
-          authenticationBloc.add(VerifyMobileNoEvent(mobileNo: mobileNumber, secureKeyword: secureKeyword, otpNumber: pin));
+          authenticationBloc.add(VerifyMobileNoEvent(mobileNo: mobileNumber, secureKeyword: secureKeyword, otpNumber: pin, callback: (UserAuthenticationResponse userAuthenticationResponse) {}));
 //          Future.delayed(Duration(milliseconds: 1000), () {
 //            //Delay 1 second to simulate something loading
 //            Navigator.pop(context);

@@ -18,13 +18,16 @@ class User {
   @JsonKey(name: 'googleAccountId')
   String googleAccountId;
 
+  @JsonKey(name: 'emailAddress')
+  String emailAddress;
+
   @JsonKey(name: 'countryCode')
   String countryCode;
 
   @JsonKey(name: 'mobileNo')
   String mobileNo;
 
-  User({this.id, this.displayName, this.realName, this.mobileNo, this.googleAccountId, this.countryCode});
+  User({this.id, this.displayName, this.realName, this.mobileNo, this.googleAccountId, this.emailAddress, this.countryCode});
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 

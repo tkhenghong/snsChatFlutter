@@ -62,12 +62,9 @@ class DeleteUserEvent extends UserEvent {
 }
 
 class GetOwnUserEvent extends UserEvent {
-  final FirebaseUser firebaseUser;
-  final FirebaseAuth firebaseAuth;
-  final GoogleSignIn googleSignIn;
   final Function callback;
 
-  GetOwnUserEvent({this.googleSignIn, this.firebaseAuth, this.firebaseUser, this.callback});
+  GetOwnUserEvent({this.callback});
 
   @override
   List<Object> get props => [];

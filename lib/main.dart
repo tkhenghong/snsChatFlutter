@@ -163,6 +163,7 @@ initializeServices() {
   Get.put(NetworkService());
   Get.put(NetworkService());
   Get.put(WebSocketService());
+  Get.put(PasswordService());
 
   // Dio
   Get.put(new Dio());

@@ -13,6 +13,7 @@ User _$UserFromJson(Map<String, dynamic> json) {
     realName: json['realName'] as String,
     mobileNo: json['mobileNo'] as String,
     googleAccountId: json['googleAccountId'] as String,
+    emailAddress: json['emailAddress'] as String,
     countryCode: json['countryCode'] as String,
   );
 }
@@ -22,6 +23,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'displayName': instance.displayName,
       'realName': instance.realName,
       'googleAccountId': instance.googleAccountId,
+      'emailAddress': instance.emailAddress,
       'countryCode': instance.countryCode,
       'mobileNo': instance.mobileNo,
     };
@@ -36,6 +38,7 @@ abstract class _$UserLombok {
   String displayName;
   String realName;
   String googleAccountId;
+  String emailAddress;
   String countryCode;
   String mobileNo;
 
@@ -55,6 +58,10 @@ abstract class _$UserLombok {
 
   void setGoogleAccountId(String googleAccountId) {
     this.googleAccountId = googleAccountId;
+  }
+
+  void setEmailAddress(String emailAddress) {
+    this.emailAddress = emailAddress;
   }
 
   void setCountryCode(String countryCode) {
@@ -80,6 +87,10 @@ abstract class _$UserLombok {
 
   String getGoogleAccountId() {
     return googleAccountId;
+  }
+
+  String getEmailAddress() {
+    return emailAddress;
   }
 
   String getCountryCode() {

@@ -47,7 +47,9 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
         String username = sharedPreferences.getString("username");
         DateTime otpExpirationTime = DateTime.parse(sharedPreferences.getString("otpExpirationTime"));
 
-        if (!isStringEmpty(jwtToken) && !isStringEmpty(username) && !isObjectEmpty(otpExpirationTime)) {
+        bool jwtExpired = otpExpirationTime.isBefore(DateTime.now());
+
+        if (!isStringEmpty(jwtToken) && !isStringEmpty(username) && !isObjectEmpty(otpExpirationTime) && !jwtExpired) {
           yield AuthenticationsLoaded(jwtToken, username, otpExpirationTime);
           functionCallback(event, true);
         } else {

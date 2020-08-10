@@ -14,7 +14,7 @@ abstract class ApiException implements Exception {
     }
 
     String messageTitle = !isObjectEmpty(errorResponse) ? errorResponse.exceptionName : this.runtimeType.toString();
-    String messageContent = !isObjectEmpty(errorResponse) ? errorResponse.message : '';
+    String messageContent = !isObjectEmpty(errorResponse) && !isStringEmpty(errorResponse.message) ? errorResponse.message : '';
     String trace = !isObjectEmpty(errorResponse) ? errorResponse.trace : 'No traces available.';
 
     if (!isObjectEmpty(showDialog) && showDialog) {

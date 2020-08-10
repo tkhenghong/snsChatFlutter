@@ -7,8 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:snschat_flutter/general/index.dart';
+import 'package:get/get.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
+import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
@@ -102,6 +103,7 @@ class LoginPageState extends State<LoginPage> {
   Widget multiBlocListener() => MultiBlocListener(listeners: [
         ipGeoLocationBlocListener(),
         userBlocListener(),
+        userAuthenticationBlocListener(),
       ], child: loginScreen());
 
   Widget loginScreen() {
@@ -170,6 +172,17 @@ class LoginPageState extends State<LoginPage> {
   Widget userBlocListener() {
     return BlocListener<UserBloc, UserState>(
       listener: (context, state) {},
+    );
+  }
+
+  Widget userAuthenticationBlocListener() {
+    return BlocListener<AuthenticationBloc, AuthenticationState>(
+      listener: (context, state) {
+        if (state is Authenticating) {
+          Get.back();
+          goToVerifyPhoneNumber();
+        }
+      },
     );
   }
 
@@ -315,15 +328,11 @@ class LoginPageState extends State<LoginPage> {
       return;
     }
 
+    showCenterLoadingIndicator();
+
     getPhoneNumber();
 
-    authenticationBloc.add(LoginUsingMobileNumberEvent(
-        mobileNo: mobileNumber,
-        callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {
-          if (!isObjectEmpty(preVerifyMobileNumberOTPResponse)) {
-            goToVerifyPhoneNumber();
-          }
-        }));
+    authenticationBloc.add(LoginUsingMobileNumberEvent(mobileNo: mobileNumber, callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
   }
 
   _signInwithFacebook() {

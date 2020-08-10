@@ -5,3 +5,4 @@ export 'image/ImageService.dart';
 export 'network/NetworkService.dart';
 export 'permissions/PermissionService.dart';
 export 'websocket/WebSocketService.dart';
+export 'password/PasswordService.dart';

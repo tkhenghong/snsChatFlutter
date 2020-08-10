@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
+import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -32,7 +33,9 @@ class WebSocketService {
   }
 
   Future<dynamic> closeWebSocket() async {
-    return webSocketChannel.sink.close();
+    if(!isObjectEmpty(webSocketChannel)) {
+      return webSocketChannel.sink.close();
+    }
   }
 
   Future<Stream<dynamic>> reconnnectWebSocket(String userId) async {

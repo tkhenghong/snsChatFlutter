@@ -22,13 +22,17 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   Stream<UserState> mapEventToState(UserEvent event) async* {
     if (event is InitializeUserEvent) {
       yield* _initializeUser(event);
-    } else if (event is AddUserEvent) {
-      yield* _addUser(event);
-    } else if (event is EditUserEvent) {
+    }
+//    else if (event is AddUserEvent) {
+//      yield* _addUser(event);
+//    }
+    else if (event is EditUserEvent) {
       yield* _editUserToState(event);
-    } else if (event is DeleteUserEvent) {
-      yield* _deleteUserFromState(event);
-    } else if (event is GetOwnUserEvent) {
+    }
+//    else if (event is DeleteUserEvent) {
+//      yield* _deleteUserFromState(event);
+//    }
+    else if (event is GetOwnUserEvent) {
       yield* _getOwnUser(event);
     } else if (event is CheckUserSignedUpEvent) {
       yield* _checkUserSignedUp(event);
@@ -57,31 +61,31 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   // Register user in API, DB, BLOC
-  Stream<UserState> _addUser(AddUserEvent event) async* {
-    User userFromServer;
-    bool userSaved = false;
-
-    // Avoid readding existed user object
-    if (isStringEmpty(event.user.id)) {
-      userFromServer = await userAPIService.addUser(event.user);
-    } else {
-      userFromServer = event.user;
-    }
-
-    if (!isObjectEmpty(userFromServer)) {
-      userSaved = await userDBService.addUser(userFromServer);
-
-      if (userSaved) {
-        yield UserLoaded(userFromServer);
-        functionCallback(event, userFromServer);
-      }
-    }
-
-    if (isObjectEmpty(userFromServer) || !userSaved) {
-      yield UserNotLoaded();
-      functionCallback(event, null);
-    }
-  }
+//  Stream<UserState> _addUser(AddUserEvent event) async* {
+//    User userFromServer;
+//    bool userSaved = false;
+//
+//    // Avoid readding existed user object
+//    if (isStringEmpty(event.user.id)) {
+//      userFromServer = await userAPIService.addUser(event.user);
+//    } else {
+//      userFromServer = event.user;
+//    }
+//
+//    if (!isObjectEmpty(userFromServer)) {
+//      userSaved = await userDBService.addUser(userFromServer);
+//
+//      if (userSaved) {
+//        yield UserLoaded(userFromServer);
+//        functionCallback(event, userFromServer);
+//      }
+//    }
+//
+//    if (isObjectEmpty(userFromServer) || !userSaved) {
+//      yield UserNotLoaded();
+//      functionCallback(event, null);
+//    }
+//  }
 
   // Change User information in API, DB, and State
   Stream<UserState> _editUserToState(EditUserEvent event) async* {
@@ -106,35 +110,38 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   // Remove User from DB, and BLOC state
-  Stream<UserState> _deleteUserFromState(DeleteUserEvent event) async* {
-    bool deletedFromREST = false;
-    bool deleted = false;
-    if (state is UserLoaded) {
-      deletedFromREST = await userAPIService.deleteUser(event.user.id);
-      if (deletedFromREST) {
-        deleted = await userDBService.deleteUser(event.user.id);
-        if (deleted) {
-          functionCallback(event, true);
-
-          User existingUser = (state as UserLoaded).user;
-
-          if (existingUser.id == event.user.id) {
-            yield UserNotLoaded();
-          }
-        }
-      }
-
-      if (!deletedFromREST || !deleted) {
-        functionCallback(event, false);
-      }
-    }
-  }
+//  Stream<UserState> _deleteUserFromState(DeleteUserEvent event) async* {
+//    bool deletedFromREST = false;
+//    bool deleted = false;
+//    if (state is UserLoaded) {
+//      deletedFromREST = await userAPIService.deleteUser(event.user.id);
+//      if (deletedFromREST) {
+//        deleted = await userDBService.deleteUser(event.user.id);
+//        if (deleted) {
+//          functionCallback(event, true);
+//
+//          User existingUser = (state as UserLoaded).user;
+//
+//          if (existingUser.id == event.user.id) {
+//            yield UserNotLoaded();
+//          }
+//        }
+//      }
+//
+//      if (!deletedFromREST || !deleted) {
+//        functionCallback(event, false);
+//      }
+//    }
+//  }
 
   Stream<UserState> _getOwnUser(GetOwnUserEvent event) async* {
-    if (state is UserLoaded) {
-      User user = (state as UserLoaded).user;
-      functionCallback(event, user);
+    User user = await userAPIService.getOwnUser();
+
+    if(!isObjectEmpty(user)) {
+      yield UserLoaded(user);
     }
+
+    functionCallback(event, user);
   }
 
   // TODO: Moved to AuthenticationBloc
