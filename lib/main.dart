@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:snschat_flutter/rest/index.dart';
@@ -131,6 +132,10 @@ Widget initializeBlocProviders() {
 }
 
 initializeServices() {
+
+  // Secure Storage
+  Get.put(new FlutterSecureStorage());
+
   // API Services
   Get.put(CustomHttpClient());
   Get.put(ConversationGroupAPIService());

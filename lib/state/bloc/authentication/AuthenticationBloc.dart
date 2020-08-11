@@ -13,7 +13,7 @@ import 'bloc.dart';
 class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> {
   AuthenticationBloc() : super(AuthenticationsLoading());
 
-  UserAuthenticationAPIService authenticationAPIService = Get.find();
+  UserAuthenticationAPIService authenticationAPIService = Get.find();  
 
   @override
   Stream<AuthenticationState> mapEventToState(AuthenticationEvent event) async* {
@@ -42,7 +42,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     if (state is AuthenticationsLoading || state is AuthenticationsNotLoaded) {
       try {
         SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-        final storage = new FlutterSecureStorage();
+        final FlutterSecureStorage storage = Get.find();
         String jwtToken = await storage.read(key: "jwtToken");
         String username = sharedPreferences.getString("username");
         DateTime otpExpirationTime = DateTime.parse(sharedPreferences.getString("otpExpirationTime"));
@@ -152,7 +152,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
 
       if (!isObjectEmpty(userAuthenticationResponse)) {
         SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-        final storage = new FlutterSecureStorage();
+        final FlutterSecureStorage storage = Get.find();
         sharedPreferences.setString("jwtToken", userAuthenticationResponse.jwt);
         await storage.write(key: "jwtToken", value: userAuthenticationResponse.jwt);
         sharedPreferences.setString("username", userAuthenticationResponse.username);

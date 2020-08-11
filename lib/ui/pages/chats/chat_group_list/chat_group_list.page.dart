@@ -238,6 +238,10 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           webSocketBloc.add(InitializeWebSocketEvent(user: userState.user, callback: (bool done) {}));
           restoreUserPreviousData();
         }
+
+        if(userState is UserNotLoaded) {
+          userBloc.add(GetOwnUserEvent(callback: (User user) {}));
+        }
       },
     );
   }
