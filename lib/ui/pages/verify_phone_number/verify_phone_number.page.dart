@@ -54,7 +54,6 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
   Widget authenticationBlocListener() {
     return BlocListener<AuthenticationBloc, AuthenticationState>(
       listener: (context, authenticationState) {
-        print('authenticationBlocListener() works');
         if(authenticationState is AuthenticationsLoaded) { // If verification successful,
           Get.back();
           showToast('Verification successful.', Toast.LENGTH_SHORT);

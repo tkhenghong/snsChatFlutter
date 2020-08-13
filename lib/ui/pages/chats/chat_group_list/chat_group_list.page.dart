@@ -191,6 +191,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         }
         if (authenticationState is AuthenticationsLoaded) {
           userBloc.add(InitializeUserEvent(userId: authenticationState.username, callback: (bool initialized) {}));
+          userBloc.add(GetOwnUserEvent(callback: (User user) {}));
         }
       },
     );
@@ -237,10 +238,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         if (userState is UserLoaded) {
           webSocketBloc.add(InitializeWebSocketEvent(user: userState.user, callback: (bool done) {}));
           restoreUserPreviousData();
-        }
-
-        if(userState is UserNotLoaded) {
-          userBloc.add(GetOwnUserEvent(callback: (User user) {}));
         }
       },
     );

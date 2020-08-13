@@ -50,6 +50,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
           yield UserLoaded(userFromDB);
           functionCallback(event, true);
         } else {
+          add(GetOwnUserEvent(callback: (User user) {}));
           yield UserNotLoaded();
           functionCallback(event, false);
         }
