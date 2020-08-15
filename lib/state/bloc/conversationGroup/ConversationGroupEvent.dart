@@ -57,17 +57,16 @@ class DeleteConversationGroupEvent extends ConversationGroupEvent {
   String toString() => 'DeleteConversationGroupEvent {conversationGroup: $conversationGroup}';
 }
 
-class GetUserPreviousConversationGroupsEvent extends ConversationGroupEvent {
-  final User user;
+class GetUserOwnConversationGroupsEvent extends ConversationGroupEvent {
   final Function callback;
 
-  const GetUserPreviousConversationGroupsEvent({this.user, this.callback});
+  const GetUserOwnConversationGroupsEvent({this.callback});
 
   @override
-  List<Object> get props => [user];
+  List<Object> get props => [];
 
   @override
-  String toString() => 'GetUserPreviousConversationGroupsEvent {user: $user}';
+  String toString() => 'GetUserOwnConversationGroupsEvent';
 }
 
 class AddGroupMemberEvent extends ConversationGroupEvent {

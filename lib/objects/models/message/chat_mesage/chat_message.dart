@@ -35,16 +35,6 @@ class ChatMessage {
   @JsonKey(name: 'senderMobileNo')
   String senderMobileNo;
 
-  // Receiver
-  @JsonKey(name: 'receiverId')
-  String receiverId; // UserContactId
-
-  @JsonKey(name: 'receiverName')
-  String receiverName;
-
-  @JsonKey(name: 'receiverMobileNo')
-  String receiverMobileNo;
-
   @JsonKey(name: 'createdTime')
   DateTime createdTime;
 
@@ -57,9 +47,6 @@ class ChatMessage {
       this.senderId,
       this.senderName,
       this.senderMobileNo,
-      this.receiverId,
-      this.receiverName,
-      this.receiverMobileNo,
       this.type,
       this.status,
       this.messageContent,

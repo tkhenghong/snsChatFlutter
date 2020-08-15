@@ -25,7 +25,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       yield* _editSettings(event);
     } else if (event is DeleteSettingsEvent) {
       yield* _deleteSettings(event);
-    } else if (event is GetUserSettingsEvent) {
+    } else if (event is GetUserOwnSettingsEvent) {
       yield* _getSettingsOfTheUserEvent(event);
     }
   }
@@ -120,19 +120,17 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   }
 
   // Used during login to initialize Settings after having the User Initialized
-  Stream<SettingsState> _getSettingsOfTheUserEvent(GetUserSettingsEvent event) async* {
+  Stream<SettingsState> _getSettingsOfTheUserEvent(GetUserOwnSettingsEvent event) async* {
     Settings settingsFromREST;
     bool savedIntoDB;
 
-    if (!isObjectEmpty(event.user)) {
-      settingsFromREST = await settingsAPIService.getSettingsOfAUser(event.user.id);
+    settingsFromREST = await settingsAPIService.getUserOwnSettings();
 
-      savedIntoDB = await settingsDBService.addSettings(settingsFromREST);
+    savedIntoDB = await settingsDBService.addSettings(settingsFromREST);
 
-      if (!isObjectEmpty(settingsFromREST) && savedIntoDB) {
-        yield SettingsLoaded(settingsFromREST);
-        functionCallback(event, settingsFromREST);
-      }
+    if (!isObjectEmpty(settingsFromREST) && savedIntoDB) {
+      yield SettingsLoaded(settingsFromREST);
+      functionCallback(event, settingsFromREST);
     }
 
     if (isObjectEmpty(settingsFromREST) || !savedIntoDB) {

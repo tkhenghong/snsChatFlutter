@@ -30,8 +30,8 @@ class UserContactAPIService {
     return UserContact.fromJson(await httpClient.getRequest("$REST_URL/$userContactAPI/mobileNo/$mobileNo"));
   }
 
-  Future<List<UserContact>> getUserContactsByUserId(String userId) async {
-    List<dynamic> userContactListRaw = await httpClient.getRequest("$REST_URL/$userContactAPI/user/$userId");
+  Future<List<UserContact>> getOwnUserContacts() async {
+    List<dynamic> userContactListRaw = await httpClient.getRequest("$REST_URL/$userContactAPI/user");
     return userContactListRaw.map((e) => UserContact.fromJson(e)).toList();
   }
 }

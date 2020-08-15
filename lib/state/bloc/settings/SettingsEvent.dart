@@ -58,11 +58,10 @@ class DeleteSettingsEvent extends SettingsEvent {
   String toString() => 'DeleteSettingsEvent {settings: $settings}';
 }
 
-class GetUserSettingsEvent extends SettingsEvent {
-  final User user;
+class GetUserOwnSettingsEvent extends SettingsEvent {
   final Function callback;
 
-  const GetUserSettingsEvent({this.user, this.callback});
+  const GetUserOwnSettingsEvent({this.callback});
 
   @override
   List<Object> get props => [];

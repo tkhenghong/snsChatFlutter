@@ -30,7 +30,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   AuthenticationBloc authenticationBloc;
   MultimediaProgressBloc multimediaProgressBloc;
   ConversationGroupBloc conversationGroupBloc;
-  MessageBloc messageBloc;
+  ChatMessageBloc messageBloc;
   MultimediaBloc multimediaBloc;
   UnreadMessageBloc unreadMessageBloc;
   UserContactBloc userContactBloc;
@@ -58,7 +58,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
     multimediaProgressBloc = BlocProvider.of<MultimediaProgressBloc>(context);
     conversationGroupBloc = BlocProvider.of<ConversationGroupBloc>(context);
-    messageBloc = BlocProvider.of<MessageBloc>(context);
+    messageBloc = BlocProvider.of<ChatMessageBloc>(context);
     multimediaBloc = BlocProvider.of<MultimediaBloc>(context);
     unreadMessageBloc = BlocProvider.of<UnreadMessageBloc>(context);
     userContactBloc = BlocProvider.of<UserContactBloc>(context);
@@ -191,7 +191,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         }
         if (authenticationState is AuthenticationsLoaded) {
           userBloc.add(InitializeUserEvent(userId: authenticationState.username, callback: (bool initialized) {}));
-          userBloc.add(GetOwnUserEvent(callback: (User user) {}));
         }
       },
     );
@@ -237,7 +236,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
       listener: (context, userState) {
         if (userState is UserLoaded) {
           webSocketBloc.add(InitializeWebSocketEvent(user: userState.user, callback: (bool done) {}));
-          restoreUserPreviousData();
+          restoreUserPreviousData(); // TODO: Use restoreUserPreviousData() to either restore or refresh user's data , implement pagination
         }
       },
     );
@@ -312,32 +311,30 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   initialize() async {
+    print('chat_group_list_page.dart initialize()');
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     authenticationBloc.add(InitializeAuthenticationsEvent(callback: (bool done) {}));
     multimediaProgressBloc.add(InitializeMultimediaProgressEvent(callback: (bool done) {}));
     conversationGroupBloc.add(InitializeConversationGroupsEvent(callback: (bool done) {}));
-    messageBloc.add(InitializeMessagesEvent(callback: (bool done) {}));
+    messageBloc.add(InitializeChatMessagesEvent(callback: (bool done) {}));
     multimediaBloc.add(InitializeMultimediaEvent(callback: (bool done) {}));
     unreadMessageBloc.add(InitializeUnreadMessagesEvent(callback: (bool done) {}));
     userContactBloc.add(InitializeUserContactsEvent(callback: (bool done) {}));
   }
 
   restoreUserPreviousData() {
-    UserState userState = userBloc.state;
-    if (userState is UserLoaded) {
-      // Restore previous data
-      settingsBloc.add(GetUserSettingsEvent(user: userState.user, callback: (Settings settings) {}));
-      conversationGroupBloc.add(GetUserPreviousConversationGroupsEvent(
-          user: userState.user,
-          callback: (bool done) {
-            if (done) {
-              getConversationGroupsMultimedia();
-            }
-          }));
-      unreadMessageBloc.add(GetUserPreviousUnreadMessagesEvent(user: userState.user, callback: (bool done) {}));
-      multimediaBloc.add(GetUserProfilePictureMultimediaEvent(user: userState.user, callback: (bool done) {}));
-      userContactBloc.add(GetUserPreviousUserContactsEvent(user: userState.user, callback: (bool done) {}));
-    }
+    // Restore previous data
+    userBloc.add(GetOwnUserEvent(callback: (User user) {}));
+    settingsBloc.add(GetUserOwnSettingsEvent(callback: (Settings settings) {}));
+    conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(
+        callback: (bool done) {
+          if (done) {
+            getConversationGroupsMultimedia();
+          }
+        }));
+    unreadMessageBloc.add(GetUserPreviousUnreadMessagesEvent(callback: (bool done) {}));
+    multimediaBloc.add(GetUserOwnProfilePictureMultimediaEvent(callback: (bool done) {}));
+    userContactBloc.add(GetUserOwnUserContactsEvent(callback: (bool done) {}));
   }
 
   // TODO: ProcessWebSocketMessage event should be completely inside Bloc, don't put it here.

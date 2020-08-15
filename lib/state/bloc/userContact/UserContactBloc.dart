@@ -24,10 +24,10 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       yield* _deleteUserContact(event);
     } else if (event is GetUserContactEvent) {
       _getUserContact(event);
-    } else if (event is GetOwnUserContactEvent) {
-      yield* _getOwnUserContact(event);
-    } else if (event is GetUserPreviousUserContactsEvent) {
-      yield* _getUserPreviousUserContactsEvent(event);
+    } else if (event is GetUserContactByUserIdEvent) {
+      yield* _getUserContactByUserId(event);
+    } else if (event is GetUserOwnUserContactsEvent) {
+      yield* _getUserOwnUserContactsEvent(event);
     } else if (event is AddMultipleUserContactEvent) {
       yield* _addMultipleUserContact(event);
     }
@@ -200,7 +200,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     }
   }
 
-  Stream<UserContactState> _getOwnUserContact(GetOwnUserContactEvent event) async* {
+  Stream<UserContactState> _getUserContactByUserId(GetUserContactByUserIdEvent event) async* {
     if (!isObjectEmpty(event.user)) {
       UserContact userContactFromDB = await userContactDBService.getUserContactByUserId(event.user.id);
 
@@ -210,8 +210,8 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     }
   }
 
-  Stream<UserContactState> _getUserPreviousUserContactsEvent(GetUserPreviousUserContactsEvent event) async* {
-    List<UserContact> userContactListFromServer = await userContactAPIService.getUserContactsByUserId(event.user.id);
+  Stream<UserContactState> _getUserOwnUserContactsEvent(GetUserOwnUserContactsEvent event) async* {
+    List<UserContact> userContactListFromServer = await userContactAPIService.getOwnUserContacts();
     if (state is UserContactsLoaded) {
       List<UserContact> existingUserContactList = (state as UserContactsLoaded).userContactList;
 

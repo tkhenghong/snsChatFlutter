@@ -10,8 +10,8 @@ class ConversationGroupAPIService {
 
   CustomHttpClient httpClient = new CustomHttpClient();
 
-  Future<ConversationGroup> addConversationGroup(ConversationGroup conversation) async {
-    return ConversationGroup.fromJson(await httpClient.postRequest("$REST_URL/$conversationGroupAPI", requestBody: conversation));
+  Future<ConversationGroup> addConversationGroup(ConversationGroup conversationGroup) async {
+    return ConversationGroup.fromJson(await httpClient.postRequest("$REST_URL/$conversationGroupAPI", requestBody: conversationGroup));
   }
 
   Future<bool> editConversationGroup(ConversationGroup conversation) async {
@@ -26,8 +26,8 @@ class ConversationGroupAPIService {
     return ConversationGroup.fromJson(await httpClient.getRequest("$REST_URL/$conversationGroupAPI/$conversationGroupId"));
   }
 
-  Future<List<ConversationGroup>> getConversationGroupsForUserByMobileNo(String mobileNo) async {
-    List<dynamic> conversationGroupListRaw = await httpClient.getRequest("$REST_URL/$conversationGroupAPI/user/mobileNo/$mobileNo");
+  Future<List<ConversationGroup>> getUserOwnConversationGroups() async {
+    List<dynamic> conversationGroupListRaw = await httpClient.getRequest("$REST_URL/$conversationGroupAPI/user");
     return conversationGroupListRaw.map((e) => ConversationGroup.fromJson(e)).toList();
   }
 }

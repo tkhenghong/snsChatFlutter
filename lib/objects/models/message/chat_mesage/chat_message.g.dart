@@ -13,9 +13,6 @@ ChatMessage _$ChatMessageFromJson(Map<String, dynamic> json) {
     senderId: json['senderId'] as String,
     senderName: json['senderName'] as String,
     senderMobileNo: json['senderMobileNo'] as String,
-    receiverId: json['receiverId'] as String,
-    receiverName: json['receiverName'] as String,
-    receiverMobileNo: json['receiverMobileNo'] as String,
     type: _$enumDecodeNullable(_$ChatMessageTypeEnumMap, json['type']),
     status: _$enumDecodeNullable(_$ChatMessageStatusEnumMap, json['status']),
     messageContent: json['messageContent'] as String,
@@ -40,9 +37,6 @@ Map<String, dynamic> _$ChatMessageToJson(ChatMessage instance) =>
       'senderId': instance.senderId,
       'senderName': instance.senderName,
       'senderMobileNo': instance.senderMobileNo,
-      'receiverId': instance.receiverId,
-      'receiverName': instance.receiverName,
-      'receiverMobileNo': instance.receiverMobileNo,
       'createdTime': instance.createdTime?.toIso8601String(),
       'sentTime': instance.sentTime?.toIso8601String(),
     };
@@ -111,9 +105,6 @@ abstract class _$ChatMessageLombok {
   String senderId;
   String senderName;
   String senderMobileNo;
-  String receiverId;
-  String receiverName;
-  String receiverMobileNo;
   DateTime createdTime;
   DateTime sentTime;
 
@@ -153,18 +144,6 @@ abstract class _$ChatMessageLombok {
 
   void setSenderMobileNo(String senderMobileNo) {
     this.senderMobileNo = senderMobileNo;
-  }
-
-  void setReceiverId(String receiverId) {
-    this.receiverId = receiverId;
-  }
-
-  void setReceiverName(String receiverName) {
-    this.receiverName = receiverName;
-  }
-
-  void setReceiverMobileNo(String receiverMobileNo) {
-    this.receiverMobileNo = receiverMobileNo;
   }
 
   void setCreatedTime(DateTime createdTime) {
@@ -210,18 +189,6 @@ abstract class _$ChatMessageLombok {
 
   String getSenderMobileNo() {
     return senderMobileNo;
-  }
-
-  String getReceiverId() {
-    return receiverId;
-  }
-
-  String getReceiverName() {
-    return receiverName;
-  }
-
-  String getReceiverMobileNo() {
-    return receiverMobileNo;
   }
 
   DateTime getCreatedTime() {

@@ -26,7 +26,7 @@ class SettingsAPIService {
     return Settings.fromJson(await httpClient.getRequest("$REST_URL/$settingsAPI/$settingsId"));
   }
 
-  Future<Settings> getSettingsOfAUser(String userId) async {
-    return Settings.fromJson(await httpClient.getRequest("$REST_URL/$settingsAPI/user/$userId"));
+  Future<Settings> getUserOwnSettings() async {
+    return Settings.fromJson(await httpClient.getRequest("$REST_URL/$settingsAPI/user"));
   }
 }

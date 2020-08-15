@@ -95,8 +95,8 @@ Widget initializeBlocProviders() {
     BlocProvider<IPGeoLocationBloc>(
       create: (context) => IPGeoLocationBloc(),
     ),
-    BlocProvider<MessageBloc>(
-      create: (context) => MessageBloc(),
+    BlocProvider<ChatMessageBloc>(
+      create: (context) => ChatMessageBloc(),
     ),
     BlocProvider<MultimediaBloc>(
       create: (context) => MultimediaBloc(),
@@ -140,7 +140,7 @@ initializeServices() {
   Get.put(CustomHttpClient());
   Get.put(ConversationGroupAPIService());
   Get.put(IPLocationAPIService());
-  Get.put(MessageAPIService());
+  Get.put(ChatMessageAPIService());
   Get.put(MultimediaAPIService());
   Get.put(SettingsAPIService());
   Get.put(UnreadMessageAPIService());

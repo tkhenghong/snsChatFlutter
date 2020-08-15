@@ -11,8 +11,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
-import 'package:snschat_flutter/environments/development/variables.dart'
-as globals;
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
@@ -567,15 +566,15 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   Widget loadMessageList(BuildContext context, User user) {
-    return BlocBuilder<MessageBloc, MessageState>(
-      builder: (context, messageState) {
-        if (messageState is MessageLoading) {
+    return BlocBuilder<ChatMessageBloc, ChatMessageState>(
+      builder: (context, chatMessageState) {
+        if (chatMessageState is ChatMessageLoading) {
           return showSingleMessagePage('Loading...');
         }
 
-        if (messageState is MessagesLoaded) {
+        if (chatMessageState is ChatMessagesLoaded) {
           // Get current conversation messages and sort them.
-          List<ChatMessage> conversationGroupMessageList = messageState.messageList.where((ChatMessage message) => message.conversationId == widget._conversationGroup.id).toList();
+          List<ChatMessage> conversationGroupMessageList = chatMessageState.chatMessageList.where((ChatMessage message) => message.conversationId == widget._conversationGroup.id).toList();
           conversationGroupMessageList.sort((message1, message2) => message2.createdTime.compareTo(message1.createdTime));
 
           return Flexible(
@@ -992,10 +991,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         conversationId: widget._conversationGroup.id,
         messageContent: content,
         multimediaId: '',
-        // Send to group will not need receiver
-        receiverId: '',
-        receiverMobileNo: '',
-        receiverName: '',
         senderId: user.id,
         senderMobileNo: user.mobileNo,
         senderName: user.displayName,
@@ -1004,7 +999,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         createdTime: DateTime.now(),
       );
 
-      BlocProvider.of<MessageBloc>(context).add(AddMessageEvent(
+      BlocProvider.of<ChatMessageBloc>(context).add(AddChatMessageEvent(
           message: newMessage,
           callback: (ChatMessage message) {
             if (isObjectEmpty(message)) {
@@ -1086,10 +1081,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
           conversationId: widget._conversationGroup.id,
           messageContent: basename(file.path),
           multimediaId: '',
-          // Send to group will not need receiver
-          receiverId: '',
-          receiverMobileNo: '',
-          receiverName: '',
           senderId: user.id,
           senderMobileNo: user.mobileNo,
           senderName: user.displayName,
@@ -1097,7 +1088,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
           type: type,
           createdTime: DateTime.now(),
         );
-        BlocProvider.of<MessageBloc>(context).add(AddMessageEvent(
+        BlocProvider.of<ChatMessageBloc>(context).add(AddChatMessageEvent(
             message: message,
             callback: (ChatMessage message2) async {
               if (!isObjectEmpty(message2)) {

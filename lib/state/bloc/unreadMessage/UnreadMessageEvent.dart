@@ -58,14 +58,13 @@ class DeleteUnreadMessageEvent extends UnreadMessageEvent {
 }
 
 class GetUserPreviousUnreadMessagesEvent extends UnreadMessageEvent {
-  final User user;
   final Function callback;
 
-  GetUserPreviousUnreadMessagesEvent({this.user, this.callback});
+  GetUserPreviousUnreadMessagesEvent({this.callback});
 
   @override
-  List<Object> get props => [user];
+  List<Object> get props => [];
 
   @override
-  String toString() => 'GetUserPreviousUnreadMessagesEvent {user: $user}';
+  String toString() => 'GetUserPreviousUnreadMessagesEvent}';
 }

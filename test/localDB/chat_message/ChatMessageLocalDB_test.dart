@@ -7,7 +7,7 @@ import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 
 void main() {
-  MessageAPIService messageAPIService = MessageAPIService();
+  ChatMessageAPIService chatMessageAPIService = ChatMessageAPIService();
   ChatMessageDBService messageDBService = ChatMessageDBService();
 
   ChatMessage createTestObject() {
@@ -21,9 +21,6 @@ void main() {
       senderName: "Teoh Kheng Hong",
       senderMobileNo: "+60182262663",
       senderId: "f9g87rd98g7r8e9g7",
-      receiverName: "Teoh Kheng Lam",
-      receiverMobileNo: "+60182223991",
-      receiverId: "df09g809dg8df0",
       multimediaId: "seioghsriujgrsogr78gf9rg78",
     );
   }
@@ -31,7 +28,7 @@ void main() {
   test("Test Create ChatMessage Locally", () async {
     ChatMessage message = createTestObject();
 
-    ChatMessage newMessage = await messageAPIService.addMessage(message);
+    ChatMessage newMessage = await chatMessageAPIService.addChatMessage(message);
     print("newMessage.id:" + newMessage.id.toString());
     await messageDBService.addChatMessage(newMessage);
     ChatMessage messageFromLocalDB = await messageDBService.getSingleChatMessage(newMessage.id);
@@ -43,7 +40,7 @@ void main() {
   test("Test Edit ChatMessage Locally", () async {
     ChatMessage message = createTestObject();
 
-    ChatMessage newMessage = await messageAPIService.addMessage(message);
+    ChatMessage newMessage = await chatMessageAPIService.addChatMessage(message);
     await messageDBService.addChatMessage(newMessage);
 
     ChatMessage editedMessage = newMessage;
@@ -51,7 +48,7 @@ void main() {
     editedMessage.type = ChatMessageType.Video;
     editedMessage.multimediaId = "edited multimedia ID";
 
-    bool edited = await messageAPIService.editMessage(editedMessage);
+    bool edited = await chatMessageAPIService.editChatMessage(editedMessage);
     print("edited:" + edited.toString());
     await messageDBService.editChatMessage(editedMessage);
     ChatMessage messageFromLocalDB = await messageDBService.getSingleChatMessage(newMessage.id);
@@ -66,10 +63,10 @@ void main() {
   test("Test Get ChatMessage Locally", () async {
     ChatMessage message = createTestObject();
 
-    ChatMessage newMessage = await messageAPIService.addMessage(message);
+    ChatMessage newMessage = await chatMessageAPIService.addChatMessage(message);
     await messageDBService.addChatMessage(newMessage);
 
-    ChatMessage messageFromServer = await messageAPIService.getSingleMessage(newMessage.id);
+    ChatMessage messageFromServer = await chatMessageAPIService.getSingleChatMessage(newMessage.id);
     ChatMessage messageFromLocalDB = await messageDBService.getSingleChatMessage(message.id);
 
     expect(messageFromServer.id, equals(newMessage.id));
@@ -79,10 +76,10 @@ void main() {
   test("Test Delete ChatMessage Locally", () async {
     ChatMessage message = createTestObject();
 
-    ChatMessage newMessage = await messageAPIService.addMessage(message);
+    ChatMessage newMessage = await chatMessageAPIService.addChatMessage(message);
     await messageDBService.addChatMessage(newMessage);
 
-    bool deleted = await messageAPIService.deleteMessage(message.id);
+    bool deleted = await chatMessageAPIService.deleteChatMessage(message.id);
     await messageDBService.deleteChatMessage(message.id);
     print("deleted:" + deleted.toString());
 

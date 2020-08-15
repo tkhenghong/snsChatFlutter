@@ -1,11 +1,11 @@
 import 'package:bloc/bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/rest/models/user_authentication/UserAuthenticationAPIService.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'bloc.dart';
 
@@ -53,6 +53,9 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
           yield AuthenticationsLoaded(jwtToken, username, otpExpirationTime);
           functionCallback(event, true);
         } else {
+          storage.delete(key: 'jwtToken');
+          storage.delete(key: 'username');
+          sharedPreferences.remove('otpExpirationTime');
           yield AuthenticationsNotLoaded();
           functionCallback(event, false);
         }

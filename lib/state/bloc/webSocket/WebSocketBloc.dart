@@ -79,14 +79,14 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
           if (userState is UserLoaded) {
             if (userState.user.id != webSocketMessage.message.senderId) {
               // "Message" message
-              BlocProvider.of<MessageBloc>(event.context).add(AddMessageEvent(message: webSocketMessage.message, callback: (ChatMessage message) {}));
+              BlocProvider.of<ChatMessageBloc>(event.context).add(AddChatMessageEvent(message: webSocketMessage.message, callback: (ChatMessage message) {}));
               if (webSocketMessage.message.type != 'Text' && webSocketMessage.message.type != 'Contact' && webSocketMessage.message.type != 'Location') {
                 BlocProvider.of<MultimediaBloc>(event.context).add(GetMessageMultimediaEvent(messageId: webSocketMessage.message.id, conversationGroupId: webSocketMessage.message.conversationId, callback: (Multimedia multimedia) {}));
               }
             } else {
               // Mark your own message as sent, received status will changed by recipient
               webSocketMessage.message.status = ChatMessageStatus.Sent;
-              BlocProvider.of<MessageBloc>(event.context).add(EditMessageEvent(message: webSocketMessage.message, callback: (ChatMessage message) {}));
+              BlocProvider.of<ChatMessageBloc>(event.context).add(EditChatMessageEvent(message: webSocketMessage.message, callback: (ChatMessage message) {}));
             }
           }
         }

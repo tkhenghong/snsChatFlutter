@@ -25,8 +25,8 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
       yield* _deleteMultimedia(event);
     } else if (event is SendMultimediaEvent) {
       yield* _uploadMultimedia(event);
-    } else if (event is GetUserProfilePictureMultimediaEvent) {
-      yield* _getUserProfilePictureMultimediaEvent(event);
+    } else if (event is GetUserOwnProfilePictureMultimediaEvent) {
+      yield* _getUserOwnProfilePictureMultimediaEvent(event);
     } else if (event is GetConversationGroupsMultimediaEvent) {
       yield* _getConversationGroupsMultimediaEvent(event);
     } else if (event is GetUserContactsMultimediaEvent) {
@@ -157,7 +157,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     add(AddMultimediaEvent(multimedia: newMultimedia, callback: (Multimedia multimedia) {}));
   }
 
-  Stream<MultimediaState> _getUserProfilePictureMultimediaEvent(GetUserProfilePictureMultimediaEvent event) async* {
+  Stream<MultimediaState> _getUserOwnProfilePictureMultimediaEvent(GetUserOwnProfilePictureMultimediaEvent event) async* {
     List<Multimedia> multimediaList = [];
 
     if (state is MultimediaLoaded) {
@@ -165,7 +165,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     }
 
     // Get user profile picture
-    Multimedia multimediaFromServer = await multimediaAPIService.getMultimediaOfAUser(event.user.id);
+    Multimedia multimediaFromServer = await multimediaAPIService.getUserOwnMultimedia();
 
     if (!isObjectEmpty(multimediaFromServer)) {
       // Update DB

@@ -1,5 +1,5 @@
+export 'chat_message/chat_message.dart';
 export 'conversation_group/conversation_group.dart';
-export 'message/message.dart';
 export 'multimedia/multimedia.dart';
 export 'multimedia_progress/multimedia_progress.dart';
 export 'settings/settings.dart';

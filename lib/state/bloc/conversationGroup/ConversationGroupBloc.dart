@@ -25,8 +25,8 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       yield* _editConversationGroup(event);
     } else if (event is DeleteConversationGroupEvent) {
       yield* _deleteConversationGroup(event);
-    } else if (event is GetUserPreviousConversationGroupsEvent) {
-      yield* _getUserPreviousConversationGroups(event);
+    } else if (event is GetUserOwnConversationGroupsEvent) {
+      yield* _getUserOwnConversationGroups(event);
     } else if (event is AddGroupMemberEvent) {
       yield* _addGroupMember(event);
     }
@@ -132,8 +132,8 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     }
   }
 
-  Stream<ConversationGroupState> _getUserPreviousConversationGroups(GetUserPreviousConversationGroupsEvent event) async* {
-    List<ConversationGroup> conversationGroupListFromServer = await conversationGroupAPIService.getConversationGroupsForUserByMobileNo(event.user.mobileNo);
+  Stream<ConversationGroupState> _getUserOwnConversationGroups(GetUserOwnConversationGroupsEvent event) async* {
+    List<ConversationGroup> conversationGroupListFromServer = await conversationGroupAPIService.getUserOwnConversationGroups();
     if (state is ConversationGroupsLoaded) {
       List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 

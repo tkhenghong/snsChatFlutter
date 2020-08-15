@@ -54,7 +54,6 @@ class UserContactDBService {
     return !isObjectEmpty(recordSnapshot) ? UserContact.fromJson(recordSnapshot.value) : null;
   }
 
-  // Used for retreiving your own UserContact
   Future<UserContact> getUserContactByUserId(String userId) async {
     if (isObjectEmpty(await _db)) {
       return null;

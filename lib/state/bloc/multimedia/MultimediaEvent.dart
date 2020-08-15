@@ -70,17 +70,16 @@ class SendMultimediaEvent extends MultimediaEvent {
   String toString() => 'SendMultimediaEvent {multimedia: $multimedia}';
 }
 
-class GetUserProfilePictureMultimediaEvent extends MultimediaEvent {
-  final User user;
+class GetUserOwnProfilePictureMultimediaEvent extends MultimediaEvent {
   final Function callback;
 
-  GetUserProfilePictureMultimediaEvent({this.user, this.callback});
+  GetUserOwnProfilePictureMultimediaEvent({this.callback});
 
   @override
-  List<Object> get props => [user];
+  List<Object> get props => [];
 
   @override
-  String toString() => 'GetUserProfilePictureMultimediaEvent {user: $user}';
+  String toString() => 'GetUserProfilePictureMultimediaEvent';
 }
 
 class GetConversationGroupsMultimediaEvent extends MultimediaEvent {
