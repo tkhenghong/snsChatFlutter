@@ -165,7 +165,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     }
 
     // Get user profile picture
-    Multimedia multimediaFromServer = await multimediaAPIService.getUserOwnMultimedia();
+    Multimedia multimediaFromServer = await multimediaAPIService.getUserOwnProfilePictureMultimedia();
 
     if (!isObjectEmpty(multimediaFromServer)) {
       // Update DB

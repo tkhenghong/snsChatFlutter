@@ -26,7 +26,7 @@ class MultimediaAPIService {
     return Multimedia.fromJson(await httpClient.getRequest("$REST_URL/$multimediaAPI/$multimediaId"));
   }
 
-  Future<Multimedia> getUserOwnMultimedia() async {
+  Future<Multimedia> getUserOwnProfilePictureMultimedia() async {
     return Multimedia.fromJson(await httpClient.getRequest("$REST_URL/$multimediaAPI/user"));
   }
 

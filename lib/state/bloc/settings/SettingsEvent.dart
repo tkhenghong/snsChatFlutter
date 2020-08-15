@@ -19,19 +19,6 @@ class InitializeSettingsEvent extends SettingsEvent {
   String toString() => 'InitializeSettingsEvent';
 }
 
-class AddSettingsEvent extends SettingsEvent {
-  final Settings settings;
-  final Function callback;
-
-  const AddSettingsEvent({this.settings, this.callback});
-
-  @override
-  List<Object> get props => [settings];
-
-  @override
-  String toString() => 'AddSettingsEvent {settings: $settings}';
-}
-
 class EditSettingsEvent extends SettingsEvent {
   final Settings settings;
   final Function callback;

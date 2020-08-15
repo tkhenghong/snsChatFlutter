@@ -331,13 +331,8 @@ class GroupNamePageState extends State<GroupNamePage> {
                     if (!isObjectEmpty(conversationGroup2)) {
                       groupMultimedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
                       unreadMessage.userId = conversationGroup2.creatorUserId;
-                      BlocProvider.of<UnreadMessageBloc>(context).add(AddUnreadMessageEvent(
-                          unreadMessage: unreadMessage,
-                          callback: (UnreadMessage unreadMessage2) async {
-                            if (!isObjectEmpty(unreadMessage2)) {
-                              addMultimedia(groupMultimedia, !isObjectEmpty(copiedImageFile) ? copiedImageFile : null, conversationGroup2, context);
-                            }
-                          }));
+                      // TODO: Removed UnreadMessage, should be created from backend
+                      addMultimedia(groupMultimedia, !isObjectEmpty(copiedImageFile) ? copiedImageFile : null, conversationGroup2, context);
                     } else {
                       Navigator.pop(context);
                       Fluttertoast.showToast(msg: 'Unable to create conversation group. Please try again.', toastLength: Toast.LENGTH_SHORT);

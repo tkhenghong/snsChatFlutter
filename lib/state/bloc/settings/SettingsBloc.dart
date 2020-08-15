@@ -19,8 +19,6 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   Stream<SettingsState> mapEventToState(SettingsEvent event) async* {
     if (event is InitializeSettingsEvent) {
       yield* _initializeSettingsToState(event);
-    } else if (event is AddSettingsEvent) {
-      yield* _addSettings(event);
     } else if (event is EditSettingsEvent) {
       yield* _editSettings(event);
     } else if (event is DeleteSettingsEvent) {
@@ -56,33 +54,6 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     }
   }
 
-  // Add Settings into REST, DB, and BLOC
-  Stream<SettingsState> _addSettings(AddSettingsEvent event) async* {
-    Settings newSettings;
-    bool settingsSaved = false;
-
-    // Avoid readding existing settings
-    if (isStringEmpty(event.settings.id)) {
-      newSettings = await settingsAPIService.addSettings(event.settings);
-    } else {
-      newSettings = event.settings;
-    }
-
-    if (!isObjectEmpty(newSettings)) {
-      settingsSaved = await settingsDBService.addSettings(newSettings);
-
-      if (settingsSaved) {
-        yield SettingsLoaded(newSettings);
-        functionCallback(event, newSettings);
-      }
-    }
-
-    if (isObjectEmpty(newSettings) || !settingsSaved) {
-      yield SettingsNotLoaded();
-      functionCallback(event, null);
-    }
-  }
-
   Stream<SettingsState> _editSettings(EditSettingsEvent event) async* {
     bool updatedInREST = false;
     bool updated = false;
@@ -106,6 +77,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     }
   }
 
+  // Only deletes Local DB's Settings**
   Stream<SettingsState> _deleteSettings(DeleteSettingsEvent event) async* {
     if (state is SettingsLoaded) {
       bool settingsDeleted = await settingsDBService.deleteSettings(event.settings.id);

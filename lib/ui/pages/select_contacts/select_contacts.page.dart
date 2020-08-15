@@ -526,13 +526,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                     if (!isObjectEmpty(conversationGroup2)) {
                       groupMultimedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
                       unreadMessage.userId = conversationGroup2.creatorUserId;
-                      BlocProvider.of<UnreadMessageBloc>(context).add(AddUnreadMessageEvent(
-                          unreadMessage: unreadMessage,
-                          callback: (UnreadMessage unreadMessage2) {
-                            if (!isObjectEmpty(unreadMessage2)) {
-                              addMultimedia(groupMultimedia, null, conversationGroup2, context);
-                            }
-                          }));
+                      // TODO: Remove create UnreadMessage, should be done at backend
+                      addMultimedia(groupMultimedia, null, conversationGroup2, context);
                     } else {
                       Navigator.pop(context);
                       showToast('Unable to create conversation group. Please try again.', Toast.LENGTH_SHORT);

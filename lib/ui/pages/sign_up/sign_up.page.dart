@@ -140,7 +140,8 @@ class SignUpPageState extends State<SignUpPage> {
   BlocListener userAuthenticationBlocListener() {
     return BlocListener<AuthenticationBloc, AuthenticationState>(
       listener: (context, authenticationState) {
-        if(authenticationState is Authenticating) { //
+        if (authenticationState is Authenticating) {
+          //
           Get.back();
           goToVerifyPhoneNumber();
         }
@@ -252,10 +253,8 @@ class SignUpPageState extends State<SignUpPage> {
 
     showCenterLoadingIndicator();
 
-    authenticationBloc.add(RegisterUsingMobileNoEvent(
-        mobileNo: mobileNumber,
-        countryCode: !isObjectEmpty(countryCode) ? countryCode.code : countryCodeString,
-        callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
+    authenticationBloc
+        .add(RegisterUsingMobileNoEvent(mobileNo: mobileNumber, countryCode: !isObjectEmpty(countryCode) ? countryCode.code : countryCodeString, callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
   }
 
   /// NOTE: sign up using Google is deprecated */
@@ -300,37 +299,28 @@ class SignUpPageState extends State<SignUpPage> {
                           // TODO: Error Handling
                           userContact.userId = multimedia.userId = settings.userId = user2.id;
                           userContact.userIds.add(user2.id);
-                          settingsBloc.add(AddSettingsEvent(
-                              settings: settings,
-                              callback: (Settings settings2) {
-                                if (!isObjectEmpty(settings2)) {
-                                  multimediaBloc.add(AddMultimediaEvent(
-                                      multimedia: multimedia,
-                                      callback: (Multimedia multimedia2) {
-                                        if (!isObjectEmpty(multimedia2)) {
-                                          userContact.multimediaId = multimedia.id;
-                                          multimedia2.userContactId = userContact.id;
-                                          userContactBloc.add(AddUserContactEvent(
-                                              userContact: userContact,
-                                              callback: (UserContact userContact2) {
-                                                multimediaBloc.add(EditMultimediaEvent(
-                                                    multimedia: multimedia2,
-                                                    callback: (Multimedia multimedia3) {
-                                                      if (!isObjectEmpty(googleSignIn2) && !isObjectEmpty(user2) && !isObjectEmpty(settings2) && !isObjectEmpty(userContact2) && !isObjectEmpty(multimedia3)) {
-                                                        showToast('Sign up success. Please verify your phone number.', Toast.LENGTH_SHORT);
-                                                        Navigator.pop(context);
-                                                        goToVerifyPhoneNumber();
-                                                      }
-                                                    }));
-                                              }));
-                                        } else {
-                                          showToast('Sign up error. Please try again.', Toast.LENGTH_SHORT);
-                                        }
+                          // TODO: Removed AddSettingsEvent, should be created at backend.
+                          multimediaBloc.add(AddMultimediaEvent(
+                              multimedia: multimedia,
+                              callback: (Multimedia multimedia2) {
+                                if (!isObjectEmpty(multimedia2)) {
+                                  userContact.multimediaId = multimedia.id;
+                                  multimedia2.userContactId = userContact.id;
+                                  userContactBloc.add(AddUserContactEvent(
+                                      userContact: userContact,
+                                      callback: (UserContact userContact2) {
+                                        multimediaBloc.add(EditMultimediaEvent(
+                                            multimedia: multimedia2,
+                                            callback: (Multimedia multimedia3) {
+                                              if (!isObjectEmpty(googleSignIn2) && !isObjectEmpty(user2) && !isObjectEmpty(userContact2) && !isObjectEmpty(multimedia3)) {
+                                                showToast('Sign up success. Please verify your phone number.', Toast.LENGTH_SHORT);
+                                                Navigator.pop(context);
+                                                goToVerifyPhoneNumber();
+                                              }
+                                            }));
                                       }));
                                 } else {
                                   showToast('Sign up error. Please try again.', Toast.LENGTH_SHORT);
-                                  googleInfoBloc.add(RemoveGoogleInfoEvent());
-                                  Navigator.pop(context);
                                 }
                               }));
                         }));

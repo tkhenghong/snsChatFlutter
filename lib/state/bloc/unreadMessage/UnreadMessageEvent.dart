@@ -18,19 +18,6 @@ class InitializeUnreadMessagesEvent extends UnreadMessageEvent {
   String toString() => 'InitializeUnreadMessagesEvent';
 }
 
-class AddUnreadMessageEvent extends UnreadMessageEvent {
-  final UnreadMessage unreadMessage;
-  final Function callback;
-
-  AddUnreadMessageEvent({this.unreadMessage, this.callback});
-
-  @override
-  List<Object> get props => [unreadMessage];
-
-  @override
-  String toString() => 'AddUnreadMessageToStateEvent {unreadMessage: $unreadMessage}';
-}
-
 class EditUnreadMessageEvent extends UnreadMessageEvent {
   final UnreadMessage unreadMessage;
   final Function callback;
