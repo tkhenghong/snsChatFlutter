@@ -10,7 +10,7 @@ import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/state/bloc/settings/bloc.dart';
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
-  SettingsBloc(): super(SettingsLoading());
+  SettingsBloc() : super(SettingsLoading());
 
   SettingsAPIService settingsAPIService = Get.find();
   SettingsDBService settingsDBService = Get.find();

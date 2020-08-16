@@ -194,7 +194,7 @@ class MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'PocketChat',
       theme: ThemeData(
-        textTheme: GoogleFonts.latoTextTheme(Theme.of(context).textTheme),
+        fontFamily: 'Roboto',
         brightness: primaryBrightness,
         primaryColor: primaryColor,
         accentColor: primaryColor,

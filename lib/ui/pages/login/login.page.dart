@@ -219,6 +219,9 @@ class LoginPageState extends State<LoginPage> {
       textAlign: TextAlign.left,
       keyboardType: TextInputType.number,
       onChanged: getPhoneNumber(),
+      onFieldSubmitted: (text) {
+        _signIn();
+      },
     );
   }
 

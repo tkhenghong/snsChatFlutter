@@ -11,13 +11,12 @@ abstract class UserEvent extends Equatable {
 }
 
 class InitializeUserEvent extends UserEvent {
-  final String userId;
   final Function callback;
 
-  const InitializeUserEvent({this.userId, this.callback});
+  const InitializeUserEvent({this.callback});
 
   @override
-  String toString() => 'InitializeUsersEvent. {userId: $userId}';
+  String toString() => 'InitializeUsersEvent';
 }
 
 class AddUserEvent extends UserEvent {

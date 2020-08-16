@@ -22,41 +22,27 @@ class CustomFileService {
   // TODO: getApplicationDocumentDirectory should change to getDirectories,
   // TODO: so you can get any directory based on where you want.
   Future<String> getApplicationDocumentDirectory() async {
-    bool storageAccessGranted = await permissionService.requestStoragePermission();
-    if (storageAccessGranted) {
-      // get the application documents directory
-
-      // var dir = await getApplicationDocumentsDirectory();
-      // TODO: Testing directory. Original should be the above code
-      // getExternalStoragePath is only available on Android
-
-      var dir = null;
-      if(Platform.isAndroid) {
-        dir = await getExternalStorageDirectory();
-        // make sure it exists
-        await dir.create(recursive: true);
-        return dir.path; // join method comes from path.dart
-      } else if(Platform.isIOS) {
-        dir = await getApplicationDocumentDirectory();
-        return dir;
-      } else if(Platform.isWindows) {
-        return 'C:/';
-      } else if (Platform.isMacOS) {
-        return '/tmp/';
-      } else if (Platform.isLinux) {
-        return '/tmp';
-      } else if (Platform.isFuchsia) {
-        return '/tmp';
-      }
-
-      // Is Website mode
-      if(kIsWeb) {
-        // TODO: No directory can be given!
-        return null;
-      }
-
+    var dir = null;
+    if(Platform.isAndroid) {
+      dir = await getExternalStorageDirectory();
+      // make sure it exists
+      await dir.create(recursive: true);
+      return dir.path; // join method comes from path.dart
+    } else if(Platform.isIOS) {
+      dir = await getApplicationDocumentDirectory();
+      return dir;
+    } else if(Platform.isWindows) {
+      return 'C:/';
+    } else if (Platform.isMacOS) {
+      return '/tmp/';
+    } else if (Platform.isLinux) {
+      return '/tmp/';
+    } else if (Platform.isFuchsia) {
+      return '/tmp/';
+    } else if(kIsWeb) {
+      return '';
     } else {
-      return null;
+      return '';
     }
   }
 

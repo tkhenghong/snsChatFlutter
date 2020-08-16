@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:pin_input_text_field/pin_input_text_field.dart';
 import 'package:snschat_flutter/general/functions/toast/show_toast.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 
@@ -24,6 +25,12 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
   Color themePrimaryColor;
 
   AuthenticationBloc authenticationBloc;
+  UserContactBloc userContactBloc;
+  SettingsBloc settingsBloc;
+  UserBloc userBloc;
+  MultimediaBloc multimediaBloc;
+  ConversationGroupBloc conversationGroupBloc;
+  UnreadMessageBloc unreadMessageBloc;
 
   int pinFieldLength = 6;
 
@@ -38,6 +45,12 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
     themePrimaryColor = Theme.of(context).primaryColor;
 
     authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
+    conversationGroupBloc = BlocProvider.of<ConversationGroupBloc>(context);
+    unreadMessageBloc = BlocProvider.of<UnreadMessageBloc>(context);
+    multimediaBloc = BlocProvider.of<MultimediaBloc>(context);
+    userContactBloc = BlocProvider.of<UserContactBloc>(context);
+    settingsBloc = BlocProvider.of<SettingsBloc>(context);
+    userBloc = BlocProvider.of<UserBloc>(context);
 
     return multiBlocListener();
   }
@@ -57,6 +70,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
         if(authenticationState is AuthenticationsLoaded) { // If verification successful,
           Get.back();
           showToast('Verification successful.', Toast.LENGTH_SHORT);
+          refreshUserData();
           goToChatGroupList();
         }
       },
@@ -183,6 +197,16 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
       onPressed: () {},
       child: Text('Call me'),
     );
+  }
+
+  refreshUserData() {
+    print('verify_phone_number.dart refreshUserData()');
+    userBloc.add(GetOwnUserEvent(callback: (User user) {}));
+    settingsBloc.add(GetUserOwnSettingsEvent(callback: (Settings settings) {}));
+    conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(callback: (bool done) {}));
+    unreadMessageBloc.add(GetUserPreviousUnreadMessagesEvent(callback: (bool done) {}));
+    multimediaBloc.add(GetUserOwnProfilePictureMultimediaEvent(callback: (bool done) {}));
+    userContactBloc.add(GetUserOwnUserContactsEvent(callback: (bool done) {}));
   }
 
   goToLoginPage() {

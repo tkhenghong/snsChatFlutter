@@ -73,7 +73,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     }
 
     return MultiBlocListener(listeners: [
-//       googleBlocListener(),
+      // googleBlocListener(),
       userAuthenticationBlocListener(),
       userContactBlocListener(),
       userBlocListener(),
@@ -189,9 +189,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         if (authenticationState is AuthenticationsNotLoaded) {
           goToLoginPage();
         }
-        if (authenticationState is AuthenticationsLoaded) {
-          userBloc.add(InitializeUserEvent(userId: authenticationState.username, callback: (bool initialized) {}));
-        }
       },
     );
   }
@@ -236,7 +233,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
       listener: (context, userState) {
         if (userState is UserLoaded) {
           webSocketBloc.add(InitializeWebSocketEvent(user: userState.user, callback: (bool done) {}));
-          restoreUserPreviousData(); // TODO: Use restoreUserPreviousData() to either restore or refresh user's data , implement pagination
         }
       },
     );
@@ -304,14 +300,14 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   onRefresh() async {
-    restoreUserPreviousData();
+    refreshUserData();
     setState(() {
       _refreshController.refreshCompleted();
     });
   }
 
   initialize() async {
-    print('chat_group_list_page.dart initialize()');
+    userBloc.add(InitializeUserEvent(callback: (bool done) {}));
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     authenticationBloc.add(InitializeAuthenticationsEvent(callback: (bool done) {}));
     multimediaProgressBloc.add(InitializeMultimediaProgressEvent(callback: (bool done) {}));
@@ -322,8 +318,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     userContactBloc.add(InitializeUserContactsEvent(callback: (bool done) {}));
   }
 
-  restoreUserPreviousData() {
-    // Restore previous data
+  refreshUserData() {
     userBloc.add(GetOwnUserEvent(callback: (User user) {}));
     settingsBloc.add(GetUserOwnSettingsEvent(callback: (Settings settings) {}));
     conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(

@@ -160,11 +160,18 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
 
-  #- family: RobotoMono
-  #  fonts:
-  #  - asset: fonts/RobotoMono-Regular.ttf
-  #  - asset: fonts/RobotoMono-Bold.ttf
-  #    weight: 700
+  #- family: Roboto & Raleway
+  fonts:
+    - family: Raleway
+      fonts:
+        - asset: lib/fonts/Raleway-Italic-VariableFont_wght.ttf
+        - asset: lib/fonts/Raleway-VariableFont_wght.ttf
+          style: normal
+    - family: Roboto
+      fonts:
+        - asset: lib/fonts/Roboto-Regular.ttf
+        - asset: lib/fonts/Roboto-Bold.ttf
+          weight: 700
 
   uses-material-design: true
 

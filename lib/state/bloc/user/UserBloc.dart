@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
@@ -16,7 +17,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   UserDBService userDBService = Get.find();
 
   String ENVIRONMENT = globals.ENVIRONMENT;
-
 
   @override
   Stream<UserState> mapEventToState(UserEvent event) async* {
@@ -44,13 +44,15 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   Stream<UserState> _initializeUser(InitializeUserEvent event) async* {
     if (state is UserLoading || state is UserNotLoaded) {
       try {
-        User userFromDB = await userDBService.getSingleUser(event.userId);
+        final FlutterSecureStorage storage = Get.find();
+        String userId = await storage.read(key: 'userId');
 
-        if (!isObjectEmpty(userFromDB)) {
+        User userFromDB = await userDBService.getSingleUser(userId);
+
+        if (!isStringEmpty(userId) && !isObjectEmpty(userFromDB)) {
           yield UserLoaded(userFromDB);
           functionCallback(event, true);
         } else {
-          add(GetOwnUserEvent(callback: (User user) {}));
           yield UserNotLoaded();
           functionCallback(event, false);
         }
@@ -138,7 +140,10 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   Stream<UserState> _getOwnUser(GetOwnUserEvent event) async* {
     User user = await userAPIService.getOwnUser();
 
-    if(!isObjectEmpty(user)) {
+    if (!isObjectEmpty(user)) {
+      userDBService.addUser(user);
+      final FlutterSecureStorage storage = Get.find();
+      storage.write(key: 'userId', value: user.id);
       yield UserLoaded(user);
     }
 

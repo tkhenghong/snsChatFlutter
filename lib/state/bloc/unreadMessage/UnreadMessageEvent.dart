@@ -53,5 +53,5 @@ class GetUserPreviousUnreadMessagesEvent extends UnreadMessageEvent {
   List<Object> get props => [];
 
   @override
-  String toString() => 'GetUserPreviousUnreadMessagesEvent}';
+  String toString() => 'GetUserPreviousUnreadMessagesEvent';
 }

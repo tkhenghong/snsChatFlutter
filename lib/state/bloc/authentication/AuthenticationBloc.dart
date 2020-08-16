@@ -156,7 +156,6 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
       if (!isObjectEmpty(userAuthenticationResponse)) {
         SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
         final FlutterSecureStorage storage = Get.find();
-        sharedPreferences.setString("jwtToken", userAuthenticationResponse.jwt);
         await storage.write(key: "jwtToken", value: userAuthenticationResponse.jwt);
         sharedPreferences.setString("username", userAuthenticationResponse.username);
         sharedPreferences.setString("otpExpirationTime", userAuthenticationResponse.otpExpirationTime.toString());

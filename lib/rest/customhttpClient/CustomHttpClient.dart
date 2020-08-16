@@ -88,10 +88,6 @@ class CustomHttpClient {
     bool connectedThroughWifi = networkService.connectedThroughWifi.value;
     bool hasInternetConnection = networkService.hasInternetConnection.value;
 
-    print('CustomHttpClient.dart hasInternetConnection: ' + hasInternetConnection.toString());
-    print('CustomHttpClient.dart connectedThroughMobileData: ' + connectedThroughMobileData.toString());
-    print('CustomHttpClient.dart connectedThroughWifi: ' + connectedThroughWifi.toString());
-
     if (!hasInternetConnection) {
       throw ConnectionException(ErrorResponse(), 'No Internet connection.');
     }
@@ -111,7 +107,6 @@ class CustomHttpClient {
       if (statusCode >= 400 && statusCode < 500) {
         print('CustomHttpClient.dart if (statusCode >= 400 && statusCode < 500)');
         print('CustomHttpClient.dart errorResponse.toString(): ' + errorResponse.toString());
-        ;
         throw ClientErrorException(errorResponse, statusCode.toString());
       } else if (statusCode >= 500 && statusCode < 600) {
         print('CustomHttpClient.dart else if (statusCode >= 500 && statusCode < 600)');
