@@ -14,113 +14,163 @@ class MyselfPage extends StatefulWidget {
 }
 
 class MyselfPageState extends State<MyselfPage> {
-  double deviceWidth;
-  double deviceHeight;
+  static IPGeoLocationBloc ipGeoLocationBloc;
+  static GoogleInfoBloc googleInfoBloc;
 
-  Color appBarThemeTextColor;
-  Color themePrimaryColor;
+  static NavigatorState navigatorState;
 
-  User blankUser = User(mobileNo: '', realName: '', displayName: '', countryCode: '', googleAccountId: '');
+  User user = User(mobileNo: '', realName: '', displayName: '', countryCode: '', googleAccountId: '');
+  UserContact userContact;
+  Multimedia multimedia;
+
+  List<ListTile> buttons = [
+    ListTile(
+        title: Text("Settings"),
+        leading: Icon(Icons.settings),
+        onTap: () {
+          goToSettingsPage();
+        }),
+    ListTile(
+        title: Text("About"),
+        leading: Icon(Icons.info),
+        onTap: () {
+          goToSettingsPage();
+        }),
+    ListTile(
+        title: Text("Help"),
+        leading: Icon(Icons.help),
+        onTap: () {
+          goToSettingsPage();
+        }),
+    ListTile(
+        title: Text("Feedback"),
+        leading: Icon(Icons.feedback),
+        onTap: () {
+          goToSettingsPage();
+        }),
+    ListTile(
+        title: Text("Logout"),
+        leading: Icon(Icons.exit_to_app),
+        onTap: () {
+          logOut();
+        }),
+  ];
 
   ImageService imageService = Get.find();
 
   @override
   Widget build(BuildContext context) {
-    deviceWidth = MediaQuery.of(context).size.width;
-    deviceHeight = MediaQuery.of(context).size.height;
+    ipGeoLocationBloc = BlocProvider.of<IPGeoLocationBloc>(context);
+    googleInfoBloc = BlocProvider.of<GoogleInfoBloc>(context);
+    navigatorState = Navigator.of(context);
 
-    themePrimaryColor = Theme.of(context).textTheme.title.color;
-    appBarThemeTextColor = Theme.of(context).appBarTheme.textTheme.title.color;
+    return Material(child: userBlocBuilder());
+  }
 
-    List<PageListItem> listItems = [
-      PageListItem(title: Text("Settings"), leading: Icon(Icons.settings), onTap: (context, object) => goToSettingsPage(context)),
-      PageListItem(title: Text("About"), leading: Icon(Icons.info), onTap: (context, object) => goToSettingsPage(context)),
-      PageListItem(title: Text("Help"), leading: Icon(Icons.help), onTap: (context, object) => goToSettingsPage(context)),
-      PageListItem(title: Text("Feedback"), leading: Icon(Icons.feedback), onTap: (context, object) => goToSettingsPage(context)),
-      PageListItem(
-          title: Text("Logout"),
-          leading: Icon(Icons.exit_to_app),
-          onTap: (context, object) {
-            logOut(context);
-          }),
-    ];
-
-    return Material(
-      color: appBarThemeTextColor,
-      child: BlocBuilder<UserBloc, UserState>(
-        builder: (context, userState) {
-          if (userState is UserLoaded) {
-            User user = userState.user;
-
-            return BlocBuilder<UserContactBloc, UserContactState>(
-              builder: (context, userContactState) {
-                if (userContactState is UserContactsLoaded) {
-                  List<UserContact> userContactList = userContactState.userContactList;
-
-                  UserContact userContact = userContactList.firstWhere((UserContact existingUserContact) => user.id == existingUserContact.userId.toString(), orElse: () => null);
-                  if (!isObjectEmpty(userContact)) {
-                    return BlocBuilder<MultimediaBloc, MultimediaState>(
-                      builder: (context, multimediaState) {
-                        if (multimediaState is MultimediaLoaded) {
-                          List<Multimedia> multimediaList = multimediaState.multimediaList;
-                          Multimedia multimedia = multimediaList.firstWhere((Multimedia existingMultimedia) => user.id == existingMultimedia.userId, orElse: null);
-                          if (!isObjectEmpty(multimedia)) {
-                            return showMyselfPage(context, user, userContact, multimedia, listItems);
-                          }
-                        }
-                        return showErrorPage(context, 'Error. Multimedia not loaded. Please sign in again.');
-                      },
-                    );
-                  }
-                }
-                return showErrorPage(context, 'Error. Unable to load user. Please sign in again.');
-              },
-            );
+  Widget userBlocBuilder() {
+    return BlocBuilder<UserBloc, UserState>(
+      builder: (context, userState) {
+        if (userState is UserLoaded) {
+          user = userState.user;
+          if (!isObjectEmpty(user)) {
+            return userContactBlocBuilder();
           }
-          return showErrorPage(context, 'Error. User not loaded. Please sign in again.');
-        },
-      ),
+        }
+        return showErrorPage('Error. User not loaded. Please sign in again.');
+      },
     );
   }
 
-  Widget showMyselfPage(BuildContext context, User user, UserContact userContact, Multimedia multimedia, List<PageListItem> listItems) {
-    PageListItem pageListItem = PageListItem(
+  Widget userContactBlocBuilder() {
+    return BlocBuilder<UserContactBloc, UserContactState>(
+      builder: (context, userContactState) {
+        if (userContactState is UserContactsLoaded) {
+          List<UserContact> userContactList = userContactState.userContactList;
+
+          userContact = userContactList.firstWhere((UserContact existingUserContact) => user.id == existingUserContact.userId.toString(), orElse: () => null);
+          if (!isObjectEmpty(userContact)) {
+            return multimediaBlocBuilder();
+          }
+        }
+        return showErrorPage('Error. Unable to load user. Please sign in again.');
+      },
+    );
+  }
+
+  Widget multimediaBlocBuilder() {
+    return BlocBuilder<MultimediaBloc, MultimediaState>(
+      builder: (context, multimediaState) {
+        if (multimediaState is MultimediaLoaded) {
+          List<Multimedia> multimediaList = multimediaState.multimediaList;
+          multimedia = multimediaList.firstWhere((Multimedia existingMultimedia) => user.id == existingMultimedia.userId, orElse: null);
+          if (!isObjectEmpty(multimedia)) {
+            return showMyselfPage();
+          }
+        }
+        return showErrorPage('Error. Multimedia not loaded. Please sign in again.');
+      },
+    );
+  }
+
+//  Widget showMyselfPage() {
+//    insertUserProfilePicture();
+//    return Column(
+//      children: <Widget>[PageListView(array: buttons, context: context)],
+//    );
+//  }
+
+  Widget showMyselfPage() {
+    insertUserProfilePicture();
+    return Column(
+      children: <Widget>[
+        ListView.builder(
+            itemCount: buttons.length,
+            shrinkWrap: true,
+            physics: BouncingScrollPhysics(),
+            // suggestion from https://github.com/flutter/flutter/issues/22314
+            itemBuilder: (BuildContext content, int index) {
+              return buttons[index];
+            })
+      ],
+    );
+  }
+
+  insertUserProfilePicture() {
+    ListTile listTile = ListTile(
       title: Text(user.displayName),
       subtitle: Text(!isStringEmpty(userContact.about) ? userContact.about : ''),
       leading: Hero(
         tag: user.id + "1",
-        child: imageService.loadImageThumbnailCircleAvatar(multimedia, DefaultImagePathType.Profile, context),
+        child: imageService.loadImageThumbnailCircleAvatar(multimedia, DefaultImagePathType.Profile),
       ),
     );
-    listItems.insert(0, pageListItem);
-    return Column(
-      children: <Widget>[PageListView(array: listItems, context: context)],
-    );
+    buttons.insert(0, listTile);
   }
 
-  Widget showErrorPage(BuildContext context, String message) {
+  Widget showErrorPage(String message) {
     return Column(
       children: <Widget>[
-        Padding(padding: EdgeInsets.only(top: deviceHeight * 0.35)),
+        Padding(padding: EdgeInsets.only(top: Get.height * 0.35)),
         Center(
           child: Text(message),
         ),
         RaisedButton(
           child: Text('Go to Sign In'),
-          onPressed: () => logOut(context),
-          textColor: appBarThemeTextColor,
+          onPressed: () {
+            logOut();
+          },
         ),
       ],
     );
   }
 
-  static goToSettingsPage(BuildContext context) {
-    return Navigator.of(context).pushNamed("settings_page");
+  static goToSettingsPage() {
+    navigatorState.pushNamed("settings_page");
   }
 
-  static logOut(BuildContext context) {
-    BlocProvider.of<IPGeoLocationBloc>(context).add(InitializeIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {}));
-    BlocProvider.of<GoogleInfoBloc>(context).add(RemoveGoogleInfoEvent(callback: (bool done) {}));
-    return Navigator.of(context).pushReplacementNamed("login_page");
+  static logOut() {
+    ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {}));
+    googleInfoBloc.add(RemoveGoogleInfoEvent(callback: (bool done) {}));
+    navigatorState.pushReplacementNamed("login_page");
   }
 }

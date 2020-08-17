@@ -421,7 +421,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                           softWrap: true,
                         ),
                         onTap: () {},
-                        leading: imageService.loadImageThumbnailCircleAvatar(null, DefaultImagePathType.UserContact, context),
+                        leading: imageService.loadImageThumbnailCircleAvatar(null, DefaultImagePathType.UserContact),
 //                                        leading: imageService.loadImageThumbnailCircleAvatar(
 //                                            multimediaList.firstWhere(
 //                                                (Multimedia userContactMultimedia) =>

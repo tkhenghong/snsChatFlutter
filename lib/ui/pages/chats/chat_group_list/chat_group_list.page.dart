@@ -282,7 +282,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         subtitle: Text(isObjectEmpty(unreadMessage) ? '' : unreadMessage.lastMessage),
         leading: Hero(
           tag: conversationGroup.id + '1',
-          child: imageService.loadImageThumbnailCircleAvatar(multimedia, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.type), context),
+          child: imageService.loadImageThumbnailCircleAvatar(multimedia, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.type)),
         ),
         trailing: Column(
           children: <Widget>[

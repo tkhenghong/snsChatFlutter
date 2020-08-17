@@ -214,7 +214,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                   Icon(Icons.arrow_back),
                   Hero(
                     tag: conversationGroup.id + '1',
-                    child: imageService.loadImageThumbnailCircleAvatar(multimedia, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.type), context),
+                    child: imageService.loadImageThumbnailCircleAvatar(multimedia, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.type)),
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 30.0),

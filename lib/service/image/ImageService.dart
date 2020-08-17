@@ -18,18 +18,15 @@ class ImageService {
 
   static int imageThumbnailWidthSize = globals.imageThumbnailWidthSize;
 
-  Widget loadImageThumbnailCircleAvatar(Multimedia multimedia, DefaultImagePathType type, BuildContext context) {
-    Color appBarTextTitleColor = Theme.of(context).appBarTheme.textTheme.title.color;
-
+  Widget loadImageThumbnailCircleAvatar(Multimedia multimedia, DefaultImagePathType type) {
     return isObjectEmpty(multimedia)
-        ? defaultImage(appBarTextTitleColor, type)
+        ? defaultImage(type)
         : isStringEmpty(multimedia.remoteThumbnailUrl)
-            ? defaultImage(appBarTextTitleColor, type)
+            ? defaultImage(type)
             : CachedNetworkImage(
                 // Note: imageBuilder is a place that tell CachedNetworkImage how the image should be displayed
                 imageBuilder: (BuildContext context, ImageProvider<dynamic> imageProvider) {
                   return CircleAvatar(
-                    backgroundColor: appBarTextTitleColor,
                     backgroundImage: imageProvider,
                   );
                 },
@@ -38,14 +35,12 @@ class ImageService {
                 placeholder: (context, url) => new CircularProgressIndicator(),
                 errorWidget: (context, url, error) => Image.asset(
                   fileService.getDefaultImagePath(type),
-                  color: appBarTextTitleColor,
                 ),
               );
   }
 
-  Widget defaultImage(Color appBarTextTitleColor, DefaultImagePathType type) {
+  Widget defaultImage(DefaultImagePathType type) {
     return CircleAvatar(
-      backgroundColor: appBarTextTitleColor,
       backgroundImage: AssetImage(fileService.getDefaultImagePath(type)),
     );
   }
