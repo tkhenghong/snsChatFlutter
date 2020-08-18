@@ -35,12 +35,13 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   String title = "";
   String subtitle = "";
 
+  List<Contact> contacts = [];
   List<Contact> selectedContacts = [];
   Map<String, bool> contactCheckBoxes = {};
 
-  Color themePrimaryColor;
-  Color appBarThemeTextColor;
-  TextStyle circleAvatarTextStyle;
+//  Color themePrimaryColor;
+//  Color appBarThemeTextColor;
+//  TextStyle circleAvatarTextStyle;
 
   RefreshController _refreshController;
   ScrollController scrollController;
@@ -54,7 +55,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     super.initState();
     _refreshController = new RefreshController();
     scrollController = new ScrollController();
-    getContacts(context);
+    getContacts();
     setConversationType(widget.chatGroupType);
   }
 
@@ -68,70 +69,15 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   @override
   Widget build(BuildContext context) {
-    themePrimaryColor = Theme.of(context).textTheme.title.color;
-    appBarThemeTextColor = Theme.of(context).appBarTheme.textTheme.title.color;
-    circleAvatarTextStyle = TextStyle(color: appBarThemeTextColor);
-
     return Scaffold(
-      appBar: appBar(context),
-      body: MultiBlocListener(
-        listeners: [
-          BlocListener<PhoneStorageContactBloc, PhoneStorageContactState>(
-            listener: (context, phoneStorageContactState) {
-              if (phoneStorageContactState is PhoneStorageContactsLoaded) {
-                setupCheckBoxes(phoneStorageContactState.phoneStorageContactList);
-              }
-            },
-          ),
-          BlocListener<UserBloc, UserState>(
-            listener: (context, userState) {},
-          ),
-        ],
-        child: BlocBuilder<PhoneStorageContactBloc, PhoneStorageContactState>(
-          builder: (context, phoneStorageContactState) {
-            if (phoneStorageContactState is PhoneStorageContactLoading) {
-              return showLoadingContactsPage(context);
-            }
-
-            if (phoneStorageContactState is PhoneStorageContactsLoaded) {
-              if (phoneStorageContactState.phoneStorageContactList.length == 0) {
-                return showNoContactPage(context);
-              } else {
-                return SmartRefresher(
-                  controller: _refreshController,
-                  enablePullDown: true,
-                  physics: BouncingScrollPhysics(),
-                  onRefresh: () => onRefresh(context),
-                  child: ListView(
-                    controller: scrollController,
-                    children: phoneStorageContactState.phoneStorageContactList.map((Contact contact) {
-                      return Container(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[needSelectMultipleContacts() ? showContactWithCheckBox(context, contact) : showContactWithoutCheckbox(context, contact)],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                );
-              }
-            }
-
-            if (phoneStorageContactState is PhoneStorageContactsNotLoaded) {
-              return showNoContactPermissionPage(context);
-            }
-
-            return showErrorPage(context);
-          },
-        ),
-      ),
-      bottomNavigationBar: _bottomAppBar(context),
-      floatingActionButton: _floatingActionButton(context),
+      appBar: appBar(),
+      body: multiBlocListener(),
+      bottomNavigationBar: _bottomAppBar(),
+      floatingActionButton: _floatingActionButton(),
     );
   }
 
-  Widget appBar(BuildContext context) {
+  Widget appBar() {
     return AppBar(
         title: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -170,7 +116,76 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     ));
   }
 
-  Widget showLoadingContactsPage(BuildContext context) {
+  Widget multiBlocListener() {
+    return MultiBlocListener(listeners: [
+      phoneStorageContactBlocListener(),
+      userBlocListener(),
+    ], child: phoneStorageContactBlocBuilder());
+  }
+
+  Widget phoneStorageContactBlocListener() {
+    return BlocListener<PhoneStorageContactBloc, PhoneStorageContactState>(
+      listener: (context, phoneStorageContactState) {
+        if (phoneStorageContactState is PhoneStorageContactsLoaded) {
+          setupCheckBoxes(); // TODO: Use BlocBuilder
+        }
+      },
+    );
+  }
+
+  Widget userBlocListener() {
+    return BlocListener<UserBloc, UserState>(
+      listener: (context, userState) {},
+    );
+  }
+
+  Widget phoneStorageContactBlocBuilder() {
+    return BlocBuilder<PhoneStorageContactBloc, PhoneStorageContactState>(
+      builder: (context, phoneStorageContactState) {
+        if (phoneStorageContactState is PhoneStorageContactLoading) {
+          return showLoadingContactsPage();
+        }
+
+        if (phoneStorageContactState is PhoneStorageContactsLoaded) {
+          if (phoneStorageContactState.phoneStorageContactList.length == 0) {
+            return showNoContactPage();
+          } else {
+            contacts = phoneStorageContactState.phoneStorageContactList;
+            return showSelectContactPageContent();
+          }
+        }
+
+        if (phoneStorageContactState is PhoneStorageContactsNotLoaded) {
+          return showNoContactPermissionPage();
+        }
+
+        return showErrorPage();
+      },
+    );
+  }
+
+  Widget showSelectContactPageContent() {
+    return SmartRefresher(
+      controller: _refreshController,
+      enablePullDown: true,
+      physics: BouncingScrollPhysics(),
+      onRefresh: () => onRefresh(),
+      child: ListView(
+        controller: scrollController,
+        children: contacts.map((Contact contact) {
+          return Container(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[needSelectMultipleContacts() ? showContactWithCheckBox(contact) : showContactWithoutCheckbox(contact)],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget showLoadingContactsPage() {
     return Center(
         child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -185,7 +200,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     ));
   }
 
-  Widget showContactWithCheckBox(BuildContext context, Contact contact) {
+  Widget showContactWithCheckBox(Contact contact) {
     return CheckboxListTile(
       title: Text(
         contact.displayName,
@@ -207,23 +222,23 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         });
       },
       secondary: CircleAvatar(
-        backgroundColor: themePrimaryColor,
+//        backgroundColor: themePrimaryColor,
         backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
         child: contact.avatar.isEmpty
             ? Text(
                 contact.displayName[0],
-                style: circleAvatarTextStyle,
+//                style: circleAvatarTextStyle,
               )
             : Text(
                 '',
-                style: circleAvatarTextStyle,
+//                style: circleAvatarTextStyle,
               ),
         radius: 20.0,
       ),
     );
   }
 
-  Widget showContactWithoutCheckbox(BuildContext context, Contact contact) {
+  Widget showContactWithoutCheckbox(Contact contact) {
     return ListTile(
       title: Text(
         contact.displayName,
@@ -234,28 +249,28 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         softWrap: true,
       ),
       onTap: () {
-        if (widget.chatGroupType == "Personal") {
-          createPersonalConversation(contact, context);
+        if (widget.chatGroupType == ConversationGroupType.Personal) {
+          createPersonalConversation(contact);
         }
       },
       leading: CircleAvatar(
-        backgroundColor: themePrimaryColor,
+//        backgroundColor: themePrimaryColor,
         backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
         child: contact.avatar.isEmpty
             ? Text(
                 contact.displayName[0],
-                style: circleAvatarTextStyle,
+//                style: circleAvatarTextStyle,
               )
             : Text(
                 '',
-                style: circleAvatarTextStyle,
+//                style: circleAvatarTextStyle,
               ),
         radius: 20.0,
       ),
     );
   }
 
-  Widget showErrorPage(BuildContext context) {
+  Widget showErrorPage() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -270,7 +285,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     );
   }
 
-  Widget showNoContactPage(BuildContext context) {
+  Widget showNoContactPage() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -285,7 +300,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     );
   }
 
-  Widget showNoContactPermissionPage(BuildContext context) {
+  Widget showNoContactPermissionPage() {
     return Center(
         child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -299,21 +314,21 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           height: 10.0,
         ),
         RaisedButton(
-          onPressed: () => getContacts(context),
+          onPressed: () => getContacts(),
           child: Text("Grant Contact Permission"),
         )
       ],
     ));
   }
 
-  BottomAppBar _bottomAppBar(BuildContext context) {
+  BottomAppBar _bottomAppBar() {
     return BottomAppBar(
       shape: CircularNotchedRectangle(),
       color: Theme.of(context).primaryColor,
     );
   }
 
-  FloatingActionButton _floatingActionButton(BuildContext context) {
+  FloatingActionButton _floatingActionButton() {
     return FloatingActionButton(
       child: Icon(Icons.search),
       onPressed: () => showSearch(context: context, delegate: CustomSearchDelegate()),
@@ -327,18 +342,18 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   bool needSelectMultipleContacts() {
     // return widget.chatGroupType == ChatGroupType.Group || widget.chatGroupType == ChatGroupType.Broadcast;
     // return widget.chatGroupType == "Group" || widget.chatGroupType == "Broadcast";
-    return widget.chatGroupType != "Personal";
+    return widget.chatGroupType != ConversationGroupType.Personal;
   }
 
-  setupCheckBoxes(List<Contact> phoneStorageContactList) {
-    phoneStorageContactList.forEach((contact) {
+  setupCheckBoxes() {
+    contacts.forEach((contact) {
       contactCheckBoxes[contact.displayName] = false;
     });
 
     contactLoaded = true;
   }
 
-  getContacts(BuildContext context) async {
+  getContacts() async {
     BlocProvider.of<PhoneStorageContactBloc>(context).add(GetPhoneStorageContactsEvent(callback: (bool success) {
       success ? _refreshController.refreshCompleted() : _refreshController.refreshFailed();
     }));
@@ -365,12 +380,12 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     }
   }
 
-  onRefresh(BuildContext context) async {
-    getContacts(context);
+  onRefresh() async {
+    getContacts();
   }
 
   // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
-  createPersonalConversation(Contact contact, BuildContext context) async {
+  createPersonalConversation(Contact contact) async {
     // TODO: create loading that cannot be dismissed to prevent exit, and make it faster
     showLoading("Loading conversation...");
     UserState userState = BlocProvider.of<UserBloc>(context).state;
@@ -495,11 +510,11 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           List<UserContact> userContactList = userContactState.userContactList;
           List<ConversationGroup> conversationGroupList = conversationGroupState.conversationGroupList;
 
-          bool personalConversationGroupExist = conversationGroupList
-              .contains((ConversationGroup existingConversationGroup) => existingConversationGroup.type == 'Personal' && existingConversationGroup.memberIds.contains((String memberId) => memberId == userContactFromServer.id));
+          bool personalConversationGroupExist = conversationGroupList.contains(
+              (ConversationGroup existingConversationGroup) => existingConversationGroup.type == ConversationGroupType.Personal && existingConversationGroup.memberIds.contains((String memberId) => memberId == userContactFromServer.id));
 
           if (personalConversationGroupExist) {
-            goToChatRoomPage(context, conversationGroup);
+            goToChatRoomPage(conversationGroup);
             return;
           }
         }
@@ -527,7 +542,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                       groupMultimedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
                       unreadMessage.userId = conversationGroup2.creatorUserId;
                       // TODO: Remove create UnreadMessage, should be done at backend
-                      addMultimedia(groupMultimedia, null, conversationGroup2, context);
+                      addMultimedia(groupMultimedia, null, conversationGroup2);
                     } else {
                       Navigator.pop(context);
                       showToast('Unable to create conversation group. Please try again.', Toast.LENGTH_SHORT);
@@ -538,7 +553,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     }
   }
 
-  addMultimedia(Multimedia groupMultimedia, File imageFile, ConversationGroup conversationGroup, BuildContext context) async {
+  addMultimedia(Multimedia groupMultimedia, File imageFile, ConversationGroup conversationGroup) async {
     // 4. Upload Group Multimedia
     // Create thumbnail before upload
     File thumbnailImageFile;
@@ -553,11 +568,11 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
         multimedia: groupMultimedia,
         callback: (Multimedia multimedia2) {
-          goToChatRoomPage(context, conversationGroup);
+          goToChatRoomPage(conversationGroup);
         }));
   }
 
-  goToChatRoomPage(BuildContext context, ConversationGroup conversationGroup) {
+  goToChatRoomPage(ConversationGroup conversationGroup) {
     // Go to chat room page
     Navigator.pop(context); //pop loading dialog
     Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
