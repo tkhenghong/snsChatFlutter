@@ -6,6 +6,9 @@ export 'request/authentication/RegisterUsingMobileNumberRequest/RegisterUsingMob
 export 'request/authentication/UsernamePasswordUserAuthenticationRequest/UsernamePasswordUserAuthenticationRequest.dart';
 export 'request/authentication/VerifyEmailAddressRequest/VerifyEmailAddressRequest.dart';
 export 'request/authentication/VerifyMobileNumberOTPRequest/VerifyMobileNumberOTPRequest.dart';
+export 'request/conversation_group/CreateConversationGroupRequest.dart';
+
+// Response
 export 'response/authentication/OTPResponse/OTPResponse.dart';
 export 'response/authentication/PreVerifyMobileNumberOTPResponse/PreVerifyMobileNumberOTPResponse.dart';
 export 'response/authentication/UserAuthenticationResponse/UserAuthenticationResponse.dart';

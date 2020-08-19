@@ -25,83 +25,83 @@ void main() {
     );
   }
 
-  test("Test Create Conversation Group Locally", () async {
-    ConversationGroup conversationGroup = createTestObject();
-
-    ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(conversationGroup);
-    print("newConversationGroup.id:" + newConversationGroup.id.toString());
-    // TODO: Check the value of the boolean return by DB service
-    bool added = await conversationGroupDBService.addConversationGroup(newConversationGroup);
-    ConversationGroup conversationGroupFromLocalDB = await conversationGroupDBService.getSingleConversationGroup(conversationGroup.id);
-    print("conversationGroupFromLocalDB.id: " + conversationGroupFromLocalDB.id);
-    // Validations
-    expect(newConversationGroup.id, isNotEmpty);
-    expect(conversationGroupFromLocalDB.id, equals(newConversationGroup.id)); // Only comparing ids due to no equatable package
-  });
-
-  test("Test Edit Conversation Group Locally", () async {
-    ConversationGroup conversationGroup = createTestObject();
-
-    ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(conversationGroup);
-    await conversationGroupDBService.addConversationGroup(newConversationGroup);
-
-    // Edit
-    ConversationGroup editedConversationGroup = newConversationGroup;
-    editedConversationGroup.name = "Test Group 2";
-    editedConversationGroup.type = ConversationGroupType.Group;
-    editedConversationGroup.description = "Edited Description";
-
-    bool edited = await conversationGroupAPIService.editConversationGroup(editedConversationGroup);
-    // Edit in DB
-    await conversationGroupDBService.editConversationGroup(editedConversationGroup);
-    ConversationGroup conversationGroupFromLocalDB = await conversationGroupDBService.getSingleConversationGroup(conversationGroup.id);
-
-    //Validations
-    expect(conversationGroupFromLocalDB.id, equals(editedConversationGroup.id));
-    expect(conversationGroupFromLocalDB.name, equals(editedConversationGroup.name));
-    expect(conversationGroupFromLocalDB.type, equals(editedConversationGroup.type));
-    expect(conversationGroupFromLocalDB.description, equals(editedConversationGroup.description));
-    print("edited:" + edited.toString());
-
-    expect(edited, isTrue);
-  });
-
-  test("Test Get Conversation Group Locally", () async {
-    ConversationGroup conversationGroup = createTestObject();
-
-    ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(conversationGroup);
-    await conversationGroupDBService.addConversationGroup(newConversationGroup);
-    print("newConversationGroup.id: " + newConversationGroup.id);
-
-    ConversationGroup conversationGroupFromServer = await conversationGroupAPIService.getSingleConversationGroup(newConversationGroup.id);
-    // Take the id from the conversationGroupFromServer and put it into local DB to search
-    ConversationGroup conversationGroupFromLocalDB = await conversationGroupDBService.getSingleConversationGroup(conversationGroup.id);
-
-    print("conversationGroupFromServer.id: " + conversationGroupFromServer.id);
-    print("conversationGroupFromServer.id == newConversation.id:" + (conversationGroupFromServer.id == newConversationGroup.id).toString());
-    print("conversationGroupFromLocalDB.id == conversationGroupFromServer.id:" +
-        (conversationGroupFromLocalDB.id == conversationGroupFromServer.id).toString());
-
-    // Expect newConversationGroup.id == conversationGroupFromServer.id == conversationGroupFromLocalDB.id
-    expect(conversationGroupFromServer.id, equals(newConversationGroup.id));
-    expect(conversationGroupFromLocalDB.id, equals(conversationGroupFromServer.id));
-  });
-
-  test("Test Delete Conversation Group Locally", () async {
-    ConversationGroup conversationGroup = createTestObject();
-
-    ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(conversationGroup);
-    await conversationGroupDBService.addConversationGroup(newConversationGroup);
-
-    // Delete
-    bool deleted = await conversationGroupAPIService.deleteConversationGroup(conversationGroup.id);
-    await conversationGroupDBService.deleteConversationGroup(conversationGroup.id);
-
-    print("deleted:" + deleted.toString());
-    // Expect deleted is OK from server and unable to find the object in Local DB
-    expect(deleted, isTrue);
-    expect(await conversationGroupDBService.getSingleConversationGroup(conversationGroup.id), null);
-  });
+//  test("Test Create Conversation Group Locally", () async {
+//    ConversationGroup conversationGroup = createTestObject();
+//
+//    ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(conversationGroup);
+//    print("newConversationGroup.id:" + newConversationGroup.id.toString());
+//    // TODO: Check the value of the boolean return by DB service
+//    bool added = await conversationGroupDBService.addConversationGroup(newConversationGroup);
+//    ConversationGroup conversationGroupFromLocalDB = await conversationGroupDBService.getSingleConversationGroup(conversationGroup.id);
+//    print("conversationGroupFromLocalDB.id: " + conversationGroupFromLocalDB.id);
+//    // Validations
+//    expect(newConversationGroup.id, isNotEmpty);
+//    expect(conversationGroupFromLocalDB.id, equals(newConversationGroup.id)); // Only comparing ids due to no equatable package
+//  });
+//
+//  test("Test Edit Conversation Group Locally", () async {
+//    ConversationGroup conversationGroup = createTestObject();
+//
+//    ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(conversationGroup);
+//    await conversationGroupDBService.addConversationGroup(newConversationGroup);
+//
+//    // Edit
+//    ConversationGroup editedConversationGroup = newConversationGroup;
+//    editedConversationGroup.name = "Test Group 2";
+//    editedConversationGroup.type = ConversationGroupType.Group;
+//    editedConversationGroup.description = "Edited Description";
+//
+//    bool edited = await conversationGroupAPIService.editConversationGroup(editedConversationGroup);
+//    // Edit in DB
+//    await conversationGroupDBService.editConversationGroup(editedConversationGroup);
+//    ConversationGroup conversationGroupFromLocalDB = await conversationGroupDBService.getSingleConversationGroup(conversationGroup.id);
+//
+//    //Validations
+//    expect(conversationGroupFromLocalDB.id, equals(editedConversationGroup.id));
+//    expect(conversationGroupFromLocalDB.name, equals(editedConversationGroup.name));
+//    expect(conversationGroupFromLocalDB.type, equals(editedConversationGroup.type));
+//    expect(conversationGroupFromLocalDB.description, equals(editedConversationGroup.description));
+//    print("edited:" + edited.toString());
+//
+//    expect(edited, isTrue);
+//  });
+//
+//  test("Test Get Conversation Group Locally", () async {
+//    ConversationGroup conversationGroup = createTestObject();
+//
+//    ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(conversationGroup);
+//    await conversationGroupDBService.addConversationGroup(newConversationGroup);
+//    print("newConversationGroup.id: " + newConversationGroup.id);
+//
+//    ConversationGroup conversationGroupFromServer = await conversationGroupAPIService.getSingleConversationGroup(newConversationGroup.id);
+//    // Take the id from the conversationGroupFromServer and put it into local DB to search
+//    ConversationGroup conversationGroupFromLocalDB = await conversationGroupDBService.getSingleConversationGroup(conversationGroup.id);
+//
+//    print("conversationGroupFromServer.id: " + conversationGroupFromServer.id);
+//    print("conversationGroupFromServer.id == newConversation.id:" + (conversationGroupFromServer.id == newConversationGroup.id).toString());
+//    print("conversationGroupFromLocalDB.id == conversationGroupFromServer.id:" +
+//        (conversationGroupFromLocalDB.id == conversationGroupFromServer.id).toString());
+//
+//    // Expect newConversationGroup.id == conversationGroupFromServer.id == conversationGroupFromLocalDB.id
+//    expect(conversationGroupFromServer.id, equals(newConversationGroup.id));
+//    expect(conversationGroupFromLocalDB.id, equals(conversationGroupFromServer.id));
+//  });
+//
+//  test("Test Delete Conversation Group Locally", () async {
+//    ConversationGroup conversationGroup = createTestObject();
+//
+//    ConversationGroup newConversationGroup = await conversationGroupAPIService.addConversationGroup(conversationGroup);
+//    await conversationGroupDBService.addConversationGroup(newConversationGroup);
+//
+//    // Delete
+//    bool deleted = await conversationGroupAPIService.deleteConversationGroup(conversationGroup.id);
+//    await conversationGroupDBService.deleteConversationGroup(conversationGroup.id);
+//
+//    print("deleted:" + deleted.toString());
+//    // Expect deleted is OK from server and unable to find the object in Local DB
+//    expect(deleted, isTrue);
+//    expect(await conversationGroupDBService.getSingleConversationGroup(conversationGroup.id), null);
+//  });
 
   test("Test Get Conversation Groups of A User Locally", () async {
     // TODO

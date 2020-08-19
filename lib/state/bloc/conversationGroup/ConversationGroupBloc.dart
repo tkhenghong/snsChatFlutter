@@ -29,6 +29,8 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       yield* _getUserOwnConversationGroups(event);
     } else if (event is AddGroupMemberEvent) {
       yield* _addGroupMember(event);
+    } else if (event is CreateConversationGroupEvent) {
+      yield* _createConversationGroup(event);
     }
   }
 
@@ -50,33 +52,27 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     }
   }
 
+  // Add Conversation Group to LocalDB and State
   Stream<ConversationGroupState> _addConversationGroup(AddConversationGroupEvent event) async* {
-    ConversationGroup newConversationGroup;
     bool added = false;
     if (state is ConversationGroupsLoaded) {
-      // Avoid readding existing conversationGroup
-      if (isStringEmpty(event.conversationGroup.id)) {
-        newConversationGroup = await conversationGroupAPIService.addConversationGroup(event.conversationGroup);
-      } else {
-        newConversationGroup = event.conversationGroup;
-      }
 
-      if (!isObjectEmpty(newConversationGroup)) {
-        added = await conversationGroupDBService.addConversationGroup(newConversationGroup);
+      if (!isObjectEmpty(event.conversationGroup)) {
+        added = await conversationGroupDBService.addConversationGroup(event.conversationGroup);
         if (added) {
           List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
           existingConversationGroupList.removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == event.conversationGroup.id);
 
-          existingConversationGroupList.add(newConversationGroup);
+          existingConversationGroupList.add(event.conversationGroup);
 
           yield ConversationGroupsLoaded(existingConversationGroupList);
-          functionCallback(event, newConversationGroup);
+          functionCallback(event, event.conversationGroup);
         }
       }
     }
 
-    if (isObjectEmpty(newConversationGroup) || !added) {
+    if (isObjectEmpty(event.conversationGroup) || !added) {
       functionCallback(event, null);
     }
   }
@@ -178,6 +174,10 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       conversationGroup.memberIds.add(event.userContactId);
       // TODO: To be continued?
     }
+  }
+
+  Stream<ConversationGroupState> _createConversationGroup(CreateConversationGroupEvent event) {
+    // TODO: Create ConversationGroup Personal/Group
   }
 
   // To send response to those dispatched Actions

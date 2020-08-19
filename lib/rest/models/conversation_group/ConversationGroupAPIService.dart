@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/rest/customHttpClient/CustomHttpClient.dart';
 
 class ConversationGroupAPIService {
@@ -10,8 +11,8 @@ class ConversationGroupAPIService {
 
   CustomHttpClient httpClient = new CustomHttpClient();
 
-  Future<ConversationGroup> addConversationGroup(ConversationGroup conversationGroup) async {
-    return ConversationGroup.fromJson(await httpClient.postRequest("$REST_URL/$conversationGroupAPI", requestBody: conversationGroup));
+  Future<ConversationGroup> addConversationGroup(CreateConversationGroupRequest createConversationGroupRequest) async {
+    return ConversationGroup.fromJson(await httpClient.postRequest("$REST_URL/$conversationGroupAPI", requestBody: createConversationGroupRequest));
   }
 
   Future<bool> editConversationGroup(ConversationGroup conversation) async {

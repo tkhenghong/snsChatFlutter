@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
@@ -108,7 +109,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
               child: Icon(Icons.check),
             ),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: ((context) => GroupNamePage(selectedContacts: selectedContacts))));
+              goToGroupNamePage();
             },
           ),
         ),
@@ -394,20 +395,13 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       List<Contact> contactList = [];
       contactList.add(contact);
 
-      ConversationGroup conversationGroup = new ConversationGroup(
-        id: null,
-        creatorUserId: currentUser.id,
-        createdDate: new DateTime.now(),
+      CreateConversationGroupRequest createConversationGroupRequest = new CreateConversationGroupRequest(
         name: contact.displayName,
-        type: ConversationGroupType.Personal,
-        block: false,
+        conversationGroupType: ConversationGroupType.Personal,
         description: '',
         adminMemberIds: [],
         // Add later
         memberIds: [],
-        // Add later
-        // memberIds put UserContact.id. NOT User.id
-        notificationExpireDate: null,
       );
 
       UnreadMessage unreadMessage = UnreadMessage(
@@ -514,7 +508,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
               (ConversationGroup existingConversationGroup) => existingConversationGroup.type == ConversationGroupType.Personal && existingConversationGroup.memberIds.contains((String memberId) => memberId == userContactFromServer.id));
 
           if (personalConversationGroupExist) {
-            goToChatRoomPage(conversationGroup);
+//            goToChatRoomPage(conversationGroup); // TODO: Go to another page with conversationGroup ID only, use API to getSingleConversationGroup.
             return;
           }
         }
@@ -530,13 +524,13 @@ class SelectContactsPageState extends State<SelectContactsPage> {
               showToast('Unable to upload your member list. Please try again.', Toast.LENGTH_SHORT);
             } else {
               // Give the list of UserContactIds to memberIds of ConversationGroup
-              conversationGroup.memberIds = newUserContactList.map((newUserContact) => newUserContact.id).toList();
+              createConversationGroupRequest.memberIds = newUserContactList.map((newUserContact) => newUserContact.id).toList();
 
               // Add your own userContact's ID as admin by find the one that has the same mobile number in the userContactList
-              conversationGroup.adminMemberIds.add(newUserContactList.firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentUser.mobileNo, orElse: () => null).id);
+              createConversationGroupRequest.adminMemberIds.add(newUserContactList.firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentUser.mobileNo, orElse: () => null).id);
 
-              BlocProvider.of<ConversationGroupBloc>(context).add(AddConversationGroupEvent(
-                  conversationGroup: conversationGroup,
+              BlocProvider.of<ConversationGroupBloc>(context).add(CreateConversationGroupEvent(
+                  createConversationGroupRequest: createConversationGroupRequest,
                   callback: (ConversationGroup conversationGroup2) async {
                     if (!isObjectEmpty(conversationGroup2)) {
                       groupMultimedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
@@ -570,6 +564,10 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         callback: (Multimedia multimedia2) {
           goToChatRoomPage(conversationGroup);
         }));
+  }
+
+  goToGroupNamePage() {
+    Navigator.push(context, MaterialPageRoute(builder: ((context) => GroupNamePage(selectedContacts: selectedContacts))));
   }
 
   goToChatRoomPage(ConversationGroup conversationGroup) {

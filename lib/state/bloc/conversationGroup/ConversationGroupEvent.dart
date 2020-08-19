@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/objects/rest/index.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial
 abstract class ConversationGroupEvent extends Equatable {
@@ -18,6 +19,7 @@ class InitializeConversationGroupsEvent extends ConversationGroupEvent {
   String toString() => 'InitializeConversationGroupsEvent';
 }
 
+// Used to add conversationGroup from WebSocket
 class AddConversationGroupEvent extends ConversationGroupEvent {
   final ConversationGroup conversationGroup;
   final Function callback;
@@ -29,6 +31,19 @@ class AddConversationGroupEvent extends ConversationGroupEvent {
 
   @override
   String toString() => 'AddConversationGroupEvent {conversationGroup: $conversationGroup}';
+}
+
+class CreateConversationGroupEvent extends ConversationGroupEvent {
+  final CreateConversationGroupRequest createConversationGroupRequest;
+  final Function callback;
+
+  const CreateConversationGroupEvent({this.createConversationGroupRequest, this.callback});
+
+  @override
+  List<Object> get props => [createConversationGroupRequest];
+
+  @override
+  String toString() => 'CreateConversationGroupEvent {createConversationGroupRequest: $createConversationGroupRequest}';
 }
 
 class EditConversationGroupEvent extends ConversationGroupEvent {
