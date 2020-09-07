@@ -3,13 +3,14 @@ import 'package:get/get.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/rest/models/conversation_group/ConversationGroupAPIService.dart';
 
 import 'bloc.dart';
 
 // Idea from Official Documentation. Link: https://bloclibrary.dev/#/fluttertodostutorial
 class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGroupState> {
-  ConversationGroupBloc(): super(ConversationGroupsLoading());
+  ConversationGroupBloc() : super(ConversationGroupsLoading());
 
   ConversationGroupAPIService conversationGroupAPIService = Get.find();
   ConversationDBService conversationGroupDBService = Get.find();
@@ -56,7 +57,6 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
   Stream<ConversationGroupState> _addConversationGroup(AddConversationGroupEvent event) async* {
     bool added = false;
     if (state is ConversationGroupsLoaded) {
-
       if (!isObjectEmpty(event.conversationGroup)) {
         added = await conversationGroupDBService.addConversationGroup(event.conversationGroup);
         if (added) {
@@ -178,6 +178,31 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
 
   Stream<ConversationGroupState> _createConversationGroup(CreateConversationGroupEvent event) {
     // TODO: Create ConversationGroup Personal/Group
+    CreateConversationGroupRequest createConversationGroupRequest = event.createConversationGroupRequest;
+    switch (createConversationGroupRequest.conversationGroupType) {
+      case ConversationGroupType.Personal:
+        _createPersonalConversationGroup(createConversationGroupRequest);
+        break;
+      case ConversationGroupType.Group:
+        _createPersonalConversationGroup(createConversationGroupRequest);
+        break;
+      case ConversationGroupType.Broadcast:
+        break;
+      default:
+        throw Exception("Something's wrong during creating conversations: Invalid conversation Group type.");
+    }
+  }
+
+  _createPersonalConversationGroup(CreateConversationGroupRequest createConversationGroupRequest) {
+
+  }
+
+  _createGroupConversationGroup(CreateConversationGroupRequest createConversationGroupRequest) {
+
+  }
+
+  _createBroadcastConversationGroup(CreateConversationGroupRequest createConversationGroupRequest) {
+
   }
 
   // To send response to those dispatched Actions

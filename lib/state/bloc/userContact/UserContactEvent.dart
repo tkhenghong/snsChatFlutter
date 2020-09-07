@@ -77,7 +77,7 @@ class GetUserContactEvent extends UserContactEvent {
   GetUserContactEvent({this.userContactId, this.callback});
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [userContactId];
 
   @override
   String toString() => 'GetUserContactEvent {userContactId: ${userContactId}}';
@@ -90,10 +90,10 @@ class GetUserContactByUserIdEvent extends UserContactEvent {
   GetUserContactByUserIdEvent({this.user, this.callback});
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [user];
 
   @override
-  String toString() => 'GetUserOwnContactEvent';
+  String toString() => 'GetUserOwnContactEvent {user: $user}';
 }
 
 class GetUserOwnUserContactsEvent extends UserContactEvent {
@@ -106,4 +106,17 @@ class GetUserOwnUserContactsEvent extends UserContactEvent {
 
   @override
   String toString() => 'GetUserOwnUserContactsEvent';
+}
+
+class GetUserContactByMobileNoEvent extends UserContactEvent {
+  final String mobileNo;
+  final Function callback;
+
+  GetUserContactByMobileNoEvent({this.mobileNo, this.callback});
+
+  @override
+  List<Object> get props => [mobileNo];
+
+  @override
+  String toString() => 'GetUserContactByMobileNoEvent';
 }
