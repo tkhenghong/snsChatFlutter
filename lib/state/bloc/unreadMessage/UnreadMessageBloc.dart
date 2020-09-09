@@ -98,7 +98,7 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
     if (state is UnreadMessagesLoaded) {
       List<UnreadMessage> existingUnreadMessageList = (state as UnreadMessagesLoaded).unreadMessageList;
 
-      if (unreadMessageListFromServer != null && unreadMessageListFromServer.length > 0) {
+      if (!isObjectEmpty(unreadMessageListFromServer) && unreadMessageListFromServer.length > 0) {
         // Update the current info of the unreadMessage to latest information
 
         for (UnreadMessage unreadMessageFromServer in unreadMessageListFromServer) {

@@ -12,14 +12,15 @@ class UserContactsLoading extends UserContactState {}
 
 class UserContactsLoaded extends UserContactState {
   final List<UserContact> userContactList;
+  final UserContact ownUserContact;
 
-  const UserContactsLoaded([this.userContactList = const []]);
+  const UserContactsLoaded([this.userContactList = const [], this.ownUserContact]);
 
   @override
   List<Object> get props => [userContactList];
 
   @override
-  String toString() => 'UserContactLoaded {userContactList: $userContactList}';
+  String toString() => 'UserContactLoaded {userContactList: $userContactList, ownUserContact: $ownUserContact}';
 }
 
 class UserContactsNotLoaded extends UserContactState {}

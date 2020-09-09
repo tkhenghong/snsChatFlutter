@@ -59,7 +59,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     Multimedia multimediaFromServer;
     bool saved = false;
 
-    // Avoid readding existing multimedia
+    // Avoid reading existing multimedia
     if (isStringEmpty(event.multimedia.id)) {
       multimediaFromServer = await multimediaAPIService.addMultimedia(event.multimedia);
     } else {
@@ -67,6 +67,8 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     }
 
     if (!isObjectEmpty(multimediaFromServer)) {
+      await multimediaDBService.deleteMultimedia(multimediaFromServer.id);
+
       saved = await multimediaDBService.addMultimedia(multimediaFromServer);
       if (saved) {
         List<Multimedia> existingMultimediaList = [];

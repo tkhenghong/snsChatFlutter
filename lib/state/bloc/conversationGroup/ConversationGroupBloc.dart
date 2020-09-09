@@ -58,6 +58,9 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     bool added = false;
     if (state is ConversationGroupsLoaded) {
       if (!isObjectEmpty(event.conversationGroup)) {
+
+        await conversationGroupDBService.deleteConversationGroup(event.conversationGroup.id);
+
         added = await conversationGroupDBService.addConversationGroup(event.conversationGroup);
         if (added) {
           List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;

@@ -246,38 +246,25 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
 
   Stream<UserContactState> _getUserContactByMobileNo(GetUserContactByMobileNoEvent event) async* {
     UserContact userContact = await userContactAPIService.getUserContactByMobileNo(event.mobileNo);
-    // Step 1: Find local
-    // Step 2: Find Network
-    // Step 3: If yes, add it to state and DB
-    // Step 4: If no, not doing anything
     if (state is UserContactsLoaded) {
-      // TODO: Add UserContact into State and DB
-      List<UserContact> existingUserContactList = (state as UserContactsLoaded).userContactList;
-
       if (!isObjectEmpty(userContact)) {
+        UserContact dbUserContact = await userContactDBService.getSingleUserContact(userContact.id);
 
-//        for (UserContact userContactFromServer in userContactListFromServer) {
-//          // Unable to use contains() method here. Will cause concurrent modification during iteration problem.
-//          // Link: https://stackoverflow.com/questions/22409666/exception-concurrent-modification-during-iteration-instancelength17-of-gr
-//          bool userContactExist = false;
-//          for (UserContact existingUserContact in existingUserContactList) {
-//            if (existingUserContact.id == userContactFromServer.id) {
-//              userContactExist = true;
-//            }
-//          }
-//
-//          if (userContactExist) {
-//            existingUserContactList.removeWhere((UserContact existingUserContact) => existingUserContact.id == userContactFromServer.id);
-//            userContactDBService.editUserContact(userContactFromServer);
-//          } else {
-//            userContactDBService.addUserContact(userContactFromServer);
-//          }
-//
-//          existingUserContactList.add(userContactFromServer);
-//        }
+        if(!isObjectEmpty(dbUserContact)) {
+          await userContactDBService.deleteUserContact(userContact.id);
+        }
+
+        await userContactDBService.addUserContact(userContact);
+
+        List<UserContact> existingUserContactList = (state as UserContactsLoaded).userContactList;
+
+        existingUserContactList.removeWhere((UserContact existingUserContact) => existingUserContact.id == userContact.id);
+
+        existingUserContactList.add(userContact);
+
+        yield UserContactsLoaded(existingUserContactList);
       }
 
-      yield UserContactsLoaded(existingUserContactList);
       functionCallback(userContact, true);
     }
   }

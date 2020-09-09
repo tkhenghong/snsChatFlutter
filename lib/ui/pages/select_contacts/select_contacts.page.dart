@@ -36,6 +36,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   String title = "";
   String subtitle = "";
 
+  UserContact ownUserContact;
+
   List<Contact> contacts = [];
   List<Contact> selectedContacts = [];
   Map<String, bool> contactCheckBoxes = {};
@@ -49,7 +51,11 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   CustomFileService fileService = Get.find();
   ImageService imageService = Get.find();
-  UserContactAPIService userContactAPIService = Get.find();
+
+  // UserContactAPIService userContactAPIService = Get.find();
+
+  UserContactBloc userContactBloc;
+  ConversationGroupBloc conversationGroupBloc;
 
   @override
   initState() {
@@ -70,6 +76,9 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   @override
   Widget build(BuildContext context) {
+    userContactBloc = BlocProvider.of<UserContactBloc>(context);
+    conversationGroupBloc = BlocProvider.of<ConversationGroupBloc>(context);
+
     return Scaffold(
       appBar: appBar(),
       body: multiBlocListener(),
@@ -121,6 +130,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     return MultiBlocListener(listeners: [
       phoneStorageContactBlocListener(),
       userBlocListener(),
+      userContactBlocListener(),
     ], child: phoneStorageContactBlocBuilder());
   }
 
@@ -137,6 +147,16 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   Widget userBlocListener() {
     return BlocListener<UserBloc, UserState>(
       listener: (context, userState) {},
+    );
+  }
+
+  Widget userContactBlocListener() {
+    return BlocListener<UserContactBloc, UserContactState>(
+      listener: (context, userContactState) {
+        if (userContactState is UserContactsLoaded) {
+          ownUserContact = userContactState.ownUserContact;
+        }
+      },
     );
   }
 
@@ -251,7 +271,29 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       ),
       onTap: () {
         if (widget.chatGroupType == ConversationGroupType.Personal) {
-          createPersonalConversation(contact);
+          List<String> phoneNumberList = getUserContactMobileNumber(contact);
+
+          if (phoneNumberList.length > 1) {
+            showSelectPhoneNumberDialog(contact.displayName, phoneNumberList);
+          } else if (phoneNumberList.length == 1) {
+            userContactBloc.add(GetUserContactByMobileNoEvent(
+                mobileNo: phoneNumberList[0],
+                callback: (UserContact userContact) {
+                  if (!isObjectEmpty(userContact)) {
+                    conversationGroupBloc.add(CreateConversationGroupEvent(
+                        createConversationGroupRequest: CreateConversationGroupRequest(name: contact.displayName, conversationGroupType: ConversationGroupType.Personal, description: null, memberIds: [userContact.id, ownUserContact.id])));
+                  }
+                }));
+          } else {
+            Get.dialog(
+                Dialog(
+                  child: Center(
+                    child: Text('No mobile number found under this contact. Please add mobile number.'),
+                  ),
+                ),
+                barrierDismissible: false);
+          }
+          // createPersonalConversation(contact);
         }
       },
       leading: CircleAvatar(
@@ -336,6 +378,39 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     );
   }
 
+  showSelectPhoneNumberDialog(String contactName, List<String> mobileNumbers) {
+    Get.dialog(
+        Dialog(
+          child: ListView.builder(
+              itemCount: mobileNumbers.length,
+              itemBuilder: (BuildContext context, int index) => ListTile(
+                  title: Text(
+                    mobileNumbers[index],
+                    softWrap: true,
+                  ),
+                  onTap: () {
+                    if (widget.chatGroupType == ConversationGroupType.Personal) {
+                      userContactBloc.add(GetUserContactByMobileNoEvent(
+                          mobileNo: mobileNumbers[index],
+                          callback: (UserContact userContact) {
+                            if (!isObjectEmpty(userContact)) {
+                              conversationGroupBloc.add(CreateConversationGroupEvent(
+                                  createConversationGroupRequest: CreateConversationGroupRequest(
+                                name: contactName,
+                                conversationGroupType: ConversationGroupType.Personal,
+                                description: null,
+                                memberIds: [userContact.id, ownUserContact.id],
+                                adminMemberIds: [ownUserContact.id],
+                              )));
+                            }
+                          }));
+                      // createPersonalConversation(contact);
+                    }
+                  })),
+        ),
+        barrierDismissible: true);
+  }
+
   bool contactIsSelected(Contact contact) {
     return selectedContacts.any((Contact selectedContact) => selectedContact.displayName == contact.displayName);
   }
@@ -385,166 +460,186 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     getContacts();
   }
 
+  List<String> getUserContactMobileNumber(Contact contact) {
+    List<String> primaryNo = [];
+    if (contact.phones.length > 0) {
+      contact.phones.forEach((phoneNo) {
+        primaryNo.add(phoneNo.value);
+      });
+    } else {
+      // No phone number and the display name is the phone number itself
+      // Reason: No contact.phones when the mobile number doesn't have a name on it
+      String mobileNo = contact.displayName.replaceAll(new RegExp(r"\s+\b|\b\s|\s|\b"), "");
+      primaryNo.add(mobileNo);
+    }
+
+    if (primaryNo.length == 0) {
+      Get.snackbar('Unable to get the User\'s phone number.', 'Please edit your phone number to proper phone number format and try again.');
+    }
+
+    return primaryNo;
+  }
+
   // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
   createPersonalConversation(Contact contact) async {
     // TODO: create loading that cannot be dismissed to prevent exit, and make it faster
-    showLoading("Loading conversation...");
-    UserState userState = BlocProvider.of<UserBloc>(context).state;
-    if (userState is UserLoaded) {
-      User currentUser = userState.user;
-      List<Contact> contactList = [];
-      contactList.add(contact);
-
-      CreateConversationGroupRequest createConversationGroupRequest = new CreateConversationGroupRequest(
-        name: contact.displayName,
-        conversationGroupType: ConversationGroupType.Personal,
-        description: '',
-        adminMemberIds: [],
-        // Add later
-        memberIds: [],
-      );
-
-      UnreadMessage unreadMessage = UnreadMessage(
-        id: null,
-        conversationId: null,
-        count: 0,
-        date: DateTime.now(),
-        lastMessage: "",
-        userId: null,
-      );
-
-      Multimedia groupMultimedia = Multimedia(
-          id: null,
-          localFullFileUrl: null,
-          localThumbnailUrl: null,
-          remoteThumbnailUrl: null,
-          remoteFullFileUrl: null,
-          userContactId: null,
-          conversationId: null,
-          // Add later
-          messageId: null,
-          userId: null);
-
-      File userContactImage;
-      // TODO: Temporary close it because not yet able to convert Uint8List to File
-      //    if (!isObjectEmpty(contact.avatar) && contact.avatar.length > 0) {
-      //      print("if (!isObjectEmpty(contact.avatar))");
-      //      print("contact.avatar.length.toString(): " + contact.avatar.length.toString());
-      //      userContactImage = await getUserContactPhoto(contact);
-      //    }
-
-      if (!isObjectEmpty(userContactImage)) {
-        groupMultimedia.localFullFileUrl = userContactImage.path;
-        // TODO: What if this userContact is known user in REST?
-        groupMultimedia.localThumbnailUrl = userContactImage.path;
-      }
-
-      // 2. Upload UserContactList
-      // Note: Backend already helped you to check any duplicates of the same UserContact
-      List<UserContact> userContactList = [];
-
-      UserContact yourOwnUserContact = UserContact(
-        id: null,
-        userIds: [currentUser.id],
-        userId: currentUser.id,
-        displayName: currentUser.displayName,
-        realName: currentUser.realName,
-        block: false,
-        lastSeenDate: new DateTime.now(),
-        // make unknown time, let server decide
-        mobileNo: currentUser.mobileNo,
-      );
-
-      userContactList.add(yourOwnUserContact);
-
-      contactList.forEach((contact) {
-        List<String> primaryNo = [];
-        if (contact.phones.length > 0) {
-          contact.phones.forEach((phoneNo) {
-            primaryNo.add(phoneNo.value);
-          });
-        } else {
-          // No phone number and the display name is the phone number itself
-          // Reason: No contact.phones when the mobile number doesn't have a name on it
-          String mobileNo = contact.displayName.replaceAll(new RegExp(r"\s+\b|\b\s|\s|\b"), "");
-          primaryNo.add(mobileNo);
-        }
-
-        UserContact userContact = UserContact(
-          id: null,
-          // So this contact number is mine. Later send it to backend and merge with other UserContact who got the same number
-          userIds: [currentUser.id],
-          displayName: contact.displayName,
-          realName: contact.displayName,
-          block: false,
-          lastSeenDate: new DateTime.now(),
-        );
-
-        userContact.mobileNo = primaryNo.length == 0 ? "" : primaryNo[0];
-
-        // If got Malaysia number
-        if (primaryNo[0].contains("+60")) {
-          print("If Malaysian Number: ");
-          String trimmedString = primaryNo[0].substring(3);
-          print("trimmedString: " + trimmedString);
-        }
-
-        userContactList.add(userContact);
-      });
-
-      UserContact targetUserContact = userContactList[1];
-
-      // Logic to detect to find same personal conversation group in local state/DB
-      UserContact userContactFromServer = await userContactAPIService.getUserContactByMobileNo(targetUserContact.mobileNo);
-      if (!isObjectEmpty(userContactFromServer)) {
-        UserContactState userContactState = BlocProvider.of<UserContactBloc>(context).state;
-        ConversationGroupState conversationGroupState = BlocProvider.of<ConversationGroupBloc>(context).state;
-
-        if (userContactState is UserContactsLoaded && conversationGroupState is ConversationGroupsLoaded) {
-          List<UserContact> userContactList = userContactState.userContactList;
-          List<ConversationGroup> conversationGroupList = conversationGroupState.conversationGroupList;
-
-          bool personalConversationGroupExist = conversationGroupList.contains(
-              (ConversationGroup existingConversationGroup) => existingConversationGroup.type == ConversationGroupType.Personal && existingConversationGroup.memberIds.contains((String memberId) => memberId == userContactFromServer.id));
-
-          if (personalConversationGroupExist) {
-//            goToChatRoomPage(conversationGroup); // TODO: Go to another page with conversationGroup ID only, use API to getSingleConversationGroup.
-            return;
-          }
-        }
-      }
-
-      BlocProvider.of<UserContactBloc>(context).add(AddMultipleUserContactEvent(
-          userContactList: userContactList,
-          callback: (List<UserContact> newUserContactList) {
-            if ((contactList.length != newUserContactList.length - 1) || newUserContactList.length == 0) {
-              // event.contactList doesn't include yourself, so newUserContactList.length - 1 OR Any UserContact is not added into the list (means not uploaded successfully)
-              // That means some UseContact are not uploaded into the REST
-              Navigator.pop(context);
-              showToast('Unable to upload your member list. Please try again.', Toast.LENGTH_SHORT);
-            } else {
-              // Give the list of UserContactIds to memberIds of ConversationGroup
-              createConversationGroupRequest.memberIds = newUserContactList.map((newUserContact) => newUserContact.id).toList();
-
-              // Add your own userContact's ID as admin by find the one that has the same mobile number in the userContactList
-              createConversationGroupRequest.adminMemberIds.add(newUserContactList.firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentUser.mobileNo, orElse: () => null).id);
-
-              BlocProvider.of<ConversationGroupBloc>(context).add(CreateConversationGroupEvent(
-                  createConversationGroupRequest: createConversationGroupRequest,
-                  callback: (ConversationGroup conversationGroup2) async {
-                    if (!isObjectEmpty(conversationGroup2)) {
-                      groupMultimedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
-                      unreadMessage.userId = conversationGroup2.creatorUserId;
-                      // TODO: Remove create UnreadMessage, should be done at backend
-                      addMultimedia(groupMultimedia, null, conversationGroup2);
-                    } else {
-                      Navigator.pop(context);
-                      showToast('Unable to create conversation group. Please try again.', Toast.LENGTH_SHORT);
-                    }
-                  }));
-            }
-          }));
-    }
+//     showLoading("Loading conversation...");
+//     UserState userState = BlocProvider.of<UserBloc>(context).state;
+//     if (userState is UserLoaded) {
+//       User currentUser = userState.user;
+//       List<Contact> contactList = [];
+//       contactList.add(contact);
+//
+//       CreateConversationGroupRequest createConversationGroupRequest = new CreateConversationGroupRequest(
+//         name: contact.displayName,
+//         conversationGroupType: ConversationGroupType.Personal,
+//         description: '',
+//         adminMemberIds: [],
+//         // Add later
+//         memberIds: [],
+//       );
+//
+//       UnreadMessage unreadMessage = UnreadMessage(
+//         id: null,
+//         conversationId: null,
+//         count: 0,
+//         date: DateTime.now(),
+//         lastMessage: "",
+//         userId: null,
+//       );
+//
+//       Multimedia groupMultimedia = Multimedia(
+//           id: null,
+//           localFullFileUrl: null,
+//           localThumbnailUrl: null,
+//           remoteThumbnailUrl: null,
+//           remoteFullFileUrl: null,
+//           userContactId: null,
+//           conversationId: null,
+//           // Add later
+//           messageId: null,
+//           userId: null);
+//
+//       File userContactImage;
+//       // TODO: Temporary close it because not yet able to convert Uint8List to File
+//       //    if (!isObjectEmpty(contact.avatar) && contact.avatar.length > 0) {
+//       //      print("if (!isObjectEmpty(contact.avatar))");
+//       //      print("contact.avatar.length.toString(): " + contact.avatar.length.toString());
+//       //      userContactImage = await getUserContactPhoto(contact);
+//       //    }
+//
+//       if (!isObjectEmpty(userContactImage)) {
+//         groupMultimedia.localFullFileUrl = userContactImage.path;
+//         // TODO: What if this userContact is known user in REST?
+//         groupMultimedia.localThumbnailUrl = userContactImage.path;
+//       }
+//
+//       // 2. Upload UserContactList
+//       // Note: Backend already helped you to check any duplicates of the same UserContact
+//       List<UserContact> userContactList = [];
+//
+//       UserContact yourOwnUserContact = UserContact(
+//         id: null,
+//         userIds: [currentUser.id],
+//         userId: currentUser.id,
+//         displayName: currentUser.displayName,
+//         realName: currentUser.realName,
+//         block: false,
+//         lastSeenDate: new DateTime.now(),
+//         // make unknown time, let server decide
+//         mobileNo: currentUser.mobileNo,
+//       );
+//
+//       userContactList.add(yourOwnUserContact);
+//
+//       contactList.forEach((contact) {
+//         List<String> primaryNo = [];
+//         if (contact.phones.length > 0) {
+//           contact.phones.forEach((phoneNo) {
+//             primaryNo.add(phoneNo.value);
+//           });
+//         } else {
+//           // No phone number and the display name is the phone number itself
+//           // Reason: No contact.phones when the mobile number doesn't have a name on it
+//           String mobileNo = contact.displayName.replaceAll(new RegExp(r"\s+\b|\b\s|\s|\b"), "");
+//           primaryNo.add(mobileNo);
+//         }
+//
+//         UserContact userContact = UserContact(
+//           id: null,
+//           // So this contact number is mine. Later send it to backend and merge with other UserContact who got the same number
+//           userIds: [currentUser.id],
+//           displayName: contact.displayName,
+//           realName: contact.displayName,
+//           block: false,
+//           lastSeenDate: new DateTime.now(),
+//         );
+//
+//         userContact.mobileNo = primaryNo.length == 0 ? "" : primaryNo[0];
+//
+//         // If got Malaysia number
+//         if (primaryNo[0].contains("+60")) {
+//           print("If Malaysian Number: ");
+//           String trimmedString = primaryNo[0].substring(3);
+//           print("trimmedString: " + trimmedString);
+//         }
+//
+//         userContactList.add(userContact);
+//       });
+//
+//       UserContact targetUserContact = userContactList[1];
+//
+//       // Logic to detect to find same personal conversation group in local state/DB
+//       UserContact userContactFromServer = await userContactAPIService.getUserContactByMobileNo(targetUserContact.mobileNo);
+//       if (!isObjectEmpty(userContactFromServer)) {
+//         UserContactState userContactState = BlocProvider.of<UserContactBloc>(context).state;
+//         ConversationGroupState conversationGroupState = BlocProvider.of<ConversationGroupBloc>(context).state;
+//
+//         if (userContactState is UserContactsLoaded && conversationGroupState is ConversationGroupsLoaded) {
+//           List<UserContact> userContactList = userContactState.userContactList;
+//           List<ConversationGroup> conversationGroupList = conversationGroupState.conversationGroupList;
+//
+//           bool personalConversationGroupExist = conversationGroupList.contains(
+//               (ConversationGroup existingConversationGroup) => existingConversationGroup.type == ConversationGroupType.Personal && existingConversationGroup.memberIds.contains((String memberId) => memberId == userContactFromServer.id));
+//
+//           if (personalConversationGroupExist) {
+// //            goToChatRoomPage(conversationGroup); // TODO: Go to another page with conversationGroup ID only, use API to getSingleConversationGroup.
+//             return;
+//           }
+//         }
+//       }
+//
+//       BlocProvider.of<UserContactBloc>(context).add(AddMultipleUserContactEvent(
+//           userContactList: userContactList,
+//           callback: (List<UserContact> newUserContactList) {
+//             if ((contactList.length != newUserContactList.length - 1) || newUserContactList.length == 0) {
+//               // event.contactList doesn't include yourself, so newUserContactList.length - 1 OR Any UserContact is not added into the list (means not uploaded successfully)
+//               // That means some UseContact are not uploaded into the REST
+//               Navigator.pop(context);
+//               showToast('Unable to upload your member list. Please try again.', Toast.LENGTH_SHORT);
+//             } else {
+//               // Give the list of UserContactIds to memberIds of ConversationGroup
+//               createConversationGroupRequest.memberIds = newUserContactList.map((newUserContact) => newUserContact.id).toList();
+//
+//               // Add your own userContact's ID as admin by find the one that has the same mobile number in the userContactList
+//               createConversationGroupRequest.adminMemberIds.add(newUserContactList.firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentUser.mobileNo, orElse: () => null).id);
+//
+//               BlocProvider.of<ConversationGroupBloc>(context).add(CreateConversationGroupEvent(
+//                   createConversationGroupRequest: createConversationGroupRequest,
+//                   callback: (ConversationGroup conversationGroup2) async {
+//                     if (!isObjectEmpty(conversationGroup2)) {
+//                       groupMultimedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
+//                       unreadMessage.userId = conversationGroup2.creatorUserId;
+//                       // TODO: Remove create UnreadMessage, should be done at backend
+//                       addMultimedia(groupMultimedia, null, conversationGroup2);
+//                     } else {
+//                       Navigator.pop(context);
+//                       showToast('Unable to create conversation group. Please try again.', Toast.LENGTH_SHORT);
+//                     }
+//                   }));
+//             }
+//           }));
+//     }
   }
 
   addMultimedia(Multimedia groupMultimedia, File imageFile, ConversationGroup conversationGroup) async {

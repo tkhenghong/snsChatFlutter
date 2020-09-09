@@ -98,6 +98,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
     settingsFromREST = await settingsAPIService.getUserOwnSettings();
 
+    await settingsDBService.deleteSettings(settingsFromREST.id);
+
     savedIntoDB = await settingsDBService.addSettings(settingsFromREST);
 
     if (!isObjectEmpty(settingsFromREST) && savedIntoDB) {
