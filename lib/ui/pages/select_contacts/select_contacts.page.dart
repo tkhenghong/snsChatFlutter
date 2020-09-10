@@ -276,14 +276,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           if (phoneNumberList.length > 1) {
             showSelectPhoneNumberDialog(contact.displayName, phoneNumberList);
           } else if (phoneNumberList.length == 1) {
-            userContactBloc.add(GetUserContactByMobileNoEvent(
-                mobileNo: phoneNumberList[0],
-                callback: (UserContact userContact) {
-                  if (!isObjectEmpty(userContact)) {
-                    conversationGroupBloc.add(CreateConversationGroupEvent(
-                        createConversationGroupRequest: CreateConversationGroupRequest(name: contact.displayName, conversationGroupType: ConversationGroupType.Personal, description: null, memberIds: [userContact.id, ownUserContact.id])));
-                  }
-                }));
+            createPersonalConversationGroupTest(phoneNumberList[0], contact.displayName);
           } else {
             Get.dialog(
                 Dialog(
@@ -389,26 +382,27 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                     softWrap: true,
                   ),
                   onTap: () {
-                    if (widget.chatGroupType == ConversationGroupType.Personal) {
-                      userContactBloc.add(GetUserContactByMobileNoEvent(
-                          mobileNo: mobileNumbers[index],
-                          callback: (UserContact userContact) {
-                            if (!isObjectEmpty(userContact)) {
-                              conversationGroupBloc.add(CreateConversationGroupEvent(
-                                  createConversationGroupRequest: CreateConversationGroupRequest(
-                                name: contactName,
-                                conversationGroupType: ConversationGroupType.Personal,
-                                description: null,
-                                memberIds: [userContact.id, ownUserContact.id],
-                                adminMemberIds: [ownUserContact.id],
-                              )));
-                            }
-                          }));
-                      // createPersonalConversation(contact);
-                    }
+                    createPersonalConversationGroupTest(mobileNumbers[index], contactName);
                   })),
         ),
         barrierDismissible: true);
+  }
+
+  createPersonalConversationGroupTest(String mobileNumber, String contactName) {
+    userContactBloc.add(GetUserContactByMobileNoEvent(
+        mobileNo: mobileNumber,
+        callback: (UserContact userContact) {
+          if (!isObjectEmpty(userContact)) {
+            conversationGroupBloc.add(CreateConversationGroupEvent(
+                createConversationGroupRequest: CreateConversationGroupRequest(
+                  name: contactName,
+                  conversationGroupType: ConversationGroupType.Personal,
+                  description: null,
+                  memberIds: [userContact.id, ownUserContact.id],
+                  adminMemberIds: [ownUserContact.id],
+                )));
+          }
+        }));
   }
 
   bool contactIsSelected(Contact contact) {

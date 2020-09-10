@@ -40,6 +40,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   GoogleInfoBloc googleInfoBloc;
 
   static bool firstRun = true;
+  static bool userContactsMultimediaLoaded = false;
 
   @override
   initState() {
@@ -189,6 +190,15 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         if (authenticationState is AuthenticationsNotLoaded) {
           goToLoginPage();
         }
+
+        if (authenticationState is AuthenticationsLoaded) {
+          if (userContactBloc.state is UserContactsLoaded) {
+            List<UserContact> userContactList = (userContactBloc.state as UserContactsLoaded).userContactList;
+
+            multimediaBloc.add(GetUserContactsMultimediaEvent(userContactList: userContactList, callback: (bool done) {}));
+            userContactsMultimediaLoaded = true;
+          }
+        }
       },
     );
   }
@@ -222,7 +232,11 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     return BlocListener<UserContactBloc, UserContactState>(
       listener: (context, userContactState) {
         if (userContactState is UserContactsLoaded) {
-          multimediaBloc.add(GetUserContactsMultimediaEvent(userContactList: userContactState.userContactList, callback: (bool done) {}));
+
+          if(userBloc.state is UserLoaded) {
+            multimediaBloc.add(GetUserContactsMultimediaEvent(userContactList: userContactState.userContactList, callback: (bool done) {}));
+            userContactsMultimediaLoaded = true;
+          }
         }
       },
     );
@@ -321,12 +335,11 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   refreshUserData() {
     userBloc.add(GetOwnUserEvent(callback: (User user) {}));
     settingsBloc.add(GetUserOwnSettingsEvent(callback: (Settings settings) {}));
-    conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(
-        callback: (bool done) {
-          if (done) {
-            getConversationGroupsMultimedia();
-          }
-        }));
+    conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(callback: (bool done) {
+      if (done) {
+        getConversationGroupsMultimedia();
+      }
+    }));
     unreadMessageBloc.add(GetUserPreviousUnreadMessagesEvent(callback: (bool done) {}));
     multimediaBloc.add(GetUserOwnProfilePictureMultimediaEvent(callback: (bool done) {}));
     userContactBloc.add(GetUserOwnUserContactsEvent(callback: (bool done) {}));

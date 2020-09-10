@@ -58,7 +58,6 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     bool added = false;
     if (state is ConversationGroupsLoaded) {
       if (!isObjectEmpty(event.conversationGroup)) {
-
         await conversationGroupDBService.deleteConversationGroup(event.conversationGroup.id);
 
         added = await conversationGroupDBService.addConversationGroup(event.conversationGroup);
@@ -162,7 +161,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       }
 
       yield ConversationGroupsLoaded(existingConversationGroupList);
-      functionCallback(event, true);
+      functionCallback(existingConversationGroupList, true);
     }
   }
 
@@ -179,34 +178,42 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     }
   }
 
-  Stream<ConversationGroupState> _createConversationGroup(CreateConversationGroupEvent event) {
+  Stream<ConversationGroupState> _createConversationGroup(CreateConversationGroupEvent event) async* {
     // TODO: Create ConversationGroup Personal/Group
     CreateConversationGroupRequest createConversationGroupRequest = event.createConversationGroupRequest;
-    switch (createConversationGroupRequest.conversationGroupType) {
-      case ConversationGroupType.Personal:
-        _createPersonalConversationGroup(createConversationGroupRequest);
-        break;
-      case ConversationGroupType.Group:
-        _createPersonalConversationGroup(createConversationGroupRequest);
-        break;
-      case ConversationGroupType.Broadcast:
-        break;
-      default:
-        throw Exception("Something's wrong during creating conversations: Invalid conversation Group type.");
+
+    ConversationGroup conversationGroupFromServer = await conversationGroupAPIService.addConversationGroup(createConversationGroupRequest);
+
+    if (isObjectEmpty(conversationGroupFromServer)) {
+      throw Exception("Failed when creating conversation Group. Please try again.");
     }
+
+    bool savedIntoDB = await conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
+
+    if (!savedIntoDB) {
+      throw Exception("Failed when saving conversation Group into the DB. Please try again.");
+    }
+
+    if (!(state is ConversationGroupsLoaded)) {
+      throw Exception("Failed when saving conversation Group: conversationGroupState is not ready. Please restart the application.");
+    }
+
+    List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
+
+    existingConversationGroupList.removeWhere((element) => element.id == conversationGroupFromServer.id);
+
+    existingConversationGroupList.add(conversationGroupFromServer);
+
+    yield ConversationGroupsLoaded(existingConversationGroupList);
+
+    functionCallback(event, true);
   }
 
-  _createPersonalConversationGroup(CreateConversationGroupRequest createConversationGroupRequest) {
+  _createPersonalConversationGroup(CreateConversationGroupRequest createConversationGroupRequest) {}
 
-  }
+  _createGroupConversationGroup(CreateConversationGroupRequest createConversationGroupRequest) {}
 
-  _createGroupConversationGroup(CreateConversationGroupRequest createConversationGroupRequest) {
-
-  }
-
-  _createBroadcastConversationGroup(CreateConversationGroupRequest createConversationGroupRequest) {
-
-  }
+  _createBroadcastConversationGroup(CreateConversationGroupRequest createConversationGroupRequest) {}
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
