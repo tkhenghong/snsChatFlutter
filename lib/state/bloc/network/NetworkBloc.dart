@@ -50,7 +50,7 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
     if (!isObjectEmpty(event)) {
-      event.callback(value);
+      event?.callback(value);
     }
   }
 }

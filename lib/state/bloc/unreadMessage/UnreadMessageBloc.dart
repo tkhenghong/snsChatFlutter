@@ -131,7 +131,7 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
     if (!isObjectEmpty(event)) {
-      event.callback(value);
+      event?.callback(value);
     }
   }
 }
