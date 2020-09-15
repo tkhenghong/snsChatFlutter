@@ -206,14 +206,8 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
 
     yield ConversationGroupsLoaded(existingConversationGroupList);
 
-    functionCallback(event, true);
+    functionCallback(event, conversationGroupFromServer);
   }
-
-  _createPersonalConversationGroup(CreateConversationGroupRequest createConversationGroupRequest) {}
-
-  _createGroupConversationGroup(CreateConversationGroupRequest createConversationGroupRequest) {}
-
-  _createBroadcastConversationGroup(CreateConversationGroupRequest createConversationGroupRequest) {}
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {

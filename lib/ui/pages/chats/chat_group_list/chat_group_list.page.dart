@@ -335,8 +335,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   refreshUserData() {
     userBloc.add(GetOwnUserEvent(callback: (User user) {}));
     settingsBloc.add(GetUserOwnSettingsEvent(callback: (Settings settings) {}));
-    conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(callback: (bool done) {
-      if (done) {
+    conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(callback: (List<ConversationGroup> conversationGroupList) {
+      if (!isObjectEmpty(conversationGroupList) && conversationGroupList.length > 0) {
         getConversationGroupsMultimedia();
       }
     }));

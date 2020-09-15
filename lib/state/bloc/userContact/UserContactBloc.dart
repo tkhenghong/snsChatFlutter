@@ -265,7 +265,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
         yield UserContactsLoaded(existingUserContactList);
       }
 
-      functionCallback(userContact, true);
+      functionCallback(event, userContact);
     }
   }
 

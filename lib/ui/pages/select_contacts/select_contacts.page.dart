@@ -3,13 +3,11 @@ import 'dart:io';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
-import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 
@@ -74,10 +72,19 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     scrollController.dispose();
   }
 
+  getOwnUserContact() {
+    if (userContactBloc.state is UserContactsLoaded) {
+      UserContactsLoaded userContactsLoaded = userContactBloc.state as UserContactsLoaded;
+      ownUserContact = userContactsLoaded.ownUserContact;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     userContactBloc = BlocProvider.of<UserContactBloc>(context);
     conversationGroupBloc = BlocProvider.of<ConversationGroupBloc>(context);
+
+    getOwnUserContact();
 
     return Scaffold(
       appBar: appBar(),
@@ -400,7 +407,12 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                   description: null,
                   memberIds: [userContact.id, ownUserContact.id],
                   adminMemberIds: [ownUserContact.id],
-                )));
+                ),
+                callback: (ConversationGroup conversationGroup) {
+                  if (!isObjectEmpty(conversationGroup)) {
+                    goToChatRoomPage(conversationGroup);
+                  }
+                }));
           }
         }));
   }
@@ -663,6 +675,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     // Go to chat room page
     Navigator.pop(context); //pop loading dialog
     Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
+    // Navigator.of(context).pushReplacementNamed(ChatRoomPage(conversationGroup));
     Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
   }
 }
