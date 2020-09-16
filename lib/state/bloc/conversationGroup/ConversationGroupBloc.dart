@@ -161,7 +161,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       }
 
       yield ConversationGroupsLoaded(existingConversationGroupList);
-      functionCallback(existingConversationGroupList, true);
+      functionCallback(event, existingConversationGroupList);
     }
   }
 
