@@ -330,6 +330,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     multimediaBloc.add(InitializeMultimediaEvent(callback: (bool done) {}));
     unreadMessageBloc.add(InitializeUnreadMessagesEvent(callback: (bool done) {}));
     userContactBloc.add(InitializeUserContactsEvent(callback: (bool done) {}));
+    userContactBloc.add(GetUserOwnUserContactEvent(callback: (bool done) {}));
   }
 
   refreshUserData() {

@@ -26,6 +26,8 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       _getUserContact(event);
     } else if (event is GetUserContactByUserIdEvent) {
       yield* _getUserContactByUserId(event);
+    } else if (event is GetUserOwnUserContactEvent) {
+      yield* _getUserOwnUserContactEvent(event);
     } else if (event is GetUserOwnUserContactsEvent) {
       yield* _getUserOwnUserContactsEvent(event);
     } else if (event is AddMultipleUserContactEvent) {
@@ -58,7 +60,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     UserContact newUserContact;
     bool userContactAdded = false;
 
-    // Avoid readding existing userContact
+    // Avoid reading existing userContact
     if (isStringEmpty(event.userContact.id)) {
       newUserContact = await userContactAPIService.addUserContact(event.userContact);
     }
@@ -91,48 +93,49 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     List<UserContact> newUserContactList = [];
 
     if (state is UserContactsLoaded) {
+      UserContactsLoaded userContactsLoaded = (state as UserContactsLoaded);
       existingUserContactList = (state as UserContactsLoaded).userContactList;
-    }
 
-    for (UserContact userContact in event.userContactList) {
-      UserContact newUserContact;
-      bool userContactAdded = false;
+      for (UserContact userContact in event.userContactList) {
+        UserContact newUserContact;
+        bool userContactAdded = false;
 
-      // Avoid readding existing userContact
-      if (isStringEmpty(userContact.id)) {
-        newUserContact = await userContactAPIService.addUserContact(userContact);
-      }
+        // Avoid reading existing userContact
+        if (isStringEmpty(userContact.id)) {
+          newUserContact = await userContactAPIService.addUserContact(userContact);
+        }
 
-      if (!isObjectEmpty(newUserContact)) {
-        bool userContactExist = false;
+        if (!isObjectEmpty(newUserContact)) {
+          bool userContactExist = false;
 
-        for (UserContact existingUserContact in existingUserContactList) {
-          if (existingUserContact.id == newUserContact.id) {
-            userContactExist = true;
+          for (UserContact existingUserContact in existingUserContactList) {
+            if (existingUserContact.id == newUserContact.id) {
+              userContactExist = true;
+            }
+          }
+          if (userContactExist) {
+            userContactAdded = await userContactDBService.editUserContact(newUserContact);
+          } else {
+            userContactAdded = await userContactDBService.addUserContact(newUserContact);
+          }
+
+          existingUserContactList.removeWhere((UserContact existingUserContact) => existingUserContact.id == newUserContact.id);
+
+          if (userContactAdded) {
+            newUserContactList.add(userContact);
           }
         }
-        if (userContactExist) {
-          userContactAdded = await userContactDBService.editUserContact(newUserContact);
-        } else {
-          userContactAdded = await userContactDBService.addUserContact(newUserContact);
-        }
 
-        existingUserContactList.removeWhere((UserContact existingUserContact) => existingUserContact.id == newUserContact.id);
-
-        if (userContactAdded) {
-          newUserContactList.add(userContact);
+        if (isObjectEmpty(newUserContact) || !userContactAdded) {
+          functionCallback(event, []);
+          return; // Any error, out
         }
       }
 
-      if (isObjectEmpty(newUserContact) || !userContactAdded) {
-        functionCallback(event, []);
-        return; // Any error, out
-      }
+      existingUserContactList = [existingUserContactList, newUserContactList].expand((x) => x).toList();
+
+      yield UserContactsLoaded(existingUserContactList, userContactsLoaded.ownUserContact);
     }
-
-    existingUserContactList = [existingUserContactList, newUserContactList].expand((x) => x).toList();
-
-    yield UserContactsLoaded(existingUserContactList);
     functionCallback(event, newUserContactList);
   }
 
@@ -147,13 +150,14 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
         bool userContactEdited = await userContactDBService.editUserContact(event.userContact);
 
         if (userContactEdited) {
-          List<UserContact> existingUserContactList = (state as UserContactsLoaded).userContactList;
+          UserContactsLoaded userContactsLoaded = (state as UserContactsLoaded);
+          List<UserContact> existingUserContactList = userContactsLoaded.userContactList;
 
           existingUserContactList.removeWhere((UserContact existingUserContact) => existingUserContact.id == event.userContact.id);
 
           existingUserContactList.add(event.userContact);
 
-          yield UserContactsLoaded(existingUserContactList);
+          yield UserContactsLoaded(existingUserContactList, userContactsLoaded.ownUserContact);
           functionCallback(event, event.userContact);
         }
       }
@@ -175,11 +179,12 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
         deleted = await userContactDBService.deleteUserContact(event.userContact.id);
 
         if (deleted) {
-          List<UserContact> existingUserContactList = (state as UserContactsLoaded).userContactList;
+          UserContactsLoaded userContactsLoaded = (state as UserContactsLoaded);
+          List<UserContact> existingUserContactList = userContactsLoaded.userContactList;
 
           existingUserContactList.removeWhere((UserContact existingUserContact) => existingUserContact.id == event.userContact.id);
 
-          yield UserContactsLoaded(existingUserContactList);
+          yield UserContactsLoaded(existingUserContactList, userContactsLoaded.ownUserContact);
           functionCallback(event, true);
         }
       }
@@ -212,34 +217,32 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     }
   }
 
+  Stream<UserContactState> _getUserOwnUserContactEvent(GetUserOwnUserContactEvent event) async* {
+    UserContact ownUserContact = await userContactAPIService.getOwnUserContact();
+    if (state is UserContactsLoaded) {
+      addUserContactIntoDB(ownUserContact);
+
+      List<UserContact> userContactList = addUserContactIntoState(ownUserContact);
+
+      yield UserContactsLoaded(userContactList, ownUserContact);
+      functionCallback(event, true);
+    }
+  }
+
   Stream<UserContactState> _getUserOwnUserContactsEvent(GetUserOwnUserContactsEvent event) async* {
     List<UserContact> userContactListFromServer = await userContactAPIService.getUserContactsByUserId();
     if (state is UserContactsLoaded) {
-      List<UserContact> existingUserContactList = (state as UserContactsLoaded).userContactList;
-
       if (!isObjectEmpty(userContactListFromServer) && userContactListFromServer.length > 0) {
         for (UserContact userContactFromServer in userContactListFromServer) {
-          // Unable to use contains() method here. Will cause concurrent modification during iteration problem.
-          // Link: https://stackoverflow.com/questions/22409666/exception-concurrent-modification-during-iteration-instancelength17-of-gr
-          bool userContactExist = false;
-          for (UserContact existingUserContact in existingUserContactList) {
-            if (existingUserContact.id == userContactFromServer.id) {
-              userContactExist = true;
-            }
-          }
+          bool added = addUserContactIntoDB(userContactFromServer);
 
-          if (userContactExist) {
-            existingUserContactList.removeWhere((UserContact existingUserContact) => existingUserContact.id == userContactFromServer.id);
-            userContactDBService.editUserContact(userContactFromServer);
-          } else {
-            userContactDBService.addUserContact(userContactFromServer);
+          if(added) {
+            List<UserContact> updatedUserContactList = addUserContactIntoState(userContactFromServer);
+            UserContact ownUserContact = (state as UserContactsLoaded).ownUserContact;
+            yield UserContactsLoaded(updatedUserContactList, ownUserContact);
           }
-
-          existingUserContactList.add(userContactFromServer);
         }
       }
-
-      yield UserContactsLoaded(existingUserContactList);
       functionCallback(event, true);
     }
   }
@@ -267,6 +270,29 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
 
       functionCallback(event, userContact);
     }
+  }
+
+  addUserContactIntoDB(UserContact userContact) async {
+    bool added = false;
+
+    UserContact userContactInDB = await userContactDBService.getSingleUserContact(userContact.id);
+    if (!isObjectEmpty(userContactInDB)) {
+      added = await userContactDBService.editUserContact(userContact);
+    } else {
+      added = await userContactDBService.addUserContact(userContact);
+    }
+
+    return added;
+  }
+
+  List<UserContact> addUserContactIntoState(UserContact userContact) {
+    List<UserContact> existingUserContactList = (state as UserContactsLoaded).userContactList;
+
+    existingUserContactList.removeWhere((UserContact existingUserContact) => existingUserContact.id == userContact.id);
+
+    existingUserContactList.add(userContact);
+
+    return existingUserContactList;
   }
 
   // To send response to those dispatched Actions

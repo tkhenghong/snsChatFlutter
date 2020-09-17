@@ -49,7 +49,7 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     ChatMessage messageFromServer;
     bool savedIntoDB = false;
     if (state is ChatMessagesLoaded) {
-      // Avoid readding existing message
+      // Avoid reading existing message
       if (isStringEmpty(event.message.id)) {
         messageFromServer = await chatMessageAPIService.addChatMessage(event.message);
       } else {

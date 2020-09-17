@@ -68,7 +68,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 //    User userFromServer;
 //    bool userSaved = false;
 //
-//    // Avoid readding existed user object
+//    // Avoid reading existed user object
 //    if (isStringEmpty(event.user.id)) {
 //      userFromServer = await userAPIService.addUser(event.user);
 //    } else {

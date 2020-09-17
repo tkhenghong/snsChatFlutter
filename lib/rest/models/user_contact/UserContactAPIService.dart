@@ -30,6 +30,10 @@ class UserContactAPIService {
     return UserContact.fromJson(await httpClient.getRequest("$REST_URL/$userContactAPI/mobileNo/$mobileNo"));
   }
 
+  Future<UserContact> getOwnUserContact() async {
+    return UserContact.fromJson(await httpClient.getRequest("$REST_URL/$userContactAPI"));
+  }
+
   // Get all UserContacts of the signed in user, including yourself.
   Future<List<UserContact>> getUserContactsByUserId() async {
     List<dynamic> userContactListRaw = await httpClient.getRequest("$REST_URL/$userContactAPI/user");

@@ -74,8 +74,14 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   getOwnUserContact() {
     if (userContactBloc.state is UserContactsLoaded) {
+      print('if (userContactBloc.state is UserContactsLoaded)');
       UserContactsLoaded userContactsLoaded = userContactBloc.state as UserContactsLoaded;
+      userContactsLoaded.ownUserContact.toString();
+
+      print('userContactsLoaded.ownUserContact.toString(): ' + userContactsLoaded.ownUserContact.toString());
       ownUserContact = userContactsLoaded.ownUserContact;
+    } else {
+      print('if (userContactBloc.state is NOT UserContactsLoaded)');
     }
   }
 
@@ -400,6 +406,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         mobileNo: mobileNumber,
         callback: (UserContact userContact) {
           if (!isObjectEmpty(userContact)) {
+            print('userContact.id: ' + userContact.id);
+            print('ownUserContact.id: ' + ownUserContact.id);
             conversationGroupBloc.add(CreateConversationGroupEvent(
                 createConversationGroupRequest: CreateConversationGroupRequest(
                   name: contactName,
