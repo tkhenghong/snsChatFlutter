@@ -94,7 +94,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
 
     if (state is UserContactsLoaded) {
       UserContactsLoaded userContactsLoaded = (state as UserContactsLoaded);
-      existingUserContactList = (state as UserContactsLoaded).userContactList;
+      existingUserContactList = userContactsLoaded.userContactList;
 
       for (UserContact userContact in event.userContactList) {
         UserContact newUserContact;
@@ -224,6 +224,8 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
 
       List<UserContact> userContactList = addUserContactIntoState(ownUserContact);
 
+      yield UserContactsLoading(); // Need change state for BlOC to detect changes.
+
       yield UserContactsLoaded(userContactList, ownUserContact);
       functionCallback(event, true);
     }
@@ -234,7 +236,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     if (state is UserContactsLoaded) {
       if (!isObjectEmpty(userContactListFromServer) && userContactListFromServer.length > 0) {
         for (UserContact userContactFromServer in userContactListFromServer) {
-          bool added = addUserContactIntoDB(userContactFromServer);
+          bool added = await addUserContactIntoDB(userContactFromServer);
 
           if(added) {
             List<UserContact> updatedUserContactList = addUserContactIntoState(userContactFromServer);
@@ -272,7 +274,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     }
   }
 
-  addUserContactIntoDB(UserContact userContact) async {
+  Future<bool> addUserContactIntoDB(UserContact userContact) async {
     bool added = false;
 
     UserContact userContactInDB = await userContactDBService.getSingleUserContact(userContact.id);

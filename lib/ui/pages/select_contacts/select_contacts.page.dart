@@ -72,7 +72,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     scrollController.dispose();
   }
 
-  getOwnUserContact() {
+  getOwnUserContact() async {
     if (userContactBloc.state is UserContactsLoaded) {
       print('if (userContactBloc.state is UserContactsLoaded)');
       UserContactsLoaded userContactsLoaded = userContactBloc.state as UserContactsLoaded;

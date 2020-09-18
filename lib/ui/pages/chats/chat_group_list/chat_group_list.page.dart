@@ -68,10 +68,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
     googleInfoBloc = BlocProvider.of<GoogleInfoBloc>(context);
 
-    if (firstRun) {
-      initialize();
-      firstRun = false;
-    }
+    authenticationBloc.add(InitializeAuthenticationsEvent(callback: (bool done) {})); // Load authentication
 
     return MultiBlocListener(listeners: [
       // googleBlocListener(),
@@ -192,6 +189,11 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         }
 
         if (authenticationState is AuthenticationsLoaded) {
+          if (firstRun) {
+            initialize();
+            firstRun = false;
+          }
+
           if (userContactBloc.state is UserContactsLoaded) {
             List<UserContact> userContactList = (userContactBloc.state as UserContactsLoaded).userContactList;
 
@@ -323,7 +325,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   initialize() async {
     userBloc.add(InitializeUserEvent(callback: (bool done) {}));
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
-    authenticationBloc.add(InitializeAuthenticationsEvent(callback: (bool done) {}));
     multimediaProgressBloc.add(InitializeMultimediaProgressEvent(callback: (bool done) {}));
     conversationGroupBloc.add(InitializeConversationGroupsEvent(callback: (bool done) {}));
     messageBloc.add(InitializeChatMessagesEvent(callback: (bool done) {}));
