@@ -45,6 +45,14 @@ class MultimediaDBService {
     return noOfDeleted == 1;
   }
 
+  Future<void> deleteAllMultimedia() async {
+    if (isObjectEmpty(await _db)) {
+      return;
+    }
+
+    _multimediaStore.delete(await _db);
+  }
+
   Future<Multimedia> getSingleMultimedia(String multimediaId) async {
     if (isObjectEmpty(await _db)) {
       return null;

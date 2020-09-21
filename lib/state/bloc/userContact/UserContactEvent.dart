@@ -132,3 +132,15 @@ class GetUserContactByMobileNoEvent extends UserContactEvent {
   @override
   String toString() => 'GetUserContactByMobileNoEvent';
 }
+
+class RemoveAllUserContactsEvent extends UserContactEvent {
+  final Function callback;
+
+  RemoveAllUserContactsEvent({this.callback});
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'RemoveAllUserContactsEvent';
+}

@@ -69,3 +69,14 @@ class GetUserOwnChatMessagesEvent extends ChatMessageEvent {
   @override
   String toString() => 'GetUserOwnChatMessagesEvent {user: $user}';
 }
+class RemoveAllChatMessagesEvent extends ChatMessageEvent {
+  final Function callback;
+
+  RemoveAllChatMessagesEvent({this.callback});
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'RemoveAllChatMessagesEvent';
+}

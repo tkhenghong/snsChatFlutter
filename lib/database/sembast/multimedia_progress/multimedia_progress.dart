@@ -45,6 +45,13 @@ class MultimediaProgressDBService {
     return noOfDeleted == 1;
   }
 
+  Future<void> deleteAllMultimediaProgress() async {
+    if (isObjectEmpty(await _db)) {
+      return;
+    }
+    _multimediaProgressStore.delete(await _db);
+  }
+
   Future<MultimediaProgress> getSingleMultimediaProgress(String multimediaProgressId) async {
     if (isObjectEmpty(await _db)) {
       return null;

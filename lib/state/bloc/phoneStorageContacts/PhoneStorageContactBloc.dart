@@ -18,6 +18,8 @@ class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorag
       yield* _initializePhoneStorageContactsToState(event);
     } else if (event is SearchPhoneStorageContactEvent) {
       yield* _searchPhoneStorageContactEvent(event);
+    } else if (event is RemoveAllPhoneStorageContactsEvent) {
+      yield* _removeAllPhoneStorageContactsEvent(event);
     }
   }
 
@@ -31,6 +33,7 @@ class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorag
       }
 
       if (contactAccessGranted) {
+        yield PhoneStorageContactLoading();
         Iterable<Contact> contacts = await ContactsService.getContacts();
         Iterable<Contact> filteredContacts = contacts.where((Contact contact) {
           bool phoneNoIsEligible = false;
@@ -101,6 +104,11 @@ class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorag
     contactSearchResultList = [contactSearchResultList, searchResultBasedOnPhoneNumber].expand((x) => x).toList();
 
     yield PhoneStorageContactsLoaded(phoneStorageContactList, contactSearchResultList); // again
+  }
+
+  Stream<PhoneStorageContactState> _removeAllPhoneStorageContactsEvent(RemoveAllPhoneStorageContactsEvent event) async* {
+    yield PhoneStorageContactsNotLoaded();
+    functionCallback(event, true);
   }
 
   // To send response to those dispatched Actions

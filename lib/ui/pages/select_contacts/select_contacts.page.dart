@@ -36,13 +36,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   UserContact ownUserContact;
 
-  List<Contact> contacts = [];
   List<Contact> selectedContacts = [];
   Map<String, bool> contactCheckBoxes = {};
-
-//  Color themePrimaryColor;
-//  Color appBarThemeTextColor;
-//  TextStyle circleAvatarTextStyle;
 
   RefreshController _refreshController;
   ScrollController scrollController;
@@ -50,10 +45,9 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   CustomFileService fileService = Get.find();
   ImageService imageService = Get.find();
 
-  // UserContactAPIService userContactAPIService = Get.find();
-
   UserContactBloc userContactBloc;
   ConversationGroupBloc conversationGroupBloc;
+  PhoneStorageContactBloc phoneStorageContactBloc;
 
   @override
   initState() {
@@ -66,7 +60,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     _refreshController.dispose();
     scrollController.dispose();
@@ -74,14 +67,9 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   getOwnUserContact() async {
     if (userContactBloc.state is UserContactsLoaded) {
-      print('if (userContactBloc.state is UserContactsLoaded)');
       UserContactsLoaded userContactsLoaded = userContactBloc.state as UserContactsLoaded;
       userContactsLoaded.ownUserContact.toString();
-
-      print('userContactsLoaded.ownUserContact.toString(): ' + userContactsLoaded.ownUserContact.toString());
       ownUserContact = userContactsLoaded.ownUserContact;
-    } else {
-      print('if (userContactBloc.state is NOT UserContactsLoaded)');
     }
   }
 
@@ -89,6 +77,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   Widget build(BuildContext context) {
     userContactBloc = BlocProvider.of<UserContactBloc>(context);
     conversationGroupBloc = BlocProvider.of<ConversationGroupBloc>(context);
+    phoneStorageContactBloc = BlocProvider.of<PhoneStorageContactBloc>(context);
 
     getOwnUserContact();
 
@@ -151,7 +140,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     return BlocListener<PhoneStorageContactBloc, PhoneStorageContactState>(
       listener: (context, phoneStorageContactState) {
         if (phoneStorageContactState is PhoneStorageContactsLoaded) {
-          setupCheckBoxes(); // TODO: Use BlocBuilder
+          setupCheckBoxes(phoneStorageContactState.phoneStorageContactList);
         }
       },
     );
@@ -184,8 +173,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           if (phoneStorageContactState.phoneStorageContactList.length == 0) {
             return showNoContactPage();
           } else {
-            contacts = phoneStorageContactState.phoneStorageContactList;
-            return showSelectContactPageContent();
+            return showSelectContactPageContent(phoneStorageContactState.phoneStorageContactList);
           }
         }
 
@@ -198,7 +186,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     );
   }
 
-  Widget showSelectContactPageContent() {
+  Widget showSelectContactPageContent(List<Contact> contacts) {
     return SmartRefresher(
       controller: _refreshController,
       enablePullDown: true,
@@ -256,17 +244,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         });
       },
       secondary: CircleAvatar(
-//        backgroundColor: themePrimaryColor,
         backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
-        child: contact.avatar.isEmpty
-            ? Text(
-                contact.displayName[0],
-//                style: circleAvatarTextStyle,
-              )
-            : Text(
-                '',
-//                style: circleAvatarTextStyle,
-              ),
+        child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
         radius: 20.0,
       ),
     );
@@ -299,20 +278,16 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                 ),
                 barrierDismissible: false);
           }
-          // createPersonalConversation(contact);
         }
       },
       leading: CircleAvatar(
-//        backgroundColor: themePrimaryColor,
         backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
         child: contact.avatar.isEmpty
             ? Text(
                 contact.displayName[0],
-//                style: circleAvatarTextStyle,
               )
             : Text(
                 '',
-//                style: circleAvatarTextStyle,
               ),
         radius: 20.0,
       ),
@@ -386,19 +361,37 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   showSelectPhoneNumberDialog(String contactName, List<String> mobileNumbers) {
     Get.dialog(
-        Dialog(
-          child: ListView.builder(
-              itemCount: mobileNumbers.length,
-              itemBuilder: (BuildContext context, int index) => ListTile(
-                  title: Text(
-                    mobileNumbers[index],
-                    softWrap: true,
-                  ),
-                  onTap: () {
-                    createPersonalConversationGroupTest(mobileNumbers[index], contactName);
-                  })),
-        ),
-        barrierDismissible: true);
+        SimpleDialog(
+            title: Center(
+              child: Text('Please select a phone number: '),
+            ),
+            children: <Widget>[
+              // Flutter ListView in a SimpleDialog:
+              // https://stackoverflow.com/questions/50095763
+              Container(
+                padding: EdgeInsets.only(left: Get.width * 0.05, right: Get.width * 0.05, top: Get.height * 0.3, bottom: Get.height * 0.3),
+                height: Get.height,
+                width: Get.width,
+                child: Column(
+                  children: <Widget>[
+                    ListView.builder(
+                        physics: BouncingScrollPhysics(),
+                        itemCount: mobileNumbers.length,
+                        itemBuilder: (BuildContext context, int index) => ListTile(
+                            title: Text(
+                              mobileNumbers[index],
+                              softWrap: true,
+                            ),
+                            onTap: () {
+                              createPersonalConversationGroupTest(mobileNumbers[index], contactName);
+                            }),
+                        shrinkWrap: true),
+                  ],
+                ),
+              ),
+            ]),
+        barrierDismissible: true,
+        useRootNavigator: true);
   }
 
   createPersonalConversationGroupTest(String mobileNumber, String contactName) {
@@ -406,8 +399,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         mobileNo: mobileNumber,
         callback: (UserContact userContact) {
           if (!isObjectEmpty(userContact)) {
-            print('userContact.id: ' + userContact.id);
-            print('ownUserContact.id: ' + ownUserContact.id);
             conversationGroupBloc.add(CreateConversationGroupEvent(
                 createConversationGroupRequest: CreateConversationGroupRequest(
                   name: contactName,
@@ -430,12 +421,10 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   }
 
   bool needSelectMultipleContacts() {
-    // return widget.chatGroupType == ChatGroupType.Group || widget.chatGroupType == ChatGroupType.Broadcast;
-    // return widget.chatGroupType == "Group" || widget.chatGroupType == "Broadcast";
     return widget.chatGroupType != ConversationGroupType.Personal;
   }
 
-  setupCheckBoxes() {
+  setupCheckBoxes(List<Contact> contacts) {
     contacts.forEach((contact) {
       contactCheckBoxes[contact.displayName] = false;
     });
@@ -444,7 +433,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   }
 
   getContacts() async {
-    BlocProvider.of<PhoneStorageContactBloc>(context).add(GetPhoneStorageContactsEvent(callback: (bool success) {
+    phoneStorageContactBloc.add(GetPhoneStorageContactsEvent(callback: (bool success) {
       success ? _refreshController.refreshCompleted() : _refreshController.refreshFailed();
     }));
   }

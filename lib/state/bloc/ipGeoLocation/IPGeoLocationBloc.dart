@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:get/get.dart';
 import 'package:snschat_flutter/general/index.dart';
@@ -21,9 +23,15 @@ class IPGeoLocationBloc extends Bloc<IPGeoLocationEvent, IPGeoLocationState> {
     }
   }
 
-  // InitializeIPGeoLocationEvent
   Stream<IPGeoLocationState> _initIPGeoLocationToState(InitializeIPGeoLocationEvent event) async* {
-    IPGeoLocation ipGeoLocation = await ipLocationAPIService.getIPGeolocation();
+    IPGeoLocation ipGeoLocation;
+    try {
+      ipGeoLocation = await ipLocationAPIService.getIPGeolocation();
+    } on TimeoutException {
+      yield IPGeoLocationNotLoaded();
+      functionCallback(event, false);
+      throw NetworkTimeoutException('Get IP Location', 'Unable to get your location in time.');
+    }
 
     if (!isObjectEmpty(ipGeoLocation)) {
       yield IPGeoLocationLoaded(ipGeoLocation);

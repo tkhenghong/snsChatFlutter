@@ -25,6 +25,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       yield* _deleteSettings(event);
     } else if (event is GetUserOwnSettingsEvent) {
       yield* _getSettingsOfTheUserEvent(event);
+    } else if (event is RemoveAllSettingsEvent) {
+      yield* _removeAllSettingsEvent(event);
     }
   }
 
@@ -111,6 +113,12 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       yield SettingsNotLoaded();
       functionCallback(event, null);
     }
+  }
+
+  Stream<SettingsState> _removeAllSettingsEvent(RemoveAllSettingsEvent event) async* {
+    settingsDBService.deleteAllSettings();
+    yield SettingsNotLoaded();
+    functionCallback(event, true);
   }
 
   // To send response to those dispatched Actions

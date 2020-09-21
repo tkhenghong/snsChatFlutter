@@ -68,7 +68,10 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
     googleInfoBloc = BlocProvider.of<GoogleInfoBloc>(context);
 
-    authenticationBloc.add(InitializeAuthenticationsEvent(callback: (bool done) {})); // Load authentication
+    if (firstRun) {
+      initialize();
+      firstRun = false;
+    }
 
     return MultiBlocListener(listeners: [
       // googleBlocListener(),
@@ -189,11 +192,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         }
 
         if (authenticationState is AuthenticationsLoaded) {
-          if (firstRun) {
-            initialize();
-            firstRun = false;
-          }
-
           if (userContactBloc.state is UserContactsLoaded) {
             List<UserContact> userContactList = (userContactBloc.state as UserContactsLoaded).userContactList;
 
@@ -234,8 +232,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     return BlocListener<UserContactBloc, UserContactState>(
       listener: (context, userContactState) {
         if (userContactState is UserContactsLoaded) {
-
-          if(userBloc.state is UserLoaded) {
+          if (userBloc.state is UserLoaded) {
             multimediaBloc.add(GetUserContactsMultimediaEvent(userContactList: userContactState.userContactList, callback: (bool done) {}));
             userContactsMultimediaLoaded = true;
           }
@@ -283,9 +280,9 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   PageListItem mapConversationToPageListTile(ConversationGroup conversationGroup, MultimediaState multimediaState, UnreadMessageState unreadMessageState) {
-    Multimedia multimedia = (multimediaState as MultimediaLoaded)
-        .multimediaList
-        .firstWhere((Multimedia existingMultimedia) => existingMultimedia.conversationId.toString() == conversationGroup.id && isStringEmpty(existingMultimedia.messageId), orElse: () => null);
+    Multimedia multimedia = (multimediaState as MultimediaLoaded).multimediaList
+        .firstWhere((Multimedia existingMultimedia) =>
+    existingMultimedia.conversationId.toString() == conversationGroup.id && isStringEmpty(existingMultimedia.messageId), orElse: () => null);
 
     UnreadMessage unreadMessage =
         (unreadMessageState as UnreadMessagesLoaded).unreadMessageList.firstWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.conversationId.toString() == conversationGroup.id, orElse: () => null);
@@ -323,6 +320,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   initialize() async {
+    authenticationBloc.add(InitializeAuthenticationsEvent(callback: (bool done) {}));
+    ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     userBloc.add(InitializeUserEvent(callback: (bool done) {}));
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     multimediaProgressBloc.add(InitializeMultimediaProgressEvent(callback: (bool done) {}));
@@ -331,19 +330,19 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     multimediaBloc.add(InitializeMultimediaEvent(callback: (bool done) {}));
     unreadMessageBloc.add(InitializeUnreadMessagesEvent(callback: (bool done) {}));
     userContactBloc.add(InitializeUserContactsEvent(callback: (bool done) {}));
-    userContactBloc.add(GetUserOwnUserContactEvent(callback: (bool done) {}));
   }
 
   refreshUserData() {
     userBloc.add(GetOwnUserEvent(callback: (User user) {}));
     settingsBloc.add(GetUserOwnSettingsEvent(callback: (Settings settings) {}));
-    conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(callback: (List<ConversationGroup> conversationGroupList) {
-      if (!isObjectEmpty(conversationGroupList) && conversationGroupList.length > 0) {
+    conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(callback: (bool done) {
+      if (done) {
         getConversationGroupsMultimedia();
       }
     }));
     unreadMessageBloc.add(GetUserPreviousUnreadMessagesEvent(callback: (bool done) {}));
     multimediaBloc.add(GetUserOwnProfilePictureMultimediaEvent(callback: (bool done) {}));
+    userContactBloc.add(GetUserOwnUserContactEvent(callback: (bool done) {}));
     userContactBloc.add(GetUserOwnUserContactsEvent(callback: (bool done) {}));
   }
 

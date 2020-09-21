@@ -80,16 +80,17 @@ class LoginPageState extends State<LoginPage> {
   Widget ipGeoLocationBlocBuilder() {
     return BlocBuilder<IPGeoLocationBloc, IPGeoLocationState>(
       builder: (context, ipGeoLocationState) {
-        if (ipGeoLocationState is IPGeoLocationLoading) {
-          return showLoading();
-        }
-
-        if (ipGeoLocationState is IPGeoLocationNotLoaded) {
+        if (ipGeoLocationState is IPGeoLocationLoading || ipGeoLocationState is IPGeoLocationNotLoaded) {
           countryCodeString = DEFAULT_COUNTRY_CODE;
-          return multiBlocListener();
-        }
+          deviceLocated = false;
 
-        if (ipGeoLocationState is IPGeoLocationLoaded) {
+          if (ipGeoLocationState is IPGeoLocationLoading) {
+            return showLoading();
+          } else if (ipGeoLocationState is IPGeoLocationNotLoaded) {
+            return multiBlocListener();
+          }
+        } else if (ipGeoLocationState is IPGeoLocationLoaded) {
+          deviceLocated = true;
           countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? DEFAULT_COUNTRY_CODE : ipGeoLocationState.ipGeoLocation.country_code2;
           ipGeoLocation = ipGeoLocationState.ipGeoLocation;
           return multiBlocListener();
@@ -292,7 +293,9 @@ class LoginPageState extends State<LoginPage> {
     String phoneNoInitials = '';
 
     if (isObjectEmpty(countryCode)) {
-      phoneNoInitials = ipGeoLocation.calling_code;
+      if (!isObjectEmpty(ipGeoLocation)) {
+        phoneNoInitials = ipGeoLocation.calling_code;
+      }
     } else {
       phoneNoInitials = countryCode.dialCode;
     }

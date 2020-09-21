@@ -56,3 +56,15 @@ class GetUserOwnSettingsEvent extends SettingsEvent {
   @override
   String toString() => 'GetSettingsOfTheUserEvent';
 }
+
+class RemoveAllSettingsEvent extends SettingsEvent {
+  final Function callback;
+
+  const RemoveAllSettingsEvent({this.callback});
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'RemoveAllSettingsEvent';
+}

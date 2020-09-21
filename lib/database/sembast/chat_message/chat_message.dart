@@ -45,6 +45,14 @@ class ChatMessageDBService {
     return noOfDeleted == 1;
   }
 
+  Future<void> deleteAllChatMessages() async {
+    if (isObjectEmpty(await _db)) {
+      return;
+    }
+
+    _chatMessageStore.delete(await _db);
+  }
+
   Future<ChatMessage> getSingleChatMessage(String chatMessageId) async {
     if (isObjectEmpty(await _db)) {
       return null;

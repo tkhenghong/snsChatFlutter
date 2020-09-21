@@ -45,6 +45,14 @@ class UserContactDBService {
     return noOfDeleted == 1;
   }
 
+  Future<void> deleteAllUserContacts() async {
+    if (isObjectEmpty(await _db)) {
+      return;
+    }
+
+    _userContactStore.delete(await _db);
+  }
+
   Future<UserContact> getSingleUserContact(String userContactId) async {
     if (isObjectEmpty(await _db)) {
       return null;

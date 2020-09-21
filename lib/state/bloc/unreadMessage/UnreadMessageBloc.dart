@@ -7,7 +7,7 @@ import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/unreadMessage/bloc.dart';
 
 class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
-  UnreadMessageBloc(): super(UnreadMessageLoading());
+  UnreadMessageBloc() : super(UnreadMessageLoading());
 
   UnreadMessageAPIService unreadMessageAPIService = Get.find();
   UnreadMessageDBService unreadMessageDBService = Get.find();
@@ -22,6 +22,8 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
       yield* _deleteUnreadMessage(event);
     } else if (event is GetUserPreviousUnreadMessagesEvent) {
       yield* _getPreviousUnreadMessages(event);
+    } else if (event is RemoveAllUnreadMessagesEvent) {
+      yield* _removeAllUnreadMessagesEvent(event);
     }
   }
 
@@ -126,6 +128,12 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
       yield UnreadMessagesLoaded(existingUnreadMessageList);
       functionCallback(event, true);
     }
+  }
+
+  Stream<UnreadMessageState> _removeAllUnreadMessagesEvent(RemoveAllUnreadMessagesEvent event) async* {
+    unreadMessageDBService.deleteAllUnreadMessage();
+    yield UnreadMessagesNotLoaded();
+    functionCallback(event, true);
   }
 
   // To send response to those dispatched Actions

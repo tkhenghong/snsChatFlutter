@@ -32,6 +32,8 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       yield* _addGroupMember(event);
     } else if (event is CreateConversationGroupEvent) {
       yield* _createConversationGroup(event);
+    } else if (event is RemoveConversationGroupsEvent) {
+      yield* _removeAllConversationGroups(event);
     }
   }
 
@@ -161,7 +163,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       }
 
       yield ConversationGroupsLoaded(existingConversationGroupList);
-      functionCallback(event, existingConversationGroupList);
+      functionCallback(event, true);
     }
   }
 
@@ -207,6 +209,12 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     yield ConversationGroupsLoaded(existingConversationGroupList);
 
     functionCallback(event, conversationGroupFromServer);
+  }
+
+  Stream<ConversationGroupState> _removeAllConversationGroups(RemoveConversationGroupsEvent event) async* {
+    conversationGroupDBService.deleteAllConversationGroups();
+    yield ConversationGroupsNotLoaded();
+    functionCallback(event, true);
   }
 
   // To send response to those dispatched Actions

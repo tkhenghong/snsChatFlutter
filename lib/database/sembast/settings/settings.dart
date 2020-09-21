@@ -45,6 +45,14 @@ class SettingsDBService {
     return noOfDeleted == 1;
   }
 
+  Future<void> deleteAllSettings() async {
+    if (isObjectEmpty(await _db)) {
+      return;
+    }
+
+    _settingsStore.delete(await _db);
+  }
+
   Future<Settings> getSingleSettings(String settingsId) async {
     if (isObjectEmpty(await _db)) {
       return null;

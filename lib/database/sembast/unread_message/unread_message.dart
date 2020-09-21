@@ -45,6 +45,14 @@ class UnreadMessageDBService {
     return noOfDeleted == 1;
   }
 
+  Future<void> deleteAllUnreadMessage() async {
+    if (isObjectEmpty(await _db)) {
+      return;
+    }
+
+    _unreadMessageStore.delete(await _db);
+  }
+
   Future<UnreadMessage> getSingleUnreadMessage(String unreadMessageId) async {
     if (isObjectEmpty(await _db)) {
       return null;

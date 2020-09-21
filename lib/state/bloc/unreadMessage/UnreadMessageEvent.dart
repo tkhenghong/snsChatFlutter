@@ -55,3 +55,15 @@ class GetUserPreviousUnreadMessagesEvent extends UnreadMessageEvent {
   @override
   String toString() => 'GetUserPreviousUnreadMessagesEvent';
 }
+
+class RemoveAllUnreadMessagesEvent extends UnreadMessageEvent {
+  final Function callback;
+
+  RemoveAllUnreadMessagesEvent({this.callback});
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'RemoveAllUnreadMessagesEvent';
+}

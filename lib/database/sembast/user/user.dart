@@ -45,6 +45,14 @@ class UserDBService {
     return noOfDeleted == 1;
   }
 
+  Future<void> deleteAllUsers() async {
+    if (isObjectEmpty(await _db)) {
+      return;
+    }
+
+    _userStore.delete(await _db);
+  }
+
   Future<User> getSingleUser(String userId) async {
     if (isObjectEmpty(await _db)) {
       return null;

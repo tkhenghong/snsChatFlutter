@@ -209,6 +209,11 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     }
   }
 
+  Stream<UserState> _removeAllUsersEvent(RemoveAllUsersEvent event) async* {
+    yield UserNotLoaded();
+    functionCallback(event, true);
+  }
+
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
     if (!isObjectEmpty(event)) {

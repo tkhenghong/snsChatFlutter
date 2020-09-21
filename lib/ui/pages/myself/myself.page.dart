@@ -15,6 +15,16 @@ class MyselfPage extends StatefulWidget {
 
 class MyselfPageState extends State<MyselfPage> {
   static IPGeoLocationBloc ipGeoLocationBloc;
+  static AuthenticationBloc authenticationBloc;
+  static MultimediaProgressBloc multimediaProgressBloc;
+  static ConversationGroupBloc conversationGroupBloc;
+  static ChatMessageBloc messageBloc;
+  static MultimediaBloc multimediaBloc;
+  static UnreadMessageBloc unreadMessageBloc;
+  static UserContactBloc userContactBloc;
+  static SettingsBloc settingsBloc;
+  static UserBloc userBloc;
+  static WebSocketBloc webSocketBloc;
   static GoogleInfoBloc googleInfoBloc;
 
   static NavigatorState navigatorState;
@@ -61,7 +71,18 @@ class MyselfPageState extends State<MyselfPage> {
   @override
   Widget build(BuildContext context) {
     ipGeoLocationBloc = BlocProvider.of<IPGeoLocationBloc>(context);
+    authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
+    multimediaProgressBloc = BlocProvider.of<MultimediaProgressBloc>(context);
+    conversationGroupBloc = BlocProvider.of<ConversationGroupBloc>(context);
+    messageBloc = BlocProvider.of<ChatMessageBloc>(context);
+    multimediaBloc = BlocProvider.of<MultimediaBloc>(context);
+    unreadMessageBloc = BlocProvider.of<UnreadMessageBloc>(context);
+    userContactBloc = BlocProvider.of<UserContactBloc>(context);
+    settingsBloc = BlocProvider.of<SettingsBloc>(context);
+    userBloc = BlocProvider.of<UserBloc>(context);
+    webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
     googleInfoBloc = BlocProvider.of<GoogleInfoBloc>(context);
+
     navigatorState = Navigator.of(context);
 
     return Material(child: userBlocBuilder());
@@ -169,8 +190,18 @@ class MyselfPageState extends State<MyselfPage> {
   }
 
   static logOut() {
-    ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (IPGeoLocation ipGeoLocation) {}));
+    ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     googleInfoBloc.add(RemoveGoogleInfoEvent(callback: (bool done) {}));
+    conversationGroupBloc.add(RemoveConversationGroupsEvent(callback: (bool done) {}));
+    messageBloc.add(RemoveAllChatMessagesEvent(callback: (bool done) {}));
+    multimediaBloc.add(RemoveAllMultimediaEvent(callback: (bool done) {}));
+    multimediaProgressBloc.add(RemoveAllMultimediaProgressEvent(callback: (bool done) {}));
+    settingsBloc.add(RemoveAllSettingsEvent(callback: (bool done) {}));
+    unreadMessageBloc.add(RemoveAllUnreadMessagesEvent(callback: (bool done) {}));
+    userBloc.add(RemoveAllUsersEvent(callback: (bool done) {}));
+    userContactBloc.add(RemoveAllUserContactsEvent(callback: (bool done) {}));
+    authenticationBloc.add(RemoveAllAuthenticationsEvent(callback: (bool done) {}));
+
     navigatorState.pushReplacementNamed("login_page");
   }
 }

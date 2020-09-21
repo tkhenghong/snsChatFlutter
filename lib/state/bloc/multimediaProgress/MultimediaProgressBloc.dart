@@ -23,6 +23,8 @@ class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaPro
       yield* _updateMultimediaProgressToState(event);
     } else if (event is SearchMultimediaProgressEvent) {
       yield* _searchMultimediaProgressEvent(event);
+    } else if (event is RemoveAllMultimediaProgressEvent) {
+      yield* _removeAllMultimediaProgressEvent(event);
     }
   }
 
@@ -98,6 +100,12 @@ class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaPro
       yield MultimediaProgressNotLoaded();
       functionCallback(event, null);
     }
+  }
+
+  Stream<MultimediaProgressState> _removeAllMultimediaProgressEvent(RemoveAllMultimediaProgressEvent event) async* {
+    multimediaProgressDBService.deleteAllMultimediaProgress();
+    MultimediaProgressNotLoaded();
+    functionCallback(event, true);
   }
 
   Stream<MultimediaProgressState> _searchMultimediaProgressEvent(SearchMultimediaProgressEvent event) async* {}

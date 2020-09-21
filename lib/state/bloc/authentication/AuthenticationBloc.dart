@@ -13,7 +13,7 @@ import 'bloc.dart';
 class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> {
   AuthenticationBloc() : super(AuthenticationsLoading());
 
-  UserAuthenticationAPIService authenticationAPIService = Get.find();  
+  UserAuthenticationAPIService authenticationAPIService = Get.find();
 
   @override
   Stream<AuthenticationState> mapEventToState(AuthenticationEvent event) async* {
@@ -22,8 +22,8 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
       yield* _mapInitializeAuthentication(event);
     } else if (event is EditAuthenticationEvent) {
       yield* _editAuthentication(event);
-    } else if (event is DeleteAuthenticationEvent) {
-      yield* _deleteAuthentication(event);
+    } else if (event is RemoveAllAuthenticationsEvent) {
+      yield* _removeAllAuthenticationsEvent(event);
     } else if (event is RequestAuthenticationUsingEmailAddressEvent) {
       yield* _requestAuthenticationUsingEmail(event);
     } else if (event is RegisterUsingMobileNumberEvent) {
@@ -96,15 +96,8 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     if (!isObjectEmpty(preVerifyMobileNumberOTPResponse)) {
       String toastContent = 'A verification code has been sent to your mobile no.: ${event.mobileNo}.';
       showToast(toastContent, Toast.LENGTH_SHORT);
-      yield Authenticating(
-          event.mobileNo,
-          null,
-          preVerifyMobileNumberOTPResponse.maskedMobileNumber,
-          preVerifyMobileNumberOTPResponse.maskedEmailAddress,
-          preVerifyMobileNumberOTPResponse.secureKeyword,
-          preVerifyMobileNumberOTPResponse
-              .tokenExpiryTime,
-          VerificationMode.SignUp);
+      yield Authenticating(event.mobileNo, null, preVerifyMobileNumberOTPResponse.maskedMobileNumber, preVerifyMobileNumberOTPResponse.maskedEmailAddress, preVerifyMobileNumberOTPResponse.secureKeyword,
+          preVerifyMobileNumberOTPResponse.tokenExpiryTime, VerificationMode.SignUp);
     } else {
       showToast("Error when request OTP.", Toast.LENGTH_SHORT);
       yield AuthenticationsNotLoaded();
@@ -119,15 +112,8 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     if (!isObjectEmpty(preVerifyMobileNumberOTPResponse)) {
       String toastContent = 'A verification code has been sent to your mobile no.: ${event.mobileNo}.';
       showToast(toastContent, Toast.LENGTH_SHORT);
-      yield Authenticating(
-          event.mobileNo,
-          null,
-          preVerifyMobileNumberOTPResponse.maskedMobileNumber,
-          preVerifyMobileNumberOTPResponse.maskedEmailAddress,
-          preVerifyMobileNumberOTPResponse.secureKeyword,
-          preVerifyMobileNumberOTPResponse
-              .tokenExpiryTime,
-          VerificationMode.Login);
+      yield Authenticating(event.mobileNo, null, preVerifyMobileNumberOTPResponse.maskedMobileNumber, preVerifyMobileNumberOTPResponse.maskedEmailAddress, preVerifyMobileNumberOTPResponse.secureKeyword,
+          preVerifyMobileNumberOTPResponse.tokenExpiryTime, VerificationMode.Login);
     } else {
       showToast("Error when request OTP.", Toast.LENGTH_SHORT);
       yield AuthenticationsNotLoaded();
@@ -197,34 +183,16 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     //    }
   }
 
-  Stream<AuthenticationState> _deleteAuthentication(DeleteAuthenticationEvent event) async* {
-    //    bool deletedInREST = false;
-    //    bool deleted = false;
-    //    if (state is AuthenticationsLoaded) {
-    //      deletedInREST = await authenticationAPIService
-    //          .deleteAuthentication(event.Authentication.id);
-    //
-    //      if (deletedInREST) {
-    //        deleted = await authenticationDBService
-    //            .deleteAuthentication(event.Authentication.id);
-    //
-    //        if (deleted) {
-    //          List<Authentication> existingAuthenticationList =
-    //              (state as AuthenticationsLoaded).AuthenticationList;
-    //
-    //          existingAuthenticationList.removeWhere(
-    //              (Authentication existingAuthentication) =>
-    //                  existingAuthentication.id == event.Authentication.id);
-    //
-    //          yield AuthenticationsLoaded(existingAuthenticationList);
-    //          functionCallback(event, true);
-    //        }
-    //      }
-    //    }
-    //
-    //    if (!deletedInREST || !deleted) {
-    //      functionCallback(event, false);
-    //    }
+  Stream<AuthenticationState> _removeAllAuthenticationsEvent(RemoveAllAuthenticationsEvent event) async* {
+    final FlutterSecureStorage storage = Get.find();
+    storage.deleteAll();
+
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.remove('username');
+    sharedPreferences.remove('otpExpirationTime');
+
+    yield AuthenticationsNotLoaded();
+    functionCallback(event, true);
   }
 
   // To send response to those dispatched Actions

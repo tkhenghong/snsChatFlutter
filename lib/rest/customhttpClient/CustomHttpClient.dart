@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -22,17 +23,27 @@ class CustomHttpClient {
     return _instance;
   }
 
-  Future<dynamic> getRequest(String path, {Map<String, String> additionalHeaders}) async {
+  Future<dynamic> getRequest(String path, {Map<String, String> additionalHeaders, int timeoutSeconds}) async {
     Map<String, String> headers = await handleHTTPHeaders(additionalHeaders);
     try {
       await checkNetwork();
-      return handleResponse(await get(path, headers: headers));
+      Response response;
+
+      if(!isObjectEmpty(timeoutSeconds)) {
+        print('if(!isObjectEmpty(timeoutSeconds))');
+        response = await get(path, headers: headers).timeout(Duration(seconds: timeoutSeconds));
+      } else {
+        print('if(isObjectEmpty(timeoutSeconds))');
+        response = await get(path, headers: headers);
+      }
+
+      return handleResponse(response);
     } on SocketException {
       handleError();
     }
   }
 
-  Future<dynamic> postRequest(String path, {var requestBody, Map<String, String> additionalHeaders}) async {
+  Future<dynamic> postRequest(String path, {var requestBody, Map<String, String> additionalHeaders, int timeoutSeconds}) async {
     Map<String, String> headers = await handleHTTPHeaders(additionalHeaders);
     try {
       await checkNetwork();
@@ -42,7 +53,7 @@ class CustomHttpClient {
     }
   }
 
-  Future<dynamic> putRequest(String path, {var requestBody, Map<String, String> additionalHeaders}) async {
+  Future<dynamic> putRequest(String path, {var requestBody, Map<String, String> additionalHeaders, int timeoutSeconds}) async {
     Map<String, String> headers = await handleHTTPHeaders(additionalHeaders);
     try {
       await checkNetwork();
@@ -52,7 +63,7 @@ class CustomHttpClient {
     }
   }
 
-  Future<dynamic> deleteRequest(String path, {Map<String, String> additionalHeaders}) async {
+  Future<dynamic> deleteRequest(String path, {Map<String, String> additionalHeaders, int timeoutSeconds}) async {
     Map<String, String> headers = await handleHTTPHeaders(additionalHeaders);
     try {
       await checkNetwork();

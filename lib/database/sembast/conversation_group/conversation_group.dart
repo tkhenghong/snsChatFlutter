@@ -46,6 +46,14 @@ class ConversationDBService {
     return noOfDeleted == 1;
   }
 
+  Future<void> deleteAllConversationGroups() async {
+    if (isObjectEmpty(await _db)) {
+      return;
+    }
+
+    _conversationGroupStore.delete(await _db);
+  }
+
   Future<ConversationGroup> getSingleConversationGroup(String conversationGroupId) async {
     if (isObjectEmpty(await _db)) {
       return null;

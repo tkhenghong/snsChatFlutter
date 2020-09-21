@@ -34,6 +34,8 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       yield* _addMultipleUserContact(event);
     } else if (event is GetUserContactByMobileNoEvent) {
       yield* _getUserContactByMobileNo(event);
+    } else if (event is RemoveAllUserContactsEvent) {
+      yield* _removeAllUserContactsEvent(event);
     }
   }
 
@@ -285,6 +287,12 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     }
 
     return added;
+  }
+
+  Stream<UserContactState> _removeAllUserContactsEvent(RemoveAllUserContactsEvent event) async* {
+    userContactDBService.deleteAllUserContacts();
+    yield UserContactsNotLoaded();
+    functionCallback(event, true);
   }
 
   List<UserContact> addUserContactIntoState(UserContact userContact) {

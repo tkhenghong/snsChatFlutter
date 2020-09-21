@@ -98,3 +98,15 @@ class UserSignInEvent extends UserEvent {
   @override
   String toString() => 'UserSignInEvent';
 }
+
+class RemoveAllUsersEvent extends UserEvent {
+  final Function callback;
+
+  RemoveAllUsersEvent({this.callback});
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'RemoveAllUsersEvent';
+}

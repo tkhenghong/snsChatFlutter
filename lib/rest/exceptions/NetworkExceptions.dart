@@ -15,35 +15,43 @@ abstract class ApiException implements Exception {
 
     String messageTitle = !isObjectEmpty(errorResponse) && !isStringEmpty(errorResponse.exceptionName) ? errorResponse.exceptionName : this.runtimeType.toString();
     String messageContent = !isObjectEmpty(errorResponse) && !isStringEmpty(errorResponse.message) ? errorResponse.message : '-';
-    String trace = !isObjectEmpty(errorResponse) && !isStringEmpty(errorResponse.trace) ? errorResponse.trace : 'No traces available.';
+    String trace = !isObjectEmpty(errorResponse) && !isStringEmpty(errorResponse.trace) ? errorResponse.trace : null;
 
     if (!isObjectEmpty(showDialog) && showDialog) {
-      Get.dialog(
-          SimpleDialog(
-            title: Center(
-              child: Text(messageTitle),
-            ),
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(left: Get.width * 0.05, right: Get.width * 0.05),
-                child: Column(
-                  children: <Widget>[
-                    wordSection(errorCode, messageContent, trace),
-                    minorSpacing(),
-                    sendErrorReportButton(),
-                    okButton(),
-                  ],
-                ),
-              )
-            ],
-          ),
-          barrierDismissible: false,
-          useRootNavigator: true);
+      showMessageDialog(messageTitle, messageContent, errorCode, trace);
     }
 
     if (!isObjectEmpty(showSnackBar) && showSnackBar) {
-      Get.snackbar(messageTitle, messageContent, snackPosition: SnackPosition.BOTTOM, isDismissible: false, mainButton: sendErrorReportButton());
+      showSnackbar(messageTitle, messageContent);
     }
+  }
+
+  showSnackbar(String messageTitle, String messageContent) {
+    Get.snackbar(messageTitle, messageContent, snackPosition: SnackPosition.BOTTOM, isDismissible: false, mainButton: okButton());
+  }
+
+  showMessageDialog(String messageTitle, String messageContent, String errorCode, String trace) {
+    Get.dialog(
+        SimpleDialog(
+          title: Center(
+            child: Text(messageTitle),
+          ),
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(left: Get.width * 0.05, right: Get.width * 0.05),
+              child: Column(
+                children: <Widget>[
+                  wordSection(errorCode, messageContent, trace),
+                  minorSpacing(),
+                  sendErrorReportButton(),
+                  okButton(),
+                ],
+              ),
+            )
+          ],
+        ),
+        barrierDismissible: false,
+        useRootNavigator: true);
   }
 
   Widget wordSection(String errorCode, String messageContent, String trace) {
@@ -55,19 +63,21 @@ abstract class ApiException implements Exception {
           children: <Widget>[Text('Error code: ', style: TextStyle(fontWeight: FontWeight.bold)), Text(errorCode)],
         ),
         minorSpacing(),
-        Text('Description: ', style: TextStyle(fontWeight: FontWeight.bold)),
-        Text(messageContent, softWrap: true),
+        !isStringEmpty(messageContent) ? Text('Description: ', style: TextStyle(fontWeight: FontWeight.bold)) : Container(),
+        !isStringEmpty(messageContent) ? Text(messageContent, softWrap: true) : Container(),
         minorSpacing(),
-        ExpandablePanel(
-          header: Text('Details: '),
-          collapsed: Text(
-            trace,
-            softWrap: true,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontStyle: FontStyle.italic),
-          ),
-          expanded: Text(trace, softWrap: true, style: TextStyle(fontStyle: FontStyle.italic)),
-        ),
+        !isStringEmpty(trace)
+            ? ExpandablePanel(
+                header: Text('Details: '),
+                collapsed: Text(
+                  trace,
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+                expanded: !isStringEmpty(trace) ? Text(trace, softWrap: true, style: TextStyle(fontStyle: FontStyle.italic)) : Container(),
+              )
+            : Container(),
       ],
     );
   }
@@ -114,4 +124,22 @@ class ClientErrorException extends ApiException {
 
 class UnknownException extends ApiException {
   UnknownException(ErrorResponse errorResponse, [String errorCode]) : super(errorResponse, errorCode: errorCode, showDialog: true) {}
+}
+
+class NetworkTimeoutException {
+  NetworkTimeoutException(String messageTitle, String messageContent) {
+    showSnackbar(messageTitle, messageContent);
+  }
+
+  showSnackbar(String messageTitle, String messageContent) {
+    Get.snackbar(messageTitle, messageContent, snackPosition: SnackPosition.BOTTOM, isDismissible: true, mainButton: okButton());
+  }
+
+  Widget okButton() {
+    return FlatButton(
+        onPressed: () {
+          Get.back();
+        },
+        child: Text('OK'));
+  }
 }

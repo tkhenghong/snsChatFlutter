@@ -112,15 +112,14 @@ class EditAuthenticationEvent extends AuthenticationEvent {
   String toString() => 'EditAuthenticationEvent {jwtToken: $jwtToken}';
 }
 
-class DeleteAuthenticationEvent extends AuthenticationEvent {
-  final String jwtToken;
+class RemoveAllAuthenticationsEvent extends AuthenticationEvent {
   final Function callback;
 
-  const DeleteAuthenticationEvent(this.jwtToken, this.callback);
+  const RemoveAllAuthenticationsEvent({this.callback});
 
   @override
-  List<Object> get props => [jwtToken];
+  List<Object> get props => [];
 
   @override
-  String toString() => 'DeleteAuthenticationEvent {jwtToken: $jwtToken}';
+  String toString() => 'RemoveAllAuthenticationsEvent';
 }

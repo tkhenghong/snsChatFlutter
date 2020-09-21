@@ -47,3 +47,12 @@ class SearchMultimediaProgressEvent extends MultimediaProgressEvent {
   @override
   String toString() => 'SearchMultimediaProgressEvent - searchTerm: ${searchTerm}';
 }
+
+class RemoveAllMultimediaProgressEvent extends MultimediaProgressEvent {
+  final Function callback;
+
+  const RemoveAllMultimediaProgressEvent({this.callback});
+
+  @override
+  String toString() => 'RemoveAllMultimediaProgressEvent';
+}

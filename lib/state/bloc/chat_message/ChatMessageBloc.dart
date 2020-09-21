@@ -23,6 +23,8 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
       yield* _editChatMessage(event);
     } else if (event is DeleteChatMessageEvent) {
       yield* _deleteChatMessage(event);
+    } else if (event is RemoveAllChatMessagesEvent) {
+      yield* _removeAllChatMessagesEvent(event);
     }
   }
 
@@ -123,6 +125,12 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     if (!deletedInREST || !deleted) {
       functionCallback(event, false);
     }
+  }
+
+  Stream<ChatMessageState> _removeAllChatMessagesEvent(RemoveAllChatMessagesEvent event) async* {
+    chatMessageDBService.deleteAllChatMessages();
+    yield ChatMessagesNotLoaded();
+    functionCallback(event, true);
   }
 
   // To send response to those dispatched Actions

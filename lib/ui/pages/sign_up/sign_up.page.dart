@@ -232,7 +232,9 @@ class SignUpPageState extends State<SignUpPage> {
     String phoneNoInitials = "";
 
     if (isObjectEmpty(countryCode)) {
-      phoneNoInitials = ipGeoLocation.calling_code;
+      if (!isObjectEmpty(ipGeoLocation)) {
+        phoneNoInitials = ipGeoLocation.calling_code;
+      }
     } else {
       phoneNoInitials = countryCode.dialCode;
     }

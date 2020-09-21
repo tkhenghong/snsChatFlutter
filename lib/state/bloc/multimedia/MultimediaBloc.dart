@@ -33,6 +33,8 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
       yield* _getUserContactsMultimediaEvent(event);
     } else if (event is GetMessageMultimediaEvent) {
       yield* _getMessageMultimediaEvent(event);
+    } else if (event is RemoveAllMultimediaEvent) {
+      yield* _removeAllMultimediaEvent(event);
     }
   }
 
@@ -258,6 +260,12 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     if (!isObjectEmpty(multimediaFromServer)) {
       add(AddMultimediaEvent(multimedia: multimediaFromServer, callback: (Multimedia multimedia) {}));
     }
+  }
+
+  Stream<MultimediaState> _removeAllMultimediaEvent(RemoveAllMultimediaEvent event) async* {
+    multimediaDBService.deleteAllMultimedia();
+    yield MultimediaNotLoaded();
+    functionCallback(event, true);
   }
 
   // To send response to those dispatched Actions

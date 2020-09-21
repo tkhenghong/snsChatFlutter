@@ -121,3 +121,15 @@ class GetMessageMultimediaEvent extends MultimediaEvent {
   @override
   String toString() => 'GetMessageMultimediaEvent {messageId: $messageId, conversationGroupId: $conversationGroupId}';
 }
+
+class RemoveAllMultimediaEvent extends MultimediaEvent {
+  final Function callback;
+
+  RemoveAllMultimediaEvent({this.callback});
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'RemoveAllMultimediaEvent {}';
+}
