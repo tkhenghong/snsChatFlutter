@@ -171,15 +171,16 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
         enabled: true,
         keyboardType: TextInputType.number,
         decoration: UnderlineDecoration(textStyle: TextStyle(color: Colors.black, fontSize: 20.0, fontWeight: FontWeight.bold), color: Colors.black),
+        onChanged: (pin) {
+          if(pin.length == pinFieldLength) {
+            verifyMobileNumber(pin, mobileNumber, secureKeyword);
+          }
+        },
         onSubmit: (pin) {
           showLoading("Verifying PIN...");
           // TODO: Verify phone by calling BlocEvent > call UserAuthentication API > goToChatGroupList
+          verifyMobileNumber(pin, mobileNumber, secureKeyword);
           authenticationBloc.add(VerifyMobileNoEvent(mobileNo: mobileNumber, secureKeyword: secureKeyword, otpNumber: pin, callback: (UserAuthenticationResponse userAuthenticationResponse) {}));
-//          Future.delayed(Duration(milliseconds: 1000), () {
-//            //Delay 1 second to simulate something loading
-//            Navigator.pop(context);
-//            goToChatGroupList();
-//          });
         },
       ),
     );
@@ -207,6 +208,11 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
     unreadMessageBloc.add(GetUserPreviousUnreadMessagesEvent(callback: (bool done) {}));
     multimediaBloc.add(GetUserOwnProfilePictureMultimediaEvent(callback: (bool done) {}));
     userContactBloc.add(GetUserOwnUserContactsEvent(callback: (bool done) {}));
+  }
+
+  verifyMobileNumber(String pin, String mobileNumber, String secureKeyword) {
+    showLoading("Verifying PIN...");
+    authenticationBloc.add(VerifyMobileNoEvent(mobileNo: mobileNumber, secureKeyword: secureKeyword, otpNumber: pin, callback: (UserAuthenticationResponse userAuthenticationResponse) {}));
   }
 
   goToLoginPage() {
