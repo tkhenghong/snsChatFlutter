@@ -123,7 +123,7 @@ class MyselfPageState extends State<MyselfPage> {
       builder: (context, multimediaState) {
         if (multimediaState is MultimediaLoaded) {
           List<Multimedia> multimediaList = multimediaState.multimediaList;
-          multimedia = multimediaList.firstWhere((Multimedia existingMultimedia) => user.id == existingMultimedia.userId, orElse: null);
+          multimedia = multimediaList.firstWhere((Multimedia existingMultimedia) => user.id == existingMultimedia.userId, orElse: () => null);
           if (!isObjectEmpty(multimedia)) {
             return showMyselfPage();
           }

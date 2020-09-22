@@ -35,17 +35,12 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   bool isRecording = false;
   bool imageFound = false;
   bool openMultimediaTab = false;
-  double deviceWidth;
-  double deviceHeight;
   bool textFieldHasValue = false;
 
   String inputFieldText = 'Type your message...';
   DateTime recordStartTime;
   Timer recordingTimer;
   double recordingTimeText;
-
-  Color appBarTextTitleColor;
-  Color appBarThemeColor;
 
   // This is used to get batch send multiple multimedia in one go, like multiple image and video
   List<File> imageFileList = [];
@@ -97,12 +92,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   @override
   Widget build(BuildContext context) {
-    appBarTextTitleColor = Theme.of(context).appBarTheme.textTheme.title.color;
-    appBarThemeColor = Theme.of(context).appBarTheme.color;
-
-    deviceWidth = MediaQuery.of(context).size.width;
-    deviceHeight = MediaQuery.of(context).size.height;
-
     // TODO: Send message using WebSocket
     // Do in this order (To allow resend message if anything goes wrong [Send timeout, websocket down, Internet down situations])
     // 1. Send to DB
@@ -203,7 +192,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         Tooltip(
           message: 'Back',
           child: Material(
-            color: appBarThemeColor,
             child: InkWell(
               customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
               onTap: () {
@@ -225,7 +213,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
           ),
         ),
         Material(
-          color: appBarThemeColor,
           child: InkWell(
               customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
               onTap: () {
@@ -242,12 +229,12 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                     tag: conversationGroup.id,
                     child: Text(
                       conversationGroup.name,
-                      style: TextStyle(color: appBarTextTitleColor, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                   Text(
                     'Tap here for more details',
-                    style: TextStyle(color: appBarTextTitleColor, fontSize: 13.0),
+                    style: TextStyle(fontSize: 13.0),
                   )
                 ],
               )),
@@ -375,7 +362,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         children: <Widget>[
           Container(
             height: 150,
-            width: deviceWidth,
+            width: Get.width,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               controller: imageViewScrollController,
@@ -390,7 +377,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                   children: <Widget>[
                     Card(
                       elevation: 2.0,
-                      color: appBarTextTitleColor,
                       child: Image.file(currentFile),
                     ),
                     Align(
@@ -433,7 +419,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         children: <Widget>[
           Container(
             height: 150,
-            width: deviceWidth,
+            width: Get.width,
             child: ListView.builder(
               controller: fileViewScrollController,
               physics: BouncingScrollPhysics(),
@@ -448,7 +434,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                   children: <Widget>[
                     Card(
                       elevation: 2.0,
-                      color: appBarTextTitleColor,
                       child: Text(fileName),
                     ),
                     Align(
@@ -492,8 +477,8 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
             child: Row(
               children: <Widget>[
                 Container(
-                    height: deviceHeight * 0.3,
-                    width: deviceWidth,
+                    height: Get.height * 0.3,
+                    width: Get.width,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
@@ -649,7 +634,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     Widget textMessageContent = Text(
       // message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
       message.messageContent,
-      style: TextStyle(color: appBarTextTitleColor),
+      style: TextStyle(),
     );
 
     return buildMessageChatBubble(context, message, isSenderMessage, textMessageContent);
@@ -667,7 +652,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
             mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
             children: <Widget>[
               Container(
-                margin: EdgeInsets.only(bottom: 20.0, right: isSenderMessage ? deviceWidth * 0.01 : 0.0, left: isSenderMessage ? deviceWidth * 0.01 : 0.0),
+                margin: EdgeInsets.only(bottom: 20.0, right: isSenderMessage ? Get.width * 0.01 : 0.0, left: isSenderMessage ? Get.width * 0.01 : 0.0),
                 child: Row(
                   children: <Widget>[
                     Column(
@@ -709,8 +694,8 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
       children: <Widget>[
         Container(
           padding: EdgeInsets.fromLTRB(lrPadding, tbPadding, lrPadding, tbPadding),
-          decoration: BoxDecoration(color: appBarThemeColor, borderRadius: BorderRadius.circular(32.0)),
-          margin: EdgeInsets.only(bottom: 20.0, right: isSenderMessage ? deviceWidth * 0.01 : 0.0, left: isSenderMessage ? deviceWidth * 0.01 : 0.0),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(32.0)),
+          margin: EdgeInsets.only(bottom: 20.0, right: isSenderMessage ? Get.width * 0.01 : 0.0, left: isSenderMessage ? Get.width * 0.01 : 0.0),
           child: Row(
             children: <Widget>[
               Column(
@@ -730,8 +715,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         Multimedia messageMultimedia = multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.id, orElse: () => null);
         fileService.downloadMultimediaFile(context, messageMultimedia);
 
-        Widget documentMessage =
-            RichText(text: TextSpan(children: [TextSpan(text: message.messageContent, style: TextStyle(color: appBarTextTitleColor), recognizer: TapGestureRecognizer()..onTap = () => downloadFile(context, messageMultimedia, message))]));
+        Widget documentMessage = RichText(text: TextSpan(children: [TextSpan(text: message.messageContent, style: TextStyle(), recognizer: TapGestureRecognizer()..onTap = () => downloadFile(context, messageMultimedia, message))]));
         return buildMessageChatBubble(context, message, isSenderMessage, documentMessage);
       }
 
@@ -741,7 +725,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
           isSenderMessage,
           Text(
             'Document appears here',
-            style: TextStyle(color: appBarTextTitleColor),
+            style: TextStyle(),
           ));
     });
   }
@@ -779,15 +763,15 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
     return Container(
       padding: EdgeInsets.fromLTRB(lrPadding, tbPadding, lrPadding, tbPadding),
-      decoration: BoxDecoration(color: appBarThemeColor, borderRadius: BorderRadius.circular(32.0)),
-      margin: EdgeInsets.only(bottom: 20.0, right: isSenderMessage ? deviceWidth * 0.01 : 0.0, left: isSenderMessage ? deviceWidth * 0.01 : 0.0),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(32.0)),
+      margin: EdgeInsets.only(bottom: 20.0, right: isSenderMessage ? Get.width * 0.01 : 0.0, left: isSenderMessage ? Get.width * 0.01 : 0.0),
       child: Row(
         children: <Widget>[
           Column(
             children: <Widget>[
               Text(
                 'Unindentified message.',
-                style: TextStyle(color: appBarTextTitleColor),
+                style: TextStyle(),
               )
             ],
           ),

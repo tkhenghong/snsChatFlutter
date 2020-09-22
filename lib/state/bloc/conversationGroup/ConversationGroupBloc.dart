@@ -41,10 +41,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     if (state is ConversationGroupsLoading || state is ConversationGroupsNotLoaded) {
       try {
         List<ConversationGroup> conversationGroupListFromDB = await conversationGroupDBService.getAllConversationGroups();
-        if (isObjectEmpty(conversationGroupListFromDB)) {
-          yield ConversationGroupsNotLoaded();
-          functionCallback(event, false);
-        } else {
+        if (!isObjectEmpty(conversationGroupListFromDB)) {
           yield ConversationGroupsLoaded(conversationGroupListFromDB);
           functionCallback(event, true);
         }

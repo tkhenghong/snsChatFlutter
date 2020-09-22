@@ -192,6 +192,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         }
 
         if (authenticationState is AuthenticationsLoaded) {
+          refreshUserData();
           if (userContactBloc.state is UserContactsLoaded) {
             List<UserContact> userContactList = (userContactBloc.state as UserContactsLoaded).userContactList;
 
