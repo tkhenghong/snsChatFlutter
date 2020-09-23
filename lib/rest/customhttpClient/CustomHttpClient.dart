@@ -29,11 +29,9 @@ class CustomHttpClient {
       await checkNetwork();
       Response response;
 
-      if(!isObjectEmpty(timeoutSeconds)) {
-        print('if(!isObjectEmpty(timeoutSeconds))');
+      if (!isObjectEmpty(timeoutSeconds)) {
         response = await get(path, headers: headers).timeout(Duration(seconds: timeoutSeconds));
       } else {
-        print('if(isObjectEmpty(timeoutSeconds))');
         response = await get(path, headers: headers);
       }
 
@@ -47,7 +45,14 @@ class CustomHttpClient {
     Map<String, String> headers = await handleHTTPHeaders(additionalHeaders);
     try {
       await checkNetwork();
-      return handleResponse(await post(path, body: json.encode(requestBody.toJson()), headers: headers));
+      Response response;
+
+      if (!isObjectEmpty(timeoutSeconds)) {
+        response = await post(path, body: json.encode(requestBody.toJson()), headers: headers).timeout(Duration(seconds: timeoutSeconds));
+      } else {
+        response = await post(path, body: json.encode(requestBody.toJson()), headers: headers);
+      }
+      return handleResponse(response);
     } on SocketException {
       handleError();
     }
@@ -57,7 +62,15 @@ class CustomHttpClient {
     Map<String, String> headers = await handleHTTPHeaders(additionalHeaders);
     try {
       await checkNetwork();
-      return handleResponse(await put(path, body: json.encode(requestBody.toJson()), headers: headers));
+      Response response;
+
+      if (!isObjectEmpty(timeoutSeconds)) {
+        response = await put(path, body: json.encode(requestBody.toJson()), headers: headers).timeout(Duration(seconds: timeoutSeconds));
+      } else {
+        response = await put(path, body: json.encode(requestBody.toJson()), headers: headers);
+      }
+
+      return handleResponse(response);
     } on SocketException {
       handleError();
     }
@@ -67,7 +80,15 @@ class CustomHttpClient {
     Map<String, String> headers = await handleHTTPHeaders(additionalHeaders);
     try {
       await checkNetwork();
-      return handleResponse(await delete(path, headers: headers));
+      Response response;
+
+      if (!isObjectEmpty(timeoutSeconds)) {
+        response = await delete(path, headers: headers).timeout(Duration(seconds: timeoutSeconds));
+      } else {
+        response = await delete(path, headers: headers);
+      }
+
+      return handleResponse(response);
     } on SocketException {
       handleError();
     }
