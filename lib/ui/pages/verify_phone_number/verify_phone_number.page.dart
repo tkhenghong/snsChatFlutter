@@ -180,7 +180,6 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
           showLoading("Verifying PIN...");
           // TODO: Verify phone by calling BlocEvent > call UserAuthentication API > goToChatGroupList
           verifyMobileNumber(pin, mobileNumber, secureKeyword);
-          authenticationBloc.add(VerifyMobileNoEvent(mobileNo: mobileNumber, secureKeyword: secureKeyword, otpNumber: pin, callback: (UserAuthenticationResponse userAuthenticationResponse) {}));
         },
       ),
     );
