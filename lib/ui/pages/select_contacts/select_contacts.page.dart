@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:contacts_service/contacts_service.dart';
@@ -54,8 +55,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     super.initState();
     _refreshController = new RefreshController();
     scrollController = new ScrollController();
-    getContacts();
-    setConversationType(widget.chatGroupType);
   }
 
   @override
@@ -80,6 +79,8 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     phoneStorageContactBloc = BlocProvider.of<PhoneStorageContactBloc>(context);
 
     getOwnUserContact();
+    getContacts();
+    setConversationType(widget.chatGroupType);
 
     return Scaffold(
       appBar: appBar(),

@@ -269,9 +269,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   conversationGroupBlocListener() {
     return BlocListener<ConversationGroupBloc, ConversationGroupState>(
       listener: (context, conversationGroupState) {
-        if (conversationGroupState is ConversationGroupsLoaded) {
-          getConversationGroupsMultimedia();
-        }
       },
     );
   }
@@ -343,8 +340,12 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     }));
     unreadMessageBloc.add(GetUserPreviousUnreadMessagesEvent(callback: (bool done) {}));
     multimediaBloc.add(GetUserOwnProfilePictureMultimediaEvent(callback: (bool done) {}));
-    userContactBloc.add(GetUserOwnUserContactEvent(callback: (bool done) {}));
-    userContactBloc.add(GetUserOwnUserContactsEvent(callback: (bool done) {}));
+    userContactBloc.add(GetUserOwnUserContactEvent(callback: (bool done) {
+      if(done) {
+        userContactBloc.add(GetUserOwnUserContactsEvent(callback: (bool done) {}));
+      }
+    }));
+
   }
 
   // TODO: ProcessWebSocketMessage event should be completely inside Bloc, don't put it here.
