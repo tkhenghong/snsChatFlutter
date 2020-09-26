@@ -92,9 +92,9 @@ class ChatInfoPageState extends State<ChatInfoPage> {
 
                               Multimedia multimedia = multimediaList.firstWhere((Multimedia existingMultimedia) => existingMultimedia.conversationId.toString() == widget._conversationGroup.id && isStringEmpty(existingMultimedia.messageId));
 
-                              return Hero(tag: conversationGroup.id + "1", child: imageService.loadFullImage(context, multimedia, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.type)));
+                              return Hero(tag: conversationGroup.id + "1", child: imageService.loadFullImage(context, multimedia, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.conversationGroupType)));
                             }
-                            return Hero(tag: conversationGroup.id + "1", child: imageService.loadFullImage(context, null, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.type)));
+                            return Hero(tag: conversationGroup.id + "1", child: imageService.loadFullImage(context, null, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.conversationGroupType)));
                           },
                         ),
                       ),

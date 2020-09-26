@@ -219,7 +219,7 @@ class GroupNamePageState extends State<GroupNamePage> {
         creatorUserId: currentUser.id,
         createdDate: new DateTime.now(),
         name: textEditingController.text,
-        type: ConversationGroupType.Group,
+        conversationGroupType: ConversationGroupType.Group,
         block: false,
         description: '',
         adminMemberIds: [],
@@ -366,8 +366,8 @@ class GroupNamePageState extends State<GroupNamePage> {
   updateMultimediaContent(BuildContext context, Multimedia multimedia, ConversationGroup conversationGroup) async {
     Navigator.pop(context); // close create conversation group loading
     showLoading('Uploading group photo...');
-    String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
-    String remoteThumbnailUrl = await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
+    String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.conversationGroupType, conversationGroup.id);
+    String remoteThumbnailUrl = await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.conversationGroupType, conversationGroup.id);
 
     if (!isStringEmpty(remoteUrl)) {
       multimedia.remoteFullFileUrl = remoteUrl;

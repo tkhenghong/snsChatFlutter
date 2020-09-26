@@ -243,6 +243,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
           if(added) {
             List<UserContact> updatedUserContactList = addUserContactIntoState(userContactFromServer);
             UserContact ownUserContact = (state as UserContactsLoaded).ownUserContact;
+            yield UserContactsLoading(); // Need change state for BlOC to detect changes.
             yield UserContactsLoaded(updatedUserContactList, ownUserContact);
           }
         }

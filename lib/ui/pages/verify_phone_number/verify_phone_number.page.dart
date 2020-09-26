@@ -170,7 +170,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
         controller: textEditingController,
         enabled: true,
         keyboardType: TextInputType.number,
-        decoration: UnderlineDecoration(textStyle: TextStyle(color: Colors.black, fontSize: 20.0, fontWeight: FontWeight.bold), color: Colors.black),
+        decoration: UnderlineDecoration(textStyle: TextStyle(color: Colors.black, fontSize: 20.0, fontWeight: FontWeight.bold), colorBuilder: FixedColorListBuilder([Colors.black])),
         onChanged: (pin) {
           if(pin.length == pinFieldLength) {
             verifyMobileNumber(pin, mobileNumber, secureKeyword);

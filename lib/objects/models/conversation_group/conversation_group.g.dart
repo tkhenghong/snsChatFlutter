@@ -14,7 +14,8 @@ ConversationGroup _$ConversationGroupFromJson(Map<String, dynamic> json) {
         ? null
         : DateTime.parse(json['createdDate'] as String),
     name: json['name'] as String,
-    type: _$enumDecodeNullable(_$ConversationGroupTypeEnumMap, json['type']),
+    conversationGroupType: _$enumDecodeNullable(
+        _$ConversationGroupTypeEnumMap, json['conversationGroupType']),
     block: json['block'] as bool,
     description: json['description'] as String,
     memberIds: (json['memberIds'] as List)?.map((e) => e as String)?.toList(),
@@ -32,7 +33,8 @@ Map<String, dynamic> _$ConversationGroupToJson(ConversationGroup instance) =>
       'creatorUserId': instance.creatorUserId,
       'createdDate': instance.createdDate?.toIso8601String(),
       'name': instance.name,
-      'type': _$ConversationGroupTypeEnumMap[instance.type],
+      'conversationGroupType':
+          _$ConversationGroupTypeEnumMap[instance.conversationGroupType],
       'description': instance.description,
       'memberIds': instance.memberIds,
       'adminMemberIds': instance.adminMemberIds,
@@ -89,7 +91,7 @@ abstract class _$ConversationGroupLombok {
   String creatorUserId;
   DateTime createdDate;
   String name;
-  ConversationGroupType type;
+  ConversationGroupType conversationGroupType;
   String description;
   List<String> memberIds;
   List<String> adminMemberIds;
@@ -114,8 +116,8 @@ abstract class _$ConversationGroupLombok {
     this.name = name;
   }
 
-  void setType(ConversationGroupType type) {
-    this.type = type;
+  void setConversationGroupType(ConversationGroupType conversationGroupType) {
+    this.conversationGroupType = conversationGroupType;
   }
 
   void setDescription(String description) {
@@ -155,8 +157,8 @@ abstract class _$ConversationGroupLombok {
     return name;
   }
 
-  ConversationGroupType getType() {
-    return type;
+  ConversationGroupType getConversationGroupType() {
+    return conversationGroupType;
   }
 
   String getDescription() {

@@ -49,8 +49,8 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
 
             AuthCredential credential = GoogleAuthProvider.getCredential(idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
 
-            AuthResult authResult = await firebaseAuth.signInWithCredential(credential);
-            firebaseUser = authResult.user;
+            UserCredential userCredential = await firebaseAuth.signInWithCredential(credential);
+            firebaseUser = userCredential.user;
 
             yield GoogleInfoLoaded(googleSignIn, firebaseAuth, firebaseUser);
             if (!isObjectEmpty(event)) {
@@ -131,8 +131,8 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
 
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
 
-        AuthResult authResult = await firebaseAuth.signInWithCredential(credential);
-        firebaseUser = authResult.user;
+        UserCredential userCredential = await firebaseAuth.signInWithCredential(credential);
+        firebaseUser = userCredential.user;
 
         yield GoogleInfoLoaded(googleSignIn, firebaseAuth, firebaseUser);
         if (!isObjectEmpty(event)) {

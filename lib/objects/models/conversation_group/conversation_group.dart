@@ -20,8 +20,8 @@ class ConversationGroup {
   @JsonKey(name: 'name')
   String name;
 
-  @JsonKey(name: 'type')
-  ConversationGroupType type;
+  @JsonKey(name: 'conversationGroupType')
+  ConversationGroupType conversationGroupType;
 
   @JsonKey(name: 'description')
   String description;
@@ -38,7 +38,7 @@ class ConversationGroup {
   @JsonKey(name: 'notificationExpireDate')
   DateTime notificationExpireDate; // 0 = unblocked, > 0 = blocked until specific time
 
-  ConversationGroup({this.id, this.creatorUserId, this.createdDate, this.name, this.type, this.block, this.description, this.memberIds, this.adminMemberIds, this.notificationExpireDate});
+  ConversationGroup({this.id, this.creatorUserId, this.createdDate, this.name, this.conversationGroupType, this.block, this.description, this.memberIds, this.adminMemberIds, this.notificationExpireDate});
 
   factory ConversationGroup.fromJson(Map<String, dynamic> json) => _$ConversationGroupFromJson(json);
 

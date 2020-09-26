@@ -202,7 +202,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                   Icon(Icons.arrow_back),
                   Hero(
                     tag: conversationGroup.id + '1',
-                    child: imageService.loadImageThumbnailCircleAvatar(multimedia, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.type)),
+                    child: imageService.loadImageThumbnailCircleAvatar(multimedia, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.conversationGroupType)),
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 30.0),
@@ -1035,10 +1035,13 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   // Note: Can get any file
   Future getFiles() async {
-    List<File> fileList = await FilePicker.getMultiFile(type: FileType.any);
-    if (!isObjectEmpty(fileList) && fileList.length > 0) {
+    FilePickerResult filePickerResult = await FilePicker.platform.pickFiles(type: FileType.any);
+
+    if (!filePickerResult.isNullOrBlank && filePickerResult.files.length > 0) {
       setState(() {
-        documentFileList.addAll(fileList.where((File file) => true));
+        documentFileList.addAll(filePickerResult.files.map((PlatformFile file) {
+          return File(file.path);
+        }));
       });
       scrollToTheEnd();
     }
@@ -1119,11 +1122,11 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   Future<Multimedia> uploadMultimediaToCloud(BuildContext context, Multimedia multimedia, ConversationGroup conversationGroup) async {
     if (!isStringEmpty(multimedia.localFullFileUrl)) {
-      multimedia.remoteFullFileUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.type, conversationGroup.id);
+      multimedia.remoteFullFileUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.conversationGroupType, conversationGroup.id);
     }
 
     if (!isStringEmpty(multimedia.localThumbnailUrl)) {
-      multimedia.remoteThumbnailUrl = await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.type, conversationGroup.id);
+      multimedia.remoteThumbnailUrl = await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.conversationGroupType, conversationGroup.id);
     }
 
     return multimedia;

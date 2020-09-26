@@ -187,11 +187,13 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   userAuthenticationBlocListener() {
     return BlocListener<AuthenticationBloc, AuthenticationState>(
       listener: (context, authenticationState) {
+        print('userAuthenticationBlocListener() is triggered.');
         if (authenticationState is AuthenticationsNotLoaded) {
           goToLoginPage();
         }
 
         if (authenticationState is AuthenticationsLoaded) {
+          print('if (authenticationState is AuthenticationsLoaded)');
           refreshUserData();
           if (userContactBloc.state is UserContactsLoaded) {
             List<UserContact> userContactList = (userContactBloc.state as UserContactsLoaded).userContactList;
@@ -293,7 +295,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         subtitle: Text(isObjectEmpty(unreadMessage) ? '' : unreadMessage.lastMessage),
         leading: Hero(
           tag: conversationGroup.id + '1',
-          child: imageService.loadImageThumbnailCircleAvatar(multimedia, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.type)),
+          child: imageService.loadImageThumbnailCircleAvatar(multimedia, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.conversationGroupType)),
         ),
         trailing: Column(
           children: <Widget>[
@@ -331,6 +333,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   refreshUserData() {
+    print('refreshUserData()');
     userBloc.add(GetOwnUserEvent(callback: (User user) {}));
     settingsBloc.add(GetUserOwnSettingsEvent(callback: (Settings settings) {}));
     conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(callback: (bool done) {
@@ -341,6 +344,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     unreadMessageBloc.add(GetUserPreviousUnreadMessagesEvent(callback: (bool done) {}));
     multimediaBloc.add(GetUserOwnProfilePictureMultimediaEvent(callback: (bool done) {}));
     userContactBloc.add(GetUserOwnUserContactEvent(callback: (bool done) {
+      print('GetUserOwnUserContactEvent is done: $done');
       if(done) {
         userContactBloc.add(GetUserOwnUserContactsEvent(callback: (bool done) {}));
       }

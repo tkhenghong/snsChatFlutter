@@ -5,7 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
-import 'package:image/image.dart' as CustomImage;
+// import 'package:image/image.dart' as CustomImage;
 import 'package:snschat_flutter/environments/development/variables.dart'
 as globals;
 import 'package:snschat_flutter/general/index.dart';
@@ -118,11 +118,12 @@ class ImageService {
       await Isolate.spawn(createThumbnail, DecodeParam(imageFile, receivePort.sendPort));
 
       // Get the processed image from the isolate.
-      CustomImage.Image thumbnailImage = await receivePort.first;
+      // CustomImage.Image thumbnailImage = await receivePort.first;
 
-      String fullThumbnailDirectory = await fileService.getApplicationDocumentDirectory() + "/" + "thumbnail-" + new DateTime.now().millisecondsSinceEpoch.toString() + ".png";
+      // String fullThumbnailDirectory = await fileService.getApplicationDocumentDirectory() + "/" + "thumbnail-" + new DateTime.now().millisecondsSinceEpoch.toString() + ".png";
       // Put it into our directory, set it as temp.png first (File format: FILEPATH/thumbnail-95102006192014.png)
-      File thumbnailFile = new File(fullThumbnailDirectory)..writeAsBytesSync(CustomImage.encodePng(thumbnailImage));
+      // File thumbnailFile = new File(fullThumbnailDirectory)..writeAsBytesSync(CustomImage.encodePng(thumbnailImage));
+      File thumbnailFile; // temporary
 
       // Fix thumbnail not rotated properly when created.
       // Link: https://pub.dev/packages/flutter_exif_rotation
@@ -138,11 +139,11 @@ class ImageService {
   }
 
   static void createThumbnail(DecodeParam param) async {
-    CustomImage.Image image = CustomImage.decodeImage(param.file.readAsBytesSync());
+    // CustomImage.Image image = CustomImage.decodeImage(param.file.readAsBytesSync());
 
-    CustomImage.Image thumbnail = CustomImage.copyResize(image, width: imageThumbnailWidthSize);
+    // CustomImage.Image thumbnail = CustomImage.copyResize(image, width: imageThumbnailWidthSize);
 
-    param.sendPort.send(thumbnail);
+    // param.sendPort.send(thumbnail);
   }
 }
 

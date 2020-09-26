@@ -15,7 +15,7 @@ void main() {
       id: null,
       name: "Testing Group 1",
       description: "Testing description",
-      type: ConversationGroupType.Personal,
+      conversationGroupType: ConversationGroupType.Personal,
       createdDate: new DateTime.now(),
       notificationExpireDate: null,
       creatorUserId: "65421654654651",
