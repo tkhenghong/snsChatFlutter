@@ -270,8 +270,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   conversationGroupBlocListener() {
     return BlocListener<ConversationGroupBloc, ConversationGroupState>(
-      listener: (context, conversationGroupState) {
-      },
+      listener: (context, conversationGroupState) {},
     );
   }
 
@@ -280,9 +279,9 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   PageListItem mapConversationToPageListTile(ConversationGroup conversationGroup, MultimediaState multimediaState, UnreadMessageState unreadMessageState) {
-    Multimedia multimedia = (multimediaState as MultimediaLoaded).multimediaList
-        .firstWhere((Multimedia existingMultimedia) =>
-    existingMultimedia.conversationId.toString() == conversationGroup.id && isStringEmpty(existingMultimedia.messageId), orElse: () => null);
+    Multimedia multimedia = (multimediaState as MultimediaLoaded)
+        .multimediaList
+        .firstWhere((Multimedia existingMultimedia) => existingMultimedia.conversationId.toString() == conversationGroup.id && isStringEmpty(existingMultimedia.messageId), orElse: () => null);
 
     UnreadMessage unreadMessage =
         (unreadMessageState as UnreadMessagesLoaded).unreadMessageList.firstWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.conversationId.toString() == conversationGroup.id, orElse: () => null);
@@ -345,11 +344,10 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     multimediaBloc.add(GetUserOwnProfilePictureMultimediaEvent(callback: (bool done) {}));
     userContactBloc.add(GetUserOwnUserContactEvent(callback: (bool done) {
       print('GetUserOwnUserContactEvent is done: $done');
-      if(done) {
+      if (done) {
         userContactBloc.add(GetUserOwnUserContactsEvent(callback: (bool done) {}));
       }
     }));
-
   }
 
   // TODO: ProcessWebSocketMessage event should be completely inside Bloc, don't put it here.

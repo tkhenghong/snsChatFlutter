@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -41,6 +40,13 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    textEditingController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     themePrimaryColor = Theme.of(context).primaryColor;
 
@@ -57,9 +63,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
 
   Widget multiBlocListener() {
     return MultiBlocListener(
-      listeners: [
-        authenticationBlocListener()
-      ],
+      listeners: [authenticationBlocListener()],
       child: authenticationBlocBuilder(),
     );
   }
@@ -67,7 +71,8 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
   Widget authenticationBlocListener() {
     return BlocListener<AuthenticationBloc, AuthenticationState>(
       listener: (context, authenticationState) {
-        if(authenticationState is AuthenticationsLoaded) { // If verification successful,
+        if (authenticationState is AuthenticationsLoaded) {
+          // If verification successful,
           Get.back();
           showToast('Verification successful.', Toast.LENGTH_SHORT);
           refreshUserData();
@@ -170,9 +175,10 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
         controller: textEditingController,
         enabled: true,
         keyboardType: TextInputType.number,
-        decoration: UnderlineDecoration(textStyle: TextStyle(color: Colors.black, fontSize: 20.0, fontWeight: FontWeight.bold), colorBuilder: FixedColorListBuilder([Colors.black])),
+        decoration: UnderlineDecoration(
+            textStyle: TextStyle(color: Colors.black, fontSize: 20.0, fontWeight: FontWeight.bold), colorBuilder: PinListenColorBuilder(Colors.black, Colors.black), obscureStyle: ObscureStyle(isTextObscure: true, obscureText: '*')),
         onChanged: (pin) {
-          if(pin.length == pinFieldLength) {
+          if (pin.length == pinFieldLength) {
             verifyMobileNumber(pin, mobileNumber, secureKeyword);
           }
         },
@@ -203,10 +209,26 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
     print('verify_phone_number.dart refreshUserData()');
     userBloc.add(GetOwnUserEvent(callback: (User user) {}));
     settingsBloc.add(GetUserOwnSettingsEvent(callback: (Settings settings) {}));
-    conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(callback: (bool done) {}));
+    conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(callback: (bool done) {
+      if (done) {
+        getConversationGroupsMultimedia();
+      }
+    }));
     unreadMessageBloc.add(GetUserPreviousUnreadMessagesEvent(callback: (bool done) {}));
     multimediaBloc.add(GetUserOwnProfilePictureMultimediaEvent(callback: (bool done) {}));
-    userContactBloc.add(GetUserOwnUserContactsEvent(callback: (bool done) {}));
+    userContactBloc.add(GetUserOwnUserContactEvent(callback: (bool done) {
+      print('GetUserOwnUserContactEvent is done: $done');
+      if (done) {
+        userContactBloc.add(GetUserOwnUserContactsEvent(callback: (bool done) {}));
+      }
+    }));
+  }
+
+  getConversationGroupsMultimedia() {
+    ConversationGroupState conversationGroupState = conversationGroupBloc.state;
+    if (conversationGroupState is ConversationGroupsLoaded) {
+      multimediaBloc.add(GetConversationGroupsMultimediaEvent(conversationGroupList: conversationGroupState.conversationGroupList, callback: (bool done) {}));
+    }
   }
 
   verifyMobileNumber(String pin, String mobileNumber, String secureKeyword) {
