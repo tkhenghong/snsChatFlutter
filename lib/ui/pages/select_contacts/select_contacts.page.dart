@@ -370,9 +370,9 @@ class SelectContactsPageState extends State<SelectContactsPage> {
               // Flutter ListView in a SimpleDialog:
               // https://stackoverflow.com/questions/50095763
               Container(
-                padding: EdgeInsets.only(left: Get.width * 0.05, right: Get.width * 0.05, top: Get.height * 0.3, bottom: Get.height * 0.3),
-                height: Get.height,
-                width: Get.width,
+                // padding: EdgeInsets.only(left: Get.width * 0.05, right: Get.width * 0.05, top: Get.height * 0.3, bottom: Get.height * 0.3),
+                height: Get.height * 0.3,
+                width: Get.width * 0.9,
                 child: Column(
                   children: <Widget>[
                     ListView.builder(
@@ -410,6 +410,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                 ),
                 callback: (ConversationGroup conversationGroup) {
                   if (!isObjectEmpty(conversationGroup)) {
+                    Get.back(); // Close select phone number pop up
                     goToChatRoomPage(conversationGroup);
                   }
                 }));

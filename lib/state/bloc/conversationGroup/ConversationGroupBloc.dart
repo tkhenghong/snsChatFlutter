@@ -181,6 +181,8 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     // TODO: Create ConversationGroup Personal/Group
     CreateConversationGroupRequest createConversationGroupRequest = event.createConversationGroupRequest;
 
+    showLoading('Loading conversation....');
+
     ConversationGroup conversationGroupFromServer = await conversationGroupAPIService.addConversationGroup(createConversationGroupRequest);
 
     if (isObjectEmpty(conversationGroupFromServer)) {
@@ -204,6 +206,8 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     existingConversationGroupList.add(conversationGroupFromServer);
 
     yield ConversationGroupsLoaded(existingConversationGroupList);
+
+    Get.back(); // Close show loading...
 
     functionCallback(event, conversationGroupFromServer);
   }

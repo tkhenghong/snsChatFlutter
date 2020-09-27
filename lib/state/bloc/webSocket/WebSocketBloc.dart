@@ -32,7 +32,7 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
 
   Stream<WebSocketState> _initializeWebSocketToState(InitializeWebSocketEvent event) async* {
     try {
-      yield WebSocketLoaded(await webSocketService.connectWebSocket(event.user.id));
+      yield WebSocketLoaded(await webSocketService.connectWebSocket());
       functionCallback(event, true);
     } catch (e) {
       yield WebSocketNotLoaded();
@@ -48,7 +48,7 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
 
   Stream<WebSocketState> _reconnectWebSocket(ReconnectWebSocketEvent event) async* {
     if (state is WebSocketLoaded) {
-      yield WebSocketLoaded(await webSocketService.reconnnectWebSocket(event.user.id));
+      yield WebSocketLoaded(await webSocketService.reconnnectWebSocket());
       functionCallback(event, true);
     } else {
       functionCallback(event, false);

@@ -1,9 +1,11 @@
-import 'dart:collection';
 import 'dart:convert';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get/get.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/rest/RestRequestUtils.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -14,9 +16,9 @@ class WebSocketService {
   WebSocketChannel webSocketChannel;
   Stream<dynamic> webSocketStream;
 
-  Future<Stream<dynamic>> connectWebSocket(String userId, {String jwtToken}) async {
-    Map<String, String> headers = new HashMap();
-    headers['userId'] = userId;
+  Future<Stream<dynamic>> connectWebSocket() async {
+    Map<String, String> headers = await handleHTTPHeaders();
+
     webSocketChannel = IOWebSocketChannel.connect(WEBSOCKET_URL, headers: headers);
     webSocketStream = webSocketChannel.stream.asBroadcastStream();
 
@@ -33,13 +35,30 @@ class WebSocketService {
   }
 
   Future<dynamic> closeWebSocket() async {
-    if(!isObjectEmpty(webSocketChannel)) {
+    if (!isObjectEmpty(webSocketChannel)) {
       return webSocketChannel.sink.close();
     }
   }
 
-  Future<Stream<dynamic>> reconnnectWebSocket(String userId) async {
+  Future<Stream<dynamic>> reconnnectWebSocket() async {
     await closeWebSocket();
-    return connectWebSocket(userId);
+    return connectWebSocket();
+  }
+
+  Future<Map<String, String>> handleHTTPHeaders() async {
+    Map<String, String> headers = createAcceptJSONHeader();
+
+    String jwt = await _readJWT();
+
+    if (!isStringEmpty(jwt)) {
+      headers.putIfAbsent('Authorization', () => 'Bearer $jwt');
+    }
+
+    return headers;
+  }
+
+  Future<String> _readJWT() async {
+    final FlutterSecureStorage flutterSecureStorage = Get.find();
+    return await flutterSecureStorage.read(key: "jwtToken");
   }
 }

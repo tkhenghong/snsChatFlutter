@@ -18,7 +18,7 @@ class SettingsDBService {
     }
 
     Settings existingSettings = await getSingleSettings(settings.id);
-    var key = existingSettings == null ? await _settingsStore.add(await _db, settings.toJson()) : null;
+    var key = existingSettings == null ? await _settingsStore.add(await _db, settings.toJson()) : editSettings(settings);
 
     return !isStringEmpty(key.toString());
   }

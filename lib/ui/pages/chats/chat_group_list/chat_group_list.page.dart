@@ -248,7 +248,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     return BlocListener<UserBloc, UserState>(
       listener: (context, userState) {
         if (userState is UserLoaded) {
-          webSocketBloc.add(InitializeWebSocketEvent(user: userState.user, callback: (bool done) {}));
+          webSocketBloc.add(InitializeWebSocketEvent(callback: (bool done) {}));
         }
       },
     );
@@ -360,12 +360,12 @@ class ChatGroupListState extends State<ChatGroupListPage> {
       print('chat_room.page.dart onError listener is working.');
       print('chat_room.page.dart onError: ' + onError.toString());
       if (userState is UserLoaded) {
-        webSocketBloc.add(ReconnectWebSocketEvent(user: userState.user, callback: (bool done) {}));
+        webSocketBloc.add(ReconnectWebSocketEvent(callback: (bool done) {}));
       }
     }, onDone: () {
       // TODO: Show reconnect message
       if (userState is UserLoaded) {
-        webSocketBloc.add(ReconnectWebSocketEvent(user: userState.user, callback: (bool done) {}));
+        webSocketBloc.add(ReconnectWebSocketEvent(callback: (bool done) {}));
       }
     }, cancelOnError: false);
   }

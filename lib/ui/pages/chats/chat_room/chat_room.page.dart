@@ -60,6 +60,8 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   AnimationController _animationController, _animationController2;
   Animation animation;
 
+  WebSocketBloc webSocketBloc;
+
   CustomFileService fileService = Get.find();
   ImageService imageService = Get.find();
   AudioService audioService = Get.find();
@@ -92,6 +94,10 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   @override
   Widget build(BuildContext context) {
+    print('build()');
+
+    webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
+
     // TODO: Send message using WebSocket
     // Do in this order (To allow resend message if anything goes wrong [Send timeout, websocket down, Internet down situations])
     // 1. Send to DB
@@ -100,7 +106,9 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     // 4. Retrieve through WebSocket
 
     return MultiBlocListener(
-      listeners: [],
+      listeners: [
+        webSocketBlocListener()
+      ],
       child: BlocBuilder<UserBloc, UserState>(
         builder: (context, userState) {
           if (userState is UserLoading) {
@@ -139,6 +147,17 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
           );
         },
       ),
+    );
+  }
+
+  Widget webSocketBlocListener() {
+    return BlocListener<WebSocketBloc, WebSocketState>(
+      listener: (context, webSocketState) {
+        if (webSocketState is WebSocketNotLoaded) {
+          showToast('Connection broken. Reconnecting WebSocket...', Toast.LENGTH_SHORT);
+          webSocketBloc.add(InitializeWebSocketEvent(callback: (bool done) {}));
+        }
+      },
     );
   }
 

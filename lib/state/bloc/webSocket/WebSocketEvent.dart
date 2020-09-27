@@ -11,10 +11,9 @@ abstract class WebSocketEvent extends Equatable {
 }
 
 class InitializeWebSocketEvent extends WebSocketEvent {
-  final User user;
   final Function callback;
 
-  const InitializeWebSocketEvent({this.user, this.callback});
+  const InitializeWebSocketEvent({this.callback});
 
   @override
   String toString() => 'InitializeWebSocketEvent';
@@ -33,10 +32,9 @@ class DisconnectWebSocketEvent extends WebSocketEvent {
 }
 
 class ReconnectWebSocketEvent extends WebSocketEvent {
-  final User user;
   final Function callback;
 
-  ReconnectWebSocketEvent({this.user, this.callback});
+  ReconnectWebSocketEvent({this.callback});
 
   @override
   List<Object> get props => [];

@@ -18,7 +18,7 @@ class MultimediaProgressDBService {
     }
 
     MultimediaProgress existingMultimediaProgress = await getSingleMultimediaProgress(multimediaProgress.taskId);
-    var key = isObjectEmpty(existingMultimediaProgress) ? await _multimediaProgressStore.add(await _db, multimediaProgress.toJson()) : null;
+    var key = isObjectEmpty(existingMultimediaProgress) ? await _multimediaProgressStore.add(await _db, multimediaProgress.toJson()) : editMultimediaProgress(multimediaProgress);
 
     return !isStringEmpty(key.toString());
   }

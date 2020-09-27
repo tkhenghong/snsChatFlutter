@@ -215,7 +215,7 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
       print('tabs.page.dart if (state == AppLifecycleState.resumed)');
       UserState userState = BlocProvider.of<UserBloc>(context).state;
       if (userState is UserLoaded) {
-        BlocProvider.of<WebSocketBloc>(context).add(ReconnectWebSocketEvent(user: userState.user, callback: (bool done) {}));
+        BlocProvider.of<WebSocketBloc>(context).add(ReconnectWebSocketEvent(callback: (bool done) {}));
       }
     }
 
