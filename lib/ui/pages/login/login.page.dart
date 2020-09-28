@@ -1,7 +1,6 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,7 +35,7 @@ class LoginPageState extends State<LoginPage> {
   String countryCodeString;
   String mobileNumber;
 
-  Color themePrimaryColor;
+  // Color themePrimaryColor;
 
   AuthenticationBloc authenticationBloc;
   WebSocketBloc webSocketBloc;
@@ -63,7 +62,7 @@ class LoginPageState extends State<LoginPage> {
     deviceWidth = MediaQuery.of(context).size.width;
     deviceHeight = MediaQuery.of(context).size.height;
 
-    themePrimaryColor = Theme.of(context).textTheme.title.color;
+    // themePrimaryColor = Theme.of(context).textTheme.title.color;
 
     authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
@@ -230,8 +229,8 @@ class LoginPageState extends State<LoginPage> {
     return RaisedButton(
       child: Text('Sign In'),
       onPressed: () => _signIn(),
-      textColor: Colors.white,
-      splashColor: Colors.grey,
+      // textColor: Colors.white,
+      // splashColor: Colors.grey,
       animationDuration: Duration(milliseconds: 500),
       padding: EdgeInsets.only(left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
@@ -243,20 +242,38 @@ class LoginPageState extends State<LoginPage> {
         onPressed: () => goToSignUp(),
         child: Text(
           'Sign Up Now',
-          style: TextStyle(color: themePrimaryColor),
+          // style: TextStyle(color: themePrimaryColor),
         ));
   }
 
   Widget contactSupportButton() {
-    return RichText(textAlign: TextAlign.center, text: TextSpan(children: [TextSpan(text: 'Contact Support', style: TextStyle(color: themePrimaryColor), recognizer: TapGestureRecognizer()..onTap = () => goToContactSupport())]));
+    return Container(
+      height: Get.height * 0.03,
+      child: FlatButton(
+        onPressed: () => goToContactSupport(),
+        child: Text('Contact Support'),
+      ),
+    );
   }
 
   Widget termsAndConditionsButton() {
-    return RichText(textAlign: TextAlign.center, text: TextSpan(children: [TextSpan(text: 'Terms and Conditions', style: TextStyle(color: themePrimaryColor), recognizer: TapGestureRecognizer()..onTap = () => goToTermsAndConditions())]));
+    return Container(
+      height: Get.height * 0.03,
+      child: FlatButton(
+        onPressed: () => goToTermsAndConditions(),
+        child: Text('Terms and Conditions'),
+      ),
+    );
   }
 
   Widget privacyNoticeButton() {
-    return RichText(textAlign: TextAlign.center, text: TextSpan(children: [TextSpan(text: 'Privacy Notice', style: TextStyle(color: themePrimaryColor), recognizer: TapGestureRecognizer()..onTap = () => goToPrivacyNotice())]));
+    return Container(
+      height: Get.height * 0.03,
+      child: FlatButton(
+        onPressed: () => goToPrivacyNotice(),
+        child: Text('Privacy Notice'),
+      ),
+    );
   }
 
   Widget showLoading() {

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
+import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -184,35 +185,54 @@ class MyApp extends StatefulWidget {
 class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    Color primaryColor = Colors.black;
-    Color primaryColorInText = Colors.white;
-    Color primaryColorWhenFocus = Colors.black54;
-    Brightness primaryBrightness = Brightness.light;
-    TextStyle primaryTextStyle = TextStyle(color: primaryColor);
-    TextStyle primaryTextStyleInAppBarText = TextStyle(color: primaryColorInText, fontSize: 18.0, fontWeight: FontWeight.bold);
+    return dynamicColorTheme();
+  }
 
+  Widget dynamicColorTheme() {
+    Brightness primaryBrightness = Brightness.light;
+    Color primaryColor = Colors.blue;
+    return DynamicTheme(
+        defaultBrightness: primaryBrightness,
+        data: (brightness) => new ThemeData(
+          primarySwatch: primaryColor,
+          brightness: brightness,
+        ),
+        themedWidgetBuilder: (context, theme) {
+          return materialApp();
+        }
+    );
+  }
+
+  Widget materialApp() {
+    // Color primaryColor = Colors.black;
+    // Color primaryColorInText = Colors.white;
+    // Color primaryColorWhenFocus = Colors.black54;
+    // TextStyle primaryTextStyle = TextStyle(color: primaryColor);
+    // TextStyle primaryTextStyleInAppBarText = TextStyle(color: primaryColorInText, fontSize: 18.0, fontWeight: FontWeight.bold);
     return MaterialApp(
       title: 'PocketChat',
       theme: ThemeData(
         fontFamily: 'Roboto',
-        brightness: primaryBrightness,
-        primaryColor: primaryColor,
-        accentColor: primaryColor,
-        cursorColor: primaryColor,
-        highlightColor: primaryColorWhenFocus,
-        textSelectionColor: primaryColorWhenFocus,
-        buttonColor: primaryColor,
-        buttonTheme: ButtonThemeData(buttonColor: primaryColor, textTheme: ButtonTextTheme.primary),
-        errorColor: primaryColor,
-        bottomAppBarColor: primaryColor,
-        bottomAppBarTheme: BottomAppBarTheme(
-          color: primaryColor,
-        ),
-        appBarTheme: AppBarTheme(
-            color: primaryColor,
-            textTheme: TextTheme(
-              button: primaryTextStyleInAppBarText,
-            )),
+        // brightness: primaryBrightness,
+        // primarySwatch: Colors.blue,
+        // primaryColor: Colors.black,
+        // primaryColor: primaryColor,
+        // accentColor: primaryColor,
+        // cursorColor: primaryColor,
+        // highlightColor: primaryColorWhenFocus,
+        // textSelectionColor: primaryColorWhenFocus,
+        // buttonColor: primaryColor,
+        // buttonTheme: ButtonThemeData(buttonColor: primaryColor, textTheme: ButtonTextTheme.primary),
+        // errorColor: primaryColor,
+        // bottomAppBarColor: primaryColor,
+        // bottomAppBarTheme: BottomAppBarTheme(
+        //   color: primaryColor,
+        // ),
+        // appBarTheme: AppBarTheme(
+        //     color: primaryColor,
+        //     textTheme: TextTheme(
+        //       button: primaryTextStyleInAppBarText,
+        //     )),
       ),
       home: TabsPage(),
       routes: routeList,

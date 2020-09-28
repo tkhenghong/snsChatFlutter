@@ -267,9 +267,9 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
       child: isLoading
           ? Container(
               child: Center(
-                child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)),
+                child: CircularProgressIndicator(),
               ),
-              color: Colors.white.withOpacity(0.8),
+              // color: Colors.white.withOpacity(0.8),
             )
           : Container(),
     );
@@ -284,7 +284,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
           buildMultimediaTab(context),
           Row(
             children: <Widget>[
-              // Button send image
+              // Send image button
               Material(
                 child: Container(
                   margin: EdgeInsets.symmetric(horizontal: 1.0),
@@ -302,20 +302,20 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                     },
                   ),
                 ),
-                color: Colors.white,
-              ),
-              Material(
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 1.0),
-                  child: IconButton(
-                    icon: Icon(Icons.face),
-                    onPressed: () => getSticker(),
-                  ),
-                ),
-                color: Colors.white,
+                // color: Colors.white,
               ),
 
-              // Edit text
+              // Stickers button
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 1.0),
+                child: IconButton(
+                  icon: Icon(Icons.face),
+                  onPressed: () => getSticker(),
+                ),
+                // color: Colors.white,
+              ),
+
+              // Edit text field
               Flexible(
                 child: Container(
                   child: TextField(
@@ -324,7 +324,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                     controller: textEditingController,
                     decoration: InputDecoration.collapsed(
                       hintText: inputFieldText,
-                      hintStyle: TextStyle(color: Colors.grey),
+                      // hintStyle: TextStyle(color: Colors.grey),
                     ),
                     focusNode: focusNode,
                     onChanged: checkTextOnField,
@@ -332,13 +332,13 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                 ),
               ),
 
-              // Button send message
+              // Send message button
               Material(
                 child: Container(
                   margin: EdgeInsets.symmetric(horizontal: 8.0),
                   child: !textFieldHasValue ? recordVoiceMessageButton(context, user, conversationGroup) : textSendButton(context, user, conversationGroup),
                 ),
-                color: Colors.white,
+                // color: Colors.white,
               ),
             ],
           )
@@ -346,7 +346,14 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
       ),
       width: double.infinity,
 //      height: fileList.length > 0 ? deviceHeight * 0.2 : deviceHeight * 0.1,
-      decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 0.5)), color: Colors.white),
+      decoration: BoxDecoration(
+          border: Border(
+          top: BorderSide(
+              // color: Colors.grey,
+              width: 0.5)
+          ),
+          // color: Colors.white
+      ),
     );
   }
 
@@ -408,10 +415,10 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                         child: InkWell(
                           onTap: () => removeImageFile(currentFile),
                           child: Material(
-                            color: Colors.black,
+                            // color: Colors.black,
                             child: Icon(
                               Icons.clear,
-                              color: Colors.white,
+                              // color: Colors.white,
                             ),
                             elevation: 2.0,
                             type: MaterialType.circle,
@@ -465,10 +472,10 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                         child: InkWell(
                           onTap: () => removeFile(currentFile),
                           child: Material(
-                            color: Colors.black,
+                            // color: Colors.black,
                             child: Icon(
                               Icons.clear,
-                              color: Colors.white,
+                              // color: Colors.white,
                             ),
                             elevation: 2.0,
                             type: MaterialType.circle,
@@ -599,7 +606,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   Widget showSingleMessagePage(String message) {
     return Material(
-      color: Colors.white,
+      // color: Colors.white,
       child: Flexible(
         child: Center(
           child: Column(
@@ -636,7 +643,10 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
             Text(
               message.senderName + ', ' + messageTimeDisplay(message.createdTime.millisecondsSinceEpoch),
 //                    message.senderName,
-              style: TextStyle(fontSize: 10.0, color: Colors.black38),
+              style: TextStyle(
+                  fontSize: 10.0,
+                  // color: Colors.black38
+              ),
             ),
           ],
         ),
@@ -904,7 +914,14 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         ],
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       ),
-      decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 0.5)), color: Colors.white),
+      decoration: BoxDecoration(
+          border: Border(
+          top: BorderSide(
+          // color: Colors.grey, width: 0.5
+          )
+      ),
+          // color: Colors.white
+      ),
       padding: EdgeInsets.all(5.0),
       height: 180.0,
     );
