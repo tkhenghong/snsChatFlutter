@@ -13,10 +13,6 @@ environment:
   sdk: ">=2.2.0 <3.0.0"
 
 dependencies:
-
-  # Dynamic theme color
-  dynamic_theme: ^1.0.0
-
   # Database
   sembast: ^2.4.5
 
@@ -45,7 +41,7 @@ dependencies:
   checked_yaml: ^1.0.2
 
   # Download a file
-#  flutter_downloader: ^1.4.4
+  # flutter_downloader: ^1.4.4
 
   # Format date/time
   time_formatter: ^1.0.0+5

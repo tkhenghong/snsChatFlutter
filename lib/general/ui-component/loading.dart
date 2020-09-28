@@ -2,34 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 void showLoading(String message) {
-  BuildContext context = Get.context;
-  Color appBarTextTitleColor = Theme.of(context).primaryColor;
-
-  Get.dialog(Dialog(
-    child: new Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        new Padding(
-          padding: EdgeInsets.all(20.0),
-          child: new CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(appBarTextTitleColor),
-          ),
+  Get.dialog(
+      Dialog(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(padding: EdgeInsets.all(20.0), child: CircularProgressIndicator()),
+            Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Text(message),
+            ),
+          ],
         ),
-        new Padding(
-          padding: EdgeInsets.all(20.0),
-          child: new Text(message),
-        ),
-      ],
-    ),
-  ), barrierDismissible: false);
+      ),
+      barrierDismissible: false);
 }
 
 void showCenterLoadingIndicator() {
-  Color appBarTextTitleColor = Theme.of(Get.context).appBarTheme.color;
-
-  Get.dialog(Center(
-    child: CircularProgressIndicator(
-      valueColor: AlwaysStoppedAnimation<Color>(appBarTextTitleColor),
-    ),
-  ), barrierDismissible: false);
+  Get.dialog(
+      Center(
+        child: CircularProgressIndicator(),
+      ),
+      barrierDismissible: false);
 }

@@ -211,13 +211,13 @@ class LoginPageState extends State<LoginPage> {
       controller: mobileNoTextController,
       validator: validateMobileNo,
       inputFormatters: [
-        BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
+        FilteringTextInputFormatter.allow(RegExp('[0-9]')),
       ],
       maxLength: 15,
       decoration: InputDecoration(hintText: 'Mobile Number'),
       autofocus: true,
       textAlign: TextAlign.left,
-      keyboardType: TextInputType.number,
+      keyboardType: TextInputType.phone,
       onChanged: getPhoneNumber(),
       onFieldSubmitted: (text) {
         _signIn();

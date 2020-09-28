@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
-import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,7 +9,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
@@ -66,6 +64,57 @@ Map<String, WidgetBuilder> generateRoutes() {
 final List<GetPage> getPageList = [];
 final Map<String, WidgetBuilder> routeList = new Map();
 
+// Default theme details in the app
+Brightness primaryBrightness = Brightness.light;
+
+// Black theme. Black is not MaterialColor, which has a list of colors within it
+// https://github.com/flutter/flutter/issues/15658
+int _blackPrimaryValue = 0xFF000000;
+MaterialColor blackTheme = MaterialColor(
+  _blackPrimaryValue,
+  <int, Color>{
+    50: Color(0xFFF5F5F5),
+    100: Color(0xFFE9E9E9),
+    200: Color(0xFFD9D9D9),
+    300: Color(0xFFC4C4C4),
+    400: Color(0xFF9D9D9D),
+    500: Color(0xFF7B7B7B),
+    600: Color(0xFF555555),
+    700: Color(0xFF434343),
+    800: Color(0xFF262626),
+    900: Color(_blackPrimaryValue),
+  },
+);
+
+MaterialColor themeColor = blackTheme;
+
+TextStyle primaryTextStyleInAppBarText = TextStyle(color: themeColor, fontSize: 18.0, fontWeight: FontWeight.bold);
+
+ThemeData themeData = ThemeData(
+  fontFamily: 'Roboto',
+  brightness: primaryBrightness,
+  primarySwatch: themeColor,
+  primaryColor: themeColor,
+  accentColor: themeColor,
+  cursorColor: themeColor,
+  highlightColor: themeColor[500],
+  textSelectionColor: themeColor[500],
+  textSelectionHandleColor: themeColor,
+  indicatorColor: themeColor,
+  buttonColor: themeColor,
+  buttonTheme: ButtonThemeData(buttonColor: themeColor, textTheme: ButtonTextTheme.primary),
+  errorColor: themeColor,
+  bottomAppBarColor: themeColor,
+  bottomAppBarTheme: BottomAppBarTheme(
+    color: themeColor,
+  ),
+  appBarTheme: AppBarTheme(
+      color: themeColor,
+      textTheme: TextTheme(
+        button: primaryTextStyleInAppBarText,
+      )),
+);
+
 void main() async {
   generateRoutes();
   generateGetPageList();
@@ -81,6 +130,7 @@ void main() async {
     child: GetMaterialApp(
       home: initializeBlocProviders(),
       getPages: getPageList,
+      theme: themeData,
     ),
   ));
 }
@@ -133,7 +183,6 @@ Widget initializeBlocProviders() {
 }
 
 initializeServices() {
-
   // Secure Storage
   Get.put(new FlutterSecureStorage());
 
@@ -185,55 +234,9 @@ class MyApp extends StatefulWidget {
 class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return dynamicColorTheme();
-  }
-
-  Widget dynamicColorTheme() {
-    Brightness primaryBrightness = Brightness.light;
-    Color primaryColor = Colors.blue;
-    return DynamicTheme(
-        defaultBrightness: primaryBrightness,
-        data: (brightness) => new ThemeData(
-          primarySwatch: primaryColor,
-          brightness: brightness,
-        ),
-        themedWidgetBuilder: (context, theme) {
-          return materialApp();
-        }
-    );
-  }
-
-  Widget materialApp() {
-    // Color primaryColor = Colors.black;
-    // Color primaryColorInText = Colors.white;
-    // Color primaryColorWhenFocus = Colors.black54;
-    // TextStyle primaryTextStyle = TextStyle(color: primaryColor);
-    // TextStyle primaryTextStyleInAppBarText = TextStyle(color: primaryColorInText, fontSize: 18.0, fontWeight: FontWeight.bold);
     return MaterialApp(
       title: 'PocketChat',
-      theme: ThemeData(
-        fontFamily: 'Roboto',
-        // brightness: primaryBrightness,
-        // primarySwatch: Colors.blue,
-        // primaryColor: Colors.black,
-        // primaryColor: primaryColor,
-        // accentColor: primaryColor,
-        // cursorColor: primaryColor,
-        // highlightColor: primaryColorWhenFocus,
-        // textSelectionColor: primaryColorWhenFocus,
-        // buttonColor: primaryColor,
-        // buttonTheme: ButtonThemeData(buttonColor: primaryColor, textTheme: ButtonTextTheme.primary),
-        // errorColor: primaryColor,
-        // bottomAppBarColor: primaryColor,
-        // bottomAppBarTheme: BottomAppBarTheme(
-        //   color: primaryColor,
-        // ),
-        // appBarTheme: AppBarTheme(
-        //     color: primaryColor,
-        //     textTheme: TextTheme(
-        //       button: primaryTextStyleInAppBarText,
-        //     )),
-      ),
+      theme: themeData,
       home: TabsPage(),
       routes: routeList,
     );
