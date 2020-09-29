@@ -94,16 +94,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   @override
   Widget build(BuildContext context) {
-    print('build()');
-
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
-
-    // TODO: Send message using WebSocket
-    // Do in this order (To allow resend message if anything goes wrong [Send timeout, websocket down, Internet down situations])
-    // 1. Send to DB
-    // 2. Send to State
-    // 3. Send to API
-    // 4. Retrieve through WebSocket
 
     return MultiBlocListener(
       listeners: [
@@ -211,6 +202,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         Tooltip(
           message: 'Back',
           child: Material(
+            color: Get.theme.primaryColor,
             child: InkWell(
               customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
               onTap: () {
@@ -232,6 +224,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
           ),
         ),
         Material(
+          color: Get.theme.primaryColor,
           child: InkWell(
               customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
               onTap: () {
@@ -248,12 +241,12 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                     tag: conversationGroup.id,
                     child: Text(
                       conversationGroup.name,
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(fontWeight: FontWeight.bold, color: Get.theme.primaryTextTheme.button.color),
                     ),
                   ),
                   Text(
                     'Tap here for more details',
-                    style: TextStyle(fontSize: 13.0),
+                    style: TextStyle(fontSize: 13.0, color: Get.theme.primaryTextTheme.button.color),
                   )
                 ],
               )),
