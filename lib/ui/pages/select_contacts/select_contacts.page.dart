@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,7 +27,10 @@ class SelectContactsPage extends StatefulWidget {
 // WhatsApp closes the search function when multi select
 class SelectContactsPageState extends State<SelectContactsPage> {
   bool isLoading = true;
+
+  // contactLoaded is true
   bool contactLoaded = false;
+  bool checkboxesLoaded = false;
 
   String title = "";
   String subtitle = "";
@@ -64,22 +64,16 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     scrollController.dispose();
   }
 
-  getOwnUserContact() async {
-    if (userContactBloc.state is UserContactsLoaded) {
-      UserContactsLoaded userContactsLoaded = userContactBloc.state as UserContactsLoaded;
-      userContactsLoaded.ownUserContact.toString();
-      ownUserContact = userContactsLoaded.ownUserContact;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     userContactBloc = BlocProvider.of<UserContactBloc>(context);
     conversationGroupBloc = BlocProvider.of<ConversationGroupBloc>(context);
     phoneStorageContactBloc = BlocProvider.of<PhoneStorageContactBloc>(context);
 
-    getOwnUserContact();
-    getContacts();
+    if (!contactLoaded) {
+      getContacts();
+      contactLoaded = true;
+    }
     setConversationType(widget.chatGroupType);
 
     return Scaffold(
@@ -134,16 +128,12 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       phoneStorageContactBlocListener(),
       userBlocListener(),
       userContactBlocListener(),
-    ], child: phoneStorageContactBlocBuilder());
+    ], child: userContactBlocBuilder());
   }
 
   Widget phoneStorageContactBlocListener() {
     return BlocListener<PhoneStorageContactBloc, PhoneStorageContactState>(
-      listener: (context, phoneStorageContactState) {
-        if (phoneStorageContactState is PhoneStorageContactsLoaded) {
-          setupCheckBoxes(phoneStorageContactState.phoneStorageContactList);
-        }
-      },
+      listener: (context, phoneStorageContactState) {},
     );
   }
 
@@ -163,6 +153,25 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     );
   }
 
+  Widget userContactBlocBuilder() {
+    return BlocBuilder<UserContactBloc, UserContactState>(
+      builder: (context, userContactState) {
+        if (userContactState is UserContactsLoading) {
+          return showLoadingContactsPage();
+        }
+
+        if (userContactState is UserContactsLoaded) {
+          if (!isObjectEmpty(userContactState.ownUserContact)) {
+            ownUserContact = userContactState.ownUserContact;
+            return phoneStorageContactBlocBuilder();
+          }
+        }
+
+        return showErrorPage('userContactBlocBuilder()');
+      },
+    );
+  }
+
   Widget phoneStorageContactBlocBuilder() {
     return BlocBuilder<PhoneStorageContactBloc, PhoneStorageContactState>(
       builder: (context, phoneStorageContactState) {
@@ -171,6 +180,11 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         }
 
         if (phoneStorageContactState is PhoneStorageContactsLoaded) {
+          if (!checkboxesLoaded) {
+            setupCheckBoxes(phoneStorageContactState.phoneStorageContactList);
+            checkboxesLoaded = true;
+          }
+
           if (phoneStorageContactState.phoneStorageContactList.length == 0) {
             return showNoContactPage();
           } else {
@@ -182,7 +196,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           return showNoContactPermissionPage();
         }
 
-        return showErrorPage();
+        return showErrorPage('phoneStorageContactBlocBuilder()');
       },
     );
   }
@@ -269,7 +283,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           if (phoneNumberList.length > 1) {
             showSelectPhoneNumberDialog(contact.displayName, phoneNumberList);
           } else if (phoneNumberList.length == 1) {
-            createPersonalConversationGroupTest(phoneNumberList[0], contact.displayName);
+            createPersonalConversationGroup(phoneNumberList[0], contact.displayName);
           } else {
             Get.dialog(
                 Dialog(
@@ -295,7 +309,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     );
   }
 
-  Widget showErrorPage() {
+  Widget showErrorPage(String source) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -305,6 +319,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
             'Error in getting phone storage contacts. Please try again.',
             textAlign: TextAlign.center,
           ),
+          Text(source)
         ],
       ),
     );
@@ -349,7 +364,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   BottomAppBar _bottomAppBar() {
     return BottomAppBar(
       shape: CircularNotchedRectangle(),
-      color: Theme.of(context).primaryColor,
     );
   }
 
@@ -384,7 +398,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                               softWrap: true,
                             ),
                             onTap: () {
-                              createPersonalConversationGroupTest(mobileNumbers[index], contactName);
+                              createPersonalConversationGroup(mobileNumbers[index], contactName);
                             }),
                         shrinkWrap: true),
                   ],
@@ -395,7 +409,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         useRootNavigator: true);
   }
 
-  createPersonalConversationGroupTest(String mobileNumber, String contactName) {
+  createPersonalConversationGroup(String mobileNumber, String contactName) {
     userContactBloc.add(GetUserContactByMobileNoEvent(
         mobileNo: mobileNumber,
         callback: (UserContact userContact) {
@@ -430,8 +444,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     contacts.forEach((contact) {
       contactCheckBoxes[contact.displayName] = false;
     });
-
-    contactLoaded = true;
   }
 
   getContacts() async {
@@ -483,187 +495,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     }
 
     return primaryNo;
-  }
-
-  // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
-  createPersonalConversation(Contact contact) async {
-    // TODO: create loading that cannot be dismissed to prevent exit, and make it faster
-//     showLoading("Loading conversation...");
-//     UserState userState = BlocProvider.of<UserBloc>(context).state;
-//     if (userState is UserLoaded) {
-//       User currentUser = userState.user;
-//       List<Contact> contactList = [];
-//       contactList.add(contact);
-//
-//       CreateConversationGroupRequest createConversationGroupRequest = new CreateConversationGroupRequest(
-//         name: contact.displayName,
-//         conversationGroupType: ConversationGroupType.Personal,
-//         description: '',
-//         adminMemberIds: [],
-//         // Add later
-//         memberIds: [],
-//       );
-//
-//       UnreadMessage unreadMessage = UnreadMessage(
-//         id: null,
-//         conversationId: null,
-//         count: 0,
-//         date: DateTime.now(),
-//         lastMessage: "",
-//         userId: null,
-//       );
-//
-//       Multimedia groupMultimedia = Multimedia(
-//           id: null,
-//           localFullFileUrl: null,
-//           localThumbnailUrl: null,
-//           remoteThumbnailUrl: null,
-//           remoteFullFileUrl: null,
-//           userContactId: null,
-//           conversationId: null,
-//           // Add later
-//           messageId: null,
-//           userId: null);
-//
-//       File userContactImage;
-//       // TODO: Temporary close it because not yet able to convert Uint8List to File
-//       //    if (!isObjectEmpty(contact.avatar) && contact.avatar.length > 0) {
-//       //      print("if (!isObjectEmpty(contact.avatar))");
-//       //      print("contact.avatar.length.toString(): " + contact.avatar.length.toString());
-//       //      userContactImage = await getUserContactPhoto(contact);
-//       //    }
-//
-//       if (!isObjectEmpty(userContactImage)) {
-//         groupMultimedia.localFullFileUrl = userContactImage.path;
-//         // TODO: What if this userContact is known user in REST?
-//         groupMultimedia.localThumbnailUrl = userContactImage.path;
-//       }
-//
-//       // 2. Upload UserContactList
-//       // Note: Backend already helped you to check any duplicates of the same UserContact
-//       List<UserContact> userContactList = [];
-//
-//       UserContact yourOwnUserContact = UserContact(
-//         id: null,
-//         userIds: [currentUser.id],
-//         userId: currentUser.id,
-//         displayName: currentUser.displayName,
-//         realName: currentUser.realName,
-//         block: false,
-//         lastSeenDate: new DateTime.now(),
-//         // make unknown time, let server decide
-//         mobileNo: currentUser.mobileNo,
-//       );
-//
-//       userContactList.add(yourOwnUserContact);
-//
-//       contactList.forEach((contact) {
-//         List<String> primaryNo = [];
-//         if (contact.phones.length > 0) {
-//           contact.phones.forEach((phoneNo) {
-//             primaryNo.add(phoneNo.value);
-//           });
-//         } else {
-//           // No phone number and the display name is the phone number itself
-//           // Reason: No contact.phones when the mobile number doesn't have a name on it
-//           String mobileNo = contact.displayName.replaceAll(new RegExp(r"\s+\b|\b\s|\s|\b"), "");
-//           primaryNo.add(mobileNo);
-//         }
-//
-//         UserContact userContact = UserContact(
-//           id: null,
-//           // So this contact number is mine. Later send it to backend and merge with other UserContact who got the same number
-//           userIds: [currentUser.id],
-//           displayName: contact.displayName,
-//           realName: contact.displayName,
-//           block: false,
-//           lastSeenDate: new DateTime.now(),
-//         );
-//
-//         userContact.mobileNo = primaryNo.length == 0 ? "" : primaryNo[0];
-//
-//         // If got Malaysia number
-//         if (primaryNo[0].contains("+60")) {
-//           print("If Malaysian Number: ");
-//           String trimmedString = primaryNo[0].substring(3);
-//           print("trimmedString: " + trimmedString);
-//         }
-//
-//         userContactList.add(userContact);
-//       });
-//
-//       UserContact targetUserContact = userContactList[1];
-//
-//       // Logic to detect to find same personal conversation group in local state/DB
-//       UserContact userContactFromServer = await userContactAPIService.getUserContactByMobileNo(targetUserContact.mobileNo);
-//       if (!isObjectEmpty(userContactFromServer)) {
-//         UserContactState userContactState = BlocProvider.of<UserContactBloc>(context).state;
-//         ConversationGroupState conversationGroupState = BlocProvider.of<ConversationGroupBloc>(context).state;
-//
-//         if (userContactState is UserContactsLoaded && conversationGroupState is ConversationGroupsLoaded) {
-//           List<UserContact> userContactList = userContactState.userContactList;
-//           List<ConversationGroup> conversationGroupList = conversationGroupState.conversationGroupList;
-//
-//           bool personalConversationGroupExist = conversationGroupList.contains(
-//               (ConversationGroup existingConversationGroup) => existingConversationGroup.type == ConversationGroupType.Personal && existingConversationGroup.memberIds.contains((String memberId) => memberId == userContactFromServer.id));
-//
-//           if (personalConversationGroupExist) {
-// //            goToChatRoomPage(conversationGroup); // TODO: Go to another page with conversationGroup ID only, use API to getSingleConversationGroup.
-//             return;
-//           }
-//         }
-//       }
-//
-//       BlocProvider.of<UserContactBloc>(context).add(AddMultipleUserContactEvent(
-//           userContactList: userContactList,
-//           callback: (List<UserContact> newUserContactList) {
-//             if ((contactList.length != newUserContactList.length - 1) || newUserContactList.length == 0) {
-//               // event.contactList doesn't include yourself, so newUserContactList.length - 1 OR Any UserContact is not added into the list (means not uploaded successfully)
-//               // That means some UseContact are not uploaded into the REST
-//               Navigator.pop(context);
-//               showToast('Unable to upload your member list. Please try again.', Toast.LENGTH_SHORT);
-//             } else {
-//               // Give the list of UserContactIds to memberIds of ConversationGroup
-//               createConversationGroupRequest.memberIds = newUserContactList.map((newUserContact) => newUserContact.id).toList();
-//
-//               // Add your own userContact's ID as admin by find the one that has the same mobile number in the userContactList
-//               createConversationGroupRequest.adminMemberIds.add(newUserContactList.firstWhere((UserContact newUserContact) => newUserContact.mobileNo == currentUser.mobileNo, orElse: () => null).id);
-//
-//               BlocProvider.of<ConversationGroupBloc>(context).add(CreateConversationGroupEvent(
-//                   createConversationGroupRequest: createConversationGroupRequest,
-//                   callback: (ConversationGroup conversationGroup2) async {
-//                     if (!isObjectEmpty(conversationGroup2)) {
-//                       groupMultimedia.conversationId = unreadMessage.conversationId = conversationGroup2.id;
-//                       unreadMessage.userId = conversationGroup2.creatorUserId;
-//                       // TODO: Remove create UnreadMessage, should be done at backend
-//                       addMultimedia(groupMultimedia, null, conversationGroup2);
-//                     } else {
-//                       Navigator.pop(context);
-//                       showToast('Unable to create conversation group. Please try again.', Toast.LENGTH_SHORT);
-//                     }
-//                   }));
-//             }
-//           }));
-//     }
-  }
-
-  addMultimedia(Multimedia groupMultimedia, File imageFile, ConversationGroup conversationGroup) async {
-    // 4. Upload Group Multimedia
-    // Create thumbnail before upload
-    File thumbnailImageFile;
-    if (!isStringEmpty(groupMultimedia.localFullFileUrl) && !isObjectEmpty(imageFile)) {
-      thumbnailImageFile = await imageService.getImageThumbnail(imageFile);
-    }
-
-    if (!isObjectEmpty(thumbnailImageFile)) {
-      groupMultimedia.localThumbnailUrl = thumbnailImageFile.path;
-    }
-
-    BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
-        multimedia: groupMultimedia,
-        callback: (Multimedia multimedia2) {
-          goToChatRoomPage(conversationGroup);
-        }));
   }
 
   goToGroupNamePage() {

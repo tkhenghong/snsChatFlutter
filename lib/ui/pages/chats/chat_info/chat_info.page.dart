@@ -27,6 +27,8 @@ class ChatInfoPageState extends State<ChatInfoPage> {
   TextEditingController textEditingController;
   ScrollController scrollController;
 
+  WebSocketBloc webSocketBloc;
+
   File imageFile;
   CustomFileService fileService = Get.find();
   ImageService imageService = Get.find();
@@ -42,7 +44,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    Color textSelectionColor = Theme.of(context).textSelectionColor;
+    webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
 
     return MultiBlocListener(
       listeners: [],
@@ -141,7 +143,6 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                         isStringEmpty(conversationGroup.description) ? "Add Group description" : conversationGroup.description,
                                         style: TextStyle(
                                           fontSize: 17.0,
-                                          color: textSelectionColor,
                                         ),
                                       ),
                                       Padding(
@@ -178,7 +179,9 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                                       ),
                                       Text(
                                         conversationGroup.notificationExpireDate == 0 ? "On" : "Off",
-                                        style: TextStyle(fontSize: 17.0, color: textSelectionColor),
+                                        style: TextStyle(
+                                          fontSize: 17.0,
+                                        ),
                                       ),
                                       Padding(
                                         padding: EdgeInsets.only(bottom: 5.0),
@@ -363,6 +366,17 @@ class ChatInfoPageState extends State<ChatInfoPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget webSocketBlocListener() {
+    return BlocListener<WebSocketBloc, WebSocketState>(
+      listener: (context, webSocketState) {
+        if (webSocketState is WebSocketNotLoaded) {
+          showToast('Connection broken. Reconnecting WebSocket...', Toast.LENGTH_SHORT);
+          webSocketBloc.add(InitializeWebSocketEvent(callback: (bool done) {}));
+        }
+      },
     );
   }
 
