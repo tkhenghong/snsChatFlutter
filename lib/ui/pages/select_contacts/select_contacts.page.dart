@@ -38,6 +38,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   UserContact ownUserContact;
 
   List<Contact> selectedContacts = [];
+  List<UserContact> selectedUserContacts = [];
   Map<String, bool> contactCheckBoxes = {};
 
   RefreshController _refreshController;
@@ -249,14 +250,9 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       ),
       value: contactCheckBoxes[contact.displayName],
       onChanged: (bool value) {
-        if (contactIsSelected(contact)) {
-          selectedContacts.remove(contact);
-        } else {
-          selectedContacts.add(contact);
+        if (widget.chatGroupType == ConversationGroupType.Group) {
+          showSelectPhoneNumberDialog(contact, checked: value);
         }
-        setState(() {
-          contactCheckBoxes[contact.displayName] = value;
-        });
       },
       secondary: CircleAvatar(
         backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
@@ -278,21 +274,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       ),
       onTap: () {
         if (widget.chatGroupType == ConversationGroupType.Personal) {
-          List<String> phoneNumberList = getUserContactMobileNumber(contact);
-
-          if (phoneNumberList.length > 1) {
-            showSelectPhoneNumberDialog(contact.displayName, phoneNumberList);
-          } else if (phoneNumberList.length == 1) {
-            createPersonalConversationGroup(phoneNumberList[0], contact.displayName);
-          } else {
-            Get.dialog(
-                Dialog(
-                  child: Center(
-                    child: Text('No mobile number found under this contact. Please add mobile number.'),
-                  ),
-                ),
-                barrierDismissible: false);
-          }
+          showSelectPhoneNumberDialog(contact);
         }
       },
       leading: CircleAvatar(
@@ -374,49 +356,71 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     );
   }
 
-  showSelectPhoneNumberDialog(String contactName, List<String> mobileNumbers) {
-    Get.dialog(
-        SimpleDialog(
-            title: Center(
-              child: Text('Please select a phone number: '),
-            ),
-            children: <Widget>[
-              // Flutter ListView in a SimpleDialog:
-              // https://stackoverflow.com/questions/50095763
-              Container(
-                // padding: EdgeInsets.only(left: Get.width * 0.05, right: Get.width * 0.05, top: Get.height * 0.3, bottom: Get.height * 0.3),
-                height: Get.height * 0.3,
-                width: Get.width * 0.9,
-                child: Column(
-                  children: <Widget>[
-                    ListView.builder(
-                        physics: BouncingScrollPhysics(),
-                        itemCount: mobileNumbers.length,
-                        itemBuilder: (BuildContext context, int index) => ListTile(
-                            title: Text(
-                              mobileNumbers[index],
-                              softWrap: true,
-                            ),
-                            onTap: () {
-                              createPersonalConversationGroup(mobileNumbers[index], contactName);
-                            }),
-                        shrinkWrap: true),
-                  ],
-                ),
+  showSelectPhoneNumberDialog(Contact contact, {bool checked}) {
+    List<String> phoneNumberList = getContactMobileNumber(contact);
+    if (phoneNumberList.length > 1) {
+      Get.dialog(
+          SimpleDialog(
+              title: Center(
+                child: Text('Please select a phone number: '),
               ),
-            ]),
-        barrierDismissible: true,
-        useRootNavigator: true);
+              children: <Widget>[
+                // Flutter ListView in a SimpleDialog:
+                // https://stackoverflow.com/questions/50095763
+                Container(
+                  // padding: EdgeInsets.only(left: Get.width * 0.05, right: Get.width * 0.05, top: Get.height * 0.3, bottom: Get.height * 0.3),
+                  height: Get.height * 0.3,
+                  width: Get.width * 0.9,
+                  child: Column(
+                    children: <Widget>[
+                      ListView.builder(
+                          physics: BouncingScrollPhysics(),
+                          itemCount: phoneNumberList.length,
+                          itemBuilder: (BuildContext context, int index) => ListTile(
+                              title: Text(
+                                phoneNumberList[index],
+                                softWrap: true,
+                              ),
+                              onTap: () {
+                                managePhoneNumber(contact, phoneNumberList[0], checked: checked);
+                              }),
+                          shrinkWrap: true),
+                    ],
+                  ),
+                ),
+              ]),
+          barrierDismissible: true,
+          useRootNavigator: true);
+    } else if (phoneNumberList.length == 1) {
+      managePhoneNumber(contact, phoneNumberList[0], checked: checked);
+    } else {
+      Get.dialog(
+          Dialog(
+            child: Center(
+              child: Text('No mobile number found under this contact. Please add mobile number.'),
+            ),
+          ),
+          barrierDismissible: false);
+    }
   }
 
-  createPersonalConversationGroup(String mobileNumber, String contactName) {
+  /// Manage the phone number acquired from showSelectPhoneNumberDialog().
+  managePhoneNumber(Contact contact, String mobileNo, {bool checked}) {
+    if (widget.chatGroupType == ConversationGroupType.Personal) {
+      createPersonalConversationGroup(contact, mobileNo);
+    } else if (widget.chatGroupType == ConversationGroupType.Group) {
+      addGroupUserContact(contact, mobileNo, checked);
+    }
+  }
+
+  createPersonalConversationGroup(Contact contact, String mobileNumber) {
     userContactBloc.add(GetUserContactByMobileNoEvent(
         mobileNo: mobileNumber,
         callback: (UserContact userContact) {
           if (!isObjectEmpty(userContact)) {
             conversationGroupBloc.add(CreateConversationGroupEvent(
                 createConversationGroupRequest: CreateConversationGroupRequest(
-                  name: contactName,
+                  name: contact.displayName,
                   conversationGroupType: ConversationGroupType.Personal,
                   description: null,
                   memberIds: [userContact.id, ownUserContact.id],
@@ -428,6 +432,43 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                     goToChatRoomPage(conversationGroup);
                   }
                 }));
+          }
+        }));
+  }
+
+  addGroupUserContact(Contact contact, String mobileNumber, bool checked) {
+    // if (phoneNumberList.length > 1) {
+    //
+    //           } else if (phoneNumberList.length == 1) {
+    //             if (contactIsSelected(contact)) {
+    //               // TODO: Contact is selected.
+    //               selectedContacts.remove(contact);
+    //               selectedUserContacts.remove(value);
+    //             } else {
+    //               // TODO: contact is not selected.
+    //             }
+    //
+    //           } else {
+    //             Get.dialog(
+    //                 Dialog(
+    //                   child: Center(
+    //                     child: Text('No mobile number found under this contact. Please add mobile number.'),
+    //                   ),
+    //                 ),
+    //                 barrierDismissible: false);
+    //           }
+
+    // Move to new method
+    userContactBloc.add(GetUserContactByMobileNoEvent(
+        mobileNo: mobileNumber,
+        callback: (UserContact userContact) {
+          if (!isObjectEmpty(userContact)) {
+            // TODO:
+            selectedContacts.add(contact);
+            selectedUserContacts.add(userContact);
+            setState(() {
+              contactCheckBoxes[contact.displayName] = checked;
+            });
           }
         }));
   }
@@ -477,7 +518,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     getContacts();
   }
 
-  List<String> getUserContactMobileNumber(Contact contact) {
+  List<String> getContactMobileNumber(Contact contact) {
     List<String> primaryNo = [];
     if (contact.phones.length > 0) {
       contact.phones.forEach((phoneNo) {
