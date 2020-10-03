@@ -43,7 +43,7 @@ void main() {
     editedUserContact.mobileNo = "+60182223991";
     editedUserContact.userIds = ["999999999"];
 
-    bool edited = await userContactAPIService.editUserContact(editedUserContact);
+    bool edited = await userContactAPIService.editOwnUserContact(editedUserContact);
     await userContactDBService.editUserContact(editedUserContact);
 
     UserContact userContactFromLocalDB = await userContactDBService.getSingleUserContact(userContact.id);

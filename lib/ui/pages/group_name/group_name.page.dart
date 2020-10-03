@@ -331,6 +331,7 @@ class GroupNamePageState extends State<GroupNamePage> {
     //     userContactList.add(userContact);
     //   });
     //
+    //   // TODO: Remove AddMultipleUserContactEvent
     //   BlocProvider.of<UserContactBloc>(context).add(AddMultipleUserContactEvent(
     //       userContactList: userContactList,
     //       callback: (List<UserContact> newUserContactList) {

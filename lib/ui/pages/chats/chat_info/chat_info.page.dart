@@ -480,6 +480,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
             userContactId: memberId,
             callback: (UserContact userContact) {
               if (!isObjectEmpty(userContact)) {
+                // TODO: Remove below line.
                 BlocProvider.of<UserContactBloc>(context).add(AddUserContactEvent(userContact: userContact, callback: (UserContact userContact2) {}));
               }
             }));

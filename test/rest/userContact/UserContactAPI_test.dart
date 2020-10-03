@@ -36,7 +36,7 @@ void main() {
     editedUserContact.displayName = "KL Lam";
     editedUserContact.mobileNo = "+60182223991";
     editedUserContact.userIds = ["999999999"];
-    bool edited = await userContactAPIService.editUserContact(editedUserContact);
+    bool edited = await userContactAPIService.editOwnUserContact(editedUserContact);
     print("edited:" + edited.toString());
 
     expect(edited, isTrue);

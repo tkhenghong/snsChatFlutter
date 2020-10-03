@@ -168,7 +168,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           }
         }
 
-        return showErrorPage('userContactBlocBuilder()');
+        return showErrorPage();
       },
     );
   }
@@ -197,7 +197,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           return showNoContactPermissionPage();
         }
 
-        return showErrorPage('phoneStorageContactBlocBuilder()');
+        return showErrorPage();
       },
     );
   }
@@ -291,7 +291,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     );
   }
 
-  Widget showErrorPage(String source) {
+  Widget showErrorPage() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -300,8 +300,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           Text(
             'Error in getting phone storage contacts. Please try again.',
             textAlign: TextAlign.center,
-          ),
-          Text(source)
+          )
         ],
       ),
     );
@@ -437,40 +436,28 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   }
 
   addGroupUserContact(Contact contact, String mobileNumber, bool checked) {
-    // if (phoneNumberList.length > 1) {
-    //
-    //           } else if (phoneNumberList.length == 1) {
-    //             if (contactIsSelected(contact)) {
-    //               // TODO: Contact is selected.
-    //               selectedContacts.remove(contact);
-    //               selectedUserContacts.remove(value);
-    //             } else {
-    //               // TODO: contact is not selected.
-    //             }
-    //
-    //           } else {
-    //             Get.dialog(
-    //                 Dialog(
-    //                   child: Center(
-    //                     child: Text('No mobile number found under this contact. Please add mobile number.'),
-    //                   ),
-    //                 ),
-    //                 barrierDismissible: false);
-    //           }
-
-    // Move to new method
-    userContactBloc.add(GetUserContactByMobileNoEvent(
-        mobileNo: mobileNumber,
-        callback: (UserContact userContact) {
-          if (!isObjectEmpty(userContact)) {
-            // TODO:
-            selectedContacts.add(contact);
-            selectedUserContacts.add(userContact);
-            setState(() {
-              contactCheckBoxes[contact.displayName] = checked;
-            });
-          }
-        }));
+    if (checked) {
+      // Check and add user contact and Contact
+      userContactBloc.add(GetUserContactByMobileNoEvent(
+          mobileNo: mobileNumber,
+          callback: (UserContact userContact) {
+            if (!isObjectEmpty(userContact)) {
+              // TODO:
+              selectedContacts.add(contact);
+              selectedUserContacts.add(userContact);
+              setState(() {
+                contactCheckBoxes[contact.displayName] = checked;
+              });
+            }
+          }));
+    } else {
+      // Uncheck and remove user contact and Contact
+      selectedContacts.removeWhere((element) => element == contact);
+      selectedUserContacts.removeWhere((element) => element.mobileNo == mobileNumber);
+      setState(() {
+        contactCheckBoxes[contact.displayName] = checked;
+      });
+    }
   }
 
   bool contactIsSelected(Contact contact) {
