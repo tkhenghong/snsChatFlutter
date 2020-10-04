@@ -47,7 +47,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
 
     return MultiBlocListener(
-      listeners: [],
+      listeners: [webSocketBlocListener()],
       child: GestureDetector(
         onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
         child: Material(
