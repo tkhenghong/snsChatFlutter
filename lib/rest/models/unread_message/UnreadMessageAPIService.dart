@@ -26,6 +26,10 @@ class UnreadMessageAPIService {
     return UnreadMessage.fromJson(await httpClient.getRequest("$REST_URL/$unreadMessageAPI/$messageId"));
   }
 
+  Future<UnreadMessage> geUnreadMessageByConversationGroupId(String conversationGroupId) async {
+    return UnreadMessage.fromJson(await httpClient.getRequest("$REST_URL/$unreadMessageAPI/conversationGroup/$conversationGroupId"));
+  }
+
   Future<List<UnreadMessage>> getUnreadMessagesOfAUser() async {
     List<dynamic> unreadMessageListRaw = await httpClient.getRequest("$REST_URL/$unreadMessageAPI/user");
     return unreadMessageListRaw.map((e) => UnreadMessage.fromJson(e)).toList();
