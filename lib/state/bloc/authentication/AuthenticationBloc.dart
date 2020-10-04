@@ -15,6 +15,9 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
 
   UserAuthenticationAPIService authenticationAPIService = Get.find();
 
+  // NOTE: Do not use Get.find() for SharedPreferences. It will cause problem in Production mode.
+  FlutterSecureStorage storage = Get.find();
+
   @override
   Stream<AuthenticationState> mapEventToState(AuthenticationEvent event) async* {
     // TODO: implement mapEventToState
@@ -42,7 +45,6 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     if (state is AuthenticationsLoading || state is AuthenticationsNotLoaded) {
       try {
         SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-        final FlutterSecureStorage storage = Get.find();
         String jwtToken = await storage.read(key: "jwtToken");
         String username = sharedPreferences.getString("username");
         DateTime otpExpirationTime = DateTime.parse(sharedPreferences.getString("otpExpirationTime"));
@@ -141,7 +143,6 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
 
       if (!isObjectEmpty(userAuthenticationResponse)) {
         SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-        final FlutterSecureStorage storage = Get.find();
         await storage.write(key: "jwtToken", value: userAuthenticationResponse.jwt);
         sharedPreferences.setString("username", userAuthenticationResponse.username);
         sharedPreferences.setString("otpExpirationTime", userAuthenticationResponse.otpExpirationTime.toString());
@@ -184,7 +185,6 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
   }
 
   Stream<AuthenticationState> _removeAllAuthenticationsEvent(RemoveAllAuthenticationsEvent event) async* {
-    final FlutterSecureStorage storage = Get.find();
     storage.deleteAll();
 
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();

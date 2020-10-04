@@ -6,9 +6,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
@@ -16,6 +19,7 @@ import 'package:snschat_flutter/state/bloc/network/bloc.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
 
 import 'database/sembast/index.dart';
+import 'general/functions/index.dart';
 
 // Sets a platform override for desktop to avoid exceptions. See
 // https://flutter.dev/desktop#target-platform-override for more info.
@@ -222,6 +226,9 @@ initializeServices() {
 
   // Dio
   Get.put(new Dio());
+
+  // ImagePicker
+  Get.put(ImagePicker());
 }
 
 class MyApp extends StatefulWidget {
@@ -233,6 +240,12 @@ class MyApp extends StatefulWidget {
 
 class MyAppState extends State<MyApp> {
   @override
+  void initState() {
+    super.initState();
+    setDisplayMode();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'PocketChat',
@@ -240,6 +253,46 @@ class MyAppState extends State<MyApp> {
       home: TabsPage(),
       routes: routeList,
     );
+  }
+
+  /// Set display mode of the app to allow maximum fps in the app.
+  Future<void> setDisplayMode() async {
+    try {
+      final DisplayMode currentDisplayMode = await FlutterDisplayMode.current;
+      List<DisplayMode> displayModeList = await FlutterDisplayMode.supported;
+      int highestWidthResolution = 0;
+      double highestRefreshRate = 0;
+      int selectedId = 0;
+
+      displayModeList.forEach((displayMode) {
+        if (displayMode.width > highestWidthResolution || displayMode.refreshRate > highestRefreshRate) {
+          selectedId = displayMode.id;
+        }
+
+        if (displayMode.width > highestWidthResolution) {
+          highestWidthResolution = displayMode.width;
+        }
+        if (displayMode.refreshRate > highestRefreshRate) {
+          highestRefreshRate = displayMode.refreshRate;
+        }
+      });
+
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+      bool enableFullFPS = sharedPreferences.get('enableFullFPS');
+
+      if(!isObjectEmpty(enableFullFPS) && enableFullFPS) {
+        await FlutterDisplayMode.setMode(displayModeList[selectedId]);
+      } else {
+        await FlutterDisplayMode.setMode(currentDisplayMode); // Use back user set default mode.
+      }
+    } on PlatformException catch (e) {
+      // Do nothing.
+      print('PlatformException');
+      print('e.code: ' + e.code);
+      print('e.message: ' + e.message);
+      print('e.details: ' + e.details.toString());
+    }
   }
 }
 
