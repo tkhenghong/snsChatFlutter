@@ -8,6 +8,7 @@ import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 
 import '../index.dart';
 import 'CustomSearchDelegate.dart';
@@ -31,6 +32,13 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   // contactLoaded is true
   bool contactLoaded = false;
   bool checkboxesLoaded = false;
+
+  double header1 = globals.header1;
+  double header2 = globals.header2;
+  double header3 = globals.header3;
+  double header4 = globals.header4;
+  double header5 = globals.header5;
+  double header6 = globals.header6;
 
   String title = "";
   String subtitle = "";
@@ -98,11 +106,11 @@ class SelectContactsPageState extends State<SelectContactsPage> {
             children: <Widget>[
               Text(
                 title,
-                style: TextStyle(fontSize: 18.0),
+                style: TextStyle(fontSize: header1),
               ),
               Text(
                 subtitle,
-                style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.w300),
+                style: TextStyle(fontSize: header2, fontWeight: FontWeight.w300),
               )
             ],
           ),
@@ -243,10 +251,12 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       title: Text(
         contact.displayName,
         softWrap: true,
+        style: TextStyle(fontSize: header3),
       ),
       subtitle: Text(
         'Hey There! I am using PocketChat.',
         softWrap: true,
+        style: TextStyle(fontSize: header4),
       ),
       value: contactCheckBoxes[contact.displayName],
       onChanged: (bool value) {
@@ -254,11 +264,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           showSelectPhoneNumberDialog(contact, checked: value);
         }
       },
-      secondary: CircleAvatar(
-        backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
-        child: contact.avatar.isEmpty ? Text(contact.displayName[0]) : Text(''),
-        radius: 20.0,
-      ),
+      secondary: contactCircleAvatar(contact),
     );
   }
 
@@ -267,27 +273,33 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       title: Text(
         contact.displayName,
         softWrap: true,
+        style: TextStyle(fontSize: header3),
       ),
       subtitle: Text(
         'Hey There! I am using PocketChat.',
         softWrap: true,
+        style: TextStyle(fontSize: header4),
       ),
       onTap: () {
         if (widget.chatGroupType == ConversationGroupType.Personal) {
           showSelectPhoneNumberDialog(contact);
         }
       },
-      leading: CircleAvatar(
-        backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : NetworkImage(''),
-        child: contact.avatar.isEmpty
-            ? Text(
-                contact.displayName[0],
-              )
-            : Text(
-                '',
-              ),
-        radius: 20.0,
+      leading: contactCircleAvatar(contact),
+    );
+  }
+
+  Widget contactCircleAvatar(Contact contact) {
+    return CircleAvatar(
+      backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : AssetImage('lib/ui/images/blank_black.png'),
+      child: contact.avatar.isEmpty
+          ? Text(
+        contact.displayName[0],
+      )
+          : Text(
+        '',
       ),
+      radius: Get.width * 0.06,
     );
   }
 
@@ -357,49 +369,59 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   showSelectPhoneNumberDialog(Contact contact, {bool checked}) {
     List<String> phoneNumberList = getContactMobileNumber(contact);
-    if (phoneNumberList.length > 1) {
-      Get.dialog(
-          SimpleDialog(
-              title: Center(
-                child: Text('Please select a phone number: '),
-              ),
-              children: <Widget>[
-                // Flutter ListView in a SimpleDialog:
-                // https://stackoverflow.com/questions/50095763
-                Container(
-                  // padding: EdgeInsets.only(left: Get.width * 0.05, right: Get.width * 0.05, top: Get.height * 0.3, bottom: Get.height * 0.3),
-                  height: Get.height * 0.3,
-                  width: Get.width * 0.9,
-                  child: Column(
-                    children: <Widget>[
-                      ListView.builder(
-                          physics: BouncingScrollPhysics(),
-                          itemCount: phoneNumberList.length,
-                          itemBuilder: (BuildContext context, int index) => ListTile(
-                              title: Text(
-                                phoneNumberList[index],
-                                softWrap: true,
-                              ),
-                              onTap: () {
-                                managePhoneNumber(contact, phoneNumberList[0], checked: checked);
-                              }),
-                          shrinkWrap: true),
-                    ],
-                  ),
-                ),
-              ]),
-          barrierDismissible: true,
-          useRootNavigator: true);
-    } else if (phoneNumberList.length == 1) {
-      managePhoneNumber(contact, phoneNumberList[0], checked: checked);
+
+    if(widget.chatGroupType == ConversationGroupType.Group && !isObjectEmpty(checked) && !checked) {
+      removeGroupUserContact(contact, phoneNumberList, checked);
     } else {
-      Get.dialog(
-          Dialog(
-            child: Center(
-              child: Text('No mobile number found under this contact. Please add mobile number.'),
+      if (phoneNumberList.length > 1) {
+        Get.dialog(
+            SimpleDialog(
+                title: Center(
+                  child: Text('Please select a phone number: '),
+                ),
+                children: <Widget>[
+                  // Flutter ListView in a SimpleDialog:
+                  // https://stackoverflow.com/questions/50095763
+                  Container(
+                    // padding: EdgeInsets.only(left: Get.width * 0.05, right: Get.width * 0.05, top: Get.height * 0.3, bottom: Get.height * 0.3),
+                    height: Get.height * 0.3,
+                    width: Get.width * 0.9,
+                    child: Column(
+                      children: <Widget>[
+                        ListView.builder(
+                            physics: BouncingScrollPhysics(),
+                            itemCount: phoneNumberList.length,
+                            itemBuilder: (BuildContext context, int index) => ListTile(
+                                title: Text(
+                                  phoneNumberList[index],
+                                  softWrap: true,
+                                ),
+                                onTap: () {
+                                  managePhoneNumber(contact, phoneNumberList[0], checked: checked);
+                                }),
+                            shrinkWrap: true),
+                      ],
+                    ),
+                  ),
+                ]),
+            barrierDismissible: true,
+            useRootNavigator: true);
+      } else if (phoneNumberList.length == 1) {
+        managePhoneNumber(contact, phoneNumberList[0], checked: checked);
+      } else {
+        Get.dialog(
+            Dialog(
+              child: Center(
+                child: Column(
+                  children: [
+                    Text('No mobile number found under this contact. Please add mobile number.'),
+                    FlatButton(onPressed: () => Get.back(), child: Text('Ok')),
+                  ],
+                ),
+              ),
             ),
-          ),
-          barrierDismissible: false);
+            barrierDismissible: true);
+      }
     }
   }
 
@@ -410,6 +432,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     } else if (widget.chatGroupType == ConversationGroupType.Group) {
       addGroupUserContact(contact, mobileNo, checked);
     }
+    Get.back(); // Close showSelectPhoneNumberDialog()
   }
 
   createPersonalConversationGroup(Contact contact, String mobileNumber) {
@@ -442,7 +465,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           mobileNo: mobileNumber,
           callback: (UserContact userContact) {
             if (!isObjectEmpty(userContact)) {
-              // TODO:
               selectedContacts.add(contact);
               selectedUserContacts.add(userContact);
               setState(() {
@@ -458,6 +480,18 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         contactCheckBoxes[contact.displayName] = checked;
       });
     }
+  }
+
+  /// Remove a group user contact
+  removeGroupUserContact(Contact contact, List<String> phoneNumberList, bool checked) {
+    // Uncheck and remove user contact and Contact
+    selectedContacts.removeWhere((element) => element == contact);
+    phoneNumberList.forEach((phoneNumber) {
+      selectedUserContacts.removeWhere((element) => element.mobileNo == phoneNumber);
+    });
+    setState(() {
+      contactCheckBoxes[contact.displayName] = checked;
+    });
   }
 
   bool contactIsSelected(Contact contact) {
