@@ -25,3 +25,17 @@ String AUDIO_DIRECTORY = '';
 
 // Support Email
 String supportEmail = 'tkhenghong@gmail.com';
+
+double header1 = 18.0;
+double header2 = 15.0;
+double header3 = 14.0;
+double header4 = 13.0;
+double header5 = 12.0;
+double header6 = 10.0;
+
+double inkWellDefaultPadding = 15.0;
+
+// Emoji Picker configurations
+int emojiRows = 5;
+int emojiColumns = 7;
+int recommendedEmojis = 10;
