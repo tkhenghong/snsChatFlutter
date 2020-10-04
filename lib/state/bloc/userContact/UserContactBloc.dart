@@ -283,6 +283,12 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     }
   }
 
+  Stream<UserContactState> _removeAllUserContactsEvent(RemoveAllUserContactsEvent event) async* {
+    userContactDBService.deleteAllUserContacts();
+    yield UserContactsNotLoaded();
+    functionCallback(event, true);
+  }
+
   Future<bool> addUserContactIntoDB(UserContact userContact) async {
     bool added = false;
 
@@ -294,12 +300,6 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     }
 
     return added;
-  }
-
-  Stream<UserContactState> _removeAllUserContactsEvent(RemoveAllUserContactsEvent event) async* {
-    userContactDBService.deleteAllUserContacts();
-    yield UserContactsNotLoaded();
-    functionCallback(event, true);
   }
 
   List<UserContact> addUserContactIntoState(UserContact userContact) {
