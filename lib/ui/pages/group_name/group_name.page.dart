@@ -412,7 +412,6 @@ class GroupNamePageState extends State<GroupNamePage> {
   }
 
   onEmojiButtonClicked() {
-    print('group_name.page.dart onEmojiButtonClicked()');
     textFieldFocusNode.unfocus(); // Hide text field keyboard
     setState(() {
       showEmojis = !showEmojis;
@@ -421,7 +420,6 @@ class GroupNamePageState extends State<GroupNamePage> {
 
   /// Related to WillPopScope and EmojiPicker
   void onFocusChange() {
-    print('group_name.page.dart onFocusChange()');
     if (textFieldFocusNode.hasFocus) {
       // Hide sticker/emojis when keyboard appear
       setState(() {
@@ -431,7 +429,6 @@ class GroupNamePageState extends State<GroupNamePage> {
   }
 
   void onGlobalFocusChange() {
-    print('group_name.page.dart onGlobalFocusChange()');
     FocusScope.of(context).requestFocus(new FocusNode());
     // Hide sticker/emojis when keyboard appear
     setState(() {
@@ -441,7 +438,6 @@ class GroupNamePageState extends State<GroupNamePage> {
 
   /// Register listener when the back button is pressed.
   Future<bool> onBackPress() {
-    print('group_name.page.dart onBackPress()');
     if (showEmojis) {
       setState(() {
         showEmojis = false;
