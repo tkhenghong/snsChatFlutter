@@ -10,14 +10,16 @@ import 'package:image_picker/image_picker.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
 
 class GroupNamePage extends StatefulWidget {
+  final List<UserContact> selectedUserContacts;
   final List<Contact> selectedContacts;
 
-  GroupNamePage({this.selectedContacts});
+  GroupNamePage({this.selectedUserContacts, this.selectedContacts});
 
   @override
   State<StatefulWidget> createState() {
@@ -29,41 +31,111 @@ class GroupNamePageState extends State<GroupNamePage> {
   bool imageExists = false;
   int imageThumbnailWidthSize = globals.imagePickerQuality;
 
-  List<UserContact> userContactList = [];
+  double header1 = globals.header1;
+  double header2 = globals.header2;
+  double inkWellDefaultPadding = globals.inkWellDefaultPadding;
 
+  PickedFile pickedFile;
+  File imageFile;
+  TextEditingController textEditingController;
   TextStyle circleAvatarTextStyle;
   BorderRadius circleAvatarCircleRadius = BorderRadius.circular(20.0);
 
-  File imageFile;
-  TextEditingController textEditingController;
+  UserContact ownUserContact;
+  ConversationGroupBloc conversationGroupBloc;
 
   CustomFileService fileService = Get.find();
   ImageService imageService = Get.find();
   FirebaseStorageService firebaseStorageService = Get.find();
+  ImagePicker imagePicker = Get.find();
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     textEditingController = new TextEditingController();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     textEditingController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    conversationGroupBloc = BlocProvider.of<ConversationGroupBloc>(context);
     return mainBody();
   }
 
   Widget mainBody() {
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
-      child: Scaffold(appBar: topBar(), body: body()),
+      child: Scaffold(appBar: topBar(), body: multiBlocListener()),
+    );
+  }
+
+  Widget multiBlocListener() {
+    return MultiBlocListener(listeners: [
+      userContactBlocListener(),
+    ], child: userContactBlocBuilder());
+  }
+
+  Widget userContactBlocListener() {
+    return BlocListener<UserContactBloc, UserContactState>(
+      listener: (context, userContactState) {
+        if (userContactState is UserContactsLoaded) {
+          ownUserContact = userContactState.ownUserContact;
+        }
+      },
+    );
+  }
+
+  Widget userContactBlocBuilder() {
+    return BlocBuilder<UserContactBloc, UserContactState>(
+      builder: (context, userContactState) {
+        if (userContactState is UserContactsLoading) {
+          return showLoadingContactsPage();
+        }
+
+        if (userContactState is UserContactsLoaded) {
+          if (!isObjectEmpty(userContactState.ownUserContact)) {
+            ownUserContact = userContactState.ownUserContact;
+            return body();
+          }
+        }
+
+        return showErrorPage();
+      },
+    );
+  }
+
+  Widget showLoadingContactsPage() {
+    return Center(
+        child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Text('Loading contacts....'),
+        SizedBox(
+          height: Get.height * 0.1,
+        ),
+        CircularProgressIndicator(),
+      ],
+    ));
+  }
+
+  Widget showErrorPage() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            'Error in loading this page. Please try again.',
+            textAlign: TextAlign.center,
+          )
+        ],
+      ),
     );
   }
 
@@ -73,32 +145,32 @@ class GroupNamePageState extends State<GroupNamePage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.only(top: 10.0),
+          padding: EdgeInsets.only(top: Get.height * 0.01),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                "New Group",
-                style: TextStyle(fontSize: 18.0),
+                'New Group',
+                style: TextStyle(fontSize: header1),
               ),
               Text(
-                "Add group name below",
-                style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.w300),
+                'Add group name below',
+                style: TextStyle(fontSize: header2, fontWeight: FontWeight.w300),
               )
             ],
           ),
         ),
         Tooltip(
-          message: "Next",
+          message: 'Next',
           child: InkWell(
-            borderRadius: BorderRadius.circular(30.0),
+            borderRadius: BorderRadius.circular(Get.width * 0.25),
             child: Padding(
-              padding: EdgeInsets.all(15.0),
+              padding: EdgeInsets.all(inkWellDefaultPadding),
               child: Icon(Icons.check),
             ),
             onTap: () {
-              createGroupConversation(widget.selectedContacts, context);
+              createGroupConversation();
             },
           ),
         ),
@@ -139,6 +211,7 @@ class GroupNamePageState extends State<GroupNamePage> {
           },
           borderRadius: circleAvatarCircleRadius,
           child: CircleAvatar(
+            radius: Get.width * 0.25, // Testing
             // AssetImage('lib/ui/icons/default_blank_photo.png')
             // backgroundImage: FileImage(imageFile),
             child: !imageExists
@@ -180,9 +253,9 @@ class GroupNamePageState extends State<GroupNamePage> {
 
   Widget groupMembersLabel() {
     return Container(
-      padding: EdgeInsets.only(top: 20.0, left: 20.0, bottom: 20.0),
+      padding: EdgeInsets.only(top: Get.height * 0.05, left: Get.width * 0.03, bottom: Get.height * 0.05),
       child: Text(
-        "Group Members: " + widget.selectedContacts.length.toString(),
+        "Group Members: " + widget.selectedUserContacts.length.toString(),
         style: TextStyle(color: Colors.grey, fontSize: 14.0),
         textAlign: TextAlign.left,
       ),
@@ -191,7 +264,7 @@ class GroupNamePageState extends State<GroupNamePage> {
 
   Widget groupMemberList() {
     return Container(
-      height: 380.0,
+      height: Get.height * 0.4,
       child: ListView(
         physics: BouncingScrollPhysics(),
         children: widget.selectedContacts.map((Contact contact) {
@@ -227,7 +300,25 @@ class GroupNamePageState extends State<GroupNamePage> {
   }
 
   // TODO: Conversation Group Creation into BLOC, can be merged with Group & Broadcast
-  createGroupConversation(List<Contact> contactList, BuildContext context) async {
+  createGroupConversation() async {
+    widget.selectedUserContacts;
+    widget.selectedContacts;
+
+    conversationGroupBloc.add(CreateConversationGroupEvent(
+        createConversationGroupRequest: CreateConversationGroupRequest(
+          name: textEditingController.text,
+          conversationGroupType: ConversationGroupType.Group,
+          description: null,
+          memberIds: widget.selectedUserContacts.map((e) => e.id).toList(),
+          adminMemberIds: [ownUserContact.id],
+        ),
+        callback: (ConversationGroup conversationGroup) {
+          if (!isObjectEmpty(conversationGroup)) {
+            Get.back(); // Close select phone number pop up
+            goToChatRoomPage(conversationGroup);
+          }
+        }));
+
     // TODO: create loading that cannot be dismissed to prevent exit, and make it faster
     // showLoading("Creating conversation...");
 
@@ -365,60 +456,72 @@ class GroupNamePageState extends State<GroupNamePage> {
     // }
   }
 
-  addMultimedia(Multimedia groupMultimedia, File imageFile, ConversationGroup conversationGroup, BuildContext context) async {
-    // 4. Upload Group Multimedia
-    // Create thumbnail before upload
-    File thumbnailImageFile;
-    if (!isStringEmpty(groupMultimedia.localFullFileUrl) && !isObjectEmpty(imageFile)) {
-      thumbnailImageFile = await imageService.getImageThumbnail(imageFile);
-    }
-
-    if (!isObjectEmpty(thumbnailImageFile)) {
-      groupMultimedia.localThumbnailUrl = thumbnailImageFile.path;
-    }
-
-    BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
-        multimedia: groupMultimedia,
-        callback: (Multimedia multimedia2) async {
-          updateMultimediaContent(context, multimedia2, conversationGroup);
-        }));
-  }
+  // addMultimedia(Multimedia groupMultimedia, File imageFile, ConversationGroup conversationGroup, BuildContext context) async {
+  //   // 4. Upload Group Multimedia
+  //   // Create thumbnail before upload
+  //   File thumbnailImageFile;
+  //   if (!isStringEmpty(groupMultimedia.localFullFileUrl) && !isObjectEmpty(imageFile)) {
+  //     thumbnailImageFile = await imageService.getImageThumbnail(imageFile);
+  //   }
+  //
+  //   if (!isObjectEmpty(thumbnailImageFile)) {
+  //     groupMultimedia.localThumbnailUrl = thumbnailImageFile.path;
+  //   }
+  //
+  //   BlocProvider.of<MultimediaBloc>(context).add(AddMultimediaEvent(
+  //       multimedia: groupMultimedia,
+  //       callback: (Multimedia multimedia2) async {
+  //         updateMultimediaContent(context, multimedia2, conversationGroup);
+  //       }));
+  // }
 
   // Actually shouldn't be here
-  updateMultimediaContent(BuildContext context, Multimedia multimedia, ConversationGroup conversationGroup) async {
-    Navigator.pop(context); // close create conversation group loading
-    showLoading('Uploading group photo...');
-    String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.conversationGroupType, conversationGroup.id);
-    String remoteThumbnailUrl = await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.conversationGroupType, conversationGroup.id);
+  // updateMultimediaContent(BuildContext context, Multimedia multimedia, ConversationGroup conversationGroup) async {
+  //   Navigator.pop(context); // close create conversation group loading
+  //   showLoading('Uploading group photo...');
+  //   String remoteUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.conversationGroupType, conversationGroup.id);
+  //   String remoteThumbnailUrl = await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.conversationGroupType, conversationGroup.id);
+  //
+  //   if (!isStringEmpty(remoteUrl)) {
+  //     multimedia.remoteFullFileUrl = remoteUrl;
+  //   }
+  //
+  //   if (!isStringEmpty(remoteThumbnailUrl)) {
+  //     multimedia.remoteThumbnailUrl = remoteThumbnailUrl;
+  //   }
+  //
+  //   BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(
+  //       multimedia: multimedia,
+  //       callback: (Multimedia multimedia2) {
+  //         if (!isObjectEmpty(multimedia2)) {
+  //           // Go to chat room page
+  //           Navigator.pop(context); //pop loading dialog
+  //           Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
+  //           Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
+  //         }
+  //       }));
+  // }
 
-    if (!isStringEmpty(remoteUrl)) {
-      multimedia.remoteFullFileUrl = remoteUrl;
-    }
-
-    if (!isStringEmpty(remoteThumbnailUrl)) {
-      multimedia.remoteThumbnailUrl = remoteThumbnailUrl;
-    }
-
-    BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(
-        multimedia: multimedia,
-        callback: (Multimedia multimedia2) {
-          if (!isObjectEmpty(multimedia2)) {
-            // Go to chat room page
-            Navigator.pop(context); //pop loading dialog
-            Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
-            Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
-          }
-        }));
+  goToChatRoomPage(ConversationGroup conversationGroup) {
+    // Go to chat room page
+    Navigator.pop(context); //pop loading dialog
+    Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
+    // Navigator.of(context).pushReplacementNamed(ChatRoomPage(conversationGroup));
+    Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
   }
 
+  /// Get image from Image Picker.
   Future getImage() async {
-    File image = await ImagePicker.pickImage(source: ImageSource.camera, imageQuality: imageThumbnailWidthSize);
-    if (await image.exists()) {
-      imageExists = true;
+    pickedFile = await imagePicker.getImage(source: ImageSource.camera, imageQuality: imageThumbnailWidthSize);
+
+    if (!pickedFile.isNullOrBlank) {
+      setState(() {
+        imageFile = File(pickedFile.path);
+        imageExists = true;
+      });
+    } else {
+      imageFile = null;
+      imageExists = false;
     }
-    setState(() {
-      imageFile = image;
-      imageExists = true;
-    });
   }
 }

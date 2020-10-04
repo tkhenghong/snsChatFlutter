@@ -526,7 +526,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   }
 
   goToGroupNamePage() {
-    Navigator.push(context, MaterialPageRoute(builder: ((context) => GroupNamePage(selectedContacts: selectedContacts))));
+    Navigator.push(context, MaterialPageRoute(builder: ((context) => GroupNamePage(selectedUserContacts: selectedUserContacts, selectedContacts: selectedContacts))));
   }
 
   goToChatRoomPage(ConversationGroup conversationGroup) {
