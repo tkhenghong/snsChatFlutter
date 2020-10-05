@@ -132,7 +132,7 @@ dependencies:
   # Build runner for json_annotation and json_serializable
   build_runner: ^1.10.0
 
-  # Phoenix to restart the app programatically
+  # Phoenix to restart the app programmatically
   flutter_phoenix: ^0.1.0
 
   # Expandable
