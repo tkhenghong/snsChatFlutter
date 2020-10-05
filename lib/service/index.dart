@@ -6,3 +6,4 @@ export 'network/network.service.dart';
 export 'password/password.service.dart';
 export 'permissions/permission.service.dart';
 export 'websocket/websocket.service.dart';
+export 'digest/digest.service.dart';

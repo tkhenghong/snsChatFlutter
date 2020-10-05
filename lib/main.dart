@@ -226,6 +226,8 @@ initializeServices() {
   Get.put(NetworkService());
   Get.put(WebSocketService());
   Get.put(PasswordService());
+  Get.put(CryptoJSService());
+  Get.put(DigestService());
 
   // Dio
   Get.put(new Dio());
@@ -284,7 +286,7 @@ class MyAppState extends State<MyApp> {
 
       bool enableFullFPS = sharedPreferences.get('enableFullFPS');
 
-      if(!isObjectEmpty(enableFullFPS) && enableFullFPS) {
+      if (!isObjectEmpty(enableFullFPS) && enableFullFPS) {
         await FlutterDisplayMode.setMode(displayModeList[selectedId]);
       } else {
         await FlutterDisplayMode.setMode(currentDisplayMode); // Use back user set default mode.
