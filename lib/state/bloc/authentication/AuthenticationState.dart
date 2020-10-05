@@ -43,5 +43,4 @@ class AuthenticationsLoaded extends AuthenticationState {
   String toString() => 'AuthenticationsLoaded {jwtToken: $jwtToken, username: $username, otpExpirationTime: $otpExpirationTime}';
 }
 
-// UserAuthenticationNotVerified
 class AuthenticationsNotLoaded extends AuthenticationState {}
