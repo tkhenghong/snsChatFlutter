@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
-import 'package:snschat_flutter/rest/RestRequestUtils.dart';
+import 'package:snschat_flutter/rest/rest_request.utils.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -40,7 +40,7 @@ class WebSocketService {
     }
   }
 
-  Future<Stream<dynamic>> reconnnectWebSocket() async {
+  Future<Stream<dynamic>> reconnectWebSocket() async {
     await closeWebSocket();
     return connectWebSocket();
   }

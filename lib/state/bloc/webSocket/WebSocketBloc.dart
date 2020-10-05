@@ -48,7 +48,7 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
 
   Stream<WebSocketState> _reconnectWebSocket(ReconnectWebSocketEvent event) async* {
     if (state is WebSocketLoaded) {
-      yield WebSocketLoaded(await webSocketService.reconnnectWebSocket());
+      yield WebSocketLoaded(await webSocketService.reconnectWebSocket());
       functionCallback(event, true);
     } else {
       functionCallback(event, false);

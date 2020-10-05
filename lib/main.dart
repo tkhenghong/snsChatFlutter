@@ -21,6 +21,8 @@ import 'package:snschat_flutter/ui/pages/index.dart';
 import 'database/sembast/index.dart';
 import 'general/functions/index.dart';
 
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
+
 // Sets a platform override for desktop to avoid exceptions. See
 // https://flutter.dev/desktop#target-platform-override for more info.
 void _enablePlatformOverrideForDesktop() {
@@ -47,6 +49,10 @@ List<NavigationPage> navigationPageList = [
   NavigationPage(routeName: 'video_player_page', routePage: VideoPlayerPage()),
 ];
 
+final List<GetPage> getPageList = [];
+final Map<String, WidgetBuilder> routeList = new Map();
+
+/// Generate a list of page routes for GetX state management.
 List<GetPage> generateGetPageList() {
   navigationPageList.forEach((element) {
     getPageList.add(GetPage(name: element.routeName, page: () => element.routePage));
@@ -55,6 +61,7 @@ List<GetPage> generateGetPageList() {
   return getPageList;
 }
 
+/// Generate a list of page routes for main Flutter navigation.
 Map<String, WidgetBuilder> generateRoutes() {
   if (routeList.length == 0) {
     navigationPageList.forEach((element) {
@@ -64,9 +71,6 @@ Map<String, WidgetBuilder> generateRoutes() {
 
   return routeList;
 }
-
-final List<GetPage> getPageList = [];
-final Map<String, WidgetBuilder> routeList = new Map();
 
 // Default theme details in the app
 Brightness primaryBrightness = Brightness.light;
@@ -92,7 +96,7 @@ MaterialColor blackTheme = MaterialColor(
 
 MaterialColor themeColor = blackTheme;
 
-TextStyle primaryTextStyleInAppBarText = TextStyle(color: themeColor, fontSize: 18.0, fontWeight: FontWeight.bold);
+TextStyle primaryTextStyleInAppBarText = TextStyle(color: themeColor, fontSize: globals.header1, fontWeight: FontWeight.bold);
 
 ThemeData themeData = ThemeData(
   fontFamily: 'Roboto',
@@ -124,7 +128,7 @@ void main() async {
   generateGetPageList();
   WidgetsFlutterBinding.ensureInitialized();
   ByteData byteData = await rootBundle.load('lib/keystore/keystore.p12');
-  HttpOverrides.global = new MyHttpOverrides(byteData);
+  HttpOverrides.global = new CustomHttpOverrides(byteData);
   _enablePlatformOverrideForDesktop();
   initializeServices();
 
@@ -219,7 +223,6 @@ initializeServices() {
   Get.put(CustomFileService());
   Get.put(FirebaseStorageService());
   Get.put(ImageService());
-  Get.put(NetworkService());
   Get.put(NetworkService());
   Get.put(WebSocketService());
   Get.put(PasswordService());

@@ -1,8 +1,8 @@
 export 'audio/AudioService.dart';
 export 'file/CustomFileService.dart';
-export 'firebaseStorage/FirebaseStorageService.dart';
-export 'image/ImageService.dart';
-export 'network/NetworkService.dart';
-export 'password/PasswordService.dart';
-export 'permissions/PermissionService.dart';
-export 'websocket/WebSocketService.dart';
+export 'firebase_storage/firebase_storage.service.dart';
+export 'image/image.service.dart';
+export 'network/network.service.dart';
+export 'password/password.service.dart';
+export 'permissions/permission.service.dart';
+export 'websocket/websocket.service.dart';

@@ -92,8 +92,8 @@ class ImageService {
         );
       }
     } catch (e) {
-      print('ImageService.dart loadFullImage() error');
-      print('ImageService.dart e: ' + e.toString());
+      print('image.service.dart loadFullImage() error');
+      print('image.service.dart e: ' + e.toString());
       redownloadMultimediaFile(context, multimedia);
       return Image.asset(
         fileService.getDefaultImagePath(type),

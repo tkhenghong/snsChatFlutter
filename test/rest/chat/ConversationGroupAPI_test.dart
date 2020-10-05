@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:snschat_flutter/general/enums/conversation_group_type.dart';
+import 'package:snschat_flutter/general/enums/conversation_group_type.enum.dart';
 
 import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';

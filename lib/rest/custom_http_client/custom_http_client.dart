@@ -7,10 +7,10 @@ import 'package:get/get.dart';
 import 'package:http/http.dart';
 import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
-import 'package:snschat_flutter/rest/exceptions/NetworkExceptions.dart';
+import 'package:snschat_flutter/rest/exceptions/network_exceptions.dart';
 import 'package:snschat_flutter/service/index.dart';
 
-import '../RestRequestUtils.dart';
+import '../rest_request.utils.dart';
 
 class CustomHttpClient {
   CustomHttpClient._privateConstructor();
@@ -137,14 +137,14 @@ class CustomHttpClient {
     } else {
       final ErrorResponse errorResponse = ErrorResponse.fromJson(jsonDecode(response.body));
       if (statusCode >= 400 && statusCode < 500) {
-        print('CustomHttpClient.dart if (statusCode >= 400 && statusCode < 500)');
-        print('CustomHttpClient.dart errorResponse.toString(): ' + errorResponse.toString());
+        print('custom_http_client.dart if (statusCode >= 400 && statusCode < 500)');
+        print('custom_http_client.dart errorResponse.toString(): ' + errorResponse.toString());
         throw ClientErrorException(errorResponse, statusCode.toString());
       } else if (statusCode >= 500 && statusCode < 600) {
-        print('CustomHttpClient.dart else if (statusCode >= 500 && statusCode < 600)');
+        print('custom_http_client.dart else if (statusCode >= 500 && statusCode < 600)');
         throw ServerErrorException(errorResponse, statusCode.toString());
       } else {
-        print('CustomHttpClient.dart UnknownException');
+        print('custom_http_client.dart UnknownException');
         throw UnknownException(errorResponse, statusCode.toString());
       }
     }

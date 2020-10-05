@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
-import 'package:snschat_flutter/rest/models/user_authentication/UserAuthenticationAPIService.dart';
+import 'package:snschat_flutter/rest/services/user_authentication/UserAuthenticationAPIService.dart';
 
 import 'bloc.dart';
 

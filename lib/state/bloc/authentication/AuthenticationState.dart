@@ -29,7 +29,6 @@ class Authenticating extends AuthenticationState {
       '${tokenExpiryTime.toIso8601String()}, verificationMode: $verificationMode';
 }
 
-// UserAuthenticationVerified
 class AuthenticationsLoaded extends AuthenticationState {
   final String jwtToken;
   final String username;

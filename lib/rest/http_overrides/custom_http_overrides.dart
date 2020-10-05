@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 
-class MyHttpOverrides extends HttpOverrides {
+class CustomHttpOverrides extends HttpOverrides {
   String ENVIRONMENT = globals.ENVIRONMENT;
-  List<String> allowedHost = globals.allowedHost;
+  List<String> allowedHost = globals.allowedHosts;
 
   ByteData byteData;
 
-  MyHttpOverrides(ByteData byteData) {
+  CustomHttpOverrides(ByteData byteData) {
     this.byteData = byteData;
   }
 

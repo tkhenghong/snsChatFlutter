@@ -1,4 +1,4 @@
-export 'BlocObserver/SimpleBlocObserver.dart';
+export 'bloc_observer/simple_bloc_observer.dart';
 export 'authentication/bloc.dart';
 export 'chat_message/bloc.dart';
 export 'conversationGroup/bloc.dart';

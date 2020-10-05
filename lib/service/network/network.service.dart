@@ -12,18 +12,6 @@ class NetworkService {
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
-//  BehaviorSubject hasInternetConnection = BehaviorSubject<bool>();
-//  BehaviorSubject connectedThroughWifi = BehaviorSubject<bool>();
-//  BehaviorSubject connectedThroughMobileData = BehaviorSubject<bool>();
-//  BehaviorSubject hasLocationEnabled = BehaviorSubject<bool>();
-
-//  BehaviorSubject connectionType = BehaviorSubject<ConnectionType>();
-
-//  BehaviorSubject wifiName = BehaviorSubject<String>();
-//  BehaviorSubject wifiSSID = BehaviorSubject<String>();
-//  BehaviorSubject ipAddress = BehaviorSubject<String>();
-//  BehaviorSubject connectionStatus = BehaviorSubject<String>();
-
   RxBool hasInternetConnection = false.obs;
   RxBool connectedThroughWifi = false.obs;
   RxBool connectedThroughMobileData = false.obs;

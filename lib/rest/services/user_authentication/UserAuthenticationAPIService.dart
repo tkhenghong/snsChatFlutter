@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/objects/rest/index.dart';
-import 'package:snschat_flutter/rest/customHttpClient/CustomHttpClient.dart';
+import 'package:snschat_flutter/rest/custom_http_client/custom_http_client.dart';
 
 class UserAuthenticationAPIService {
   String REST_URL = globals.REST_URL;

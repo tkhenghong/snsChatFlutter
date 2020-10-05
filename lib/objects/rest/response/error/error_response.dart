@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:lombok/lombok.dart';
 
-part 'ErrorResponse.g.dart';
+part 'error_response.g.dart';
 
 @data
 @JsonSerializable()

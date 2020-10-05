@@ -4,7 +4,7 @@ import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
-import 'package:snschat_flutter/rest/models/conversation_group/ConversationGroupAPIService.dart';
+import 'package:snschat_flutter/rest/services/conversation_group/ConversationGroupAPIService.dart';
 
 import 'bloc.dart';
 
