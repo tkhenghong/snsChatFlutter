@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 
 import '../index.dart';
 import 'CustomSearchDelegate.dart';
@@ -44,6 +44,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   String subtitle = "";
 
   UserContact ownUserContact;
+  User ownUser;
 
   List<Contact> selectedContacts = [];
   List<UserContact> selectedUserContacts = [];
@@ -137,7 +138,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       phoneStorageContactBlocListener(),
       userBlocListener(),
       userContactBlocListener(),
-    ], child: userContactBlocBuilder());
+    ], child: userBlocBuilder());
   }
 
   Widget phoneStorageContactBlocListener() {
@@ -158,6 +159,25 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         if (userContactState is UserContactsLoaded) {
           ownUserContact = userContactState.ownUserContact;
         }
+      },
+    );
+  }
+
+  Widget userBlocBuilder() {
+    return BlocBuilder<UserBloc, UserState>(
+      builder: (context, userState) {
+        if (userState is UserLoading) {
+          return showLoadingContactsPage();
+        }
+
+        if (userState is UserLoaded) {
+          if (!isObjectEmpty(userState.user)) {
+            ownUser = userState.user;
+            return userContactBlocBuilder();
+          }
+        }
+
+        return showErrorPage();
       },
     );
   }
@@ -197,6 +217,10 @@ class SelectContactsPageState extends State<SelectContactsPage> {
           if (phoneStorageContactState.phoneStorageContactList.length == 0) {
             return showNoContactPage();
           } else {
+            // Filter own mobile no.
+            phoneStorageContactState.phoneStorageContactList.removeWhere((element) {
+              return isOwnUserContact(element);
+            });
             return showSelectContactPageContent(phoneStorageContactState.phoneStorageContactList);
           }
         }
@@ -294,11 +318,11 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : AssetImage('lib/ui/images/blank_black.png'),
       child: contact.avatar.isEmpty
           ? Text(
-        contact.displayName[0],
-      )
+              contact.displayName[0],
+            )
           : Text(
-        '',
-      ),
+              '',
+            ),
       radius: Get.width * 0.06,
     );
   }
@@ -370,7 +394,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   showSelectPhoneNumberDialog(Contact contact, {bool checked}) {
     List<String> phoneNumberList = getContactMobileNumber(contact);
 
-    if(widget.chatGroupType == ConversationGroupType.Group && !isObjectEmpty(checked) && !checked) {
+    if (widget.chatGroupType == ConversationGroupType.Group && !isObjectEmpty(checked) && !checked) {
       removeGroupUserContact(contact, phoneNumberList, checked);
     } else {
       if (phoneNumberList.length > 1) {
@@ -557,6 +581,13 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     }
 
     return primaryNo;
+  }
+
+  bool isOwnUserContact(Contact contact) {
+    List<String> mobileNoList = getContactMobileNumber(contact);
+    int countryCodeLength  = ownUser.countryCode.length;
+    String strippedOwnUserContactMobileNo = ownUserContact.mobileNo.substring(countryCodeLength);
+    return mobileNoList.indexWhere((element) => element.contains(strippedOwnUserContactMobileNo)) > -1;
   }
 
   goToGroupNamePage() {
