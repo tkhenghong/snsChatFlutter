@@ -66,7 +66,7 @@ class VerifyMobileNoEvent extends AuthenticationEvent {
   const VerifyMobileNoEvent({this.mobileNo, this.secureKeyword, this.otpNumber, this.callback});
 
   @override
-  List<Object> get props => [mobileNo];
+  List<Object> get props => [mobileNo, secureKeyword, otpNumber];
 
   @override
   String toString() => 'VerifyMobileNoEvent {mobileNo: $mobileNo, secureKeyword: $secureKeyword, otpNumber: $otpNumber}';
@@ -83,33 +83,6 @@ class RequestAuthenticationUsingEmailAddressEvent extends AuthenticationEvent {
 
   @override
   String toString() => 'GetAuthenticationEventUsingMobileNo {emailAddress: $emailAddress}';
-}
-
-
-class AddAuthenticationEvent extends AuthenticationEvent {
-  final String jwtToken;
-  final Function callback;
-
-  const AddAuthenticationEvent({this.jwtToken, this.callback});
-
-  @override
-  List<Object> get props => [jwtToken];
-
-  @override
-  String toString() => 'AddAuthenticationEvent {jwtToken: $jwtToken}';
-}
-
-class EditAuthenticationEvent extends AuthenticationEvent {
-  final String jwtToken;
-  final Function callback;
-
-  const EditAuthenticationEvent({this.jwtToken, this.callback});
-
-  @override
-  List<Object> get props => [jwtToken];
-
-  @override
-  String toString() => 'EditAuthenticationEvent {jwtToken: $jwtToken}';
 }
 
 class RemoveAllAuthenticationsEvent extends AuthenticationEvent {

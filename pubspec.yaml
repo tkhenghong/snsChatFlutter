@@ -141,6 +141,14 @@ dependencies:
   # Flutter Display Mode (To enable >60fps on OnePlus 7 Pro and other supported devices)
   flutter_displaymode: ^0.1.0
 
+  # Recaptcha (TODO: Research on Recaptcha implementation)
+  flutter_recaptcha_v2: ^0.1.0
+
+  # Encryption
+  tuple: ^1.0.3
+  encrypt: ^4.0.3
+  crypto: ^2.1.5 # Hash password with SHA1 for Login
+
   flutter:
     sdk: flutter
 

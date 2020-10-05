@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:get/get.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
@@ -9,7 +10,7 @@ class ConversationGroupAPIService {
   String REST_URL = globals.REST_URL;
   String conversationGroupAPI = "conversationGroup";
 
-  CustomHttpClient httpClient = new CustomHttpClient();
+  CustomHttpClient httpClient = Get.find();
 
   Future<ConversationGroup> addConversationGroup(CreateConversationGroupRequest createConversationGroupRequest) async {
     return ConversationGroup.fromJson(await httpClient.postRequest("$REST_URL/$conversationGroupAPI", requestBody: createConversationGroupRequest));

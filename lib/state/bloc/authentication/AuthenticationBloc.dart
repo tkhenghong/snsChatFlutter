@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
-import 'package:snschat_flutter/rest/services/user_authentication/UserAuthenticationAPIService.dart';
+import 'package:snschat_flutter/rest/index.dart';
 
 import 'bloc.dart';
 
@@ -23,8 +23,6 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     // TODO: implement mapEventToState
     if (event is InitializeAuthenticationsEvent) {
       yield* _mapInitializeAuthentication(event);
-    } else if (event is EditAuthenticationEvent) {
-      yield* _editAuthentication(event);
     } else if (event is RemoveAllAuthenticationsEvent) {
       yield* _removeAllAuthenticationsEvent(event);
     } else if (event is RequestAuthenticationUsingEmailAddressEvent) {
@@ -38,7 +36,6 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     } else if (event is VerifyMobileNoEvent) {
       yield* _verifyMobileNo(event);
     }
-    // RegisterUsingMobileNoEvent
   }
 
   Stream<AuthenticationState> _mapInitializeAuthentication(InitializeAuthenticationsEvent event) async* {
@@ -151,37 +148,6 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
 
       functionCallback(event, userAuthenticationResponse);
     }
-  }
-
-  Stream<AuthenticationState> _editAuthentication(EditAuthenticationEvent event) async* {
-    //    bool updatedInREST = false;
-    //    bool saved = false;
-    //    if (state is AuthenticationsLoaded) {
-    //      updatedInREST = await authenticationAPIService
-    //          .editAuthentication(event.Authentication);
-    //
-    //      if (updatedInREST) {
-    //        saved = await authenticationDBService
-    //            .editAuthentication(event.Authentication);
-    //        if (saved) {
-    //          List<Authentication> existingAuthenticationList =
-    //              (state as AuthenticationsLoaded).AuthenticationList;
-    //
-    //          existingAuthenticationList.removeWhere(
-    //              (Authentication existingAuthentication) =>
-    //                  existingAuthentication.id == event.Authentication.id);
-    //
-    //          existingAuthenticationList.add(event.Authentication);
-    //
-    //          yield AuthenticationsLoaded(existingAuthenticationList);
-    //          functionCallback(event, event.Authentication);
-    //        }
-    //      }
-    //    }
-    //
-    //    if (!updatedInREST || !saved) {
-    //      functionCallback(event, null);
-    //    }
   }
 
   Stream<AuthenticationState> _removeAllAuthenticationsEvent(RemoveAllAuthenticationsEvent event) async* {

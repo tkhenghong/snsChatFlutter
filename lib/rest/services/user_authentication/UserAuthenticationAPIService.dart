@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:get/get.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/rest/custom_http_client/custom_http_client.dart';
@@ -8,7 +9,7 @@ class UserAuthenticationAPIService {
   String REST_URL = globals.REST_URL;
   String authenticationAPI = "authentication";
 
-  CustomHttpClient httpClient = new CustomHttpClient();
+  CustomHttpClient httpClient = Get.find();
 
   // Register Step 1
   Future<PreVerifyMobileNumberOTPResponse> registerMobileNumber(RegisterUsingMobileNumberRequest registerUsingMobileNumberRequest) async {

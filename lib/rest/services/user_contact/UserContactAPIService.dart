@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:get/get.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/rest/custom_http_client/custom_http_client.dart';
@@ -8,7 +9,7 @@ class UserContactAPIService {
   String REST_URL = globals.REST_URL;
   String userContactAPI = "userContact";
 
-  CustomHttpClient httpClient = new CustomHttpClient();
+  CustomHttpClient httpClient = Get.find();
 
   Future<UserContact> addUserContact(UserContact userContact) async {
     return UserContact.fromJson(await httpClient.postRequest("$REST_URL/$userContactAPI", requestBody: userContact));
