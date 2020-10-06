@@ -39,8 +39,8 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "flutter.snschat.com.snschatflutter"
-        minSdkVersion 18 // Android 4.3.1 Last Jelly Bean
-        targetSdkVersion 28 // Android 9 Pie
+        minSdkVersion 21 // Android 5 Lollipop (to Support TLS 1.2)
+        targetSdkVersion 29 // Android 10 Q
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
