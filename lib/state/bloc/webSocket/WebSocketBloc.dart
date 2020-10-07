@@ -9,7 +9,15 @@ import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'bloc.dart';
 
 class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
-  WebSocketBloc(): super(WebSocketLoading());
+  WebSocketBloc() : super(WebSocketLoading());
+
+  ConversationGroupBloc conversationGroupBloc;
+  ChatMessageBloc chatMessageBloc;
+  MultimediaBloc multimediaBloc;
+  UnreadMessageBloc unreadMessageBloc;
+  UserContactBloc userContactBloc;
+  SettingsBloc settingsBloc;
+  UserBloc userBloc;
 
   WebSocketService webSocketService = Get.find();
 
@@ -66,29 +74,23 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
   }
 
   Stream<WebSocketState> _processWebSocketMessageEvent(ProcessWebSocketMessageEvent event) async* {
+    conversationGroupBloc =
+        BlocProvider.of<ConversationGroupBloc>(event.context); // New Conversation Group event, Live Update conversation group event
+    chatMessageBloc = BlocProvider.of<ChatMessageBloc>(event.context); // Live Update Chat Message event
+    multimediaBloc = BlocProvider.of<MultimediaBloc>(event.context); // Live Update Multimedia event
+    unreadMessageBloc = BlocProvider.of<UnreadMessageBloc>(event.context); // Live Update last unread message event
+    userContactBloc = BlocProvider.of<UserContactBloc>(event.context); // Live Update new Group member enter/leave event
+    settingsBloc = BlocProvider.of<SettingsBloc>(event.context);
+    userBloc = BlocProvider.of<UserBloc>(event.context); // Used to determine Chat Message belongs to own user or other users.
     try {
       WebSocketMessage webSocketMessage = event.webSocketMessage;
       if (!isObjectEmpty(webSocketMessage)) {
         if (!isObjectEmpty(webSocketMessage.conversationGroup)) {
-          // Conversation Group message
-          BlocProvider.of<ConversationGroupBloc>(event.context).add(AddConversationGroupEvent(conversationGroup: webSocketMessage.conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+          processConversationGroup(webSocketMessage.conversationGroup);
         }
 
         if (!isObjectEmpty(webSocketMessage.message)) {
-          UserState userState = BlocProvider.of<UserBloc>(event.context).state;
-          if (userState is UserLoaded) {
-            if (userState.user.id != webSocketMessage.message.senderId) {
-              // "Message" message
-              BlocProvider.of<ChatMessageBloc>(event.context).add(AddChatMessageEvent(message: webSocketMessage.message, callback: (ChatMessage message) {}));
-              if (webSocketMessage.message.type != 'Text' && webSocketMessage.message.type != 'Contact' && webSocketMessage.message.type != 'Location') {
-                BlocProvider.of<MultimediaBloc>(event.context).add(GetMessageMultimediaEvent(messageId: webSocketMessage.message.id, conversationGroupId: webSocketMessage.message.conversationId, callback: (Multimedia multimedia) {}));
-              }
-            } else {
-              // Mark your own message as sent, received status will changed by recipient
-              webSocketMessage.message.status = ChatMessageStatus.Sent;
-              BlocProvider.of<ChatMessageBloc>(event.context).add(EditChatMessageEvent(message: webSocketMessage.message, callback: (ChatMessage message) {}));
-            }
-          }
+          processChatMessage(webSocketMessage.message);
         }
 
         if (!isObjectEmpty(webSocketMessage.multimedia)) {}
@@ -111,12 +113,35 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
 
   Stream<WebSocketState> _sendWebSocketMessage(SendWebSocketMessageEvent event) async* {
     if (state is WebSocketLoaded) {
-//      Stream<dynamic> webSocketStream = (state as WebSocketLoaded).webSocketStream;
       webSocketService.sendWebSocketMessage(event.webSocketMessage);
 
       functionCallback(event, true);
     } else {
       functionCallback(event, false);
+    }
+  }
+
+  processConversationGroup(ConversationGroup conversationGroup) {
+    // Conversation Group message
+    conversationGroupBloc
+        .add(AddConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+  }
+
+  processChatMessage(ChatMessage chatMessage) {
+    UserState userState = userBloc.state;
+    if (userState is UserLoaded) {
+      if (userState.user.id != chatMessage.senderId) {
+        // "Message" message
+        chatMessageBloc.add(AddChatMessageEvent(message: chatMessage, callback: (ChatMessage message) {}));
+        if (chatMessage.type == ChatMessageType.Audio || chatMessage.type == ChatMessageType.Image) {
+          multimediaBloc.add(GetMessageMultimediaEvent(
+              messageId: chatMessage.id, conversationGroupId: chatMessage.conversationId, callback: (Multimedia multimedia) {}));
+        }
+      } else {
+        // Mark your own message as sent, received status will changed by recipient
+        chatMessage.status = ChatMessageStatus.Sent;
+        chatMessageBloc.add(EditChatMessageEvent(message: chatMessage, callback: (ChatMessage message) {}));
+      }
     }
   }
 

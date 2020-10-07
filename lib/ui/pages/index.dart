@@ -1,6 +1,6 @@
-export './chats/chat_group_list/chat_group_list.page.dart';
-export './chats/chat_info/chat_info.page.dart';
-export './chats/chat_room/chat_room.page.dart';
+export 'chats/chat_group_list/chat_group_list.page.dart';
+export 'chats/chat_info/chat_info.page.dart';
+export 'chats/chat_room/chat_room.page.dart';
 export 'contact_support/contact_support.page.dart';
 export 'group_name/group_name.page.dart';
 export 'login/login.page.dart';

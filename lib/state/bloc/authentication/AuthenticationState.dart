@@ -26,7 +26,7 @@ class Authenticating extends AuthenticationState {
 
   @override
   String toString() => 'Authenticating {mobileNumber: $mobileNumber, emailAddress: $emailAddress, maskedMobileNumber: $maskedMobileNumber, maskedEmailAddress: $maskedEmailAddress, secureKeyword: $secureKeyword, tokenExpiryTime: '
-      '${tokenExpiryTime.toIso8601String()}, verificationMode: $verificationMode';
+      '${tokenExpiryTime.toIso8601String()}, verificationMode: $verificationMode}';
 }
 
 class AuthenticationsLoaded extends AuthenticationState {

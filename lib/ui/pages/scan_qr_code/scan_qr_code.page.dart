@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:snschat_flutter/general/index.dart';
 
 class ScanQrCodePage extends StatefulWidget {
   @override
@@ -32,7 +33,7 @@ class ScanQrCodePageState extends State<ScanQrCodePage> {
           errorStateBuilder: (context, obj) {
             String errorMessage = "[QR] ERROR - ${obj.toString()}";
             debugPrint(errorMessage);
-            Fluttertoast.showToast(msg: errorMessage, toastLength: Toast.LENGTH_LONG);
+            showToast(errorMessage, Toast.LENGTH_LONG);
             return Text(errorMessage);
           },
         ),

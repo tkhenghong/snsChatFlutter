@@ -30,7 +30,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   AuthenticationBloc authenticationBloc;
   MultimediaProgressBloc multimediaProgressBloc;
   ConversationGroupBloc conversationGroupBloc;
-  ChatMessageBloc messageBloc;
+  ChatMessageBloc chatMessageBloc;
   MultimediaBloc multimediaBloc;
   UnreadMessageBloc unreadMessageBloc;
   UserContactBloc userContactBloc;
@@ -59,7 +59,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
     multimediaProgressBloc = BlocProvider.of<MultimediaProgressBloc>(context);
     conversationGroupBloc = BlocProvider.of<ConversationGroupBloc>(context);
-    messageBloc = BlocProvider.of<ChatMessageBloc>(context);
+    chatMessageBloc = BlocProvider.of<ChatMessageBloc>(context);
     multimediaBloc = BlocProvider.of<MultimediaBloc>(context);
     unreadMessageBloc = BlocProvider.of<UnreadMessageBloc>(context);
     userContactBloc = BlocProvider.of<UserContactBloc>(context);
@@ -170,7 +170,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                     shrinkWrap: true,
                     itemCount: conversationGroupState.conversationGroupList.length,
                     itemBuilder: (context, index) {
-                      PageListItem pageListItem = mapConversationToPageListTile(conversationGroupState.conversationGroupList[index], multimediaState, unreadMessageState);
+                      PageListItem pageListItem = mapConversationToPageListTile(
+                          conversationGroupState.conversationGroupList[index], multimediaState, unreadMessageState);
                       return PageListTile(pageListItem, context);
                     }),
               );
@@ -278,12 +279,16 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     return Center(child: Text('Loading...'));
   }
 
-  PageListItem mapConversationToPageListTile(ConversationGroup conversationGroup, MultimediaState multimediaState, UnreadMessageState unreadMessageState) {
-    Multimedia multimedia = (multimediaState as MultimediaLoaded).multimediaList.firstWhere((Multimedia existingMultimedia) =>
-    existingMultimedia.conversationId.toString() == conversationGroup.id && isStringEmpty(existingMultimedia.messageId), orElse: () => null);
+  PageListItem mapConversationToPageListTile(
+      ConversationGroup conversationGroup, MultimediaState multimediaState, UnreadMessageState unreadMessageState) {
+    Multimedia multimedia = (multimediaState as MultimediaLoaded).multimediaList.firstWhere(
+        (Multimedia existingMultimedia) =>
+            existingMultimedia.conversationId.toString() == conversationGroup.id && isStringEmpty(existingMultimedia.messageId),
+        orElse: () => null);
 
-    UnreadMessage unreadMessage =
-        (unreadMessageState as UnreadMessagesLoaded).unreadMessageList.firstWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.conversationId.toString() == conversationGroup.id, orElse: () => null);
+    UnreadMessage unreadMessage = (unreadMessageState as UnreadMessagesLoaded).unreadMessageList.firstWhere(
+        (UnreadMessage existingUnreadMessage) => existingUnreadMessage.conversationId.toString() == conversationGroup.id,
+        orElse: () => null);
 
     return PageListItem(
         title: Hero(
@@ -293,15 +298,21 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         subtitle: Text(isObjectEmpty(unreadMessage) ? '' : unreadMessage.lastMessage),
         leading: Hero(
           tag: conversationGroup.id + '1',
-          child: imageService.loadImageThumbnailCircleAvatar(multimedia, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.conversationGroupType)),
+          child: imageService.loadImageThumbnailCircleAvatar(
+              multimedia, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.conversationGroupType)),
         ),
         trailing: Column(
           children: <Widget>[
             Padding(
               padding: EdgeInsets.only(top: 10.0),
-              child: Text(isObjectEmpty(unreadMessage) ? '' : formatTime(unreadMessage.date.millisecondsSinceEpoch), style: TextStyle(fontSize: 9.0)),
+              child: Text(isObjectEmpty(unreadMessage) ? '' : formatTime(unreadMessage.date.millisecondsSinceEpoch),
+                  style: TextStyle(fontSize: 9.0)),
             ),
-            Text(isObjectEmpty(unreadMessage) ? '' : unreadMessage.count.toString() == '0' ? '' : unreadMessage.count.toString())
+            Text(isObjectEmpty(unreadMessage)
+                ? ''
+                : unreadMessage.count.toString() == '0'
+                    ? ''
+                    : unreadMessage.count.toString())
           ],
         ),
         onTap: (BuildContext context, object) {
@@ -324,7 +335,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     multimediaProgressBloc.add(InitializeMultimediaProgressEvent(callback: (bool done) {}));
     conversationGroupBloc.add(InitializeConversationGroupsEvent(callback: (bool done) {}));
-    messageBloc.add(InitializeChatMessagesEvent(callback: (bool done) {}));
+    chatMessageBloc.add(InitializeChatMessagesEvent(callback: (bool done) {}));
     multimediaBloc.add(InitializeMultimediaEvent(callback: (bool done) {}));
     unreadMessageBloc.add(InitializeUnreadMessagesEvent(callback: (bool done) {}));
     userContactBloc.add(InitializeUserContactsEvent(callback: (bool done) {}));
@@ -349,13 +360,16 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     }));
   }
 
-  // TODO: ProcessWebSocketMessage event should be completely inside Bloc, don't put it here.
+  /// Need this method to listen WebSocket messages
+  /// As long as this page is not removed during logged in state, it will receive and process the messages correctly
+  /// If user perform sudden logout or system logout, it will be disconnected immediately even if there's a message processing here. It's excepted.
   processWebSocketMessage(Stream<dynamic> webSocketStream) {
     UserState userState = userBloc.state;
     webSocketStream.listen((data) {
-      Fluttertoast.showToast(msg: 'Message confirmed received!', toastLength: Toast.LENGTH_LONG);
+      showToast('Message confirmed received!', Toast.LENGTH_LONG);
       WebSocketMessage receivedWebSocketMessage = WebSocketMessage.fromJson(json.decode(data));
-      webSocketBloc.add(ProcessWebSocketMessageEvent(webSocketMessage: receivedWebSocketMessage, callback: (bool done) {}));
+      webSocketBloc
+          .add(ProcessWebSocketMessageEvent(webSocketMessage: receivedWebSocketMessage, context: context, callback: (bool done) {}));
     }, onError: (onError) {
       print('chat_room.page.dart onError listener is working.');
       print('chat_room.page.dart onError: ' + onError.toString());
@@ -373,7 +387,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   getConversationGroupsMultimedia() {
     ConversationGroupState conversationGroupState = conversationGroupBloc.state;
     if (conversationGroupState is ConversationGroupsLoaded) {
-      multimediaBloc.add(GetConversationGroupsMultimediaEvent(conversationGroupList: conversationGroupState.conversationGroupList, callback: (bool done) {}));
+      multimediaBloc.add(GetConversationGroupsMultimediaEvent(
+          conversationGroupList: conversationGroupState.conversationGroupList, callback: (bool done) {}));
     }
   }
 
