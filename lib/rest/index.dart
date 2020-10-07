@@ -14,7 +14,7 @@ export 'custom_http_client/custom_http_client.dart';
 export 'http_overrides/custom_http_overrides.dart';
 
 // Dio
-export 'dio/download/http_file.service.dart';
+export 'dio/http_file/http_file.service.dart';
 
 // Exceptions
 export 'exceptions/network_exceptions.dart';
