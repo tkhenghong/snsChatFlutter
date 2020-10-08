@@ -196,6 +196,7 @@ initializeServices() {
 
   // API Services
   Get.put(CustomHttpClient());
+  Get.put(HTTPFileService());
   Get.put(ConversationGroupAPIService());
   Get.put(IPLocationAPIService());
   Get.put(ChatMessageAPIService());
