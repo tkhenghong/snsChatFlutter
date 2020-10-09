@@ -14,7 +14,6 @@ class VideoPlayerPage extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return VideoPlayerState();
   }
 }
@@ -28,12 +27,11 @@ class VideoPlayerState extends State<VideoPlayerPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    if (!isObjectEmpty(widget.multimedia.localFullFileUrl)) {
+    if (widget.multimedia.localFullFileUrl.isNotEmpty) {
       videoPlayerController = VideoPlayerController.file(File(widget.multimedia.localFullFileUrl));
       videoFound = true;
-    } else if (!isObjectEmpty(widget.multimedia.remoteFullFileUrl)) {
+    } else if (widget.multimedia.remoteFullFileUrl.isNotEmpty) {
       videoPlayerController = VideoPlayerController.network(widget.multimedia.remoteFullFileUrl);
       videoFound = true;
     } else {
@@ -43,7 +41,6 @@ class VideoPlayerState extends State<VideoPlayerPage> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return videoFound
         ? AspectRatio(
             aspectRatio: videoPlayerController.value.aspectRatio,

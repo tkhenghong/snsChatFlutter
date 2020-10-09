@@ -29,7 +29,7 @@ class CustomHttpClient {
       await checkNetwork();
       Response response;
 
-      if (!isObjectEmpty(timeoutSeconds)) {
+      if (!timeoutSeconds.isNull) {
         response = await get(path, headers: headers).timeout(Duration(seconds: timeoutSeconds));
       } else {
         response = await get(path, headers: headers);
@@ -47,7 +47,7 @@ class CustomHttpClient {
       await checkNetwork();
       Response response;
 
-      if (!isObjectEmpty(timeoutSeconds)) {
+      if (!timeoutSeconds.isNull) {
         response = await post(path, body: json.encode(requestBody.toJson()), headers: headers).timeout(Duration(seconds: timeoutSeconds));
       } else {
         response = await post(path, body: json.encode(requestBody.toJson()), headers: headers);
@@ -64,7 +64,7 @@ class CustomHttpClient {
       await checkNetwork();
       Response response;
 
-      if (!isObjectEmpty(timeoutSeconds)) {
+      if (!timeoutSeconds.isNull) {
         response = await put(path, body: json.encode(requestBody.toJson()), headers: headers).timeout(Duration(seconds: timeoutSeconds));
       } else {
         response = await put(path, body: json.encode(requestBody.toJson()), headers: headers);
@@ -82,7 +82,7 @@ class CustomHttpClient {
       await checkNetwork();
       Response response;
 
-      if (!isObjectEmpty(timeoutSeconds)) {
+      if (!timeoutSeconds.isNull) {
         response = await delete(path, headers: headers).timeout(Duration(seconds: timeoutSeconds));
       } else {
         response = await delete(path, headers: headers);
@@ -99,11 +99,11 @@ class CustomHttpClient {
 
     String jwt = await _readJWT();
 
-    if (!isStringEmpty(jwt)) {
+    if (jwt.isNotEmpty) {
       headers.putIfAbsent('Authorization', () => 'Bearer $jwt');
     }
 
-    if (!isObjectEmpty(additionalHeaders)) {
+    if (additionalHeaders.isNotEmpty) {
       headers.addAll(additionalHeaders);
     }
     return headers;

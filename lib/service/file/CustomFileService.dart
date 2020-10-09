@@ -8,7 +8,6 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
@@ -47,7 +46,7 @@ class CustomFileService {
   }
 
   Future<File> copyFile(File fileToBeCopied, String directory) async {
-    if (isObjectEmpty(fileToBeCopied)) {
+    if (fileToBeCopied.isNull) {
       return null;
     }
 
@@ -65,7 +64,7 @@ class CustomFileService {
         break;
     }
 
-    if (!isStringEmpty(destinationFilePath)) {
+    if (destinationFilePath.isNotEmpty) {
       destinationFilePath = destinationFilePath + fileName;
     }
 
@@ -98,9 +97,9 @@ class CustomFileService {
   // TODO: Use Dio to download file
   @deprecated
   downloadMultimediaFile(BuildContext context, Multimedia multimedia) async {
-    if (!isStringEmpty(multimedia.remoteFullFileUrl)) {
+    if (multimedia.remoteFullFileUrl.isNotEmpty) {
       File file = await defaultCacheManager.getSingleFile(multimedia.remoteFullFileUrl);
-      if (isObjectEmpty(file)) {
+      if (file.isNull) {
         FileInfo fileDownloadFromInternet = await defaultCacheManager.downloadFile(multimedia.remoteFullFileUrl);
         FileInfo fileThumbnailDownloadedFromInternet = await defaultCacheManager.downloadFile(multimedia.remoteThumbnailUrl);
 
@@ -118,7 +117,7 @@ class CustomFileService {
   }
 
   bool fileInfoIsEmpty(FileInfo fileInfo) {
-    return isObjectEmpty(fileInfo) || isObjectEmpty(fileInfo.file);
+    return fileInfo.isNull || fileInfo.file.isNull;
   }
 
   // Check if file exist
@@ -136,15 +135,15 @@ class CustomFileService {
   }
 
   Future<File> getLocalImage(Multimedia multimedia, String type) async {
-    if (!isStringEmpty(multimedia.localFullFileUrl)) {
+    if (multimedia.localFullFileUrl.isNotEmpty) {
       File file = await getFile(multimedia.localFullFileUrl);
-      if (!isObjectEmpty(file)) {
+      if (!file.isNull) {
         return file;
       }
     }
-    if (!isStringEmpty(multimedia.localThumbnailUrl)) {
+    if (multimedia.localThumbnailUrl.isNotEmpty) {
       File file = await getFile(multimedia.localThumbnailUrl);
-      if (!isObjectEmpty(file)) {
+      if (!file.isNull) {
         return null;
       }
     }

@@ -90,7 +90,8 @@ class LoginPageState extends State<LoginPage> {
           }
         } else if (ipGeoLocationState is IPGeoLocationLoaded) {
           deviceLocated = true;
-          countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? DEFAULT_COUNTRY_CODE : ipGeoLocationState.ipGeoLocation.country_code2;
+          countryCodeString =
+              ipGeoLocationState.ipGeoLocation.isNull ? DEFAULT_COUNTRY_CODE : ipGeoLocationState.ipGeoLocation.country_code2;
           ipGeoLocation = ipGeoLocationState.ipGeoLocation;
           return multiBlocListener();
         }
@@ -309,8 +310,8 @@ class LoginPageState extends State<LoginPage> {
   getPhoneNumber() {
     String phoneNoInitials = '';
 
-    if (isObjectEmpty(countryCode)) {
-      if (!isObjectEmpty(ipGeoLocation)) {
+    if (countryCode.isNull) {
+      if (!ipGeoLocation.isNull) {
         phoneNoInitials = ipGeoLocation.calling_code;
       }
     } else {
@@ -324,13 +325,24 @@ class LoginPageState extends State<LoginPage> {
   }
 
   goToSignUp() {
-    Navigator.push(context, MaterialPageRoute(builder: ((context) => SignUpPage(mobileNo: mobileNoTextController.value.text, countryCodeString: countryCodeString))));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: ((context) => SignUpPage(mobileNo: mobileNoTextController.value.text, countryCodeString: countryCodeString))));
   }
 
   goToContactSupport() async {
     String now = formatDate(new DateTime.now(), [dd, '/', mm, '/', yyyy]);
     String linebreak = '%0D%0A';
-    String url = 'mailto:<tkhenghong@gmail.com>?subject=Request for Contact Support ' + now + ' &body=Name: ' + linebreak + linebreak + 'Email: ' + linebreak + linebreak + 'Enquiry Details:';
+    String url = 'mailto:<tkhenghong@gmail.com>?subject=Request for Contact Support ' +
+        now +
+        ' &body=Name: ' +
+        linebreak +
+        linebreak +
+        'Email: ' +
+        linebreak +
+        linebreak +
+        'Enquiry Details:';
     if (await canLaunch(url)) {
       await launch(url);
     } else {
@@ -355,20 +367,21 @@ class LoginPageState extends State<LoginPage> {
 
     getPhoneNumber();
 
-    authenticationBloc.add(LoginUsingMobileNumberEvent(mobileNo: mobileNumber, callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
+    authenticationBloc.add(LoginUsingMobileNumberEvent(
+        mobileNo: mobileNumber, callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
   }
 
-  _signInwithFacebook() {
+  _signInWithFacebook() {
     print('Sign in using Facebook');
     showToast('Coming soon.', Toast.LENGTH_SHORT);
   }
 
-  _signInwithApple() {
+  _signInWithApple() {
     print('Sign in using Apple');
     showToast('Coming soon.', Toast.LENGTH_SHORT);
   }
 
-  _signInwithTwitter() {
+  _signInWithTwitter() {
     print('Sign in using Twitter');
     showToast('Coming soon.', Toast.LENGTH_SHORT);
   }

@@ -20,7 +20,7 @@ class ChatMessageDBService {
     ChatMessage existingChatMessage = await getSingleChatMessage(chatMessage.id);
     var key = existingChatMessage == null ? await _chatMessageStore.add(await _db, chatMessage.toJson()) : null;
 
-    return !isStringEmpty(key.toString());
+    return key.toString().isNotEmpty;
   }
 
   Future<bool> editChatMessage(ChatMessage chatMessage) async {

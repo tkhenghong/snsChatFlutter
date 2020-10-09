@@ -32,7 +32,7 @@ class PhotoViewState extends State<PhotoViewPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!isObjectEmpty(widget.multimedia.localFullFileUrl)) {
+    if (widget.multimedia.localFullFileUrl.isNotEmpty) {
       displayingFile = File(widget.multimedia.localFullFileUrl);
       return PhotoView(
           heroAttributes: PhotoViewHeroAttributes(tag: widget.multimedia.id),
@@ -48,7 +48,7 @@ class PhotoViewState extends State<PhotoViewPage> {
   }
 
   fileInfoIsEmpty(FileInfo fileInfo) {
-    return isObjectEmpty(fileInfo) || isObjectEmpty(fileInfo.file);
+    return fileInfo.isNull || fileInfo.file.isNull;
   }
 
   AssetImage loadDefaultAssetImage() {

@@ -1,11 +1,8 @@
 import 'package:country_code_picker/country_code_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
@@ -28,7 +25,7 @@ class SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController mobileNoTextController = new TextEditingController();
 
-  String DEFAULT_COUNTRY_CODE = globals.DEFAULT_COUNTRY_CODE;
+  String defaultCountryCode = globals.DEFAULT_COUNTRY_CODE;
 
   FocusNode nodeOne = FocusNode();
 
@@ -52,15 +49,20 @@ class SignUpPageState extends State<SignUpPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     mobileNoTextController.text = widget.mobileNo.isNotEmpty ? widget.mobileNo : null;
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     nodeOne.dispose();
+    ipGeoLocationBloc.close();
+    authenticationBloc.close();
+    googleInfoBloc.close();
+    settingsBloc.close();
+    userBloc.close();
+    userContactBloc.close();
+    multimediaBloc.close();
     super.dispose();
   }
 
@@ -130,7 +132,7 @@ class SignUpPageState extends State<SignUpPage> {
     return BlocListener<IPGeoLocationBloc, IPGeoLocationState>(
       listener: (context, ipGeoLocationState) {
         if (ipGeoLocationState is IPGeoLocationLoaded) {
-          countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? DEFAULT_COUNTRY_CODE : ipGeoLocationState.ipGeoLocation.country_code2;
+          countryCodeString = ipGeoLocationState.ipGeoLocation.isNull ? defaultCountryCode : ipGeoLocationState.ipGeoLocation.country_code2;
           ipGeoLocation = ipGeoLocationState.ipGeoLocation;
         }
       },
@@ -167,7 +169,7 @@ class SignUpPageState extends State<SignUpPage> {
         }
 
         if (ipGeoLocationState is IPGeoLocationLoaded) {
-          countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? DEFAULT_COUNTRY_CODE : ipGeoLocationState.ipGeoLocation.country_code2;
+          countryCodeString = ipGeoLocationState.ipGeoLocation.isNull ? defaultCountryCode : ipGeoLocationState.ipGeoLocation.country_code2;
           ipGeoLocation = ipGeoLocationState.ipGeoLocation;
           return countryCodePicker();
         }
@@ -198,7 +200,7 @@ class SignUpPageState extends State<SignUpPage> {
       child: TextFormField(
         controller: mobileNoTextController,
         inputFormatters: [
-          BlacklistingTextInputFormatter(RegExp('[\\.|\\,]')),
+          FilteringTextInputFormatter.allow(RegExp('[0-9]')),
         ],
         maxLength: 15,
         decoration: InputDecoration(hintText: "Mobile Number"),
@@ -231,8 +233,8 @@ class SignUpPageState extends State<SignUpPage> {
   getPhoneNumber() {
     String phoneNoInitials = "";
 
-    if (isObjectEmpty(countryCode)) {
-      if (!isObjectEmpty(ipGeoLocation)) {
+    if (countryCode.isNull) {
+      if (!ipGeoLocation.isNull) {
         phoneNoInitials = ipGeoLocation.calling_code;
       }
     } else {
@@ -255,8 +257,10 @@ class SignUpPageState extends State<SignUpPage> {
 
     showCenterLoadingIndicator();
 
-    authenticationBloc
-        .add(RegisterUsingMobileNoEvent(mobileNo: mobileNumber, countryCode: !isObjectEmpty(countryCode) ? countryCode.code : countryCodeString, callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
+    authenticationBloc.add(RegisterUsingMobileNoEvent(
+        mobileNo: mobileNumber,
+        countryCode: !countryCode.isNull ? countryCode.code : countryCodeString,
+        callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
   }
 
   goToVerifyPhoneNumber() {

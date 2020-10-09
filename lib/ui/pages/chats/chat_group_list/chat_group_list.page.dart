@@ -260,7 +260,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
       listener: (context, websocketState) {
         if (websocketState is WebSocketLoaded) {
           webSocketBloc.add(GetOwnWebSocketEvent(callback: (Stream<dynamic> webSocketStream) {
-            if (!isObjectEmpty(webSocketStream)) {
+            if (!webSocketStream.isNull) {
               processWebSocketMessage(webSocketStream);
             }
           }));
@@ -283,7 +283,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
       ConversationGroup conversationGroup, MultimediaState multimediaState, UnreadMessageState unreadMessageState) {
     Multimedia multimedia = (multimediaState as MultimediaLoaded).multimediaList.firstWhere(
         (Multimedia existingMultimedia) =>
-            existingMultimedia.conversationId.toString() == conversationGroup.id && isStringEmpty(existingMultimedia.messageId),
+            existingMultimedia.conversationId.toString() == conversationGroup.id && existingMultimedia.messageId.isEmpty,
         orElse: () => null);
 
     UnreadMessage unreadMessage = (unreadMessageState as UnreadMessagesLoaded).unreadMessageList.firstWhere(
@@ -295,7 +295,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           tag: conversationGroup.id,
           child: Text(conversationGroup.name),
         ),
-        subtitle: Text(isObjectEmpty(unreadMessage) ? '' : unreadMessage.lastMessage),
+        subtitle: Text(unreadMessage.isNull ? '' : unreadMessage.lastMessage),
         leading: Hero(
           tag: conversationGroup.id + '1',
           child: imageService.loadImageThumbnailCircleAvatar(
@@ -305,10 +305,10 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           children: <Widget>[
             Padding(
               padding: EdgeInsets.only(top: 10.0),
-              child: Text(isObjectEmpty(unreadMessage) ? '' : formatTime(unreadMessage.date.millisecondsSinceEpoch),
-                  style: TextStyle(fontSize: 9.0)),
+              child:
+                  Text(unreadMessage.isNull ? '' : formatTime(unreadMessage.date.millisecondsSinceEpoch), style: TextStyle(fontSize: 9.0)),
             ),
-            Text(isObjectEmpty(unreadMessage)
+            Text(unreadMessage.isNull
                 ? ''
                 : unreadMessage.count.toString() == '0'
                     ? ''

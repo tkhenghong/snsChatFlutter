@@ -287,7 +287,7 @@ class MyAppState extends State<MyApp> {
 
       bool enableFullFPS = sharedPreferences.get('enableFullFPS');
 
-      if (!isObjectEmpty(enableFullFPS) && enableFullFPS) {
+      if (!enableFullFPS.isNull && enableFullFPS) {
         await FlutterDisplayMode.setMode(displayModeList[selectedId]);
       } else {
         await FlutterDisplayMode.setMode(currentDisplayMode); // Use back user set default mode.

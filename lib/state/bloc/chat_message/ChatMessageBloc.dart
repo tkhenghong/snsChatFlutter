@@ -33,7 +33,7 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
       try {
         List<ChatMessage> messageListFromDB = await chatMessageDBService.getAllChatMessages();
 
-        if (isObjectEmpty(messageListFromDB)) {
+        if (messageListFromDB.isEmpty) {
           functionCallback(event, false);
           yield ChatMessagesNotLoaded();
         } else {
@@ -52,13 +52,13 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     bool savedIntoDB = false;
     if (state is ChatMessagesLoaded) {
       // Avoid reading existing message
-      if (isStringEmpty(event.message.id)) {
+      if (event.message.id.isEmpty) {
         messageFromServer = await chatMessageAPIService.addChatMessage(event.message);
       } else {
         messageFromServer = event.message;
       }
 
-      if (!isObjectEmpty(messageFromServer)) {
+      if (!messageFromServer.isNull) {
         savedIntoDB = await chatMessageDBService.addChatMessage(messageFromServer);
 
         if (savedIntoDB) {
@@ -73,7 +73,7 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
           functionCallback(event, messageFromServer);
         }
       }
-      if (isObjectEmpty(messageFromServer) || !savedIntoDB) {
+      if (messageFromServer.isNull || !savedIntoDB) {
         functionCallback(event, null);
       }
     }
@@ -135,7 +135,7 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!isObjectEmpty(event)) {
+    if (!event.isNull) {
       event.callback(value);
     }
   }

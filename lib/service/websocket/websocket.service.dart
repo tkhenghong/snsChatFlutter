@@ -35,7 +35,7 @@ class WebSocketService {
   }
 
   Future<dynamic> closeWebSocket() async {
-    if (!isObjectEmpty(webSocketChannel)) {
+    if (!webSocketChannel.isNull) {
       return webSocketChannel.sink.close();
     }
   }
@@ -50,7 +50,7 @@ class WebSocketService {
 
     String jwt = await _readJWT();
 
-    if (!isStringEmpty(jwt)) {
+    if (jwt.isNotEmpty) {
       headers.putIfAbsent('Authorization', () => 'Bearer $jwt');
     }
 

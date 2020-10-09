@@ -33,7 +33,7 @@ class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaPro
       try {
         List<MultimediaProgress> multimediaProgressListFromDB = await multimediaProgressDBService.getAllMultimediaProgress();
 
-        if (isObjectEmpty(multimediaProgressListFromDB)) {
+        if (multimediaProgressListFromDB.isEmpty) {
           yield MultimediaProgressNotLoaded();
           functionCallback(event, false);
         } else {
@@ -54,7 +54,7 @@ class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaPro
 
     if (state is MultimediaProgressLoaded) {
       multimediaProgressList = (state as MultimediaProgressLoaded).multimediaProgressList;
-      if (!isObjectEmpty(newMultimediaProgress)) {
+      if (!newMultimediaProgress.isNull) {
         multimediaProgressSaved = await multimediaProgressDBService.addMultimediaProgress(newMultimediaProgress);
 
         if (multimediaProgressSaved) {
@@ -68,7 +68,7 @@ class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaPro
       }
     }
 
-    if (isObjectEmpty(newMultimediaProgress) || !multimediaProgressSaved) {
+    if (newMultimediaProgress.isNull || !multimediaProgressSaved) {
       yield MultimediaProgressNotLoaded();
       functionCallback(event, null);
     }
@@ -81,7 +81,7 @@ class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaPro
 
     if (state is MultimediaProgressLoaded) {
       multimediaProgressList = (state as MultimediaProgressLoaded).multimediaProgressList;
-      if (!isObjectEmpty(newMultimediaProgress)) {
+      if (!newMultimediaProgress.isNull) {
         multimediaProgressSaved = await multimediaProgressDBService.addMultimediaProgress(newMultimediaProgress);
 
         if (multimediaProgressSaved) {
@@ -96,7 +96,7 @@ class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaPro
       }
     }
 
-    if (isObjectEmpty(newMultimediaProgress) || !multimediaProgressSaved) {
+    if (newMultimediaProgress.isNull || !multimediaProgressSaved) {
       yield MultimediaProgressNotLoaded();
       functionCallback(event, null);
     }
@@ -112,7 +112,7 @@ class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaPro
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!isObjectEmpty(event)) {
+    if (!event.isNull) {
       event?.callback(value);
     }
   }

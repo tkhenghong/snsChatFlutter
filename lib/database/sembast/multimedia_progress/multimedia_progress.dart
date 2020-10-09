@@ -20,7 +20,7 @@ class MultimediaProgressDBService {
     MultimediaProgress existingMultimediaProgress = await getSingleMultimediaProgress(multimediaProgress.taskId);
     var key = isObjectEmpty(existingMultimediaProgress) ? await _multimediaProgressStore.add(await _db, multimediaProgress.toJson()) : editMultimediaProgress(multimediaProgress);
 
-    return !isStringEmpty(key.toString());
+    return key.toString().isNotEmpty;
   }
 
   Future<bool> editMultimediaProgress(MultimediaProgress multimediaProgress) async {

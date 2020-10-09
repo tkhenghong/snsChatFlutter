@@ -2,7 +2,6 @@ import 'package:bloc/bloc.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 
 import 'bloc.dart';
@@ -51,20 +50,16 @@ class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorag
 
         // Dart way of removing duplicates. // https://stackoverflow.com/questions/12030613/how-to-delete-duplicates-in-a-dart-list-list-distinct
         phoneContactList = phoneContactList.toList();
-        if (!isObjectEmpty(event)) {
-          yield PhoneStorageContactsLoaded(phoneContactList);
-          event.callback(true);
-        }
+        yield PhoneStorageContactsLoaded(phoneContactList);
+        functionCallback(event, true);
       } else {
-        if (!isObjectEmpty(event)) {
-          yield PhoneStorageContactsNotLoaded();
-          event.callback(false);
-        }
+        yield PhoneStorageContactsNotLoaded();
+        functionCallback(event, false);
       }
     } catch (e) {
       debugPrint('Error in GetPhoneStorageContactsEvent');
       yield PhoneStorageContactsNotLoaded();
-      event.callback(false);
+      functionCallback(event, false);
     }
   }
 
@@ -89,7 +84,8 @@ class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorag
 
     contactSearchResultList = [contactSearchResultList, searchResultBasedOnName].expand((x) => x).toList();
 
-    yield PhoneStorageContactsLoaded(phoneStorageContactList, contactSearchResultList); // display current found results first (appear faster)
+    yield PhoneStorageContactsLoaded(
+        phoneStorageContactList, contactSearchResultList); // display current found results first (appear faster)
     List<Contact> searchResultBasedOnPhoneNumber = phoneStorageContactList.where((Contact contact) {
       bool phoneFound = false;
       contact.phones.forEach((phone) {
@@ -113,7 +109,7 @@ class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorag
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!isObjectEmpty(event)) {
+    if (!event.isNull) {
       event?.callback(value);
     }
   }

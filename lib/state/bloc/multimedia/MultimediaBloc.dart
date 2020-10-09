@@ -43,7 +43,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
       try {
         List<Multimedia> multimediaListFromDB = await multimediaDBService.getAllMultimedia();
 
-        if (isObjectEmpty(multimediaListFromDB)) {
+        if (multimediaListFromDB.isEmpty) {
           yield MultimediaNotLoaded();
           functionCallback(event, false);
         } else {
@@ -62,13 +62,13 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     bool saved = false;
 
     // Avoid reading existing multimedia
-    if (isStringEmpty(event.multimedia.id)) {
+    if (event.multimedia.id.isEmpty) {
       multimediaFromServer = await multimediaAPIService.addMultimedia(event.multimedia);
     } else {
       multimediaFromServer = event.multimedia;
     }
 
-    if (!isObjectEmpty(multimediaFromServer)) {
+    if (!multimediaFromServer.isNull) {
       await multimediaDBService.deleteMultimedia(multimediaFromServer.id);
 
       saved = await multimediaDBService.addMultimedia(multimediaFromServer);
@@ -88,7 +88,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
       }
     }
 
-    if (isObjectEmpty(multimediaFromServer) || !saved) {
+    if (multimediaFromServer.isNull || !saved) {
       functionCallback(event, null);
     }
   }
@@ -148,7 +148,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
   Stream<MultimediaState> _uploadMultimedia(SendMultimediaEvent event) async* {
     Multimedia newMultimedia = await multimediaAPIService.addMultimedia(event.multimedia);
 
-    if (isObjectEmpty(newMultimedia)) {
+    if (newMultimedia.isNull) {
       functionCallback(event, false);
     }
 
@@ -171,10 +171,10 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     // Get user profile picture
     Multimedia multimediaFromServer = await multimediaAPIService.getUserOwnProfilePictureMultimedia();
 
-    if (!isObjectEmpty(multimediaFromServer)) {
+    if (!multimediaFromServer.isNull) {
       // Update DB
       Multimedia userMultimedia = await multimediaDBService.getSingleMultimedia(multimediaFromServer.id);
-      if (!isObjectEmpty(userMultimedia)) {
+      if (!userMultimedia.isNull) {
         multimediaDBService.addMultimedia(multimediaFromServer);
       } else {
         multimediaDBService.editMultimedia(multimediaFromServer);
@@ -204,7 +204,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
           // Update DB
           for (Multimedia multimediaFromServer in multimediaListFromServer) {
             Multimedia existingConversationGroupMultimedia = await multimediaDBService.getSingleMultimedia(multimediaFromServer.id);
-            if (!isObjectEmpty(existingConversationGroupMultimedia)) {
+            if (!existingConversationGroupMultimedia.isNull) {
               multimediaDBService.editMultimedia(multimediaFromServer);
             } else {
               multimediaDBService.addMultimedia(multimediaFromServer);
@@ -235,10 +235,10 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
       for (UserContact userContact in event.userContactList) {
         Multimedia userContactMultimedia = await multimediaAPIService.getMultimediaOfAUserContact(userContact.id);
 
-        if (!isObjectEmpty(userContactMultimedia)) {
+        if (!userContactMultimedia.isNull) {
           // Update DB
           Multimedia existingUserContactMultimedia = await multimediaDBService.getSingleMultimedia(userContactMultimedia.id);
-          if (!isObjectEmpty(existingUserContactMultimedia)) {
+          if (!existingUserContactMultimedia.isNull) {
             multimediaDBService.editMultimedia(userContactMultimedia);
           } else {
             multimediaDBService.addMultimedia(userContactMultimedia);
@@ -257,7 +257,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
 
   Stream<MultimediaState> _getMessageMultimediaEvent(GetMessageMultimediaEvent event) async* {
     Multimedia multimediaFromServer = await multimediaAPIService.getMessageMultimedia(event.conversationGroupId, event.messageId);
-    if (!isObjectEmpty(multimediaFromServer)) {
+    if (!multimediaFromServer.isNull) {
       add(AddMultimediaEvent(multimedia: multimediaFromServer, callback: (Multimedia multimedia) {}));
     }
   }
@@ -270,7 +270,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!isObjectEmpty(event)) {
+    if (!event.isNull) {
       event?.callback(value);
     }
   }

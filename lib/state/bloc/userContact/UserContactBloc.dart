@@ -16,27 +16,19 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
   Stream<UserContactState> mapEventToState(UserContactEvent event) async* {
     if (event is InitializeUserContactsEvent) {
       yield* _initializeUserContactsToState(event);
-    }
-    // else if (event is AddUserContactEvent) {
-    //   yield* _addUserContact(event);
-    // }
-    else if (event is EditOwnUserContactEvent) {
+    } else if (event is EditOwnUserContactEvent) {
       yield* _editOwnUserContact(event);
     } else if (event is DeleteUserContactEvent) {
       yield* _deleteUserContact(event);
     } else if (event is GetUserContactEvent) {
-      _getUserContact(event);
+      yield* _getUserContact(event);
     } else if (event is GetUserContactByUserIdEvent) {
       yield* _getUserContactByUserId(event);
     } else if (event is GetUserOwnUserContactEvent) {
       yield* _getUserOwnUserContactEvent(event);
     } else if (event is GetUserOwnUserContactsEvent) {
       yield* _getUserOwnUserContactsEvent(event);
-    }
-    // else if (event is AddMultipleUserContactEvent) {
-    //   yield* _addMultipleUserContact(event);
-    // }
-    else if (event is GetUserContactByMobileNoEvent) {
+    } else if (event is GetUserContactByMobileNoEvent) {
       yield* _getUserContactByMobileNo(event);
     } else if (event is RemoveAllUserContactsEvent) {
       yield* _removeAllUserContactsEvent(event);
@@ -48,7 +40,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       try {
         List<UserContact> userContactListFromDB = await userContactDBService.getAllUserContacts();
 
-        if (isObjectEmpty(userContactListFromDB)) {
+        if (userContactListFromDB.isEmpty) {
           yield UserContactsNotLoaded();
           functionCallback(event, false);
         } else {
@@ -61,91 +53,6 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       }
     }
   }
-
-  // Deprecated: Due to not adding user contact from the frontend. Architecture changed.
-  // Stream<UserContactState> _addUserContact(AddUserContactEvent event) async* {
-  //   UserContact newUserContact;
-  //   bool userContactAdded = false;
-  //
-  //   // Avoid reading existing userContact
-  //   if (isStringEmpty(event.userContact.id)) {
-  //     newUserContact = await userContactAPIService.addUserContact(event.userContact);
-  //   }
-  //
-  //   if (!isObjectEmpty(newUserContact)) {
-  //     userContactAdded = await userContactDBService.addUserContact(newUserContact);
-  //     if (userContactAdded) {
-  //       List<UserContact> existingUserContactList = [];
-  //
-  //       if (state is UserContactsLoaded) {
-  //         existingUserContactList = (state as UserContactsLoaded).userContactList;
-  //       }
-  //
-  //       existingUserContactList.removeWhere((UserContact existingUserContact) => existingUserContact.id == event.userContact.id);
-  //
-  //       existingUserContactList.add(event.userContact);
-  //
-  //       yield UserContactsLoaded(existingUserContactList);
-  //       functionCallback(event, event.userContact);
-  //     }
-  //   }
-  //
-  //   if (isObjectEmpty(newUserContact) || !userContactAdded) {
-  //     functionCallback(event, null);
-  //   }
-  // }
-
-  // Deprecated: Due to not adding Multiple user contacts from the frontend. Architecture changed.
-  // Stream<UserContactState> _addMultipleUserContact(AddMultipleUserContactEvent event) async* {
-  //   List<UserContact> existingUserContactList = [];
-  //   List<UserContact> newUserContactList = [];
-  //
-  //   if (state is UserContactsLoaded) {
-  //     UserContactsLoaded userContactsLoaded = (state as UserContactsLoaded);
-  //     existingUserContactList = userContactsLoaded.userContactList;
-  //
-  //     for (UserContact userContact in event.userContactList) {
-  //       UserContact newUserContact;
-  //       bool userContactAdded = false;
-  //
-  //       // Avoid reading existing userContact
-  //       if (isStringEmpty(userContact.id)) {
-  //         newUserContact = await userContactAPIService.addUserContact(userContact);
-  //       }
-  //
-  //       if (!isObjectEmpty(newUserContact)) {
-  //         bool userContactExist = false;
-  //
-  //         for (UserContact existingUserContact in existingUserContactList) {
-  //           if (existingUserContact.id == newUserContact.id) {
-  //             userContactExist = true;
-  //           }
-  //         }
-  //         if (userContactExist) {
-  //           userContactAdded = await userContactDBService.editUserContact(newUserContact);
-  //         } else {
-  //           userContactAdded = await userContactDBService.addUserContact(newUserContact);
-  //         }
-  //
-  //         existingUserContactList.removeWhere((UserContact existingUserContact) => existingUserContact.id == newUserContact.id);
-  //
-  //         if (userContactAdded) {
-  //           newUserContactList.add(userContact);
-  //         }
-  //       }
-  //
-  //       if (isObjectEmpty(newUserContact) || !userContactAdded) {
-  //         functionCallback(event, []);
-  //         return; // Any error, out
-  //       }
-  //     }
-  //
-  //     existingUserContactList = [existingUserContactList, newUserContactList].expand((x) => x).toList();
-  //
-  //     yield UserContactsLoaded(existingUserContactList, userContactsLoaded.ownUserContact);
-  //   }
-  //   functionCallback(event, newUserContactList);
-  // }
 
   // Only updates the user's own UserContact.
   Stream<UserContactState> _editOwnUserContact(EditOwnUserContactEvent event) async* {
@@ -201,10 +108,10 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
   }
 
   Stream<UserContactState> _getUserContact(GetUserContactEvent event) async* {
-    if (!isStringEmpty(event.userContactId)) {
+    if (event.userContactId.isNotEmpty) {
       UserContact userContactFromServer = await userContactAPIService.getUserContact(event.userContactId);
 
-      if (!isObjectEmpty(userContactFromServer)) {
+      if (!userContactFromServer.isNull) {
         addUserContactIntoDB(userContactFromServer);
         List<UserContact> updatedUserContactList = addUserContactIntoState(userContactFromServer);
 
@@ -218,7 +125,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
 
   // Not used until multiple user login happens.
   Stream<UserContactState> _getUserContactByUserId(GetUserContactByUserIdEvent event) async* {
-    if (!isObjectEmpty(event.user)) {
+    if (!event.user.isNull) {
       UserContact userContactFromDB = await userContactDBService.getUserContactByUserId(event.user.id);
 
       functionCallback(event, userContactFromDB);
@@ -230,7 +137,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
   Stream<UserContactState> _getUserOwnUserContactEvent(GetUserOwnUserContactEvent event) async* {
     UserContact ownUserContact = await userContactAPIService.getOwnUserContact();
 
-    if (!isObjectEmpty(ownUserContact)) {
+    if (!ownUserContact.isNull) {
       addUserContactIntoDB(ownUserContact);
       List<UserContact> updatedUserContactList = addUserContactIntoState(ownUserContact);
       yield* yieldUserContactState(updatedUserContactList: updatedUserContactList, updatedOwnUserContact: ownUserContact);
@@ -260,11 +167,12 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     if (state is UserContactsLoaded) {
       List<UserContact> existingUserContactList = (state as UserContactsLoaded).userContactList;
 
-      UserContact existingStateUserContact = existingUserContactList.firstWhere((element) => element.mobileNo == event.mobileNo, orElse: () => null);
+      UserContact existingStateUserContact =
+          existingUserContactList.firstWhere((element) => element.mobileNo == event.mobileNo, orElse: () => null);
 
       UserContact updatedUserContact;
 
-      if (!isObjectEmpty(existingStateUserContact)) {
+      if (!existingStateUserContact.isNull) {
         // Local UserContact found, update the UserContact.
         updatedUserContact = await userContactAPIService.getUserContact(existingStateUserContact.id);
       } else {
@@ -272,7 +180,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
         updatedUserContact = await userContactAPIService.getUserContactByMobileNo(event.mobileNo);
       }
 
-      if (!isObjectEmpty(updatedUserContact)) {
+      if (!updatedUserContact.isNull) {
         addUserContactIntoDB(updatedUserContact);
         List<UserContact> existingUserContactList = addUserContactIntoState(updatedUserContact);
 
@@ -293,7 +201,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     bool added = false;
 
     UserContact userContactInDB = await userContactDBService.getSingleUserContact(userContact.id);
-    if (!isObjectEmpty(userContactInDB)) {
+    if (!userContactInDB.isNull) {
       added = await userContactDBService.editUserContact(userContact);
     } else {
       added = await userContactDBService.addUserContact(userContact);
@@ -320,17 +228,17 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       existingOwnUserContact = (state as UserContactsLoaded).ownUserContact;
       existingUserContactList = (state as UserContactsLoaded).userContactList;
 
-      if (!isObjectEmpty(updatedOwnUserContact)) {
+      if (!updatedOwnUserContact.isNull) {
         existingOwnUserContact = updatedOwnUserContact;
       }
 
-      if (!isObjectEmpty(updatedUserContactList)) {
+      if (updatedUserContactList.isNotEmpty) {
         existingUserContactList = updatedUserContactList;
       }
     }
 
     yield UserContactsLoading(); // Need change state for BlOC to detect changes.
-    if (isObjectEmpty(existingUserContactList) && isObjectEmpty(existingOwnUserContact)) {
+    if (existingUserContactList.isEmpty && existingOwnUserContact.isNull) {
       yield UserContactsNotLoaded();
     } else {
       yield UserContactsLoaded(existingUserContactList, existingOwnUserContact);
@@ -339,7 +247,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!isObjectEmpty(event)) {
+    if (!event.isNull) {
       event?.callback(value);
     }
   }

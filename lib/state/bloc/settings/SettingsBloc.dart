@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:get/get.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
-import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
@@ -34,11 +33,11 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     if (state is SettingsLoading || state is SettingsNotLoaded) {
       Settings settingsFromDB;
       try {
-        if (!isObjectEmpty(event.user)) {
+        if (!event.user.isNull) {
           // TODO: get user from state using better way
           settingsFromDB = await settingsDBService.getSettingsOfAUser(event.user.id);
 
-          if (!isObjectEmpty(settingsFromDB)) {
+          if (!settingsFromDB.isNull) {
             yield SettingsLoaded(settingsFromDB);
             functionCallback(event, true);
           } else {
@@ -104,12 +103,12 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
     savedIntoDB = await settingsDBService.addSettings(settingsFromREST);
 
-    if (!isObjectEmpty(settingsFromREST) && savedIntoDB) {
+    if (!settingsFromREST.isNull && savedIntoDB) {
       yield SettingsLoaded(settingsFromREST);
       functionCallback(event, settingsFromREST);
     }
 
-    if (isObjectEmpty(settingsFromREST) || !savedIntoDB) {
+    if (settingsFromREST.isNull || !savedIntoDB) {
       yield SettingsNotLoaded();
       functionCallback(event, null);
     }
@@ -123,7 +122,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!isObjectEmpty(event)) {
+    if (!event.isNull) {
       event?.callback(value);
     }
   }

@@ -84,24 +84,24 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
     userBloc = BlocProvider.of<UserBloc>(event.context); // Used to determine Chat Message belongs to own user or other users.
     try {
       WebSocketMessage webSocketMessage = event.webSocketMessage;
-      if (!isObjectEmpty(webSocketMessage)) {
-        if (!isObjectEmpty(webSocketMessage.conversationGroup)) {
+      if (!webSocketMessage.isNull) {
+        if (!webSocketMessage.conversationGroup.isNull) {
           processConversationGroup(webSocketMessage.conversationGroup);
         }
 
-        if (!isObjectEmpty(webSocketMessage.message)) {
+        if (!webSocketMessage.message.isNull) {
           processChatMessage(webSocketMessage.message);
         }
 
-        if (!isObjectEmpty(webSocketMessage.multimedia)) {}
+        if (!webSocketMessage.multimedia.isNull) {}
 
-        if (!isObjectEmpty(webSocketMessage.unreadMessage)) {}
+        if (!webSocketMessage.unreadMessage.isNull) {}
 
-        if (!isObjectEmpty(webSocketMessage.settings)) {}
+        if (!webSocketMessage.settings.isNull) {}
 
-        if (!isObjectEmpty(webSocketMessage.user)) {}
+        if (!webSocketMessage.user.isNull) {}
 
-        if (!isObjectEmpty(webSocketMessage.userContact)) {}
+        if (!webSocketMessage.userContact.isNull) {}
         functionCallback(event, true);
       } else {
         functionCallback(event, false);
@@ -131,7 +131,6 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
     UserState userState = userBloc.state;
     if (userState is UserLoaded) {
       if (userState.user.id != chatMessage.senderId) {
-        // "Message" message
         chatMessageBloc.add(AddChatMessageEvent(message: chatMessage, callback: (ChatMessage message) {}));
         if (chatMessage.type == ChatMessageType.Audio || chatMessage.type == ChatMessageType.Image) {
           multimediaBloc.add(GetMessageMultimediaEvent(
@@ -147,7 +146,7 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!isObjectEmpty(event)) {
+    if (!event.isNull) {
       event?.callback(value);
     }
   }

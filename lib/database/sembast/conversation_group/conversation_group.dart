@@ -23,7 +23,7 @@ class ConversationDBService {
     var key = isObjectEmpty(existingConversationGroup) ? await _conversationGroupStore.add(await _db, conversationGroup.toJson()) : editConversationGroup(conversationGroup);
 
     // Return added or not added
-    return !isStringEmpty(key.toString());
+    return key.toString().isNotEmpty;
   }
 
   Future<bool> editConversationGroup(ConversationGroup conversationGroup) async {

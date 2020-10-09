@@ -22,17 +22,9 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   Stream<UserState> mapEventToState(UserEvent event) async* {
     if (event is InitializeUserEvent) {
       yield* _initializeUser(event);
-    }
-//    else if (event is AddUserEvent) {
-//      yield* _addUser(event);
-//    }
-    else if (event is EditUserEvent) {
+    } else if (event is EditUserEvent) {
       yield* _editUserToState(event);
-    }
-//    else if (event is DeleteUserEvent) {
-//      yield* _deleteUserFromState(event);
-//    }
-    else if (event is GetOwnUserEvent) {
+    } else if (event is GetOwnUserEvent) {
       yield* _getOwnUser(event);
     } else if (event is CheckUserSignedUpEvent) {
       yield* _checkUserSignedUp(event);
@@ -49,7 +41,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
         User userFromDB = await userDBService.getSingleUser(userId);
 
-        if (!isStringEmpty(userId) && !isObjectEmpty(userFromDB)) {
+        if (userId.isNotEmpty && !userFromDB.isNull) {
           yield UserLoaded(userFromDB);
           functionCallback(event, true);
         } else {
@@ -62,33 +54,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       }
     }
   }
-
-  // Register user in API, DB, BLOC
-//  Stream<UserState> _addUser(AddUserEvent event) async* {
-//    User userFromServer;
-//    bool userSaved = false;
-//
-//    // Avoid reading existed user object
-//    if (isStringEmpty(event.user.id)) {
-//      userFromServer = await userAPIService.addUser(event.user);
-//    } else {
-//      userFromServer = event.user;
-//    }
-//
-//    if (!isObjectEmpty(userFromServer)) {
-//      userSaved = await userDBService.addUser(userFromServer);
-//
-//      if (userSaved) {
-//        yield UserLoaded(userFromServer);
-//        functionCallback(event, userFromServer);
-//      }
-//    }
-//
-//    if (isObjectEmpty(userFromServer) || !userSaved) {
-//      yield UserNotLoaded();
-//      functionCallback(event, null);
-//    }
-//  }
 
   // Change User information in API, DB, and State
   Stream<UserState> _editUserToState(EditUserEvent event) async* {
@@ -112,35 +77,10 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     }
   }
 
-  // Remove User from DB, and BLOC state
-//  Stream<UserState> _deleteUserFromState(DeleteUserEvent event) async* {
-//    bool deletedFromREST = false;
-//    bool deleted = false;
-//    if (state is UserLoaded) {
-//      deletedFromREST = await userAPIService.deleteUser(event.user.id);
-//      if (deletedFromREST) {
-//        deleted = await userDBService.deleteUser(event.user.id);
-//        if (deleted) {
-//          functionCallback(event, true);
-//
-//          User existingUser = (state as UserLoaded).user;
-//
-//          if (existingUser.id == event.user.id) {
-//            yield UserNotLoaded();
-//          }
-//        }
-//      }
-//
-//      if (!deletedFromREST || !deleted) {
-//        functionCallback(event, false);
-//      }
-//    }
-//  }
-
   Stream<UserState> _getOwnUser(GetOwnUserEvent event) async* {
     User user = await userAPIService.getOwnUser();
 
-    if (!isObjectEmpty(user)) {
+    if (!user.isNull) {
       userDBService.addUser(user);
       final FlutterSecureStorage storage = Get.find();
       storage.write(key: 'userId', value: user.id);
@@ -156,24 +96,22 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     User existingUserUsingMobileNo;
     User existingUserUsingGoogleAccount;
 
-    if (!isStringEmpty(event.mobileNo)) {
+    if (event.mobileNo.isNotEmpty) {
 //      existingUserUsingMobileNo = await userAPIService.getUserByUsingMobileNo(event.mobileNo);
     }
 
-    if (!isObjectEmpty(event.googleSignIn) && !isStringEmpty(event.googleSignIn.currentUser.id)) {
+    if (!event.googleSignIn.isNull && event.googleSignIn.currentUser.id.isNotEmpty) {
 //      existingUserUsingGoogleAccount = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
     }
 
     // Must have both not empty then only considered it as sign up
-    isSignedUp = !isObjectEmpty(existingUserUsingMobileNo) && !isObjectEmpty(existingUserUsingGoogleAccount);
+    isSignedUp = !existingUserUsingMobileNo.isNull && !existingUserUsingGoogleAccount.isNull;
 
     if (ENVIRONMENT != 'PRODUCTION') {
       isSignedUp = true;
     }
 
-    if (!isObjectEmpty(event)) {
-      event.callback(isSignedUp);
-    }
+    functionCallback(event, isSignedUp);
   }
 
   // TODO: Moved to AuthenticationBloc
@@ -181,12 +119,12 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     bool isSignedIn = false;
     User userFromServer;
     bool saved = false;
-    if (!isObjectEmpty(event.googleSignIn)) {
+    if (!event.googleSignIn.isNull) {
       isSignedIn = await event.googleSignIn.isSignedIn();
       if (isSignedIn) {
 //        userFromServer = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
 
-        if (!isObjectEmpty(userFromServer)) {
+        if (!userFromServer.isNull) {
           // Check mobile no match with it's googleAccount ID or not.
           if (userFromServer.mobileNo == event.mobileNo) {
             saved = await userDBService.addUser(userFromServer);
@@ -203,7 +141,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       }
     }
 
-    if (!isSignedIn || isObjectEmpty(userFromServer) || !saved) {
+    if (!isSignedIn || userFromServer.isNull || !saved) {
       yield UserNotLoaded();
       functionCallback(event, null);
     }
@@ -216,7 +154,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!isObjectEmpty(event)) {
+    if (!event.isNull) {
       event.callback(value);
     }
   }

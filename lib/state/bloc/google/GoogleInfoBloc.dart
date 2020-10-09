@@ -53,9 +53,7 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
             firebaseUser = userCredential.user;
 
             yield GoogleInfoLoaded(googleSignIn, firebaseAuth, firebaseUser);
-            if (!isObjectEmpty(event)) {
-              event.callback(true);
-            }
+            functionCallback(event, true);
           }
         }
       } catch (e) {
@@ -135,9 +133,7 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
         firebaseUser = userCredential.user;
 
         yield GoogleInfoLoaded(googleSignIn, firebaseAuth, firebaseUser);
-        if (!isObjectEmpty(event)) {
-          event.callback(true);
-        }
+        functionCallback(event, true);
       } catch (e) {
         yield GoogleInfoNotLoaded();
         functionCallback(event, false);
@@ -147,7 +143,7 @@ class GoogleInfoBloc extends Bloc<GoogleInfoEvent, GoogleInfoState> {
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!isObjectEmpty(event)) {
+    if (!event.isNull) {
       event.callback(value);
     }
   }

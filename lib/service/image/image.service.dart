@@ -19,9 +19,9 @@ class ImageService {
   static int imageThumbnailWidthSize = globals.imageThumbnailWidthSize;
 
   Widget loadImageThumbnailCircleAvatar(Multimedia multimedia, DefaultImagePathType type) {
-    return isObjectEmpty(multimedia)
+    return multimedia.isNull
         ? defaultImage(type)
-        : isStringEmpty(multimedia.remoteThumbnailUrl)
+        : multimedia.remoteThumbnailUrl.isEmpty
             ? defaultImage(type)
             : CachedNetworkImage(
                 // Note: imageBuilder is a place that tell CachedNetworkImage how the image should be displayed
@@ -52,7 +52,7 @@ class ImageService {
     double width = deviceWidth * 0.65;
     double height = deviceHeight * 0.4;
     try {
-      if (!isObjectEmpty(multimedia.localFullFileUrl)) {
+      if (multimedia.localFullFileUrl.isNotEmpty) {
         File localImagefile = File(multimedia.localFullFileUrl);
 
         localImagefile.exists().then((bool exist) {
@@ -104,7 +104,7 @@ class ImageService {
   }
 
   redownloadMultimediaFile(BuildContext context, Multimedia multimedia) {
-    if (!isObjectEmpty(multimedia) && !isStringEmpty(multimedia.remoteFullFileUrl)) {
+    if (!multimedia.isNull && multimedia.remoteFullFileUrl.isNotEmpty) {
       fileService.downloadMultimediaFile(context, multimedia);
     }
   }

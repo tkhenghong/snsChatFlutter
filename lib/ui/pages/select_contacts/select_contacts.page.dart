@@ -171,7 +171,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         }
 
         if (userState is UserLoaded) {
-          if (!isObjectEmpty(userState.user)) {
+          if (!userState.user.isNull) {
             ownUser = userState.user;
             return userContactBlocBuilder();
           }
@@ -190,7 +190,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         }
 
         if (userContactState is UserContactsLoaded) {
-          if (!isObjectEmpty(userContactState.ownUserContact)) {
+          if (!userContactState.ownUserContact.isNull) {
             ownUserContact = userContactState.ownUserContact;
             return phoneStorageContactBlocBuilder();
           }
@@ -394,7 +394,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   showSelectPhoneNumberDialog(Contact contact, {bool checked}) {
     List<String> phoneNumberList = getContactMobileNumber(contact);
 
-    if (widget.chatGroupType == ConversationGroupType.Group && !isObjectEmpty(checked) && !checked) {
+    if (widget.chatGroupType == ConversationGroupType.Group && !checked.isNull && !checked) {
       removeGroupUserContact(contact, phoneNumberList, checked);
     } else {
       if (phoneNumberList.length > 1) {
@@ -463,7 +463,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     userContactBloc.add(GetUserContactByMobileNoEvent(
         mobileNo: mobileNumber,
         callback: (UserContact userContact) {
-          if (!isObjectEmpty(userContact)) {
+          if (!userContact.isNull) {
             conversationGroupBloc.add(CreateConversationGroupEvent(
                 createConversationGroupRequest: CreateConversationGroupRequest(
                   name: contact.displayName,
@@ -473,7 +473,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                   adminMemberIds: [ownUserContact.id],
                 ),
                 callback: (ConversationGroup conversationGroup) {
-                  if (!isObjectEmpty(conversationGroup)) {
+                  if (!conversationGroup.isNull) {
                     Get.back(); // Close select phone number pop up
                     goToChatRoomPage(conversationGroup);
                   }
@@ -488,7 +488,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       userContactBloc.add(GetUserContactByMobileNoEvent(
           mobileNo: mobileNumber,
           callback: (UserContact userContact) {
-            if (!isObjectEmpty(userContact)) {
+            if (!userContact.isNull) {
               selectedContacts.add(contact);
               selectedUserContacts.add(userContact);
               setState(() {
@@ -585,13 +585,16 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   bool isOwnUserContact(Contact contact) {
     List<String> mobileNoList = getContactMobileNumber(contact);
-    int countryCodeLength  = ownUser.countryCode.length;
+    int countryCodeLength = ownUser.countryCode.length;
     String strippedOwnUserContactMobileNo = ownUserContact.mobileNo.substring(countryCodeLength);
     return mobileNoList.indexWhere((element) => element.contains(strippedOwnUserContactMobileNo)) > -1;
   }
 
   goToGroupNamePage() {
-    Navigator.push(context, MaterialPageRoute(builder: ((context) => GroupNamePage(selectedUserContacts: selectedUserContacts, selectedContacts: selectedContacts))));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: ((context) => GroupNamePage(selectedUserContacts: selectedUserContacts, selectedContacts: selectedContacts))));
   }
 
   goToChatRoomPage(ConversationGroup conversationGroup) {

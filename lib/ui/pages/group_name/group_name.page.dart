@@ -116,7 +116,7 @@ class GroupNamePageState extends State<GroupNamePage> {
         }
 
         if (userContactState is UserContactsLoaded) {
-          if (!isObjectEmpty(userContactState.ownUserContact)) {
+          if (!userContactState.ownUserContact.isNull) {
             ownUserContact = userContactState.ownUserContact;
             return WillPopScope(
               child: Stack(
@@ -378,9 +378,9 @@ class GroupNamePageState extends State<GroupNamePage> {
           adminMemberIds: [ownUserContact.id],
         ),
         callback: (ConversationGroup conversationGroup) {
-          if (!isObjectEmpty(conversationGroup)) {
+          if (!conversationGroup.isNull) {
             Get.back(); // Close select phone number pop up
-            if (!isObjectEmpty(conversationGroup)) {
+            if (!conversationGroup.isNull) {
               unreadMessageBloc.add(GetUnreadMessageByConversationGroupIdEvent(conversationGroupId: conversationGroup.id));
               goToChatRoomPage(conversationGroup);
             }

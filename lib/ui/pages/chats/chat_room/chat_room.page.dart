@@ -97,9 +97,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
 
     return MultiBlocListener(
-      listeners: [
-        webSocketBlocListener()
-      ],
+      listeners: [webSocketBlocListener()],
       child: BlocBuilder<UserBloc, UserState>(
         builder: (context, userState) {
           if (userState is UserLoading) {
@@ -119,8 +117,10 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
             return BlocBuilder<ConversationGroupBloc, ConversationGroupState>(
               builder: (context, conversationGroupState) {
                 if (conversationGroupState is ConversationGroupsLoaded) {
-                  ConversationGroup conversationGroup = conversationGroupState.conversationGroupList.firstWhere((ConversationGroup conversationGroup) => conversationGroup.id == widget._conversationGroup.id, orElse: () => null);
-                  if (!isObjectEmpty(conversationGroup)) {
+                  ConversationGroup conversationGroup = conversationGroupState.conversationGroupList.firstWhere(
+                      (ConversationGroup conversationGroup) => conversationGroup.id == widget._conversationGroup.id,
+                      orElse: () => null);
+                  if (!conversationGroup.isNull) {
                     return chatRoomMainBody(context, conversationGroup, userState.user);
                   } else {
                     showToast('Error. Conversation Group not found.', Toast.LENGTH_LONG);
@@ -162,7 +162,9 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
           title: BlocBuilder<MultimediaBloc, MultimediaState>(
             builder: (context, multimediaState) {
               if (multimediaState is MultimediaLoaded) {
-                Multimedia multimedia = multimediaState.multimediaList.firstWhere((Multimedia existingMultimedia) => existingMultimedia.conversationId == selectedConversationGroup.id, orElse: () => null);
+                Multimedia multimedia = multimediaState.multimediaList.firstWhere(
+                    (Multimedia existingMultimedia) => existingMultimedia.conversationId == selectedConversationGroup.id,
+                    orElse: () => null);
 
                 return chatRoomPageTopBar(context, selectedConversationGroup, multimedia);
               }
@@ -213,7 +215,8 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                   Icon(Icons.arrow_back),
                   Hero(
                     tag: conversationGroup.id + '1',
-                    child: imageService.loadImageThumbnailCircleAvatar(multimedia, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.conversationGroupType)),
+                    child: imageService.loadImageThumbnailCircleAvatar(
+                        multimedia, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.conversationGroupType)),
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 30.0),
@@ -329,7 +332,9 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               Material(
                 child: Container(
                   margin: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: !textFieldHasValue ? recordVoiceMessageButton(context, user, conversationGroup) : textSendButton(context, user, conversationGroup),
+                  child: !textFieldHasValue
+                      ? recordVoiceMessageButton(context, user, conversationGroup)
+                      : textSendButton(context, user, conversationGroup),
                 ),
                 // color: Colors.white,
               ),
@@ -340,12 +345,11 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
       width: double.infinity,
 //      height: fileList.length > 0 ? deviceHeight * 0.2 : deviceHeight * 0.1,
       decoration: BoxDecoration(
-          border: Border(
-          top: BorderSide(
-              // color: Colors.grey,
-              width: 0.5)
-          ),
-          // color: Colors.white
+        border: Border(
+            top: BorderSide(
+                // color: Colors.grey,
+                width: 0.5)),
+        // color: Colors.white
       ),
     );
   }
@@ -369,7 +373,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   checkTextOnField(String text) {
     setState(() {
-      textFieldHasValue = !isStringEmpty(textEditingController.text);
+      textFieldHasValue = textEditingController.text.isNotEmpty;
     });
   }
 
@@ -578,7 +582,9 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
         if (chatMessageState is ChatMessagesLoaded) {
           // Get current conversation messages and sort them.
-          List<ChatMessage> conversationGroupMessageList = chatMessageState.chatMessageList.where((ChatMessage message) => message.conversationId == widget._conversationGroup.id).toList();
+          List<ChatMessage> conversationGroupMessageList = chatMessageState.chatMessageList
+              .where((ChatMessage message) => message.conversationId == widget._conversationGroup.id)
+              .toList();
           conversationGroupMessageList.sort((message1, message2) => message2.createdTime.compareTo(message1.createdTime));
 
           return Flexible(
@@ -637,8 +643,8 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               message.senderName + ', ' + messageTimeDisplay(message.createdTime.millisecondsSinceEpoch),
 //                    message.senderName,
               style: TextStyle(
-                  fontSize: 10.0,
-                  // color: Colors.black38
+                fontSize: 10.0,
+                // color: Colors.black38
               ),
             ),
           ],
@@ -647,7 +653,11 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
             ? showTextMessage(context, message, isSenderMessage)
             : isImage
                 ? showImageMessage(context, message, isSenderMessage)
-                : isFile ? showFileMessage(context, message, isSenderMessage) : isAudio ? showAudioMessage(context, message, isSenderMessage) : showUnidentifiedMessageText(context, message, isSenderMessage),
+                : isFile
+                    ? showFileMessage(context, message, isSenderMessage)
+                    : isAudio
+                        ? showAudioMessage(context, message, isSenderMessage)
+                        : showUnidentifiedMessageText(context, message, isSenderMessage),
       ],
     );
   }
@@ -666,15 +676,17 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     return BlocBuilder<MultimediaBloc, MultimediaState>(builder: (context, multimediaState) {
       if (multimediaState is MultimediaLoaded) {
         List<Multimedia> multimediaList = multimediaState.multimediaList;
-        Multimedia messageMultimedia = multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.id, orElse: () => null);
-        if (!isObjectEmpty(messageMultimedia)) {
+        Multimedia messageMultimedia =
+            multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.id, orElse: () => null);
+        if (!messageMultimedia.isNull) {
           // Need custom design, so Image doesn't use buildMessageChatBubble() method.
           return Row(
             crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
             mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
             children: <Widget>[
               Container(
-                margin: EdgeInsets.only(bottom: 20.0, right: isSenderMessage ? Get.width * 0.01 : 0.0, left: isSenderMessage ? Get.width * 0.01 : 0.0),
+                margin: EdgeInsets.only(
+                    bottom: 20.0, right: isSenderMessage ? Get.width * 0.01 : 0.0, left: isSenderMessage ? Get.width * 0.01 : 0.0),
                 child: Row(
                   children: <Widget>[
                     Column(
@@ -702,7 +714,8 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         }
       }
 
-      return buildMessageChatBubble(context, message, isSenderMessage, imageService.loadFullImage(context, null, DefaultImagePathType.ConversationGroupMessage));
+      return buildMessageChatBubble(
+          context, message, isSenderMessage, imageService.loadFullImage(context, null, DefaultImagePathType.ConversationGroupMessage));
     });
   }
 
@@ -717,7 +730,8 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         Container(
           padding: EdgeInsets.fromLTRB(lrPadding, tbPadding, lrPadding, tbPadding),
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(32.0)),
-          margin: EdgeInsets.only(bottom: 20.0, right: isSenderMessage ? Get.width * 0.01 : 0.0, left: isSenderMessage ? Get.width * 0.01 : 0.0),
+          margin: EdgeInsets.only(
+              bottom: 20.0, right: isSenderMessage ? Get.width * 0.01 : 0.0, left: isSenderMessage ? Get.width * 0.01 : 0.0),
           child: Row(
             children: <Widget>[
               Column(
@@ -734,10 +748,17 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     return BlocBuilder<MultimediaBloc, MultimediaState>(builder: (context, multimediaState) {
       if (multimediaState is MultimediaLoaded) {
         List<Multimedia> multimediaList = multimediaState.multimediaList;
-        Multimedia messageMultimedia = multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.id, orElse: () => null);
+        Multimedia messageMultimedia =
+            multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.id, orElse: () => null);
         fileService.downloadMultimediaFile(context, messageMultimedia);
 
-        Widget documentMessage = RichText(text: TextSpan(children: [TextSpan(text: message.messageContent, style: TextStyle(), recognizer: TapGestureRecognizer()..onTap = () => downloadFile(context, messageMultimedia, message))]));
+        Widget documentMessage = RichText(
+            text: TextSpan(children: [
+          TextSpan(
+              text: message.messageContent,
+              style: TextStyle(),
+              recognizer: TapGestureRecognizer()..onTap = () => downloadFile(context, messageMultimedia, message))
+        ]));
         return buildMessageChatBubble(context, message, isSenderMessage, documentMessage);
       }
 
@@ -763,10 +784,12 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
           UserContactState userContactState = BlocProvider.of<UserContactBloc>(context).state;
           if (userContactState is UserContactsLoaded) {
             List<UserContact> userContactList = userContactState.userContactList;
-            UserContact userContact = userContactList.firstWhere((UserContact userContact) => userContact.id == message.senderId, orElse: () => null);
+            UserContact userContact =
+                userContactList.firstWhere((UserContact userContact) => userContact.id == message.senderId, orElse: () => null);
           }
 
-          userContactMultimedia = multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.senderId, orElse: () => null);
+          userContactMultimedia =
+              multimediaList.firstWhere((Multimedia multimedia) => multimedia.messageId == message.senderId, orElse: () => null);
           fileService.downloadMultimediaFile(context, messageMultimedia);
           Widget content = messageAudioPlayer(context, message, userContactMultimedia, messageMultimedia, audioService);
           return buildMessageChatBubble(context, message, isSenderMessage, content);
@@ -786,13 +809,14 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     return Container(
       padding: EdgeInsets.fromLTRB(lrPadding, tbPadding, lrPadding, tbPadding),
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(32.0)),
-      margin: EdgeInsets.only(bottom: 20.0, right: isSenderMessage ? Get.width * 0.01 : 0.0, left: isSenderMessage ? Get.width * 0.01 : 0.0),
+      margin:
+          EdgeInsets.only(bottom: 20.0, right: isSenderMessage ? Get.width * 0.01 : 0.0, left: isSenderMessage ? Get.width * 0.01 : 0.0),
       child: Row(
         children: <Widget>[
           Column(
             children: <Widget>[
               Text(
-                'Unindentified message.',
+                'Unidentified message.',
                 style: TextStyle(),
               )
             ],
@@ -807,7 +831,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     String formattedDate = DateFormat('dd-MM-yyyy').format(now);
     DateFormat dateFormat = DateFormat('dd-MM-yyyy');
     DateTime today = dateFormat.parse(formattedDate);
-    String formattedDate2 = DateFormat('dd-MM-yyyy hh:mm:ss').format(today);
+    // String formattedDate2 = DateFormat('dd-MM-yyyy hh:mm:ss').format(today);
     DateTime messageTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
     String formattedDate3 = DateFormat('hh:mm').format(messageTime);
     return formattedDate3;
@@ -908,12 +932,11 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       ),
       decoration: BoxDecoration(
-          border: Border(
-          top: BorderSide(
-          // color: Colors.grey, width: 0.5
-          )
-      ),
-          // color: Colors.white
+        border: Border(
+            top: BorderSide(
+                // color: Colors.grey, width: 0.5
+                )),
+        // color: Colors.white
       ),
       padding: EdgeInsets.all(5.0),
       height: 180.0,
@@ -979,7 +1002,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     });
   }
 
-  Future<bool> recordngIsTooShort() async {
+  Future<bool> recordingIsTooShort() async {
     // int recordDuration = this.audioService.durationsInMiliseconds;
     print('chat_room.page.dart minimumRecordingLength: ' + minimumRecordingLength.toString());
     // print('chat_room.page.dart recordDuration: ' + recordDuration.toString());
@@ -1015,11 +1038,12 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
       BlocProvider.of<ChatMessageBloc>(context).add(AddChatMessageEvent(
           message: newMessage,
           callback: (ChatMessage message) {
-            if (isObjectEmpty(message)) {
+            if (message.isNull) {
               showToast('ChatMessage not sent. Please try again.', Toast.LENGTH_SHORT);
             } else {
               WebSocketMessage webSocketMessage = WebSocketMessage(message: message);
-              BlocProvider.of<WebSocketBloc>(context).add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
+              BlocProvider.of<WebSocketBloc>(context)
+                  .add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
             }
           }));
     }
@@ -1044,7 +1068,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   Future getImage() async {
     File imageFile = await ImagePicker.pickImage(source: ImageSource.gallery, imageQuality: imagePickerQuality);
-    if (!isObjectEmpty(imageFile) && await imageFile.exists()) {
+    if (!imageFile.isNull && await imageFile.exists()) {
       setState(() {
         imageFileList.add(imageFile);
       });
@@ -1084,7 +1108,10 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   scrollToTheEnd() {
     // 2 timers. First to delay scrolling, 2nd is the given time to animate scrolling effect
-    Timer(Duration(milliseconds: 1000), () => imageViewScrollController.animateTo(imageViewScrollController.position.maxScrollExtent, duration: Duration(milliseconds: 300), curve: Curves.easeOut));
+    Timer(
+        Duration(milliseconds: 1000),
+        () => imageViewScrollController.animateTo(imageViewScrollController.position.maxScrollExtent,
+            duration: Duration(milliseconds: 300), curve: Curves.easeOut));
   }
 
   uploadMultimediaFiles(BuildContext context, List<File> fileList, User user, ConversationGroup conversationGroup, ChatMessageType type) {
@@ -1107,10 +1134,10 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         BlocProvider.of<ChatMessageBloc>(context).add(AddChatMessageEvent(
             message: message,
             callback: (ChatMessage message2) async {
-              if (!isObjectEmpty(message2)) {
+              if (!message2.isNull) {
                 Multimedia messageMultimedia = Multimedia(
                     id: null,
-                    localFullFileUrl: isObjectEmpty(file) ? null : file.path,
+                    localFullFileUrl: file.isNull ? null : file.path,
                     localThumbnailUrl: null,
                     remoteThumbnailUrl: null,
                     remoteFullFileUrl: null,
@@ -1121,13 +1148,13 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                     userId: null,
                     fileSize: fileStat.size);
 
-                if (type == 'Image') {
+                if (type == ChatMessageType.Image) {
                   // Create thumbnail
                   File thumbnailImageFile;
-                  if (!isStringEmpty(messageMultimedia.localFullFileUrl) && !isObjectEmpty(file)) {
+                  if (messageMultimedia.localFullFileUrl.isNotEmpty && !file.isNull) {
                     thumbnailImageFile = await imageService.getImageThumbnail(file);
 
-                    if (!isObjectEmpty(thumbnailImageFile)) {
+                    if (!thumbnailImageFile.isNull) {
                       messageMultimedia.localThumbnailUrl = thumbnailImageFile.path;
                     }
                   }
@@ -1150,12 +1177,14 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   Future<Multimedia> uploadMultimediaToCloud(BuildContext context, Multimedia multimedia, ConversationGroup conversationGroup) async {
-    if (!isStringEmpty(multimedia.localFullFileUrl)) {
-      multimedia.remoteFullFileUrl = await firebaseStorageService.uploadFile(multimedia.localFullFileUrl, conversationGroup.conversationGroupType, conversationGroup.id);
+    if (multimedia.localFullFileUrl.isNotEmpty) {
+      multimedia.remoteFullFileUrl = await firebaseStorageService.uploadFile(
+          multimedia.localFullFileUrl, conversationGroup.conversationGroupType, conversationGroup.id);
     }
 
-    if (!isStringEmpty(multimedia.localThumbnailUrl)) {
-      multimedia.remoteThumbnailUrl = await firebaseStorageService.uploadFile(multimedia.localThumbnailUrl, conversationGroup.conversationGroupType, conversationGroup.id);
+    if (multimedia.localThumbnailUrl.isNotEmpty) {
+      multimedia.remoteThumbnailUrl = await firebaseStorageService.uploadFile(
+          multimedia.localThumbnailUrl, conversationGroup.conversationGroupType, conversationGroup.id);
     }
 
     return multimedia;
@@ -1165,9 +1194,10 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(
         multimedia: multimedia,
         callback: (Multimedia multimedia2) {
-          if (!isObjectEmpty(multimedia2)) {
+          if (!multimedia2.isNull) {
             WebSocketMessage webSocketMessage = WebSocketMessage(message: message, multimedia: multimedia);
-            BlocProvider.of<WebSocketBloc>(context).add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
+            BlocProvider.of<WebSocketBloc>(context)
+                .add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
           }
         }));
   }

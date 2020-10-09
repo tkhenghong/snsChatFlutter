@@ -13,15 +13,16 @@ abstract class ApiException implements Exception {
       Get.back();
     }
 
-    String messageTitle = !isObjectEmpty(errorResponse) && !isStringEmpty(errorResponse.exceptionName) ? errorResponse.exceptionName : this.runtimeType.toString();
-    String messageContent = !isObjectEmpty(errorResponse) && !isStringEmpty(errorResponse.message) ? errorResponse.message : '-';
-    String trace = !isObjectEmpty(errorResponse) && !isStringEmpty(errorResponse.trace) ? errorResponse.trace : null;
+    String messageTitle =
+        !errorResponse.isNull && errorResponse.exceptionName.isNotEmpty ? errorResponse.exceptionName : this.runtimeType.toString();
+    String messageContent = !errorResponse.isNull && errorResponse.message.isNotEmpty ? errorResponse.message : '-';
+    String trace = !errorResponse.isNull && errorResponse.trace.isNotEmpty ? errorResponse.trace : null;
 
-    if (!isObjectEmpty(showDialog) && showDialog) {
+    if (!showDialog.isNull && showDialog) {
       showMessageDialog(messageTitle, messageContent, errorCode, trace);
     }
 
-    if (!isObjectEmpty(showSnackBar) && showSnackBar) {
+    if (!showSnackBar.isNull && showSnackBar) {
       showSnackbar(messageTitle, messageContent);
     }
   }
@@ -63,10 +64,10 @@ abstract class ApiException implements Exception {
           children: <Widget>[Text('Error code: ', style: TextStyle(fontWeight: FontWeight.bold)), Text(errorCode)],
         ),
         minorSpacing(),
-        !isStringEmpty(messageContent) ? Text('Description: ', style: TextStyle(fontWeight: FontWeight.bold)) : Container(),
-        !isStringEmpty(messageContent) ? Text(messageContent, softWrap: true) : Container(),
+        messageContent.isNotEmpty ? Text('Description: ', style: TextStyle(fontWeight: FontWeight.bold)) : Container(),
+        messageContent.isNotEmpty ? Text(messageContent, softWrap: true) : Container(),
         minorSpacing(),
-        !isStringEmpty(trace)
+        trace.isNotEmpty
             ? ExpandablePanel(
                 header: Text('Details: '),
                 collapsed: Text(
@@ -75,7 +76,7 @@ abstract class ApiException implements Exception {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontStyle: FontStyle.italic),
                 ),
-                expanded: !isStringEmpty(trace) ? Text(trace, softWrap: true, style: TextStyle(fontStyle: FontStyle.italic)) : Container(),
+                expanded: trace.isNotEmpty ? Text(trace, softWrap: true, style: TextStyle(fontStyle: FontStyle.italic)) : Container(),
               )
             : Container(),
       ],

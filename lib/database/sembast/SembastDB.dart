@@ -28,7 +28,7 @@ class SembastDB {
   // Get the
   Future<Database> get database async {
     // if _dbOpenCompleter is not null, it will not create a new instance of database object from Sembast
-    if (isObjectEmpty(_dbOpenCompleter)) {
+    if (_dbOpenCompleter.isNull) {
       _dbOpenCompleter = Completer();
       _startSembastDatabase();
     }
@@ -54,7 +54,7 @@ class SembastDB {
         CustomFileService fileService = Get.find();
         // get the application documents directory
         String path = await fileService.getApplicationDocumentDirectory();
-        if (isStringEmpty(path)) {
+        if (path.isEmpty) {
           storageAccessGranted = false;
         } else {
           // build the database path

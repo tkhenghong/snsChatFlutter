@@ -34,7 +34,7 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
       try {
         List<UnreadMessage> unreadMessageListFromDB = await unreadMessageDBService.getAllUnreadMessage();
 
-        if (isObjectEmpty(unreadMessageListFromDB)) {
+        if (unreadMessageListFromDB.isEmpty) {
           yield UnreadMessagesNotLoaded();
           functionCallback(event, false);
         } else {
@@ -166,14 +166,14 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
     if (state is UnreadMessagesLoaded) {
       existingUnreadMessageList = (state as UnreadMessagesLoaded).unreadMessageList;
 
-      if (!isObjectEmpty(updatedUnreadMessageList)) {
+      if (updatedUnreadMessageList.isNotEmpty) {
         existingUnreadMessageList = updatedUnreadMessageList;
       }
     }
 
     yield UnreadMessageLoading();
 
-    if (isObjectEmpty(existingUnreadMessageList)) {
+    if (existingUnreadMessageList.isEmpty) {
       yield UnreadMessagesNotLoaded();
     } else {
       yield UnreadMessagesLoaded(existingUnreadMessageList);
@@ -182,7 +182,7 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!isObjectEmpty(event)) {
+    if (!event.isNull) {
       event?.callback(value);
     }
   }

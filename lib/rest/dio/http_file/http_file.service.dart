@@ -49,11 +49,11 @@ class HTTPFileService {
 
     String jwt = await _readJWT();
 
-    if (!isStringEmpty(jwt)) {
+    if (jwt.isNotEmpty) {
       headers.putIfAbsent('Authorization', () => 'Bearer $jwt');
     }
 
-    if (!isObjectEmpty(additionalHeaders)) {
+    if (additionalHeaders.isNotEmpty) {
       headers.addAll(additionalHeaders);
     }
     return headers;

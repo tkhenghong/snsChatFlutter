@@ -93,7 +93,7 @@ class MyselfPageState extends State<MyselfPage> {
       builder: (context, userState) {
         if (userState is UserLoaded) {
           user = userState.user;
-          if (!isObjectEmpty(user)) {
+          if (!user.isNull) {
             return userContactBlocBuilder();
           }
         }
@@ -108,8 +108,9 @@ class MyselfPageState extends State<MyselfPage> {
         if (userContactState is UserContactsLoaded) {
           List<UserContact> userContactList = userContactState.userContactList;
 
-          userContact = userContactList.firstWhere((UserContact existingUserContact) => user.id == existingUserContact.userId.toString(), orElse: () => null);
-          if (!isObjectEmpty(userContact)) {
+          userContact = userContactList.firstWhere((UserContact existingUserContact) => user.id == existingUserContact.userId.toString(),
+              orElse: () => null);
+          if (!userContact.isNull) {
             return multimediaBlocBuilder();
           }
         }
@@ -123,8 +124,9 @@ class MyselfPageState extends State<MyselfPage> {
       builder: (context, multimediaState) {
         if (multimediaState is MultimediaLoaded) {
           List<Multimedia> multimediaList = multimediaState.multimediaList;
-          multimedia = multimediaList.firstWhere((Multimedia existingMultimedia) => user.id == existingMultimedia.userId, orElse: () => null);
-          if (!isObjectEmpty(multimedia)) {
+          multimedia =
+              multimediaList.firstWhere((Multimedia existingMultimedia) => user.id == existingMultimedia.userId, orElse: () => null);
+          if (!multimedia.isNull) {
             return showMyselfPage();
           }
         }
@@ -159,7 +161,7 @@ class MyselfPageState extends State<MyselfPage> {
   insertUserProfilePicture() {
     ListTile listTile = ListTile(
       title: Text(user.displayName),
-      subtitle: Text(!isStringEmpty(userContact.about) ? userContact.about : ''),
+      subtitle: Text(userContact.about.isNotEmpty ? userContact.about : ''),
       leading: Hero(
         tag: user.id + "1",
         child: imageService.loadImageThumbnailCircleAvatar(multimedia, DefaultImagePathType.Profile),

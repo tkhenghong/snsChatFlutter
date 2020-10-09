@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:snschat_flutter/general/functions/validation_functions.dart';
 
 class CustomDialogs {
   final String title;
@@ -66,7 +65,7 @@ class CustomDialogs {
                       ),
                       FlatButton(
                         onPressed: () {
-                          if (isStringEmpty(textEditingController.text)) {
+                          if (textEditingController.text.isEmpty) {
                             Navigator.of(Get.context).pop(value);
                           } else {
                             Navigator.of(Get.context).pop(textEditingController.text);
