@@ -11,7 +11,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 // Not using it right now, currently testing it inside chat room page.
 class WebSocketService {
-  String WEBSOCKET_URL = globals.WEBSOCKET_URL;
+  String webSocketUrl = globals.WEBSOCKET_URL;
 
   WebSocketChannel webSocketChannel;
   Stream<dynamic> webSocketStream;
@@ -19,7 +19,7 @@ class WebSocketService {
   Future<Stream<dynamic>> connectWebSocket() async {
     Map<String, String> headers = await handleHTTPHeaders();
 
-    webSocketChannel = IOWebSocketChannel.connect(WEBSOCKET_URL, headers: headers);
+    webSocketChannel = IOWebSocketChannel.connect(webSocketUrl, headers: headers);
     webSocketStream = webSocketChannel.stream.asBroadcastStream();
 
     return webSocketStream;
