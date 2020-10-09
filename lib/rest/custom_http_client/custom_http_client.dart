@@ -99,11 +99,11 @@ class CustomHttpClient {
 
     String jwt = await _readJWT();
 
-    if (jwt.isNotEmpty) {
+    if (!jwt.isNullOrBlank) {
       headers.putIfAbsent('Authorization', () => 'Bearer $jwt');
     }
 
-    if (additionalHeaders.isNotEmpty) {
+    if (!additionalHeaders.isNull && additionalHeaders.isNotEmpty) {
       headers.addAll(additionalHeaders);
     }
     return headers;

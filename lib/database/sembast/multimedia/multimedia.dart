@@ -18,9 +18,9 @@ class MultimediaDBService {
     }
 
     Multimedia existingMultimedia = await getSingleMultimedia(multimedia.id);
-    var key = isObjectEmpty(existingMultimedia) ? await _multimediaStore.add(await _db, multimedia.toJson()) : editMultimedia(multimedia);
+    int key = isObjectEmpty(existingMultimedia) ? await _multimediaStore.add(await _db, multimedia.toJson()) : editMultimedia(multimedia);
 
-    return key.toString().isNotEmpty;
+    return key != null && key != 0 && key.toString().isNotEmpty;
   }
 
   Future<bool> editMultimedia(Multimedia multimedia) async {

@@ -41,9 +41,15 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
-    textEditingController.dispose();
     super.dispose();
+    textEditingController.dispose();
+    authenticationBloc.close();
+    userContactBloc.close();
+    settingsBloc.close();
+    userBloc.close();
+    multimediaBloc.close();
+    conversationGroupBloc.close();
+    unreadMessageBloc.close();
   }
 
   @override

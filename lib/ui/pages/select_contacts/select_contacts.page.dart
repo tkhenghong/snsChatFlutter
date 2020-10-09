@@ -565,7 +565,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   List<String> getContactMobileNumber(Contact contact) {
     List<String> primaryNo = [];
-    if (contact.phones.isNotEmpty) {
+    if (!contact.phones.isNull && contact.phones.isNotEmpty) {
       contact.phones.forEach((phoneNo) {
         primaryNo.add(phoneNo.value);
       });

@@ -135,7 +135,7 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!event.isNull) {
+    if (!isObjectEmpty(event)) {
       event.callback(value);
     }
   }

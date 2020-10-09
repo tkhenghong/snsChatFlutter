@@ -52,7 +52,7 @@ class IPGeoLocationBloc extends Bloc<IPGeoLocationEvent, IPGeoLocationState> {
   }
 
   void functionCallback(event, value) {
-    if (!event.isNull) {
+    if (!isObjectEmpty(event)) {
       event.callback(value);
     }
   }

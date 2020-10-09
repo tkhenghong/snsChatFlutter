@@ -22,6 +22,18 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
   WebSocketService webSocketService = Get.find();
 
   @override
+  Future<void> close() {
+    conversationGroupBloc.close();
+    chatMessageBloc.close();
+    multimediaBloc.close();
+    unreadMessageBloc.close();
+    userContactBloc.close();
+    settingsBloc.close();
+    userBloc.close();
+    return super.close();
+  }
+
+  @override
   Stream<WebSocketState> mapEventToState(WebSocketEvent event) async* {
     if (event is InitializeWebSocketEvent) {
       yield* _initializeWebSocketToState(event);
@@ -146,7 +158,7 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!event.isNull) {
+    if (!isObjectEmpty(event)) {
       event?.callback(value);
     }
   }

@@ -48,7 +48,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
 
         bool jwtExpired = otpExpirationTime.isBefore(DateTime.now());
 
-        if (jwtToken.isNotEmpty && username.isNotEmpty && !otpExpirationTime.isNull && !jwtExpired) {
+        if (!jwtToken.isNullOrBlank && username.isNullOrBlank && !otpExpirationTime.isNull && !jwtExpired) {
           yield AuthenticationsLoaded(jwtToken, username, otpExpirationTime);
           functionCallback(event, true);
         } else {
@@ -184,7 +184,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!event.isNull) {
+    if (!isObjectEmpty(event)) {
       event.callback(value);
     }
   }

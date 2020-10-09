@@ -69,6 +69,23 @@ class MyselfPageState extends State<MyselfPage> {
   ImageService imageService = Get.find();
 
   @override
+  void dispose() {
+    super.dispose();
+    ipGeoLocationBloc.close();
+    authenticationBloc.close();
+    multimediaProgressBloc.close();
+    conversationGroupBloc.close();
+    messageBloc.close();
+    multimediaBloc.close();
+    unreadMessageBloc.close();
+    userContactBloc.close();
+    settingsBloc.close();
+    userBloc.close();
+    webSocketBloc.close();
+    googleInfoBloc.close();
+  }
+
+  @override
   Widget build(BuildContext context) {
     ipGeoLocationBloc = BlocProvider.of<IPGeoLocationBloc>(context);
     authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);

@@ -194,6 +194,9 @@ initializeServices() {
   // Secure Storage
   Get.put(new FlutterSecureStorage());
 
+  // Dio
+  Get.put(new Dio());
+
   // API Services
   Get.put(CustomHttpClient());
   Get.put(HTTPFileService());
@@ -229,9 +232,6 @@ initializeServices() {
   Get.put(PasswordService());
   Get.put(CryptoJSService());
   Get.put(DigestService());
-
-  // Dio
-  Get.put(new Dio());
 
   // ImagePicker
   Get.put(ImagePicker());

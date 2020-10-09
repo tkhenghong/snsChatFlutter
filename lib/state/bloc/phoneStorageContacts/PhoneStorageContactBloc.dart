@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 
 import 'bloc.dart';
@@ -109,7 +110,7 @@ class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorag
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!event.isNull) {
+    if (!isObjectEmpty(event)) {
       event?.callback(value);
     }
   }

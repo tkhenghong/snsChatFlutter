@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:get/get.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
+import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
@@ -122,7 +123,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
   // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!event.isNull) {
+    if (!isObjectEmpty(event)) {
       event?.callback(value);
     }
   }

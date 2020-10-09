@@ -2,7 +2,6 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
-import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
 
 String supportEmail = globals.supportEmail;
@@ -14,9 +13,9 @@ abstract class ApiException implements Exception {
     }
 
     String messageTitle =
-        !errorResponse.isNull && errorResponse.exceptionName.isNotEmpty ? errorResponse.exceptionName : this.runtimeType.toString();
-    String messageContent = !errorResponse.isNull && errorResponse.message.isNotEmpty ? errorResponse.message : '-';
-    String trace = !errorResponse.isNull && errorResponse.trace.isNotEmpty ? errorResponse.trace : null;
+        !errorResponse.isNull && errorResponse.exceptionName.isNullOrBlank ? errorResponse.exceptionName : this.runtimeType.toString();
+    String messageContent = !errorResponse.isNull && errorResponse.message.isNullOrBlank ? errorResponse.message : '-';
+    String trace = !errorResponse.isNull && errorResponse.trace.isNullOrBlank ? errorResponse.trace : null;
 
     if (!showDialog.isNull && showDialog) {
       showMessageDialog(messageTitle, messageContent, errorCode, trace);
@@ -64,10 +63,10 @@ abstract class ApiException implements Exception {
           children: <Widget>[Text('Error code: ', style: TextStyle(fontWeight: FontWeight.bold)), Text(errorCode)],
         ),
         minorSpacing(),
-        messageContent.isNotEmpty ? Text('Description: ', style: TextStyle(fontWeight: FontWeight.bold)) : Container(),
-        messageContent.isNotEmpty ? Text(messageContent, softWrap: true) : Container(),
+        messageContent.isNullOrBlank ? Text('Description: ', style: TextStyle(fontWeight: FontWeight.bold)) : Container(),
+        messageContent.isNullOrBlank ? Text(messageContent, softWrap: true) : Container(),
         minorSpacing(),
-        trace.isNotEmpty
+        trace.isNullOrBlank
             ? ExpandablePanel(
                 header: Text('Details: '),
                 collapsed: Text(
@@ -76,7 +75,7 @@ abstract class ApiException implements Exception {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontStyle: FontStyle.italic),
                 ),
-                expanded: trace.isNotEmpty ? Text(trace, softWrap: true, style: TextStyle(fontStyle: FontStyle.italic)) : Container(),
+                expanded: trace.isNullOrBlank ? Text(trace, softWrap: true, style: TextStyle(fontStyle: FontStyle.italic)) : Container(),
               )
             : Container(),
       ],

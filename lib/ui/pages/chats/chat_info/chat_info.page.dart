@@ -35,11 +35,16 @@ class ChatInfoPageState extends State<ChatInfoPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     textEditingController = new TextEditingController();
     scrollController = new ScrollController();
     textEditingController.text = widget._conversationGroup.name;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    webSocketBloc.close();
   }
 
   @override

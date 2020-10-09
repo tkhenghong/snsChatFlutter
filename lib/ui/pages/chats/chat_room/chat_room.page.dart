@@ -47,7 +47,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   List<File> imageThumbnailFileList = [];
   List<File> documentFileList = [];
 
-  String WEBSOCKET_URL = globals.WEBSOCKET_URL;
+  String webSocketUrl = globals.WEBSOCKET_URL;
   int minimumRecordingLength = globals.minimumRecordingLength;
 
   int imagePickerQuality = globals.imagePickerQuality;
@@ -85,11 +85,12 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   @override
   void dispose() {
+    super.dispose();
     listScrollController.dispose();
     textEditingController.dispose();
     _animationController.dispose();
     _animationController2.dispose();
-    super.dispose();
+    webSocketBloc.close();
   }
 
   @override
@@ -1003,7 +1004,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   Future<bool> recordingIsTooShort() async {
-    // int recordDuration = this.audioService.durationsInMiliseconds;
+    // int recordDuration = this.audioService.durationsInMilliseconds;
     print('chat_room.page.dart minimumRecordingLength: ' + minimumRecordingLength.toString());
     // print('chat_room.page.dart recordDuration: ' + recordDuration.toString());
     // return recordDuration < minimumRecordingLength;
@@ -1177,12 +1178,12 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   Future<Multimedia> uploadMultimediaToCloud(BuildContext context, Multimedia multimedia, ConversationGroup conversationGroup) async {
-    if (multimedia.localFullFileUrl.isNotEmpty) {
+    if (multimedia.localFullFileUrl.isNullOrBlank) {
       multimedia.remoteFullFileUrl = await firebaseStorageService.uploadFile(
           multimedia.localFullFileUrl, conversationGroup.conversationGroupType, conversationGroup.id);
     }
 
-    if (multimedia.localThumbnailUrl.isNotEmpty) {
+    if (multimedia.localThumbnailUrl.isNullOrBlank) {
       multimedia.remoteThumbnailUrl = await firebaseStorageService.uploadFile(
           multimedia.localThumbnailUrl, conversationGroup.conversationGroupType, conversationGroup.id);
     }

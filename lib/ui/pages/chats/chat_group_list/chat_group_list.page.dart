@@ -51,6 +51,18 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   void dispose() {
     super.dispose();
     _refreshController.dispose();
+    ipGeoLocationBloc.close();
+    authenticationBloc.close();
+    multimediaProgressBloc.close();
+    conversationGroupBloc.close();
+    chatMessageBloc.close();
+    multimediaBloc.close();
+    unreadMessageBloc.close();
+    userContactBloc.close();
+    settingsBloc.close();
+    userBloc.close();
+    webSocketBloc.close();
+    googleInfoBloc.close();
   }
 
   @override

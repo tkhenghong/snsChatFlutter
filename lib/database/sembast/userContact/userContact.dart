@@ -18,9 +18,9 @@ class UserContactDBService {
     }
 
     UserContact existingUserContact = await getSingleUserContact(userContact.id);
-    var key = isObjectEmpty(existingUserContact) ? await _userContactStore.add(await _db, userContact.toJson()) : editUserContact(userContact);
+    int key = isObjectEmpty(existingUserContact) ? await _userContactStore.add(await _db, userContact.toJson()) : editUserContact(userContact);
 
-    return key.toString().isNotEmpty;
+    return key != null && key != 0 && key.toString().isNotEmpty;
   }
 
   Future<bool> editUserContact(UserContact userContact) async {

@@ -55,6 +55,8 @@ class LoginPageState extends State<LoginPage> {
     // TODO: implement dispose
     super.dispose();
     mobileNoTextController.dispose();
+    authenticationBloc.close();
+    webSocketBloc.close();
   }
 
   @override

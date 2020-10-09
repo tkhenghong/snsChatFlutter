@@ -50,7 +50,7 @@ class WebSocketService {
 
     String jwt = await _readJWT();
 
-    if (jwt.isNotEmpty) {
+    if (!jwt.isNullOrBlank) {
       headers.putIfAbsent('Authorization', () => 'Bearer $jwt');
     }
 

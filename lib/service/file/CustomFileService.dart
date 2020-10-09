@@ -97,7 +97,7 @@ class CustomFileService {
   // TODO: Use Dio to download file
   @deprecated
   downloadMultimediaFile(BuildContext context, Multimedia multimedia) async {
-    if (multimedia.remoteFullFileUrl.isNotEmpty) {
+    if (!multimedia.remoteFullFileUrl.isNullOrBlank) {
       File file = await defaultCacheManager.getSingleFile(multimedia.remoteFullFileUrl);
       if (file.isNull) {
         FileInfo fileDownloadFromInternet = await defaultCacheManager.downloadFile(multimedia.remoteFullFileUrl);
