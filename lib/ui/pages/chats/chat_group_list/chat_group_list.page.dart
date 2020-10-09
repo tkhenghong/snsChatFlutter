@@ -156,7 +156,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           UnreadMessageState unreadMessageState = unreadMessageBloc.state;
 
           if (conversationGroupState is ConversationGroupsLoaded) {
-            if (isObjectEmpty(conversationGroupState.conversationGroupList) || conversationGroupState.conversationGroupList.length == 0) {
+            if (conversationGroupState.conversationGroupList.isNullOrBlank || conversationGroupState.conversationGroupList.isEmpty) {
               return Center(child: Text('No conversations. Tap \'+\' to create one!'));
             } else {
               return SmartRefresher(

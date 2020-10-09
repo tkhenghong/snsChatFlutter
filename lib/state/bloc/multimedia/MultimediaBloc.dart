@@ -196,11 +196,11 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
       multimediaList = (state as MultimediaLoaded).multimediaList;
     }
 
-    if (!isObjectEmpty(event.conversationGroupList) && event.conversationGroupList.length > 0) {
+    if (!event.conversationGroupList.isNullOrBlank && event.conversationGroupList.isNotEmpty) {
       for (ConversationGroup conversationGroup in event.conversationGroupList) {
         List<Multimedia> multimediaListFromServer = await multimediaAPIService.getAllMultimediaOfAConversationGroup(conversationGroup.id);
 
-        if (!isObjectEmpty(multimediaListFromServer) && multimediaListFromServer.length > 0) {
+        if (!multimediaListFromServer.isNullOrBlank && multimediaListFromServer.isNotEmpty) {
           // Update DB
           for (Multimedia multimediaFromServer in multimediaListFromServer) {
             Multimedia existingConversationGroupMultimedia = await multimediaDBService.getSingleMultimedia(multimediaFromServer.id);
@@ -231,7 +231,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
       multimediaList = (state as MultimediaLoaded).multimediaList;
     }
 
-    if (!isObjectEmpty(event.userContactList) && event.userContactList.length > 0) {
+    if (!event.userContactList.isNullOrBlank && event.userContactList.isNotEmpty) {
       for (UserContact userContact in event.userContactList) {
         Multimedia userContactMultimedia = await multimediaAPIService.getMultimediaOfAUserContact(userContact.id);
 

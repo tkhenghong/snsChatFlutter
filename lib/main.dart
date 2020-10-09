@@ -63,7 +63,7 @@ List<GetPage> generateGetPageList() {
 
 /// Generate a list of page routes for main Flutter navigation.
 Map<String, WidgetBuilder> generateRoutes() {
-  if (routeList.length == 0) {
+  if (routeList.isEmpty) {
     navigationPageList.forEach((element) {
       routeList.putIfAbsent(element.routeName, () => (_) => element.routePage);
     });

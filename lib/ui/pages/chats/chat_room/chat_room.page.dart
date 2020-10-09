@@ -376,7 +376,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   Widget buildImageListTab(BuildContext context) {
     return // Use Visibility to control to show widget easily. https://stackoverflow.com/questions/44489804/show-hide-widgets-in-flutter-programmatically
         Visibility(
-      visible: imageFileList.length > 0,
+      visible: imageFileList.isNotEmpty,
       child: Row(
         children: <Widget>[
           Container(
@@ -433,7 +433,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   Widget buildFileListTab(BuildContext context) {
     return // Use Visibility to control to show widget easily. https://stackoverflow.com/questions/44489804/show-hide-widgets-in-flutter-programmatically
         Visibility(
-      visible: documentFileList.length > 0,
+      visible: documentFileList.isNotEmpty,
       child: Row(
         children: <Widget>[
           Container(
@@ -1025,11 +1025,11 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     }
 
     // Got files to send (Images, Video, Audio, Files)
-    if (imageFileList.length > 0) {
+    if (imageFileList.isNotEmpty) {
       uploadMultimediaFiles(context, imageFileList, user, conversationGroup, ChatMessageType.Image);
     }
 
-    if (documentFileList.length > 0) {
+    if (documentFileList.isNotEmpty) {
       uploadMultimediaFiles(context, documentFileList, user, conversationGroup, ChatMessageType.Document);
     }
 
@@ -1066,7 +1066,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   Future getFiles() async {
     FilePickerResult filePickerResult = await FilePicker.platform.pickFiles(type: FileType.any);
 
-    if (!filePickerResult.isNullOrBlank && filePickerResult.files.length > 0) {
+    if (!filePickerResult.isNullOrBlank && filePickerResult.files.isNotEmpty) {
       setState(() {
         documentFileList.addAll(filePickerResult.files.map((PlatformFile file) {
           return File(file.path);
@@ -1088,7 +1088,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   uploadMultimediaFiles(BuildContext context, List<File> fileList, User user, ConversationGroup conversationGroup, ChatMessageType type) {
-    if (fileList.length > 0) {
+    if (fileList.isNotEmpty) {
       fileList.forEach((File file) async {
         FileStat fileStat = await file.stat();
 

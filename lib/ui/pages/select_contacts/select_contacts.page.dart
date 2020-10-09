@@ -214,7 +214,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
             checkboxesLoaded = true;
           }
 
-          if (phoneStorageContactState.phoneStorageContactList.length == 0) {
+          if (phoneStorageContactState.phoneStorageContactList.isEmpty) {
             return showNoContactPage();
           } else {
             // Filter own mobile no.
@@ -565,7 +565,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   List<String> getContactMobileNumber(Contact contact) {
     List<String> primaryNo = [];
-    if (contact.phones.length > 0) {
+    if (contact.phones.isNotEmpty) {
       contact.phones.forEach((phoneNo) {
         primaryNo.add(phoneNo.value);
       });
@@ -576,7 +576,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       primaryNo.add(mobileNo);
     }
 
-    if (primaryNo.length == 0) {
+    if (primaryNo.isEmpty) {
       Get.snackbar('Unable to get the User\'s phone number.', 'Please edit your phone number to proper phone number format and try again.');
     }
 

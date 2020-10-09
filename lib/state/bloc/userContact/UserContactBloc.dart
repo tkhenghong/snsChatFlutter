@@ -243,7 +243,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
   Stream<UserContactState> _getUserOwnUserContactsEvent(GetUserOwnUserContactsEvent event) async* {
     List<UserContact> userContactListFromServer = await userContactAPIService.getOwnUserContacts();
 
-    if (!isObjectEmpty(userContactListFromServer) && userContactListFromServer.length > 0) {
+    if (!userContactListFromServer.isNullOrBlank && userContactListFromServer.isNotEmpty) {
       for (UserContact userContactFromServer in userContactListFromServer) {
         addUserContactIntoDB(userContactFromServer);
         List<UserContact> updatedUserContactList = addUserContactIntoState(userContactFromServer);

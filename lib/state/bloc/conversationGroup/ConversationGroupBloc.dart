@@ -134,7 +134,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     if (state is ConversationGroupsLoaded) {
       List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
-      if (!isObjectEmpty(conversationGroupListFromServer) && conversationGroupListFromServer.length > 0) {
+      if (!conversationGroupListFromServer.isNullOrBlank && conversationGroupListFromServer.isNotEmpty) {
         // Update the current info of the conversationGroup to latest information
         for (ConversationGroup conversationGroupFromServer in conversationGroupListFromServer) {
           // Unable to use contains() method here. Will cause concurrent modification during iteration problem.

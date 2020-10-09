@@ -48,7 +48,7 @@ class CustomSearchDelegate extends SearchDelegate {
         BlocBuilder<PhoneStorageContactBloc, PhoneStorageContactState>(
           builder: (context, phoneStorageContactState) {
             if (phoneStorageContactState is PhoneStorageContactsLoaded) {
-              if (phoneStorageContactState.searchResults.length == 0) {
+              if (phoneStorageContactState.searchResults.isEmpty) {
                 return Column(
                   children: <Widget>[
                     Center(
