@@ -15,16 +15,28 @@ UserContact _$UserContactFromJson(Map<String, dynamic> json) {
     userIds: (json['userIds'] as List)?.map((e) => e as String)?.toList(),
     userId: json['userId'] as String,
     mobileNo: json['mobileNo'] as String,
-    lastSeenDate: json['lastSeenDate'] == null
-        ? null
-        : DateTime.parse(json['lastSeenDate'] as String),
+    countryCode: json['countryCode'] as String,
     block: json['block'] as bool,
-    multimediaId: json['multimediaId'] as String,
-  );
+    profilePicture: json['profilePicture'] as String,
+  )
+    ..createdBy = json['createdBy'] as String
+    ..createdDate = json['createdDate'] == null
+        ? null
+        : DateTime.parse(json['createdDate'] as String)
+    ..lastModifiedBy = json['lastModifiedBy'] as String
+    ..lastModifiedDate = json['lastModifiedDate'] == null
+        ? null
+        : DateTime.parse(json['lastModifiedDate'] as String)
+    ..version = json['version'] as int;
 }
 
 Map<String, dynamic> _$UserContactToJson(UserContact instance) =>
     <String, dynamic>{
+      'createdBy': instance.createdBy,
+      'createdDate': instance.createdDate?.toIso8601String(),
+      'lastModifiedBy': instance.lastModifiedBy,
+      'lastModifiedDate': instance.lastModifiedDate?.toIso8601String(),
+      'version': instance.version,
       'id': instance.id,
       'displayName': instance.displayName,
       'realName': instance.realName,
@@ -32,9 +44,9 @@ Map<String, dynamic> _$UserContactToJson(UserContact instance) =>
       'userIds': instance.userIds,
       'userId': instance.userId,
       'mobileNo': instance.mobileNo,
-      'lastSeenDate': instance.lastSeenDate?.toIso8601String(),
+      'countryCode': instance.countryCode,
       'block': instance.block,
-      'multimediaId': instance.multimediaId,
+      'profilePicture': instance.profilePicture,
     };
 
 // **************************************************************************
@@ -50,9 +62,9 @@ abstract class _$UserContactLombok {
   List<String> userIds;
   String userId;
   String mobileNo;
-  DateTime lastSeenDate;
+  String countryCode;
   bool block;
-  String multimediaId;
+  String profilePicture;
 
   /// Setter
 
@@ -84,16 +96,16 @@ abstract class _$UserContactLombok {
     this.mobileNo = mobileNo;
   }
 
-  void setLastSeenDate(DateTime lastSeenDate) {
-    this.lastSeenDate = lastSeenDate;
+  void setCountryCode(String countryCode) {
+    this.countryCode = countryCode;
   }
 
   void setBlock(bool block) {
     this.block = block;
   }
 
-  void setMultimediaId(String multimediaId) {
-    this.multimediaId = multimediaId;
+  void setProfilePicture(String profilePicture) {
+    this.profilePicture = profilePicture;
   }
 
   /// Getter
@@ -125,15 +137,15 @@ abstract class _$UserContactLombok {
     return mobileNo;
   }
 
-  DateTime getLastSeenDate() {
-    return lastSeenDate;
+  String getCountryCode() {
+    return countryCode;
   }
 
   bool getBlock() {
     return block;
   }
 
-  String getMultimediaId() {
-    return multimediaId;
+  String getProfilePicture() {
+    return profilePicture;
   }
 }

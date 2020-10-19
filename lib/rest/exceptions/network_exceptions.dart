@@ -7,15 +7,15 @@ import 'package:snschat_flutter/objects/rest/index.dart';
 String supportEmail = globals.supportEmail;
 
 abstract class ApiException implements Exception {
-  ApiException(ErrorResponse errorResponse, {String errorCode, bool showDialog, bool showSnackBar}) {
+  ApiException(ErrorResponse errorResponse, {String errorCode, bool showDialog = false, bool showSnackBar = false}) {
     if (Get.isOverlaysOpen || Get.isBottomSheetOpen || Get.isSnackbarOpen || Get.isDialogOpen) {
       Get.back();
     }
 
     String messageTitle =
-        !errorResponse.isNull && errorResponse.exceptionName.isNullOrBlank ? errorResponse.exceptionName : this.runtimeType.toString();
-    String messageContent = !errorResponse.isNull && errorResponse.message.isNullOrBlank ? errorResponse.message : '-';
-    String trace = !errorResponse.isNull && errorResponse.trace.isNullOrBlank ? errorResponse.trace : null;
+        !errorResponse.isNull && !errorResponse.exceptionName.isNullOrBlank ? errorResponse.exceptionName : this.runtimeType.toString();
+    String messageContent = !errorResponse.isNull && !errorResponse.message.isNullOrBlank ? errorResponse.message : '-';
+    String trace = !errorResponse.isNull && !errorResponse.trace.isNullOrBlank ? errorResponse.trace : null;
 
     if (!showDialog.isNull && showDialog) {
       showMessageDialog(messageTitle, messageContent, errorCode, trace);
@@ -107,23 +107,23 @@ abstract class ApiException implements Exception {
 }
 
 class EmptyResultException extends ApiException {
-  EmptyResultException(ErrorResponse errorResponse, [String errorCode]) : super(errorResponse, errorCode: errorCode, showSnackBar: true) {}
+  EmptyResultException(ErrorResponse errorResponse, [String errorCode, bool showSnackBar = true, bool showDialog]) : super(errorResponse, errorCode: errorCode, showDialog: showDialog, showSnackBar: showSnackBar) {}
 }
 
 class ConnectionException extends ApiException {
-  ConnectionException(ErrorResponse errorResponse, [String errorCode]) : super(errorResponse, errorCode: errorCode, showDialog: true) {}
+  ConnectionException(ErrorResponse errorResponse, [String errorCode, bool showSnackBar, bool showDialog = true]) : super(errorResponse, errorCode: errorCode, showDialog: showDialog, showSnackBar: showSnackBar) {}
 }
 
 class ServerErrorException extends ApiException {
-  ServerErrorException(ErrorResponse errorResponse, [String errorCode]) : super(errorResponse, errorCode: errorCode, showDialog: true) {}
+  ServerErrorException(ErrorResponse errorResponse, [String errorCode, bool showSnackBar, bool showDialog = true]) : super(errorResponse, errorCode: errorCode, showDialog: showDialog, showSnackBar: showSnackBar) {}
 }
 
 class ClientErrorException extends ApiException {
-  ClientErrorException(ErrorResponse errorResponse, [String errorCode]) : super(errorResponse, errorCode: errorCode, showDialog: true) {}
+  ClientErrorException(ErrorResponse errorResponse, [String errorCode, bool showSnackBar, bool showDialog = true]) : super(errorResponse, errorCode: errorCode, showDialog: showDialog, showSnackBar: showSnackBar) {}
 }
 
 class UnknownException extends ApiException {
-  UnknownException(ErrorResponse errorResponse, [String errorCode]) : super(errorResponse, errorCode: errorCode, showDialog: true) {}
+  UnknownException(ErrorResponse errorResponse, [String errorCode, bool showSnackBar, bool showDialog = true]) : super(errorResponse, errorCode: errorCode, showDialog: showDialog, showSnackBar: showSnackBar) {}
 }
 
 class NetworkTimeoutException {

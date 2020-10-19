@@ -1,11 +1,12 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:lombok/lombok.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 
 part 'user.g.dart';
 
 @data
 @JsonSerializable()
-class User {
+class User extends Auditable {
   @JsonKey(name: 'id')
   String id;
 
@@ -14,9 +15,6 @@ class User {
 
   @JsonKey(name: 'realName')
   String realName;
-
-  @JsonKey(name: 'googleAccountId')
-  String googleAccountId;
 
   @JsonKey(name: 'emailAddress')
   String emailAddress;
@@ -27,7 +25,7 @@ class User {
   @JsonKey(name: 'mobileNo')
   String mobileNo;
 
-  User({this.id, this.displayName, this.realName, this.mobileNo, this.googleAccountId, this.emailAddress, this.countryCode});
+  User({this.id, this.displayName, this.realName, this.mobileNo, this.emailAddress, this.countryCode});
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 

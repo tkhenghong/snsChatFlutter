@@ -12,7 +12,6 @@ UnreadMessage _$UnreadMessageFromJson(Map<String, dynamic> json) {
     userId: json['userId'] as String,
     conversationId: json['conversationId'] as String,
     lastMessage: json['lastMessage'] as String,
-    date: json['date'] == null ? null : DateTime.parse(json['date'] as String),
     count: json['count'] as int,
   );
 }
@@ -23,7 +22,6 @@ Map<String, dynamic> _$UnreadMessageToJson(UnreadMessage instance) =>
       'conversationId': instance.conversationId,
       'userId': instance.userId,
       'lastMessage': instance.lastMessage,
-      'date': instance.date?.toIso8601String(),
       'count': instance.count,
     };
 
@@ -37,7 +35,6 @@ abstract class _$UnreadMessageLombok {
   String conversationId;
   String userId;
   String lastMessage;
-  DateTime date;
   int count;
 
   /// Setter
@@ -56,10 +53,6 @@ abstract class _$UnreadMessageLombok {
 
   void setLastMessage(String lastMessage) {
     this.lastMessage = lastMessage;
-  }
-
-  void setDate(DateTime date) {
-    this.date = date;
   }
 
   void setCount(int count) {
@@ -81,10 +74,6 @@ abstract class _$UnreadMessageLombok {
 
   String getLastMessage() {
     return lastMessage;
-  }
-
-  DateTime getDate() {
-    return date;
   }
 
   int getCount() {

@@ -40,21 +40,19 @@ Used plugins:
 
 5. Barcode scanner
 
-6. Firebase Auth + Google Sign In + Firebase Storage
+6. http
 
-7. http
+7. Network to file image
 
-8. Network to file image
+8. Web Socket Channel
 
-9. Web Socket Channel
+9. Video Player
 
-10. Video Player
+10. Time formatter
 
-11. Time formatter
+11. Flutter Downloader
 
-12. Flutter Downloader
-
-13. JSON Annotation and JSON Serializable (For convert between object and JSON strings)
+12. JSON Annotation and JSON Serializable (For convert between object and JSON strings)
 Refer to tutorial: https://www.thedroidsonroids.com/blog/how-to-build-an-app-with-flutter-networking-and-connecting-to-api
 NOTE: When created the object, please run `flutter packages pub run build_runner build --delete-conflicting-outputs` to generate proper files for the objects. 
 

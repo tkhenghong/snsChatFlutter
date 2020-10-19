@@ -12,17 +12,29 @@ User _$UserFromJson(Map<String, dynamic> json) {
     displayName: json['displayName'] as String,
     realName: json['realName'] as String,
     mobileNo: json['mobileNo'] as String,
-    googleAccountId: json['googleAccountId'] as String,
     emailAddress: json['emailAddress'] as String,
     countryCode: json['countryCode'] as String,
-  );
+  )
+    ..createdBy = json['createdBy'] as String
+    ..createdDate = json['createdDate'] == null
+        ? null
+        : DateTime.parse(json['createdDate'] as String)
+    ..lastModifiedBy = json['lastModifiedBy'] as String
+    ..lastModifiedDate = json['lastModifiedDate'] == null
+        ? null
+        : DateTime.parse(json['lastModifiedDate'] as String)
+    ..version = json['version'] as int;
 }
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
+      'createdBy': instance.createdBy,
+      'createdDate': instance.createdDate?.toIso8601String(),
+      'lastModifiedBy': instance.lastModifiedBy,
+      'lastModifiedDate': instance.lastModifiedDate?.toIso8601String(),
+      'version': instance.version,
       'id': instance.id,
       'displayName': instance.displayName,
       'realName': instance.realName,
-      'googleAccountId': instance.googleAccountId,
       'emailAddress': instance.emailAddress,
       'countryCode': instance.countryCode,
       'mobileNo': instance.mobileNo,
@@ -37,7 +49,6 @@ abstract class _$UserLombok {
   String id;
   String displayName;
   String realName;
-  String googleAccountId;
   String emailAddress;
   String countryCode;
   String mobileNo;
@@ -54,10 +65,6 @@ abstract class _$UserLombok {
 
   void setRealName(String realName) {
     this.realName = realName;
-  }
-
-  void setGoogleAccountId(String googleAccountId) {
-    this.googleAccountId = googleAccountId;
   }
 
   void setEmailAddress(String emailAddress) {
@@ -83,10 +90,6 @@ abstract class _$UserLombok {
 
   String getRealName() {
     return realName;
-  }
-
-  String getGoogleAccountId() {
-    return googleAccountId;
   }
 
   String getEmailAddress() {

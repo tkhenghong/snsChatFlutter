@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'CreateConversationGroupRequest.dart';
+part of 'create_conversation_group_request.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

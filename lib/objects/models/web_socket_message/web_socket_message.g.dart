@@ -8,6 +8,8 @@ part of 'web_socket_message.dart';
 
 WebSocketMessage _$WebSocketMessageFromJson(Map<String, dynamic> json) {
   return WebSocketMessage(
+    webSocketEvent:
+        _$enumDecodeNullable(_$WebSocketEventEnumMap, json['webSocketEvent']),
     conversationGroup: json['conversationGroup'] == null
         ? null
         : ConversationGroup.fromJson(
@@ -35,6 +37,7 @@ WebSocketMessage _$WebSocketMessageFromJson(Map<String, dynamic> json) {
 
 Map<String, dynamic> _$WebSocketMessageToJson(WebSocketMessage instance) =>
     <String, dynamic>{
+      'webSocketEvent': _$WebSocketEventEnumMap[instance.webSocketEvent],
       'conversationGroup': instance.conversationGroup,
       'message': instance.message,
       'multimedia': instance.multimedia,
@@ -44,12 +47,60 @@ Map<String, dynamic> _$WebSocketMessageToJson(WebSocketMessage instance) =>
       'userContact': instance.userContact,
     };
 
+T _$enumDecode<T>(
+  Map<T, dynamic> enumValues,
+  dynamic source, {
+  T unknownValue,
+}) {
+  if (source == null) {
+    throw ArgumentError('A value must be provided. Supported values: '
+        '${enumValues.values.join(', ')}');
+  }
+
+  final value = enumValues.entries
+      .singleWhere((e) => e.value == source, orElse: () => null)
+      ?.key;
+
+  if (value == null && unknownValue == null) {
+    throw ArgumentError('`$source` is not one of the supported values: '
+        '${enumValues.values.join(', ')}');
+  }
+  return value ?? unknownValue;
+}
+
+T _$enumDecodeNullable<T>(
+  Map<T, dynamic> enumValues,
+  dynamic source, {
+  T unknownValue,
+}) {
+  if (source == null) {
+    return null;
+  }
+  return _$enumDecode<T>(enumValues, source, unknownValue: unknownValue);
+}
+
+const _$WebSocketEventEnumMap = {
+  WebSocketEvent.JoinedConversationGroup: 'JoinedConversationGroup',
+  WebSocketEvent.LeftConversationGroup: 'LeftConversationGroup',
+  WebSocketEvent.UploadedGroupPhoto: 'UploadedGroupPhoto',
+  WebSocketEvent.ChangedGroupPhoto: 'ChangedGroupPhoto',
+  WebSocketEvent.DeletedGroupPhoto: 'DeletedGroupPhoto',
+  WebSocketEvent.ChangedGroupDescription: 'ChangedGroupDescription',
+  WebSocketEvent.PromoteGroupAdmin: 'PromoteGroupAdmin',
+  WebSocketEvent.DemoteGroupAdmin: 'DemoteGroupAdmin',
+  WebSocketEvent.AddGroupMember: 'AddGroupMember',
+  WebSocketEvent.RemoveGroupMember: 'RemoveGroupMember',
+  WebSocketEvent.ChangedPhoneNumber: 'ChangedPhoneNumber',
+  WebSocketEvent.ExistingContactJoined: 'ExistingContactJoined',
+};
+
 // **************************************************************************
 // DataGenerator
 // **************************************************************************
 
 abstract class _$WebSocketMessageLombok {
   /// Field
+  WebSocketEvent webSocketEvent;
   ConversationGroup conversationGroup;
   ChatMessage message;
   Multimedia multimedia;
@@ -59,6 +110,10 @@ abstract class _$WebSocketMessageLombok {
   UserContact userContact;
 
   /// Setter
+
+  void setWebSocketEvent(WebSocketEvent webSocketEvent) {
+    this.webSocketEvent = webSocketEvent;
+  }
 
   void setConversationGroup(ConversationGroup conversationGroup) {
     this.conversationGroup = conversationGroup;
@@ -89,6 +144,10 @@ abstract class _$WebSocketMessageLombok {
   }
 
   /// Getter
+  WebSocketEvent getWebSocketEvent() {
+    return webSocketEvent;
+  }
+
   ConversationGroup getConversationGroup() {
     return conversationGroup;
   }

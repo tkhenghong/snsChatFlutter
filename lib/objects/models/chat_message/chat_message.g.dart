@@ -13,32 +13,36 @@ ChatMessage _$ChatMessageFromJson(Map<String, dynamic> json) {
     senderId: json['senderId'] as String,
     senderName: json['senderName'] as String,
     senderMobileNo: json['senderMobileNo'] as String,
-    type: _$enumDecodeNullable(_$ChatMessageTypeEnumMap, json['type']),
     status: _$enumDecodeNullable(_$ChatMessageStatusEnumMap, json['status']),
     messageContent: json['messageContent'] as String,
     multimediaId: json['multimediaId'] as String,
-    createdTime: json['createdTime'] == null
+  )
+    ..createdBy = json['createdBy'] as String
+    ..createdDate = json['createdDate'] == null
         ? null
-        : DateTime.parse(json['createdTime'] as String),
-    sentTime: json['sentTime'] == null
+        : DateTime.parse(json['createdDate'] as String)
+    ..lastModifiedBy = json['lastModifiedBy'] as String
+    ..lastModifiedDate = json['lastModifiedDate'] == null
         ? null
-        : DateTime.parse(json['sentTime'] as String),
-  );
+        : DateTime.parse(json['lastModifiedDate'] as String)
+    ..version = json['version'] as int;
 }
 
 Map<String, dynamic> _$ChatMessageToJson(ChatMessage instance) =>
     <String, dynamic>{
+      'createdBy': instance.createdBy,
+      'createdDate': instance.createdDate?.toIso8601String(),
+      'lastModifiedBy': instance.lastModifiedBy,
+      'lastModifiedDate': instance.lastModifiedDate?.toIso8601String(),
+      'version': instance.version,
       'id': instance.id,
       'conversationId': instance.conversationId,
-      'type': _$ChatMessageTypeEnumMap[instance.type],
-      'status': _$ChatMessageStatusEnumMap[instance.status],
-      'messageContent': instance.messageContent,
-      'multimediaId': instance.multimediaId,
       'senderId': instance.senderId,
       'senderName': instance.senderName,
       'senderMobileNo': instance.senderMobileNo,
-      'createdTime': instance.createdTime?.toIso8601String(),
-      'sentTime': instance.sentTime?.toIso8601String(),
+      'status': _$ChatMessageStatusEnumMap[instance.status],
+      'messageContent': instance.messageContent,
+      'multimediaId': instance.multimediaId,
     };
 
 T _$enumDecode<T>(
@@ -73,16 +77,6 @@ T _$enumDecodeNullable<T>(
   return _$enumDecode<T>(enumValues, source, unknownValue: unknownValue);
 }
 
-const _$ChatMessageTypeEnumMap = {
-  ChatMessageType.Text: 'Text',
-  ChatMessageType.Image: 'Image',
-  ChatMessageType.Video: 'Video',
-  ChatMessageType.Audio: 'Audio',
-  ChatMessageType.Recording: 'Recording',
-  ChatMessageType.Document: 'Document',
-  ChatMessageType.File: 'File',
-};
-
 const _$ChatMessageStatusEnumMap = {
   ChatMessageStatus.Sending: 'Sending',
   ChatMessageStatus.Sent: 'Sent',
@@ -98,15 +92,12 @@ abstract class _$ChatMessageLombok {
   /// Field
   String id;
   String conversationId;
-  ChatMessageType type;
-  ChatMessageStatus status;
-  String messageContent;
-  String multimediaId;
   String senderId;
   String senderName;
   String senderMobileNo;
-  DateTime createdTime;
-  DateTime sentTime;
+  ChatMessageStatus status;
+  String messageContent;
+  String multimediaId;
 
   /// Setter
 
@@ -116,22 +107,6 @@ abstract class _$ChatMessageLombok {
 
   void setConversationId(String conversationId) {
     this.conversationId = conversationId;
-  }
-
-  void setType(ChatMessageType type) {
-    this.type = type;
-  }
-
-  void setStatus(ChatMessageStatus status) {
-    this.status = status;
-  }
-
-  void setMessageContent(String messageContent) {
-    this.messageContent = messageContent;
-  }
-
-  void setMultimediaId(String multimediaId) {
-    this.multimediaId = multimediaId;
   }
 
   void setSenderId(String senderId) {
@@ -146,12 +121,16 @@ abstract class _$ChatMessageLombok {
     this.senderMobileNo = senderMobileNo;
   }
 
-  void setCreatedTime(DateTime createdTime) {
-    this.createdTime = createdTime;
+  void setStatus(ChatMessageStatus status) {
+    this.status = status;
   }
 
-  void setSentTime(DateTime sentTime) {
-    this.sentTime = sentTime;
+  void setMessageContent(String messageContent) {
+    this.messageContent = messageContent;
+  }
+
+  void setMultimediaId(String multimediaId) {
+    this.multimediaId = multimediaId;
   }
 
   /// Getter
@@ -161,22 +140,6 @@ abstract class _$ChatMessageLombok {
 
   String getConversationId() {
     return conversationId;
-  }
-
-  ChatMessageType getType() {
-    return type;
-  }
-
-  ChatMessageStatus getStatus() {
-    return status;
-  }
-
-  String getMessageContent() {
-    return messageContent;
-  }
-
-  String getMultimediaId() {
-    return multimediaId;
   }
 
   String getSenderId() {
@@ -191,11 +154,15 @@ abstract class _$ChatMessageLombok {
     return senderMobileNo;
   }
 
-  DateTime getCreatedTime() {
-    return createdTime;
+  ChatMessageStatus getStatus() {
+    return status;
   }
 
-  DateTime getSentTime() {
-    return sentTime;
+  String getMessageContent() {
+    return messageContent;
+  }
+
+  String getMultimediaId() {
+    return multimediaId;
   }
 }

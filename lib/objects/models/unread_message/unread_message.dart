@@ -18,13 +18,10 @@ class UnreadMessage {
   @JsonKey(name: 'lastMessage')
   String lastMessage;
 
-  @JsonKey(name: 'date')
-  DateTime date; // last unread message's date
-
   @JsonKey(name: 'count')
   int count;
 
-  UnreadMessage({this.id, this.userId, this.conversationId, this.lastMessage, this.date, this.count});
+  UnreadMessage({this.id, this.userId, this.conversationId, this.lastMessage, this.count});
 
   factory UnreadMessage.fromJson(Map<String, dynamic> json) => _$UnreadMessageFromJson(json);
 

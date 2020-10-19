@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:lombok/lombok.dart';
 import 'package:snschat_flutter/general/enums/index.dart';
 
-part 'CreateConversationGroupRequest.g.dart';
+part 'create_conversation_group_request.g.dart';
 
 @data
 @JsonSerializable()

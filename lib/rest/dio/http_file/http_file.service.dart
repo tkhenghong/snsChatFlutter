@@ -40,8 +40,10 @@ class HTTPFileService {
             receiveTimeout: receiveTimeoutSeconds));
   }
 
-  Future<Response<dynamic>> downloadFile(String url, String downloadFileName) async {
-    return await dio.download("$REST_URL/$url", downloadFileName);
+  /// Download a file using Dio
+  /// Example of download a file: https://stackoverflow.com/questions/59616610
+  Future<Response<dynamic>> downloadFile(String url, String savePath, {Function(int, int) onDownloadProgress}) async {
+    return await dio.download("$REST_URL/$url", savePath, onReceiveProgress: onDownloadProgress);
   }
 
   Future<Map<String, String>> handleHTTPHeaders(Map<String, String> additionalHeaders) async {

@@ -1,47 +1,33 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'multimedia.dart';
+part of 'multimedia_response.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-Multimedia _$MultimediaFromJson(Map<String, dynamic> json) {
-  return Multimedia(
+MultimediaResponse _$MultimediaResponseFromJson(Map<String, dynamic> json) {
+  return MultimediaResponse(
     id: json['id'] as String,
     multimediaType:
         _$enumDecodeNullable(_$MultimediaTypeEnumMap, json['multimediaType']),
-  )
-    ..createdBy = json['createdBy'] as String
-    ..createdDate = json['createdDate'] == null
-        ? null
-        : DateTime.parse(json['createdDate'] as String)
-    ..lastModifiedBy = json['lastModifiedBy'] as String
-    ..lastModifiedDate = json['lastModifiedDate'] == null
-        ? null
-        : DateTime.parse(json['lastModifiedDate'] as String)
-    ..version = json['version'] as int
-    ..fileDirectory = json['fileDirectory'] as String
-    ..fileSize = json['fileSize'] as int
-    ..fileExtension = json['fileExtension'] as String
-    ..contentType = json['contentType'] as String
-    ..fileName = json['fileName'] as String;
+    fileDirectory: json['fileDirectory'] as String,
+    fileSize: json['fileSize'] as int,
+    fileExtension: json['fileExtension'] as String,
+    contentType: json['contentType'] as String,
+    fileName: json['fileName'] as String,
+  );
 }
 
-Map<String, dynamic> _$MultimediaToJson(Multimedia instance) =>
+Map<String, dynamic> _$MultimediaResponseToJson(MultimediaResponse instance) =>
     <String, dynamic>{
-      'createdBy': instance.createdBy,
-      'createdDate': instance.createdDate?.toIso8601String(),
-      'lastModifiedBy': instance.lastModifiedBy,
-      'lastModifiedDate': instance.lastModifiedDate?.toIso8601String(),
-      'version': instance.version,
+      'id': instance.id,
+      'multimediaType': _$MultimediaTypeEnumMap[instance.multimediaType],
       'fileDirectory': instance.fileDirectory,
       'fileSize': instance.fileSize,
       'fileExtension': instance.fileExtension,
       'contentType': instance.contentType,
       'fileName': instance.fileName,
-      'id': instance.id,
-      'multimediaType': _$MultimediaTypeEnumMap[instance.multimediaType],
     };
 
 T _$enumDecode<T>(
@@ -93,10 +79,15 @@ const _$MultimediaTypeEnumMap = {
 // DataGenerator
 // **************************************************************************
 
-abstract class _$MultimediaLombok {
+abstract class _$MultimediaResponseLombok {
   /// Field
   String id;
   MultimediaType multimediaType;
+  String fileDirectory;
+  int fileSize;
+  String fileExtension;
+  String contentType;
+  String fileName;
 
   /// Setter
 
@@ -108,6 +99,26 @@ abstract class _$MultimediaLombok {
     this.multimediaType = multimediaType;
   }
 
+  void setFileDirectory(String fileDirectory) {
+    this.fileDirectory = fileDirectory;
+  }
+
+  void setFileSize(int fileSize) {
+    this.fileSize = fileSize;
+  }
+
+  void setFileExtension(String fileExtension) {
+    this.fileExtension = fileExtension;
+  }
+
+  void setContentType(String contentType) {
+    this.contentType = contentType;
+  }
+
+  void setFileName(String fileName) {
+    this.fileName = fileName;
+  }
+
   /// Getter
   String getId() {
     return id;
@@ -115,5 +126,25 @@ abstract class _$MultimediaLombok {
 
   MultimediaType getMultimediaType() {
     return multimediaType;
+  }
+
+  String getFileDirectory() {
+    return fileDirectory;
+  }
+
+  int getFileSize() {
+    return fileSize;
+  }
+
+  String getFileExtension() {
+    return fileExtension;
+  }
+
+  String getContentType() {
+    return contentType;
+  }
+
+  String getFileName() {
+    return fileName;
   }
 }

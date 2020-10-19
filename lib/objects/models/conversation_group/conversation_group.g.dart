@@ -9,38 +9,43 @@ part of 'conversation_group.dart';
 ConversationGroup _$ConversationGroupFromJson(Map<String, dynamic> json) {
   return ConversationGroup(
     id: json['id'] as String,
-    creatorUserId: json['creatorUserId'] as String,
-    createdDate: json['createdDate'] == null
-        ? null
-        : DateTime.parse(json['createdDate'] as String),
-    name: json['name'] as String,
     conversationGroupType: _$enumDecodeNullable(
         _$ConversationGroupTypeEnumMap, json['conversationGroupType']),
-    block: json['block'] as bool,
+    creatorUserId: json['creatorUserId'] as String,
+    name: json['name'] as String,
     description: json['description'] as String,
     memberIds: (json['memberIds'] as List)?.map((e) => e as String)?.toList(),
     adminMemberIds:
         (json['adminMemberIds'] as List)?.map((e) => e as String)?.toList(),
-    notificationExpireDate: json['notificationExpireDate'] == null
+    groupPhoto: json['groupPhoto'] as String,
+  )
+    ..createdBy = json['createdBy'] as String
+    ..createdDate = json['createdDate'] == null
         ? null
-        : DateTime.parse(json['notificationExpireDate'] as String),
-  );
+        : DateTime.parse(json['createdDate'] as String)
+    ..lastModifiedBy = json['lastModifiedBy'] as String
+    ..lastModifiedDate = json['lastModifiedDate'] == null
+        ? null
+        : DateTime.parse(json['lastModifiedDate'] as String)
+    ..version = json['version'] as int;
 }
 
 Map<String, dynamic> _$ConversationGroupToJson(ConversationGroup instance) =>
     <String, dynamic>{
+      'createdBy': instance.createdBy,
+      'createdDate': instance.createdDate?.toIso8601String(),
+      'lastModifiedBy': instance.lastModifiedBy,
+      'lastModifiedDate': instance.lastModifiedDate?.toIso8601String(),
+      'version': instance.version,
       'id': instance.id,
       'creatorUserId': instance.creatorUserId,
-      'createdDate': instance.createdDate?.toIso8601String(),
       'name': instance.name,
       'conversationGroupType':
           _$ConversationGroupTypeEnumMap[instance.conversationGroupType],
       'description': instance.description,
       'memberIds': instance.memberIds,
       'adminMemberIds': instance.adminMemberIds,
-      'block': instance.block,
-      'notificationExpireDate':
-          instance.notificationExpireDate?.toIso8601String(),
+      'groupPhoto': instance.groupPhoto,
     };
 
 T _$enumDecode<T>(
@@ -89,14 +94,12 @@ abstract class _$ConversationGroupLombok {
   /// Field
   String id;
   String creatorUserId;
-  DateTime createdDate;
   String name;
   ConversationGroupType conversationGroupType;
   String description;
   List<String> memberIds;
   List<String> adminMemberIds;
-  bool block;
-  DateTime notificationExpireDate;
+  String groupPhoto;
 
   /// Setter
 
@@ -106,10 +109,6 @@ abstract class _$ConversationGroupLombok {
 
   void setCreatorUserId(String creatorUserId) {
     this.creatorUserId = creatorUserId;
-  }
-
-  void setCreatedDate(DateTime createdDate) {
-    this.createdDate = createdDate;
   }
 
   void setName(String name) {
@@ -132,12 +131,8 @@ abstract class _$ConversationGroupLombok {
     this.adminMemberIds = adminMemberIds;
   }
 
-  void setBlock(bool block) {
-    this.block = block;
-  }
-
-  void setNotificationExpireDate(DateTime notificationExpireDate) {
-    this.notificationExpireDate = notificationExpireDate;
+  void setGroupPhoto(String groupPhoto) {
+    this.groupPhoto = groupPhoto;
   }
 
   /// Getter
@@ -147,10 +142,6 @@ abstract class _$ConversationGroupLombok {
 
   String getCreatorUserId() {
     return creatorUserId;
-  }
-
-  DateTime getCreatedDate() {
-    return createdDate;
   }
 
   String getName() {
@@ -173,11 +164,7 @@ abstract class _$ConversationGroupLombok {
     return adminMemberIds;
   }
 
-  bool getBlock() {
-    return block;
-  }
-
-  DateTime getNotificationExpireDate() {
-    return notificationExpireDate;
+  String getGroupPhoto() {
+    return groupPhoto;
   }
 }

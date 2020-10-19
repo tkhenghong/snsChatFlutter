@@ -121,7 +121,7 @@ dependencies:
   device_info: ^0.4.2+4
 
   # Pull to refresh
-  pull_to_refresh: ^1.6.0
+  pull_to_refresh: ^1.6.2
 
   # Contacts service
   contacts_service: ^0.4.6

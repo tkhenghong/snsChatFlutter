@@ -47,10 +47,12 @@ class CustomHttpClient {
       await checkNetwork();
       Response response;
 
+      String body = !isObjectEmpty(requestBody) ? json.encode(requestBody.toJson()) : null;
+
       if (!timeoutSeconds.isNull) {
-        response = await post(path, body: json.encode(requestBody.toJson()), headers: headers).timeout(Duration(seconds: timeoutSeconds));
+        response = await post(path, body: body, headers: headers).timeout(Duration(seconds: timeoutSeconds));
       } else {
-        response = await post(path, body: json.encode(requestBody.toJson()), headers: headers);
+        response = await post(path, body: body, headers: headers);
       }
       return handleResponse(response);
     } on SocketException {
@@ -64,10 +66,12 @@ class CustomHttpClient {
       await checkNetwork();
       Response response;
 
+      String body = !isObjectEmpty(requestBody) ? json.encode(requestBody.toJson()) : null;
+
       if (!timeoutSeconds.isNull) {
-        response = await put(path, body: json.encode(requestBody.toJson()), headers: headers).timeout(Duration(seconds: timeoutSeconds));
+        response = await put(path, body: body, headers: headers).timeout(Duration(seconds: timeoutSeconds));
       } else {
-        response = await put(path, body: json.encode(requestBody.toJson()), headers: headers);
+        response = await put(path, body: body, headers: headers);
       }
 
       return handleResponse(response);
@@ -103,7 +107,7 @@ class CustomHttpClient {
       headers.putIfAbsent('Authorization', () => 'Bearer $jwt');
     }
 
-    if (!additionalHeaders.isNull && additionalHeaders.isNotEmpty) {
+    if (!isObjectEmpty(additionalHeaders)) {
       headers.addAll(additionalHeaders);
     }
     return headers;
@@ -125,7 +129,7 @@ class CustomHttpClient {
     }
   }
 
-  dynamic handleResponse(Response response) {
+  dynamic handleResponse(Response response, {bool showDialog, bool showSnackBar}) {
     final statusCode = response.statusCode;
 
     if (statusCode >= 200 && statusCode < 299) {
@@ -139,13 +143,13 @@ class CustomHttpClient {
       if (statusCode >= 400 && statusCode < 500) {
         print('custom_http_client.dart if (statusCode >= 400 && statusCode < 500)');
         print('custom_http_client.dart errorResponse.toString(): ' + errorResponse.toString());
-        throw ClientErrorException(errorResponse, statusCode.toString());
+        throw ClientErrorException(errorResponse, statusCode.toString(), showSnackBar, showDialog);
       } else if (statusCode >= 500 && statusCode < 600) {
         print('custom_http_client.dart else if (statusCode >= 500 && statusCode < 600)');
-        throw ServerErrorException(errorResponse, statusCode.toString());
+        throw ServerErrorException(errorResponse, statusCode.toString(), showSnackBar, showDialog);
       } else {
         print('custom_http_client.dart UnknownException');
-        throw UnknownException(errorResponse, statusCode.toString());
+        throw UnknownException(errorResponse, statusCode.toString(), showSnackBar, showDialog);
       }
     }
   }
