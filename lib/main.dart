@@ -232,6 +232,7 @@ initializeServices() {
   Get.put(PasswordService());
   Get.put(CryptoJSService());
   Get.put(DigestService());
+  Get.put(FileCachingService());
 
   // ImagePicker
   Get.put(ImagePicker());

@@ -38,6 +38,50 @@ class ConversationGroupAPIService {
     return ConversationGroup.fromJson(await httpClient.putRequest("$REST_URL/$conversationGroupAPI", requestBody: editConversationGroupRequest));
   }
 
+  Future<ConversationGroup> addConversationGroupMember(String conversationGroupId, AddConversationGroupMemberRequest addConversationGroupMemberRequest) async {
+    return ConversationGroup.fromJson(await httpClient.putRequest("$REST_URL/$conversationGroupAPI/$conversationGroupId/groupMember/add", requestBody: addConversationGroupMemberRequest));
+  }
+
+  Future<ConversationGroup> removeConversationGroupMember(String conversationGroupId, RemoveConversationGroupMemberRequest removeConversationGroupMemberRequest) async {
+    return ConversationGroup.fromJson(await httpClient.putRequest("$REST_URL/$conversationGroupAPI/$conversationGroupId/groupMember/remove", requestBody: removeConversationGroupMemberRequest));
+  }
+
+  Future<ConversationGroup> addConversationGroupAdmin(String conversationGroupId, AddConversationGroupAdminRequest addConversationGroupAdminRequest) async {
+    return ConversationGroup.fromJson(await httpClient.putRequest("$REST_URL/$conversationGroupAPI/$conversationGroupId/groupAdmin/add", requestBody: addConversationGroupAdminRequest));
+  }
+
+  Future<ConversationGroup> removeConversationGroupAdmin(String conversationGroupId, RemoveConversationGroupAdminRequest removeConversationGroupAdminRequest) async {
+    return ConversationGroup.fromJson(await httpClient.putRequest("$REST_URL/$conversationGroupAPI/$conversationGroupId/groupAdmin/remove", requestBody: removeConversationGroupAdminRequest));
+  }
+
+  Future<ConversationGroup> leaveConversationGroup(String conversationGroupId) async {
+    return ConversationGroup.fromJson(await httpClient.deleteRequest("$REST_URL/$conversationGroupAPI/$conversationGroupId/leave"));
+  }
+
+  Future<ConversationGroupBlock> blockConversationGroupNotifications(String conversationGroupId) async {
+    return ConversationGroupBlock.fromJson(await httpClient.putRequest("$REST_URL/$conversationGroupAPI/$conversationGroupId/block"));
+  }
+
+  Future<ConversationGroupBlock> blockConversationGroup(String conversationGroupId) async {
+    return ConversationGroupBlock.fromJson(await httpClient.putRequest("$REST_URL/$conversationGroupAPI/$conversationGroupId/block"));
+  }
+
+  Future<void> unblockConversationGroup(String conversationGroupId) async {
+    return await httpClient.putRequest("$REST_URL/$conversationGroupAPI/$conversationGroupId/unblock");
+  }
+
+  Future<ConversationGroupMuteNotification> muteConversationGroupNotification(String conversationGroupId, MuteConversationGroupNotificationRequest muteConversationGroupNotificationRequest) async {
+    return ConversationGroupMuteNotification.fromJson(await httpClient.putRequest("$REST_URL/$conversationGroupAPI/$conversationGroupId/notification/mute", requestBody: muteConversationGroupNotificationRequest));
+  }
+
+  Future<void> unmuteConversationGroupNotification(String conversationGroupId, UnmuteConversationGroupNotificationRequest unmuteConversationGroupNotificationRequest) async {
+    return await httpClient.putRequest("$REST_URL/$conversationGroupAPI/$conversationGroupId/notification/unmute", requestBody: unmuteConversationGroupNotificationRequest);
+  }
+
+  Future<void> joinConversationGroup(JoinConversationGroupRequest joinConversationGroupRequest) async {
+    return await httpClient.putRequest("$REST_URL/$conversationGroupAPI/join", requestBody: joinConversationGroupRequest);
+  }
+
   Future<bool> deleteConversationGroup(String conversationGroupId) async {
     return await httpClient.deleteRequest("$REST_URL/$conversationGroupAPI/$conversationGroupId");
   }

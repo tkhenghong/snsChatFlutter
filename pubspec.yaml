@@ -47,6 +47,9 @@ dependencies:
   time_formatter: ^1.0.0+5
   date_format: ^1.0.8
 
+  # Internationalization and Localization (i18n)
+  intl: ^0.16.1
+
   # Sign In
   google_sign_in: ^4.4.4
   firebase_auth: ^0.18.0+1
@@ -78,7 +81,7 @@ dependencies:
   # flutter_exif_rotation: ^0.2.7
 
   # Things required by cached_network_image
-  flutter_cache_manager: ^1.4.1
+  flutter_cache_manager: ^2.0.0
   rxdart: ^0.24.1
 
   # Video

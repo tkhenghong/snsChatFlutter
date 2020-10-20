@@ -13,11 +13,25 @@ UnreadMessage _$UnreadMessageFromJson(Map<String, dynamic> json) {
     conversationId: json['conversationId'] as String,
     lastMessage: json['lastMessage'] as String,
     count: json['count'] as int,
-  );
+  )
+    ..createdBy = json['createdBy'] as String
+    ..createdDate = json['createdDate'] == null
+        ? null
+        : DateTime.parse(json['createdDate'] as String)
+    ..lastModifiedBy = json['lastModifiedBy'] as String
+    ..lastModifiedDate = json['lastModifiedDate'] == null
+        ? null
+        : DateTime.parse(json['lastModifiedDate'] as String)
+    ..version = json['version'] as int;
 }
 
 Map<String, dynamic> _$UnreadMessageToJson(UnreadMessage instance) =>
     <String, dynamic>{
+      'createdBy': instance.createdBy,
+      'createdDate': instance.createdDate?.toIso8601String(),
+      'lastModifiedBy': instance.lastModifiedBy,
+      'lastModifiedDate': instance.lastModifiedDate?.toIso8601String(),
+      'version': instance.version,
       'id': instance.id,
       'conversationId': instance.conversationId,
       'userId': instance.userId,

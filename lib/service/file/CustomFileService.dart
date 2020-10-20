@@ -2,237 +2,180 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
-import 'package:snschat_flutter/state/bloc/bloc.dart';
 
 class CustomFileService {
   PermissionService permissionService = Get.find();
-  DefaultCacheManager defaultCacheManager = DefaultCacheManager();
-//  List<DownloadTask> tasks = [];
+  FileCachingService fileCachingService = Get.find();
 
-  // TODO: getApplicationDocumentDirectory should change to getDirectories,
-  // TODO: so you can get any directory based on where you want.
-  Future<String> getApplicationDocumentDirectory() async {
-    var dir = null;
-    if(Platform.isAndroid) {
-      dir = await getExternalStorageDirectory();
-      // make sure it exists
-      await dir.create(recursive: true);
-      return dir.path; // join method comes from path.dart
-    } else if(Platform.isIOS) {
-      dir = await getApplicationDocumentDirectory();
-      return dir;
-    } else if(Platform.isWindows) {
-      return 'C:/';
-    } else if (Platform.isMacOS) {
-      return '/tmp/';
-    } else if (Platform.isLinux) {
-      return '/tmp/';
-    } else if (Platform.isFuchsia) {
-      return '/tmp/';
-    } else if(kIsWeb) {
-      return '';
-    } else {
-      return '';
-    }
+  String baseDirectory = '';
+  bool baseDirectoryIsReady = false;
+
+  CustomFileService() {
+    setBaseDirectory(); // Run this during service startup to get base directory.
   }
 
-  Future<File> copyFile(File fileToBeCopied, String directory) async {
-    if (fileToBeCopied.isNull) {
-      return null;
+  Future<String> setBaseDirectory() async {
+    baseDirectoryIsReady = true;
+    if (Platform.isAndroid) {
+      return baseDirectory = (await (await getExternalStorageDirectory()).create(recursive: true)).path; // Create and return the directory path
+    } else if (Platform.isIOS) {
+      return baseDirectory = await setBaseDirectory();
+    } else if (Platform.isWindows) {
+      return baseDirectory = 'C:/';
+    } else if (Platform.isMacOS) {
+      return baseDirectory = '/tmp/';
+    } else if (Platform.isLinux) {
+      return baseDirectory = '/tmp/';
+    } else if (Platform.isFuchsia) {
+      return baseDirectory = '/tmp/';
+    } else if (kIsWeb) {
+      return baseDirectory = '';
     }
 
-    // Retrieve file name
-    int lastSlash = fileToBeCopied.path.lastIndexOf("/");
-    String fileName = fileToBeCopied.path.substring(lastSlash + 1, fileToBeCopied.path.length);
+    baseDirectoryIsReady = false;
 
-    String destinationFilePath = "";
+    // if no condition of the above if else is met, throw Exception.
+    throw PlatformException(code: '000', message: 'Error in CustomFileService: Platform is not supported!');
+  }
 
-    switch (directory) {
-      case "ApplicationDocumentDirectory":
-        destinationFilePath = await getApplicationDocumentDirectory() + "/";
-        break;
-      default:
-        break;
+  /// Get the file based on given directory, file name and multimedia type.
+  Future<File> getFile(String fileNameWithExtension, MultimediaType multimediaType, {String baseDir}) async {
+    checkBaseDirectory();
+    if (isObjectEmpty(fileNameWithExtension) || isObjectEmpty(multimediaType)) {
+      throw FileSystemException('Error in CustomFileService: File name or multimediaType is missing!');
+    }
+    if (isObjectEmpty(baseDir)) {
+      baseDir = baseDirectory;
     }
 
-    if (destinationFilePath.isNotEmpty) {
-      destinationFilePath = destinationFilePath + fileName;
+    String directory = '$baseDir/${multimediaType.name}/$fileNameWithExtension';
+
+    File file = File(directory);
+    if (!(await file.exists())) {
+      throw FileSystemException('Error in CustomFileService: Unable to get the File, File does not exist!');
     }
+    return file;
+  }
+
+  /// This function will try to retrieve the file from local directory.
+  /// Not it's not in the given local storage, it wil try to get file from the FileCachingService.
+  /// If it's not in the cache storage, it will download the file from the Internet, then download the file
+  /// with the given Multimedia object,
+  /// NOTE: The file will be stored into the cache storage with the multimedia.fileName by default.
+  Future<File> retrieveMultimediaFile(Multimedia multimedia, String url, {String key}) async {
+    checkBaseDirectory();
+    // Get file with assumed local storage directory.
+    File file = File('$baseDirectory/${multimedia.multimediaType}/${multimedia.fileName}');
+
+    if (await file.exists()) {
+      return file;
+    }
+
+    // Try file in cache storage.
+    FileInfo fileInfo = await fileCachingService.getFileFromCache(multimedia.fileName);
+    if (!isObjectEmpty(fileInfo.file) && await fileInfo.file.exists()) {
+      return fileInfo.file;
+    }
+
+    // Download the file and put it into cache storage.
+    // Note: May throw Exceptions. Let the caller gets the error.
+    FileInfo fileInfoFromInternet = await fileCachingService.downloadFile(url, multimedia.fileName);
+
+    if (!isObjectEmpty(fileInfoFromInternet.file) && await fileInfoFromInternet.file.exists()) {
+      return fileInfoFromInternet.file;
+    }
+
+    throw FileSystemException('Error in CustomFileService: Unable to retrieve the file.!');
+  }
+
+  /// Copy a file from given one to a new directory.
+  /// multimediaType: MultimediaType file.
+  Future<File> copyFile(File fileToBeCopied, MultimediaType multimediaType) async {
+    checkBaseDirectory();
+
+    if (isObjectEmpty(fileToBeCopied)) {
+      throw FileSystemException('Error in CustomFileService: Error in copying file, fileToBeCopied or directory is empty!');
+    }
+
+    String fileName = getFileName(fileToBeCopied);
+
+    String destinationFilePath = '$baseDirectory/${multimediaType.name}/$fileName';
 
     try {
       File copiedFile = await fileToBeCopied.copy(destinationFilePath);
+      if (!(await copiedFile.exists())) {
+        throw FileSystemException('Error in CustomFileService: Error in copying file, copied file does not exist!');
+      }
+
       return copiedFile;
     } catch (e) {
-      Fluttertoast.showToast(msg: "Error in file copying.");
-      print("Error in file copying.");
-      print("Reason: " + e.toString());
+      Fluttertoast.showToast(msg: "Error in file copying. Message: $e}");
       return null;
     }
   }
 
-  Future<File> downloadFileFromUint8List(Uint8List rawFile, String fileName, String fileFormat) async {
-    try {
-      String path = await getApplicationDocumentDirectory() + "/";
-      String fileFullPath = path + fileName + "." + fileFormat;
-      File file = await File(fileFullPath).writeAsBytes(rawFile);
-      bool fileExist = await file.exists();
-      File copiedFile = await file.copy(fileFullPath);
-      return copiedFile;
-    } catch (e) {
-      print("downloadFileFromUint8List error");
-      print("Reason: " + e.toString());
-      return null;
-    }
-  }
+  /// Create a File object with given directory, file name and multimedia type using Uint8List.
+  /// Typically used for files in Contact service(3rd party plugin).
+  Future<File> downloadFileFromUINT8List(Uint8List rawFile, String fileNameWithExtension, MultimediaType multimediaType) async {
+    checkBaseDirectory();
+    String path = '$baseDirectory/${multimediaType.name}/$fileNameWithExtension';
+    File file = await File(path).writeAsBytes(rawFile);
 
-  // TODO: Use Dio to download file
-  @deprecated
-  downloadMultimediaFile(BuildContext context, Multimedia multimedia) async {
-    if (!multimedia.remoteFullFileUrl.isNullOrBlank) {
-      File file = await defaultCacheManager.getSingleFile(multimedia.remoteFullFileUrl);
-      if (file.isNull) {
-        FileInfo fileDownloadFromInternet = await defaultCacheManager.downloadFile(multimedia.remoteFullFileUrl);
-        FileInfo fileThumbnailDownloadedFromInternet = await defaultCacheManager.downloadFile(multimedia.remoteThumbnailUrl);
-
-        if (!fileInfoIsEmpty(fileDownloadFromInternet) && !fileInfoIsEmpty(fileThumbnailDownloadedFromInternet)) {
-          multimedia.localFullFileUrl = fileDownloadFromInternet.file.path;
-          multimedia.localThumbnailUrl = fileThumbnailDownloadedFromInternet.file.path;
-          BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
-        }
-      } else {
-        multimedia.localFullFileUrl = file.path;
-        multimedia.localThumbnailUrl = file.path;
-        BlocProvider.of<MultimediaBloc>(context).add(EditMultimediaEvent(multimedia: multimedia, callback: (Multimedia multimedia) {}));
-      }
-    }
-  }
-
-  bool fileInfoIsEmpty(FileInfo fileInfo) {
-    return fileInfo.isNull || fileInfo.file.isNull;
-  }
-
-  // Check if file exist
-  Future<File> getFile(String filePath) async {
-    try {
-      File file = File(filePath);
-      bool fileExists = await file.exists();
-      if (!fileExists) {
-        return null;
-      }
-      return file;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  Future<File> getLocalImage(Multimedia multimedia, String type) async {
-    if (multimedia.localFullFileUrl.isNotEmpty) {
-      File file = await getFile(multimedia.localFullFileUrl);
-      if (!file.isNull) {
-        return file;
-      }
-    }
-    if (multimedia.localThumbnailUrl.isNotEmpty) {
-      File file = await getFile(multimedia.localThumbnailUrl);
-      if (!file.isNull) {
-        return null;
-      }
+    if (!(await file.exists())) {
+      throw FileSystemException('Error in CustomFileService: Copied File object does not exist in directory.');
     }
 
-    return null;
+    return file;
   }
 
-  Future<String> _findLocalPath(BuildContext context) async {
-    final platform = Theme.of(context).platform;
-    final directory = platform == TargetPlatform.android ? await getExternalStorageDirectory() : await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  // TODO: bring filename to download the file correctly
-  downloadFile(BuildContext context, String remoteUrl, bool showNotification, bool openFileFromNotification, String fileName) async {
-//    try {
-//      String downloadDirectory = await getApplicationDocumentDirectory() + "/";
-//      String downloadDirectory = await _findLocalPath(context) + "/";
-//
-//      tasks = await FlutterDownloader.loadTasks();
-//
-//      // Create a task
-//      final taskId = await FlutterDownloader.enqueue(
-//        url: remoteUrl,
-//        savedDir: downloadDirectory,
-//        showNotification: showNotification,
-//        // show download progress in status bar (for Android)
-//        openFileFromNotification: openFileFromNotification, // click on notification to open downloaded file (for Android)
-//      );
-//
-//      print("taskId: " + taskId.toString());
-//
-//      FlutterDownloader.registerCallback(flutterDownloaderCallback); // callback is a top-level or static function
-//
-//      tasks.forEach((DownloadTask downloadTask) {
-//        print("downloadTask.taskId.toString(): " + downloadTask.taskId.toString());
-//        print("downloadTask.filename.toString(): " + downloadTask.filename.toString());
-//        print("downloadTask.savedDir.toString(): " + downloadTask.savedDir.toString());
-//        print("downloadTask.url.toString(): " + downloadTask.url.toString());
-//        print("downloadTask.status.toString(): " + downloadTask.status.toString());
-//        print("downloadTask.progress.toString(): " + downloadTask.progress.toString());
-//        print("Next!");
-//      });
-//
-//      await FlutterDownloader.open(taskId: taskId);
-//    } catch (e) {
-//      print('Error when download a file');
-//      print('Error reason: ' + e.toString());
-//    }
-  }
-
-//  static void flutterDownloaderCallback(String id, DownloadTaskStatus downloadTaskStatus, int progress) {
-//    if (downloadTaskStatus == DownloadTaskStatus.complete) {
-//      Fluttertoast.showToast(msg: 'File downloaded.', toastLength: Toast.LENGTH_LONG);
-//      FlutterDownloader.open(taskId: id);
-//    }
-//  }
-
-  // TODO: Make a default Icon Image return method
-  String getDefaultImagePath(DefaultImagePathType type) {
-    switch (type) {
-      case DefaultImagePathType.Personal:
-      case DefaultImagePathType.UserContact:
-        return "lib/ui/icons/single_conversation.png";
-        break;
-      case DefaultImagePathType.Group:
-        return "lib/ui/icons/group_conversation.png";
-        break;
-      case DefaultImagePathType.Broadcast:
-        return "lib/ui/icons/broadcast_conversation.png";
-        break;
-      case DefaultImagePathType.Profile:
-        return "lib/ui/icons/default_user_icon.png";
-        break;
-      case DefaultImagePathType.ConversationGroupMessage:
-        return "lib/ui/icons/conversation_group_message.png";
-      default:
-//        return "lib/ui/icons/none.png";
-        return "lib/ui/icons/default_user_icon.png";
-        break;
+  /// Delete a file based on given directory, file name and multimedia type.
+  Future<bool> deleteFile({String baseDir, String fileName, MultimediaType multimediaType}) async {
+    checkBaseDirectory();
+    if (isObjectEmpty(fileName) || isObjectEmpty(multimediaType)) {
+      throw FileSystemException('Error in CustomFileService: File name or multimediaType is missing!');
     }
+    if (isObjectEmpty(baseDir)) {
+      baseDir = baseDirectory;
+    }
+
+    String directory = '$baseDir/${multimediaType.name}/$fileName';
+
+    File fileToBeDeleted = File(directory);
+
+    if (!(await fileToBeDeleted.exists())) {
+      throw FileSystemException('Error in CustomFileService: Unable to delete a File! File does not exist given the path: $directory.');
+    }
+
+    FileSystemEntity fileSystemEntity = await fileToBeDeleted.delete(recursive: true);
+    return !(await fileSystemEntity.exists());
   }
 
-  Future<bool> deleteFile(String url) async {
-    File fileToBeDeleted = new File(url);
-    if (await fileToBeDeleted.exists()) {
-      FileSystemEntity fileSystemEntity = await fileToBeDeleted.delete(recursive: true);
-      return await fileSystemEntity.exists();
+  /// Note: It gets the file name WITH the extension.
+  String getFileName(File file) {
+    return file.path.substring(file.path.lastIndexOf("/") + 1, file.path.length);
+  }
+
+  String getFileNameWithoutExtension(File file) {
+    return file.path.substring(file.path.lastIndexOf("/") + 1, file.path.lastIndexOf("."));
+  }
+
+  /// Get today in String to save file with date categorization.
+  // String getToday() {
+  //   return DateFormat('yyyy-MM-dd').format(DateTime.now());
+  // }
+
+  checkBaseDirectory() {
+    if (!baseDirectoryIsReady) {
+      throw FileSystemException('Error in CustomFileService: baseDirectory is empty!');
     }
-    return false; // Means file is not deleted
   }
 }

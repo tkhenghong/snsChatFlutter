@@ -11,21 +11,9 @@ class UserAPIService {
 
   CustomHttpClient httpClient = Get.find();
 
-//  Future<User> addUser(User user) async {
-//    return User.fromJson(await httpClient.postRequest("$REST_URL/$userAPI", requestBody: user));
-//  }
-
   Future<bool> editUser(User user) async {
     return await httpClient.putRequest("$REST_URL/$userAPI", requestBody: user);
   }
-
-//  Future<bool> deleteUser(String userId) async {
-//    return await httpClient.deleteRequest("$REST_URL/$userAPI/$userId");
-//  }
-
-//  Future<User> getUser(String userId) async {
-//    return User.fromJson(await httpClient.getRequest("$REST_URL/$userAPI/$userId"));
-//  }
 
   Future<User> getOwnUser() async {
     return User.fromJson(await httpClient.getRequest("$REST_URL/$userAPI/"));

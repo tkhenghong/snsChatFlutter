@@ -1,5 +1,5 @@
 enum MultimediaType {
-  GIF, Image, Video, Music, Recording, Audio, Word, Excel, PowerPoint, TXT
+  GIF, Image, Video, Music, Recording, Audio, Word, Excel, PowerPoint, Document, TXT
 }
 
 extension MultimediaTypeUtil on MultimediaType {
@@ -14,6 +14,7 @@ extension MultimediaTypeUtil on MultimediaType {
       case MultimediaType.Word: return 'Word';
       case MultimediaType.Excel: return 'Excel';
       case MultimediaType.PowerPoint: return 'PowerPoint';
+      case MultimediaType.Document: return 'Document';
       case MultimediaType.TXT: return 'TXT';
       default: return null;
     }
@@ -30,7 +31,9 @@ extension MultimediaTypeUtil on MultimediaType {
       case 'Word': return MultimediaType.Word;
       case 'Excel': return MultimediaType.Excel;
       case 'PowerPoint': return MultimediaType.PowerPoint;
+      case 'Document': return MultimediaType.Document;
       case 'TXT': return MultimediaType.TXT;
+      default: return null;
     }
   }
 }

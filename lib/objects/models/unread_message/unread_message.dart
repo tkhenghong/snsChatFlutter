@@ -1,11 +1,12 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:lombok/lombok.dart';
+import 'package:snschat_flutter/objects/models/auditable/auditable.dart';
 
 part 'unread_message.g.dart';
 
 @data
 @JsonSerializable()
-class UnreadMessage {
+class UnreadMessage extends Auditable {
   @JsonKey(name: 'id')
   String id;
 

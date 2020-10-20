@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:snschat_flutter/general/index.dart';
 
+@deprecated
 class FirebaseStorageService {
   // Returns remote URL of the file
   // String type value: User, UserContact, GroupPhoto, Message. Defines the Category of the file when it's uploaded to the Storage

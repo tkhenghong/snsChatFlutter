@@ -10,6 +10,13 @@ export 'request/conversation_group/create_conversation_group/create_conversation
 export 'request/chat_message/create_chat_message_request/create_chat_message_request.dart';
 export 'request/conversation_group/get_conversation_groups/get_conversation_groups_request.dart';
 export 'request/conversation_group/edit_conversation_group/edit_conversation_group_request.dart';
+export 'request/conversation_group/add_conversation_group_member/add_conversation_group_member_request.dart';
+export 'request/conversation_group/remove_conversation_group_member/remove_conversation_group_member_request.dart';
+export 'request/conversation_group/add_conversation_group_admin/add_conversation_group_admin_request.dart';
+export 'request/conversation_group/remove_conversation_group_admin/remove_conversation_group_admin_request.dart';
+export 'request/conversation_group/mute_conversation_group_notification/mute_conversation_group_notification_request.dart';
+export 'request/conversation_group/unmute_conversation_group_notification/unmute_conversation_group_notification_request.dart';
+export 'request/conversation_group/join_conversation_group/join_conversation_group_request.dart';
 
 // Responses
 export 'response/authentication/OTPResponse/OTPResponse.dart';

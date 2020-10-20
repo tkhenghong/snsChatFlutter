@@ -72,6 +72,7 @@ const _$MultimediaTypeEnumMap = {
   MultimediaType.Word: 'Word',
   MultimediaType.Excel: 'Excel',
   MultimediaType.PowerPoint: 'PowerPoint',
+  MultimediaType.Document: 'Document',
   MultimediaType.TXT: 'TXT',
 };
 

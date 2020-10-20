@@ -53,7 +53,7 @@ class SembastDB {
       default:
         CustomFileService fileService = Get.find();
         // get the application documents directory
-        String path = await fileService.getApplicationDocumentDirectory();
+        String path = await fileService.setBaseDirectory();
         if (path.isEmpty) {
           storageAccessGranted = false;
         } else {

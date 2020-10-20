@@ -11,41 +11,7 @@ class MultimediaAPIService {
 
   CustomHttpClient httpClient = Get.find();
 
-  Future<Multimedia> addMultimedia(Multimedia multimedia) async {
-    return Multimedia.fromJson(await httpClient.postRequest("$REST_URL/$multimediaAPI", requestBody: multimedia));
-  }
-
-  Future<bool> editMultimedia(Multimedia multimedia) async {
-    return await httpClient.putRequest("$REST_URL/$multimediaAPI", requestBody: multimedia);
-  }
-
-  Future<bool> deleteMultimedia(String multimediaId) async {
-    return await httpClient.deleteRequest("$REST_URL/$multimediaAPI/$multimediaId");
-  }
-
   Future<Multimedia> getSingleMultimedia(String multimediaId) async {
     return Multimedia.fromJson(await httpClient.getRequest("$REST_URL/$multimediaAPI/$multimediaId"));
-  }
-
-  Future<Multimedia> getUserOwnProfilePictureMultimedia() async {
-    return Multimedia.fromJson(await httpClient.getRequest("$REST_URL/$multimediaAPI/user"));
-  }
-
-  Future<Multimedia> getMultimediaOfAUserContact(String userContactId) async {
-    return Multimedia.fromJson(await httpClient.getRequest("$REST_URL/$multimediaAPI/userContact/$userContactId"));
-  }
-
-  Future<Multimedia> getConversationGroupPhotoMultimedia(String conversationGroupId) async {
-    return Multimedia.fromJson(await httpClient.getRequest("$REST_URL/$multimediaAPI/conversationGroup/photo/$conversationGroupId"));
-  }
-
-  // conversationGroupId is required for find the exact multimedia easier
-  Future<Multimedia> getMessageMultimedia(String conversationGroupId, String messageId) async {
-    return Multimedia.fromJson(await httpClient.getRequest("$REST_URL/$multimediaAPI/message/$conversationGroupId/$messageId"));
-  }
-
-  Future<List<Multimedia>> getAllMultimediaOfAConversationGroup(String conversationGroupId) async {
-    List<dynamic> multimediaListRaw =  await httpClient.getRequest("$REST_URL/$multimediaAPI/conversationGroup/$conversationGroupId");
-    return multimediaListRaw.map((e) => Multimedia.fromJson(e)).toList();
   }
 }
