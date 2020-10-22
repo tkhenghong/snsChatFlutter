@@ -16,12 +16,9 @@ void main() {
       name: "Testing Group 1",
       description: "Testing description",
       conversationGroupType: ConversationGroupType.Personal,
-      createdDate: new DateTime.now(),
-      notificationExpireDate: null,
       creatorUserId: "65421654654651",
       memberIds: ["wadwadw56f4sef", "56s4f6r54g89e4g", "54hs564ju456dyth5jsr", "5t4s5g1erg65t4ae"],
       adminMemberIds: ["g9hf865465fhb6t54"],
-      block: false,
     );
   }
 
