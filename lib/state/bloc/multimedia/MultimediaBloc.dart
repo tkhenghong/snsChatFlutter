@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:get/get.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
@@ -8,8 +9,6 @@ import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/service/file/CustomFileService.dart';
 
 import 'bloc.dart';
-
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 
 class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
   MultimediaBloc() : super(MultimediaLoading());
@@ -25,6 +24,8 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
   Stream<MultimediaState> mapEventToState(MultimediaEvent event) async* {
     if (event is InitializeMultimediaEvent) {
       yield* _initializeMultimediaToState(event);
+    } else if (event is UpdateMultimediaEvent) {
+      yield* _updateMultimedia(event);
     } else if (event is GetUserOwnProfilePictureMultimediaEvent) {
       yield* _getUserOwnProfilePictureMultimediaEvent(event);
     } else if (event is GetConversationGroupsMultimediaEvent) {
@@ -57,6 +58,28 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     }
   }
 
+  /// Add multimedia list into multimedia state and local DB.
+  Stream<MultimediaState> _updateMultimedia(UpdateMultimediaEvent event) async* {
+    try {
+      if (state is MultimediaLoaded) {
+        List<Multimedia> multimediaList = (state as MultimediaLoaded).multimediaList;
+
+        await multimediaDBService.addMultimediaList(event.multimediaList);
+
+        for (int i = 0; i < event.multimediaList.length; i++) {
+          multimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == event.multimediaList[i].id);
+        }
+
+        multimediaList.addAll(event.multimediaList);
+
+        yield MultimediaLoaded(multimediaList);
+        functionCallback(event, true);
+      }
+    } catch (e) {
+      functionCallback(event, false);
+    }
+  }
+
   Stream<MultimediaState> _getUserOwnProfilePictureMultimediaEvent(GetUserOwnProfilePictureMultimediaEvent event) async* {
     try {
       if (state is MultimediaLoaded) {
@@ -72,7 +95,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
           Multimedia userMultimedia = await multimediaDBService.getSingleMultimedia(multimediaFromServer.id);
           bool savedInDB = await multimediaDBService.addMultimedia(userMultimedia);
 
-          if(!savedInDB) {
+          if (!savedInDB) {
             throw Exception('Unable to get user own profile picture multimedia.');
           }
 
@@ -100,7 +123,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
 
           await multimediaDBService.addMultimediaList(multimediaListFromServer);
           if (!multimediaListFromServer.isNullOrBlank && multimediaListFromServer.isNotEmpty) {
-            for(int i = 0; i < multimediaListFromServer.length; i++) {
+            for (int i = 0; i < multimediaListFromServer.length; i++) {
               multimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == multimediaListFromServer[i].id);
             }
             multimediaList.addAll(multimediaListFromServer);
@@ -113,7 +136,6 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     } catch (e) {
       functionCallback(event, false);
     }
-
   }
 
   Stream<MultimediaState> _getUserContactsMultimediaEvent(GetUserContactsMultimediaEvent event) async* {
@@ -127,7 +149,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
 
           await multimediaDBService.addMultimediaList(multimediaListFromServer);
           if (!multimediaListFromServer.isNullOrBlank && multimediaListFromServer.isNotEmpty) {
-            for(int i = 0; i < multimediaListFromServer.length; i++) {
+            for (int i = 0; i < multimediaListFromServer.length; i++) {
               multimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == multimediaListFromServer[i].id);
             }
             multimediaList.addAll(multimediaListFromServer);
@@ -153,7 +175,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
 
           await multimediaDBService.addMultimediaList(multimediaListFromServer);
           if (!multimediaListFromServer.isNullOrBlank && multimediaListFromServer.isNotEmpty) {
-            for(int i = 0; i < multimediaListFromServer.length; i++) {
+            for (int i = 0; i < multimediaListFromServer.length; i++) {
               multimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == multimediaListFromServer[i].id);
             }
             multimediaList.addAll(multimediaListFromServer);

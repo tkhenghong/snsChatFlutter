@@ -17,6 +17,19 @@ class InitializeMultimediaEvent extends MultimediaEvent {
   String toString() => 'InitializeMultimediaEvent';
 }
 
+class UpdateMultimediaEvent extends MultimediaEvent {
+  final List<Multimedia> multimediaList;
+  final Function callback;
+
+  UpdateMultimediaEvent({this.multimediaList, this.callback});
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'UpdateMultimediaEvent {multimediaList: $multimediaList}';
+}
+
 class GetUserOwnProfilePictureMultimediaEvent extends MultimediaEvent {
   final String ownUserContactMultimediaId;
   final Function callback;

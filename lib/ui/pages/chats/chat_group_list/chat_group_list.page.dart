@@ -10,6 +10,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
@@ -345,9 +346,13 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   refreshUserData() {
     userBloc.add(GetOwnUserEvent(callback: (User user) {}));
     settingsBloc.add(GetUserOwnSettingsEvent(callback: (Settings settings) {}));
-    conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(callback: (bool done) {
-      if (done) {
-        multimediaBloc.add(GetConversationGroupsMultimediaEvent(conversationGroupList: conversationGroupState.conversationGroupList, callback: (bool done) {}));
+    conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(callback: (ConversationPageableResponse conversationPageableResponse) {
+      if (!isObjectEmpty(conversationPageableResponse) && conversationPageableResponse.conversationGroupResponses.total > 0) {
+        List<UnreadMessage> unreadMessageList = conversationPageableResponse.unreadMessageResponses.content.map((e) => UnreadMessage.fromJson(e)).toList();
+        List<ConversationGroup> conversationGroupList = conversationPageableResponse.conversationGroupResponses.content.map((e) => ConversationGroup.fromJson(e)).toList();
+
+        unreadMessageBloc.add(UpdateUnreadMessagesEvent(unreadMessages: unreadMessageList));
+        multimediaBloc.add(GetConversationGroupsMultimediaEvent(conversationGroupList: conversationGroupList, callback: (bool done) {}));
       }
     }));
     multimediaBloc.add(GetUserOwnProfilePictureMultimediaEvent(callback: (bool done) {}));

@@ -151,42 +151,47 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
   }
 
   Stream<ConversationGroupState> _getUserOwnConversationGroups(GetUserOwnConversationGroupsEvent event) async* {
-    ConversationPageableResponse conversationPageableResponse = await conversationGroupAPIService.getUserOwnConversationGroups(event.getConversationGroupsRequest);
-    if (state is ConversationGroupsLoaded) {
-      List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
-      if (!conversationPageableResponse.isNull &&
-          !conversationPageableResponse.conversationGroupResponses.content.isNull &&
-          !conversationPageableResponse.conversationGroupResponses.content.isNotEmpty) {
-        List<ConversationGroup> conversationGroupList = conversationPageableResponse.conversationGroupResponses.content.map((e) => ConversationGroup.fromJson(e)).toList();
-        // Update the current info of the conversationGroup to latest information
-        for (ConversationGroup conversationGroupFromServer in conversationGroupList) {
-          // Unable to use contains() method here. Will cause concurrent modification during iteration problem.
-          // Link: https://stackoverflow.com/questions/22409666/exception-concurrent-modification-during-iteration-instancelength17-of-gr
-          bool conversationGroupExist = false;
+   try {
+     if (state is ConversationGroupsLoaded) {
+       ConversationPageableResponse conversationPageableResponse = await conversationGroupAPIService.getUserOwnConversationGroups(event.getConversationGroupsRequest);
+       List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
-          for (ConversationGroup existingConversationGroup in existingConversationGroupList) {
-            if (existingConversationGroup.id == conversationGroupFromServer.id) {
-              conversationGroupExist = true;
-            }
-          }
+       if (!conversationPageableResponse.isNull &&
+           !conversationPageableResponse.conversationGroupResponses.content.isNull &&
+           !conversationPageableResponse.conversationGroupResponses.content.isNotEmpty) {
+         List<ConversationGroup> conversationGroupList = conversationPageableResponse.conversationGroupResponses.content.map((e) => ConversationGroup.fromJson(e)).toList();
+         // Update the current info of the conversationGroup to latest information
+         for (ConversationGroup conversationGroupFromServer in conversationGroupList) {
+           // Unable to use contains() method here. Will cause concurrent modification during iteration problem.
+           // Link: https://stackoverflow.com/questions/22409666/exception-concurrent-modification-during-iteration-instancelength17-of-gr
+           bool conversationGroupExist = false;
 
-          if (conversationGroupExist) {
-            conversationGroupDBService.editConversationGroup(conversationGroupFromServer);
+           for (ConversationGroup existingConversationGroup in existingConversationGroupList) {
+             if (existingConversationGroup.id == conversationGroupFromServer.id) {
+               conversationGroupExist = true;
+             }
+           }
 
-            existingConversationGroupList.removeWhere(
-                (ConversationGroup existingConversationGroup) => existingConversationGroup.id == conversationGroupFromServer.id);
-          } else {
-            conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
-          }
+           if (conversationGroupExist) {
+             conversationGroupDBService.editConversationGroup(conversationGroupFromServer);
 
-          existingConversationGroupList.add(conversationGroupFromServer);
-        }
-      }
+             existingConversationGroupList.removeWhere(
+                     (ConversationGroup existingConversationGroup) => existingConversationGroup.id == conversationGroupFromServer.id);
+           } else {
+             conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
+           }
 
-      yield ConversationGroupsLoaded(existingConversationGroupList);
-      functionCallback(event, true);
-    }
+           existingConversationGroupList.add(conversationGroupFromServer);
+         }
+       }
+
+       yield ConversationGroupsLoaded(existingConversationGroupList);
+       functionCallback(event, conversationPageableResponse);
+     }
+   } catch (e) {
+     functionCallback(event, null);
+   }
   }
 
   Stream<ConversationGroupState> _addGroupMember(AddGroupMemberEvent event) async* {
