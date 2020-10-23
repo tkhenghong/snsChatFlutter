@@ -224,6 +224,7 @@ initializeServices() {
   // Services
   Get.put(PermissionService());
   Get.put(AudioService());
+  Get.put(FileCachingService());
   Get.put(CustomFileService());
   Get.put(FirebaseStorageService());
   Get.put(NetworkService());
@@ -231,7 +232,6 @@ initializeServices() {
   Get.put(PasswordService());
   Get.put(CryptoJSService());
   Get.put(DigestService());
-  Get.put(FileCachingService());
 
   // ImagePicker
   Get.put(ImagePicker());
