@@ -25,8 +25,13 @@ class UserContactAPIService {
     return MultimediaResponse.fromJson(response.data);
   }
 
-  Future<dynamic> getOwnUserContactProfilePhoto(String userContactId, String savePath, Function(int, int) downloadProgress) async {
+  Future<dynamic> getOwnUserContactProfilePhoto(String savePath, Function(int, int) downloadProgress) async {
     Response<dynamic> response = await httpFileService.downloadFile("$REST_URL/$userContactAPI/profilePhoto", savePath, onDownloadProgress: downloadProgress);
+    return response.data; // Return file data to allow BLOC architecture to handle the saving path of the file.
+  }
+
+  Future<dynamic> getUserContactProfilePhoto(String userContactId, String savePath, Function(int, int) downloadProgress) async {
+    Response<dynamic> response = await httpFileService.downloadFile("$REST_URL/$userContactAPI/$userContactId/profilePhoto", savePath, onDownloadProgress: downloadProgress);
     return response.data; // Return file data to allow BLOC architecture to handle the saving path of the file.
   }
 

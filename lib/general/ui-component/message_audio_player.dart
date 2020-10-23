@@ -3,7 +3,8 @@ import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 
-Widget messageAudioPlayer(BuildContext context, ChatMessage message, Multimedia userMultimedia, Multimedia multimedia, AudioService audioService) {
+/// TODO: Transform this to a Stateful widget.
+Widget messageAudioPlayer(ChatMessage message, Multimedia userMultimedia, Multimedia multimedia, AudioService audioService) {
   if (!isObjectEmpty(multimedia)) {
     return Column(
       children: <Widget>[

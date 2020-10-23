@@ -18,17 +18,17 @@ class InitializeUnreadMessagesEvent extends UnreadMessageEvent {
   String toString() => 'InitializeUnreadMessagesEvent';
 }
 
-class EditUnreadMessageEvent extends UnreadMessageEvent {
+class UpdateUnreadMessageEvent extends UnreadMessageEvent {
   final UnreadMessage unreadMessage;
   final Function callback;
 
-  EditUnreadMessageEvent({this.unreadMessage, this.callback});
+  UpdateUnreadMessageEvent({this.unreadMessage, this.callback});
 
   @override
   List<Object> get props => [unreadMessage];
 
   @override
-  String toString() => 'EditUnreadMessageToStateEvent {unreadMessage: $unreadMessage}';
+  String toString() => 'UpdateUnreadMessageEvent {unreadMessage: $unreadMessage}';
 }
 
 class DeleteUnreadMessageEvent extends UnreadMessageEvent {
@@ -57,16 +57,17 @@ class GetUnreadMessageByConversationGroupIdEvent extends UnreadMessageEvent {
   String toString() => 'GetUnreadMessageByConversationGroupIdEvent {unreadMessage: $conversationGroupId}';
 }
 
-class GetUserPreviousUnreadMessagesEvent extends UnreadMessageEvent {
+class UpdateUnreadMessagesEvent extends UnreadMessageEvent {
+  final List<UnreadMessage> unreadMessages;
   final Function callback;
 
-  GetUserPreviousUnreadMessagesEvent({this.callback});
+  UpdateUnreadMessagesEvent({this.unreadMessages, this.callback});
 
   @override
   List<Object> get props => [];
 
   @override
-  String toString() => 'GetUserPreviousUnreadMessagesEvent';
+  String toString() => 'UpdateUnreadMessagesEvent: {unreadMessages: $unreadMessages}';
 }
 
 class RemoveAllUnreadMessagesEvent extends UnreadMessageEvent {

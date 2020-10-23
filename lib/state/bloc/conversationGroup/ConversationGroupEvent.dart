@@ -21,16 +21,16 @@ class InitializeConversationGroupsEvent extends ConversationGroupEvent {
 
 // Used to add conversationGroup from WebSocket
 class AddConversationGroupEvent extends ConversationGroupEvent {
-  final ConversationGroup conversationGroup;
+  final CreateConversationGroupRequest createConversationGroupRequest;
   final Function callback;
 
-  const AddConversationGroupEvent({this.conversationGroup, this.callback});
+  const AddConversationGroupEvent({this.createConversationGroupRequest, this.callback});
 
   @override
-  List<Object> get props => [conversationGroup];
+  List<Object> get props => [createConversationGroupRequest];
 
   @override
-  String toString() => 'AddConversationGroupEvent {conversationGroup: $conversationGroup}';
+  String toString() => 'AddConversationGroupEvent {createConversationGroupRequest: $createConversationGroupRequest}';
 }
 
 class CreateConversationGroupEvent extends ConversationGroupEvent {
@@ -47,16 +47,16 @@ class CreateConversationGroupEvent extends ConversationGroupEvent {
 }
 
 class EditConversationGroupEvent extends ConversationGroupEvent {
-  final ConversationGroup conversationGroup;
+  final EditConversationGroupRequest editConversationGroupRequest;
   final Function callback;
 
-  const EditConversationGroupEvent({this.conversationGroup, this.callback});
+  const EditConversationGroupEvent({this.editConversationGroupRequest, this.callback});
 
   @override
-  List<Object> get props => [conversationGroup];
+  List<Object> get props => [editConversationGroupRequest];
 
   @override
-  String toString() => 'EditConversationGroupEvent {conversationGroup: $conversationGroup}';
+  String toString() => 'EditConversationGroupEvent {editConversationGroupRequest: $editConversationGroupRequest}';
 }
 
 class DeleteConversationGroupEvent extends ConversationGroupEvent {
@@ -73,12 +73,13 @@ class DeleteConversationGroupEvent extends ConversationGroupEvent {
 }
 
 class GetUserOwnConversationGroupsEvent extends ConversationGroupEvent {
+  final GetConversationGroupsRequest getConversationGroupsRequest;
   final Function callback;
 
-  const GetUserOwnConversationGroupsEvent({this.callback});
+  const GetUserOwnConversationGroupsEvent({this.getConversationGroupsRequest, this.callback});
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [getConversationGroupsRequest];
 
   @override
   String toString() => 'GetUserOwnConversationGroupsEvent';

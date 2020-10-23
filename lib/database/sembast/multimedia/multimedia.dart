@@ -23,6 +23,20 @@ class MultimediaDBService {
     return key != null && key != 0 && key.toString().isNotEmpty;
   }
 
+  Future<void> addMultimediaList(List<Multimedia> multimediaList) async {
+    Database database = await _db;
+    if (isObjectEmpty(database)) {
+      return false;
+    }
+    
+    return await database.transaction((transaction) async {
+      for(int i = 0; i < multimediaList.length; i++) {
+        Multimedia existingMultimedia = await getSingleMultimedia(multimediaList[i].id);
+        isObjectEmpty(existingMultimedia) ? await _multimediaStore.add(database, multimediaList[i].toJson()) : editMultimedia(multimediaList[i]);
+      }
+    });
+  }
+
   Future<bool> editMultimedia(Multimedia multimedia) async {
     if (isObjectEmpty(await _db)) {
       return false;

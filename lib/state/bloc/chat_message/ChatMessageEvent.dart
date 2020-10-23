@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/objects/rest/index.dart';
 
 abstract class ChatMessageEvent extends Equatable {
   @override
@@ -19,42 +20,29 @@ class InitializeChatMessagesEvent extends ChatMessageEvent {
 }
 
 class AddChatMessageEvent extends ChatMessageEvent {
-  final ChatMessage message;
+  final CreateChatMessageRequest createChatMessageRequest;
   final Function callback;
 
-  AddChatMessageEvent({this.message, this.callback});
+  AddChatMessageEvent({this.createChatMessageRequest, this.callback});
 
   @override
-  List<Object> get props => [message];
+  List<Object> get props => [createChatMessageRequest];
 
   @override
-  String toString() => 'AddChatMessageEvent {message: $message}';
-}
-
-class EditChatMessageEvent extends ChatMessageEvent {
-  final ChatMessage message;
-  final Function callback;
-
-  EditChatMessageEvent({this.message, this.callback});
-
-  @override
-  List<Object> get props => [message];
-
-  @override
-  String toString() => 'EditChatMessageEvent {message: $message}';
+  String toString() => 'AddChatMessageEvent {createChatMessageRequest: $createChatMessageRequest}';
 }
 
 class DeleteChatMessageEvent extends ChatMessageEvent {
-  final ChatMessage message;
+  final String chatMessageId;
   final Function callback;
 
-  DeleteChatMessageEvent({this.message, this.callback});
+  DeleteChatMessageEvent({this.chatMessageId, this.callback});
 
   @override
-  List<Object> get props => [message];
+  List<Object> get props => [chatMessageId];
 
   @override
-  String toString() => 'DeleteChatMessageEvent {message: $message}';
+  String toString() => 'DeleteChatMessageEvent {chatMessageId: $chatMessageId}';
 }
 
 class GetUserOwnChatMessagesEvent extends ChatMessageEvent {

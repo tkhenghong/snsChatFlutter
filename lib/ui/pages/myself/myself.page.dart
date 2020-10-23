@@ -1,9 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
-import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 
 class MyselfPage extends StatefulWidget {
@@ -14,6 +15,8 @@ class MyselfPage extends StatefulWidget {
 }
 
 class MyselfPageState extends State<MyselfPage> {
+  String REST_URL = globals.REST_URL;
+
   static IPGeoLocationBloc ipGeoLocationBloc;
   static AuthenticationBloc authenticationBloc;
   static MultimediaProgressBloc multimediaProgressBloc;
@@ -27,62 +30,21 @@ class MyselfPageState extends State<MyselfPage> {
   static WebSocketBloc webSocketBloc;
   static GoogleInfoBloc googleInfoBloc;
 
-  static NavigatorState navigatorState;
+  User ownUser = User(mobileNo: '', realName: '', displayName: '', countryCode: '');
+  UserContact ownUserContact;
+  Multimedia userOwnMultimedia;
 
-  User user = User(mobileNo: '', realName: '', displayName: '', countryCode: '', googleAccountId: '');
-  UserContact userContact;
-  Multimedia multimedia;
-
-  List<ListTile> buttons = [
-    ListTile(
-        title: Text("Settings"),
-        leading: Icon(Icons.settings),
-        onTap: () {
-          goToSettingsPage();
-        }),
-    ListTile(
-        title: Text("About"),
-        leading: Icon(Icons.info),
-        onTap: () {
-          goToSettingsPage();
-        }),
-    ListTile(
-        title: Text("Help"),
-        leading: Icon(Icons.help),
-        onTap: () {
-          goToSettingsPage();
-        }),
-    ListTile(
-        title: Text("Feedback"),
-        leading: Icon(Icons.feedback),
-        onTap: () {
-          goToSettingsPage();
-        }),
-    ListTile(
-        title: Text("Logout"),
-        leading: Icon(Icons.exit_to_app),
-        onTap: () {
-          logOut();
-        }),
-  ];
-
-  ImageService imageService = Get.find();
+  List<ListTile> buttons;
 
   @override
   void dispose() {
     super.dispose();
-    ipGeoLocationBloc.close();
-    authenticationBloc.close();
-    multimediaProgressBloc.close();
-    conversationGroupBloc.close();
-    messageBloc.close();
-    multimediaBloc.close();
-    unreadMessageBloc.close();
-    userContactBloc.close();
-    settingsBloc.close();
-    userBloc.close();
-    webSocketBloc.close();
-    googleInfoBloc.close();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadButtons();
   }
 
   @override
@@ -100,8 +62,6 @@ class MyselfPageState extends State<MyselfPage> {
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
     googleInfoBloc = BlocProvider.of<GoogleInfoBloc>(context);
 
-    navigatorState = Navigator.of(context);
-
     return Material(child: userBlocBuilder());
   }
 
@@ -109,8 +69,8 @@ class MyselfPageState extends State<MyselfPage> {
     return BlocBuilder<UserBloc, UserState>(
       builder: (context, userState) {
         if (userState is UserLoaded) {
-          user = userState.user;
-          if (!user.isNull) {
+          ownUser = userState.user;
+          if (!ownUser.isNull) {
             return userContactBlocBuilder();
           }
         }
@@ -125,9 +85,8 @@ class MyselfPageState extends State<MyselfPage> {
         if (userContactState is UserContactsLoaded) {
           List<UserContact> userContactList = userContactState.userContactList;
 
-          userContact = userContactList.firstWhere((UserContact existingUserContact) => user.id == existingUserContact.userId.toString(),
-              orElse: () => null);
-          if (!userContact.isNull) {
+          ownUserContact = userContactList.firstWhere((UserContact existingUserContact) => ownUser.id == existingUserContact.userId, orElse: () => null);
+          if (!isObjectEmpty(ownUserContact)) {
             return multimediaBlocBuilder();
           }
         }
@@ -141,9 +100,8 @@ class MyselfPageState extends State<MyselfPage> {
       builder: (context, multimediaState) {
         if (multimediaState is MultimediaLoaded) {
           List<Multimedia> multimediaList = multimediaState.multimediaList;
-          multimedia =
-              multimediaList.firstWhere((Multimedia existingMultimedia) => user.id == existingMultimedia.userId, orElse: () => null);
-          if (!multimedia.isNull) {
+          userOwnMultimedia = multimediaList.firstWhere((Multimedia existingMultimedia) => ownUserContact.profilePicture == existingMultimedia.id, orElse: () => null);
+          if (!isObjectEmpty(userOwnMultimedia)) {
             return showMyselfPage();
           }
         }
@@ -176,12 +134,25 @@ class MyselfPageState extends State<MyselfPage> {
   }
 
   insertUserProfilePicture() {
+    Widget defaultImage = Image.asset(DefaultImagePathType.UserContact.path);
+
     ListTile listTile = ListTile(
-      title: Text(user.displayName),
-      subtitle: Text(userContact.about.isNotEmpty ? userContact.about : ''),
+      title: Text(ownUser.displayName),
+      subtitle: Text(ownUserContact.about.isNotEmpty ? ownUserContact.about : ''),
       leading: Hero(
-        tag: user.id + "1",
-        child: imageService.loadImageThumbnailCircleAvatar(multimedia, DefaultImagePathType.Profile),
+        tag: ownUser.id + "1",
+        child: CachedNetworkImage(
+          imageUrl: '$REST_URL/userContact/profilePicture',
+          // Get own profile Picture
+          useOldImageOnUrlChange: true,
+          placeholder: (context, url) => defaultImage,
+          errorWidget: (context, url, error) => defaultImage,
+          imageBuilder: (BuildContext context, ImageProvider<dynamic> imageProvider) {
+            return CircleAvatar(
+              backgroundImage: imageProvider,
+            );
+          },
+        ),
       ),
     );
     buttons.insert(0, listTile);
@@ -204,11 +175,46 @@ class MyselfPageState extends State<MyselfPage> {
     );
   }
 
-  static goToSettingsPage() {
-    navigatorState.pushNamed("settings_page");
+  loadButtons() {
+    buttons = [
+      ListTile(
+          title: Text("Settings"),
+          leading: Icon(Icons.settings),
+          onTap: () {
+            goToSettingsPage();
+          }),
+      ListTile(
+          title: Text("About"),
+          leading: Icon(Icons.info),
+          onTap: () {
+            goToSettingsPage();
+          }),
+      ListTile(
+          title: Text("Help"),
+          leading: Icon(Icons.help),
+          onTap: () {
+            goToSettingsPage();
+          }),
+      ListTile(
+          title: Text("Feedback"),
+          leading: Icon(Icons.feedback),
+          onTap: () {
+            goToSettingsPage();
+          }),
+      ListTile(
+          title: Text("Logout"),
+          leading: Icon(Icons.exit_to_app),
+          onTap: () {
+            logOut();
+          }),
+    ];
   }
 
-  static logOut() {
+  goToSettingsPage() {
+    Navigator.of(context).pushNamed("settings_page");
+  }
+
+  logOut() {
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     googleInfoBloc.add(RemoveGoogleInfoEvent(callback: (bool done) {}));
     conversationGroupBloc.add(RemoveConversationGroupsEvent(callback: (bool done) {}));
@@ -221,6 +227,6 @@ class MyselfPageState extends State<MyselfPage> {
     userContactBloc.add(RemoveAllUserContactsEvent(callback: (bool done) {}));
     authenticationBloc.add(RemoveAllAuthenticationsEvent(callback: (bool done) {}));
 
-    navigatorState.pushReplacementNamed("login_page");
+    Navigator.of(context).pushNamedAndRemoveUntil('login_page', (Route<dynamic> route) => false);
   }
 }

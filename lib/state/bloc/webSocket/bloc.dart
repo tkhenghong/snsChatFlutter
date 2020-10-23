@@ -1,3 +1,3 @@
 export 'WebSocketBloc.dart';
-export 'WebSocketEvent.dart';
+export 'WebSocketBlocEvent.dart';
 export 'WebSocketState.dart';

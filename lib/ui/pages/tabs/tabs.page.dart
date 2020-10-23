@@ -15,20 +15,18 @@ class TabsPage extends StatefulWidget {
 }
 
 class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
+  WebSocketBloc webSocketBloc;
+
   AnimationController _animationController, _animationController2;
   Animation animation;
-  static const List<IconData> icons = const [Icons.person_add, Icons.group_add]; // TODO: Add Broadcast
-  static const List<ConversationGroupType> chatTitles = const [ConversationGroupType.Personal, ConversationGroupType.Group]; // TODO: Add Broadcast
-  Color foregroundColor = Colors.white;
-  Color themePrimaryColor;
+  static const List<IconData> icons = const [Icons.person_add, Icons.group_add, Icons.campaign]; // TODO: Add Broadcast
+  static const List<ConversationGroupType> chatTitles = const [ConversationGroupType.Personal, ConversationGroupType.Group, ConversationGroupType.Broadcast]; // TODO: Add Broadcast
 
   int _bottomNavBarIndex = 0;
-  String tabTitle = "Chats"; // Have to put default tab name or compiler will say null error
+  String tabTitle = 'Chats'; // Have to put default tab name or compiler will say null error
 
   PageController pageViewController = PageController(initialPage: 0, keepPage: true);
   List<Widget> tabPages;
-
-  // BuildContext context;
 
   @override
   void initState() {
@@ -56,8 +54,7 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
 
   @override
   Widget build(BuildContext context) {
-//    this.context = context;
-    themePrimaryColor = Theme.of(context).textTheme.title.color;
+    webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
 
     return Material(
       color: Colors.white,
@@ -69,7 +66,7 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
             title: Text(
               tabTitle,
               textAlign: TextAlign.start,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32.0, color: themePrimaryColor),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32.0),
             ),
           ),
           backgroundColor: Colors.white,
@@ -98,32 +95,20 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
               BottomNavigationBarItem(
                 icon: Icon(
                   Icons.chat,
-                  color: themePrimaryColor,
                 ),
-                title: Text(
-                  "Chats",
-                  style: TextStyle(color: themePrimaryColor),
-                ),
+                label: 'Chats',
               ),
               BottomNavigationBarItem(
                 icon: Icon(
                   Icons.code,
-                  color: themePrimaryColor,
                 ),
-                title: Text(
-                  "Scan QR Code",
-                  style: TextStyle(color: themePrimaryColor),
-                ),
+                label: 'Scan QR Code',
               ),
               BottomNavigationBarItem(
                 icon: Icon(
                   Icons.person,
-                  color: themePrimaryColor,
                 ),
-                title: Text(
-                  "Myself",
-                  style: TextStyle(color: themePrimaryColor),
-                ),
+                label: 'Myself',
               ),
             ],
           ),
@@ -143,11 +128,17 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
                         curve: Interval(0.0, 1.0 - index / icons.length / 2.0, curve: Curves.easeOut),
                       ),
                       child: Tooltip(
-                        message: index == 0 ? "Create Personal Conversation" : index == 1 ? "Create Group Conversation" : index == 2 ? "Create Broadcast Group" : "Create Others...",
+                        message: index == 0
+                            ? 'Create Personal Conversation'
+                            : index == 1
+                                ? 'Create Group Conversation'
+                                : index == 2
+                                    ? 'Create Broadcast Group'
+                                    : 'Create Others...',
                         child: FloatingActionButton(
                           heroTag: null,
                           mini: true,
-                          child: Icon(icons[index], color: foregroundColor),
+                          child: Icon(icons[index]),
                           onPressed: () {
                             Navigator.of(context).push(MaterialPageRoute(builder: (context) => SelectContactsPage(chatGroupType: chatTitles[index])));
                             _animationController.reverse();
@@ -189,15 +180,15 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
   Widget changeTab(int pageNumber) {
     switch (pageNumber) {
       case 0:
-        tabTitle = "Chats";
+        tabTitle = 'Chats';
         _animationController2.forward();
         break;
       case 1:
-        tabTitle = "Scan QR Code";
+        tabTitle = 'Scan QR Code';
         _animationController2.reverse();
         break;
       case 2:
-        tabTitle = "Myself";
+        tabTitle = 'Myself';
         _animationController2.reverse();
         break;
       default:
@@ -206,7 +197,6 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
   }
 
   @override
-  // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 
   @override
@@ -215,13 +205,13 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
       print('tabs.page.dart if (state == AppLifecycleState.resumed)');
       UserState userState = BlocProvider.of<UserBloc>(context).state;
       if (userState is UserLoaded) {
-        BlocProvider.of<WebSocketBloc>(context).add(ReconnectWebSocketEvent(callback: (bool done) {}));
+        webSocketBloc.add(ReconnectWebSocketEvent(callback: (bool done) {}));
       }
     }
 
     if (state == AppLifecycleState.paused) {
       print('tabs.page.dart if (state == AppLifecycleState.paused)');
-      BlocProvider.of<WebSocketBloc>(context).add(DisconnectWebSocketEvent(callback: (bool done) {}));
+      webSocketBloc.add(DisconnectWebSocketEvent(callback: (bool done) {}));
     }
 
     if (state == AppLifecycleState.inactive) {

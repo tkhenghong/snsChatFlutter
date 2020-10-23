@@ -30,7 +30,6 @@ class WebSocketService {
   }
 
   sendWebSocketMessage(WebSocketMessage webSocketMessage) {
-    print("json.encode(webSocketMessage.toJson()): " + json.encode(webSocketMessage.toJson()));
     webSocketChannel.sink.add(json.encode(webSocketMessage.toJson()));
   }
 

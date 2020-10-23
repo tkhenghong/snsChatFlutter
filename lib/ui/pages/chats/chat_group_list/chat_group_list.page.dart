@@ -1,11 +1,13 @@
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
@@ -21,10 +23,11 @@ class ChatGroupListPage extends StatefulWidget {
 }
 
 class ChatGroupListState extends State<ChatGroupListPage> {
+  String REST_URL = globals.REST_URL;
+
   RefreshController _refreshController;
 
-  CustomFileService fileService = Get.find();
-  ImageService imageService = Get.find();
+  CustomFileService customFileService = Get.find();
 
   IPGeoLocationBloc ipGeoLocationBloc;
   AuthenticationBloc authenticationBloc;
@@ -51,18 +54,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   void dispose() {
     super.dispose();
     _refreshController.dispose();
-    ipGeoLocationBloc.close();
-    authenticationBloc.close();
-    multimediaProgressBloc.close();
-    conversationGroupBloc.close();
-    chatMessageBloc.close();
-    multimediaBloc.close();
-    unreadMessageBloc.close();
-    userContactBloc.close();
-    settingsBloc.close();
-    userBloc.close();
-    webSocketBloc.close();
-    googleInfoBloc.close();
   }
 
   @override
@@ -182,8 +173,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
                     shrinkWrap: true,
                     itemCount: conversationGroupState.conversationGroupList.length,
                     itemBuilder: (context, index) {
-                      PageListItem pageListItem = mapConversationToPageListTile(
-                          conversationGroupState.conversationGroupList[index], multimediaState, unreadMessageState);
+                      PageListItem pageListItem = mapConversationToPageListTile(conversationGroupState.conversationGroupList[index], multimediaState, unreadMessageState);
                       return PageListTile(pageListItem, context);
                     }),
               );
@@ -200,13 +190,11 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   userAuthenticationBlocListener() {
     return BlocListener<AuthenticationBloc, AuthenticationState>(
       listener: (context, authenticationState) {
-        print('userAuthenticationBlocListener() is triggered.');
         if (authenticationState is AuthenticationsNotLoaded) {
           goToLoginPage();
         }
 
         if (authenticationState is AuthenticationsLoaded) {
-          print('if (authenticationState is AuthenticationsLoaded)');
           refreshUserData();
           if (userContactBloc.state is UserContactsLoaded) {
             List<UserContact> userContactList = (userContactBloc.state as UserContactsLoaded).userContactList;
@@ -287,20 +275,13 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     );
   }
 
-  Widget showLoading() {
-    return Center(child: Text('Loading...'));
-  }
+  PageListItem mapConversationToPageListTile(ConversationGroup conversationGroup, MultimediaState multimediaState, UnreadMessageState unreadMessageState) {
+    UnreadMessage unreadMessage =
+        (unreadMessageState as UnreadMessagesLoaded).unreadMessageList.firstWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.conversationId.toString() == conversationGroup.id, orElse: () => null);
 
-  PageListItem mapConversationToPageListTile(
-      ConversationGroup conversationGroup, MultimediaState multimediaState, UnreadMessageState unreadMessageState) {
-    Multimedia multimedia = (multimediaState as MultimediaLoaded).multimediaList.firstWhere(
-        (Multimedia existingMultimedia) =>
-            existingMultimedia.conversationId.toString() == conversationGroup.id && existingMultimedia.messageId.isEmpty,
-        orElse: () => null);
-
-    UnreadMessage unreadMessage = (unreadMessageState as UnreadMessagesLoaded).unreadMessageList.firstWhere(
-        (UnreadMessage existingUnreadMessage) => existingUnreadMessage.conversationId.toString() == conversationGroup.id,
-        orElse: () => null);
+    Widget defaultImage = Image.asset(
+      DefaultImagePathTypeUtil.getByConversationGroupType(conversationGroup.conversationGroupType).path,
+    );
 
     return PageListItem(
         title: Hero(
@@ -310,15 +291,23 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         subtitle: Text(unreadMessage.isNull ? '' : unreadMessage.lastMessage),
         leading: Hero(
           tag: conversationGroup.id + '1',
-          child: imageService.loadImageThumbnailCircleAvatar(
-              multimedia, convertConversationGroupTypeToDefaultImagePathType(conversationGroup.conversationGroupType)),
+          child: CachedNetworkImage(
+            imageUrl: '$REST_URL/conversationGroup/${conversationGroup.id}/groupPhoto',
+            useOldImageOnUrlChange: true,
+            placeholder: (context, url) => defaultImage,
+            errorWidget: (context, url, error) => defaultImage,
+            imageBuilder: (BuildContext context, ImageProvider<dynamic> imageProvider) {
+              return CircleAvatar(
+                backgroundImage: imageProvider,
+              );
+            },
+          ),
         ),
         trailing: Column(
           children: <Widget>[
             Padding(
               padding: EdgeInsets.only(top: 10.0),
-              child:
-                  Text(unreadMessage.isNull ? '' : formatTime(unreadMessage.date.millisecondsSinceEpoch), style: TextStyle(fontSize: 9.0)),
+              child: Text(unreadMessage.isNull ? '' : formatTime(unreadMessage.lastModifiedDate.millisecondsSinceEpoch), style: TextStyle(fontSize: 9.0)),
             ),
             Text(unreadMessage.isNull
                 ? ''
@@ -354,18 +343,15 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   refreshUserData() {
-    print('refreshUserData()');
     userBloc.add(GetOwnUserEvent(callback: (User user) {}));
     settingsBloc.add(GetUserOwnSettingsEvent(callback: (Settings settings) {}));
     conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(callback: (bool done) {
       if (done) {
-        getConversationGroupsMultimedia();
+        multimediaBloc.add(GetConversationGroupsMultimediaEvent(conversationGroupList: conversationGroupState.conversationGroupList, callback: (bool done) {}));
       }
     }));
-    unreadMessageBloc.add(GetUserPreviousUnreadMessagesEvent(callback: (bool done) {}));
     multimediaBloc.add(GetUserOwnProfilePictureMultimediaEvent(callback: (bool done) {}));
     userContactBloc.add(GetUserOwnUserContactEvent(callback: (bool done) {
-      print('GetUserOwnUserContactEvent is done: $done');
       if (done) {
         userContactBloc.add(GetUserOwnUserContactsEvent(callback: (bool done) {}));
       }
@@ -380,11 +366,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     webSocketStream.listen((data) {
       showToast('Message confirmed received!', Toast.LENGTH_LONG);
       WebSocketMessage receivedWebSocketMessage = WebSocketMessage.fromJson(json.decode(data));
-      webSocketBloc
-          .add(ProcessWebSocketMessageEvent(webSocketMessage: receivedWebSocketMessage, context: context, callback: (bool done) {}));
+      webSocketBloc.add(ProcessWebSocketMessageEvent(webSocketMessage: receivedWebSocketMessage, context: context, callback: (bool done) {}));
     }, onError: (onError) {
-      print('chat_room.page.dart onError listener is working.');
-      print('chat_room.page.dart onError: ' + onError.toString());
       if (userState is UserLoaded) {
         webSocketBloc.add(ReconnectWebSocketEvent(callback: (bool done) {}));
       }
@@ -396,17 +379,33 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     }, cancelOnError: false);
   }
 
-  getConversationGroupsMultimedia() {
-    ConversationGroupState conversationGroupState = conversationGroupBloc.state;
-    if (conversationGroupState is ConversationGroupsLoaded) {
-      multimediaBloc.add(GetConversationGroupsMultimediaEvent(
-          conversationGroupList: conversationGroupState.conversationGroupList, callback: (bool done) {}));
-    }
+  Widget showLoading() {
+    return Center(
+      child: Text('Loading...'),
+    );
+  }
+
+  Widget showError() {
+    return Center(
+      child: Column(
+        children: <Widget>[Text('An error has occurred. Please try again later.'), RaisedButton(onPressed: goToLoginPage)],
+      ),
+    );
   }
 
   goToLoginPage() {
+    ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     googleInfoBloc.add(RemoveGoogleInfoEvent(callback: (bool done) {}));
-//    Get.offAndToNamed('login_page');
+    conversationGroupBloc.add(RemoveConversationGroupsEvent(callback: (bool done) {}));
+    chatMessageBloc.add(RemoveAllChatMessagesEvent(callback: (bool done) {}));
+    multimediaBloc.add(RemoveAllMultimediaEvent(callback: (bool done) {}));
+    multimediaProgressBloc.add(RemoveAllMultimediaProgressEvent(callback: (bool done) {}));
+    settingsBloc.add(RemoveAllSettingsEvent(callback: (bool done) {}));
+    unreadMessageBloc.add(RemoveAllUnreadMessagesEvent(callback: (bool done) {}));
+    userBloc.add(RemoveAllUsersEvent(callback: (bool done) {}));
+    userContactBloc.add(RemoveAllUserContactsEvent(callback: (bool done) {}));
+    authenticationBloc.add(RemoveAllAuthenticationsEvent(callback: (bool done) {}));
+
     Navigator.of(context).pushNamedAndRemoveUntil('login_page', (Route<dynamic> route) => false);
   }
 }

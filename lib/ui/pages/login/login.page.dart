@@ -45,18 +45,14 @@ class LoginPageState extends State<LoginPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     mobileNoTextController = new TextEditingController();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     mobileNoTextController.dispose();
-    authenticationBloc.close();
-    webSocketBloc.close();
   }
 
   @override
@@ -113,9 +109,9 @@ class LoginPageState extends State<LoginPage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Padding(padding: EdgeInsets.symmetric(vertical: 70.00)),
+        Padding(padding: EdgeInsets.symmetric(vertical: 70.0)),
         loginText(),
-        Padding(padding: EdgeInsets.symmetric(vertical: 20.00)),
+        Padding(padding: EdgeInsets.symmetric(vertical: 20.0)),
         Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32.0),
             child: Column(
@@ -374,17 +370,14 @@ class LoginPageState extends State<LoginPage> {
   }
 
   _signInWithFacebook() {
-    print('Sign in using Facebook');
     showToast('Coming soon.', Toast.LENGTH_SHORT);
   }
 
   _signInWithApple() {
-    print('Sign in using Apple');
     showToast('Coming soon.', Toast.LENGTH_SHORT);
   }
 
   _signInWithTwitter() {
-    print('Sign in using Twitter');
     showToast('Coming soon.', Toast.LENGTH_SHORT);
   }
 }

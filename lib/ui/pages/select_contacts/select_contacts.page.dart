@@ -54,7 +54,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   ScrollController scrollController;
 
   CustomFileService fileService = Get.find();
-  ImageService imageService = Get.find();
 
   UserContactBloc userContactBloc;
   ConversationGroupBloc conversationGroupBloc;
@@ -591,10 +590,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   }
 
   goToGroupNamePage() {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: ((context) => GroupNamePage(selectedUserContacts: selectedUserContacts, selectedContacts: selectedContacts))));
+    Navigator.push(context, MaterialPageRoute(builder: ((context) => GroupNamePage(selectedUserContacts: selectedUserContacts, selectedContacts: selectedContacts))));
   }
 
   goToChatRoomPage(ConversationGroup conversationGroup) {

@@ -16,13 +16,13 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
   Stream<UnreadMessageState> mapEventToState(UnreadMessageEvent event) async* {
     if (event is InitializeUnreadMessagesEvent) {
       yield* _initializeUnreadMessagesToState(event);
-    } else if (event is EditUnreadMessageEvent) {
-      yield* _editUnreadMessage(event);
+    } else if (event is UpdateUnreadMessageEvent) {
+      yield* _updateUnreadMessageEvent(event);
     } else if (event is DeleteUnreadMessageEvent) {
       yield* _deleteUnreadMessage(event);
     } else if (event is GetUnreadMessageByConversationGroupIdEvent) {
       yield* _geUnreadMessageByConversationGroupId(event);
-    } else if (event is GetUserPreviousUnreadMessagesEvent) {
+    } else if (event is UpdateUnreadMessagesEvent) {
       yield* _getPreviousUnreadMessages(event);
     } else if (event is RemoveAllUnreadMessagesEvent) {
       yield* _removeAllUnreadMessagesEvent(event);
@@ -48,13 +48,12 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
     }
   }
 
-  Stream<UnreadMessageState> _editUnreadMessage(EditUnreadMessageEvent event) async* {
+  // Only updates localDB and State
+  Stream<UnreadMessageState> _updateUnreadMessageEvent(UpdateUnreadMessageEvent event) async* {
     bool updatedInREST = false;
     bool unreadMessageSaved = false;
 
     if (state is UnreadMessagesLoaded) {
-      updatedInREST = await unreadMessageAPIService.editUnreadMessage(event.unreadMessage);
-
       if (updatedInREST) {
         unreadMessageSaved = await unreadMessageDBService.editUnreadMessage(event.unreadMessage);
 
@@ -105,35 +104,16 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
     yield* yieldUnreadMessageState(updatedUnreadMessageList: updatedUnreadMessageList);
   }
 
-  Stream<UnreadMessageState> _getPreviousUnreadMessages(GetUserPreviousUnreadMessagesEvent event) async* {
-    List<UnreadMessage> unreadMessageListFromServer = await unreadMessageAPIService.getUnreadMessagesOfAUser();
+  Stream<UnreadMessageState> _getPreviousUnreadMessages(UpdateUnreadMessagesEvent event) async* {
     if (state is UnreadMessagesLoaded) {
       List<UnreadMessage> existingUnreadMessageList = (state as UnreadMessagesLoaded).unreadMessageList;
 
-      if (!unreadMessageListFromServer.isNullOrBlank && unreadMessageListFromServer.isNotEmpty) {
-        // Update the current info of the unreadMessage to latest information
-
-        for (UnreadMessage unreadMessageFromServer in unreadMessageListFromServer) {
-          // Unable to use contains() method here. Will cause concurrent modification during iteration problem.
-          // Link: https://stackoverflow.com/questions/22409666/exception-concurrent-modification-during-iteration-instancelength17-of-gr
-          bool unreadMessageExist = false;
-
-          for (UnreadMessage existingUnreadMessage in existingUnreadMessageList) {
-            if (existingUnreadMessage.id == unreadMessageFromServer.id) {
-              unreadMessageExist = true;
-            }
-          }
-
-          if (unreadMessageExist) {
-            unreadMessageDBService.editUnreadMessage(unreadMessageFromServer);
-
-            existingUnreadMessageList.removeWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.id == unreadMessageFromServer.id);
-          } else {
-            unreadMessageDBService.addUnreadMessage(unreadMessageFromServer);
-          }
-
-          existingUnreadMessageList.add(unreadMessageFromServer);
-        }
+      if (!event.unreadMessages.isNullOrBlank && event.unreadMessages.isNotEmpty) {
+        // Update the current info of the unreadMessage to latest information.
+        event.unreadMessages.forEach((unreadMessage) {
+          unreadMessageDBService.addUnreadMessage(unreadMessage);
+          existingUnreadMessageList.add(unreadMessage);
+        });
       }
       yield UnreadMessagesLoaded(existingUnreadMessageList);
       functionCallback(event, true);

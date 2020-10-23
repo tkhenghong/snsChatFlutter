@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
@@ -17,7 +18,6 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
 
   @override
   Stream<ConversationGroupState> mapEventToState(ConversationGroupEvent event) async* {
-    // TODO: implement mapEventToState
     if (event is InitializeConversationGroupsEvent) {
       yield* _mapInitializeConversationGroup(event);
     } else if (event is AddConversationGroupEvent) {
@@ -54,57 +54,75 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
 
   // Add Conversation Group to LocalDB and State
   Stream<ConversationGroupState> _addConversationGroup(AddConversationGroupEvent event) async* {
+    ConversationGroup conversationGroupFromServer;
     bool added = false;
     if (state is ConversationGroupsLoaded) {
-      if (!event.conversationGroup.isNull) {
-        await conversationGroupDBService.deleteConversationGroup(event.conversationGroup.id);
+      if (!event.createConversationGroupRequest.isNull) {
+        conversationGroupFromServer = await conversationGroupAPIService.addConversationGroup(event.createConversationGroupRequest);
+        if (!conversationGroupFromServer.isNull) {
+          added = await conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
 
-        added = await conversationGroupDBService.addConversationGroup(event.conversationGroup);
-        if (added) {
-          List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
+          if(added) {
+            List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
-          existingConversationGroupList
-              .removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == event.conversationGroup.id);
+            existingConversationGroupList.add(conversationGroupFromServer);
 
-          existingConversationGroupList.add(event.conversationGroup);
+            yield ConversationGroupsLoading();
+            yield ConversationGroupsLoaded(existingConversationGroupList);
+            functionCallback(event, conversationGroupFromServer);
+          } else {
 
-          yield ConversationGroupsLoaded(existingConversationGroupList);
-          functionCallback(event, event.conversationGroup);
+          }
         }
       }
     }
 
-    if (event.conversationGroup.isNull || !added) {
+    if (conversationGroupFromServer.isNull || !added) {
+      showToast('Unable to add conversation group. Please try again later.', Toast.LENGTH_LONG);
       functionCallback(event, null);
     }
   }
 
   Stream<ConversationGroupState> _editConversationGroup(EditConversationGroupEvent event) async* {
-    bool updatedInREST = false;
+    ConversationGroup updatedConversationGroup;
     bool saved = false;
     if (state is ConversationGroupsLoaded) {
-      updatedInREST = await conversationGroupAPIService.editConversationGroup(event.conversationGroup);
+      updatedConversationGroup = await conversationGroupAPIService.editConversationGroup(event.editConversationGroupRequest);
 
-      if (updatedInREST) {
-        saved = await conversationGroupDBService.editConversationGroup(event.conversationGroup);
+      if (!updatedConversationGroup.isNull) {
+        saved = await conversationGroupDBService.editConversationGroup(updatedConversationGroup);
         if (saved) {
           List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
           existingConversationGroupList
-              .removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == event.conversationGroup.id);
+              .removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == updatedConversationGroup.id);
 
-          existingConversationGroupList.add(event.conversationGroup);
+          existingConversationGroupList.add(updatedConversationGroup);
 
           yield ConversationGroupsLoaded(existingConversationGroupList);
-          functionCallback(event, event.conversationGroup);
+          functionCallback(event, updatedConversationGroup);
         }
       }
     }
 
-    if (!updatedInREST || !saved) {
+    if (updatedConversationGroup.isNull || !saved) {
       functionCallback(event, null);
     }
   }
+
+  // AddConversationGroupMember
+
+  // RemoveConversationGroupMember
+
+  // PromoteConversationGroupMemberToAdmin
+
+  // DemoteConversationGroupAdminToMember
+
+  // LeaveConversationGroup
+
+  // BlockNotification
+
+  // UnblockNotification
 
   Stream<ConversationGroupState> _deleteConversationGroup(DeleteConversationGroupEvent event) async* {
     bool deletedInREST = false;
@@ -133,13 +151,16 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
   }
 
   Stream<ConversationGroupState> _getUserOwnConversationGroups(GetUserOwnConversationGroupsEvent event) async* {
-    List<ConversationGroup> conversationGroupListFromServer = await conversationGroupAPIService.getUserOwnConversationGroups();
+    ConversationPageableResponse conversationPageableResponse = await conversationGroupAPIService.getUserOwnConversationGroups(event.getConversationGroupsRequest);
     if (state is ConversationGroupsLoaded) {
       List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
 
-      if (!conversationGroupListFromServer.isNullOrBlank && conversationGroupListFromServer.isNotEmpty) {
+      if (!conversationPageableResponse.isNull &&
+          !conversationPageableResponse.conversationGroupResponses.content.isNull &&
+          !conversationPageableResponse.conversationGroupResponses.content.isNotEmpty) {
+        List<ConversationGroup> conversationGroupList = conversationPageableResponse.conversationGroupResponses.content.map((e) => ConversationGroup.fromJson(e)).toList();
         // Update the current info of the conversationGroup to latest information
-        for (ConversationGroup conversationGroupFromServer in conversationGroupListFromServer) {
+        for (ConversationGroup conversationGroupFromServer in conversationGroupList) {
           // Unable to use contains() method here. Will cause concurrent modification during iteration problem.
           // Link: https://stackoverflow.com/questions/22409666/exception-concurrent-modification-during-iteration-instancelength17-of-gr
           bool conversationGroupExist = false;
@@ -182,7 +203,6 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
   }
 
   Stream<ConversationGroupState> _createConversationGroup(CreateConversationGroupEvent event) async* {
-    // TODO: Create ConversationGroup Personal/Group
     CreateConversationGroupRequest createConversationGroupRequest = event.createConversationGroupRequest;
 
     showLoading('Loading conversation....');

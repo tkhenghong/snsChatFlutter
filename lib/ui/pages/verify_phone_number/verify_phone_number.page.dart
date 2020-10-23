@@ -220,7 +220,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
         getConversationGroupsMultimedia();
       }
     }));
-    unreadMessageBloc.add(GetUserPreviousUnreadMessagesEvent(callback: (bool done) {}));
+    unreadMessageBloc.add(UpdateUnreadMessagesEvent(callback: (bool done) {}));
     multimediaBloc.add(GetUserOwnProfilePictureMultimediaEvent(callback: (bool done) {}));
     userContactBloc.add(GetUserOwnUserContactEvent(callback: (bool done) {
       print('GetUserOwnUserContactEvent is done: $done');

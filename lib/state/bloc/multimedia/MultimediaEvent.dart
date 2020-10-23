@@ -3,7 +3,6 @@ import 'package:snschat_flutter/objects/models/index.dart';
 
 abstract class MultimediaEvent extends Equatable {
   @override
-  // TODO: implement props
   List<Object> get props => [];
 
   const MultimediaEvent();
@@ -18,68 +17,17 @@ class InitializeMultimediaEvent extends MultimediaEvent {
   String toString() => 'InitializeMultimediaEvent';
 }
 
-class AddMultimediaEvent extends MultimediaEvent {
-  final Multimedia multimedia;
-  final Function callback;
-
-  AddMultimediaEvent({this.multimedia, this.callback});
-
-  @override
-  List<Object> get props => [multimedia];
-
-  @override
-  String toString() => 'AddMultimediaEvent {multimedia: $multimedia}';
-}
-
-class EditMultimediaEvent extends MultimediaEvent {
-  final Multimedia multimedia;
-  final Function callback;
-
-  EditMultimediaEvent({this.multimedia, this.callback});
-
-  @override
-  List<Object> get props => [multimedia];
-
-  @override
-  String toString() => 'EditMultimediaEvent {multimedia: $multimedia}';
-}
-
-class DeleteMultimediaEvent extends MultimediaEvent {
-  final Multimedia multimedia;
-  final Function callback;
-
-  DeleteMultimediaEvent({this.multimedia, this.callback});
-
-  @override
-  List<Object> get props => [multimedia];
-
-  @override
-  String toString() => 'DeleteMultimediaEvent {multimedia: $multimedia}';
-}
-
-class SendMultimediaEvent extends MultimediaEvent {
-  final Multimedia multimedia;
-  final Function callback;
-
-  SendMultimediaEvent({this.multimedia, this.callback});
-
-  @override
-  List<Object> get props => [multimedia];
-
-  @override
-  String toString() => 'SendMultimediaEvent {multimedia: $multimedia}';
-}
-
 class GetUserOwnProfilePictureMultimediaEvent extends MultimediaEvent {
+  final String ownUserContactMultimediaId;
   final Function callback;
 
-  GetUserOwnProfilePictureMultimediaEvent({this.callback});
+  GetUserOwnProfilePictureMultimediaEvent({this.ownUserContactMultimediaId, this.callback});
 
   @override
   List<Object> get props => [];
 
   @override
-  String toString() => 'GetUserProfilePictureMultimediaEvent';
+  String toString() => 'GetUserProfilePictureMultimediaEvent {ownUserContactMultimediaId: $ownUserContactMultimediaId}';
 }
 
 class GetConversationGroupsMultimediaEvent extends MultimediaEvent {
@@ -108,18 +56,17 @@ class GetUserContactsMultimediaEvent extends MultimediaEvent {
   String toString() => 'GetUserContactsMultimediaEvent {userContactList: $userContactList}';
 }
 
-class GetMessageMultimediaEvent extends MultimediaEvent {
-  final String conversationGroupId;
-  final String messageId;
+class GetMessagesMultimediaEvent extends MultimediaEvent {
+  final List<ChatMessage> chatMessageList;
   final Function callback;
 
-  GetMessageMultimediaEvent({this.conversationGroupId, this.messageId, this.callback});
+  GetMessagesMultimediaEvent({this.chatMessageList, this.callback});
 
   @override
-  List<Object> get props => [messageId, conversationGroupId];
+  List<Object> get props => [chatMessageList];
 
   @override
-  String toString() => 'GetMessageMultimediaEvent {messageId: $messageId, conversationGroupId: $conversationGroupId}';
+  String toString() => 'GetMessageMultimediaEvent {chatMessageList: $chatMessageList}';
 }
 
 class RemoveAllMultimediaEvent extends MultimediaEvent {

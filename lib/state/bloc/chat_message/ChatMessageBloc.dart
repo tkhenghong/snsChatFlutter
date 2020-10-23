@@ -19,8 +19,6 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
       yield* _initializeChatMessagesToState(event);
     } else if (event is AddChatMessageEvent) {
       yield* _addChatMessage(event);
-    } else if (event is EditChatMessageEvent) {
-      yield* _editChatMessage(event);
     } else if (event is DeleteChatMessageEvent) {
       yield* _deleteChatMessage(event);
     } else if (event is RemoveAllChatMessagesEvent) {
@@ -48,59 +46,28 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
   }
 
   Stream<ChatMessageState> _addChatMessage(AddChatMessageEvent event) async* {
-    ChatMessage messageFromServer;
+    ChatMessage chatMessageFromServer;
     bool savedIntoDB = false;
     if (state is ChatMessagesLoaded) {
-      // Avoid reading existing message
-      if (event.message.id.isEmpty) {
-        messageFromServer = await chatMessageAPIService.addChatMessage(event.message);
-      } else {
-        messageFromServer = event.message;
-      }
+      chatMessageFromServer = await chatMessageAPIService.addChatMessage(event.createChatMessageRequest);
 
-      if (!messageFromServer.isNull) {
-        savedIntoDB = await chatMessageDBService.addChatMessage(messageFromServer);
+      if (!chatMessageFromServer.isNull) {
+        savedIntoDB = await chatMessageDBService.addChatMessage(chatMessageFromServer);
 
         if (savedIntoDB) {
           List<ChatMessage> existingMessageList = (state as ChatMessagesLoaded).chatMessageList;
 
-          existingMessageList.removeWhere((ChatMessage existingMessage) => existingMessage.id == event.message.id);
-          existingMessageList.add(messageFromServer);
+          existingMessageList.add(chatMessageFromServer);
 
           // Very funny. But must change to another state first and switch it back immediately to trigger changes.
           yield ChatMessageLoading();
           yield ChatMessagesLoaded(existingMessageList);
-          functionCallback(event, messageFromServer);
+          functionCallback(event, chatMessageFromServer);
         }
       }
-      if (messageFromServer.isNull || !savedIntoDB) {
+      if (chatMessageFromServer.isNull || !savedIntoDB) {
         functionCallback(event, null);
       }
-    }
-  }
-
-  Stream<ChatMessageState> _editChatMessage(EditChatMessageEvent event) async* {
-    bool updatedInREST = false;
-    bool updated = false;
-    if (state is ChatMessagesLoaded) {
-      updatedInREST = await chatMessageAPIService.editChatMessage(event.message);
-      if (updatedInREST) {
-        updated = await chatMessageDBService.editChatMessage(event.message);
-        if (updated) {
-          List<ChatMessage> existingMessageList = (state as ChatMessagesLoaded).chatMessageList;
-
-          existingMessageList.removeWhere((ChatMessage existingMessage) => existingMessage.id == event.message.id);
-
-          existingMessageList.add(event.message);
-
-          yield ChatMessagesLoaded(existingMessageList);
-          functionCallback(event, event.message);
-        }
-      }
-    }
-
-    if (!updatedInREST || !updated) {
-      functionCallback(event, null);
     }
   }
 
@@ -108,14 +75,15 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     bool deletedInREST = false;
     bool deleted = false;
     if (state is ChatMessagesLoaded) {
-      deletedInREST = await chatMessageAPIService.deleteChatMessage(event.message.id);
+      deletedInREST = await chatMessageAPIService.deleteChatMessage(event.chatMessageId);
       if (deletedInREST) {
-        deleted = await chatMessageDBService.deleteChatMessage(event.message.id);
+        deleted = await chatMessageDBService.deleteChatMessage(event.chatMessageId);
         if (deleted) {
           List<ChatMessage> existingMessageList = (state as ChatMessagesLoaded).chatMessageList;
 
-          existingMessageList.removeWhere((ChatMessage existingMessage) => existingMessage.id == event.message.id);
+          existingMessageList.removeWhere((ChatMessage existingMessage) => existingMessage.id == event.chatMessageId);
 
+          yield ChatMessageLoading();
           yield ChatMessagesLoaded(existingMessageList);
           functionCallback(event, true);
         }

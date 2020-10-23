@@ -58,7 +58,6 @@ class GroupNamePageState extends State<GroupNamePage> {
   UnreadMessageBloc unreadMessageBloc;
 
   CustomFileService fileService = Get.find();
-  ImageService imageService = Get.find();
   FirebaseStorageService firebaseStorageService = Get.find();
   ImagePicker imagePicker = Get.find();
 

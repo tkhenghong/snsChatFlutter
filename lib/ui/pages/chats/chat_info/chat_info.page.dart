@@ -1,18 +1,19 @@
-import 'dart:io';
-
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 
 class ChatInfoPage extends StatefulWidget {
-  final ConversationGroup _conversationGroup;
+  final String conversationGroupId;
 
-  ChatInfoPage([this._conversationGroup]); //do not final
+  ChatInfoPage([this.conversationGroupId]); //do not final
 
   @override
   State<StatefulWidget> createState() {
@@ -21,24 +22,26 @@ class ChatInfoPage extends StatefulWidget {
 }
 
 class ChatInfoPageState extends State<ChatInfoPage> {
-  bool messageListDone;
-  List<UserContact> conversationGroupMemberList = [];
-
-  TextEditingController textEditingController;
-  ScrollController scrollController;
+  String REST_URL = globals.REST_URL;
 
   WebSocketBloc webSocketBloc;
+  ConversationGroupBloc conversationGroupBloc;
 
-  File imageFile;
+  ConversationGroup currentConversationGroup;
+  List<UserContact> conversationGroupMemberList = [];
+
+  TextEditingController conversationGroupNameTextController;
+  ScrollController scrollController;
+
   CustomFileService fileService = Get.find();
-  ImageService imageService = Get.find();
+
+  Color whiteColor = Colors.white;
 
   @override
   void initState() {
     super.initState();
-    textEditingController = new TextEditingController();
+    conversationGroupNameTextController = new TextEditingController();
     scrollController = new ScrollController();
-    textEditingController.text = widget._conversationGroup.name;
   }
 
   @override
@@ -50,348 +53,15 @@ class ChatInfoPageState extends State<ChatInfoPage> {
   @override
   Widget build(BuildContext context) {
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
+    conversationGroupBloc = BlocProvider.of<ConversationGroupBloc>(context);
 
+    return multiBlocListeners();
+  }
+
+  Widget multiBlocListeners() {
     return MultiBlocListener(
       listeners: [webSocketBlocListener()],
-      child: GestureDetector(
-        onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
-        child: Material(
-          color: Colors.white,
-          child: BlocBuilder<ConversationGroupBloc, ConversationGroupState>(
-            builder: (BuildContext context, ConversationGroupState conversationGroupState) {
-              if (conversationGroupState is ConversationGroupsLoaded) {
-                List<ConversationGroup> conversationGroupList = conversationGroupState.conversationGroupList;
-
-                ConversationGroup conversationGroup = conversationGroupList.firstWhere(
-                    (ConversationGroup existingConversationGroup) => existingConversationGroup.id == widget._conversationGroup.id,
-                    orElse: null);
-                return CustomScrollView(
-                  physics: BouncingScrollPhysics(),
-                  slivers: <Widget>[
-                    SliverAppBar(
-                      floating: true,
-                      pinned: true,
-                      expandedHeight: 250.0,
-                      flexibleSpace: FlexibleSpaceBar(
-                        title: Hero(
-                          tag: conversationGroup.id,
-                          child: FlatButton(
-                              onPressed: () async {
-                                CustomDialogs customDialog = new CustomDialogs(
-                                    title: "Edit Group Name",
-                                    description: "Edit the group name below. Press OK to save.",
-                                    value: conversationGroup.name);
-                                String groupName = await customDialog.showConfirmationDialog();
-                                if (conversationGroup.name != groupName) {
-                                  conversationGroup.name = groupName;
-                                  BlocProvider.of<ConversationGroupBloc>(context).add(EditConversationGroupEvent(
-                                      conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
-                                }
-                              },
-                              child: Container(
-                                padding: EdgeInsetsDirectional.only(top: 25.0),
-                                child: Text(
-                                  conversationGroup.name,
-                                  style: TextStyle(color: Colors.white, fontSize: 18.0),
-                                  overflow: TextOverflow.fade,
-                                  softWrap: true,
-                                ),
-                              )),
-                        ),
-                        background: BlocBuilder<MultimediaBloc, MultimediaState>(
-                          builder: (BuildContext context, MultimediaState multimediaState) {
-                            if (multimediaState is MultimediaLoaded) {
-                              List<Multimedia> multimediaList = multimediaState.multimediaList;
-
-                              Multimedia multimedia = multimediaList.firstWhere((Multimedia existingMultimedia) =>
-                                  existingMultimedia.conversationId.toString() == widget._conversationGroup.id &&
-                                  existingMultimedia.messageId.isEmpty);
-
-                              return Hero(
-                                  tag: conversationGroup.id + "1",
-                                  child: imageService.loadFullImage(context, multimedia,
-                                      convertConversationGroupTypeToDefaultImagePathType(conversationGroup.conversationGroupType)));
-                            }
-                            return Hero(
-                                tag: conversationGroup.id + "1",
-                                child: imageService.loadFullImage(context, null,
-                                    convertConversationGroupTypeToDefaultImagePathType(conversationGroup.conversationGroupType)));
-                          },
-                        ),
-                      ),
-                      actions: <Widget>[
-                        IconButton(
-                            icon: Icon(Icons.share),
-                            onPressed: () {
-                              showToast('Shared!', Toast.LENGTH_SHORT);
-                            })
-                      ],
-                    ),
-                    SliverList(
-                      delegate: SliverChildListDelegate([
-                        Material(
-                            color: Colors.white,
-                            child: Container(
-                              height: 60.0,
-                              child: InkWell(
-                                onTap: () async {
-                                  CustomDialogs customDialog = new CustomDialogs(
-                                      title: "Edit Group Description",
-                                      description: "Edit the group description below. Press OK to save.",
-                                      value: conversationGroup.description);
-                                  String groupDescription = await customDialog.showConfirmationDialog();
-                                  if (conversationGroup.description != groupDescription) {
-                                    conversationGroup.description = groupDescription;
-                                    BlocProvider.of<ConversationGroupBloc>(context).add(EditConversationGroupEvent(
-                                        conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
-                                  }
-                                },
-                                child: Padding(
-                                  padding: EdgeInsets.only(left: 10.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Padding(
-                                        padding: EdgeInsets.only(top: 5.0),
-                                      ),
-                                      Text(
-                                        "Group description",
-                                        style: TextStyle(fontWeight: FontWeight.bold),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.only(top: 5.0),
-                                      ),
-                                      Text(
-                                        conversationGroup.description.isEmpty ? "Add Group description" : conversationGroup.description,
-                                        style: TextStyle(
-                                          fontSize: 17.0,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.only(bottom: 5.0),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            )),
-                        Material(
-                            color: Colors.white,
-                            child: Container(
-                              height: 60.0,
-                              child: InkWell(
-                                onTap: () {
-                                  // TODO: Set notificationExpireDate
-                                },
-                                child: Padding(
-                                  padding: EdgeInsets.only(left: 10.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Padding(
-                                        padding: EdgeInsets.only(top: 5.0),
-                                      ),
-                                      Text(
-                                        "Notifications",
-                                        style: TextStyle(fontWeight: FontWeight.bold),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.only(top: 5.0),
-                                      ),
-                                      Text(
-                                        conversationGroup.notificationExpireDate == 0 ? "On" : "Off",
-                                        style: TextStyle(
-                                          fontSize: 17.0,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.only(bottom: 5.0),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            )),
-                        Material(
-                            color: Colors.white,
-                            child: Container(
-                              height: 60.0,
-                              child: InkWell(
-                                onTap: () {},
-                                child: Padding(
-                                  padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Padding(
-                                          padding: EdgeInsets.only(top: 5.0),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: <Widget>[
-                                              Text(
-                                                "Favourites⭐",
-                                                style: TextStyle(fontSize: 17.0),
-                                              ),
-                                              Icon(Icons.keyboard_arrow_right)
-                                            ],
-                                          )),
-                                      Padding(
-                                        padding: EdgeInsets.only(bottom: 5.0),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            )),
-                        Material(
-                            color: Colors.white,
-                            child: Container(
-                              height: 60.0,
-                              child: InkWell(
-                                onTap: () {},
-                                child: Padding(
-                                  padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Padding(
-                                          padding: EdgeInsets.only(top: 5.0),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: <Widget>[
-                                              Text(
-                                                "Media",
-                                                style: TextStyle(fontSize: 17.0),
-                                              ),
-                                              Icon(Icons.keyboard_arrow_right)
-                                            ],
-                                          )),
-                                      Padding(
-                                        padding: EdgeInsets.only(bottom: 5.0),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            )),
-                        // showGroupMemberNumber
-                        BlocBuilder<UserContactBloc, UserContactState>(
-                          builder: (BuildContext context, UserContactState userContactState) {
-                            if (userContactState is UserContactsLoaded) {
-                              List<UserContact> userContactList = userContactState.userContactList;
-
-                              conversationGroupMemberList = getConversationGroupMembers(context, userContactList, conversationGroup);
-
-                              return showGroupMemberNumber(context, conversationGroupMemberList);
-                            }
-                            return showGroupMemberNumber(context, []);
-                          },
-                        ),
-                        // showGroupMemberParticipants
-                        BlocBuilder<UserContactBloc, UserContactState>(
-                          builder: (BuildContext context, UserContactState userContactState) {
-                            if (userContactState is UserContactsLoaded) {
-                              return BlocBuilder<MultimediaBloc, MultimediaState>(
-                                builder: (BuildContext context, MultimediaState multimediaState) {
-                                  if (multimediaState is MultimediaLoaded) {
-                                    List<Multimedia> conversationGroupMemberMultimediaList = [];
-                                    conversationGroupMemberMultimediaList = multimediaState.multimediaList
-                                        .where((Multimedia existingMultimedia) => conversationGroupMemberList
-                                            .contains((UserContact userContact) => userContact.id == existingMultimedia.userContactId))
-                                        .toList();
-                                    return showGroupMemberParticipants(
-                                        context, conversationGroupMemberList, conversationGroupMemberMultimediaList);
-                                  }
-
-                                  return showGroupMemberParticipants(context, conversationGroupMemberList, []);
-                                },
-                              );
-                            }
-
-                            return showGroupMemberParticipants(context, [], []);
-                          },
-                        ),
-
-                        Material(
-                            color: Colors.white,
-                            child: Container(
-                              height: 60.0,
-                              child: InkWell(
-                                onTap: () {},
-                                child: Padding(
-                                  padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Padding(
-                                          padding: EdgeInsets.only(top: 5.0),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: <Widget>[
-                                              Icon(Icons.exit_to_app, color: Colors.red),
-                                              Text(
-                                                "Exit group",
-                                                style: TextStyle(fontSize: 17.0, color: Colors.red),
-                                              ),
-                                            ],
-                                          )),
-                                      Padding(
-                                        padding: EdgeInsets.only(bottom: 5.0),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            )),
-                        Material(
-                            color: Colors.white,
-                            child: Container(
-                              height: 60.0,
-                              child: InkWell(
-                                onTap: () {},
-                                child: Padding(
-                                  padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Padding(
-                                          padding: EdgeInsets.only(top: 5.0),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: <Widget>[
-                                              Icon(Icons.report, color: Colors.red),
-                                              Text(
-                                                "Report group",
-                                                style: TextStyle(fontSize: 17.0, color: Colors.red),
-                                              ),
-                                            ],
-                                          )),
-                                      Padding(
-                                        padding: EdgeInsets.only(bottom: 5.0),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            )),
-                      ]),
-                    ),
-                  ],
-                );
-              }
-              return Center(
-                child: Text('Loading....'),
-              );
-            },
-          ),
-        ),
-      ),
+      child: conversationGroupBlocBuilder(),
     );
   }
 
@@ -404,6 +74,385 @@ class ChatInfoPageState extends State<ChatInfoPage> {
         }
       },
     );
+  }
+
+  Widget conversationGroupBlocBuilder() {
+    return BlocBuilder<ConversationGroupBloc, ConversationGroupState>(
+      builder: (context, conversationGroupState) {
+        if (conversationGroupState is ConversationGroupsLoading) {
+          return showLoading();
+        }
+
+        if (conversationGroupState is ConversationGroupsLoaded) {
+          currentConversationGroup = conversationGroupState.conversationGroupList.firstWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == widget.conversationGroupId, orElse: null);
+          conversationGroupNameTextController.text = currentConversationGroup.name;
+
+          return userContactBlocBuilder();
+        }
+
+        return showError();
+      },
+    );
+  }
+
+  Widget userContactBlocBuilder() {
+    return BlocBuilder<UserContactBloc, UserContactState>(
+      builder: (context, userContactState) {
+        if (userContactState is UserContactsLoading) {
+          return showLoading();
+        }
+
+        if (userContactState is UserContactsLoaded) {
+          currentConversationGroup.memberIds.forEach((conversationGroupMemberId) {
+            int userContactIndex = userContactState.userContactList.indexWhere((userContact) => conversationGroupMemberId == userContact.id);
+            if (userContactIndex != -1) {
+              conversationGroupMemberList.add(userContactState.userContactList[userContactIndex]);
+            }
+          });
+
+          return multimediaBlocBuilder();
+        }
+
+        return showError();
+      },
+    );
+  }
+
+  // Multimedia
+  Widget multimediaBlocBuilder() {
+    return BlocBuilder<MultimediaBloc, MultimediaState>(
+      builder: (context, multimediaState) {
+        if (multimediaState is MultimediaLoaded) {
+          return mainBody();
+        }
+
+        return showError();
+      },
+    );
+  }
+
+  Widget mainBody() {
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
+      child: Material(
+        child: CustomScrollView(
+          physics: BouncingScrollPhysics(),
+          slivers: <Widget>[
+            sliverAppBar(),
+            SliverList(
+              delegate: SliverChildListDelegate([
+                sliverConversationGroupDescription(),
+                muteNotificationToggle(),
+                favourites(),
+                Material(
+                    color: Colors.white,
+                    child: Container(
+                      height: 60.0,
+                      child: InkWell(
+                        onTap: () {},
+                        child: Padding(
+                          padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Padding(
+                                  padding: EdgeInsets.only(top: 5.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      Text(
+                                        'Media',
+                                        style: TextStyle(fontSize: 17.0),
+                                      ),
+                                      Icon(Icons.keyboard_arrow_right)
+                                    ],
+                                  )),
+                              Padding(
+                                padding: EdgeInsets.only(bottom: 5.0),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )),
+                // showGroupMemberNumber
+                BlocBuilder<UserContactBloc, UserContactState>(
+                  builder: (context, userContactState) {
+                    if (userContactState is UserContactsLoaded) {
+                      List<UserContact> userContactList = userContactState.userContactList;
+
+                      conversationGroupMemberList = getConversationGroupMembers(context, userContactList, currentConversationGroup);
+
+                      return showGroupMemberNumber(context, conversationGroupMemberList);
+                    }
+                    return showGroupMemberNumber(context, []);
+                  },
+                ),
+                // showGroupMemberParticipants
+                BlocBuilder<UserContactBloc, UserContactState>(
+                  builder: (BuildContext context, UserContactState userContactState) {
+                    if (userContactState is UserContactsLoaded) {
+                      List<UserContact> userContactList = userContactState.userContactList;
+
+                      return BlocBuilder<MultimediaBloc, MultimediaState>(
+                        builder: (BuildContext context, MultimediaState multimediaState) {
+                          if (multimediaState is MultimediaLoaded) {
+                            List<Multimedia> conversationGroupMemberMultimediaList = [];
+                            conversationGroupMemberList = getConversationGroupMembers(context, userContactList, currentConversationGroup);
+                            conversationGroupMemberMultimediaList =
+                                multimediaState.multimediaList.where((Multimedia existingMultimedia) => conversationGroupMemberList.contains((UserContact userContact) => userContact.profilePicture == existingMultimedia.id)).toList();
+                            return showGroupMemberParticipants(context, conversationGroupMemberList, conversationGroupMemberMultimediaList);
+                          }
+
+                          return showGroupMemberParticipants(context, conversationGroupMemberList, []);
+                        },
+                      );
+                    }
+
+                    return showGroupMemberParticipants(context, [], []);
+                  },
+                ),
+
+                Material(
+                    color: Colors.white,
+                    child: Container(
+                      height: 60.0,
+                      child: InkWell(
+                        onTap: () {},
+                        child: Padding(
+                          padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Padding(
+                                  padding: EdgeInsets.only(top: 5.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      Icon(Icons.exit_to_app, color: Colors.red),
+                                      Text(
+                                        'Exit group',
+                                        style: TextStyle(fontSize: 17.0, color: Colors.red),
+                                      ),
+                                    ],
+                                  )),
+                              Padding(
+                                padding: EdgeInsets.only(bottom: 5.0),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )),
+                Material(
+                    color: Colors.white,
+                    child: Container(
+                      height: 60.0,
+                      child: InkWell(
+                        onTap: () {},
+                        child: Padding(
+                          padding: EdgeInsets.only(left: 10.0, top: 10.0, right: 5.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Padding(
+                                  padding: EdgeInsets.only(top: 5.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      Icon(Icons.report, color: Colors.red),
+                                      Text(
+                                        'Report group',
+                                        style: TextStyle(fontSize: 17.0, color: Colors.red),
+                                      ),
+                                    ],
+                                  )),
+                              Padding(
+                                padding: EdgeInsets.only(bottom: 5.0),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )),
+              ]),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget sliverAppBar() {
+    return SliverAppBar(
+      floating: true,
+      pinned: true,
+      expandedHeight: Get.height * 0.4,
+      flexibleSpace: FlexibleSpaceBar(
+        title: Hero(
+          tag: currentConversationGroup.id,
+          child: FlatButton(
+              onPressed: () async {
+                CustomDialogs customDialog = new CustomDialogs(title: 'Edit Group Name', description: 'Edit the group name below. Press OK to save.', value: currentConversationGroup.name);
+                String groupName = await customDialog.showConfirmationDialog();
+                if (currentConversationGroup.name != groupName) {
+                  currentConversationGroup.name = groupName;
+                  conversationGroupBloc.add(EditConversationGroupEvent(editConversationGroupRequest: EditConversationGroupRequest(name: groupName), callback: (ConversationGroup conversationGroup) {}));
+                }
+              },
+              child: Container(
+                padding: EdgeInsetsDirectional.only(top: 25.0),
+                child: Text(
+                  currentConversationGroup.name,
+                  style: TextStyle(color: whiteColor, fontSize: 18.0),
+                  overflow: TextOverflow.fade,
+                  softWrap: true,
+                ),
+              )),
+        ),
+        background: conversationGroupPhoto(),
+      ),
+      actions: <Widget>[IconButton(icon: Icon(Icons.share), onPressed: shareConversationGroup)],
+    );
+  }
+
+  Widget sliverConversationGroupDescription() {
+    return Container(
+      height: Get.height * 0.1,
+      child: InkWell(
+        onTap: () async {
+          CustomDialogs customDialog = new CustomDialogs(title: 'Edit Group Description', description: 'Edit the group description below. Press OK to save.', value: currentConversationGroup.description);
+          String groupDescription = await customDialog.showConfirmationDialog();
+          if (currentConversationGroup.description != groupDescription) {
+            currentConversationGroup.description = groupDescription;
+            conversationGroupBloc.add(EditConversationGroupEvent(editConversationGroupRequest: EditConversationGroupRequest(description: groupDescription), callback: (ConversationGroup conversationGroup) {}));
+          }
+        },
+        child: Padding(
+          padding: EdgeInsets.only(left: Get.width * 0.02),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(
+                height: Get.height * 0.01,
+              ),
+              Text(
+                'Group description',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(
+                height: Get.height * 0.01,
+              ),
+              Text(
+                isObjectEmpty(currentConversationGroup.description) ? 'Add Group description' : currentConversationGroup.description,
+                style: TextStyle(
+                  fontSize: 17.0,
+                ),
+              ),
+              SizedBox(
+                height: Get.height * 0.01,
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget muteNotificationToggle() {
+    return Container(
+      height: Get.height * 0.1,
+      child: InkWell(
+        onTap: () {
+          // TODO: Set notificationExpireDate
+        },
+        child: Padding(
+          padding: EdgeInsets.only(left: Get.width * 0.05),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.only(top: Get.height * 0.01),
+              ),
+              Text(
+                'Notifications',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: Get.height * 0.01),
+              ),
+              // TODO: ConversationGroup Block
+              // Text(
+              //   conversationGroup.notificationExpireDate == 0 ? 'On' : 'Off',
+              //   style: TextStyle(
+              //     fontSize: 17.0,
+              //   ),
+              // ),
+              Padding(
+                padding: EdgeInsets.only(bottom: Get.height * 0.01),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget favourites() {
+    return Container(
+      height: Get.height * 0.1,
+      child: InkWell(
+        onTap: () {},
+        child: Padding(
+          padding: EdgeInsets.only(left: Get.width * 0.05, top: Get.height * 0.02, right: Get.width * 0.05),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                  padding: EdgeInsets.only(top: Get.height * 0.01),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text(
+                        'Favourites⭐',
+                        style: TextStyle(fontSize: 17.0),
+                      ),
+                      Icon(Icons.keyboard_arrow_right)
+                    ],
+                  )),
+              Padding(
+                padding: EdgeInsets.only(bottom: Get.height * 0.01),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget conversationGroupPhoto() {
+    Widget defaultImage = Image.asset(
+      DefaultImagePathTypeUtil.getByConversationGroupType(currentConversationGroup.conversationGroupType).path,
+    );
+    return Hero(
+        tag: currentConversationGroup.id + '1',
+        child: CachedNetworkImage(
+          imageUrl: '$REST_URL/conversationGroup/${widget.conversationGroupId}/groupPhoto',
+          useOldImageOnUrlChange: true,
+          placeholder: (context, url) => defaultImage,
+          errorWidget: (context, url, error) => defaultImage,
+          imageBuilder: (BuildContext context, ImageProvider<dynamic> imageProvider) {
+            return CircleAvatar(
+              backgroundImage: imageProvider,
+            );
+          },
+        ));
   }
 
   Widget showGroupMemberNumber(BuildContext context, List<UserContact> userContactList) {
@@ -424,7 +473,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                     children: <Widget>[
                       Icon(Icons.people),
                       Text(
-                        "Group members: " + userContactList.length.toString() + " participants",
+                        'Group members: ' + userContactList.length.toString() + ' participants',
                         style: TextStyle(fontSize: 17.0),
                       ),
                     ],
@@ -440,9 +489,13 @@ class ChatInfoPageState extends State<ChatInfoPage> {
   }
 
   Widget showGroupMemberParticipants(BuildContext context, List<UserContact> userContactList, List<Multimedia> multimediaList) {
+    Widget defaultImage = Image.asset(
+      DefaultImagePathType.UserContact.path,
+    );
+
     // TODO: Make it become ExpansionTile
     return Container(
-      height: 300.0,
+      height: Get.height * 0.4,
       child: ListView(
         controller: scrollController,
         children: userContactList
@@ -457,18 +510,21 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                           softWrap: true,
                         ),
                         subtitle: Text(
-                          'Hey There! I am using PocketChat.',
+                          userContact.about,
                           softWrap: true,
                         ),
                         onTap: () {},
-                        leading: imageService.loadImageThumbnailCircleAvatar(null, DefaultImagePathType.UserContact),
-//                                        leading: imageService.loadImageThumbnailCircleAvatar(
-//                                            multimediaList.firstWhere(
-//                                                (Multimedia userContactMultimedia) =>
-//                                                    !isObjectEmpty(userContactMultimedia) &&
-//                                                    userContactMultimedia.userContactId == userContact.id,
-//                                                orElse: null),
-//                                            "UserContact"),
+                        leading: CachedNetworkImage(
+                          imageUrl: '$REST_URL/userContact/${userContact.id}/profilePhoto',
+                          useOldImageOnUrlChange: true,
+                          placeholder: (context, url) => defaultImage,
+                          errorWidget: (context, url, error) => defaultImage,
+                          imageBuilder: (BuildContext context, ImageProvider<dynamic> imageProvider) {
+                            return CircleAvatar(
+                              backgroundImage: imageProvider,
+                            );
+                          },
+                        ),
                       )
                     ],
                   ),
@@ -478,43 +534,41 @@ class ChatInfoPageState extends State<ChatInfoPage> {
     );
   }
 
-  List<UserContact> getConversationGroupMembers(
-      BuildContext context, List<UserContact> userContactList, ConversationGroup conversationGroup) {
+  List<UserContact> getConversationGroupMembers(BuildContext context, List<UserContact> userContactList, ConversationGroup conversationGroup) {
     List<UserContact> conversationGroupMemberList = [];
-    List<String> notFoundMemberId = [];
 
-    UserState userState = BlocProvider.of<UserBloc>(context).state;
-
-    if (userState is UserLoaded) {
-      for (String memberId in conversationGroup.memberIds) {
-        bool userContactFound = false;
-        for (UserContact existingUserContact in userContactList) {
-          if (existingUserContact.id == memberId) {
-            userContactFound = true;
-            conversationGroupMemberList.add(existingUserContact);
-          }
+    for (String memberId in conversationGroup.memberIds) {
+      for (UserContact existingUserContact in userContactList) {
+        if (existingUserContact.id == memberId) {
+          conversationGroupMemberList.add(existingUserContact);
         }
-        // Warning: Bad practice as it will cause more and more loop in this page
-        // In case not found. Get the userContact from backend and add it into local DB. Then, BlocBuilder triggers and all userContacts will be found.
-        if (!userContactFound) {
-          notFoundMemberId.add(memberId);
-        }
-      }
-
-      // Get userContacts from server
-      for (String memberId in notFoundMemberId) {
-        BlocProvider.of<UserContactBloc>(context).add(GetUserContactEvent(
-            userContactId: memberId,
-            callback: (UserContact userContact) {
-              if (!userContact.isNull) {
-                // TODO: Remove below line.
-                // BlocProvider.of<UserContactBloc>(context)
-                //     .add(AddUserContactEvent(userContact: userContact, callback: (UserContact userContact2) {}));
-              }
-            }));
       }
     }
 
     return conversationGroupMemberList;
+  }
+
+  shareConversationGroup() {
+    showToast('Shared!', Toast.LENGTH_SHORT);
+    // TODO: Share with QR image. Can be screenshot or scanned.
+    // TODO: Share with link.
+  }
+
+  Widget showLoading() {
+    return Center(
+      child: Text('Loading...'),
+    );
+  }
+
+  Widget showError() {
+    return Center(
+      child: Column(
+        children: <Widget>[Text('An error has occurred. Please try again later.'), RaisedButton(onPressed: goBackToChatGroupListPage)],
+      ),
+    );
+  }
+
+  goBackToChatGroupListPage() {
+    Navigator.of(context).popUntil(ModalRoute.withName('chat_group_list_page'));
   }
 }

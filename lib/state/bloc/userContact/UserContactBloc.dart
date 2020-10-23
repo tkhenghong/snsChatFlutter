@@ -18,8 +18,6 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       yield* _initializeUserContactsToState(event);
     } else if (event is EditOwnUserContactEvent) {
       yield* _editOwnUserContact(event);
-    } else if (event is DeleteUserContactEvent) {
-      yield* _deleteUserContact(event);
     } else if (event is GetUserContactEvent) {
       yield* _getUserContact(event);
     } else if (event is GetUserContactByUserIdEvent) {
@@ -77,33 +75,6 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     if (!updatedInREST || !userContactEdited) {
       functionCallback(event, null);
       throw Exception('Not able to update own user contact.');
-    }
-  }
-
-  // Only happens when user is deleting his/her account.
-  Stream<UserContactState> _deleteUserContact(DeleteUserContactEvent event) async* {
-    bool deletedInREST = false;
-    bool deleted = false;
-
-    if (state is UserContactsLoaded) {
-      deletedInREST = await userContactAPIService.deleteUserContact(event.userContact.id);
-
-      if (deletedInREST) {
-        deleted = await userContactDBService.deleteUserContact(event.userContact.id);
-
-        if (deleted) {
-          List<UserContact> existingUserContactList = (state as UserContactsLoaded).userContactList;
-
-          existingUserContactList.removeWhere((UserContact existingUserContact) => existingUserContact.id == event.userContact.id);
-
-          yield* yieldUserContactState(updatedUserContactList: existingUserContactList);
-          functionCallback(event, true);
-        }
-      }
-    }
-
-    if (!deletedInREST || !deleted) {
-      functionCallback(event, false);
     }
   }
 
@@ -167,8 +138,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     if (state is UserContactsLoaded) {
       List<UserContact> existingUserContactList = (state as UserContactsLoaded).userContactList;
 
-      UserContact existingStateUserContact =
-          existingUserContactList.firstWhere((element) => element.mobileNo == event.mobileNo, orElse: () => null);
+      UserContact existingStateUserContact = existingUserContactList.firstWhere((element) => element.mobileNo == event.mobileNo, orElse: () => null);
 
       UserContact updatedUserContact;
 

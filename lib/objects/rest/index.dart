@@ -17,6 +17,7 @@ export 'request/conversation_group/remove_conversation_group_admin/remove_conver
 export 'request/conversation_group/mute_conversation_group_notification/mute_conversation_group_notification_request.dart';
 export 'request/conversation_group/unmute_conversation_group_notification/unmute_conversation_group_notification_request.dart';
 export 'request/conversation_group/join_conversation_group/join_conversation_group_request.dart';
+export 'request/multimedia/get_multimedia_list/get_multimedia_list_request.dart';
 
 // Responses
 export 'response/authentication/OTPResponse/OTPResponse.dart';

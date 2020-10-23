@@ -3,12 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 
 import 'bloc.dart';
 
-class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
+class WebSocketBloc extends Bloc<WebSocketBlocEvent, WebSocketState> {
   WebSocketBloc() : super(WebSocketLoading());
 
   ConversationGroupBloc conversationGroupBloc;
@@ -34,7 +35,7 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
   }
 
   @override
-  Stream<WebSocketState> mapEventToState(WebSocketEvent event) async* {
+  Stream<WebSocketState> mapEventToState(WebSocketBlocEvent event) async* {
     if (event is InitializeWebSocketEvent) {
       yield* _initializeWebSocketToState(event);
     } else if (event is DisconnectWebSocketEvent) {
@@ -135,23 +136,27 @@ class WebSocketBloc extends Bloc<WebSocketEvent, WebSocketState> {
 
   processConversationGroup(ConversationGroup conversationGroup) {
     // Conversation Group message
-    conversationGroupBloc
-        .add(AddConversationGroupEvent(conversationGroup: conversationGroup, callback: (ConversationGroup conversationGroup) {}));
+    /// TODO: UpdateConversationGroupEvent to differentiate with AddConversationGroupEvent.
+    // conversationGroupBloc
+    //     .add(AddConversationGroupEvent(createConversationGroupRequest: CreateConversationGroupRequest(), callback: (ConversationGroup conversationGroup) {}));
   }
 
   processChatMessage(ChatMessage chatMessage) {
     UserState userState = userBloc.state;
     if (userState is UserLoaded) {
       if (userState.user.id != chatMessage.senderId) {
-        chatMessageBloc.add(AddChatMessageEvent(message: chatMessage, callback: (ChatMessage message) {}));
-        if (chatMessage.type == ChatMessageType.Audio || chatMessage.type == ChatMessageType.Image) {
-          multimediaBloc.add(GetMessageMultimediaEvent(
-              messageId: chatMessage.id, conversationGroupId: chatMessage.conversationId, callback: (Multimedia multimedia) {}));
-        }
+        chatMessageBloc.add(AddChatMessageEvent(createChatMessageRequest: CreateChatMessageRequest(conversationId: chatMessage.conversationId, messageContent: chatMessage.messageContent), callback: (ChatMessage message) {}));
+
+        /// TODO: Retrieve Chat message's Multimedia object, save it to the localDB and state.
+        // if (chatMessage.type == MultimediaType.Audio || chatMessage.type == MultimediaType.Image) {
+        //   multimediaBloc.add(GetMessageMultimediaEvent(
+        //       messageId: chatMessage.id, conversationGroupId: chatMessage.conversationId, callback: (Multimedia multimedia) {}));
+        // }
       } else {
         // Mark your own message as sent, received status will changed by recipient
         chatMessage.status = ChatMessageStatus.Sent;
-        chatMessageBloc.add(EditChatMessageEvent(message: chatMessage, callback: (ChatMessage message) {}));
+        /// TODO: UpdateChatMessageEvent (Different than EditChatMessageEvent)
+        // chatMessageBloc.add(EditChatMessageEvent(message: chatMessage, callback: (ChatMessage message) {}));
       }
     }
   }

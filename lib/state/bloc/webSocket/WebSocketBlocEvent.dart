@@ -2,15 +2,15 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 
-abstract class WebSocketEvent extends Equatable {
+abstract class WebSocketBlocEvent extends Equatable {
   @override
   // TODO: implement props
   List<Object> get props => [];
 
-  const WebSocketEvent();
+  const WebSocketBlocEvent();
 }
 
-class InitializeWebSocketEvent extends WebSocketEvent {
+class InitializeWebSocketEvent extends WebSocketBlocEvent {
   final Function callback;
 
   const InitializeWebSocketEvent({this.callback});
@@ -19,7 +19,7 @@ class InitializeWebSocketEvent extends WebSocketEvent {
   String toString() => 'InitializeWebSocketEvent';
 }
 
-class DisconnectWebSocketEvent extends WebSocketEvent {
+class DisconnectWebSocketEvent extends WebSocketBlocEvent {
   final Function callback;
 
   DisconnectWebSocketEvent({this.callback});
@@ -31,7 +31,7 @@ class DisconnectWebSocketEvent extends WebSocketEvent {
   String toString() => 'DisconnectWebSocketEvent';
 }
 
-class ReconnectWebSocketEvent extends WebSocketEvent {
+class ReconnectWebSocketEvent extends WebSocketBlocEvent {
   final Function callback;
 
   ReconnectWebSocketEvent({this.callback});
@@ -43,7 +43,7 @@ class ReconnectWebSocketEvent extends WebSocketEvent {
   String toString() => 'ReconnectWebSocketEvent';
 }
 
-class GetOwnWebSocketEvent extends WebSocketEvent {
+class GetOwnWebSocketEvent extends WebSocketBlocEvent {
   final Function callback;
 
   GetOwnWebSocketEvent({this.callback});
@@ -55,7 +55,7 @@ class GetOwnWebSocketEvent extends WebSocketEvent {
   String toString() => 'GetOwnWebSocketEvent';
 }
 
-class ProcessWebSocketMessageEvent extends WebSocketEvent {
+class ProcessWebSocketMessageEvent extends WebSocketBlocEvent {
   final WebSocketMessage webSocketMessage;
   final BuildContext context; // Need to bring this in order to trigger other Blocs
   final Function callback;
@@ -69,7 +69,7 @@ class ProcessWebSocketMessageEvent extends WebSocketEvent {
   String toString() => 'ProcessWebSocketMessageEvent';
 }
 
-class SendWebSocketMessageEvent extends WebSocketEvent {
+class SendWebSocketMessageEvent extends WebSocketBlocEvent {
   final WebSocketMessage webSocketMessage;
   final Function callback;
 

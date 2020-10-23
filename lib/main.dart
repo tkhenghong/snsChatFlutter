@@ -226,7 +226,6 @@ initializeServices() {
   Get.put(AudioService());
   Get.put(CustomFileService());
   Get.put(FirebaseStorageService());
-  Get.put(ImageService());
   Get.put(NetworkService());
   Get.put(WebSocketService());
   Get.put(PasswordService());
