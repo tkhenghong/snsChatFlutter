@@ -38,13 +38,8 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       try {
         List<UserContact> userContactListFromDB = await userContactDBService.getAllUserContacts();
 
-        if (userContactListFromDB.isEmpty) {
-          yield UserContactsNotLoaded();
-          functionCallback(event, false);
-        } else {
-          yield UserContactsLoaded(userContactListFromDB);
-          functionCallback(event, true);
-        }
+        yield UserContactsLoaded(userContactListFromDB);
+        functionCallback(event, true);
       } catch (e) {
         yield UserContactsNotLoaded();
         functionCallback(event, false);
