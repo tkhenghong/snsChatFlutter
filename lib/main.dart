@@ -147,7 +147,8 @@ ThemeData themeData = ThemeData(
   bottomAppBarTheme: BottomAppBarTheme(
     color: primaryColor,
   ),
-  appBarTheme: AppBarTheme(color: secondaryColor, textTheme: TextTheme(headline6: TextStyle(color: primaryColor))),
+  // Invert color
+  // appBarTheme: AppBarTheme(color: secondaryColor, textTheme: TextTheme(headline6: TextStyle(color: primaryColor))),
 );
 
 void main() async {

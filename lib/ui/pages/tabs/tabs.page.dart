@@ -69,6 +69,8 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
 
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: Get.theme.primaryTextTheme.headline6.color,
+          textTheme: TextTheme(headline6: TextStyle(color: Get.theme.primaryColor)),
           titleSpacing: 0.0,
           elevation: 0.0,
           title: Text(
