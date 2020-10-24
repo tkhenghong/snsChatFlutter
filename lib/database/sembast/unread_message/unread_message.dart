@@ -18,9 +18,12 @@ class UnreadMessageDBService {
     }
 
     UnreadMessage existingUnreadMessage = await getSingleUnreadMessage(unreadMessage.id);
-    int key = isObjectEmpty(existingUnreadMessage) ? await _unreadMessageStore.add(await _db, unreadMessage.toJson()) : editUnreadMessage(unreadMessage);
-
-    return key != null && key != 0 && key.toString().isNotEmpty;
+    if (isObjectEmpty(existingUnreadMessage)) {
+      int key = await _unreadMessageStore.add(await _db, unreadMessage.toJson());
+      return key != null && key != 0 && key.toString().isNotEmpty;
+    } else {
+      return await editUnreadMessage(unreadMessage);
+    }
   }
 
   Future<bool> editUnreadMessage(UnreadMessage unreadMessage) async {

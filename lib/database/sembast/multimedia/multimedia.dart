@@ -18,9 +18,13 @@ class MultimediaDBService {
     }
 
     Multimedia existingMultimedia = await getSingleMultimedia(multimedia.id);
-    int key = isObjectEmpty(existingMultimedia) ? await _multimediaStore.add(await _db, multimedia.toJson()) : editMultimedia(multimedia);
 
-    return key != null && key != 0 && key.toString().isNotEmpty;
+    if (isObjectEmpty(existingMultimedia)) {
+      int key = await _multimediaStore.add(await _db, multimedia.toJson());
+      return key != null && key != 0 && key.toString().isNotEmpty;
+    } else {
+      return await editMultimedia(multimedia);
+    }
   }
 
   Future<void> addMultimediaList(List<Multimedia> multimediaList) async {
@@ -28,9 +32,9 @@ class MultimediaDBService {
     if (isObjectEmpty(database)) {
       return false;
     }
-    
+
     return await database.transaction((transaction) async {
-      for(int i = 0; i < multimediaList.length; i++) {
+      for (int i = 0; i < multimediaList.length; i++) {
         Multimedia existingMultimedia = await getSingleMultimedia(multimediaList[i].id);
         isObjectEmpty(existingMultimedia) ? await _multimediaStore.add(database, multimediaList[i].toJson()) : editMultimedia(multimediaList[i]);
       }

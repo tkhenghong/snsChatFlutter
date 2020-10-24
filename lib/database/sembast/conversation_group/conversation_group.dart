@@ -20,9 +20,12 @@ class ConversationDBService {
     }
 
     ConversationGroup existingConversationGroup = await getSingleConversationGroup(conversationGroup.id);
-    int key = isObjectEmpty(existingConversationGroup) ? await _conversationGroupStore.add(await _db, conversationGroup.toJson()) : editConversationGroup(conversationGroup);
-
-    return key != null && key != 0 && key.toString().isNotEmpty;
+    if(isObjectEmpty(existingConversationGroup)) {
+      int key = await _conversationGroupStore.add(await _db, conversationGroup.toJson());
+      return key != null && key != 0 && key.toString().isNotEmpty;
+    } else {
+      return await editConversationGroup(conversationGroup);
+    }
   }
 
   Future<bool> editConversationGroup(ConversationGroup conversationGroup) async {

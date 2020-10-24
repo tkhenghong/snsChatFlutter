@@ -18,9 +18,13 @@ class ChatMessageDBService {
     }
 
     ChatMessage existingChatMessage = await getSingleChatMessage(chatMessage.id);
-    int key = isObjectEmpty(existingChatMessage) ? await _chatMessageStore.add(await _db, chatMessage.toJson()) : editChatMessage(chatMessage);
 
-    return key != null && key != 0 && key.toString().isNotEmpty;
+    if (isObjectEmpty(existingChatMessage)) {
+      int key = await _chatMessageStore.add(await _db, chatMessage.toJson());
+      return key != null && key != 0 && key.toString().isNotEmpty;
+    } else {
+      return await editChatMessage(chatMessage);
+    }
   }
 
   Future<bool> editChatMessage(ChatMessage chatMessage) async {

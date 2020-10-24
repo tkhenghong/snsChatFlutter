@@ -18,9 +18,12 @@ class SettingsDBService {
     }
 
     Settings existingSettings = await getSingleSettings(settings.id);
-    int key = isObjectEmpty(existingSettings) ? await _settingsStore.add(await _db, settings.toJson()) : editSettings(settings);
-
-    return key != null && key != 0 && key.toString().isNotEmpty;
+    if (isObjectEmpty(existingSettings)) {
+      int key = await _settingsStore.add(await _db, settings.toJson());
+      return key != null && key != 0 && key.toString().isNotEmpty;
+    } else {
+      return await editSettings(settings);
+    }
   }
 
   Future<bool> editSettings(Settings settings) async {

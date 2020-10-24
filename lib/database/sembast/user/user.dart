@@ -18,9 +18,13 @@ class UserDBService {
     }
 
     User existingUser = await getSingleUser(user.id);
-    int key = isObjectEmpty(existingUser) ? await _userStore.add(await _db, user.toJson()) : editUser(user);
 
-    return key != null && key != 0 && key.toString().isNotEmpty;
+    if (isObjectEmpty(existingUser)) {
+      int key = await _userStore.add(await _db, user.toJson());
+      return key != null && key != 0 && key.toString().isNotEmpty;
+    } else {
+      return await editUser(user);
+    }
   }
 
   Future<bool> editUser(User user) async {
