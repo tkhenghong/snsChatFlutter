@@ -20,11 +20,18 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
 
   AnimationController _animationController, _animationController2;
   Animation animation;
-  static const List<IconData> icons = const [Icons.person_add, Icons.group_add, Icons.campaign]; // TODO: Add Broadcast
-  static const List<ConversationGroupType> chatTitles = const [ConversationGroupType.Personal, ConversationGroupType.Group, ConversationGroupType.Broadcast]; // TODO: Add Broadcast
+
+  List<IconData> createConversationIcons = [Icons.person_add, Icons.group_add, Icons.campaign];
+  List<ConversationGroupType> conversationGroupTypeTitles = [ConversationGroupType.Personal, ConversationGroupType.Group, ConversationGroupType.Broadcast];
+  List<String> conversationGroupTypeLabels = ['Create Personal Conversation', 'Create Group Conversation', 'Create Broadcast Group'];
+
+  List<IconData> tabIcons = [Icons.chat, Icons.code, Icons.person];
+  List<String> tabTitles = ['Chats', 'Scan QR Code', 'Myself'];
+
+  bool isActionButtonDisabled = false;
 
   int _bottomNavBarIndex = 0;
-  String tabTitle = 'Chats'; // Have to put default tab name or compiler will say null error
+  String tabTitle = ''; // Have to put default tab name or compiler will say null error
 
   PageController pageViewController = PageController(initialPage: 0, keepPage: true);
   List<Widget> tabPages;
@@ -89,57 +96,35 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
               changeTab(index);
             });
           },
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.chat,
-              ),
-              label: 'Chats',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.code,
-              ),
-              label: 'Scan QR Code',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.person,
-              ),
-              label: 'Myself',
-            ),
-          ],
+          items: initializeTabs(),
         ),
         floatingActionButton: FadeTransition(
           opacity: animation,
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: List.generate(icons.length, (int index) {
-              // 0 = Personal, 1 = Group, 2 = Broadcast
+            children: List.generate(createConversationIcons.length, (int index) {
               Widget child = new Container(
-                height: 70.0,
-                width: 56.0,
+                height: Get.height * 0.1,
+                width: Get.width * 0.1,
                 alignment: FractionalOffset.topCenter,
                 child: ScaleTransition(
                     scale: CurvedAnimation(
                       parent: _animationController,
-                      curve: Interval(0.0, 1.0 - index / icons.length / 2.0, curve: Curves.easeOut),
+                      curve: Interval(0.0, 1.0 - index / createConversationIcons.length / 2.0, curve: Curves.easeOut),
                     ),
                     child: Tooltip(
-                      message: index == 0
-                          ? 'Create Personal Conversation'
-                          : index == 1
-                          ? 'Create Group Conversation'
-                          : index == 2
-                          ? 'Create Broadcast Group'
-                          : 'Create Others...',
+                      message: conversationGroupTypeLabels[index],
                       child: FloatingActionButton(
                         heroTag: null,
                         mini: true,
-                        child: Icon(icons[index]),
+                        child: Icon(
+                          createConversationIcons[index],
+                          color: Get.theme.primaryColor,
+                        ),
                         onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute(builder: (context) => SelectContactsPage(chatGroupType: chatTitles[index])));
-                          _animationController.reverse();
+                          if(!isActionButtonDisabled) {
+                            goToSelectContactPage(index);
+                          }
                         },
                       ),
                     )),
@@ -174,23 +159,47 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
         ));
   }
 
-  Widget changeTab(int pageNumber) {
+  /// The reason of this implementation is due to compiler will give error if
+  List<BottomNavigationBarItem> initializeTabs() {
+    int i = 0;
+    return tabIcons.map((e) {
+      BottomNavigationBarItem item = BottomNavigationBarItem(
+        icon: Icon(
+          tabIcons[i],
+        ),
+        label: tabTitles[i],
+      );
+      i++;
+      return item;
+    }).toList();
+  }
+
+  changeTab(int pageNumber) {
     switch (pageNumber) {
       case 0:
-        tabTitle = 'Chats';
+        tabTitle = tabTitles[0];
+        isActionButtonDisabled = false;
         _animationController2.forward();
         break;
       case 1:
-        tabTitle = 'Scan QR Code';
+        tabTitle = tabTitles[1];
+        isActionButtonDisabled = true;
         _animationController2.reverse();
         break;
       case 2:
-        tabTitle = 'Myself';
+        tabTitle = tabTitles[2];
+        isActionButtonDisabled = true;
         _animationController2.reverse();
         break;
       default:
         break;
     }
+  }
+
+  goToSelectContactPage(int index) {
+    print('goToSelectContactPage triggered.');
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => SelectContactsPage(chatGroupType: conversationGroupTypeTitles[index])));
+    _animationController.reverse();
   }
 
   @override
