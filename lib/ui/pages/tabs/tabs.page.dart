@@ -39,6 +39,9 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
   @override
   void initState() {
     super.initState();
+
+    tabTitle = tabTitles[0];
+
     tabPages = [ChatGroupListPage(), ScanQrCodePage(), MyselfPage()];
     _animationController = new AnimationController(
       vsync: this,
@@ -68,11 +71,10 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
         appBar: AppBar(
           titleSpacing: 0.0,
           elevation: 0.0,
-          backgroundColor: Colors.white,
           title: Text(
             tabTitle,
             textAlign: TextAlign.start,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32.0, color: Get.theme.primaryColor),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32.0),
           ),
         ),
         body: PageView(
@@ -119,10 +121,9 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
                         mini: true,
                         child: Icon(
                           createConversationIcons[index],
-                          color: Get.theme.primaryColor,
                         ),
                         onPressed: () {
-                          if(!isActionButtonDisabled) {
+                          if (!isActionButtonDisabled) {
                             goToSelectContactPage(index);
                           }
                         },
@@ -197,7 +198,6 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
   }
 
   goToSelectContactPage(int index) {
-    print('goToSelectContactPage triggered.');
     Navigator.of(context).push(MaterialPageRoute(builder: (context) => SelectContactsPage(chatGroupType: conversationGroupTypeTitles[index])));
     _animationController.reverse();
   }

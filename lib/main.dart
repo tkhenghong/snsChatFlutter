@@ -12,7 +12,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
@@ -119,8 +118,6 @@ MaterialColor secondaryColor = MaterialColor(
   },
 );
 
-TextStyle primaryTextStyleInAppBarText = TextStyle(color: primaryColor, fontSize: globals.header1, fontWeight: FontWeight.bold);
-
 ThemeData themeData = ThemeData(
   fontFamily: 'Roboto',
   brightness: primaryBrightness,
@@ -128,22 +125,29 @@ ThemeData themeData = ThemeData(
   primaryColor: primaryColor,
   accentColor: primaryColor,
   cursorColor: primaryColor,
+  scaffoldBackgroundColor: secondaryColor,
+  backgroundColor: secondaryColor,
+  bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    backgroundColor: secondaryColor,
+    selectedItemColor: primaryColor,
+    unselectedItemColor: primaryColor[500],
+    selectedIconTheme: IconThemeData(color: primaryColor),
+    selectedLabelStyle: TextStyle(color: primaryColor),
+    unselectedIconTheme: IconThemeData(color: primaryColor[500]),
+    unselectedLabelStyle: TextStyle(color: primaryColor[500]),
+  ),
   highlightColor: primaryColor[500],
   textSelectionColor: primaryColor[500],
   textSelectionHandleColor: secondaryColor,
   indicatorColor: secondaryColor,
-  buttonColor: secondaryColor,
-  buttonTheme: ButtonThemeData(buttonColor: secondaryColor, textTheme: ButtonTextTheme.primary),
+  buttonColor: primaryColor,
+  buttonTheme: ButtonThemeData(buttonColor: primaryColor, textTheme: ButtonTextTheme.primary),
   errorColor: primaryColor,
   bottomAppBarColor: primaryColor,
   bottomAppBarTheme: BottomAppBarTheme(
     color: primaryColor,
   ),
-  appBarTheme: AppBarTheme(
-      color: primaryColor,
-      textTheme: TextTheme(
-        button: primaryTextStyleInAppBarText,
-      )),
+  appBarTheme: AppBarTheme(color: secondaryColor, textTheme: TextTheme(headline6: TextStyle(color: primaryColor))),
 );
 
 void main() async {

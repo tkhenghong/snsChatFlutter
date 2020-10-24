@@ -47,6 +47,41 @@ class MyselfPageState extends State<MyselfPage> {
     loadButtons();
   }
 
+  loadButtons() {
+    buttons = [
+      ListTile(
+          title: Text("Settings"),
+          leading: Icon(Icons.settings),
+          onTap: () {
+            goToSettingsPage();
+          }),
+      ListTile(
+          title: Text("About"),
+          leading: Icon(Icons.info),
+          onTap: () {
+            goToSettingsPage();
+          }),
+      ListTile(
+          title: Text("Help"),
+          leading: Icon(Icons.help),
+          onTap: () {
+            goToSettingsPage();
+          }),
+      ListTile(
+          title: Text("Feedback"),
+          leading: Icon(Icons.feedback),
+          onTap: () {
+            goToSettingsPage();
+          }),
+      ListTile(
+          title: Text("Logout"),
+          leading: Icon(Icons.exit_to_app),
+          onTap: () {
+            logOut();
+          }),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     ipGeoLocationBloc = BlocProvider.of<IPGeoLocationBloc>(context);
@@ -102,6 +137,7 @@ class MyselfPageState extends State<MyselfPage> {
           List<Multimedia> multimediaList = multimediaState.multimediaList;
           userOwnMultimedia = multimediaList.firstWhere((Multimedia existingMultimedia) => ownUserContact.profilePicture == existingMultimedia.id, orElse: () => null);
           if (!isObjectEmpty(userOwnMultimedia)) {
+            insertUserProfilePicture();
             return showMyselfPage();
           }
         }
@@ -110,15 +146,7 @@ class MyselfPageState extends State<MyselfPage> {
     );
   }
 
-//  Widget showMyselfPage() {
-//    insertUserProfilePicture();
-//    return Column(
-//      children: <Widget>[PageListView(array: buttons, context: context)],
-//    );
-//  }
-
   Widget showMyselfPage() {
-    insertUserProfilePicture();
     return Column(
       children: <Widget>[
         ListView.builder(
@@ -173,41 +201,6 @@ class MyselfPageState extends State<MyselfPage> {
         ),
       ],
     );
-  }
-
-  loadButtons() {
-    buttons = [
-      ListTile(
-          title: Text("Settings"),
-          leading: Icon(Icons.settings),
-          onTap: () {
-            goToSettingsPage();
-          }),
-      ListTile(
-          title: Text("About"),
-          leading: Icon(Icons.info),
-          onTap: () {
-            goToSettingsPage();
-          }),
-      ListTile(
-          title: Text("Help"),
-          leading: Icon(Icons.help),
-          onTap: () {
-            goToSettingsPage();
-          }),
-      ListTile(
-          title: Text("Feedback"),
-          leading: Icon(Icons.feedback),
-          onTap: () {
-            goToSettingsPage();
-          }),
-      ListTile(
-          title: Text("Logout"),
-          leading: Icon(Icons.exit_to_app),
-          onTap: () {
-            logOut();
-          }),
-    ];
   }
 
   goToSettingsPage() {
