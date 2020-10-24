@@ -26,6 +26,26 @@ class UnreadMessageDBService {
     }
   }
 
+  Future<void> addUnreadMessages(List<UnreadMessage> unreadMessages) async {
+    Database database = await _db;
+    if (isObjectEmpty(database)) {
+      return false;
+    }
+
+    try {
+      await database.transaction((transaction) async {
+        for (int i = 0; i < unreadMessages.length; i++) {
+          UnreadMessage existingUnreadMessage = await getSingleUnreadMessage(unreadMessages[i].id);
+          isObjectEmpty(existingUnreadMessage) ? await _unreadMessageStore.add(database, unreadMessages[i].toJson()) : editUnreadMessage(unreadMessages[i]);
+        }
+      });
+      return true;
+    } catch (e) {
+      // Error happened in database transaction.
+      return false;
+    }
+  }
+
   Future<bool> editUnreadMessage(UnreadMessage unreadMessage) async {
     if (isObjectEmpty(await _db)) {
       return false;

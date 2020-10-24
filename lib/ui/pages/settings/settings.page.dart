@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:snschat_flutter/general/index.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/state/bloc/bloc.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -9,42 +12,77 @@ class SettingsPage extends StatefulWidget {
 }
 
 class SettingsPageState extends State<SettingsPage> {
+  SettingsBloc settingsBloc;
+  UserBloc userBloc;
+  UserContactBloc userContactBloc;
+
+  RefreshController _refreshController;
+
+  List<IconData> settingsIcons = [Icons.account_circle, Icons.format_paint, Icons.chat, Icons.notifications, Icons.lock, Icons.security];
+  List<String> settingsButtons = ['Account', 'Theme', 'Chat', 'Notifications', 'Privacy', 'Security'];
+  List<ListTile> allSettings = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshController = new RefreshController(initialRefresh: false);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _refreshController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    settingsBloc = BlocProvider.of<SettingsBloc>(context);
+    userBloc = BlocProvider.of<UserBloc>(context);
+    userContactBloc = BlocProvider.of<UserContactBloc>(context);
+
+    initializeSettingsButtons();
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Settings"),
       ),
-      body: PageListView(array: allSettings, context: context),
+      body: SmartRefresher(
+        controller: _refreshController,
+        onRefresh: onRefresh,
+        enablePullDown: true,
+        physics: BouncingScrollPhysics(),
+        header: ClassicHeader(),
+        child: ListView.builder(
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            itemCount: allSettings.length,
+            itemBuilder: (context, index) {
+              return allSettings[index];
+            }),
+      ),
     );
   }
 
-  List<PageListItem> allSettings = [
-    PageListItem(
-        title: Text("Account"),
-        leading: Icon(Icons.account_circle),
-        // Change phone number, Change picture, Change cover photo, change username, change Bio, change display name
-        onTap: (context) => {}),
-    PageListItem(
-        title: Text("Theme"),
-        leading: Icon(Icons.format_paint),
-        // Message text size, text font family, Auto-Night mode, Color theme (Telegram)
-        onTap: (context) => {}),
-    PageListItem(
-        title: Text("Chat"),
-        leading: Icon(Icons.chat),
-        // Link open externally, Chat Animations, Save to Gallery, Send by Enter, Stickers Management, Chat Backup (Cloud/Local)
-        onTap: (context) => {}),
-    PageListItem(
-        title: Text("Notifications"),
-        leading: Icon(Icons.notifications),
-        // Notification ringtone, Vibrate type, Badge counter, In-app sounds, In-app vibrate, In-app Preview, In-chat sounds, Joined Telegram, Created Pinned Message, Background Connection
-        onTap: (context) => {}),
-    PageListItem(
-        title: Text("Privacy"),
-        leading: Icon(Icons.lock),
-        // Friend confirmation, Find Contact in storage, Blocked list, Methods of Adding me, Sync Contacts, Suggest Frequent Contacts
-        onTap: (context) => {}),
-    PageListItem(title: Text("Security"), leading: Icon(Icons.security), onTap: (context) => {}),
-  ];
+  initializeSettingsButtons() {
+    for (int i = 0; i < settingsButtons.length; i++) {
+      allSettings.add(ListTile(
+          title: Text(settingsButtons[i]),
+          leading: Icon(settingsIcons[i]),
+          // Change phone number, Change picture, Change cover photo, change username, change Bio, change display name
+          onTap: () {}));
+    }
+  }
+
+  onRefresh() {
+    userBloc.add(GetOwnUserEvent(callback: (User user) {}));
+    settingsBloc.add(GetUserOwnSettingsEvent(callback: (Settings settings) {}));
+    userContactBloc.add(GetUserOwnUserContactEvent(callback: (bool done) {
+      if (done) {
+        userContactBloc.add(GetUserOwnUserContactsEvent(callback: (bool done) {}));
+      }
+    }));
+    setState(() {
+      _refreshController.refreshCompleted();
+    });
+  }
 }

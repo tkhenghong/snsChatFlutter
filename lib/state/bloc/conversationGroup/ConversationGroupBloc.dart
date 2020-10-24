@@ -41,10 +41,8 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     if (state is ConversationGroupsLoading || state is ConversationGroupsNotLoaded) {
       try {
         List<ConversationGroup> conversationGroupListFromDB = await conversationGroupDBService.getAllConversationGroups();
-        if (conversationGroupListFromDB.isNotEmpty) {
-          yield ConversationGroupsLoaded(conversationGroupListFromDB);
-          functionCallback(event, true);
-        }
+        yield ConversationGroupsLoaded(conversationGroupListFromDB);
+        functionCallback(event, true);
       } catch (e) {
         yield ConversationGroupsNotLoaded();
         functionCallback(event, false);
@@ -151,7 +149,6 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
   }
 
   Stream<ConversationGroupState> _getUserOwnConversationGroups(GetUserOwnConversationGroupsEvent event) async* {
-
    try {
      if (state is ConversationGroupsLoaded) {
        ConversationPageableResponse conversationPageableResponse = await conversationGroupAPIService.getUserOwnConversationGroups(event.getConversationGroupsRequest);

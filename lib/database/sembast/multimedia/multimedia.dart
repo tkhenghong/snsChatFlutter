@@ -33,12 +33,18 @@ class MultimediaDBService {
       return false;
     }
 
-    return await database.transaction((transaction) async {
-      for (int i = 0; i < multimediaList.length; i++) {
-        Multimedia existingMultimedia = await getSingleMultimedia(multimediaList[i].id);
-        isObjectEmpty(existingMultimedia) ? await _multimediaStore.add(database, multimediaList[i].toJson()) : editMultimedia(multimediaList[i]);
-      }
-    });
+    try {
+      await database.transaction((transaction) async {
+        for (int i = 0; i < multimediaList.length; i++) {
+          Multimedia existingMultimedia = await getSingleMultimedia(multimediaList[i].id);
+          isObjectEmpty(existingMultimedia) ? await _multimediaStore.add(database, multimediaList[i].toJson()) : editMultimedia(multimediaList[i]);
+        }
+      });
+
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   Future<bool> editMultimedia(Multimedia multimedia) async {

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/objects/rest/index.dart';
 
 abstract class SettingsEvent extends Equatable {
   @override
@@ -20,16 +21,16 @@ class InitializeSettingsEvent extends SettingsEvent {
 }
 
 class EditSettingsEvent extends SettingsEvent {
-  final Settings settings;
+  final UpdateSettingsRequest updateSettingsRequest;
   final Function callback;
 
-  const EditSettingsEvent({this.settings, this.callback});
+  const EditSettingsEvent({this.updateSettingsRequest, this.callback});
 
   @override
-  List<Object> get props => [settings];
+  List<Object> get props => [updateSettingsRequest];
 
   @override
-  String toString() => 'EditSettingsEvent {settings: $settings}';
+  String toString() => 'EditSettingsEvent {settings: $updateSettingsRequest}';
 }
 
 class DeleteSettingsEvent extends SettingsEvent {

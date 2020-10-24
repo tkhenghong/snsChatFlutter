@@ -598,6 +598,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     Navigator.pop(context); //pop loading dialog
     Navigator.of(context).pushNamedAndRemoveUntil('tabs_page', (Route<dynamic> route) => false);
     // Navigator.of(context).pushReplacementNamed(ChatRoomPage(conversationGroup));
-    Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup))));
+    Navigator.push(context, MaterialPageRoute(builder: ((context) => ChatRoomPage(conversationGroup.id))));
   }
 }

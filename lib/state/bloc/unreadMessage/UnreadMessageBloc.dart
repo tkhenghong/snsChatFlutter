@@ -23,24 +23,19 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
     } else if (event is GetUnreadMessageByConversationGroupIdEvent) {
       yield* _geUnreadMessageByConversationGroupId(event);
     } else if (event is UpdateUnreadMessagesEvent) {
-      yield* _getPreviousUnreadMessages(event);
+      yield* _updateUnreadMessages(event);
     } else if (event is RemoveAllUnreadMessagesEvent) {
       yield* _removeAllUnreadMessagesEvent(event);
     }
   }
 
+  /// Not loading all UnreadMessage from state
+  /// Only gets unreadMessage when necessary
   Stream<UnreadMessageState> _initializeUnreadMessagesToState(InitializeUnreadMessagesEvent event) async* {
     if (state is UnreadMessageLoading || state is UnreadMessagesNotLoaded) {
       try {
-        List<UnreadMessage> unreadMessageListFromDB = await unreadMessageDBService.getAllUnreadMessage();
-
-        if (unreadMessageListFromDB.isEmpty) {
-          yield UnreadMessagesNotLoaded();
-          functionCallback(event, false);
-        } else {
-          yield UnreadMessagesLoaded(unreadMessageListFromDB);
-          functionCallback(event, true);
-        }
+        yield UnreadMessagesLoaded([]);
+        functionCallback(event, true);
       } catch (e) {
         yield UnreadMessagesNotLoaded();
         functionCallback(event, false);
@@ -50,73 +45,74 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
 
   // Only updates localDB and State
   Stream<UnreadMessageState> _updateUnreadMessageEvent(UpdateUnreadMessageEvent event) async* {
-    bool updatedInREST = false;
-    bool unreadMessageSaved = false;
+    try {
+      await unreadMessageDBService.editUnreadMessage(event.unreadMessage);
 
-    if (state is UnreadMessagesLoaded) {
-      if (updatedInREST) {
-        unreadMessageSaved = await unreadMessageDBService.editUnreadMessage(event.unreadMessage);
+      if (state is UnreadMessagesLoaded) {
+        List<UnreadMessage> updatedUnreadMessages = addUnreadMessageIntoState(event.unreadMessage);
 
-        if (unreadMessageSaved) {
-          List<UnreadMessage> existingUnreadMessageList = (state as UnreadMessagesLoaded).unreadMessageList;
-
-          existingUnreadMessageList.removeWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.id == event.unreadMessage.id);
-
-          existingUnreadMessageList.add(event.unreadMessage);
-
-          yield UnreadMessagesLoaded(existingUnreadMessageList);
-          functionCallback(event, event.unreadMessage);
-        }
+        yield* yieldUnreadMessageLoadedState(updatedUnreadMessageList: updatedUnreadMessages);
+        functionCallback(event, true);
       }
-    }
-    if (!updatedInREST || !unreadMessageSaved) {
+    } catch (e) {
       functionCallback(event, false);
     }
   }
 
-  // Delete Local DB UnreadMessage only**
   Stream<UnreadMessageState> _deleteUnreadMessage(DeleteUnreadMessageEvent event) async* {
-    bool deletedInREST = false;
-    bool unreadMessageDeleted = false;
+    try {
+      await unreadMessageDBService.deleteUnreadMessage(event.unreadMessage.id);
 
-    if (state is UnreadMessagesLoaded) {
-      unreadMessageDeleted = await unreadMessageDBService.deleteUnreadMessage(event.unreadMessage.id);
-
-      if (unreadMessageDeleted) {
-        List<UnreadMessage> existingUnreadMessageList = (state as UnreadMessagesLoaded).unreadMessageList;
+      if (state is UnreadMessagesLoaded) {
+        UnreadMessagesLoaded currentState = state as UnreadMessagesLoaded;
+        List<UnreadMessage> existingUnreadMessageList = currentState.unreadMessageList;
         existingUnreadMessageList.removeWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.id == event.unreadMessage.id);
 
+        yield UnreadMessageLoading();
         yield UnreadMessagesLoaded(existingUnreadMessageList);
         functionCallback(event, true);
       }
-    }
-
-    if (!deletedInREST || !unreadMessageDeleted) {
+    } catch (e) {
       functionCallback(event, false);
     }
   }
 
   Stream<UnreadMessageState> _geUnreadMessageByConversationGroupId(GetUnreadMessageByConversationGroupIdEvent event) async* {
-    UnreadMessage unreadMessage = await unreadMessageAPIService.geUnreadMessageByConversationGroupId(event.conversationGroupId);
-    addUnreadMessageIntoDB(unreadMessage);
-    List<UnreadMessage> updatedUnreadMessageList = addUnreadMessageIntoState(unreadMessage);
+    try {
+      UnreadMessage unreadMessage;
+      unreadMessage = await unreadMessageAPIService.geUnreadMessageByConversationGroupId(event.conversationGroupId);
 
-    yield* yieldUnreadMessageState(updatedUnreadMessageList: updatedUnreadMessageList);
+      if (!isObjectEmpty(unreadMessage)) {
+        unreadMessageDBService.addUnreadMessage(unreadMessage);
+      }
+
+      List<UnreadMessage> updatedUnreadMessageList = addUnreadMessageIntoState(unreadMessage);
+
+      yield* yieldUnreadMessageLoadedState(updatedUnreadMessageList: updatedUnreadMessageList);
+      functionCallback(event, unreadMessage);
+    } catch (e) {
+      functionCallback(event, null);
+    }
   }
 
-  Stream<UnreadMessageState> _getPreviousUnreadMessages(UpdateUnreadMessagesEvent event) async* {
-    if (state is UnreadMessagesLoaded) {
-      List<UnreadMessage> existingUnreadMessageList = (state as UnreadMessagesLoaded).unreadMessageList;
+  Stream<UnreadMessageState> _updateUnreadMessages(UpdateUnreadMessagesEvent event) async* {
+    try {
+      if (state is UnreadMessagesLoaded) {
+        UnreadMessagesLoaded currentState = state as UnreadMessagesLoaded;
+        List<UnreadMessage> existingUnreadMessageList = currentState.unreadMessageList;
 
-      if (!event.unreadMessages.isNullOrBlank && event.unreadMessages.isNotEmpty) {
-        // Update the current info of the unreadMessage to latest information.
-        event.unreadMessages.forEach((unreadMessage) {
-          unreadMessageDBService.addUnreadMessage(unreadMessage);
-          existingUnreadMessageList.add(unreadMessage);
+        unreadMessageDBService.addUnreadMessages(event.unreadMessages);
+
+        event.unreadMessages.forEach((element) {
+          existingUnreadMessageList.removeWhere((existingUnreadMessage) => element.id == existingUnreadMessage.id);
         });
+
+        existingUnreadMessageList.addAll(event.unreadMessages);
+        yield* yieldUnreadMessageLoadedState(updatedUnreadMessageList: existingUnreadMessageList);
+        functionCallback(event, true);
       }
-      yield UnreadMessagesLoaded(existingUnreadMessageList);
-      functionCallback(event, true);
+    } catch (e) {
+      functionCallback(event, false);
     }
   }
 
@@ -124,10 +120,6 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
     unreadMessageDBService.deleteAllUnreadMessage();
     yield UnreadMessagesNotLoaded();
     functionCallback(event, true);
-  }
-
-  Future<bool> addUnreadMessageIntoDB(UnreadMessage unreadMessage) async {
-    return await unreadMessageDBService.addUnreadMessage(unreadMessage);
   }
 
   List<UnreadMessage> addUnreadMessageIntoState(UnreadMessage unreadMessage) {
@@ -140,23 +132,21 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
     return existingUnreadMessageList;
   }
 
-  Stream<UnreadMessageState> yieldUnreadMessageState({List<UnreadMessage> updatedUnreadMessageList}) async* {
+  Stream<UnreadMessageState> yieldUnreadMessageLoadedState({List<UnreadMessage> updatedUnreadMessageList}) async* {
     List<UnreadMessage> existingUnreadMessageList;
 
     if (state is UnreadMessagesLoaded) {
-      existingUnreadMessageList = (state as UnreadMessagesLoaded).unreadMessageList;
+      UnreadMessagesLoaded currentState = state as UnreadMessagesLoaded;
+      existingUnreadMessageList = currentState.unreadMessageList;
 
-      if (updatedUnreadMessageList.isNotEmpty) {
+      if (!isObjectEmpty(updatedUnreadMessageList)) {
         existingUnreadMessageList = updatedUnreadMessageList;
       }
-    }
 
-    yield UnreadMessageLoading();
-
-    if (existingUnreadMessageList.isEmpty) {
-      yield UnreadMessagesNotLoaded();
-    } else {
+      yield UnreadMessageLoading();
       yield UnreadMessagesLoaded(existingUnreadMessageList);
+    } else {
+      yield UnreadMessagesLoaded(updatedUnreadMessageList);
     }
   }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
@@ -32,22 +33,20 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
   Stream<SettingsState> _initializeSettingsToState(InitializeSettingsEvent event) async* {
     if (state is SettingsLoading || state is SettingsNotLoaded) {
-      Settings settingsFromDB;
+      Settings settings;
       try {
-        if (!event.user.isNull) {
-          // TODO: get user from state using better way
-          settingsFromDB = await settingsDBService.getSettingsOfAUser(event.user.id);
+        try {
+          settings = await settingsAPIService.getUserOwnSettings();
+        } catch (e) {
+          // Failed to find user Settings from backend.
+          settings = await settingsDBService.getSettingsOfAUser(event.user.id);
 
-          if (!settingsFromDB.isNull) {
-            yield SettingsLoaded(settingsFromDB);
+          if (!isObjectEmpty(settings)) {
+            yield SettingsLoaded(settings);
             functionCallback(event, true);
           } else {
-            yield SettingsNotLoaded();
-            functionCallback(event, false);
+            throw Exception('Unable to load user settings.');
           }
-        } else {
-          yield SettingsNotLoaded();
-          functionCallback(event, false);
         }
       } catch (e) {
         yield SettingsNotLoaded();
@@ -57,59 +56,49 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   }
 
   Stream<SettingsState> _editSettings(EditSettingsEvent event) async* {
-    bool updatedInREST = false;
-    bool updated = false;
-    if (state is SettingsLoaded) {
-      updatedInREST = await settingsAPIService.editSettings(event.settings);
+    try {
+      bool updated = await settingsAPIService.editSettings(event.updateSettingsRequest);
 
-      if (updatedInREST) {
-        updated = await settingsDBService.editSettings(event.settings);
-
-        if (updated) {
-          yield SettingsLoaded(event.settings);
-          functionCallback(event, event.settings);
-        }
-
-        functionCallback(event, false);
+      if (!updated) {
+        showToast('Error in updating settings. Please try again later,', Toast.LENGTH_LONG);
+        throw Exception('Error in updating settings.');
       }
-    }
 
-    if (!updatedInREST || !updated) {
+      Settings settings = await settingsAPIService.getUserOwnSettings();
+      settingsDBService.editSettings(settings);
+
+      if (state is SettingsLoaded) {
+        yield SettingsLoaded(settings);
+        functionCallback(event, true);
+      }
+    } catch (e) {
       functionCallback(event, false);
     }
   }
 
   // Only deletes Local DB's Settings**
   Stream<SettingsState> _deleteSettings(DeleteSettingsEvent event) async* {
-    if (state is SettingsLoaded) {
-      bool settingsDeleted = await settingsDBService.deleteSettings(event.settings.id);
+    try {
+      if (state is SettingsLoaded) {
+        await settingsDBService.deleteSettings(event.settings.id);
 
-      if (!settingsDeleted) {
-        functionCallback(event, false);
-      } else {
         yield SettingsNotLoaded();
         functionCallback(event, true);
       }
+    } catch (e) {
+      functionCallback(event, false);
     }
   }
 
-  // Used during login to initialize Settings after having the User Initialized
   Stream<SettingsState> _getSettingsOfTheUserEvent(GetUserOwnSettingsEvent event) async* {
-    Settings settingsFromREST;
-    bool savedIntoDB;
+    try {
+      Settings settingsFromREST = await settingsAPIService.getUserOwnSettings();
 
-    settingsFromREST = await settingsAPIService.getUserOwnSettings();
+      settingsDBService.addSettings(settingsFromREST);
 
-    await settingsDBService.deleteSettings(settingsFromREST.id);
-
-    savedIntoDB = await settingsDBService.addSettings(settingsFromREST);
-
-    if (!settingsFromREST.isNull && savedIntoDB) {
       yield SettingsLoaded(settingsFromREST);
       functionCallback(event, settingsFromREST);
-    }
-
-    if (settingsFromREST.isNull || !savedIntoDB) {
+    } catch (e) {
       yield SettingsNotLoaded();
       functionCallback(event, null);
     }

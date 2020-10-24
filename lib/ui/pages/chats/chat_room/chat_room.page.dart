@@ -20,9 +20,9 @@ import 'package:snschat_flutter/state/bloc/bloc.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
 
 class ChatRoomPage extends StatefulWidget {
-  final ConversationGroup _conversationGroup;
+  final String conversationGroupId;
 
-  ChatRoomPage([this._conversationGroup]);
+  ChatRoomPage([this.conversationGroupId]);
 
   @override
   State<StatefulWidget> createState() {
@@ -167,7 +167,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     return BlocBuilder<ConversationGroupBloc, ConversationGroupState>(
       builder: (context, conversationGroupState) {
         if (conversationGroupState is ConversationGroupsLoaded) {
-          currentConversationGroup = conversationGroupState.conversationGroupList.firstWhere((ConversationGroup conversationGroup) => conversationGroup.id == widget._conversationGroup.id, orElse: () => null);
+          currentConversationGroup = conversationGroupState.conversationGroupList.firstWhere((ConversationGroup conversationGroup) => conversationGroup.id == widget.conversationGroupId, orElse: () => null);
 
           return multimediaBlocBuilder();
         }
@@ -607,7 +607,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
         if (chatMessageState is ChatMessagesLoaded) {
           // Get current conversation messages and sort them.
-          conversationGroupMessageList = chatMessageState.chatMessageList.where((ChatMessage message) => message.conversationId == widget._conversationGroup.id).toList();
+          conversationGroupMessageList = chatMessageState.chatMessageList.where((ChatMessage message) => message.conversationId == widget.conversationGroupId).toList();
 
           conversationGroupMessageList.sort((message1, message2) => message2.createdDate.compareTo(message1.createdDate));
 

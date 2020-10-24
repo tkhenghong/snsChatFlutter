@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/rest/custom_http_client/custom_http_client.dart';
 
 class SettingsAPIService {
@@ -11,8 +12,8 @@ class SettingsAPIService {
 
   CustomHttpClient httpClient = Get.find();
 
-  Future<bool> editSettings(Settings settings) async {
-    return await httpClient.putRequest("$REST_URL/$settingsAPI", requestBody: settings);
+  Future<bool> editSettings(UpdateSettingsRequest updateSettingsRequest) async {
+    return await httpClient.putRequest("$REST_URL/$settingsAPI", requestBody: updateSettingsRequest);
   }
 
   Future<Settings> getUserOwnSettings() async {
