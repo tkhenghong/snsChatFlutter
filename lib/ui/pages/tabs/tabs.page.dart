@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 
@@ -56,125 +57,121 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
   Widget build(BuildContext context) {
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
 
-    return Material(
-      color: Colors.white,
-      child: Scaffold(
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            titleSpacing: 0.0,
-            elevation: 0.0,
-            title: Text(
-              tabTitle,
-              textAlign: TextAlign.start,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32.0),
-            ),
-          ),
+    return Scaffold(
+        appBar: AppBar(
+          titleSpacing: 0.0,
+          elevation: 0.0,
           backgroundColor: Colors.white,
-          body: PageView(
-            controller: pageViewController,
-            onPageChanged: (int index) {
+          title: Text(
+            tabTitle,
+            textAlign: TextAlign.start,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32.0, color: Get.theme.primaryColor),
+          ),
+        ),
+        body: PageView(
+          controller: pageViewController,
+          onPageChanged: (int index) {
+            changeTab(index);
+            setState(() {
+              _bottomNavBarIndex = index;
+            });
+          },
+          physics: BouncingScrollPhysics(),
+          children: tabPages,
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _bottomNavBarIndex,
+          type: BottomNavigationBarType.shifting,
+          onTap: (int index) {
+            setState(() {
+              _bottomNavBarIndex = index;
+              pageViewController.jumpToPage(index);
               changeTab(index);
-              setState(() {
-                _bottomNavBarIndex = index;
-              });
-            },
-            physics: BouncingScrollPhysics(),
-            children: tabPages,
-          ),
-          bottomNavigationBar: BottomNavigationBar(
-            currentIndex: _bottomNavBarIndex,
-            type: BottomNavigationBarType.shifting,
-            onTap: (int index) {
-              setState(() {
-                _bottomNavBarIndex = index;
-                pageViewController.jumpToPage(index);
-                changeTab(index);
-              });
-            },
-            items: [
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.chat,
-                ),
-                label: 'Chats',
+            });
+          },
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.chat,
               ),
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.code,
-                ),
-                label: 'Scan QR Code',
+              label: 'Chats',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.code,
               ),
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.person,
-                ),
-                label: 'Myself',
+              label: 'Scan QR Code',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.person,
               ),
-            ],
-          ),
-          floatingActionButton: FadeTransition(
-            opacity: animation,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: List.generate(icons.length, (int index) {
-                // 0 = Personal, 1 = Group, 2 = Broadcast
-                Widget child = new Container(
-                  height: 70.0,
-                  width: 56.0,
-                  alignment: FractionalOffset.topCenter,
-                  child: ScaleTransition(
-                      scale: CurvedAnimation(
-                        parent: _animationController,
-                        curve: Interval(0.0, 1.0 - index / icons.length / 2.0, curve: Curves.easeOut),
-                      ),
-                      child: Tooltip(
-                        message: index == 0
-                            ? 'Create Personal Conversation'
-                            : index == 1
-                                ? 'Create Group Conversation'
-                                : index == 2
-                                    ? 'Create Broadcast Group'
-                                    : 'Create Others...',
-                        child: FloatingActionButton(
-                          heroTag: null,
-                          mini: true,
-                          child: Icon(icons[index]),
-                          onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => SelectContactsPage(chatGroupType: chatTitles[index])));
-                            _animationController.reverse();
-                          },
-                        ),
-                      )),
-                );
-                return child;
-              }).toList()
-                ..add(
-                  new FloatingActionButton(
-                    heroTag: null,
-                    child: AnimatedBuilder(
-                      animation: _animationController,
-                      builder: (BuildContext context, Widget child) {
-                        return Transform(
-                          transform: new Matrix4.rotationZ(_animationController.value * 0.5 * math.pi),
-                          alignment: FractionalOffset.center,
-                          child: Icon(
-                            _animationController.isDismissed ? Icons.add_comment : Icons.close,
-                          ),
-                        );
-                      },
+              label: 'Myself',
+            ),
+          ],
+        ),
+        floatingActionButton: FadeTransition(
+          opacity: animation,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(icons.length, (int index) {
+              // 0 = Personal, 1 = Group, 2 = Broadcast
+              Widget child = new Container(
+                height: 70.0,
+                width: 56.0,
+                alignment: FractionalOffset.topCenter,
+                child: ScaleTransition(
+                    scale: CurvedAnimation(
+                      parent: _animationController,
+                      curve: Interval(0.0, 1.0 - index / icons.length / 2.0, curve: Curves.easeOut),
                     ),
-                    onPressed: () {
-                      if (_animationController.isDismissed) {
-                        _animationController.forward();
-                      } else {
-                        _animationController.reverse();
-                      }
+                    child: Tooltip(
+                      message: index == 0
+                          ? 'Create Personal Conversation'
+                          : index == 1
+                          ? 'Create Group Conversation'
+                          : index == 2
+                          ? 'Create Broadcast Group'
+                          : 'Create Others...',
+                      child: FloatingActionButton(
+                        heroTag: null,
+                        mini: true,
+                        child: Icon(icons[index]),
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(builder: (context) => SelectContactsPage(chatGroupType: chatTitles[index])));
+                          _animationController.reverse();
+                        },
+                      ),
+                    )),
+              );
+              return child;
+            }).toList()
+              ..add(
+                new FloatingActionButton(
+                  heroTag: null,
+                  child: AnimatedBuilder(
+                    animation: _animationController,
+                    builder: (BuildContext context, Widget child) {
+                      return Transform(
+                        transform: new Matrix4.rotationZ(_animationController.value * 0.5 * math.pi),
+                        alignment: FractionalOffset.center,
+                        child: Icon(
+                          _animationController.isDismissed ? Icons.add_comment : Icons.close,
+                        ),
+                      );
                     },
                   ),
+                  onPressed: () {
+                    if (_animationController.isDismissed) {
+                      _animationController.forward();
+                    } else {
+                      _animationController.reverse();
+                    }
+                  },
                 ),
-            ),
-          )),
-    );
+              ),
+          ),
+        ));
   }
 
   Widget changeTab(int pageNumber) {

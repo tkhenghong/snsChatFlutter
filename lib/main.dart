@@ -12,6 +12,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
@@ -19,9 +20,6 @@ import 'package:snschat_flutter/state/bloc/network/bloc.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
 
 import 'database/sembast/index.dart';
-import 'general/functions/index.dart';
-
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 
 // Sets a platform override for desktop to avoid exceptions. See
 // https://flutter.dev/desktop#target-platform-override for more info.
@@ -75,11 +73,22 @@ Map<String, WidgetBuilder> generateRoutes() {
 // Default theme details in the app
 Brightness primaryBrightness = Brightness.light;
 
+// https://material.io/design/color/the-color-system.html#tools-for-picking-colors
+// Flutter Theme Color Palette Resource: https://material.io/resources/color/#!/
+
+int primaryColorValue = 0xFF000000;
+int primaryLightColorValue = 0xFF2C2C2C;
+int primaryDarkColorValue = 0xFF000000;
+int secondaryColorValue = 0xFFFFFFFF;
+int secondaryLightColorValue = 0xFFFFFFFF;
+int secondaryDarkColorValue = 0xFFCCCCCC;
+int primaryTextColorValue = 0xFFFFFFFF;
+int secondaryTextColorValue = 0xFF000000;
+
 // Black theme. Black is not MaterialColor, which has a list of colors within it
 // https://github.com/flutter/flutter/issues/15658
-int _blackPrimaryValue = 0xFF000000;
-MaterialColor blackTheme = MaterialColor(
-  _blackPrimaryValue,
+MaterialColor primaryColor = MaterialColor(
+  primaryColorValue,
   <int, Color>{
     50: Color(0xFFF5F5F5),
     100: Color(0xFFE9E9E9),
@@ -90,34 +99,48 @@ MaterialColor blackTheme = MaterialColor(
     600: Color(0xFF555555),
     700: Color(0xFF434343),
     800: Color(0xFF262626),
-    900: Color(_blackPrimaryValue),
+    900: Color(primaryColorValue),
   },
 );
 
-MaterialColor themeColor = blackTheme;
+MaterialColor secondaryColor = MaterialColor(
+  secondaryColorValue,
+  <int, Color>{
+    50: Color(0xFFFFFFFF), // #FFFFFF
+    100: Color(0xFFFAFAFA), // #FAFAFA
+    200: Color(0xFFF5F5F5), // #F5F5F5
+    300: Color(0xFFF0F0F0), // #F0F0F0
+    400: Color(0xFFDEDEDE), // #DEDEDE
+    500: Color(0xFFC2C2C2), // #C2C2C2
+    600: Color(0xFF979797), // #979797
+    700: Color(0xFF818181), // #818181
+    800: Color(0xFF606060), // #606060
+    900: Color(secondaryColorValue), // #3C3C3C
+  },
+);
 
-TextStyle primaryTextStyleInAppBarText = TextStyle(color: themeColor, fontSize: globals.header1, fontWeight: FontWeight.bold);
+TextStyle primaryTextStyleInAppBarText = TextStyle(color: primaryColor, fontSize: globals.header1, fontWeight: FontWeight.bold);
 
 ThemeData themeData = ThemeData(
   fontFamily: 'Roboto',
   brightness: primaryBrightness,
-  primarySwatch: themeColor,
-  primaryColor: themeColor,
-  accentColor: themeColor,
-  cursorColor: themeColor,
-  highlightColor: themeColor[500],
-  textSelectionColor: themeColor[500],
-  textSelectionHandleColor: themeColor,
-  indicatorColor: themeColor,
-  buttonColor: themeColor,
-  buttonTheme: ButtonThemeData(buttonColor: themeColor, textTheme: ButtonTextTheme.primary),
-  errorColor: themeColor,
-  bottomAppBarColor: themeColor,
+  primarySwatch: primaryColor,
+  primaryColor: primaryColor,
+  accentColor: primaryColor,
+  cursorColor: primaryColor,
+  highlightColor: primaryColor[500],
+  textSelectionColor: primaryColor[500],
+  textSelectionHandleColor: secondaryColor,
+  indicatorColor: secondaryColor,
+  buttonColor: secondaryColor,
+  buttonTheme: ButtonThemeData(buttonColor: secondaryColor, textTheme: ButtonTextTheme.primary),
+  errorColor: primaryColor,
+  bottomAppBarColor: primaryColor,
   bottomAppBarTheme: BottomAppBarTheme(
-    color: themeColor,
+    color: primaryColor,
   ),
   appBarTheme: AppBarTheme(
-      color: themeColor,
+      color: primaryColor,
       textTheme: TextTheme(
         button: primaryTextStyleInAppBarText,
       )),
