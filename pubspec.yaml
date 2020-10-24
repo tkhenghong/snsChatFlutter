@@ -96,8 +96,12 @@ dependencies:
 
   # Barcode/QR scanner
   qr_flutter: ^3.2.0
-  # barcode_scan: ^3.0.0 # Do not use this because it requires change minSdk from 16 to 18
-  # flutter_barcode_scanner: ^0.1.7 # Replacement
+  #  qr_code_scanner: ^0.0.13
+  # QR code scanner minSDK still needs 24 (Nougat and above), using Github version temporarily
+  # https://github.com/juliuscanute/qr_code_scanner/issues/123
+  qr_code_scanner:
+    git:
+      url: git://github.com/juliuscanute/qr_code_scanner.git
 
   # Vibrate
   vibration: ^1.4.0
