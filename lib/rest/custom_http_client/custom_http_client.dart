@@ -23,7 +23,7 @@ class CustomHttpClient {
     return _instance;
   }
 
-  Future<dynamic> getRequest(String path, {Map<String, String> additionalHeaders, int timeoutSeconds}) async {
+  Future<dynamic> getRequest(String path, {Map<String, String> additionalHeaders, int timeoutSeconds, bool showDialog, bool showSnackBar}) async {
     Map<String, String> headers = await handleHTTPHeaders(additionalHeaders);
     try {
       await checkNetwork();
@@ -35,13 +35,13 @@ class CustomHttpClient {
         response = await get(path, headers: headers);
       }
 
-      return handleResponse(response);
+      return handleResponse(response, showDialog: showDialog, showSnackBar: showSnackBar);
     } on SocketException {
       handleError();
     }
   }
 
-  Future<dynamic> postRequest(String path, {var requestBody, Map<String, String> additionalHeaders, int timeoutSeconds}) async {
+  Future<dynamic> postRequest(String path, {var requestBody, Map<String, String> additionalHeaders, int timeoutSeconds, bool showDialog, bool showSnackBar}) async {
     Map<String, String> headers = await handleHTTPHeaders(additionalHeaders);
     try {
       await checkNetwork();
@@ -54,13 +54,13 @@ class CustomHttpClient {
       } else {
         response = await post(path, body: body, headers: headers);
       }
-      return handleResponse(response);
+      return handleResponse(response, showDialog: showDialog, showSnackBar: showSnackBar);
     } on SocketException {
       handleError();
     }
   }
 
-  Future<dynamic> putRequest(String path, {var requestBody, Map<String, String> additionalHeaders, int timeoutSeconds}) async {
+  Future<dynamic> putRequest(String path, {var requestBody, Map<String, String> additionalHeaders, int timeoutSeconds, bool showDialog, bool showSnackBar}) async {
     Map<String, String> headers = await handleHTTPHeaders(additionalHeaders);
     try {
       await checkNetwork();
@@ -74,13 +74,13 @@ class CustomHttpClient {
         response = await put(path, body: body, headers: headers);
       }
 
-      return handleResponse(response);
+      return handleResponse(response, showDialog: showDialog, showSnackBar: showSnackBar);
     } on SocketException {
       handleError();
     }
   }
 
-  Future<dynamic> deleteRequest(String path, {Map<String, String> additionalHeaders, int timeoutSeconds}) async {
+  Future<dynamic> deleteRequest(String path, {Map<String, String> additionalHeaders, int timeoutSeconds, bool showDialog, bool showSnackBar}) async {
     Map<String, String> headers = await handleHTTPHeaders(additionalHeaders);
     try {
       await checkNetwork();
@@ -92,7 +92,7 @@ class CustomHttpClient {
         response = await delete(path, headers: headers);
       }
 
-      return handleResponse(response);
+      return handleResponse(response, showDialog: showDialog, showSnackBar: showSnackBar);
     } on SocketException {
       handleError();
     }
