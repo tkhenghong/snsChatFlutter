@@ -66,7 +66,7 @@ abstract class ApiException implements Exception {
         messageContent.isNullOrBlank ? Text('Description: ', style: TextStyle(fontWeight: FontWeight.bold)) : Container(),
         messageContent.isNullOrBlank ? Text(messageContent, softWrap: true) : Container(),
         minorSpacing(),
-        trace.isNullOrBlank
+        !trace.isNullOrBlank
             ? ExpandablePanel(
                 header: Text('Details: '),
                 collapsed: Text(
@@ -75,7 +75,7 @@ abstract class ApiException implements Exception {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontStyle: FontStyle.italic),
                 ),
-                expanded: trace.isNullOrBlank ? Text(trace, softWrap: true, style: TextStyle(fontStyle: FontStyle.italic)) : Container(),
+                expanded: !trace.isNullOrBlank ? Text(trace, softWrap: true, style: TextStyle(fontStyle: FontStyle.italic)) : Container(),
               )
             : Container(),
       ],
