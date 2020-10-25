@@ -228,7 +228,7 @@ class SignUpPageState extends State<SignUpPage> {
   Widget showError() {
     return Center(
       child: Column(
-        children: <Widget>[Text('An error has occurred. Please try again later.'), RaisedButton(onPressed: goToLoginPage)],
+        children: <Widget>[Text('An error has occurred. Please try again later.'), RaisedButton(onPressed: goBack)],
       ),
     );
   }
@@ -251,7 +251,7 @@ class SignUpPageState extends State<SignUpPage> {
     widget.countryCodeString = countryCode.code;
   }
 
-  signUp() async {
+  signUp() {
     if (!_formKey.currentState.validate()) {
       return;
     }
@@ -263,5 +263,9 @@ class SignUpPageState extends State<SignUpPage> {
 
   goToVerifyPhoneNumber() {
     Navigator.of(context).pushNamed('verify_phone_number_page');
+  }
+
+  goBack() {
+    Navigator.of(context).pop();
   }
 }
