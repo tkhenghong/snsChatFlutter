@@ -3,16 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:pin_input_text_field/pin_input_text_field.dart';
+import 'package:snschat_flutter/general/enums/index.dart';
+import 'package:snschat_flutter/general/enums/verification_mode.enum.dart';
 import 'package:snschat_flutter/general/functions/toast/show_toast.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
-import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
 
 class VerifyPhoneNumberPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return new VerifyPhoneNumberState();
   }
 }
@@ -24,14 +24,15 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
   Color themePrimaryColor;
 
   AuthenticationBloc authenticationBloc;
-  UserContactBloc userContactBloc;
-  SettingsBloc settingsBloc;
-  UserBloc userBloc;
-  MultimediaBloc multimediaBloc;
-  ConversationGroupBloc conversationGroupBloc;
-  UnreadMessageBloc unreadMessageBloc;
 
   int pinFieldLength = 6;
+
+  String mobileNumber = '';
+  String secureKeyword = '';
+  String emailAddress = '';
+  VerificationMode verificationMode = VerificationMode.Login;
+  String maskedEmailAddress = '';
+  String maskedMobileNumber = '';
 
   @override
   void initState() {
@@ -43,13 +44,6 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
   void dispose() {
     super.dispose();
     textEditingController.dispose();
-    authenticationBloc.close();
-    userContactBloc.close();
-    settingsBloc.close();
-    userBloc.close();
-    multimediaBloc.close();
-    conversationGroupBloc.close();
-    unreadMessageBloc.close();
   }
 
   @override
@@ -57,12 +51,6 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
     themePrimaryColor = Theme.of(context).primaryColor;
 
     authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
-    conversationGroupBloc = BlocProvider.of<ConversationGroupBloc>(context);
-    unreadMessageBloc = BlocProvider.of<UnreadMessageBloc>(context);
-    multimediaBloc = BlocProvider.of<MultimediaBloc>(context);
-    userContactBloc = BlocProvider.of<UserContactBloc>(context);
-    settingsBloc = BlocProvider.of<SettingsBloc>(context);
-    userBloc = BlocProvider.of<UserBloc>(context);
 
     return multiBlocListener();
   }
@@ -78,10 +66,8 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
     return BlocListener<AuthenticationBloc, AuthenticationState>(
       listener: (context, authenticationState) {
         if (authenticationState is AuthenticationsLoaded) {
-          // If verification successful,
-          Get.back();
+          Get.back(); // Close loading dialog.
           showToast('Verification successful.', Toast.LENGTH_SHORT);
-          refreshUserData();
           goToChatGroupList();
         }
       },
@@ -90,25 +76,18 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
 
   Widget authenticationBlocBuilder() {
     return BlocBuilder<AuthenticationBloc, AuthenticationState>(
-      cubit: authenticationBloc,
+      buildWhen: (previousAuthenticationState, nextAuthenticationState) {
+        return !(nextAuthenticationState is AuthenticationsLoaded);
+      },
       builder: (context, authenticationState) {
         if (authenticationState is Authenticating) {
-          return Scaffold(
-            appBar: appBar(authenticationState.mobileNumber),
-            body: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                textsSection(authenticationState.mobileNumber, authenticationState.secureKeyword),
-                wrongNumberButton(),
-                pinTextField(authenticationState.mobileNumber, authenticationState.secureKeyword),
-                Text('Enter $pinFieldLength-digit code'),
-                // RaisedButton(onPressed: () {},  child: Text('Resend SMS'),), //In case you're able to resend SMS
-                resendSMSButton(),
-                // In case you request a lot of times but you never retrieved and entered the correct PIN
-                callMeButton(),
-              ],
-            ),
-          );
+          mobileNumber = authenticationState.mobileNumber;
+          secureKeyword = authenticationState.secureKeyword;
+          emailAddress = authenticationState.emailAddress;
+          verificationMode = authenticationState.verificationMode;
+          maskedEmailAddress = authenticationState.maskedEmailAddress;
+          maskedMobileNumber = authenticationState.maskedMobileNumber;
+          return mainBody();
         }
 
         return showErrorPage();
@@ -116,14 +95,33 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
     );
   }
 
-  Widget appBar(String mobileNumber) {
+  Widget mainBody() {
+    return Scaffold(
+      appBar: appBar(),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          textsSection(),
+          wrongNumberButton(),
+          pinTextField(),
+          Text('Enter $pinFieldLength-digit code'),
+          // RaisedButton(onPressed: () {},  child: Text('Resend SMS'),), //In case you're able to resend SMS
+          resendSMSButton(),
+          // In case you request a lot of times but you never retrieved and entered the correct PIN
+          callMeButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget appBar() {
     return AppBar(
       title: Text('Verify $mobileNumber'),
       centerTitle: true,
     );
   }
 
-  Widget textsSection(String mobileNumber, String secureKeyword) {
+  Widget textsSection() {
     return Padding(
         padding: EdgeInsets.symmetric(horizontal: Get.width * 0.05),
         child: Column(
@@ -150,9 +148,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
           Text('Error when trying to verify your phone number. Please go to previous page to do it again.'),
           RaisedButton(
             child: Text('Go back'),
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            onPressed: goBack,
           )
         ],
       ),
@@ -169,7 +165,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
     );
   }
 
-  Widget pinTextField(String mobileNumber, String secureKeyword) {
+  Widget pinTextField() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: Get.height * 0.1),
       // PIN Text Field: https://pub.dev/packages/pin_input_text_field
@@ -183,18 +179,21 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
         keyboardType: TextInputType.number,
         decoration: UnderlineDecoration(
             textStyle: TextStyle(color: Colors.black, fontSize: 20.0, fontWeight: FontWeight.bold), colorBuilder: PinListenColorBuilder(Colors.black, Colors.black), obscureStyle: ObscureStyle(isTextObscure: true, obscureText: '*')),
-        onChanged: (pin) {
-          if (pin.length == pinFieldLength) {
-            verifyMobileNumber(pin, mobileNumber, secureKeyword);
-          }
-        },
-        onSubmit: (pin) {
-          showLoading("Verifying PIN...");
-          // TODO: Verify phone by calling BlocEvent > call UserAuthentication API > goToChatGroupList
-          verifyMobileNumber(pin, mobileNumber, secureKeyword);
-        },
+        onChanged: onPinTextFieldChanged,
+        onSubmit: verifyPin,
       ),
     );
+  }
+
+  onPinTextFieldChanged(pin) {
+    if (pin.length == pinFieldLength) {
+      verifyMobileNumber(pin);
+    }
+  }
+
+  verifyPin(pin) {
+    showLoading("Verifying PIN...");
+    verifyMobileNumber(pin);
   }
 
   Widget resendSMSButton() {
@@ -211,39 +210,17 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
     );
   }
 
-  refreshUserData() {
-    print('verify_phone_number.dart refreshUserData()');
-    userBloc.add(GetOwnUserEvent(callback: (User user) {}));
-    settingsBloc.add(GetUserOwnSettingsEvent(callback: (Settings settings) {}));
-    conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(callback: (bool done) {
-      if (done) {
-        getConversationGroupsMultimedia();
-      }
-    }));
-    unreadMessageBloc.add(UpdateUnreadMessagesEvent(callback: (bool done) {}));
-    multimediaBloc.add(GetUserOwnProfilePictureMultimediaEvent(callback: (bool done) {}));
-    userContactBloc.add(GetUserOwnUserContactEvent(callback: (bool done) {
-      print('GetUserOwnUserContactEvent is done: $done');
-      if (done) {
-        userContactBloc.add(GetUserOwnUserContactsEvent(callback: (bool done) {}));
-      }
-    }));
-  }
-
-  getConversationGroupsMultimedia() {
-    ConversationGroupState conversationGroupState = conversationGroupBloc.state;
-    if (conversationGroupState is ConversationGroupsLoaded) {
-      multimediaBloc.add(GetConversationGroupsMultimediaEvent(conversationGroupList: conversationGroupState.conversationGroupList, callback: (bool done) {}));
-    }
-  }
-
-  verifyMobileNumber(String pin, String mobileNumber, String secureKeyword) {
+  verifyMobileNumber(String pin) {
     showLoading("Verifying PIN...");
     authenticationBloc.add(VerifyMobileNoEvent(mobileNo: mobileNumber, secureKeyword: secureKeyword, otpNumber: pin, callback: (UserAuthenticationResponse userAuthenticationResponse) {}));
   }
 
   goToLoginPage() {
     Navigator.popUntil(context, ModalRoute.withName('/login_page'));
+  }
+
+  goBack() {
+    Navigator.pop(context);
   }
 
   goToChatGroupList() {
