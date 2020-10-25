@@ -22,30 +22,19 @@ class SignUpPage extends StatefulWidget {
 }
 
 class SignUpPageState extends State<SignUpPage> {
-  final _formKey = GlobalKey<FormState>();
-  TextEditingController mobileNoTextController = new TextEditingController();
-
   String defaultCountryCode = globals.DEFAULT_COUNTRY_CODE;
 
+  IPGeoLocationBloc ipGeoLocationBloc;
+  AuthenticationBloc authenticationBloc;
+
+  final _formKey = GlobalKey<FormState>();
+  TextEditingController mobileNoTextController = new TextEditingController();
   FocusNode nodeOne = FocusNode();
 
   IPGeoLocation ipGeoLocation;
   CountryCode countryCode;
   String countryCodeString;
   String mobileNumber;
-
-  bool deviceLocated = false;
-
-  double screenWidth;
-  double screenHeight;
-
-  IPGeoLocationBloc ipGeoLocationBloc;
-  AuthenticationBloc authenticationBloc;
-  GoogleInfoBloc googleInfoBloc;
-  SettingsBloc settingsBloc;
-  UserBloc userBloc;
-  UserContactBloc userContactBloc;
-  MultimediaBloc multimediaBloc;
 
   @override
   void initState() {
@@ -56,79 +45,23 @@ class SignUpPageState extends State<SignUpPage> {
   @override
   void dispose() {
     nodeOne.dispose();
-    ipGeoLocationBloc.close();
-    authenticationBloc.close();
-    googleInfoBloc.close();
-    settingsBloc.close();
-    userBloc.close();
-    userContactBloc.close();
-    multimediaBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    screenWidth = MediaQuery.of(context).size.width;
-    screenHeight = MediaQuery.of(context).size.height;
-
     ipGeoLocationBloc = BlocProvider.of<IPGeoLocationBloc>(context);
     authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
-    googleInfoBloc = BlocProvider.of<GoogleInfoBloc>(context);
-    settingsBloc = BlocProvider.of<SettingsBloc>(context);
-    userBloc = BlocProvider.of<UserBloc>(context);
-    userContactBloc = BlocProvider.of<UserContactBloc>(context);
-    multimediaBloc = BlocProvider.of<MultimediaBloc>(context);
 
-    return MultiBlocListener(
-      listeners: [ipGeoLocationBlocListener(), userAuthenticationBlocListener()],
-      child: signUpScreen(),
-    );
+    return multiBlocListeners();
   }
 
-  signUpScreen() => Material(
-      child: GestureDetector(
-          // call this method here to hide soft keyboard
-          onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
-          child: Scaffold(
-            appBar: appBar(),
-            body: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  "Sign Up",
-                  style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
-                Text(
-                  "Enter your mobile number and name: ",
-                  style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.normal),
-                  textAlign: TextAlign.center,
-                ),
-                Padding(padding: EdgeInsets.symmetric(vertical: 10.00)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 28.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        Row(
-                          children: <Widget>[
-                            ipGeoLocationBlocBuilder(),
-                            mobileNoTextField(),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                signUpButton(),
-                Padding(padding: EdgeInsets.symmetric(vertical: 50.00)),
-              ],
-            ),
-          )));
+  Widget multiBlocListeners() => MultiBlocListener(
+        listeners: [ipGeoLocationBlocListener(), userAuthenticationBlocListener()],
+        child: ipGeoLocationBlocBuilder(),
+      );
 
-  BlocListener ipGeoLocationBlocListener() {
+  Widget ipGeoLocationBlocListener() {
     return BlocListener<IPGeoLocationBloc, IPGeoLocationState>(
       listener: (context, ipGeoLocationState) {
         if (ipGeoLocationState is IPGeoLocationLoaded) {
@@ -139,23 +72,14 @@ class SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  BlocListener userAuthenticationBlocListener() {
+  Widget userAuthenticationBlocListener() {
     return BlocListener<AuthenticationBloc, AuthenticationState>(
       listener: (context, authenticationState) {
         if (authenticationState is Authenticating) {
-          //
-          Get.back();
+          Get.back(); // Close loading dialog.
           goToVerifyPhoneNumber();
         }
       },
-    );
-  }
-
-  Widget appBar() {
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0, //Set Shadow
-      iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
     );
   }
 
@@ -163,21 +87,87 @@ class SignUpPageState extends State<SignUpPage> {
     return BlocBuilder<IPGeoLocationBloc, IPGeoLocationState>(
       builder: (context, ipGeoLocationState) {
         if (ipGeoLocationState is IPGeoLocationLoading) {
-          return Center(
-            child: Text('Loading...'),
-          );
+          return showLoading('location');
         }
 
         if (ipGeoLocationState is IPGeoLocationLoaded) {
           countryCodeString = ipGeoLocationState.ipGeoLocation.isNull ? defaultCountryCode : ipGeoLocationState.ipGeoLocation.country_code2;
           ipGeoLocation = ipGeoLocationState.ipGeoLocation;
-          return countryCodePicker();
+          return authenticationBlocBuilder();
         }
 
-        return Center(
-          child: Text('Sign Up page error. Please try restart the app.'),
-        );
+        return showError();
       },
+    );
+  }
+
+  Widget authenticationBlocBuilder() {
+    return BlocBuilder<AuthenticationBloc, AuthenticationState>(buildWhen: (previousAuthenticationState, nextAuthenticationState) {
+      return !(nextAuthenticationState is Authenticating);
+    }, builder: (context, authenticationState) {
+      if (authenticationState is AuthenticationsLoading) {
+        return showLoading('Sign Up page');
+      }
+
+      if (authenticationState is AuthenticationsNotLoaded) {
+        return signUpScreen();
+      }
+
+      return showError();
+    });
+  }
+
+  Widget signUpScreen() {
+    return GestureDetector(
+        onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
+        child: Scaffold(
+          appBar: appBar(),
+          body: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              signUpTexts(),
+              SizedBox(height: Get.height * 0.05),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: Get.width * 0.2),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      Row(
+                        children: <Widget>[
+                          countryCodePicker(),
+                          mobileNoTextField(),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              signUpButton(),
+            ],
+          ),
+        ));
+  }
+
+  Widget appBar() {
+    return AppBar();
+  }
+
+  Widget signUpTexts() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          'Sign Up',
+          style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: Get.height * 0.05),
+        Text(
+          'Enter your mobile number and name: ',
+          style: TextStyle(fontSize: 15.0),
+        ),
+      ],
     );
   }
 
@@ -195,22 +185,22 @@ class SignUpPageState extends State<SignUpPage> {
 
   Widget mobileNoTextField() {
     return Container(
-      width: screenWidth * 0.6,
-      margin: EdgeInsetsDirectional.only(top: screenHeight * 0.03),
+      width: Get.width * 0.6,
+      margin: EdgeInsetsDirectional.only(top: Get.height * 0.03),
       child: TextFormField(
         controller: mobileNoTextController,
         inputFormatters: [
           FilteringTextInputFormatter.allow(RegExp('[0-9]')),
         ],
         maxLength: 15,
-        decoration: InputDecoration(hintText: "Mobile Number"),
+        decoration: InputDecoration(hintText: 'Mobile Number'),
         autofocus: true,
         textAlign: TextAlign.left,
         keyboardType: TextInputType.phone,
         focusNode: nodeOne,
         validator: (value) {
           if (value.isEmpty) {
-            return "Mobile number is empty";
+            return 'Mobile number is empty';
           }
 
           return null;
@@ -221,17 +211,30 @@ class SignUpPageState extends State<SignUpPage> {
 
   Widget signUpButton() {
     return RaisedButton(
-      onPressed: () => signUp(),
-      textColor: Colors.white,
+      onPressed: signUp,
       animationDuration: Duration(milliseconds: 500),
-      padding: EdgeInsets.only(left: 70.0, right: 70.0, top: 15.0, bottom: 15.0),
+      padding: EdgeInsets.symmetric(vertical: Get.width * 0.2, horizontal: Get.height * 0.1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
-      child: Text("Sign Up"),
+      child: Text('Sign Up'),
+    );
+  }
+
+  Widget showLoading(String module) {
+    return Center(
+      child: Text('Loading $module...'),
+    );
+  }
+
+  Widget showError() {
+    return Center(
+      child: Column(
+        children: <Widget>[Text('An error has occurred. Please try again later.'), RaisedButton(onPressed: goToLoginPage)],
+      ),
     );
   }
 
   getPhoneNumber() {
-    String phoneNoInitials = "";
+    String phoneNoInitials = '';
 
     if (countryCode.isNull) {
       if (!ipGeoLocation.isNull) {
@@ -254,17 +257,11 @@ class SignUpPageState extends State<SignUpPage> {
     }
 
     getPhoneNumber();
-
     showCenterLoadingIndicator();
-
-    authenticationBloc.add(RegisterUsingMobileNoEvent(
-        mobileNo: mobileNumber,
-        countryCode: !countryCode.isNull ? countryCode.code : countryCodeString,
-        callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
+    authenticationBloc.add(RegisterUsingMobileNoEvent(mobileNo: mobileNumber, countryCode: !countryCode.isNull ? countryCode.code : countryCodeString, callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
   }
 
   goToVerifyPhoneNumber() {
     Navigator.of(context).pushNamed('verify_phone_number_page');
-//    Navigator.push(context, MaterialPageRoute(builder: ((context) => BlocProvider.value(value: authenticationBloc, child: VerifyPhoneNumberPage(),))));
   }
 }
