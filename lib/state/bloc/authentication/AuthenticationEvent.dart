@@ -17,19 +17,6 @@ class InitializeAuthenticationsEvent extends AuthenticationEvent {
   String toString() => 'InitializeAuthenticationsEvent';
 }
 
-class RegisterUsingMobileNumberEvent extends AuthenticationEvent {
-  final String mobileNumber;
-  final Function callback;
-
-  const RegisterUsingMobileNumberEvent({this.mobileNumber, this.callback});
-
-  @override
-  List<Object> get props => [mobileNumber];
-
-  @override
-  String toString() => 'RegisterUsingMobileNumberEvent {mobileNumber: $mobileNumber}';
-}
-
 class RegisterUsingMobileNoEvent extends AuthenticationEvent {
   final String mobileNo;
   final String countryCode;
@@ -46,15 +33,16 @@ class RegisterUsingMobileNoEvent extends AuthenticationEvent {
 
 class LoginUsingMobileNumberEvent extends AuthenticationEvent {
   final String mobileNo;
+  final String countryCode;
   final Function callback;
 
-  const LoginUsingMobileNumberEvent({this.mobileNo, this.callback});
+  const LoginUsingMobileNumberEvent({this.mobileNo, this.countryCode, this.callback});
 
   @override
-  List<Object> get props => [mobileNo];
+  List<Object> get props => [mobileNo, countryCode];
 
   @override
-  String toString() => 'LoginUsingMobileNumberEvent {mobileNo: $mobileNo}';
+  String toString() => 'LoginUsingMobileNumberEvent {mobileNo: $mobileNo, countryCode: $countryCode}';
 }
 
 class VerifyMobileNoEvent extends AuthenticationEvent {

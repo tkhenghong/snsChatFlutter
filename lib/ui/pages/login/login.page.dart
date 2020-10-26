@@ -95,6 +95,9 @@ class LoginPageState extends State<LoginPage> {
 
   Widget userAuthenticationBlocBuilder() {
     return BlocBuilder<AuthenticationBloc, AuthenticationState>(
+      buildWhen: (previousAuthenticationState, nextAuthenticationState) {
+        return !(nextAuthenticationState is Authenticating);
+      },
       builder: (context, authenticationState) {
         if (authenticationState is AuthenticationsLoading) {
           return showLoading('login page');
@@ -317,6 +320,6 @@ class LoginPageState extends State<LoginPage> {
 
     getPhoneNumber();
 
-    authenticationBloc.add(LoginUsingMobileNumberEvent(mobileNo: mobileNumber, callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
+    authenticationBloc.add(LoginUsingMobileNumberEvent(mobileNo: mobileNumber, countryCode: !countryCode.isNull ? countryCode.code : countryCodeString, callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
   }
 }

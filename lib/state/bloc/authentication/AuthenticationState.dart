@@ -12,6 +12,7 @@ class AuthenticationsLoading extends AuthenticationState {}
 
 class Authenticating extends AuthenticationState {
   final String mobileNumber;
+  final String countryCode;
   final String emailAddress;
   final String maskedMobileNumber;
   final String maskedEmailAddress;
@@ -19,13 +20,14 @@ class Authenticating extends AuthenticationState {
   final DateTime tokenExpiryTime;
   final VerificationMode verificationMode;
 
-  const Authenticating([this.mobileNumber, this.emailAddress, this.maskedMobileNumber, this.maskedEmailAddress, this.secureKeyword, this.tokenExpiryTime, this.verificationMode]);
+  const Authenticating([this.mobileNumber, this.countryCode, this.emailAddress, this.maskedMobileNumber, this.maskedEmailAddress, this.secureKeyword, this.tokenExpiryTime, this.verificationMode]);
 
   @override
-  List<Object> get props => [mobileNumber, emailAddress, secureKeyword, tokenExpiryTime, verificationMode];
+  List<Object> get props => [mobileNumber, countryCode, emailAddress, secureKeyword, tokenExpiryTime, verificationMode];
 
   @override
-  String toString() => 'Authenticating {mobileNumber: $mobileNumber, emailAddress: $emailAddress, maskedMobileNumber: $maskedMobileNumber, maskedEmailAddress: $maskedEmailAddress, secureKeyword: $secureKeyword, tokenExpiryTime: '
+  String toString() => 'Authenticating {mobileNumber: $mobileNumber, countryCode: $countryCode, emailAddress: $emailAddress, maskedMobileNumber: $maskedMobileNumber, maskedEmailAddress: $maskedEmailAddress, secureKeyword: $secureKeyword, '
+      'tokenExpiryTime: '
       '${tokenExpiryTime.toIso8601String()}, verificationMode: $verificationMode}';
 }
 

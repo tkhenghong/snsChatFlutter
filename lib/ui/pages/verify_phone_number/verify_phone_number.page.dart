@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:pin_input_text_field/pin_input_text_field.dart';
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/enums/index.dart';
 import 'package:snschat_flutter/general/enums/verification_mode.enum.dart';
 import 'package:snschat_flutter/general/functions/toast/show_toast.dart';
@@ -18,16 +19,17 @@ class VerifyPhoneNumberPage extends StatefulWidget {
 }
 
 class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
-  TextEditingController textEditingController;
-  PinDecoration pinDecoration;
-
-  Color themePrimaryColor;
+  String DEFAULT_COUNTRY_CODE = globals.DEFAULT_COUNTRY_CODE;
 
   AuthenticationBloc authenticationBloc;
+
+  TextEditingController textEditingController;
+  PinDecoration pinDecoration;
 
   int pinFieldLength = 6;
 
   String mobileNumber = '';
+  String countryCode = '';
   String secureKeyword = '';
   String emailAddress = '';
   VerificationMode verificationMode = VerificationMode.Login;
@@ -48,14 +50,18 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
 
   @override
   Widget build(BuildContext context) {
-    themePrimaryColor = Theme.of(context).primaryColor;
-
     authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
 
-    return multiBlocListener();
+    countryCode = DEFAULT_COUNTRY_CODE;
+
+    return SafeArea(
+        child: WillPopScope(
+      onWillPop: goBack,
+      child: GestureDetector(onTap: () => FocusScope.of(context).requestFocus(FocusNode()), child: Material(child: multiBlocListeners())),
+    ));
   }
 
-  Widget multiBlocListener() {
+  Widget multiBlocListeners() {
     return MultiBlocListener(
       listeners: [authenticationBlocListener()],
       child: authenticationBlocBuilder(),
@@ -82,6 +88,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
       builder: (context, authenticationState) {
         if (authenticationState is Authenticating) {
           mobileNumber = authenticationState.mobileNumber;
+          countryCode = authenticationState.countryCode;
           secureKeyword = authenticationState.secureKeyword;
           emailAddress = authenticationState.emailAddress;
           verificationMode = authenticationState.verificationMode;
@@ -198,14 +205,14 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
 
   Widget resendSMSButton() {
     return RaisedButton(
-      onPressed: () {},
+      onPressed: resendVerifySMS,
       child: Text('Resend SMS in 7 hours'),
     );
   }
 
   Widget callMeButton() {
     return RaisedButton(
-      onPressed: () {},
+      onPressed: callMobileNumber,
       child: Text('Call me'),
     );
   }
@@ -215,16 +222,29 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
     authenticationBloc.add(VerifyMobileNoEvent(mobileNo: mobileNumber, secureKeyword: secureKeyword, otpNumber: pin, callback: (UserAuthenticationResponse userAuthenticationResponse) {}));
   }
 
+  resendVerifySMS() {
+    if (verificationMode == VerificationMode.Login) {
+      authenticationBloc.add(LoginUsingMobileNumberEvent(mobileNo: mobileNumber, countryCode: countryCode, callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
+    } else if (verificationMode == VerificationMode.SignUp) {
+      authenticationBloc.add(RegisterUsingMobileNoEvent(mobileNo: mobileNumber, countryCode: countryCode, callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
+    }
+  }
+
+  callMobileNumber() {
+    showToast('Coming soon.', Toast.LENGTH_LONG);
+  }
+
   goToLoginPage() {
     Navigator.popUntil(context, ModalRoute.withName('/login_page'));
   }
 
-  goBack() {
-    Navigator.pop(context);
+  Future<bool> goBack() async {
+    authenticationBloc.add(RemoveAllAuthenticationsEvent(callback: (bool done) {}));
+    return Future.value(true);
   }
 
   goToChatGroupList() {
-    //Remove all pages and make chat_group_list_page be the only page
+    //Remove all pages and make chat_group_list_page be the only page.
     Navigator.of(context).pushNamedAndRemoveUntil("tabs_page", (Route<dynamic> route) => false);
   }
 }
