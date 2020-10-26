@@ -51,11 +51,7 @@ class LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
 
-    return GestureDetector(
-        // Detect user touch out of the text fields
-        onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
-        // Focuses on nothing, means disable focus and hide keyboard
-        child: Material(child: multiBlocListeners()));
+    return SafeArea(child: GestureDetector(onTap: () => FocusScope.of(context).requestFocus(FocusNode()), child: Material(child: multiBlocListeners())));
   }
 
   Widget multiBlocListeners() => MultiBlocListener(listeners: [

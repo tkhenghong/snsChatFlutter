@@ -52,8 +52,7 @@ class SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     ipGeoLocationBloc = BlocProvider.of<IPGeoLocationBloc>(context);
     authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
-
-    return multiBlocListeners();
+    return SafeArea(child: GestureDetector(onTap: () => FocusScope.of(context).requestFocus(new FocusNode()), child: Material(child: multiBlocListeners())));
   }
 
   Widget multiBlocListeners() => MultiBlocListener(
@@ -118,40 +117,24 @@ class SignUpPageState extends State<SignUpPage> {
   }
 
   Widget mainBody() {
-    return GestureDetector(
-        onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
-        child: Scaffold(
-          appBar: appBar(),
-          body: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              signUpTexts(),
-              SizedBox(height: Get.height * 0.05),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: Get.width * 0.2),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      Row(
-                        children: <Widget>[
-                          countryCodePicker(),
-                          mobileNoTextField(),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              signUpButton(),
-            ],
-          ),
-        ));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        appBar(),
+        SizedBox(height: Get.height * 0.1),
+        signUpTexts(),
+        SizedBox(height: Get.height * 0.05),
+        mobileNumberTextField(),
+        signUpButton(),
+      ],
+    );
   }
 
   Widget appBar() {
-    return AppBar();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [IconButton(icon: Icon(Icons.keyboard_arrow_left), onPressed: goBack)],
+    );
   }
 
   Widget signUpTexts() {
@@ -164,9 +147,20 @@ class SignUpPageState extends State<SignUpPage> {
         ),
         SizedBox(height: Get.height * 0.05),
         Text(
-          'Enter your mobile number and name: ',
+          'Please enter your mobile number.',
           style: TextStyle(fontSize: 15.0),
         ),
+      ],
+    );
+  }
+
+  Widget mobileNumberTextField() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        countryCodePicker(),
+        mobileNoTextField(),
       ],
     );
   }
@@ -185,35 +179,39 @@ class SignUpPageState extends State<SignUpPage> {
 
   Widget mobileNoTextField() {
     return Container(
-      width: Get.width * 0.6,
+      width: Get.width * 0.5,
       margin: EdgeInsetsDirectional.only(top: Get.height * 0.03),
-      child: TextFormField(
-        controller: mobileNoTextController,
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp('[0-9]')),
-        ],
-        maxLength: 15,
-        decoration: InputDecoration(hintText: 'Mobile Number'),
-        autofocus: true,
-        textAlign: TextAlign.left,
-        keyboardType: TextInputType.phone,
-        focusNode: nodeOne,
-        validator: (value) {
-          if (value.isEmpty) {
-            return 'Mobile number is empty';
-          }
-
-          return null;
-        },
-      ),
+      child: Form(
+          key: _formKey,
+          child: TextFormField(
+            controller: mobileNoTextController,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp('[0-9]')),
+            ],
+            maxLength: 15,
+            decoration: InputDecoration(hintText: 'Mobile Number'),
+            autofocus: true,
+            textAlign: TextAlign.left,
+            keyboardType: TextInputType.phone,
+            focusNode: nodeOne,
+            validator: validateSignUpForm,
+          )),
     );
+  }
+
+  String validateSignUpForm(value) {
+    if (value.isEmpty) {
+      return 'Mobile number is empty.';
+    }
+
+    return null;
   }
 
   Widget signUpButton() {
     return RaisedButton(
       onPressed: signUp,
       animationDuration: Duration(milliseconds: 500),
-      padding: EdgeInsets.symmetric(vertical: Get.width * 0.2, horizontal: Get.height * 0.1),
+      padding: EdgeInsets.symmetric(vertical: Get.height * 0.025, horizontal: Get.width * 0.2),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
       child: Text('Sign Up'),
     );
