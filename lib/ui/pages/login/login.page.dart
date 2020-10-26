@@ -2,6 +2,7 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
@@ -50,7 +51,11 @@ class LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
 
-    return multiBlocListeners();
+    return GestureDetector(
+        // Detect user touch out of the text fields
+        onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
+        // Focuses on nothing, means disable focus and hide keyboard
+        child: Material(child: multiBlocListeners()));
   }
 
   Widget multiBlocListeners() => MultiBlocListener(listeners: [
@@ -109,40 +114,30 @@ class LoginPageState extends State<LoginPage> {
   }
 
   Widget mainBody() {
-    return GestureDetector(
-        // Detect user touch out of the text fields
-        onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
-        // Focuses on nothing, means disable focus and hide keyboard
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            SizedBox(height: Get.height * 0.2),
-            loginText(),
-            SizedBox(
-              height: Get.height * 0.1,
-            ),
-            mobileNumberTextField(),
-            signInButton(),
-            SizedBox(
-              height: Get.height * 0.1,
-            ),
-            Text('Don\'t have account yet?'),
-            signUpButton(),
-            SizedBox(
-              height: Get.height * 0.1,
-            ),
-            contactSupportButton(),
-            SizedBox(
-              height: Get.height * 0.1,
-            ),
-            termsAndConditionsButton(),
-            SizedBox(
-              height: Get.height * 0.05,
-            ),
-            privacyNoticeButton(),
-          ],
-        ));
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        SizedBox(height: Get.height * 0.15),
+        loginText(),
+        SizedBox(
+          height: Get.height * 0.1,
+        ),
+        mobileNumberTextField(),
+        signInButton(),
+        SizedBox(
+          height: Get.height * 0.05,
+        ),
+        Text('Don\'t have account yet?'),
+        signUpButton(),
+        SizedBox(
+          height: Get.height * 0.1,
+        ),
+        contactSupportButton(),
+        termsAndConditionsButton(),
+        privacyNoticeButton(),
+      ],
+    );
   }
 
   Widget loginText() {
@@ -153,42 +148,39 @@ class LoginPageState extends State<LoginPage> {
   }
 
   Widget mobileNumberTextField() {
-    return Padding(
-        padding: EdgeInsets.symmetric(horizontal: Get.width * 0.2),
-        child: Column(
+    return Column(
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Row(
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(left: Get.width * 0.1),
-                ),
-                countryCodePickerField(),
-                Container(
-                  width: Get.width * 0.5,
-                  margin: EdgeInsetsDirectional.only(top: Get.height * 0.03),
-                  child: Form(
-                      key: _formKey,
-                      child: TextFormField(
-                        controller: mobileNoTextController,
-                        validator: validateMobileNo,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp('[0-9]')),
-                        ],
-                        maxLength: 15,
-                        decoration: InputDecoration(hintText: 'Mobile Number'),
-                        autofocus: true,
-                        textAlign: TextAlign.left,
-                        keyboardType: TextInputType.phone,
-                        onChanged: getPhoneNumber(),
-                        onFieldSubmitted: (text) {
-                          _signIn();
-                        },
-                      )),
-                ),
-              ],
+            countryCodePickerField(),
+            Container(
+              width: Get.width * 0.5,
+              margin: EdgeInsetsDirectional.only(top: Get.height * 0.03),
+              child: Form(
+                  key: _formKey,
+                  child: TextFormField(
+                    controller: mobileNoTextController,
+                    validator: validateMobileNo,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp('[0-9]')),
+                    ],
+                    maxLength: 15,
+                    decoration: InputDecoration(hintText: 'Mobile Number'),
+                    autofocus: true,
+                    textAlign: TextAlign.left,
+                    keyboardType: TextInputType.phone,
+                    onChanged: getPhoneNumber(),
+                    onFieldSubmitted: (text) {
+                      _signIn();
+                    },
+                  )),
             ),
           ],
-        ));
+        ),
+      ],
+    );
   }
 
   Widget countryCodePickerField() {
@@ -207,8 +199,7 @@ class LoginPageState extends State<LoginPage> {
     return RaisedButton(
       child: Text('Sign In'),
       onPressed: _signIn,
-      animationDuration: Duration(milliseconds: 500),
-      padding: EdgeInsets.symmetric(vertical: Get.width * 0.2, horizontal: Get.height * 0.1),
+      padding: EdgeInsets.symmetric(vertical: Get.height * 0.025, horizontal: Get.width * 0.2),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
     );
   }

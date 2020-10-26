@@ -110,14 +110,14 @@ class SignUpPageState extends State<SignUpPage> {
       }
 
       if (authenticationState is AuthenticationsNotLoaded) {
-        return signUpScreen();
+        return mainBody();
       }
 
       return showError();
     });
   }
 
-  Widget signUpScreen() {
+  Widget mainBody() {
     return GestureDetector(
         onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
         child: Scaffold(
