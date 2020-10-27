@@ -35,6 +35,7 @@ class MyselfPageState extends State<MyselfPage> {
   Multimedia userOwnMultimedia;
 
   List<ListTile> buttons;
+  int settingListOriginalLength = 0;
 
   @override
   void dispose() {
@@ -80,6 +81,8 @@ class MyselfPageState extends State<MyselfPage> {
             logOut();
           }),
     ];
+
+    settingListOriginalLength = buttons.length;
   }
 
   @override
@@ -97,7 +100,7 @@ class MyselfPageState extends State<MyselfPage> {
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
     googleInfoBloc = BlocProvider.of<GoogleInfoBloc>(context);
 
-    return Material(child: userBlocBuilder());
+    return SafeArea(child: Material(child: userBlocBuilder()));
   }
 
   Widget userBlocBuilder() {
@@ -105,7 +108,7 @@ class MyselfPageState extends State<MyselfPage> {
       builder: (context, userState) {
         if (userState is UserLoaded) {
           ownUser = userState.user;
-          if (!ownUser.isNull) {
+          if (!isObjectEmpty(ownUser)) {
             return userContactBlocBuilder();
           }
         }
@@ -136,10 +139,8 @@ class MyselfPageState extends State<MyselfPage> {
         if (multimediaState is MultimediaLoaded) {
           List<Multimedia> multimediaList = multimediaState.multimediaList;
           userOwnMultimedia = multimediaList.firstWhere((Multimedia existingMultimedia) => ownUserContact.profilePicture == existingMultimedia.id, orElse: () => null);
-          if (!isObjectEmpty(userOwnMultimedia)) {
-            insertUserProfilePicture();
-            return showMyselfPage();
-          }
+          insertUserProfilePicture();
+          return showMyselfPage();
         }
         return showErrorPage('Error. Multimedia not loaded. Please sign in again.');
       },
@@ -162,11 +163,11 @@ class MyselfPageState extends State<MyselfPage> {
   }
 
   insertUserProfilePicture() {
-    Widget defaultImage = Image.asset(DefaultImagePathType.UserContact.path);
+    Widget defaultImage = CircleAvatar(backgroundImage: AssetImage(DefaultImagePathType.UserContact.path));
 
     ListTile listTile = ListTile(
       title: Text(ownUser.displayName),
-      subtitle: Text(ownUserContact.about.isNotEmpty ? ownUserContact.about : ''),
+      subtitle: Text(!isObjectEmpty(ownUserContact.about) ? ownUserContact.about : ''),
       leading: Hero(
         tag: ownUser.id + "1",
         child: CachedNetworkImage(
@@ -183,6 +184,11 @@ class MyselfPageState extends State<MyselfPage> {
         ),
       ),
     );
+
+    if (buttons.length + 1 == settingListOriginalLength) {
+      // Remove previous UserProfilePicture.
+      buttons.removeAt(0);
+    }
     buttons.insert(0, listTile);
   }
 

@@ -51,6 +51,9 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   bool firstRun = true;
 
+  Color whiteColor = Colors.white;
+  TextStyle buttonTextStyle = TextStyle(color: Colors.white);
+
   @override
   initState() {
     super.initState();
@@ -91,7 +94,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     ], child: userAuthenticationBlocBuilder());
   }
 
-  userAuthenticationBlocListener() {
+  Widget userAuthenticationBlocListener() {
     return BlocListener<AuthenticationBloc, AuthenticationState>(
       listener: (context, authenticationState) {
         if (authenticationState is AuthenticationsNotLoaded) {
@@ -105,10 +108,48 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     );
   }
 
+  Widget userContactBlocListener() {
+    return BlocListener<UserContactBloc, UserContactState>(
+      listener: (context, userContactState) {
+        if (userContactState is UserContactsLoaded) {}
+      },
+    );
+  }
+
+  Widget userBlocListener() {
+    return BlocListener<UserBloc, UserState>(
+      listener: (context, userState) {
+        if (userState is UserLoaded) {
+          webSocketBloc.add(InitializeWebSocketEvent(callback: (bool done) {}));
+        }
+      },
+    );
+  }
+
+  Widget webSocketBlocListener() {
+    return BlocListener<WebSocketBloc, WebSocketState>(
+      listener: (context, websocketState) {
+        if (websocketState is WebSocketLoaded) {
+          webSocketBloc.add(GetOwnWebSocketEvent(callback: (Stream<dynamic> webSocketStream) {
+            if (!webSocketStream.isNull) {
+              processWebSocketMessage(webSocketStream);
+            }
+          }));
+        }
+      },
+    );
+  }
+
+  Widget conversationGroupBlocListener() {
+    return BlocListener<ConversationGroupBloc, ConversationGroupState>(
+      listener: (context, conversationGroupState) {},
+    );
+  }
+
   Widget userAuthenticationBlocBuilder() {
     return BlocBuilder<AuthenticationBloc, AuthenticationState>(
       builder: (context, authenticationState) {
-        if(authenticationState is AuthenticationsLoading) {
+        if (authenticationState is AuthenticationsLoading) {
           showLoading('authentications');
         }
 
@@ -116,7 +157,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           return userBlocBuilder();
         }
 
-        return showError();
+        return showError('authentications');
       },
     );
   }
@@ -124,7 +165,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   Widget userBlocBuilder() {
     return BlocBuilder<UserBloc, UserState>(
       builder: (context, userState) {
-        if(userState is UserLoading) {
+        if (userState is UserLoading) {
           return showLoading('user');
         }
 
@@ -132,7 +173,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           return conversationGroupBlocBuilder();
         }
 
-        return showError();
+        return showError('user');
       },
     );
   }
@@ -149,7 +190,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           return unreadMessageBlocBuilder();
         }
 
-        return showError();
+        return showError('conversation groups');
       },
     );
   }
@@ -166,7 +207,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           return multimediaBlocBuilder();
         }
 
-        return showError();
+        return showError('unread messages');
       },
     );
   }
@@ -183,7 +224,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           return mainBody();
         }
 
-        return showError();
+        return showError('multimedia');
       },
     );
   }
@@ -195,62 +236,20 @@ class ChatGroupListState extends State<ChatGroupListPage> {
       enablePullDown: true,
       physics: BouncingScrollPhysics(),
       header: ClassicHeader(),
-      child: (conversationGroups.isNullOrBlank || conversationGroups.isEmpty) ?
-      Center(child: Text('No conversations. Tap \'+\' to create one!')) :
-      ListView.builder(
-          scrollDirection: Axis.vertical,
-          shrinkWrap: true,
-          itemCount: conversationGroups.length,
-          itemBuilder: (context, index) {
-            return mapConversationToPageListTile(conversationGroups[index]);
-          }),
-    );
-  }
-
-
-  userContactBlocListener() {
-    return BlocListener<UserContactBloc, UserContactState>(
-      listener: (context, userContactState) {
-        if (userContactState is UserContactsLoaded) {
-
-        }
-      },
-    );
-  }
-
-  userBlocListener() {
-    return BlocListener<UserBloc, UserState>(
-      listener: (context, userState) {
-        if (userState is UserLoaded) {
-          webSocketBloc.add(InitializeWebSocketEvent(callback: (bool done) {}));
-        }
-      },
-    );
-  }
-
-  webSocketBlocListener() {
-    return BlocListener<WebSocketBloc, WebSocketState>(
-      listener: (context, websocketState) {
-        if (websocketState is WebSocketLoaded) {
-          webSocketBloc.add(GetOwnWebSocketEvent(callback: (Stream<dynamic> webSocketStream) {
-            if (!webSocketStream.isNull) {
-              processWebSocketMessage(webSocketStream);
-            }
-          }));
-        }
-      },
-    );
-  }
-
-  conversationGroupBlocListener() {
-    return BlocListener<ConversationGroupBloc, ConversationGroupState>(
-      listener: (context, conversationGroupState) {},
+      child: (conversationGroups.isNullOrBlank || conversationGroups.isEmpty)
+          ? Center(child: Text('No conversations. Tap \'+\' to create one!'))
+          : ListView.builder(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: conversationGroups.length,
+              itemBuilder: (context, index) {
+                return mapConversationToPageListTile(conversationGroups[index]);
+              }),
     );
   }
 
   ListTile mapConversationToPageListTile(ConversationGroup conversationGroup) {
-    UnreadMessage unreadMessage =
-        unreadMessages.firstWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.conversationId.toString() == conversationGroup.id, orElse: () => null);
+    UnreadMessage unreadMessage = unreadMessages.firstWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.conversationId.toString() == conversationGroup.id, orElse: () => null);
 
     Widget defaultImage = Image.asset(
       DefaultImagePathTypeUtil.getByConversationGroupType(conversationGroup.conversationGroupType).path,
@@ -282,8 +281,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
               padding: EdgeInsets.only(top: Get.height * 0.01),
               child: Text(isObjectEmpty(unreadMessage) ? '' : formatTime(unreadMessage.lastModifiedDate.millisecondsSinceEpoch), style: TextStyle(fontSize: 9.0)),
             ),
-            Text(isObjectEmpty(unreadMessage) || unreadMessage.count.toString() == '0'
-                ? '' : unreadMessage.count.toString())
+            Text(isObjectEmpty(unreadMessage) || unreadMessage.count.toString() == '0' ? '' : unreadMessage.count.toString())
           ],
         ),
         onTap: goToChatRoomPage(conversationGroup.id));
@@ -313,20 +311,21 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     userBloc.add(GetOwnUserEvent(callback: (User user) {}));
     settingsBloc.add(GetUserOwnSettingsEvent(callback: (Settings settings) {}));
     GetConversationGroupsRequest getConversationGroupsRequest = GetConversationGroupsRequest(pageable: Pageable(sort: Sort(orders: [Order(direction: Direction.DESC, property: 'lastModifiedDate')]), page: page, size: size));
-    conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(getConversationGroupsRequest: getConversationGroupsRequest, callback: (ConversationPageableResponse
-    conversationPageableResponse) {
-      if (!isObjectEmpty(conversationPageableResponse) && conversationPageableResponse.conversationGroupResponses.total > 0) {
-        totalRecords = conversationPageableResponse.conversationGroupResponses.total;
-        if(conversationGroups.length < totalRecords) {
-          page++;
-        }
-        List<UnreadMessage> unreadMessageList = conversationPageableResponse.unreadMessageResponses.content.map((e) => UnreadMessage.fromJson(e)).toList();
-        List<ConversationGroup> conversationGroupList = conversationPageableResponse.conversationGroupResponses.content.map((e) => ConversationGroup.fromJson(e)).toList();
+    conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(
+        getConversationGroupsRequest: getConversationGroupsRequest,
+        callback: (ConversationPageableResponse conversationPageableResponse) {
+          if (!isObjectEmpty(conversationPageableResponse) && conversationPageableResponse.conversationGroupResponses.total > 0) {
+            totalRecords = conversationPageableResponse.conversationGroupResponses.total;
+            if (conversationGroups.length < totalRecords) {
+              page++;
+            }
+            List<UnreadMessage> unreadMessageList = conversationPageableResponse.unreadMessageResponses.content.map((e) => UnreadMessage.fromJson(e)).toList();
+            List<ConversationGroup> conversationGroupList = conversationPageableResponse.conversationGroupResponses.content.map((e) => ConversationGroup.fromJson(e)).toList();
 
-        unreadMessageBloc.add(UpdateUnreadMessagesEvent(unreadMessages: unreadMessageList));
-        multimediaBloc.add(GetConversationGroupsMultimediaEvent(conversationGroupList: conversationGroupList, callback: (bool done) {}));
-      }
-    }));
+            unreadMessageBloc.add(UpdateUnreadMessagesEvent(unreadMessages: unreadMessageList));
+            multimediaBloc.add(GetConversationGroupsMultimediaEvent(conversationGroupList: conversationGroupList, callback: (bool done) {}));
+          }
+        }));
     multimediaBloc.add(GetUserOwnProfilePictureMultimediaEvent(callback: (bool done) {}));
     userContactBloc.add(GetUserOwnUserContactEvent(callback: (bool done) {
       if (done) {
@@ -362,11 +361,10 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     );
   }
 
-  Widget showError() {
-    return Center(
-      child: Column(
-        children: <Widget>[Text('An error has occurred. Please try again later.'), RaisedButton(onPressed: goToLoginPage)],
-      ),
+  Widget showError(String module) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[Text('An error has occurred in $module. Please try again later.'), RaisedButton(child: Text('Restart App'), onPressed: goToLoginPage)],
     );
   }
 

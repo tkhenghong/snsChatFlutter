@@ -68,17 +68,7 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
 
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Get.theme.primaryTextTheme.headline6.color,
-          textTheme: TextTheme(headline6: TextStyle(color: Get.theme.primaryColor)),
-          titleSpacing: 0.0,
-          elevation: 0.0,
-          title: Text(
-            tabTitle,
-            textAlign: TextAlign.start,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32.0),
-          ),
-        ),
+        appBar: appBar(),
         body: PageView(
           controller: pageViewController,
           onPageChanged: (int index) {
@@ -90,76 +80,98 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
           physics: BouncingScrollPhysics(),
           children: tabPages,
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _bottomNavBarIndex,
-          type: BottomNavigationBarType.shifting,
-          onTap: (int index) {
-            setState(() {
-              _bottomNavBarIndex = index;
-              pageViewController.jumpToPage(index);
-              changeTab(index);
-            });
-          },
-          items: initializeTabs(),
-        ),
-        floatingActionButton: FadeTransition(
-          opacity: animation,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(createConversationIcons.length, (int index) {
-              Widget child = new Container(
-                height: Get.height * 0.1,
-                width: Get.width * 0.1,
-                alignment: FractionalOffset.topCenter,
-                child: ScaleTransition(
-                    scale: CurvedAnimation(
-                      parent: _animationController,
-                      curve: Interval(0.0, 1.0 - index / createConversationIcons.length / 2.0, curve: Curves.easeOut),
+        bottomNavigationBar: bottomNavigationBar(),
+        floatingActionButton: floatingActionButton());
+  }
+
+  Widget appBar() {
+    return AppBar(
+      backgroundColor: Get.theme.primaryTextTheme.headline6.color,
+      textTheme: TextTheme(headline6: TextStyle(color: Get.theme.primaryColor)),
+      // titleSpacing: 0.0,
+      elevation: 0.0,
+      title: Text(
+        tabTitle,
+        textAlign: TextAlign.start,
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32.0),
+      ),
+    );
+  }
+
+  Widget bottomNavigationBar() {
+    return BottomNavigationBar(
+      currentIndex: _bottomNavBarIndex,
+      type: BottomNavigationBarType.shifting,
+      onTap: (int index) {
+        setState(() {
+          _bottomNavBarIndex = index;
+          pageViewController.jumpToPage(index);
+          changeTab(index);
+        });
+      },
+      items: initializeTabs(),
+    );
+  }
+
+  Widget floatingActionButton() {
+    return FadeTransition(
+      opacity: animation,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(createConversationIcons.length, (int index) {
+          Widget child = new Container(
+            height: Get.height * 0.1,
+            width: Get.width * 0.1,
+            alignment: FractionalOffset.topCenter,
+            child: ScaleTransition(
+                scale: CurvedAnimation(
+                  parent: _animationController,
+                  curve: Interval(0.0, 1.0 - index / createConversationIcons.length / 2.0, curve: Curves.easeOut),
+                ),
+                child: Tooltip(
+                  message: conversationGroupTypeLabels[index],
+                  child: FloatingActionButton(
+                    heroTag: null,
+                    mini: true,
+                    child: Icon(
+                      createConversationIcons[index],
                     ),
-                    child: Tooltip(
-                      message: conversationGroupTypeLabels[index],
-                      child: FloatingActionButton(
-                        heroTag: null,
-                        mini: true,
-                        child: Icon(
-                          createConversationIcons[index],
-                        ),
-                        onPressed: () {
-                          if (!isActionButtonDisabled) {
-                            goToSelectContactPage(index);
-                          }
-                        },
-                      ),
-                    )),
-              );
-              return child;
-            }).toList()
-              ..add(
-                new FloatingActionButton(
-                  heroTag: null,
-                  child: AnimatedBuilder(
-                    animation: _animationController,
-                    builder: (BuildContext context, Widget child) {
-                      return Transform(
-                        transform: new Matrix4.rotationZ(_animationController.value * 0.5 * math.pi),
-                        alignment: FractionalOffset.center,
-                        child: Icon(
-                          _animationController.isDismissed ? Icons.add_comment : Icons.close,
-                        ),
-                      );
+                    onPressed: () {
+                      if (!isActionButtonDisabled) {
+                        goToSelectContactPage(index);
+                      }
                     },
                   ),
-                  onPressed: () {
-                    if (_animationController.isDismissed) {
-                      _animationController.forward();
-                    } else {
-                      _animationController.reverse();
-                    }
-                  },
-                ),
+                )),
+          );
+          return child;
+        }).toList()
+          ..add(
+            new FloatingActionButton(
+              heroTag: null,
+              child: AnimatedBuilder(
+                animation: _animationController,
+                builder: (BuildContext context, Widget child) {
+                  return Transform(
+                    transform: new Matrix4.rotationZ(_animationController.value * 0.5 * math.pi),
+                    alignment: FractionalOffset.center,
+                    child: Icon(
+                      _animationController.isDismissed ? Icons.add_comment : Icons.close,
+                    ),
+                  );
+                },
               ),
+              onPressed: () {
+                if (_animationController.isDismissed) {
+                  _animationController.forward();
+                } else {
+                  _animationController.reverse();
+                }
+              },
+            ),
           ),
-        ));
+      ),
+    );
   }
 
   /// The reason of this implementation is due to compiler will give error if

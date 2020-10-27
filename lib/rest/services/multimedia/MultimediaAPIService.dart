@@ -13,7 +13,7 @@ class MultimediaAPIService {
   CustomHttpClient httpClient = Get.find();
 
   Future<Multimedia> getSingleMultimedia(String multimediaId) async {
-    return Multimedia.fromJson(await httpClient.getRequest("$REST_URL/$multimediaAPI/$multimediaId"));
+    return Multimedia.fromJson(await httpClient.getRequest("$REST_URL/$multimediaAPI/$multimediaId", showDialog: false, showSnackBar: false));
   }
 
   /// Get a list of multimedia in one go.

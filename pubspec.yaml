@@ -20,7 +20,7 @@ dependencies:
   shared_preferences: ^0.5.7+3
 
   # Secure Storage (Keychain for iOS and Android KeyStore requires 4.3 and above)
-  flutter_secure_storage: ^3.3.4
+  flutter_secure_storage: ^3.3.5
 
   # State
   #  provider: ^4.0.5
