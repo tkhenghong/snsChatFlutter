@@ -67,6 +67,10 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
   Widget build(BuildContext context) {
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
 
+    return SafeArea(child: Material(child: mainBody()));
+  }
+
+  Widget mainBody() {
     return Scaffold(
         appBar: appBar(),
         body: PageView(

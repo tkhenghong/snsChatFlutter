@@ -86,13 +86,15 @@ class ChatGroupListState extends State<ChatGroupListPage> {
       firstRun = false;
     }
 
-    return MultiBlocListener(listeners: [
-      userAuthenticationBlocListener(),
-      userContactBlocListener(),
-      userBlocListener(),
-      conversationGroupBlocListener(),
-    ], child: userAuthenticationBlocBuilder());
+    return multiBlocListener();
   }
+
+  Widget multiBlocListener() => MultiBlocListener(listeners: [
+        userAuthenticationBlocListener(),
+        userContactBlocListener(),
+        userBlocListener(),
+        conversationGroupBlocListener(),
+      ], child: userAuthenticationBlocBuilder());
 
   Widget userAuthenticationBlocListener() {
     return BlocListener<AuthenticationBloc, AuthenticationState>(

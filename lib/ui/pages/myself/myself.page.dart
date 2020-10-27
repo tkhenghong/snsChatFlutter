@@ -100,7 +100,7 @@ class MyselfPageState extends State<MyselfPage> {
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
     googleInfoBloc = BlocProvider.of<GoogleInfoBloc>(context);
 
-    return SafeArea(child: Material(child: userBlocBuilder()));
+    return SafeArea(child: userBlocBuilder());
   }
 
   Widget userBlocBuilder() {
@@ -185,7 +185,7 @@ class MyselfPageState extends State<MyselfPage> {
       ),
     );
 
-    if (buttons.length + 1 == settingListOriginalLength) {
+    if (buttons.length + 1 > settingListOriginalLength) {
       // Remove previous UserProfilePicture.
       buttons.removeAt(0);
     }
