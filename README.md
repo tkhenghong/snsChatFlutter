@@ -56,4 +56,8 @@ Used plugins:
 Refer to tutorial: https://www.thedroidsonroids.com/blog/how-to-build-an-app-with-flutter-networking-and-connecting-to-api
 NOTE: When created the object, please run `flutter packages pub run build_runner build --delete-conflicting-outputs` to generate proper files for the objects. 
 
-13. And some other plugins but not yet implemented...
+13. Flutter Display Mode
+Unable to determine Swift version for flutter_displaymode related to SWIFT_VERSION:
+https://github.com/ajinasokan/flutter_displaymode/issues/4
+
+14. And some other plugins but not yet implemented...
