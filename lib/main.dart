@@ -276,7 +276,9 @@ class MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    setDisplayMode();
+    if(Platform.isAndroid) {
+      setDisplayMode();
+    }
   }
 
   @override

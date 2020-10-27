@@ -52,7 +52,7 @@ dependencies:
 
   # Sign In
   google_sign_in: ^4.4.4
-  firebase_auth: ^0.18.0+1
+  firebase_auth: ^0.18.1+2
 
   # Auth buttons
   flutter_auth_buttons: ^0.10.0
@@ -70,12 +70,12 @@ dependencies:
   url_launcher: ^5.5.0
 
   # Image
-  image_picker: ^0.6.7+2
+  image_picker: ^0.6.7+12
   cached_network_image: ^2.3.2+1
   photo_view: ^0.10.2
 
   # Image Online Storage Provider
-  firebase_storage: ^4.0.0
+  firebase_storage: ^4.0.1
 
   # Image rotation fix
   # flutter_exif_rotation: ^0.2.7
@@ -104,7 +104,7 @@ dependencies:
       url: git://github.com/juliuscanute/qr_code_scanner.git
 
   # Vibrate
-  vibration: ^1.4.0
+  vibration: ^1.7.1
 
   # Toast (will be replaced by Scaffold snackbars)
   fluttertoast: ^7.0.1
