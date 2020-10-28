@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
@@ -167,7 +168,7 @@ class MyselfPageState extends State<MyselfPage> {
 
     ListTile listTile = ListTile(
       title: Text(ownUser.displayName),
-      subtitle: Text(!isObjectEmpty(ownUserContact.about) ? ownUserContact.about : ''),
+      subtitle: Text(!isObjectEmpty(ownUserContact.about) ? ownUserContact.about : 'Write about yourself...'),
       leading: Hero(
         tag: ownUser.id + "1",
         child: CachedNetworkImage(
@@ -183,6 +184,7 @@ class MyselfPageState extends State<MyselfPage> {
           },
         ),
       ),
+      onTap: onUserProfilePictureTapped,
     );
 
     if (buttons.length + 1 > settingListOriginalLength) {
@@ -207,6 +209,10 @@ class MyselfPageState extends State<MyselfPage> {
         ),
       ],
     );
+  }
+
+  onUserProfilePictureTapped() {
+    showToast('Coming soon on change user\'s description.', Toast.LENGTH_SHORT);
   }
 
   goToSettingsPage() {

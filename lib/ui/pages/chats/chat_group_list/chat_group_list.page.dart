@@ -307,6 +307,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     multimediaBloc.add(InitializeMultimediaEvent(callback: (bool done) {}));
     unreadMessageBloc.add(InitializeUnreadMessagesEvent(callback: (bool done) {}));
     userContactBloc.add(InitializeUserContactsEvent(callback: (bool done) {}));
+    refreshUserData();
   }
 
   refreshUserData() {
@@ -364,9 +365,12 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   Widget showError(String module) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[Text('An error has occurred in $module. Please try again later.'), RaisedButton(child: Text('Restart App'), onPressed: goToLoginPage)],
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: Get.width * 0.05),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[Text('An error has occurred in $module. Please try again later.', textAlign: TextAlign.center,), RaisedButton(child: Text('Restart App'), onPressed: goToLoginPage)],
+      ),
     );
   }
 
