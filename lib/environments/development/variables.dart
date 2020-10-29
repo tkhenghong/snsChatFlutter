@@ -39,3 +39,6 @@ double inkWellDefaultPadding = 15.0;
 int emojiRows = 5;
 int emojiColumns = 7;
 int recommendedEmojis = 10;
+
+// Pageable configurations (Pagination)
+int numberOfRecords = 20; // Control number of records that should be fetching every time a new page is pulled.
