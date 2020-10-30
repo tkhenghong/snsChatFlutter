@@ -61,3 +61,19 @@ Unable to determine Swift version for flutter_displaymode related to SWIFT_VERSI
 https://github.com/ajinasokan/flutter_displaymode/issues/4
 
 14. And some other plugins but not yet implemented...
+
+Step to build for iOS:
+1. At project directory, type 'flutter build ios' (To build Podfile and Podfile.lock files for iOS)
+2. cd /ios
+3. Type 'pod install'
+4. Open XCode, at top bar, select Product > Clean Build Folder
+5. Select Product > Build (To check whether the plugins can build successfully for running in iOS or not)
+6a. Sign in/up with your Apple Developer Account. (https://developer.apple.com/)
+6b. Create an app with App ID.
+6c. Create development team. Link devices by using their UDID. (https://www.sourcefuse.com/blog/how-to-find-udid-in-the-new-iphone-xs-iphone-xr-and-iphone-xs-max/)
+6d. Go to XCode, get the app info and download it's provisioining profile.
+6e. At left side menu, go to Project Navigator button(1st button in a list of horizontal synbols), and select Runner.
+6f. Middle content will appear. At top of the middle content buttons, select Singing & Capabilities.
+6g. Select Team and your preferred Provisioning Profile.
+6h. Select Capabilities(Optional)
+7. Press Play button to start running the app in simulator/real device.
