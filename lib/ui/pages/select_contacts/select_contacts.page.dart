@@ -459,6 +459,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   }
 
   createPersonalConversationGroup(Contact contact, String mobileNumber) {
+    showLoading('Loading personal conversation....');
     userContactBloc.add(GetUserContactByMobileNoEvent(
         mobileNo: mobileNumber,
         callback: (UserContact userContact) {
@@ -469,11 +470,12 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                   conversationGroupType: ConversationGroupType.Personal,
                   description: null,
                   memberIds: [userContact.id, ownUserContact.id],
-                  adminMemberIds: [ownUserContact.id],
+                  adminMemberIds: [ownUserContact.id, userContact.id],
                 ),
                 callback: (ConversationGroup conversationGroup) {
                   if (!conversationGroup.isNull) {
-                    Get.back(); // Close select phone number pop up
+                    Get.back(); // Close select phone number pop up.
+                    Get.back(); // Close loading indicator.
                     goToChatRoomPage(conversationGroup);
                   }
                 }));

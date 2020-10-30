@@ -364,7 +364,7 @@ class GroupNamePageState extends State<GroupNamePage> {
     if (!_formKey.currentState.validate()) {
       return;
     }
-
+    showLoading('Loading group conversation....');
     List<String> memberUserContactIds = widget.selectedUserContacts.map((e) => e.id).toList();
     memberUserContactIds.add(ownUserContact.id); // Add yourself.
 
@@ -378,7 +378,8 @@ class GroupNamePageState extends State<GroupNamePage> {
         ),
         callback: (ConversationGroup conversationGroup) {
           if (!conversationGroup.isNull) {
-            Get.back(); // Close select phone number pop up
+            Get.back(); // Close select phone number pop up.
+            Get.back(); // Close loading indicator.
             if (!conversationGroup.isNull) {
               unreadMessageBloc.add(GetUnreadMessageByConversationGroupIdEvent(conversationGroupId: conversationGroup.id));
               goToChatRoomPage(conversationGroup);
