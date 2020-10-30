@@ -33,10 +33,6 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>io.flutter.embedded_views_preview</key>
-    <true/>
-	<key>NSCameraUsageDescription</key>
-	<string>Used to use image picker plugin and to scan QR codes</string>
 	<key>NSContactsUsageDescription</key>
 	<string>This app requires contacts access to function properly.</string>
 	<key>NSMicrophoneUsageDescription</key>
@@ -67,5 +63,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>io.flutter.embedded_views_preview</key>
+    <true/>
+    <key>NSCameraUsageDescription</key>
+    <string>Used to demonstrate image picker and barcode scanner plugin</string>
 </dict>
 </plist>
