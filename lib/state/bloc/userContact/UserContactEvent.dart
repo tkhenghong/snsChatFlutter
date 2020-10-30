@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/objects/rest/index.dart';
 
 abstract class UserContactEvent extends Equatable {
   @override
@@ -10,12 +11,14 @@ abstract class UserContactEvent extends Equatable {
 }
 
 class InitializeUserContactsEvent extends UserContactEvent {
+  final int page;
+  final int size;
   final Function callback;
 
-  const InitializeUserContactsEvent({this.callback});
+  const InitializeUserContactsEvent({this.page, this.size, this.callback});
 
   @override
-  String toString() => 'InitializeUserContactsEvent';
+  String toString() => 'InitializeUserContactsEvent {page: $page, size: $size}';
 }
 
 class EditOwnUserContactEvent extends UserContactEvent {
@@ -70,15 +73,16 @@ class GetUserOwnUserContactEvent extends UserContactEvent {
 }
 
 class GetUserOwnUserContactsEvent extends UserContactEvent {
+  final GetUserOwnUserContactsRequest getUserOwnUserContactsRequest;
   final Function callback;
 
-  GetUserOwnUserContactsEvent({this.callback});
+  GetUserOwnUserContactsEvent({this.getUserOwnUserContactsRequest, this.callback});
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [getUserOwnUserContactsRequest];
 
   @override
-  String toString() => 'GetUserOwnUserContactsEvent';
+  String toString() => 'GetUserOwnUserContactsEvent {getUserOwnUserContactsRequest: $getUserOwnUserContactsRequest}';
 }
 
 class GetUserContactByMobileNoEvent extends UserContactEvent {

@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:snschat_flutter/objects/models/user_contact/user_contact.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/rest/custom_http_client/custom_http_client.dart';
 import 'package:snschat_flutter/rest/index.dart';
@@ -16,8 +17,8 @@ class UserContactAPIService {
   CustomHttpClient httpClient = Get.find();
   HTTPFileService httpFileService = Get.find();
 
-  Future<bool> editOwnUserContact(UserContact userContact) async {
-    return await httpClient.putRequest("$REST_URL/$userContactAPI", requestBody: userContact);
+  Future<UserContact> editOwnUserContact(UserContact userContact) async {
+    return UserContact.fromJson(await httpClient.putRequest("$REST_URL/$userContactAPI", requestBody: userContact));
   }
 
   Future<MultimediaResponse> uploadOwnUserContactProfilePhoto(String userContactId, File file, {Function uploadProgress}) async {
@@ -51,9 +52,9 @@ class UserContactAPIService {
     return UserContact.fromJson(await httpClient.getRequest("$REST_URL/$userContactAPI"));
   }
 
-  // Get all UserContacts of the signed in user, including yourself.
-  Future<List<UserContact>> getOwnUserContacts() async {
-    List<dynamic> userContactListRaw = await httpClient.getRequest("$REST_URL/$userContactAPI/user");
-    return userContactListRaw.map((e) => UserContact.fromJson(e)).toList();
+  /// Get all UserContacts of the signed in user, including yourself with pangination.
+  /// Object is Page<UserContact>
+  Future<Page> getUserContactsOfAUser(GetUserOwnUserContactsRequest getUserOwnUserContactsRequest) async {
+    return Page.fromJson(await httpClient.postRequest("$REST_URL/$userContactAPI/user", requestBody: getUserOwnUserContactsRequest));
   }
 }

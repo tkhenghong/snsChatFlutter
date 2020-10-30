@@ -8,8 +8,6 @@ part 'page.g.dart';
 @data
 @JsonSerializable()
 class Page {
-  @JsonKey(name: 'total')
-  int total;
 
   @JsonKey(name: 'content')
   List<dynamic> content;
@@ -17,7 +15,31 @@ class Page {
   @JsonKey(name: 'pageable')
   Pageable pageable;
 
-  Page({this.total, this.content, this.pageable});
+  @JsonKey(name: 'totalElements')
+  int totalElements;
+
+  @JsonKey(name: 'totalPages')
+  int totalPages;
+
+  @JsonKey(name: 'last')
+  bool last;
+
+  @JsonKey(name: 'size')
+  int size;
+
+  @JsonKey(name: 'number')
+  int number;
+
+  @JsonKey(name: 'numberOfElements')
+  int numberOfElements;
+
+  @JsonKey(name: 'first')
+  bool first;
+
+  @JsonKey(name: 'empty')
+  bool empty;
+
+  Page({this.totalElements, this.totalPages, this.last, this.size, this.number, this.numberOfElements, this.first, this.empty, this.content, this.pageable});
 
   factory Page.fromJson(Map<String, dynamic> json) => _$PageFromJson(json);
 

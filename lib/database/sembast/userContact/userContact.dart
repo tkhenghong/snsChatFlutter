@@ -23,6 +23,26 @@ class UserContactDBService {
     return key != null && key != 0 && key.toString().isNotEmpty;
   }
 
+  Future<void> addUserContacts(List<UserContact> userContacts) async {
+    Database database = await _db;
+    if (isObjectEmpty(database)) {
+      return false;
+    }
+
+    try {
+      await database.transaction((transaction) async {
+        for (int i = 0; i < userContacts.length; i++) {
+          UserContact existingUserContact = await getSingleUserContact(userContacts[i].id);
+          isObjectEmpty(existingUserContact) ? await _userContactStore.add(database, userContacts[i].toJson()) : editUserContact(userContacts[i]);
+        }
+      });
+      return true;
+    } catch (e) {
+      // Error happened in database transaction.
+      return false;
+    }
+  }
+
   Future<bool> editUserContact(UserContact userContact) async {
     if (isObjectEmpty(await _db)) {
       return false;
@@ -90,7 +110,6 @@ class UserContactDBService {
     return !isObjectEmpty(recordSnapshot) ? UserContact.fromJson(recordSnapshot.value) : null;
   }
 
-  // In future, when multiple logins needed
   Future<List<UserContact>> getAllUserContacts() async {
     if (isObjectEmpty(await _db)) {
       return null;
@@ -105,6 +124,25 @@ class UserContactDBService {
 
       return userContactList;
     }
-    return null;
+    return [];
+  }
+
+  Future<List<UserContact>> getAllUserContactsWithPagination(int page, int size) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
+    // Auto sort by lastModifiedDate, but when showing in chat page, sort these conversations using last unread message's date
+    final finder = Finder(sortOrders: [SortOrder('lastModifiedDate', false)], offset: page * size, limit: size);
+    final recordSnapshots = await _userContactStore.find(await _db, finder: finder);
+    if (!isObjectEmpty(recordSnapshots)) {
+      List<UserContact> userContactList = [];
+      recordSnapshots.forEach((snapshot) {
+        final userContact = UserContact.fromJson(snapshot.value);
+        userContactList.add(userContact);
+      });
+
+      return userContactList;
+    }
+    return [];
   }
 }

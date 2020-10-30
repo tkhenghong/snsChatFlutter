@@ -19,6 +19,7 @@ export 'request/conversation_group/unmute_conversation_group_notification/unmute
 export 'request/conversation_group/join_conversation_group/join_conversation_group_request.dart';
 export 'request/multimedia/get_multimedia_list/get_multimedia_list_request.dart';
 export 'request/settings/update_settings/update_settings_request.dart';
+export 'request/user_contact/get_user_own_user_contacts/get_user_own_user_contacts_request.dart';
 
 // Responses
 export 'response/authentication/OTPResponse/OTPResponse.dart';

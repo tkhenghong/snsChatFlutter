@@ -10,13 +10,18 @@ abstract class ConversationGroupEvent extends Equatable {
   const ConversationGroupEvent();
 }
 
-class InitializeConversationGroupsEvent extends ConversationGroupEvent {
+class LoadConversationGroupsEvent extends ConversationGroupEvent {
+  final int page;
+  final int size;
   final Function callback;
 
-  const InitializeConversationGroupsEvent({this.callback});
+  const LoadConversationGroupsEvent({this.page, this.size, this.callback});
 
   @override
-  String toString() => 'InitializeConversationGroupsEvent';
+  List<Object> get props => [page, size];
+
+  @override
+  String toString() => 'LoadConversationGroupsEvent {page: $page, size: $size}';
 }
 
 // Used to add conversationGroup from WebSocket
@@ -85,18 +90,18 @@ class GetUserOwnConversationGroupsEvent extends ConversationGroupEvent {
   String toString() => 'GetUserOwnConversationGroupsEvent';
 }
 
-class AddGroupMemberEvent extends ConversationGroupEvent {
-  final String userContactId;
+class AddGroupMembersEvent extends ConversationGroupEvent {
+  final List<String> userContactIds;
   final String conversationGroupId;
   final Function callback;
 
-  const AddGroupMemberEvent({this.userContactId, this.conversationGroupId, this.callback});
+  const AddGroupMembersEvent({this.userContactIds, this.conversationGroupId, this.callback});
 
   @override
-  List<Object> get props => [userContactId, conversationGroupId];
+  List<Object> get props => [userContactIds, conversationGroupId];
 
   @override
-  String toString() => 'AddGroupMemberEvent {userContactId: $userContactId, conversationGroupId: $conversationGroupId}';
+  String toString() => 'AddGroupMembersEvent {userContactIds: $userContactIds, conversationGroupId: $conversationGroupId}';
 }
 
 class RemoveConversationGroupsEvent extends ConversationGroupEvent {

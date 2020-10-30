@@ -51,7 +51,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   AudioService audioService = Get.find();
 
   bool isShowSticker = false;
-  bool isLoading;
+  bool isLoading = false;
   bool isRecording = false;
   bool imageFound = false;
   bool openMultimediaTab = false;
@@ -74,10 +74,10 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   int imagePickerQuality = globals.imagePickerQuality;
 
-  TextEditingController textEditingController = new TextEditingController();
-  ScrollController listScrollController = new ScrollController();
-  ScrollController imageViewScrollController = new ScrollController();
-  ScrollController fileViewScrollController = new ScrollController();
+  TextEditingController textEditingController;
+  ScrollController listScrollController;
+  ScrollController imageViewScrollController;
+  ScrollController fileViewScrollController;
   FocusNode focusNode = new FocusNode();
   AnimationController _animationController, _animationController2;
   Animation animation;
@@ -85,9 +85,12 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   @override
   void initState() {
     super.initState();
+    textEditingController = new TextEditingController();
+    listScrollController = new ScrollController();
+    imageViewScrollController = new ScrollController();
+    fileViewScrollController = new ScrollController();
+
     focusNode.addListener(onFocusChange);
-    isLoading = false;
-    isShowSticker = false;
 
     _animationController = new AnimationController(
       vsync: this,
@@ -101,8 +104,11 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   @override
   void dispose() {
     super.dispose();
-    listScrollController.dispose();
     textEditingController.dispose();
+    listScrollController.dispose();
+    imageViewScrollController.dispose();
+    fileViewScrollController.dispose();
+
     _animationController.dispose();
     _animationController2.dispose();
   }

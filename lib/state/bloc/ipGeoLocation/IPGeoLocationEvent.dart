@@ -15,12 +15,3 @@ class InitializeIPGeoLocationEvent extends IPGeoLocationEvent {
   @override
   String toString() => 'InitializeIPGeoLocationEvent';
 }
-
-class GetIPGeoLocationEvent extends IPGeoLocationEvent {
-  final Function callback;
-
-  const GetIPGeoLocationEvent({this.callback});
-
-  @override
-  String toString() => 'GetIPGeoLocationEvent';
-}

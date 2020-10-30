@@ -43,19 +43,6 @@ class GetUserOwnProfilePictureMultimediaEvent extends MultimediaEvent {
   String toString() => 'GetUserProfilePictureMultimediaEvent {ownUserContactMultimediaId: $ownUserContactMultimediaId}';
 }
 
-class GetConversationGroupsMultimediaEvent extends MultimediaEvent {
-  final List<ConversationGroup> conversationGroupList;
-  final Function callback;
-
-  GetConversationGroupsMultimediaEvent({this.conversationGroupList, this.callback});
-
-  @override
-  List<Object> get props => [conversationGroupList];
-
-  @override
-  String toString() => 'GetConversationGroupsMultimediaEvent {conversationGroupList: $conversationGroupList}';
-}
-
 class GetUserContactsMultimediaEvent extends MultimediaEvent {
   final List<UserContact> userContactList;
   final Function callback;

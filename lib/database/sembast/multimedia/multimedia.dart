@@ -11,7 +11,7 @@ class MultimediaDBService {
 
   Future<Database> get _db async => await SembastDB.instance.database;
 
-  //CRUD
+  /// Add single multimedia.
   Future<bool> addMultimedia(Multimedia multimedia) async {
     if (isObjectEmpty(await _db)) {
       return false;
@@ -27,6 +27,7 @@ class MultimediaDBService {
     }
   }
 
+  /// Add multimedia in batch, with transaction safety.
   Future<void> addMultimediaList(List<Multimedia> multimediaList) async {
     Database database = await _db;
     if (isObjectEmpty(database)) {
@@ -118,6 +119,25 @@ class MultimediaDBService {
 
       return multimediaList;
     }
-    return null;
+    return [];
+  }
+
+  Future<List<Multimedia>> getMultimediaList(List<String> multimediaList) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
+    // Auto sort by lastModifiedDate, but when showing in chat page, sort these conversations using last unread message's date
+    final finder = Finder(sortOrders: [SortOrder('lastModifiedDate', false)], filter: Filter.inList('id', multimediaList));
+    final recordSnapshots = await _multimediaStore.find(await _db, finder: finder);
+    if (!isObjectEmpty(recordSnapshots)) {
+      List<Multimedia> multimediaList = [];
+      recordSnapshots.forEach((snapshot) {
+        final multimedia = Multimedia.fromJson(snapshot.value);
+        multimediaList.add(multimedia);
+      });
+
+      return multimediaList;
+    }
+    return [];
   }
 }

@@ -28,6 +28,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   int page = 0;
   int size = globals.numberOfRecords;
   int totalRecords = 0;
+  bool last = false;
+
   List<ConversationGroup> conversationGroups = [];
   List<UnreadMessage> unreadMessages = [];
   List<Multimedia> multimediaList = [];
@@ -234,7 +236,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   Widget mainBody() {
     return SmartRefresher(
       controller: _refreshController,
-      onRefresh: () => onRefresh(),
+      onRefresh: onRefresh,
       enablePullDown: true,
       physics: BouncingScrollPhysics(),
       header: ClassicHeader(),
@@ -253,7 +255,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   ListTile mapConversationToPageListTile(ConversationGroup conversationGroup) {
     UnreadMessage unreadMessage = unreadMessages.firstWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.conversationId.toString() == conversationGroup.id, orElse: () => null);
 
-    Widget defaultImage = Image.asset(
+    AssetImage defaultImage = AssetImage(
       DefaultImagePathTypeUtil.getByConversationGroupType(conversationGroup.conversationGroupType).path,
     );
 
@@ -262,14 +264,14 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           tag: conversationGroup.id,
           child: Text(conversationGroup.name),
         ),
-        subtitle: Text(!isObjectEmpty(unreadMessage) ? '' : unreadMessage.lastMessage),
+        subtitle: Text(isObjectEmpty(unreadMessage) || isObjectEmpty(unreadMessage.lastMessage) ? '' : unreadMessage.lastMessage),
         leading: Hero(
           tag: conversationGroup.id + '1',
           child: CachedNetworkImage(
             imageUrl: '$REST_URL/conversationGroup/${conversationGroup.id}/groupPhoto',
             useOldImageOnUrlChange: true,
-            placeholder: (context, url) => defaultImage,
-            errorWidget: (context, url, error) => defaultImage,
+            placeholder: (context, url) => CircleAvatar(backgroundImage: defaultImage),
+            errorWidget: (context, url, error) => CircleAvatar(backgroundImage: defaultImage),
             imageBuilder: (BuildContext context, ImageProvider<dynamic> imageProvider) {
               return CircleAvatar(
                 backgroundImage: imageProvider,
@@ -286,7 +288,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
             Text(isObjectEmpty(unreadMessage) || unreadMessage.count.toString() == '0' ? '' : unreadMessage.count.toString())
           ],
         ),
-        onTap: goToChatRoomPage(conversationGroup.id));
+        onTap: () => goToChatRoomPage(conversationGroup.id));
   }
 
   onRefresh() async {
@@ -302,10 +304,10 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     userBloc.add(InitializeUserEvent(callback: (bool done) {}));
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     multimediaProgressBloc.add(InitializeMultimediaProgressEvent(callback: (bool done) {}));
-    conversationGroupBloc.add(InitializeConversationGroupsEvent(callback: (bool done) {}));
+    conversationGroupBloc.add(LoadConversationGroupsEvent(callback: (bool done) {}));
     chatMessageBloc.add(InitializeChatMessagesEvent(callback: (bool done) {}));
     multimediaBloc.add(InitializeMultimediaEvent(callback: (bool done) {}));
-    unreadMessageBloc.add(InitializeUnreadMessagesEvent(callback: (bool done) {}));
+    unreadMessageBloc.add(LoadUnreadMessagesEvent(callback: (bool done) {}));
     userContactBloc.add(InitializeUserContactsEvent(callback: (bool done) {}));
     refreshUserData();
   }
@@ -317,16 +319,12 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(
         getConversationGroupsRequest: getConversationGroupsRequest,
         callback: (ConversationPageableResponse conversationPageableResponse) {
-          if (!isObjectEmpty(conversationPageableResponse) && conversationPageableResponse.conversationGroupResponses.total > 0) {
-            totalRecords = conversationPageableResponse.conversationGroupResponses.total;
-            if (conversationGroups.length < totalRecords) {
-              page++;
-            }
-            List<UnreadMessage> unreadMessageList = conversationPageableResponse.unreadMessageResponses.content.map((e) => UnreadMessage.fromJson(e)).toList();
-            List<ConversationGroup> conversationGroupList = conversationPageableResponse.conversationGroupResponses.content.map((e) => ConversationGroup.fromJson(e)).toList();
+          if (!isObjectEmpty(conversationPageableResponse)) {
+            totalRecords = conversationPageableResponse.conversationGroupResponses.totalElements;
+            checkLastPage(conversationPageableResponse);
 
-            unreadMessageBloc.add(UpdateUnreadMessagesEvent(unreadMessages: unreadMessageList));
-            multimediaBloc.add(GetConversationGroupsMultimediaEvent(conversationGroupList: conversationGroupList, callback: (bool done) {}));
+            List<UnreadMessage> unreadMessageList = conversationPageableResponse.unreadMessageResponses.content.map((e) => UnreadMessage.fromJson(e)).toList();
+            unreadMessageBloc.add(UpdateUnreadMessagesEvent(unreadMessages: unreadMessageList, callback: (bool done) {}));
           }
         }));
     multimediaBloc.add(GetUserOwnProfilePictureMultimediaEvent(callback: (bool done) {}));
@@ -335,6 +333,16 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         userContactBloc.add(GetUserOwnUserContactsEvent(callback: (bool done) {}));
       }
     }));
+  }
+
+  checkLastPage(ConversationPageableResponse conversationPageableResponse) {
+    last = conversationPageableResponse.conversationGroupResponses.last;
+    if (!last) {
+      // Prepare to go to next page.
+      page++;
+    } else {
+      showToast('End of conversation groups.', Toast.LENGTH_SHORT);
+    }
   }
 
   /// Need this method to listen WebSocket messages
@@ -369,7 +377,13 @@ class ChatGroupListState extends State<ChatGroupListPage> {
       padding: EdgeInsets.symmetric(horizontal: Get.width * 0.05),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[Text('An error has occurred in $module. Please try again later.', textAlign: TextAlign.center,), RaisedButton(child: Text('Restart App'), onPressed: goToLoginPage)],
+        children: <Widget>[
+          Text(
+            'An error has occurred in $module. Please try again later.',
+            textAlign: TextAlign.center,
+          ),
+          RaisedButton(child: Text('Restart App'), onPressed: goToLoginPage)
+        ],
       ),
     );
   }

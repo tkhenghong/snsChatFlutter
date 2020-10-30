@@ -28,8 +28,6 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
       yield* _updateMultimedia(event);
     } else if (event is GetUserOwnProfilePictureMultimediaEvent) {
       yield* _getUserOwnProfilePictureMultimediaEvent(event);
-    } else if (event is GetConversationGroupsMultimediaEvent) {
-      yield* _getConversationGroupsMultimediaEvent(event);
     } else if (event is GetUserContactsMultimediaEvent) {
       yield* _getUserContactsMultimediaEvent(event);
     } else if (event is GetMessagesMultimediaEvent) {
@@ -42,7 +40,6 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
   Stream<MultimediaState> _initializeMultimediaToState(InitializeMultimediaEvent event) async* {
     if (state is MultimediaLoading || state is MultimediaNotLoaded) {
       try {
-        // List<Multimedia> multimediaListFromDB = await multimediaDBService.getAllMultimedia();
         List<Multimedia> multimediaListFromDB = [];
 
         yield MultimediaLoaded(multimediaListFromDB);
@@ -58,17 +55,9 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
   Stream<MultimediaState> _updateMultimedia(UpdateMultimediaEvent event) async* {
     try {
       if (state is MultimediaLoaded) {
-        List<Multimedia> multimediaList = (state as MultimediaLoaded).multimediaList;
+        multimediaDBService.addMultimediaList(event.multimediaList);
 
-        await multimediaDBService.addMultimediaList(event.multimediaList);
-
-        for (int i = 0; i < event.multimediaList.length; i++) {
-          multimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == event.multimediaList[i].id);
-        }
-
-        multimediaList.addAll(event.multimediaList);
-
-        yield MultimediaLoaded(multimediaList);
+        yield* updateMultimediaLoadedState(updatedMultimediaList: event.multimediaList);
         functionCallback(event, true);
       }
     } catch (e) {
@@ -79,55 +68,17 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
   Stream<MultimediaState> _getUserOwnProfilePictureMultimediaEvent(GetUserOwnProfilePictureMultimediaEvent event) async* {
     try {
       if (state is MultimediaLoaded) {
-        List<Multimedia> multimediaList = (state as MultimediaLoaded).multimediaList;
-
         Multimedia multimediaFromServer = await multimediaAPIService.getSingleMultimedia(event.ownUserContactMultimediaId);
 
-        // Auto loads the file into the local directory.
+        // Loads the file into the local directory.
         customFileService.retrieveMultimediaFile(multimediaFromServer, '$REST_URL/userContact/profilePhoto');
 
         if (!multimediaFromServer.isNull) {
-          // Update DB
-          Multimedia userMultimedia = await multimediaDBService.getSingleMultimedia(multimediaFromServer.id);
-          bool savedInDB = await multimediaDBService.addMultimedia(userMultimedia);
+          multimediaDBService.addMultimedia(multimediaFromServer);
 
-          if (!savedInDB) {
-            throw Exception('Unable to get user own profile picture multimedia.');
-          }
-
-          // Update State
-          multimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == multimediaFromServer.id);
-          multimediaList.add(multimediaFromServer);
+          yield* updateMultimediaLoadedState(multimedia: multimediaFromServer);
+          functionCallback(event, true);
         }
-
-        yield MultimediaLoaded(multimediaList);
-        functionCallback(event, true);
-      }
-    } catch (e) {
-      functionCallback(event, false);
-    }
-  }
-
-  Stream<MultimediaState> _getConversationGroupsMultimediaEvent(GetConversationGroupsMultimediaEvent event) async* {
-    try {
-      if (state is MultimediaLoaded) {
-        List<Multimedia> multimediaList = (state as MultimediaLoaded).multimediaList;
-
-        if (!event.conversationGroupList.isNullOrBlank && event.conversationGroupList.isNotEmpty) {
-          List<String> multimediaIDList = event.conversationGroupList.map((e) => e.groupPhoto).toList();
-          List<Multimedia> multimediaListFromServer = await multimediaAPIService.getMultimediaList(GetMultimediaListRequest(multimediaList: multimediaIDList));
-
-          await multimediaDBService.addMultimediaList(multimediaListFromServer);
-          if (!multimediaListFromServer.isNullOrBlank && multimediaListFromServer.isNotEmpty) {
-            for (int i = 0; i < multimediaListFromServer.length; i++) {
-              multimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == multimediaListFromServer[i].id);
-            }
-            multimediaList.addAll(multimediaListFromServer);
-          }
-        }
-
-        yield MultimediaLoaded(multimediaList);
-        functionCallback(event, true);
       }
     } catch (e) {
       functionCallback(event, false);
@@ -160,26 +111,32 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     }
   }
 
+  /// Get multimedia list of the Multimedia.
+  /// Note: Multimedia normally doesn't update it's content.
   Stream<MultimediaState> _getMessagesMultimediaEvent(GetMessagesMultimediaEvent event) async* {
     try {
       if (state is MultimediaLoaded) {
-        List<Multimedia> multimediaList = (state as MultimediaLoaded).multimediaList;
+        List<String> wantedMultimediaIds = event.chatMessageList.map((chatMessage) => chatMessage.multimediaId).toList();
+
+        // Trim empty Strings.
+        wantedMultimediaIds.removeWhere((multimediaId) => isObjectEmpty(multimediaId) || multimediaId.isNullOrBlank);
 
         if (!event.chatMessageList.isNullOrBlank && event.chatMessageList.isNotEmpty) {
-          List<String> multimediaIDList = event.chatMessageList.map((e) => e.multimediaId).toList();
-          List<Multimedia> multimediaListFromServer = await multimediaAPIService.getMultimediaList(GetMultimediaListRequest(multimediaList: multimediaIDList));
+          List<Multimedia> existingMultimediaList = await multimediaDBService.getMultimediaList(wantedMultimediaIds);
 
-          await multimediaDBService.addMultimediaList(multimediaListFromServer);
-          if (!multimediaListFromServer.isNullOrBlank && multimediaListFromServer.isNotEmpty) {
-            for (int i = 0; i < multimediaListFromServer.length; i++) {
-              multimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == multimediaListFromServer[i].id);
-            }
-            multimediaList.addAll(multimediaListFromServer);
+          // Find any leftover multimedia list that does not exist in local DB yet.
+          wantedMultimediaIds.removeWhere((multimediaId) => existingMultimediaList.any((existingMultimedia) => existingMultimedia.id == multimediaId));
+
+          if(wantedMultimediaIds.length > 0) {
+            List<Multimedia> multimediaListFromServer = await multimediaAPIService.getMultimediaList(GetMultimediaListRequest(multimediaList: wantedMultimediaIds));
+
+            // Combine both local and backend list together.
+            multimediaListFromServer.addAll(existingMultimediaList);
+
+            yield* updateMultimediaLoadedState(updatedMultimediaList: multimediaListFromServer);
+            functionCallback(event, true);
           }
         }
-
-        yield MultimediaLoaded(multimediaList);
-        functionCallback(event, true);
       }
     } catch (e) {
       functionCallback(event, false);
@@ -190,6 +147,31 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     multimediaDBService.deleteAllMultimedia();
     yield MultimediaNotLoaded();
     functionCallback(event, true);
+  }
+
+  Stream<MultimediaState> updateMultimediaLoadedState({List<Multimedia> updatedMultimediaList, Multimedia multimedia}) async* {
+    if (state is MultimediaLoaded) {
+      List<Multimedia> existingMultimedia = (state as MultimediaLoaded).multimediaList;
+
+      if (!isObjectEmpty(updatedMultimediaList)) {
+        updatedMultimediaList.forEach((updatedMultimedia) {
+          existingMultimedia.removeWhere((existingMultimedia) => updatedMultimedia.id == existingMultimedia.id);
+        });
+
+        existingMultimedia.addAll(updatedMultimediaList);
+      }
+
+      if (!isObjectEmpty(multimedia)) {
+        existingMultimedia.removeWhere((existingMultimedia) => multimedia.id == existingMultimedia.id);
+
+        existingMultimedia.add(multimedia);
+      }
+
+      yield MultimediaLoading();
+      yield MultimediaLoaded(existingMultimedia);
+    } else {
+      yield MultimediaLoaded(updatedMultimediaList);
+    }
   }
 
   // To send response to those dispatched Actions

@@ -9,13 +9,17 @@ abstract class UnreadMessageEvent extends Equatable {
   const UnreadMessageEvent();
 }
 
-class InitializeUnreadMessagesEvent extends UnreadMessageEvent {
+class LoadUnreadMessagesEvent extends UnreadMessageEvent {
+  final List<String> unreadMessageIds;
   final Function callback;
 
-  const InitializeUnreadMessagesEvent({this.callback});
+  const LoadUnreadMessagesEvent({this.unreadMessageIds, this.callback});
 
   @override
-  String toString() => 'InitializeUnreadMessagesEvent';
+  List<Object> get props => [unreadMessageIds];
+
+  @override
+  String toString() => 'LoadUnreadMessagesEvent {unreadMessageIds: $unreadMessageIds}';
 }
 
 class UpdateUnreadMessageEvent extends UnreadMessageEvent {
@@ -32,16 +36,16 @@ class UpdateUnreadMessageEvent extends UnreadMessageEvent {
 }
 
 class DeleteUnreadMessageEvent extends UnreadMessageEvent {
-  final UnreadMessage unreadMessage;
+  final String unreadMessageId;
   final Function callback;
 
-  DeleteUnreadMessageEvent({this.unreadMessage, this.callback});
+  DeleteUnreadMessageEvent({this.unreadMessageId, this.callback});
 
   @override
-  List<Object> get props => [unreadMessage];
+  List<Object> get props => [unreadMessageId];
 
   @override
-  String toString() => 'DeleteUnreadMessageToStateEvent {unreadMessage: $unreadMessage}';
+  String toString() => 'DeleteUnreadMessageToStateEvent {unreadMessageId: $unreadMessageId}';
 }
 
 class GetUnreadMessageByConversationGroupIdEvent extends UnreadMessageEvent {

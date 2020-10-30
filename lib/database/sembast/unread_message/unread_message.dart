@@ -11,7 +11,7 @@ class UnreadMessageDBService {
 
   Future<Database> get _db async => await SembastDB.instance.database;
 
-  //CRUD
+  /// Add single unread message.
   Future<bool> addUnreadMessage(UnreadMessage unreadMessage) async {
     if (isObjectEmpty(await _db)) {
       return false;
@@ -26,6 +26,7 @@ class UnreadMessageDBService {
     }
   }
 
+  /// Add unread message in batch, with transaction safety.
   Future<void> addUnreadMessages(List<UnreadMessage> unreadMessages) async {
     Database database = await _db;
     if (isObjectEmpty(database)) {
@@ -85,6 +86,26 @@ class UnreadMessageDBService {
     return !isObjectEmpty(recordSnapshot) ? UnreadMessage.fromJson(recordSnapshot.value) : null;
   }
 
+  /// Find multiple UnreadMessage objects using a list of unreadMessageIds.
+  Future<List<UnreadMessage>> getUnreadMessages(List<String> unreadMessageIds) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
+
+    final finder = Finder(filter: Filter.inList('id', unreadMessageIds));
+    final recordSnapshots = await _unreadMessageStore.find(await _db, finder: finder);
+    if (!isObjectEmpty(recordSnapshots)) {
+      List<UnreadMessage> unreadMessageList = [];
+      recordSnapshots.forEach((snapshot) {
+        final unreadMessage = UnreadMessage.fromJson(snapshot.value);
+        unreadMessageList.add(unreadMessage);
+      });
+
+      return unreadMessageList;
+    }
+    return [];
+  }
+
   Future<UnreadMessage> getUnreadMessageOfAConversationGroup(String conversationGroupId) async {
     if (isObjectEmpty(await _db)) {
       return null;
@@ -108,6 +129,27 @@ class UnreadMessageDBService {
 
       return unreadMessageList;
     }
-    return null;
+    return [];
+  }
+
+  /// Load UnreadMessage objects with given pagination.
+  /// Probably not needed due to complex situation(May not in sync with Conversation Group objects)
+  Future<List<UnreadMessage>> getAllUnreadMessagesWithPagination(int page, int size) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
+    // Auto sort by lastModifiedDate, but when showing in chat page, sort these conversations using last unread message's date
+    final finder = Finder(sortOrders: [SortOrder('lastModifiedDate', false)], offset: page * size, limit: size);
+    final recordSnapshots = await _unreadMessageStore.find(await _db, finder: finder);
+    if (!isObjectEmpty(recordSnapshots)) {
+      List<UnreadMessage> unreadMessageList = [];
+      recordSnapshots.forEach((snapshot) {
+        final unreadMessage = UnreadMessage.fromJson(snapshot.value);
+        unreadMessageList.add(unreadMessage);
+      });
+
+      return unreadMessageList;
+    }
+    return [];
   }
 }
