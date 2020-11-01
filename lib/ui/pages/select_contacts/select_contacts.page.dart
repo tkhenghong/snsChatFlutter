@@ -29,6 +29,8 @@ class SelectContactsPage extends StatefulWidget {
 class SelectContactsPageState extends State<SelectContactsPage> {
   bool firstTime = true;
   bool isLoading = true;
+  List<UserContact> userContacts = [];
+  List<Contact> phoneStorageContacts = [];
 
   // contactLoaded is true
   bool contactLoaded = false;
@@ -86,7 +88,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     }
     setConversationType(widget.chatGroupType);
 
-    if(firstTime) {
+    if (firstTime) {
       initialize();
       firstTime = false;
     }
@@ -101,6 +103,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   initialize() {
     userContactBloc.add(GetUserOwnUserContactEvent(callback: (bool done) {}));
+    userContactBloc.add(InitializeUserContactsEvent(callback: (bool done) {}));
   }
 
   Widget appBar() {
@@ -201,6 +204,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         if (userContactState is UserContactsLoaded) {
           if (!userContactState.ownUserContact.isNull) {
             ownUserContact = userContactState.ownUserContact;
+            userContacts = userContactState.userContactList;
             return phoneStorageContactBlocBuilder();
           }
         }
@@ -218,20 +222,10 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         }
 
         if (phoneStorageContactState is PhoneStorageContactsLoaded) {
-          if (!checkboxesLoaded) {
-            setupCheckBoxes(phoneStorageContactState.phoneStorageContactList);
-            checkboxesLoaded = true;
-          }
+          phoneStorageContacts = phoneStorageContactState.phoneStorageContactList;
+          setupCheckBoxes();
 
-          if (phoneStorageContactState.phoneStorageContactList.isEmpty) {
-            return showNoContactPage();
-          } else {
-            // Filter own mobile no.
-            phoneStorageContactState.phoneStorageContactList.removeWhere((element) {
-              return isOwnUserContact(element);
-            });
-            return showSelectContactPageContent(phoneStorageContactState.phoneStorageContactList);
-          }
+          return mainBody();
         }
 
         if (phoneStorageContactState is PhoneStorageContactsNotLoaded) {
@@ -243,15 +237,48 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     );
   }
 
-  Widget showSelectContactPageContent(List<Contact> contacts) {
+  Widget mainBody() {
+    if (phoneStorageContacts.isEmpty) {
+      return showNoContactPage();
+    } else {
+      // Filter own mobile no.
+      phoneStorageContacts.removeWhere((element) {
+        return isOwnUserContact(element);
+      });
+      return showSelectContactPageContent();
+    }
+  }
+
+  Widget showNoContactPage() {
     return SmartRefresher(
       controller: _refreshController,
       enablePullDown: true,
       physics: BouncingScrollPhysics(),
-      onRefresh: () => onRefresh(),
+      onRefresh: onRefresh,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              'No contact in your phone storage. Create a few to start a conversation!',
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget showSelectContactPageContent() {
+    return SmartRefresher(
+      controller: _refreshController,
+      enablePullDown: true,
+      physics: BouncingScrollPhysics(),
+      onRefresh: onRefresh,
       child: ListView(
         controller: scrollController,
-        children: contacts.map((Contact contact) {
+        children: phoneStorageContacts.map((Contact contact) {
           return Container(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -272,7 +299,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       children: <Widget>[
         Text('Reading contacts from storage....'),
         SizedBox(
-          height: 10.0,
+          height: Get.height * 0.05,
         ),
         CircularProgressIndicator(),
       ],
@@ -323,17 +350,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   }
 
   Widget contactCircleAvatar(Contact contact) {
-    return CircleAvatar(
-      backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : AssetImage('lib/ui/images/blank_black.png'),
-      child: contact.avatar.isEmpty
-          ? Text(
-              contact.displayName[0],
-            )
-          : Text(
-              '',
-            ),
-      radius: Get.width * 0.06,
-    );
+    return CircleAvatar(radius: Get.width * 0.06, backgroundImage: contact.avatar.isNotEmpty ? MemoryImage(contact.avatar) : AssetImage('lib/ui/images/blank_black.png'), child: Text(contact.avatar.isEmpty ? contact.displayName[0] : ''));
   }
 
   Widget showErrorPage() {
@@ -351,26 +368,9 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     );
   }
 
-  Widget showNoContactPage() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            'No contact in your phone storage. Create a few to start a conversation!',
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget showNoContactPermissionPage() {
     return Center(
         child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Text(
           'Unable to read contacts from storage. Please grant contact permission first.',
@@ -381,7 +381,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         ),
         RaisedButton(
           onPressed: () => getContacts(),
-          child: Text("Grant Contact Permission"),
+          child: Text('Grant Contact Permission'),
         )
       ],
     ));
@@ -537,10 +537,13 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     return widget.chatGroupType != ConversationGroupType.Personal;
   }
 
-  setupCheckBoxes(List<Contact> contacts) {
-    contacts.forEach((contact) {
-      contactCheckBoxes[contact.displayName] = false;
-    });
+  setupCheckBoxes() {
+    if (!checkboxesLoaded) {
+      phoneStorageContacts.forEach((contact) {
+        contactCheckBoxes[contact.displayName] = false;
+      });
+      checkboxesLoaded = true;
+    }
   }
 
   getContacts() async {
@@ -552,20 +555,20 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   setConversationType(ConversationGroupType chatGroupType) async {
     switch (chatGroupType) {
       case ConversationGroupType.Personal:
-        title = "Create Personal Chat";
-        subtitle = "Select a contact below.";
+        title = 'Create Personal Chat';
+        subtitle = 'Select a contact below.';
         break;
       case ConversationGroupType.Group:
-        title = "Create Group Chat";
-        subtitle = "Select a few contacts below.";
+        title = 'Create Group Chat';
+        subtitle = 'Select a few contacts below.';
         break;
       case ConversationGroupType.Broadcast:
-        title = "Broadcast";
-        subtitle = "Select a few contacts below.";
+        title = 'Broadcast';
+        subtitle = 'Select a few contacts below.';
         break;
       default:
-        title = "Unknown Chat";
-        subtitle = "Error. Please go back and select again.";
+        title = 'Unknown Chat';
+        subtitle = 'Error. Please go back and select again.';
         break;
     }
   }

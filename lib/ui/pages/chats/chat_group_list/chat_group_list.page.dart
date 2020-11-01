@@ -106,7 +106,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         }
 
         if (authenticationState is AuthenticationsLoaded) {
-          refreshUserData();
+          loadConversationGroups();
         }
       },
     );
@@ -286,24 +286,19 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   onRefresh() async {
-    refreshUserData();
+    loadConversationGroups();
     setState(() {
       _refreshController.refreshCompleted();
     });
   }
 
-  initialize() async {
+  initialize() {
     authenticationBloc.add(InitializeAuthenticationsEvent(callback: (bool done) {}));
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     userBloc.add(InitializeUserEvent(callback: (bool done) {}));
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     multimediaProgressBloc.add(InitializeMultimediaProgressEvent(callback: (bool done) {}));
     multimediaBloc.add(InitializeMultimediaEvent(callback: (bool done) {}));
-    userContactBloc.add(InitializeUserContactsEvent(callback: (bool done) {}));
-    refreshUserData();
-  }
-
-  refreshUserData() {
     loadConversationGroups();
   }
 
