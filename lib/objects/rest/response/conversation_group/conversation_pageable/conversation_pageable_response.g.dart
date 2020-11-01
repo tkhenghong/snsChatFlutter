@@ -11,11 +11,12 @@ ConversationPageableResponse _$ConversationPageableResponseFromJson(
   return ConversationPageableResponse(
     conversationGroupResponses: json['conversationGroupResponses'] == null
         ? null
-        : Page.fromJson(
+        : PageInfo.fromJson(
             json['conversationGroupResponses'] as Map<String, dynamic>),
     unreadMessageResponses: json['unreadMessageResponses'] == null
         ? null
-        : Page.fromJson(json['unreadMessageResponses'] as Map<String, dynamic>),
+        : PageInfo.fromJson(
+            json['unreadMessageResponses'] as Map<String, dynamic>),
   );
 }
 
@@ -32,25 +33,25 @@ Map<String, dynamic> _$ConversationPageableResponseToJson(
 
 abstract class _$ConversationPageableResponseLombok {
   /// Field
-  Page conversationGroupResponses;
-  Page unreadMessageResponses;
+  PageInfo conversationGroupResponses;
+  PageInfo unreadMessageResponses;
 
   /// Setter
 
-  void setConversationGroupResponses(Page conversationGroupResponses) {
+  void setConversationGroupResponses(PageInfo conversationGroupResponses) {
     this.conversationGroupResponses = conversationGroupResponses;
   }
 
-  void setUnreadMessageResponses(Page unreadMessageResponses) {
+  void setUnreadMessageResponses(PageInfo unreadMessageResponses) {
     this.unreadMessageResponses = unreadMessageResponses;
   }
 
   /// Getter
-  Page getConversationGroupResponses() {
+  PageInfo getConversationGroupResponses() {
     return conversationGroupResponses;
   }
 
-  Page getUnreadMessageResponses() {
+  PageInfo getUnreadMessageResponses() {
     return unreadMessageResponses;
   }
 }

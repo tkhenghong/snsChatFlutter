@@ -54,7 +54,7 @@ class UserContactAPIService {
 
   /// Get all UserContacts of the signed in user, including yourself with pangination.
   /// Object is Page<UserContact>
-  Future<Page> getUserContactsOfAUser(GetUserOwnUserContactsRequest getUserOwnUserContactsRequest) async {
-    return Page.fromJson(await httpClient.postRequest("$REST_URL/$userContactAPI/user", requestBody: getUserOwnUserContactsRequest));
+  Future<PageInfo> getUserContactsOfAUser(GetUserOwnUserContactsRequest getUserOwnUserContactsRequest) async {
+    return PageInfo.fromJson(await httpClient.postRequest("$REST_URL/$userContactAPI/user", requestBody: getUserOwnUserContactsRequest));
   }
 }

@@ -10,13 +10,18 @@ abstract class ChatMessageEvent extends Equatable {
   const ChatMessageEvent();
 }
 
-class InitializeChatMessagesEvent extends ChatMessageEvent {
+class LoadConversationGroupChatMessagesEvent extends ChatMessageEvent {
+  final String conversationGroupId;
+  final Pageable pageable;
   final Function callback;
 
-  const InitializeChatMessagesEvent({this.callback});
+  const LoadConversationGroupChatMessagesEvent({this.conversationGroupId, this.pageable, this.callback});
 
   @override
-  String toString() => 'InitializeChatMessagesEvent';
+  List<Object> get props => [conversationGroupId, pageable];
+
+  @override
+  String toString() => 'InitializeChatMessagesEvent {conversationGroupId: $conversationGroupId, pageable: $pageable}';
 }
 
 class AddChatMessageEvent extends ChatMessageEvent {

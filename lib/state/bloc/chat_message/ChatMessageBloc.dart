@@ -15,8 +15,8 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
 
   @override
   Stream<ChatMessageState> mapEventToState(ChatMessageEvent event) async* {
-    if (event is InitializeChatMessagesEvent) {
-      yield* _initializeChatMessagesToState(event);
+    if (event is LoadConversationGroupChatMessagesEvent) {
+      yield* _loadConversationGroupChatMessages(event);
     } else if (event is AddChatMessageEvent) {
       yield* _addChatMessage(event);
     } else if (event is DeleteChatMessageEvent) {
@@ -26,22 +26,20 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     }
   }
 
-  Stream<ChatMessageState> _initializeChatMessagesToState(InitializeChatMessagesEvent event) async* {
-    if (state is ChatMessageLoading || state is ChatMessagesNotLoaded) {
-      try {
-        List<ChatMessage> messageListFromDB = await chatMessageDBService.getAllChatMessages();
+  Stream<ChatMessageState> _loadConversationGroupChatMessages(LoadConversationGroupChatMessagesEvent event) async* {
+    Pageable pageable = event.pageable;
+    try {
+      PageInfo chatMessagePageableResponse = await chatMessageAPIService.getChatMessagesOfAConversation(event.conversationGroupId, pageable);
+      List<ChatMessage> chatMessageListFromServer = chatMessagePageableResponse.content.map((chatMessageRaw) => ChatMessage.fromJson(chatMessageRaw)).toList();
 
-        if (messageListFromDB.isEmpty) {
-          functionCallback(event, false);
-          yield ChatMessagesNotLoaded();
-        } else {
-          yield ChatMessagesLoaded(messageListFromDB);
-          functionCallback(event, true);
-        }
-      } catch (e) {
-        functionCallback(event, false);
-        yield ChatMessagesNotLoaded();
-      }
+      chatMessageDBService.addChatMessages(chatMessageListFromServer);
+
+      yield* updateChatMessageLoadedState(updatedChatMessageList: chatMessageListFromServer);
+      functionCallback(event, chatMessagePageableResponse);
+    } catch (e) {
+      List<ChatMessage> messageListFromDB = await chatMessageDBService.getAllChatMessagesWithPagination(event.conversationGroupId, pageable.page, pageable.size);
+      yield* updateChatMessageLoadedState(updatedChatMessageList: messageListFromDB);
+      functionCallback(event, null);
     }
   }
 
@@ -92,6 +90,30 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
 
     if (!deletedInREST || !deleted) {
       functionCallback(event, false);
+    }
+  }
+
+  Stream<ChatMessageState> updateChatMessageLoadedState({List<ChatMessage> updatedChatMessageList, ChatMessage updateChatMessage}) async* {
+    if (state is ChatMessagesLoaded) {
+      List<ChatMessage> existingChatMessageList = (state as ChatMessagesLoaded).chatMessageList;
+
+      if (!isObjectEmpty(updatedChatMessageList)) {
+        updatedChatMessageList.forEach((updatedChatMessage) {
+          existingChatMessageList.removeWhere((existingChatMessage) => existingChatMessage.id == updatedChatMessage.id);
+        });
+
+        existingChatMessageList.addAll(updatedChatMessageList);
+      }
+
+      if (isObjectEmpty(updateChatMessage)) {
+        existingChatMessageList.removeWhere((existingChatMessage) => existingChatMessage.id == updateChatMessage.id);
+        existingChatMessageList.add(updateChatMessage);
+      }
+
+      yield ChatMessageLoading();
+      yield ChatMessagesLoaded(existingChatMessageList);
+    } else {
+      yield ChatMessagesLoaded(updatedChatMessageList);
     }
   }
 

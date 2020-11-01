@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,7 +10,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
+import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
@@ -32,13 +33,19 @@ class ChatRoomPage extends StatefulWidget {
 
 class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   String REST_URL = globals.REST_URL;
+  int page = 0;
+  int size = globals.numberOfRecords;
+  int totalRecords = 0;
+  bool last = false;
 
   ConversationGroupBloc conversationGroupBloc;
   ChatMessageBloc chatMessageBloc;
   MultimediaBloc multimediaBloc;
   UserContactBloc userContactBloc;
+  UserBloc userBloc;
   WebSocketBloc webSocketBloc;
 
+  bool firstTime = true;
   bool isWebSocketConnected = false;
   User ownUser;
   ConversationGroup currentConversationGroup;
@@ -81,6 +88,10 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   FocusNode focusNode = new FocusNode();
   AnimationController _animationController, _animationController2;
   Animation animation;
+  RefreshController _refreshController;
+  ScrollController _scrollController;
+
+  double tabHeight = Get.height * 0.3;
 
   @override
   void initState() {
@@ -89,6 +100,8 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     listScrollController = new ScrollController();
     imageViewScrollController = new ScrollController();
     fileViewScrollController = new ScrollController();
+    _refreshController = new RefreshController();
+    _scrollController = new ScrollController();
 
     focusNode.addListener(onFocusChange);
 
@@ -108,6 +121,8 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     listScrollController.dispose();
     imageViewScrollController.dispose();
     fileViewScrollController.dispose();
+    _refreshController.dispose();
+    _scrollController.dispose();
 
     _animationController.dispose();
     _animationController2.dispose();
@@ -120,10 +135,58 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     chatMessageBloc = BlocProvider.of<ChatMessageBloc>(context);
     multimediaBloc = BlocProvider.of<MultimediaBloc>(context);
     userContactBloc = BlocProvider.of<UserContactBloc>(context);
+    userBloc = BlocProvider.of<UserBloc>(context);
 
-    // TODO: GetCurrentConversationGroup messages using pagination, get multimedia from localDB first, if not get from REST.
+    if (firstTime) {
+      initialize();
+      firstTime = false;
+    }
 
-    return multiBlocListener();
+    return SafeArea(child: Material(color: Colors.white,child: multiBlocListener()));
+  }
+
+  initialize() {
+    userBloc.add(GetOwnUserEvent(callback: (User user) {}));
+
+    Pageable pageable = Pageable(sort: Sort(orders: [Order(direction: Direction.DESC, property: 'lastModifiedDate')]), page: page, size: size);
+    chatMessageBloc.add(LoadConversationGroupChatMessagesEvent(
+        conversationGroupId: widget.conversationGroupId,
+        pageable: pageable,
+        callback: (PageInfo chatMessagePageableResponse) {
+          if (!isObjectEmpty(chatMessagePageableResponse)) {
+            checkPagination(chatMessagePageableResponse);
+
+            List<ChatMessage> chatMessageListFromServer = chatMessagePageableResponse.content.map((chatMessageRaw) => ChatMessage.fromJson(chatMessageRaw)).toList();
+            multimediaBloc.add(GetMessagesMultimediaEvent(chatMessageList: chatMessageListFromServer, callback: (bool done) {})); // multimediaIds
+          }
+
+          if (_refreshController.isRefresh) {
+            if (!isObjectEmpty(chatMessagePageableResponse)) {
+              _refreshController.refreshCompleted();
+            } else {
+              _refreshController.refreshFailed();
+            }
+          }
+
+          if (_refreshController.isLoading) {
+            // NOTE: Use onLoading when scrolling down, NOT onRefresh().
+            if (!isObjectEmpty(chatMessagePageableResponse)) {
+              _refreshController.loadComplete();
+            } else {
+              _refreshController.loadFailed();
+            }
+          }
+        }));
+  }
+
+  checkPagination(PageInfo chatMessagePageableResponse) {
+    last = chatMessagePageableResponse.last;
+    if (!last) {
+      // Prepare to go to next page.
+      page++;
+    } else {
+      showToast('End of chat messages.', Toast.LENGTH_SHORT);
+    }
   }
 
   Widget multiBlocListener() => MultiBlocListener(listeners: [
@@ -145,9 +208,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     return BlocBuilder<UserBloc, UserState>(
       builder: (context, userState) {
         if (userState is UserLoading) {
-          return Center(
-            child: Text('Loading...'),
-          );
+          return showLoading();
         }
 
         if (userState is UserNotLoaded) {
@@ -162,9 +223,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
           return conversationGroupBlocBuilder();
         }
 
-        return Center(
-          child: Text('Error. Unable to load user'),
-        );
+        return showError('user');
       },
     );
   }
@@ -175,10 +234,31 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         if (conversationGroupState is ConversationGroupsLoaded) {
           currentConversationGroup = conversationGroupState.conversationGroupList.firstWhere((ConversationGroup conversationGroup) => conversationGroup.id == widget.conversationGroupId, orElse: () => null);
 
+          return chatMessageBlocBuilder();
+        }
+
+        return showError('conversation group');
+      },
+    );
+  }
+
+  Widget chatMessageBlocBuilder() {
+    return BlocBuilder<ChatMessageBloc, ChatMessageState>(
+      builder: (context, chatMessageState) {
+        if (chatMessageState is ChatMessageLoading) {
+          return showLoading();
+        }
+
+        if (chatMessageState is ChatMessagesLoaded) {
+          // Get current conversation messages and sort them.
+          conversationGroupMessageList = chatMessageState.chatMessageList.where((ChatMessage message) => message.conversationId == widget.conversationGroupId).toList();
+
+          conversationGroupMessageList.sort((message1, message2) => message2.createdDate.compareTo(message1.createdDate));
+
           return multimediaBlocBuilder();
         }
 
-        return showSingleMessagePage('Conversation group not found.');
+        return showError('chat messages');
       },
     );
   }
@@ -190,6 +270,23 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
           groupPhotoMultimedia = multimediaState.multimediaList.firstWhere((Multimedia existingMultimedia) => existingMultimedia.id == currentConversationGroup.groupPhoto, orElse: () => null);
         }
 
+        return webSocketBlocBuilder();
+      },
+    );
+  }
+
+  Widget webSocketBlocBuilder() {
+    return BlocBuilder<WebSocketBloc, WebSocketState>(
+      builder: (context, webSocketState) {
+        if (webSocketState is WebSocketNotLoaded) {
+          webSocketBloc.add(ReconnectWebSocketEvent(callback: (bool done) {}));
+          isWebSocketConnected = false;
+        }
+
+        if (webSocketState is WebSocketLoaded) {
+          isWebSocketConnected = true;
+        }
+
         return mainBody();
       },
     );
@@ -199,39 +296,63 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          titleSpacing: 0.0,
-          title: chatRoomPageTopBar(),
-        ),
+        appBar: appBar(),
         body: WillPopScope(
           // To handle event when user press back button when sticker screen is on, dismiss sticker if keyboard is shown
           child: Stack(
             children: <Widget>[
               Column(
                 children: <Widget>[
-                  //UI for message list
-                  buildListMessage(),
+                  // UI for message list
+                  chatMessageList(),
                   // UI for stickers, gifs
                   (isShowSticker ? buildSticker() : Container()),
                   // UI for text field
                   buildInput(),
                 ],
               ),
-              showLoading(),
             ],
           ),
-          onWillPop: () => onBackPress(),
+          onWillPop: onBackPress,
         ),
       ),
     );
   }
 
-  Widget chatRoomPageTopBar() {
+  Widget appBar() {
     return AppBar(
+      automaticallyImplyLeading: false,
+      titleSpacing: 0.0,
       leading: backButtonWithImage(),
       title: conversationGroupTitle(),
     );
+  }
+
+  Widget conversationGroupTitle() {
+    return InkWell(
+        customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+        onTap: goToChatInfoPage(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              // padding: EdgeInsets.only(top: 10.0, right: 250.0),
+              padding: EdgeInsets.only(top: Get.height * 0.05),
+            ),
+            Hero(
+              tag: currentConversationGroup.id,
+              child: Text(
+                currentConversationGroup.name,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            Text(
+              'Tap here for more details',
+              style: TextStyle(fontSize: 13.0, color: Get.theme.primaryTextTheme.button.color),
+            )
+          ],
+        ));
   }
 
   Widget backButtonWithImage() {
@@ -267,111 +388,20 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     );
   }
 
-  Widget conversationGroupTitle() {
-    return InkWell(
-        customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-        onTap: () {
-          goToChatInfoPage();
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(top: 10.0, right: 250.0),
-            ),
-            Hero(
-              tag: currentConversationGroup.id,
-              child: Text(
-                currentConversationGroup.name,
-                style: TextStyle(fontWeight: FontWeight.bold, color: Get.theme.primaryTextTheme.button.color),
-              ),
-            ),
-            Text(
-              'Tap here for more details',
-              style: TextStyle(fontSize: 13.0, color: Get.theme.primaryTextTheme.button.color),
-            )
-          ],
-        ));
-  }
-
-  Widget showLoading() {
-    return Center(
-      child: Text('Loading...'),
-    );
-  }
-
   Widget buildInput() {
     return Container(
+      width: double.infinity,
+      // height: fileList.length > 0 ? deviceHeight * 0.2 : deviceHeight * 0.1,
       child: Column(
         children: <Widget>[
-          buildImageListTab(),
-          buildFileListTab(),
-          buildMultimediaTab(),
+          imageListTab(),
+          fileListTab(),
+          uploadTab(),
           Row(
-            children: <Widget>[
-              // Send image button
-              Material(
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 1.0),
-                  child: IconButton(
-                    icon: Icon(Icons.attach_file),
-                    onPressed: () {
-                      setState(() {
-                        openMultimediaTab = !openMultimediaTab;
-                        if (openMultimediaTab) {
-                          _animationController2.forward();
-                        } else {
-                          _animationController2.reverse();
-                        }
-                      });
-                    },
-                  ),
-                ),
-                // color: Colors.white,
-              ),
-
-              // Stickers button
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 1.0),
-                child: IconButton(
-                  icon: Icon(Icons.face),
-                  onPressed: () => getSticker(),
-                ),
-                // color: Colors.white,
-              ),
-
-              // Edit text field
-              Flexible(
-                child: Container(
-                  child: TextField(
-                    enabled: !isRecording,
-                    style: TextStyle(fontSize: 17.0),
-                    controller: textEditingController,
-                    decoration: InputDecoration.collapsed(
-                      hintText: inputFieldText,
-                      // hintStyle: TextStyle(color: Colors.grey),
-                    ),
-                    focusNode: focusNode,
-                    onChanged: checkTextOnField,
-                  ),
-                ),
-              ),
-
-              // Send message button
-              Material(
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: !textFieldHasValue ? recordVoiceMessageButton() : textSendButton(),
-                ),
-                // color: Colors.white,
-              ),
-            ],
+            children: <Widget>[sendImageButton(), stickersButton(), textInput(), sendMessageButton()],
           )
         ],
       ),
-      width: double.infinity,
-//      height: fileList.length > 0 ? deviceHeight * 0.2 : deviceHeight * 0.1,
       decoration: BoxDecoration(
         border: Border(
             top: BorderSide(
@@ -379,6 +409,67 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                 width: 0.5)),
         // color: Colors.white
       ),
+    );
+  }
+
+  Widget sendImageButton() {
+    return Material(
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: Get.width * 0.01),
+        child: IconButton(
+          icon: Icon(Icons.attach_file),
+          onPressed: () {
+            setState(() {
+              openMultimediaTab = !openMultimediaTab;
+              if (openMultimediaTab) {
+                _animationController2.forward();
+              } else {
+                _animationController2.reverse();
+              }
+            });
+          },
+        ),
+      ),
+      // color: Colors.white,
+    );
+  }
+
+  Widget stickersButton() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: Get.width * 0.01),
+      child: IconButton(
+        icon: Icon(Icons.face),
+        onPressed: getSticker,
+      ),
+      // color: Colors.white,
+    );
+  }
+
+  Widget textInput() {
+    return Flexible(
+      child: Container(
+        child: TextField(
+          enabled: !isRecording,
+          style: TextStyle(fontSize: 17.0),
+          controller: textEditingController,
+          decoration: InputDecoration.collapsed(
+            hintText: inputFieldText,
+            // hintStyle: TextStyle(color: Colors.grey),
+          ),
+          focusNode: focusNode,
+          onChanged: validateInput,
+        ),
+      ),
+    );
+  }
+
+  Widget sendMessageButton() {
+    return Material(
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: Get.width * 0.05),
+        child: !textFieldHasValue ? recordVoiceMessageButton() : textSendButton(),
+      ),
+      // color: Colors.white,
     );
   }
 
@@ -399,20 +490,20 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     );
   }
 
-  checkTextOnField(String text) {
+  validateInput(String text) {
     setState(() {
       textFieldHasValue = textEditingController.text.isNotEmpty;
     });
   }
 
-  Widget buildImageListTab() {
-    return // Use Visibility to control to show widget easily. https://stackoverflow.com/questions/44489804/show-hide-widgets-in-flutter-programmatically
-        Visibility(
+  Widget imageListTab() {
+    // Use Visibility to control to show widget easily. https://stackoverflow.com/questions/44489804/show-hide-widgets-in-flutter-programmatically
+    return Visibility(
       visible: imageFileList.isNotEmpty,
       child: Row(
         children: <Widget>[
           Container(
-            height: 150,
+            height: tabHeight,
             width: Get.width,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
@@ -434,8 +525,8 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                       alignment: Alignment.topRight,
                       child: Container(
                         padding: EdgeInsets.only(
-                          right: 5.0,
-                          top: 5.0,
+                          right: Get.width * 0.01,
+                          top: Get.height * 0.01,
                         ),
                         child: InkWell(
                           onTap: () => removeImageFile(currentFile),
@@ -462,14 +553,14 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     );
   }
 
-  Widget buildFileListTab() {
+  Widget fileListTab() {
     return // Use Visibility to control to show widget easily. https://stackoverflow.com/questions/44489804/show-hide-widgets-in-flutter-programmatically
         Visibility(
       visible: documentFileList.isNotEmpty,
       child: Row(
         children: <Widget>[
           Container(
-            height: 150,
+            height: tabHeight,
             width: Get.width,
             child: ListView.builder(
               controller: fileViewScrollController,
@@ -491,8 +582,8 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                       alignment: Alignment.topRight,
                       child: Container(
                         padding: EdgeInsets.only(
-                          right: 5.0,
-                          top: 5.0,
+                          right: Get.width * 0.01,
+                          top: Get.height * 0.01,
                         ),
                         child: InkWell(
                           onTap: () => removeFile(currentFile),
@@ -519,7 +610,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     );
   }
 
-  Widget buildMultimediaTab() {
+  Widget uploadTab() {
     return Material(
       child: Visibility(
           visible: openMultimediaTab,
@@ -528,7 +619,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
             child: Row(
               children: <Widget>[
                 Container(
-                    height: Get.height * 0.3,
+                    height: tabHeight,
                     width: Get.width,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -586,69 +677,16 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     });
   }
 
-  Widget buildListMessage() {
-    return BlocBuilder<WebSocketBloc, WebSocketState>(
-      builder: (context, webSocketState) {
-        if (webSocketState is WebSocketNotLoaded) {
-          BlocProvider.of<WebSocketBloc>(context).add(ReconnectWebSocketEvent(callback: (bool done) {}));
-        }
+  Widget chatMessageList() {
+    if (isObjectEmpty(conversationGroupMessageList) || conversationGroupMessageList.isEmpty) {}
 
-        if (webSocketState is WebSocketLoaded) {
-          isWebSocketConnected = true;
-          return loadMessageList();
-        }
-
-        isWebSocketConnected = false;
-        return loadMessageList();
-      },
-    );
-  }
-
-  Widget loadMessageList() {
-    return BlocBuilder<ChatMessageBloc, ChatMessageState>(
-      builder: (context, chatMessageState) {
-        if (chatMessageState is ChatMessageLoading) {
-          return showSingleMessagePage('Loading...');
-        }
-
-        if (chatMessageState is ChatMessagesLoaded) {
-          // Get current conversation messages and sort them.
-          conversationGroupMessageList = chatMessageState.chatMessageList.where((ChatMessage message) => message.conversationId == widget.conversationGroupId).toList();
-
-          conversationGroupMessageList.sort((message1, message2) => message2.createdDate.compareTo(message1.createdDate));
-
-          return Flexible(
-            child: ListView.builder(
-              controller: listScrollController,
-              itemCount: conversationGroupMessageList.length,
-              reverse: true,
-              physics: BouncingScrollPhysics(),
-              itemBuilder: (context, index) => displayChatMessage(conversationGroupMessageList[index]),
-            ),
-          );
-        }
-
-        return showSingleMessagePage('No messages.');
-      },
-    );
-  }
-
-  Widget showSingleMessagePage(String message) {
-    return Material(
-      // color: Colors.white,
-      child: Flexible(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                message,
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
+    return Flexible(
+      child: ListView.builder(
+        controller: listScrollController,
+        itemCount: conversationGroupMessageList.length,
+        reverse: true,
+        physics: BouncingScrollPhysics(),
+        itemBuilder: (context, index) => displayChatMessage(conversationGroupMessageList[index]),
       ),
     );
   }
@@ -761,17 +799,14 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   Widget buildMessageChatBubble(ChatMessage message, bool isSenderMessage, Widget content) {
-    double lrPadding = 15.0;
-    double tbPadding = 10.0;
-
     return Row(
       crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
       mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: <Widget>[
         Container(
-          padding: EdgeInsets.fromLTRB(lrPadding, tbPadding, lrPadding, tbPadding),
+          padding: EdgeInsets.symmetric(horizontal: Get.width * 0.1, vertical: Get.height * 0.05),
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(32.0)),
-          margin: EdgeInsets.only(bottom: 20.0, right: isSenderMessage ? Get.width * 0.01 : 0.0, left: isSenderMessage ? Get.width * 0.01 : 0.0),
+          margin: EdgeInsets.only(bottom: Get.height * 0.01, right: isSenderMessage ? Get.width * 0.01 : 0.0, left: isSenderMessage ? Get.width * 0.01 : 0.0),
           child: Row(
             children: <Widget>[
               Column(
@@ -841,6 +876,31 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     DateTime messageTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
     String formattedDate3 = DateFormat('hh:mm').format(messageTime);
     return formattedDate3;
+  }
+
+  Widget showLoading() {
+    return Center(
+      child: Text('Loading...'),
+    );
+  }
+
+  Widget showError(String module) {
+    return Material(
+      // color: Colors.white,
+      child: Flexible(
+        child: Center(
+          child: Column(
+            children: <Widget>[
+              Text(
+                'Error in $module, please try again later.',
+                textAlign: TextAlign.center,
+              ),
+              RaisedButton(child: Text('Go back'), onPressed: goBack)
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget buildSticker() {
@@ -969,8 +1029,8 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   Future<bool> recordingIsTooShort() async {
     // int recordDuration = this.audioService.durationsInMilliseconds;
-    print('chat_room.page.dart minimumRecordingLength: ' + minimumRecordingLength.toString());
-    // print('chat_room.page.dart recordDuration: ' + recordDuration.toString());
+    print('chat_room.page_info.dart minimumRecordingLength: ' + minimumRecordingLength.toString());
+    // print('chat_room.page_info.dart recordDuration: ' + recordDuration.toString());
     // return recordDuration < minimumRecordingLength;
     return false;
   }
@@ -1030,18 +1090,12 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   openImageMessage(ChatMessage chatMessage, Multimedia chatMessageMultimedia) {
     if (!customFileService.baseDirectoryIsReady) {
       showToast('Error in getting message image. Please check check file permission of your app.', Toast.LENGTH_LONG);
-    } else {}
+    }
+
     File chatMessageFile = File('${customFileService.baseDirectory}${chatMessageMultimedia.multimediaType.name}/${chatMessageMultimedia.fileName + chatMessageMultimedia.fileExtension}');
 
     if (chatMessageFile.existsSync()) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: ((context) => PhotoViewPage(
-                    heroId: chatMessageMultimedia.fileName,
-                    photo: chatMessageFile,
-                    defaultImagePathType: DefaultImagePathType.ConversationGroupMessage,
-                  ))));
+      goToViewPhotoPage(chatMessageMultimedia, chatMessageFile);
     } else {
       showToast('Please download the file first.', Toast.LENGTH_LONG);
     }
@@ -1102,6 +1156,17 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         openMultimediaTab = false;
       });
     }
+  }
+
+  goToViewPhotoPage(Multimedia multimedia, File file) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: ((context) => PhotoViewPage(
+                  heroId: multimedia.fileName,
+                  photo: file,
+                  defaultImagePathType: DefaultImagePathType.ConversationGroupMessage,
+                ))));
   }
 
   goToLoginPage() {

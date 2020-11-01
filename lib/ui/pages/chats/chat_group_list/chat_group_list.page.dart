@@ -299,6 +299,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     multimediaProgressBloc.add(InitializeMultimediaProgressEvent(callback: (bool done) {}));
     multimediaBloc.add(InitializeMultimediaEvent(callback: (bool done) {}));
+    userBloc.add(GetOwnUserEvent(callback: (User user) {}));
     loadConversationGroups();
   }
 

@@ -2,12 +2,12 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:lombok/lombok.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 
-part 'page.g.dart';
+part 'page_info.g.dart';
 
 /// Based on Page object's implementation of Spring Boot.
 @data
 @JsonSerializable()
-class Page {
+class PageInfo {
 
   @JsonKey(name: 'content')
   List<dynamic> content;
@@ -39,9 +39,9 @@ class Page {
   @JsonKey(name: 'empty')
   bool empty;
 
-  Page({this.totalElements, this.totalPages, this.last, this.size, this.number, this.numberOfElements, this.first, this.empty, this.content, this.pageable});
+  PageInfo({this.totalElements, this.totalPages, this.last, this.size, this.number, this.numberOfElements, this.first, this.empty, this.content, this.pageable});
 
-  factory Page.fromJson(Map<String, dynamic> json) => _$PageFromJson(json);
+  factory PageInfo.fromJson(Map<String, dynamic> json) => _$PageInfoFromJson(json);
 
-  Map<String, dynamic> toJson() => _$PageToJson(this);
+  Map<String, dynamic> toJson() => _$PageInfoToJson(this);
 }

@@ -130,7 +130,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       yield* yieldUserContactState(updatedUserContactList: existingUserContacts);
 
       // TODO: Get the list from backend with pagination.
-      Page userContactPageResponse = await userContactAPIService.getUserContactsOfAUser(event.getUserOwnUserContactsRequest);
+      PageInfo userContactPageResponse = await userContactAPIService.getUserContactsOfAUser(event.getUserOwnUserContactsRequest);
 
       List<UserContact> userContacts = userContactPageResponse.content.map((userContactRaw) => UserContact.fromJson(userContactRaw)).toList();
 

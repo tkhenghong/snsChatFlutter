@@ -1,13 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'page.dart';
+part of 'page_info.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-Page _$PageFromJson(Map<String, dynamic> json) {
-  return Page(
+PageInfo _$PageInfoFromJson(Map<String, dynamic> json) {
+  return PageInfo(
     totalElements: json['totalElements'] as int,
     totalPages: json['totalPages'] as int,
     last: json['last'] as bool,
@@ -23,7 +23,7 @@ Page _$PageFromJson(Map<String, dynamic> json) {
   );
 }
 
-Map<String, dynamic> _$PageToJson(Page instance) => <String, dynamic>{
+Map<String, dynamic> _$PageInfoToJson(PageInfo instance) => <String, dynamic>{
       'content': instance.content,
       'pageable': instance.pageable,
       'totalElements': instance.totalElements,
@@ -40,7 +40,7 @@ Map<String, dynamic> _$PageToJson(Page instance) => <String, dynamic>{
 // DataGenerator
 // **************************************************************************
 
-abstract class _$PageLombok {
+abstract class _$PageInfoLombok {
   /// Field
   List content;
   Pageable pageable;

@@ -16,7 +16,7 @@ export 'pagination/order/order.dart';
 export 'pagination/sort/sort.dart';
 export 'pagination/direction/direction.dart';
 export 'pagination/null_handling/null_handling.dart';
-export 'pagination/page/page.dart';
+export 'pagination/page_info/page_info.dart';
 export 'auditable/auditable.dart';
 export 'conversation_group_block/conversation_group_block.dart';
 export 'conversation_group_invite/conversation_group_invite.dart';

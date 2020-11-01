@@ -11,7 +11,7 @@ class ChatMessageDBService {
 
   Future<Database> get _db async => await SembastDB.instance.database;
 
-  //CRUD
+  /// Add single chat message.
   Future<bool> addChatMessage(ChatMessage chatMessage) async {
     if (isObjectEmpty(await _db)) {
       return false;
@@ -24,6 +24,26 @@ class ChatMessageDBService {
       return key != null && key != 0 && key.toString().isNotEmpty;
     } else {
       return await editChatMessage(chatMessage);
+    }
+  }
+
+  Future<bool> addChatMessages(List<ChatMessage> chatMessages) async {
+    Database database = await _db;
+    if (isObjectEmpty(database)) {
+      return false;
+    }
+
+    try {
+      await database.transaction((transaction) async {
+        for (int i = 0; i < chatMessages.length; i++) {
+          ChatMessage existingChatMessage = await getSingleChatMessage(chatMessages[i].id);
+          isObjectEmpty(existingChatMessage) ? await _chatMessageStore.add(database, chatMessages[i].toJson()) : editChatMessage(chatMessages[i]);
+        }
+      });
+      return true;
+    } catch (e) {
+      // Error happened in database transaction.
+      return false;
     }
   }
 
@@ -100,5 +120,25 @@ class ChatMessageDBService {
       return chatMessageList;
     }
     return null;
+  }
+
+  Future<List<ChatMessage>> getAllChatMessagesWithPagination(String conversationGroupId, int page, int size) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
+    // Auto sort by lastModifiedDate, but when showing in chat page, sort these conversations using last unread message's date
+    final finder = Finder(sortOrders: [SortOrder('lastModifiedDate', false)], filter: Filter.equals('conversationGroupId', conversationGroupId), offset: page * size, limit: size);
+    // Find all Conversation Groups
+    final recordSnapshots = await _chatMessageStore.find(await _db, finder: finder);
+    if (!isObjectEmpty(recordSnapshots)) {
+      List<ChatMessage> chatMessageList = [];
+      recordSnapshots.forEach((snapshot) {
+        final conversationGroup = ChatMessage.fromJson(snapshot.value);
+        chatMessageList.add(conversationGroup);
+      });
+
+      return chatMessageList;
+    }
+    return [];
   }
 }

@@ -38,8 +38,8 @@ class ChatMessageAPIService {
     return ChatMessage.fromJson(await httpClient.getRequest("$REST_URL/$messageAPI/$messageId"));
   }
 
-  Future<List<ChatMessage>> getChatMessagesOfAConversation(String conversationId, Pageable pageRequest) async {
-    List<dynamic> chatMessageListRaw = await httpClient.postRequest("$REST_URL/$messageAPI/conversation/$conversationId", requestBody: pageRequest);
-    return chatMessageListRaw.map((e) => ChatMessage.fromJson(e)).toList();
+  /// Returns ChatMessage object in it's contents.
+  Future<PageInfo> getChatMessagesOfAConversation(String conversationId, Pageable pageRequest) async {
+    return PageInfo.fromJson(await httpClient.postRequest("$REST_URL/$messageAPI/conversation/$conversationId", requestBody: pageRequest));
   }
 }

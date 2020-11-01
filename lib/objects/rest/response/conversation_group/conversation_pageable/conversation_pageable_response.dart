@@ -8,10 +8,10 @@ part 'conversation_pageable_response.g.dart';
 @JsonSerializable()
 class ConversationPageableResponse {
   @JsonKey(name: 'conversationGroupResponses')
-  Page conversationGroupResponses;
+  PageInfo conversationGroupResponses;
 
   @JsonKey(name: 'unreadMessageResponses')
-  Page unreadMessageResponses;
+  PageInfo unreadMessageResponses;
 
   ConversationPageableResponse({this.conversationGroupResponses, this.unreadMessageResponses});
 
