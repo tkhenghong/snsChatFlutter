@@ -134,6 +134,7 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
                 ),
                 child: Tooltip(
                   message: conversationGroupTypeLabels[index],
+                  preferBelow: false,
                   child: FloatingActionButton(
                     heroTag: null,
                     mini: true,

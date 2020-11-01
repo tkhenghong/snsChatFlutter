@@ -158,26 +158,10 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         }
 
         if (authenticationState is AuthenticationsLoaded) {
-          return userBlocBuilder();
-        }
-
-        return showError('authentications');
-      },
-    );
-  }
-
-  Widget userBlocBuilder() {
-    return BlocBuilder<UserBloc, UserState>(
-      builder: (context, userState) {
-        if (userState is UserLoading) {
-          return showLoading('user');
-        }
-
-        if (userState is UserLoaded) {
           return conversationGroupBlocBuilder();
         }
 
-        return showError('user');
+        return showError('authentications');
       },
     );
   }
@@ -234,21 +218,31 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   Widget mainBody() {
+    if ((isObjectEmpty(conversationGroups) || conversationGroups.isEmpty)) {
+      return SmartRefresher(
+        controller: _refreshController,
+        onRefresh: onRefresh,
+        enablePullDown: true,
+        physics: BouncingScrollPhysics(),
+        header: ClassicHeader(),
+        child: Center(child: Text('No conversations. Tap \'+\' to create one!')),
+      );
+    }
+
     return SmartRefresher(
       controller: _refreshController,
-      onRefresh: onRefresh,
-      enablePullDown: true,
+      onLoading: onRefresh,
+      enablePullUp: true,
+      enablePullDown: false,
       physics: BouncingScrollPhysics(),
       header: ClassicHeader(),
-      child: (conversationGroups.isNullOrBlank || conversationGroups.isEmpty)
-          ? Center(child: Text('No conversations. Tap \'+\' to create one!'))
-          : ListView.builder(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: conversationGroups.length,
-              itemBuilder: (context, index) {
-                return mapConversationToPageListTile(conversationGroups[index]);
-              }),
+      child: ListView.builder(
+          scrollDirection: Axis.vertical,
+          shrinkWrap: true,
+          itemCount: conversationGroups.length,
+          itemBuilder: (context, index) {
+            return mapConversationToPageListTile(conversationGroups[index]);
+          }),
     );
   }
 
@@ -304,38 +298,50 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     userBloc.add(InitializeUserEvent(callback: (bool done) {}));
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     multimediaProgressBloc.add(InitializeMultimediaProgressEvent(callback: (bool done) {}));
-    conversationGroupBloc.add(LoadConversationGroupsEvent(callback: (bool done) {}));
-    chatMessageBloc.add(InitializeChatMessagesEvent(callback: (bool done) {}));
     multimediaBloc.add(InitializeMultimediaEvent(callback: (bool done) {}));
-    unreadMessageBloc.add(LoadUnreadMessagesEvent(callback: (bool done) {}));
     userContactBloc.add(InitializeUserContactsEvent(callback: (bool done) {}));
     refreshUserData();
   }
 
   refreshUserData() {
-    userBloc.add(GetOwnUserEvent(callback: (User user) {}));
-    settingsBloc.add(GetUserOwnSettingsEvent(callback: (Settings settings) {}));
+    loadConversationGroups();
+  }
+
+  /// Run conversation groups with pagination.
+  loadConversationGroups() {
+    unreadMessageBloc.add(LoadUnreadMessagesEvent(callback: (bool done) {}));
     GetConversationGroupsRequest getConversationGroupsRequest = GetConversationGroupsRequest(pageable: Pageable(sort: Sort(orders: [Order(direction: Direction.DESC, property: 'lastModifiedDate')]), page: page, size: size));
     conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(
         getConversationGroupsRequest: getConversationGroupsRequest,
         callback: (ConversationPageableResponse conversationPageableResponse) {
           if (!isObjectEmpty(conversationPageableResponse)) {
             totalRecords = conversationPageableResponse.conversationGroupResponses.totalElements;
-            checkLastPage(conversationPageableResponse);
+            checkPagination(conversationPageableResponse);
 
             List<UnreadMessage> unreadMessageList = conversationPageableResponse.unreadMessageResponses.content.map((e) => UnreadMessage.fromJson(e)).toList();
             unreadMessageBloc.add(UpdateUnreadMessagesEvent(unreadMessages: unreadMessageList, callback: (bool done) {}));
           }
+
+          if (_refreshController.isRefresh) {
+            if (!isObjectEmpty(conversationPageableResponse)) {
+              _refreshController.refreshCompleted();
+            } else {
+              _refreshController.refreshFailed();
+            }
+          }
+
+          if (_refreshController.isLoading) {
+            // NOTE: Use onLoading when scrolling down, NOT onRefresh().
+            if (!isObjectEmpty(conversationPageableResponse)) {
+              _refreshController.loadComplete();
+            } else {
+              _refreshController.loadFailed();
+            }
+          }
         }));
-    multimediaBloc.add(GetUserOwnProfilePictureMultimediaEvent(callback: (bool done) {}));
-    userContactBloc.add(GetUserOwnUserContactEvent(callback: (bool done) {
-      if (done) {
-        userContactBloc.add(GetUserOwnUserContactsEvent(callback: (bool done) {}));
-      }
-    }));
   }
 
-  checkLastPage(ConversationPageableResponse conversationPageableResponse) {
+  checkPagination(ConversationPageableResponse conversationPageableResponse) {
     last = conversationPageableResponse.conversationGroupResponses.last;
     if (!last) {
       // Prepare to go to next page.

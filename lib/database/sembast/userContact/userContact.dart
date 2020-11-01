@@ -11,18 +11,22 @@ class UserContactDBService {
 
   Future<Database> get _db async => await SembastDB.instance.database;
 
-  //CRUD
+  /// Add single user contact.
   Future<bool> addUserContact(UserContact userContact) async {
     if (isObjectEmpty(await _db)) {
       return false;
     }
 
     UserContact existingUserContact = await getSingleUserContact(userContact.id);
-    int key = isObjectEmpty(existingUserContact) ? await _userContactStore.add(await _db, userContact.toJson()) : editUserContact(userContact);
-
-    return key != null && key != 0 && key.toString().isNotEmpty;
+    if (isObjectEmpty(existingUserContact)) {
+      int key = await _userContactStore.add(await _db, userContact.toJson());
+      return key != null && key != 0 && key.toString().isNotEmpty;
+    } else {
+      return await editUserContact(userContact);
+    }
   }
 
+  /// Add user contact in batch, with transaction safety.
   Future<void> addUserContacts(List<UserContact> userContacts) async {
     Database database = await _db;
     if (isObjectEmpty(database)) {

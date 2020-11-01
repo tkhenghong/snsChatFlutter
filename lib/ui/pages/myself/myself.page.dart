@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
@@ -17,6 +18,8 @@ class MyselfPage extends StatefulWidget {
 
 class MyselfPageState extends State<MyselfPage> {
   String REST_URL = globals.REST_URL;
+
+  RefreshController _refreshController;
 
   static IPGeoLocationBloc ipGeoLocationBloc;
   static AuthenticationBloc authenticationBloc;
@@ -38,14 +41,18 @@ class MyselfPageState extends State<MyselfPage> {
   List<ListTile> buttons;
   int settingListOriginalLength = 0;
 
+  bool firstTime = true;
+
   @override
   void dispose() {
     super.dispose();
+    _refreshController.dispose();
   }
 
   @override
   void initState() {
     super.initState();
+    _refreshController = RefreshController();
     loadButtons();
   }
 
@@ -101,6 +108,11 @@ class MyselfPageState extends State<MyselfPage> {
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
     googleInfoBloc = BlocProvider.of<GoogleInfoBloc>(context);
 
+    if (firstTime) {
+      initialize();
+      firstTime = false;
+    }
+
     return SafeArea(child: userBlocBuilder());
   }
 
@@ -122,14 +134,12 @@ class MyselfPageState extends State<MyselfPage> {
     return BlocBuilder<UserContactBloc, UserContactState>(
       builder: (context, userContactState) {
         if (userContactState is UserContactsLoaded) {
-          List<UserContact> userContactList = userContactState.userContactList;
-
-          ownUserContact = userContactList.firstWhere((UserContact existingUserContact) => ownUser.id == existingUserContact.userId, orElse: () => null);
+          ownUserContact = userContactState.ownUserContact;
           if (!isObjectEmpty(ownUserContact)) {
             return multimediaBlocBuilder();
           }
         }
-        return showErrorPage('Error. Unable to load user. Please sign in again.');
+        return showErrorPage('Error. Unable to load user info. Please sign in again.');
       },
     );
   }
@@ -141,25 +151,29 @@ class MyselfPageState extends State<MyselfPage> {
           List<Multimedia> multimediaList = multimediaState.multimediaList;
           userOwnMultimedia = multimediaList.firstWhere((Multimedia existingMultimedia) => ownUserContact.profilePicture == existingMultimedia.id, orElse: () => null);
           insertUserProfilePicture();
-          return showMyselfPage();
+          return mainBody();
         }
         return showErrorPage('Error. Multimedia not loaded. Please sign in again.');
       },
     );
   }
 
-  Widget showMyselfPage() {
-    return Column(
-      children: <Widget>[
-        ListView.builder(
-            itemCount: buttons.length,
-            shrinkWrap: true,
-            physics: BouncingScrollPhysics(),
-            // suggestion from https://github.com/flutter/flutter/issues/22314
-            itemBuilder: (BuildContext content, int index) {
-              return buttons[index];
-            })
-      ],
+  Widget mainBody() {
+    return Expanded(
+      child: Container(
+        child: SmartRefresher(
+          controller: _refreshController,
+          onRefresh: refreshUserData,
+          child: ListView.builder(
+              itemCount: buttons.length,
+              shrinkWrap: true,
+              physics: BouncingScrollPhysics(),
+              // suggestion from https://github.com/flutter/flutter/issues/22314
+              itemBuilder: (BuildContext content, int index) {
+                return buttons[index];
+              }),
+        ),
+      ),
     );
   }
 
@@ -209,6 +223,17 @@ class MyselfPageState extends State<MyselfPage> {
         ),
       ],
     );
+  }
+
+  initialize() {
+    refreshUserData();
+  }
+
+  refreshUserData() {
+    userBloc.add(GetOwnUserEvent(callback: (User user) {}));
+    userContactBloc.add(GetUserOwnUserContactEvent(callback: (UserContact userContact) {}));
+    multimediaBloc.add(GetUserOwnProfilePictureMultimediaEvent(callback: (bool done) {}));
+    settingsBloc.add(GetUserOwnSettingsEvent(callback: (Settings settings) {}));
   }
 
   onUserProfilePictureTapped() {

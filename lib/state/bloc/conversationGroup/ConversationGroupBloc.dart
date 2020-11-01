@@ -149,20 +149,24 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
 
   Stream<ConversationGroupState> _getUserOwnConversationGroups(GetUserOwnConversationGroupsEvent event) async* {
     try {
-      if (state is ConversationGroupsLoaded) {
-        ConversationPageableResponse conversationPageableResponse = await conversationGroupAPIService.getUserOwnConversationGroups(event.getConversationGroupsRequest);
-        if (!isObjectEmpty(conversationPageableResponse) &&
-            !conversationPageableResponse.conversationGroupResponses.content.isNull &&
-            conversationPageableResponse.conversationGroupResponses.content.isNotEmpty) {
-          List<ConversationGroup> conversationGroupList = conversationPageableResponse.conversationGroupResponses.content.map((e) => ConversationGroup.fromJson(e)).toList();
+      ConversationPageableResponse conversationPageableResponse = await conversationGroupAPIService.getUserOwnConversationGroups(event.getConversationGroupsRequest);
+      if (!isObjectEmpty(conversationPageableResponse) &&
+          !conversationPageableResponse.conversationGroupResponses.content.isNull &&
+          conversationPageableResponse.conversationGroupResponses.content.isNotEmpty) {
+        List<ConversationGroup> conversationGroupList = conversationPageableResponse.conversationGroupResponses.content.map((e) => ConversationGroup.fromJson(e)).toList();
 
-          conversationGroupDBService.addConversationGroups(conversationGroupList);
+        conversationGroupDBService.addConversationGroups(conversationGroupList);
 
-          yield* updateConversationGroupsLoadedState(updatedConversationGroupList: conversationGroupList);
-          functionCallback(event, conversationPageableResponse);
-        }
+        yield* updateConversationGroupsLoadedState(updatedConversationGroupList: conversationGroupList);
+        functionCallback(event, conversationPageableResponse);
       }
     } catch (e) {
+      GetConversationGroupsRequest getConversationGroupsRequest = event.getConversationGroupsRequest;
+      int page = getConversationGroupsRequest.pageable.page;
+      int size = getConversationGroupsRequest.pageable.size;
+      add(LoadConversationGroupsEvent(page: page, size: size, callback: (bool done) {
+        functionCallback(event, null);
+      }));
       showToast('Failed to get conversation groups. Please try again later.', Toast.LENGTH_LONG);
       functionCallback(event, null);
     }

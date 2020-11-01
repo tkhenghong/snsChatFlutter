@@ -111,11 +111,11 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
 
       if (!isObjectEmpty(ownUserContact)) {
         userContactDBService.addUserContact(ownUserContact);
-        yield* yieldUserContactState(updatedOwnUserContact: ownUserContact);
-        functionCallback(event, true);
+        yield* yieldUserContactState(updatedOwnUserContact: ownUserContact, userContact: ownUserContact);
+        functionCallback(event, ownUserContact);
       }
     } catch (e) {
-      functionCallback(event, false);
+      functionCallback(event, null);
     }
   }
 
@@ -208,7 +208,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       yield UserContactsLoading(); // Need change state for BlOC to detect changes.
       yield UserContactsLoaded(existingUserContactList, existingOwnUserContact);
     } else {
-      yield UserContactsLoaded(existingUserContactList, existingOwnUserContact);
+      yield UserContactsLoaded(updatedUserContactList, updatedOwnUserContact);
     }
   }
 

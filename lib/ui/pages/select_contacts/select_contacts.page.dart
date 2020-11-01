@@ -27,6 +27,7 @@ class SelectContactsPage extends StatefulWidget {
 // TODO: Make Alphabet scroll
 // WhatsApp closes the search function when multi select
 class SelectContactsPageState extends State<SelectContactsPage> {
+  bool firstTime = true;
   bool isLoading = true;
 
   // contactLoaded is true
@@ -85,12 +86,21 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     }
     setConversationType(widget.chatGroupType);
 
+    if(firstTime) {
+      initialize();
+      firstTime = false;
+    }
+
     return Scaffold(
       appBar: appBar(),
       body: multiBlocListener(),
       bottomNavigationBar: _bottomAppBar(),
       floatingActionButton: _floatingActionButton(),
     );
+  }
+
+  initialize() {
+    userContactBloc.add(GetUserOwnUserContactEvent(callback: (bool done) {}));
   }
 
   Widget appBar() {
