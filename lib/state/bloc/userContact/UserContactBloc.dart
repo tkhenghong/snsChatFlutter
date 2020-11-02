@@ -31,6 +31,8 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       yield* _getUserContactByMobileNo(event);
     } else if (event is RemoveAllUserContactsEvent) {
       yield* _removeAllUserContactsEvent(event);
+    } else if (event is GetConversationGroupUserContactsEvent) {
+      yield* _getConversationGroupUserContacts(event);
     }
   }
 
@@ -176,6 +178,23 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     functionCallback(event, true);
   }
 
+  Stream<UserContactState> _getConversationGroupUserContacts(GetConversationGroupUserContactsEvent event) async* {
+    try {
+      // Get from local DB first.
+      List<UserContact> userContacts = await userContactDBService.getConversationGroupUserContacts(event.userContactIds);
+      yield* yieldUserContactState(updatedUserContactList: userContacts);
+
+      // Get latest UserContact objects from server.
+      List<UserContact> userContactsFromServer = await userContactAPIService.getUserContactsByConversationGroup(event.conversationGroupId);
+      // Update the state again.
+      yield* yieldUserContactState(updatedUserContactList: userContactsFromServer);
+      functionCallback(event, true);
+    } catch (e) {
+      showToast('Unable to load conversation group user contacts info. Please try again.', Toast.LENGTH_LONG);
+      functionCallback(event, false);
+    }
+  }
+
   Stream<UserContactState> yieldUserContactState({UserContact updatedOwnUserContact, List<UserContact> updatedUserContactList, UserContact userContact}) async* {
     UserContact existingOwnUserContact;
     List<UserContact> existingUserContactList;
@@ -208,7 +227,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       yield UserContactsLoading(); // Need change state for BlOC to detect changes.
       yield UserContactsLoaded(existingUserContactList, existingOwnUserContact);
     } else {
-      yield UserContactsLoaded(updatedUserContactList, updatedOwnUserContact);
+      yield UserContactsLoaded(isObjectEmpty(updatedUserContactList) ? [] : updatedUserContactList, updatedOwnUserContact);
     }
   }
 

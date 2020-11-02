@@ -82,7 +82,7 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
 
       unreadMessage = await unreadMessageDBService.getUnreadMessageOfAConversationGroup(event.conversationGroupId);
 
-      if(isObjectEmpty(unreadMessage)) {
+      if (isObjectEmpty(unreadMessage)) {
         unreadMessage = await unreadMessageAPIService.geUnreadMessageByConversationGroupId(event.conversationGroupId);
       }
 

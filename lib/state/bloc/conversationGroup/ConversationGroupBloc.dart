@@ -32,6 +32,8 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       yield* _addGroupMember(event);
     } else if (event is CreateConversationGroupEvent) {
       yield* _createConversationGroup(event);
+    } else if (event is GetSingleConversationGroupEvent) {
+      yield* _getSingleConversationGroup(event);
     } else if (event is RemoveConversationGroupsEvent) {
       yield* _removeAllConversationGroups(event);
     }
@@ -150,9 +152,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
   Stream<ConversationGroupState> _getUserOwnConversationGroups(GetUserOwnConversationGroupsEvent event) async* {
     try {
       ConversationPageableResponse conversationPageableResponse = await conversationGroupAPIService.getUserOwnConversationGroups(event.getConversationGroupsRequest);
-      if (!isObjectEmpty(conversationPageableResponse) &&
-          !conversationPageableResponse.conversationGroupResponses.content.isNull &&
-          conversationPageableResponse.conversationGroupResponses.content.isNotEmpty) {
+      if (!isObjectEmpty(conversationPageableResponse) && !conversationPageableResponse.conversationGroupResponses.content.isNull && conversationPageableResponse.conversationGroupResponses.content.isNotEmpty) {
         List<ConversationGroup> conversationGroupList = conversationPageableResponse.conversationGroupResponses.content.map((e) => ConversationGroup.fromJson(e)).toList();
 
         conversationGroupDBService.addConversationGroups(conversationGroupList);
@@ -164,9 +164,12 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       GetConversationGroupsRequest getConversationGroupsRequest = event.getConversationGroupsRequest;
       int page = getConversationGroupsRequest.pageable.page;
       int size = getConversationGroupsRequest.pageable.size;
-      add(LoadConversationGroupsEvent(page: page, size: size, callback: (bool done) {
-        functionCallback(event, null);
-      }));
+      add(LoadConversationGroupsEvent(
+          page: page,
+          size: size,
+          callback: (bool done) {
+            functionCallback(event, null);
+          }));
       showToast('Failed to get conversation groups. Please try again later.', Toast.LENGTH_LONG);
       functionCallback(event, null);
     }
@@ -187,7 +190,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
 
         updated = await conversationGroupDBService.editConversationGroup(updatedConversationGroup);
 
-        if(updated) {
+        if (updated) {
           yield* updateConversationGroupsLoadedState(conversationGroup: updatedConversationGroup);
           functionCallback(event, updatedConversationGroup);
         }
@@ -196,7 +199,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       updated = false;
     }
 
-    if(!updated) {
+    if (!updated) {
       showToast('Unable to add group members. Please try again later.', Toast.LENGTH_LONG);
       functionCallback(event, null);
     }
@@ -208,11 +211,11 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     ConversationGroup conversationGroup;
 
     try {
-      if(event.createConversationGroupRequest.conversationGroupType == ConversationGroupType.Personal) {
+      if (event.createConversationGroupRequest.conversationGroupType == ConversationGroupType.Personal) {
         conversationGroup = await conversationGroupDBService.getConversationGroupWithTypeAndMembers(event.createConversationGroupRequest.conversationGroupType, event.createConversationGroupRequest.memberIds);
       }
 
-      if(isObjectEmpty(conversationGroup)) {
+      if (isObjectEmpty(conversationGroup)) {
         conversationGroup = await conversationGroupAPIService.addConversationGroup(createConversationGroupRequest);
 
         if (conversationGroup.isNull) {
@@ -234,6 +237,21 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       functionCallback(event, conversationGroup);
     } catch (e) {
       showToast('Failed to load a conversation. Please try again later.', Toast.LENGTH_LONG);
+      functionCallback(event, null);
+    }
+  }
+
+  /// Get & Update a single Conversation group from local DB & backend.
+  Stream<ConversationGroupState> _getSingleConversationGroup(GetSingleConversationGroupEvent event) async* {
+    try {
+      ConversationGroup conversationGroupFromDB = await conversationGroupDBService.getSingleConversationGroup(event.conversationGroupId);
+
+      yield* updateConversationGroupsLoadedState(conversationGroup: conversationGroupFromDB);
+      ConversationGroup conversationGroupFromServer = await conversationGroupAPIService.getSingleConversationGroup(event.conversationGroupId);
+      yield* updateConversationGroupsLoadedState(conversationGroup: conversationGroupFromServer);
+      functionCallback(event, conversationGroupFromServer);
+    } catch (e) {
+      showToast('Failed to get latest info of the conversation group. Please try again.later.', Toast.LENGTH_LONG);
       functionCallback(event, null);
     }
   }

@@ -95,16 +95,6 @@ class UserContactDBService {
     return !isObjectEmpty(recordSnapshot) ? UserContact.fromJson(recordSnapshot.value) : null;
   }
 
-  // Verify userContact is in the local DB or not when login
-  Future<UserContact> getUserContactByConversationGroup(String googleAccountId) async {
-    if (isObjectEmpty(await _db)) {
-      return null;
-    }
-    final finder = Finder(filter: Filter.equals("googleAccountId", googleAccountId));
-    final recordSnapshot = await _userContactStore.findFirst(await _db, finder: finder);
-    return !isObjectEmpty(recordSnapshot) ? UserContact.fromJson(recordSnapshot.value) : null;
-  }
-
   Future<UserContact> getUserContactByMobileNo(String mobileNo) async {
     if (isObjectEmpty(await _db)) {
       return null;
@@ -119,6 +109,26 @@ class UserContactDBService {
       return null;
     }
     final recordSnapshots = await _userContactStore.find(await _db);
+    if (!isObjectEmpty(recordSnapshots)) {
+      List<UserContact> userContactList = [];
+      recordSnapshots.forEach((snapshot) {
+        final userContact = UserContact.fromJson(snapshot.value);
+        userContactList.add(userContact);
+      });
+
+      return userContactList;
+    }
+    return [];
+  }
+
+  /// Conversation group user contacts don't have pagination because the full list is in Conversation Group object already.
+  Future<List<UserContact>> getConversationGroupUserContacts(List<String> userContactIds) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
+    // Auto sort by lastModifiedDate, but when showing in chat page, sort these conversations using last unread message's date
+    final finder = Finder(sortOrders: [SortOrder('lastModifiedDate', false)], filter: Filter.inList('id', userContactIds));
+    final recordSnapshots = await _userContactStore.find(await _db, finder: finder);
     if (!isObjectEmpty(recordSnapshots)) {
       List<UserContact> userContactList = [];
       recordSnapshots.forEach((snapshot) {

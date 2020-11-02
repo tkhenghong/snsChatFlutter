@@ -109,3 +109,17 @@ class RemoveAllUserContactsEvent extends UserContactEvent {
   @override
   String toString() => 'RemoveAllUserContactsEvent';
 }
+
+class GetConversationGroupUserContactsEvent extends UserContactEvent {
+  final String conversationGroupId;
+  final List<String> userContactIds;
+  final Function callback;
+
+  GetConversationGroupUserContactsEvent({this.conversationGroupId, this.userContactIds, this.callback});
+
+  @override
+  List<Object> get props => [conversationGroupId, userContactIds];
+
+  @override
+  String toString() => 'GetConversationGroupUserContactsEvent {conversationGroupId: $conversationGroupId, userContactIds: $userContactIds}';
+}

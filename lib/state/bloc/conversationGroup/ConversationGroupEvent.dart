@@ -104,6 +104,19 @@ class AddGroupMembersEvent extends ConversationGroupEvent {
   String toString() => 'AddGroupMembersEvent {userContactIds: $userContactIds, conversationGroupId: $conversationGroupId}';
 }
 
+class GetSingleConversationGroupEvent extends ConversationGroupEvent {
+  final String conversationGroupId;
+  final Function callback;
+
+  const GetSingleConversationGroupEvent({this.conversationGroupId, this.callback});
+
+  @override
+  List<Object> get props => [conversationGroupId];
+
+  @override
+  String toString() => 'GetSingleConversationGroupEvent {conversationGroupId: $conversationGroupId}';
+}
+
 class RemoveConversationGroupsEvent extends ConversationGroupEvent {
   final Function callback;
 

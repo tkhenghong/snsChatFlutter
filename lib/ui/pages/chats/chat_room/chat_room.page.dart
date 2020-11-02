@@ -142,12 +142,26 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
       firstTime = false;
     }
 
-    return SafeArea(child: Material(color: Colors.white,child: multiBlocListener()));
+    return SafeArea(child: Material(color: Colors.white, child: multiBlocListener()));
   }
 
   initialize() {
     userBloc.add(GetOwnUserEvent(callback: (User user) {}));
 
+    loadConversationGroupInfo();
+    loadChatMessages();
+  }
+
+  /// To update userContacts and conversation group's latest info.
+  loadConversationGroupInfo() {
+    conversationGroupBloc.add(GetSingleConversationGroupEvent(
+        conversationGroupId: widget.conversationGroupId,
+        callback: (ConversationGroup conversationGroup) {
+          userContactBloc.add(GetConversationGroupUserContactsEvent(conversationGroupId: widget.conversationGroupId, userContactIds: conversationGroup.memberIds, callback: (bool done) {}));
+        }));
+  }
+
+  loadChatMessages() {
     Pageable pageable = Pageable(sort: Sort(orders: [Order(direction: Direction.DESC, property: 'lastModifiedDate')]), page: page, size: size);
     chatMessageBloc.add(LoadConversationGroupChatMessagesEvent(
         conversationGroupId: widget.conversationGroupId,
@@ -331,7 +345,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   Widget conversationGroupTitle() {
     return InkWell(
         customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-        onTap: goToChatInfoPage(),
+        onTap: goToChatInfoPage,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
