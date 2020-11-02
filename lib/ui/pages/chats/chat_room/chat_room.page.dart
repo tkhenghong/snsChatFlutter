@@ -729,7 +729,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               padding: EdgeInsets.only(left: lrPadding),
             ),
             Text(
-              chatMessage.senderName + ', ' + messageTimeDisplay(chatMessage.createdDate.millisecondsSinceEpoch),
+              chatMessage.senderName + ', ' + messageTimeDisplay(chatMessage.createdDate),
 //                    message.senderName,
               style: TextStyle(
                 fontSize: 10.0,
@@ -867,15 +867,9 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     );
   }
 
-  String messageTimeDisplay(int timestamp) {
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('dd-MM-yyyy').format(now);
-    DateFormat dateFormat = DateFormat('dd-MM-yyyy');
-    DateTime today = dateFormat.parse(formattedDate);
-    // String formattedDate2 = DateFormat('dd-MM-yyyy hh:mm:ss').format(today);
-    DateTime messageTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    String formattedDate3 = DateFormat('hh:mm').format(messageTime);
-    return formattedDate3;
+  // TODO: Build day tabs with DateFormat and time_formatter plugin.
+  String messageTimeDisplay(DateTime timestamp) {
+    return DateFormat('hh:mm').format(timestamp);
   }
 
   Widget showLoading() {
