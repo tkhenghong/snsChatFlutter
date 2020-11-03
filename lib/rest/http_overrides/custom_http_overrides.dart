@@ -16,7 +16,7 @@ class CustomHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext context) {
     context = new SecurityContext();
-    context.setTrustedCertificatesBytes(this.byteData.buffer.asUint8List(), password: 'password');
+    context.setTrustedCertificatesBytes(this.byteData.buffer.asUint8List(), password: 'password'); // If your cert has password (Eg. .p12 files), you may type password as optional parameter.
     return super.createHttpClient(context)
       ..badCertificateCallback = (X509Certificate cert, String host, int port) {
         if (allowedHost.contains(host)) {
