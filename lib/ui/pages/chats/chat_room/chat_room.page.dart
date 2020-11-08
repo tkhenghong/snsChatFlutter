@@ -33,6 +33,37 @@ class ChatRoomPage extends StatefulWidget {
 
 class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   String REST_URL = globals.REST_URL;
+
+  GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
+
+  // Option button list
+  List<String> optionButtonTitle = [
+    'Group Info',
+    'Group Media',
+    'Search',
+    'Mute Notifications',
+    'Conversation background wallpaper',
+    'Report this conversation',
+    'Block conversation',
+    'Clear all messages',
+    'Export chat messages',
+    'Add shortcut to home screen'
+  ];
+  List<IconData> optionButtonIcon = [
+    Icons.info_outline,
+    Icons.perm_media_outlined,
+    Icons.search,
+    Icons.notifications_off_outlined,
+    Icons.now_wallpaper_outlined,
+    Icons.report_outlined,
+    Icons.block_outlined,
+    Icons.clear_all_outlined,
+    Icons.import_export_outlined,
+    Platform.isIOS || Platform.isMacOS ? Icons.desktop_mac_outlined : Icons.desktop_windows_outlined
+  ];
+  List<Function> optionButtonOnTapped = [() {}, () {}, () {}, () {}, () {}, () {}, () {}, () {}, () {}, () {}];
+
+  // Pagination
   int page = 0;
   int size = globals.numberOfRecords;
   int totalRecords = 0;
@@ -311,7 +342,11 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Scaffold(
+        key: _drawerKey,
+        endDrawerEnableOpenDragGesture: false,
+        // Prevent open drawer using screen gesture.
         appBar: appBar(),
+        endDrawer: drawer(),
         body: WillPopScope(
           // To handle event when user press back button when sticker screen is on, dismiss sticker if keyboard is shown
           child: Stack(
@@ -320,7 +355,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                 children: <Widget>[
                   // UI for message list
                   chatMessageList(),
-                  // UI for stickers, gifs
+                  // UI for stickers, GIFs
                   (isShowSticker ? buildSticker() : Container()),
                   // UI for text field
                   buildInput(),
@@ -340,7 +375,63 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
       leadingWidth: Get.width * 0.18,
       leading: backButtonWithImage(),
       title: conversationGroupTitle(),
+      actions: [videoCallButton(), voiceCallButton(), optionsButton()],
     );
+  }
+
+// TODO: Load widget with a list to reduce boilerplate codes.
+  Widget drawer() {
+    return Drawer(
+      child: CustomScrollView(
+        physics: BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+              expandedHeight: Get.height * 0.3,
+              backgroundColor: Colors.transparent,
+              flexibleSpace: Container(
+                decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.black, Colors.black87, Colors.black54, Colors.black45, Colors.black38, Colors.black26, Colors.black12])),
+                child: FlexibleSpaceBar(
+                  // NOTE: May add photo of you and the him for personal conversation, and group photo for group conversation in the future.
+                  // background: Container(
+                  //   height: Get.height * 0.3,
+                  //   width: Get.width * 0.3,
+                  //   child: ,
+                  // ),
+                  title: Align(
+                    alignment: Alignment.bottomRight,
+                    child: Padding(
+                      padding: EdgeInsets.only(right: Get.width * 0.05),
+                      child: Text('Options'),
+                    ),
+                  ),
+                ),
+              )),
+          SliverList(
+            delegate: SliverChildListDelegate(generateOptionButtons()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> generateOptionButtons() {
+    List<Widget> optionButtonList = [];
+    for (int i = 0; i < optionButtonTitle.length; i++) {
+      optionButtonList.add(ListTile(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: Get.width * 0.1,
+              child: Icon(optionButtonIcon[i]),
+            ),
+            Text(optionButtonTitle[i])
+          ],
+        ),
+        onTap: optionButtonOnTapped[i],
+      ));
+    }
+    return optionButtonList;
   }
 
   Widget conversationGroupTitle() {
@@ -363,6 +454,35 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
             )
           ],
         ));
+  }
+
+  Widget videoCallButton() {
+    return IconButton(
+        icon: Icon(Icons.voice_chat),
+        onPressed: () {
+          showToast('Video call is not yet implemented.', Toast.LENGTH_SHORT);
+        });
+  }
+
+  Widget voiceCallButton() {
+    return IconButton(
+        icon: Icon(Icons.phone),
+        onPressed: () {
+          showToast('Voice call is not yet implemented.', Toast.LENGTH_SHORT);
+        });
+  }
+
+  Widget optionsButton() {
+    return IconButton(
+        icon: Icon(Icons.menu),
+        onPressed: () {
+          print('_drawerKey.currentState.isEndDrawerOpen: ${_drawerKey.currentState.isEndDrawerOpen}');
+          if (_drawerKey.currentState.isEndDrawerOpen) {
+            Navigator.pop(context);
+          } else {
+            _drawerKey.currentState.openEndDrawer();
+          }
+        });
   }
 
   Widget backButtonWithImage() {
@@ -421,24 +541,21 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   Widget sendImageButton() {
-    return Material(
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: Get.width * 0.01),
-        child: IconButton(
-          icon: Icon(Icons.attach_file),
-          onPressed: () {
-            setState(() {
-              openMultimediaTab = !openMultimediaTab;
-              if (openMultimediaTab) {
-                _animationController2.forward();
-              } else {
-                _animationController2.reverse();
-              }
-            });
-          },
-        ),
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: Get.width * 0.01),
+      child: IconButton(
+        icon: Icon(Icons.attach_file),
+        onPressed: () {
+          setState(() {
+            openMultimediaTab = !openMultimediaTab;
+            if (openMultimediaTab) {
+              _animationController2.forward();
+            } else {
+              _animationController2.reverse();
+            }
+          });
+        },
       ),
-      // color: Colors.white,
     );
   }
 
@@ -472,12 +589,9 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   Widget sendMessageButton() {
-    return Material(
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: Get.width * 0.05),
-        child: !textFieldHasValue ? recordVoiceMessageButton() : textSendButton(),
-      ),
-      // color: Colors.white,
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: Get.width * 0.05),
+      child: !textFieldHasValue ? recordVoiceMessageButton() : textSendButton(),
     );
   }
 
@@ -729,26 +843,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
       }
     }
 
-    return Column(
-      children: <Widget>[
-        Row(
-          crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-          mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.only(left: lrPadding),
-            ),
-            Text(
-              chatMessage.senderName + ', ' + messageTimeDisplay(chatMessage.createdDate),
-              style: TextStyle(
-                fontSize: 10.0,
-              ),
-            ),
-          ],
-        ),
-        messageWidget,
-      ],
-    );
+    return messageWidget;
   }
 
   Widget showTextMessage(ChatMessage chatMessage, bool isSenderMessage) {
@@ -813,29 +908,37 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     ;
   }
 
-  Widget chatMessageBubble(ChatMessage message, bool isSenderMessage, Widget content) {
+  Widget chatMessageBubble(ChatMessage chatMessage, bool isSenderMessage, Widget content) {
     Radius bubbleCornerRadius = Radius.circular(20.0);
 
-    return Row(
-      crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-      mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
-      children: <Widget>[
-        RaisedButton(
-          child: content,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              topLeft: bubbleCornerRadius,
-              topRight: bubbleCornerRadius,
-              bottomLeft: isSenderMessage ? bubbleCornerRadius : Radius.zero,
-              bottomRight: isSenderMessage ? Radius.zero : bubbleCornerRadius,
+    return Padding(
+      padding: EdgeInsets.only(top: 10.0), // Hardcode 10px for top spacing of each message.
+      child: Column(
+        crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          Text(
+            chatMessage.senderName + ', ' + messageTimeDisplay(chatMessage.createdDate),
+            style: TextStyle(
+              fontSize: 10.0,
             ),
           ),
-          padding: EdgeInsets.symmetric(horizontal: Get.width * 0.02, vertical: Get.height * 0.02),
-          onPressed: () {
-            showToast('Chat message bubble clicked!', Toast.LENGTH_SHORT);
-          },
-        )
-      ],
+          RaisedButton(
+            child: content,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: bubbleCornerRadius,
+                topRight: bubbleCornerRadius,
+                bottomLeft: isSenderMessage ? bubbleCornerRadius : Radius.zero,
+                bottomRight: isSenderMessage ? Radius.zero : bubbleCornerRadius,
+              ),
+            ),
+            padding: EdgeInsets.symmetric(horizontal: Get.width * 0.02, vertical: Get.height * 0.02),
+            onPressed: () {
+              showToast('Chat message bubble clicked!', Toast.LENGTH_SHORT);
+            },
+          )
+        ],
+      ),
     );
   }
 
