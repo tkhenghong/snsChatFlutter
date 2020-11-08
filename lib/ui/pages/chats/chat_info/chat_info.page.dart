@@ -437,9 +437,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
   }
 
   Widget conversationGroupPhoto() {
-    Widget defaultImage = Image.asset(
-      DefaultImagePathTypeUtil.getByConversationGroupType(currentConversationGroup.conversationGroupType).path,
-    );
+    Widget defaultImage = CircleAvatar(backgroundImage: AssetImage(DefaultImagePathTypeUtil.getByConversationGroupType(currentConversationGroup.conversationGroupType).path));
     return Hero(
         tag: currentConversationGroup.id + '1',
         child: CachedNetworkImage(

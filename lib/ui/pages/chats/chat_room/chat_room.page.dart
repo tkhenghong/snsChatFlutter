@@ -51,6 +51,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   ConversationGroup currentConversationGroup;
   Multimedia groupPhotoMultimedia;
   List<ChatMessage> conversationGroupMessageList = [];
+  List<Map<String, bool>> conversationGroupMessageExpanded = []; // A list to record which chat message to be expanded.
   List<Multimedia> conversationGroupMultimediaList = [];
 
   ImagePicker imagePicker = Get.find();
@@ -336,7 +337,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   Widget appBar() {
     return AppBar(
       automaticallyImplyLeading: false,
-      titleSpacing: 0.0,
+      leadingWidth: Get.width * 0.18,
       leading: backButtonWithImage(),
       title: conversationGroupTitle(),
     );
@@ -348,12 +349,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         onTap: goToChatInfoPage,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            Padding(
-              // padding: EdgeInsets.only(top: 10.0, right: 250.0),
-              padding: EdgeInsets.only(top: Get.height * 0.05),
-            ),
             Hero(
               tag: currentConversationGroup.id,
               child: Text(
@@ -370,14 +366,13 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   Widget backButtonWithImage() {
-    Widget defaultImage = Image.asset(
-      DefaultImagePathTypeUtil.getByConversationGroupType(currentConversationGroup.conversationGroupType).path,
-    );
+    Widget defaultImage = CircleAvatar(backgroundImage: AssetImage(DefaultImagePathTypeUtil.getByConversationGroupType(currentConversationGroup.conversationGroupType).path));
 
     return Tooltip(
       message: 'Back',
       child: InkWell(
-        customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+        customBorder: CircleBorder(),
+        radius: Get.width * 0.2,
         onTap: goBack,
         child: Row(
           children: <Widget>[
@@ -405,7 +400,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   Widget buildInput() {
     return Container(
       width: double.infinity,
-      // height: fileList.length > 0 ? deviceHeight * 0.2 : deviceHeight * 0.1,
       child: Column(
         children: <Widget>[
           imageListTab(),
@@ -695,12 +689,15 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     if (isObjectEmpty(conversationGroupMessageList) || conversationGroupMessageList.isEmpty) {}
 
     return Flexible(
-      child: ListView.builder(
-        controller: listScrollController,
-        itemCount: conversationGroupMessageList.length,
-        reverse: true,
-        physics: BouncingScrollPhysics(),
-        itemBuilder: (context, index) => displayChatMessage(conversationGroupMessageList[index]),
+      child: Padding(
+        padding: EdgeInsets.only(bottom: 10.0, left: 10.0, right: 10.0), // Hard code 10px for the bottom of the list.
+        child: ListView.builder(
+          controller: listScrollController,
+          itemCount: conversationGroupMessageList.length,
+          reverse: true,
+          physics: BouncingScrollPhysics(),
+          itemBuilder: (context, index) => displayChatMessage(conversationGroupMessageList[index]),
+        ),
       ),
     );
   }
@@ -710,11 +707,10 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     double lrPadding = 15.0;
     Widget messageWidget = showUnidentifiedMessageText(chatMessage, isSenderMessage);
 
-    Multimedia messageMultimedia = conversationGroupMultimediaList.firstWhere((multimedia) => multimedia.id == chatMessage.multimediaId, orElse: null);
-
-    if (!isObjectEmpty(chatMessage.multimediaId)) {
+    if (isObjectEmpty(chatMessage.multimediaId)) {
       messageWidget = showTextMessage(chatMessage, isSenderMessage);
     } else {
+      Multimedia messageMultimedia = conversationGroupMultimediaList.firstWhere((multimedia) => multimedia.id == chatMessage.multimediaId, orElse: null);
       switch (messageMultimedia.multimediaType) {
         case MultimediaType.Image:
           messageWidget = imageMessage(chatMessage, messageMultimedia, isSenderMessage);
@@ -744,7 +740,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
             ),
             Text(
               chatMessage.senderName + ', ' + messageTimeDisplay(chatMessage.createdDate),
-//                    message.senderName,
               style: TextStyle(
                 fontSize: 10.0,
               ),
@@ -757,13 +752,19 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   Widget showTextMessage(ChatMessage chatMessage, bool isSenderMessage) {
-    Widget textMessageContent = Text(
-      // message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
-      chatMessage.messageContent,
-      style: TextStyle(),
+    Widget textMessageContent = Container(
+      width: Get.width * 0.5,
+      child: Text(
+        // message.senderName + message.messageContent + messageTimeDisplay(message.timestamp),
+        chatMessage.messageContent,
+        softWrap: true,
+        overflow: TextOverflow.visible,
+        textAlign: isSenderMessage ? TextAlign.end : TextAlign.start,
+        style: TextStyle(),
+      ),
     );
 
-    return buildMessageChatBubble(chatMessage, isSenderMessage, textMessageContent);
+    return chatMessageBubble(chatMessage, isSenderMessage, textMessageContent);
   }
 
   Widget imageMessage(ChatMessage chatMessage, Multimedia chatMessageMultimedia, bool isSenderMessage) {
@@ -812,23 +813,28 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     ;
   }
 
-  Widget buildMessageChatBubble(ChatMessage message, bool isSenderMessage, Widget content) {
+  Widget chatMessageBubble(ChatMessage message, bool isSenderMessage, Widget content) {
+    Radius bubbleCornerRadius = Radius.circular(20.0);
+
     return Row(
       crossAxisAlignment: isSenderMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
       mainAxisAlignment: isSenderMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: <Widget>[
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: Get.width * 0.1, vertical: Get.height * 0.05),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(32.0)),
-          margin: EdgeInsets.only(bottom: Get.height * 0.01, right: isSenderMessage ? Get.width * 0.01 : 0.0, left: isSenderMessage ? Get.width * 0.01 : 0.0),
-          child: Row(
-            children: <Widget>[
-              Column(
-                children: <Widget>[content],
-              ),
-            ],
+        RaisedButton(
+          child: content,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: bubbleCornerRadius,
+              topRight: bubbleCornerRadius,
+              bottomLeft: isSenderMessage ? bubbleCornerRadius : Radius.zero,
+              bottomRight: isSenderMessage ? Radius.zero : bubbleCornerRadius,
+            ),
           ),
-        ),
+          padding: EdgeInsets.symmetric(horizontal: Get.width * 0.02, vertical: Get.height * 0.02),
+          onPressed: () {
+            showToast('Chat message bubble clicked!', Toast.LENGTH_SHORT);
+          },
+        )
       ],
     );
   }
@@ -840,7 +846,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     // fileService.downloadMultimediaFile(context, messageMultimedia);
 
     Widget documentMessage = RichText(text: TextSpan(children: [TextSpan(text: chatMessage.messageContent, style: TextStyle(), recognizer: TapGestureRecognizer()..onTap = () => downloadFile(messageMultimedia, chatMessage))]));
-    return buildMessageChatBubble(chatMessage, isSenderMessage, documentMessage);
+    return chatMessageBubble(chatMessage, isSenderMessage, documentMessage);
   }
 
   Widget showAudioMessage(ChatMessage chatMessage, Multimedia chatMessageMultimedia, bool isSenderMessage) {
@@ -853,7 +859,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     downloadFile(messageMultimedia, chatMessage);
 
     Widget content = messageAudioPlayer(chatMessage, userContactMultimedia, messageMultimedia, audioService);
-    return buildMessageChatBubble(chatMessage, isSenderMessage, content);
+    return chatMessageBubble(chatMessage, isSenderMessage, content);
   }
 
   Widget showUnidentifiedMessageText(ChatMessage chatMessage, bool isSenderMessage) {
