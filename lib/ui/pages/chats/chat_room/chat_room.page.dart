@@ -818,32 +818,29 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   Widget displayChatMessage(ChatMessage chatMessage) {
     bool isSenderMessage = chatMessage.senderId == ownUser.id;
-    double lrPadding = 15.0;
-    Widget messageWidget = showUnidentifiedMessageText(chatMessage, isSenderMessage);
 
     if (isObjectEmpty(chatMessage.multimediaId)) {
-      messageWidget = showTextMessage(chatMessage, isSenderMessage);
+      return showTextMessage(chatMessage, isSenderMessage);
     } else {
       Multimedia messageMultimedia = conversationGroupMultimediaList.firstWhere((multimedia) => multimedia.id == chatMessage.multimediaId, orElse: null);
       switch (messageMultimedia.multimediaType) {
         case MultimediaType.Image:
-          messageWidget = imageMessage(chatMessage, messageMultimedia, isSenderMessage);
+          return imageMessage(chatMessage, messageMultimedia, isSenderMessage);
           break;
         case MultimediaType.Document:
-          messageWidget = fileMessage(chatMessage, messageMultimedia, isSenderMessage);
+          return fileMessage(chatMessage, messageMultimedia, isSenderMessage);
           break;
         case MultimediaType.Document:
-          messageWidget = fileMessage(chatMessage, messageMultimedia, isSenderMessage);
+          return fileMessage(chatMessage, messageMultimedia, isSenderMessage);
           break;
         case MultimediaType.Audio:
-          messageWidget = showAudioMessage(chatMessage, messageMultimedia, isSenderMessage);
+          return showAudioMessage(chatMessage, messageMultimedia, isSenderMessage);
           break;
         default:
+          return showUnidentifiedMessageText(chatMessage, isSenderMessage);
           break;
       }
     }
-
-    return messageWidget;
   }
 
   Widget showTextMessage(ChatMessage chatMessage, bool isSenderMessage) {

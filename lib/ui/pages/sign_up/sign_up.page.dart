@@ -28,8 +28,8 @@ class SignUpPageState extends State<SignUpPage> {
   AuthenticationBloc authenticationBloc;
 
   final _formKey = GlobalKey<FormState>();
-  TextEditingController mobileNoTextController = new TextEditingController();
-  FocusNode nodeOne = FocusNode();
+  TextEditingController mobileNoTextController;
+  FocusNode nodeOne;
 
   IPGeoLocation ipGeoLocation;
   CountryCode countryCode;
@@ -39,11 +39,14 @@ class SignUpPageState extends State<SignUpPage> {
   @override
   void initState() {
     super.initState();
+    mobileNoTextController = new TextEditingController();
+    nodeOne = FocusNode();
     mobileNoTextController.text = widget.mobileNo.isNotEmpty ? widget.mobileNo : null;
   }
 
   @override
   void dispose() {
+    mobileNoTextController.dispose();
     nodeOne.dispose();
     super.dispose();
   }
