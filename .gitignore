@@ -17,10 +17,16 @@ android/gradle/wrapper/gradle-wrapper.jar
 android/gradlew
 android/gradlew.bat
 android/local.properties
+android/app/src/development/
+android/app/src/integration/
+android/app/src/production/
 build/
 ios/Flutter/Generated.xcconfig
 ios/Runner/GeneratedPluginRegistrant.h
 ios/Runner/GeneratedPluginRegistrant.m
+ios/Runner/Assets.xcassets/AppIcon-development.appiconset/
+ios/Runner/Assets.xcassets/AppIcon-integration.appiconset/
+ios/Runner/Assets.xcassets/AppIcon-production.appiconset/
 pocketChat.keystore.old
 pocketChat.keystore
 

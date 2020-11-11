@@ -62,6 +62,12 @@ https://github.com/ajinasokan/flutter_displaymode/issues/4
 
 14. And some other plugins but not yet implemented...
 
+Step to build for Android:
+1. Place your keystore file in the directory.
+2. Go to android/ directory, and itendify key.properties, key.profile.properties, key.release.properties files. Edit the content of the files(storeFile, keyAlias, keyPassword, storePassword)
+3. Go to app level build.grable(PROJECT_ROOT/android/app/build.gradle).
+4. View the TODOs in signingConfigs {...} and buildTypes {...}. You may decide which keystore to use for different environnments.
+
 Step to build for iOS:
 1. At project directory, type 'flutter build ios' (To build Podfile and Podfile.lock files for iOS)
 2. cd /ios
@@ -77,3 +83,42 @@ Step to build for iOS:
 6g. Select Team and your preferred Provisioning Profile.
 6h. Select Capabilities(Optional)
 7. Press Play button to start running the app in simulator/real device.
+
+Remember, 3 types of mode is available for Android development of Flutter, which are debug, profile and release.
+
+Build app icons for Android & iOS:
+Requirement:
+1. Have a app icon with resolution of 1024 x 1024 (1:1) with PNG file format.
+
+Steps:
+1. At project root directory, put the file into app_icon directory.
+1a. NOTE: You may put different icons for different types of environments. The APK built with different environments will show different type of icons.
+2. Duplicate your app icon into 3 icons named app_icon_dev.png, app_icon_integration.png and app_icon_production.png to overwrite the defaults.
+3. Then, you can start build the APK files with different icons and environments. Normally, the app can be built using
+
+Execute the following command to build app icon into Android & iOS projects:
+1. flutter pub run flutter_launcher_icons:main -f flutter_launcher_icons-development.yaml (Build app icon with app_icon_dev.png file)
+2. flutter pub run flutter_launcher_icons:main -f flutter_launcher_icons-integration.yaml (Build app icon with app_icon_integration.png file)
+3. flutter pub run flutter_launcher_icons:main -f flutter_launcher_icons-production.yaml (Build app icon with app_icon_production.png file)
+
+Available Arguments for --flavor command:
+1. development
+2. integration
+3. production
+
+NOTE: These arguments are accepted by the tool by reading flutter_launcher_icons-<ARGUMENT_OF_FLAVOR>.yaml file.
+
+Flutter Deployment Commands:
+flutter run (Default)
+
+flutter run --flavor development (Use development app icon in debug mode)
+flutter run --flavor development --profile (Use development app icon in profile mode)
+flutter run --flavor development --release (Use development app icon in release mode)
+
+flutter run --flavor integration (Use integration app icon in debug mode)
+flutter run --flavor integration --profile (Use integration app icon in profile mode)
+flutter run --flavor integration --release (Use integration app icon in release mode)
+
+flutter run --flavor production (Use production app icon in debug mode)
+flutter run --flavor production --profile (Use production app icon in profile mode)
+flutter run --flavor production --release (Use production app icon in release mode)

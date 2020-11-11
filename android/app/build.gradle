@@ -25,8 +25,32 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
+// Deploy Android with Flutter
+// https://flutter.dev/docs/deployment/android
+
+// Read configuration file for Debug mode
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+// Read configuration file for Profile mode
+def profileKeystoreProperties = new Properties()
+def profileKeystorePropertiesFile = rootProject.file('key.profile.properties')
+if (profileKeystorePropertiesFile.exists()) {
+    profileKeystoreProperties.load(new FileInputStream(profileKeystorePropertiesFile))
+}
+
+// Read configuration file for Release mode
+def releaseKeystoreProperties = new Properties()
+def releaseKeystorePropertiesFile = rootProject.file('key.release.properties')
+if (releaseKeystorePropertiesFile.exists()) {
+    releaseKeystoreProperties.load(new FileInputStream(releaseKeystorePropertiesFile))
+}
+
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -48,10 +72,74 @@ android {
         // To solve firestore problem: https://stackoverflow.com/questions/52459533/flutter-unable-to-merge-dex
     }
 
-    buildTypes {
+    // Flutter launcher icon plugin integration code
+    flavorDimensions "default"
+    productFlavors {
+        production {
+            dimension "default"
+            applicationIdSuffix ""
+            manifestPlaceholders = [appName: "PocketChat"]
+        }
+        development {
+            dimension "default"
+            applicationIdSuffix ".dev"
+            manifestPlaceholders = [appName: "PocketChat (Dev)"]
+        }
+        integration {
+            dimension "default"
+            applicationIdSuffix ".int"
+            manifestPlaceholders = [appName: "PocketChat (UAT)"]
+        }
+    }
+
+    // Deploy Android with Flutter
+    // https://flutter.dev/docs/deployment/android
+    // Signing configurations for each development mode.
+    signingConfigs {
+        // Sign with the provided sign key in debug mode
+        // TODO: If you need custom signing key for debug, uncomment the code below.
+        // debug {
+        //     keyAlias keystoreProperties['keyAlias']
+        //     keyPassword keystoreProperties['keyPassword']
+        //     storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+        //     storePassword keystoreProperties['storePassword']
+        // }
+
+        // Sign with the provided sign key in profile mode
+        profile {
+            keyAlias profileKeystoreProperties['keyAlias']
+            keyPassword profileKeystoreProperties['keyPassword']
+            storeFile profileKeystoreProperties['storeFile'] ? file(profileKeystoreProperties['storeFile']) : null
+            storePassword profileKeystoreProperties['storePassword']
+        }
+
+        // Sign with the provided sign key in release mode
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            keyAlias releaseKeystoreProperties['keyAlias']
+            keyPassword releaseKeystoreProperties['keyPassword']
+            storeFile releaseKeystoreProperties['storeFile'] ? file(releaseKeystoreProperties['storeFile']) : null
+            storePassword releaseKeystoreProperties['storePassword']
+        }
+    }
+
+    // Using which signing config for each type of deployment.
+    buildTypes {
+        debug {
+            // Signing with the debug keys, so `flutter run` works.
+            signingConfig signingConfigs.debug
+        }
+
+        profile {
+            // flutter run --profile
+            // TODO: Uncomment the code below if you have signing key located in the correctly in the directory.
+            // signingConfig signingConfigs.profile
+            signingConfig signingConfigs.debug
+        }
+
+        release {
+            // flutter run --release
+            // TODO: Uncomment the code below if you have signing key located in the correctly in the directory.
+            // signingConfig signingConfigs.release
             signingConfig signingConfigs.debug
         }
     }

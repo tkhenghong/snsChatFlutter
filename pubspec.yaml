@@ -164,6 +164,9 @@ dependencies:
   cupertino_icons: ^1.0.0
 
 dev_dependencies:
+  # Generate app icons for Android & iOS
+  flutter_launcher_icons: ^0.8.0
+
   flutter_test:
     sdk: flutter
 
