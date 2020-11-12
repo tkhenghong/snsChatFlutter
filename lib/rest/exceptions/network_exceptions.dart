@@ -8,7 +8,11 @@ import 'package:snschat_flutter/objects/rest/index.dart';
 String supportEmail = globals.supportEmail;
 
 abstract class ApiException implements Exception {
+  ErrorResponse errorResponse;
+
   ApiException(ErrorResponse errorResponse, {String errorCode, bool showDialog = false, bool showSnackBar = false}) {
+    this.errorResponse = errorResponse;
+
     if (Get.isOverlaysOpen || Get.isBottomSheetOpen || Get.isSnackbarOpen || Get.isDialogOpen) {
       Get.back();
     }
@@ -127,7 +131,7 @@ class ClientErrorException extends ApiException {
 }
 
 class UnknownException extends ApiException {
-  UnknownException(ErrorResponse errorResponse, [String errorCode, bool showSnackBar, bool showDialog = true])
+  UnknownException(ErrorResponse errorResponse, [String errorCode, bool showSnackBar, bool showDialog])
       : super(errorResponse, errorCode: errorCode, showDialog: isObjectEmpty(showDialog) ? true : showDialog, showSnackBar: isObjectEmpty(showSnackBar) ? false : showSnackBar) {}
 }
 
