@@ -10,28 +10,28 @@ description: Real-time message app created using Flutter.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.8.0 <3.0.0"
+  sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
   # Database
-  sembast: ^2.4.7+7
+  sembast: ^2.4.8
 
   # Short term storage for storing small values
-  shared_preferences: ^0.5.7+3
+  shared_preferences: ^0.5.12+4
 
   # Secure Storage (Keychain for iOS and Android KeyStore requires 4.3 and above)
   flutter_secure_storage: ^3.3.5
 
   # State
   #  provider: ^4.0.5
-  bloc: ^6.0.1
-  flutter_bloc: ^6.0.1
+  bloc: ^6.1.0
+  flutter_bloc: ^6.1.1
 
   # Latest State Management
-  get: ^3.2.2
+  get: ^3.16.2
 
   # Things that required by bloc
-  equatable: ^1.2.0
+  equatable: ^1.2.5
 
   # JSON, Data & Serialization, checked_yaml is for debug JSON parsing error.
   # dart_json_mapper: ^1.5.9
@@ -45,37 +45,37 @@ dependencies:
 
   # Format date/time
   time_formatter: ^1.0.0+5
-  date_format: ^1.0.8
+  date_format: ^1.0.9
 
   # Internationalization and Localization (i18n)
   intl: ^0.16.1
 
   # Sign In
-  google_sign_in: ^4.4.4
-  firebase_auth: ^0.18.1+2
-
-  # Auth buttons
-  flutter_auth_buttons: ^0.10.0
+  google_sign_in: ^4.5.6
+  firebase_auth: ^0.18.3
 
   # Password Text Field
-  pin_input_text_field: ^3.0.3
+  pin_input_text_field: ^3.1.1
 
   # Country Code Picker
-  country_code_picker: ^1.4.0
+  country_code_picker: ^1.6.2
 
   # Emoji Picker
   emoji_picker: ^0.1.0
 
   # URL Launcher: To send data to other application like Email etc.
-  url_launcher: ^5.5.0
+  url_launcher: ^5.7.10
 
   # Image
-  image_picker: ^0.6.7+12
-  cached_network_image: ^2.3.2+1
+  image_picker: ^0.6.7+14
+  cached_network_image: ^2.3.3
   photo_view: ^0.10.2
 
-  # Image Online Storage Provider
-  firebase_storage: ^4.0.1
+  # Firebase Core
+  firebase_core: ^0.5.2
+
+  # Firebase Storage
+  firebase_storage: ^5.0.1
 
   # Image rotation fix
   # flutter_exif_rotation: ^0.2.7
@@ -85,14 +85,16 @@ dependencies:
   rxdart: ^0.24.1
 
   # Video
-  video_player: ^0.11.0
+  # NOTE: Latest version 1.0.0 uses ffmpeg which requires Android SDK 24 as minimum in Android, which is too high.
+  video_player: ^0.11.1+5
 
   # Audio record/playback
   # flutter_sound: ^3.1.10
+  # NOTE: Latest version, 6.4.2 will made 50MB++ when deploying app in release mode.(Too large for the base)
 
   # Documents/File
-  open_file: ^3.0.1
-  file_picker: ^2.0.3
+  open_file: ^3.0.3
+  file_picker: ^2.0.13
 
   # Barcode/QR scanner
   qr_flutter: ^3.2.0
@@ -104,28 +106,29 @@ dependencies:
       url: git://github.com/juliuscanute/qr_code_scanner.git
 
   # Vibrate
-  vibration: ^1.7.1
+  vibration: ^1.7.2
 
   # Toast (will be replaced by Scaffold snackbars)
-  fluttertoast: ^7.0.1
+  fluttertoast: ^7.1.1
 
   # Permissions
   permission_handler: ^5.0.1+1
 
   # HTTP Client
-  http: ^0.12.1
+  http: ^0.12.2
 
   # HTTP Client Interceptor/ File Downloader
-  dio: ^3.0.9
+  dio: ^3.0.10
 
   # Network
-  connectivity: ^0.4.9
+  connectivity: ^2.0.1
+  wifi_info_flutter: ^1.0.1
 
   # Fonts
-  google_fonts: ^1.1.0
+  google_fonts: ^1.1.1
 
   # Device Info
-  device_info: ^0.4.2+4
+  device_info: ^1.0.0
 
   # Pull to refresh
   pull_to_refresh: ^1.6.2
@@ -134,10 +137,10 @@ dependencies:
   contacts_service: ^0.4.6
 
   # Provide locations of the phone
-  path_provider: ^1.6.11
+  path_provider: ^1.6.24
 
   # Build runner for json_annotation and json_serializable
-  build_runner: ^1.10.0
+  build_runner: ^1.10.4
 
   # Phoenix to restart the app programmatically
   flutter_phoenix: ^0.1.0

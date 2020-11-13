@@ -1,7 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:connectivity/connectivity.dart';
+import 'package:snschat_flutter/service/index.dart';
+import 'package:wifi_info_flutter/wifi_info_flutter.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:rxdart/subjects.dart';
@@ -10,6 +11,7 @@ import 'package:snschat_flutter/general/enums/index.dart';
 class NetworkService {
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<ConnectivityResult> _connectivitySubscription;
+  PermissionService permissionService = Get.find();
 
   RxBool hasInternetConnection = false.obs;
   RxBool connectedThroughWifi = false.obs;
@@ -82,17 +84,22 @@ class NetworkService {
 
   tryGetWifiName() async {
     try {
-      if (Platform.isIOS) {
-        LocationAuthorizationStatus status = await _connectivity.getLocationServiceAuthorization();
-        if (status == LocationAuthorizationStatus.notDetermined) {
-          status = await _connectivity.requestLocationServiceAuthorization();
-        }
-        if (status == LocationAuthorizationStatus.authorizedAlways || status == LocationAuthorizationStatus.authorizedWhenInUse) {
-          hasLocationEnabled.value = true;
-        }
-      }
+      // var wifiBSSID = await WifiInfo().getWifiBSSID();
+      // var wifiIP = await WifiInfo().getWifiIP();
+      // var wifiName = await WifiInfo().getWifiName();
+      // bool allowed = await permissionService.requestLocationWhenInUsePermission();
 
-      wifiFullName = await _connectivity.getWifiName();
+      // if (Platform.isIOS) {
+      //   LocationAuthorizationStatus status = await _connectivity.getLocationServiceAuthorization();
+      //   if (status == LocationAuthorizationStatus.notDetermined) {
+      //     status = await _connectivity.requestLocationServiceAuthorization();
+      //   }
+      //   if (status == LocationAuthorizationStatus.authorizedAlways || status == LocationAuthorizationStatus.authorizedWhenInUse) {
+      //     hasLocationEnabled.value = true;
+      //   }
+      // }
+
+      wifiFullName = await WifiInfo().getWifiName();
       wifiName.value = wifiFullName;
     } on PlatformException catch (e) {
       print(e.toString());
@@ -103,21 +110,23 @@ class NetworkService {
 
   tryGetWifiSSID() async {
     try {
-      if (Platform.isIOS) {
-        LocationAuthorizationStatus status = await _connectivity.getLocationServiceAuthorization();
-        if (status == LocationAuthorizationStatus.notDetermined) {
-          status = await _connectivity.requestLocationServiceAuthorization();
-        }
-        if (status == LocationAuthorizationStatus.authorizedAlways || status == LocationAuthorizationStatus.authorizedWhenInUse) {
-          wifiBSSID = await _connectivity.getWifiBSSID();
-        } else {
-          wifiBSSID = await _connectivity.getWifiBSSID();
-        }
-      } else {
-        wifiBSSID = await _connectivity.getWifiBSSID();
-      }
+      // bool allowed = await permissionService.requestLocationWhenInUsePermission();
 
-      wifiSSID.value = wifiBSSID;
+      // if (Platform.isIOS) {
+      //   LocationAuthorizationStatus status = await _connectivity.getLocationServiceAuthorization();
+      //   if (status == LocationAuthorizationStatus.notDetermined) {
+      //     status = await _connectivity.requestLocationServiceAuthorization();
+      //   }
+      //   if (status == LocationAuthorizationStatus.authorizedAlways || status == LocationAuthorizationStatus.authorizedWhenInUse) {
+      //     wifiBSSID = await _connectivity.getWifiBSSID();
+      //   } else {
+      //     wifiBSSID = await _connectivity.getWifiBSSID();
+      //   }
+      // } else {
+      //   wifiBSSID = await _connectivity.getWifiBSSID();
+      // }
+
+      wifiSSID.value = await WifiInfo().getWifiBSSID();
     } on PlatformException catch (e) {
       print(e.toString());
       wifiBSSID = "Failed to get Wifi BSSID";
@@ -127,7 +136,7 @@ class NetworkService {
 
   tryGetWifiIP() async {
     try {
-      wifiIP = await _connectivity.getWifiIP();
+      wifiIP = await WifiInfo().getWifiIP();
       ipAddress.value = wifiIP;
     } on PlatformException catch (e) {
       print(e.toString());

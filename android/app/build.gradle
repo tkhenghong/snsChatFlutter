@@ -67,9 +67,6 @@ android {
         targetSdkVersion 29 // Android 10 Q
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        multiDexEnabled true
-        // To solve firestore problem: https://stackoverflow.com/questions/52459533/flutter-unable-to-merge-dex
     }
 
     // Flutter launcher icon plugin integration code
@@ -82,12 +79,18 @@ android {
         }
         development {
             dimension "default"
-            applicationIdSuffix ".dev"
+            // Allow during development environment, add .dev at the back of your app ID.
+            // This is important if you have your app ID bind to some Google services(Firebase), it may fail due to you didn't create flutter.snschat.com.snschatflutter.int in Firebase.
+            // applicationIdSuffix ".dev"
+            applicationIdSuffix ""
             manifestPlaceholders = [appName: "PocketChat (Dev)"]
         }
         integration {
             dimension "default"
-            applicationIdSuffix ".int"
+            // Allow during development environment, add .dev at the back of your app ID.
+            // This is important if you have your app ID bind to some Google services(Firebase), it may fail due to you didn't create flutter.snschat.com.snschatflutter.int in Firebase.
+            // applicationIdSuffix ".int"
+            applicationIdSuffix ""
             manifestPlaceholders = [appName: "PocketChat (UAT)"]
         }
     }
@@ -139,7 +142,7 @@ android {
         release {
             // flutter run --release
             // TODO: Uncomment the code below if you have signing key located in the correctly in the directory.
-            // signingConfig signingConfigs.release
+//             signingConfig signingConfigs.release
             signingConfig signingConfigs.debug
         }
     }
@@ -151,15 +154,6 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    compile 'com.android.support:multidex:1.0.3'
-    // To solve firestore problem: https://stackoverflow.com/questions/52459533/flutter-unable-to-merge-dex
-    implementation 'com.google.firebase:firebase-core:16.0.9'
-    implementation 'com.google.firebase:firebase-storage:19.0.0'
-    // https://stackoverflow.com/questions/56639529/duplicate-class-com-google-common-util-concurrent-listenablefuture-found-in-modu
-    implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
 }
 
 apply plugin: 'com.google.gms.google-services'

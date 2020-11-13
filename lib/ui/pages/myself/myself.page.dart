@@ -159,21 +159,17 @@ class MyselfPageState extends State<MyselfPage> {
   }
 
   Widget mainBody() {
-    return Expanded(
-      child: Container(
-        child: SmartRefresher(
-          controller: _refreshController,
-          onRefresh: refreshUserData,
-          child: ListView.builder(
-              itemCount: buttons.length,
-              shrinkWrap: true,
-              physics: BouncingScrollPhysics(),
-              // suggestion from https://github.com/flutter/flutter/issues/22314
-              itemBuilder: (BuildContext content, int index) {
-                return buttons[index];
-              }),
-        ),
-      ),
+    return SmartRefresher(
+      controller: _refreshController,
+      onRefresh: refreshUserData,
+      child: ListView.builder(
+          itemCount: buttons.length,
+          shrinkWrap: true,
+          physics: BouncingScrollPhysics(),
+          // suggestion from https://github.com/flutter/flutter/issues/22314
+          itemBuilder: (BuildContext content, int index) {
+            return buttons[index];
+          }),
     );
   }
 

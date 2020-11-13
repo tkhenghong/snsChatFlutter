@@ -67,5 +67,9 @@
     <true/>
     <key>NSCameraUsageDescription</key>
     <string>Used to demonstrate image picker and barcode scanner plugin</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Used to determine network condition to prevent error occurs when using the app</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Used to determine network condition to prevent error occurs when using the app</string>
 </dict>
 </plist>

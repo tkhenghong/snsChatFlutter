@@ -225,6 +225,18 @@ initializeServices() {
   // Dio
   Get.put(new Dio());
 
+  // Services
+  Get.put(PermissionService());
+  Get.put(AudioService());
+  Get.put(FileCachingService());
+  Get.put(CustomFileService());
+  Get.put(FirebaseStorageService());
+  Get.put(NetworkService());
+  Get.put(WebSocketService());
+  Get.put(PasswordService());
+  Get.put(CryptoJSService());
+  Get.put(DigestService());
+
   // API Services
   Get.put(CustomHttpClient());
   Get.put(HTTPFileService());
@@ -248,18 +260,6 @@ initializeServices() {
   Get.put(UnreadMessageDBService());
   Get.put(UserDBService());
   Get.put(UserContactDBService());
-
-  // Services
-  Get.put(PermissionService());
-  Get.put(AudioService());
-  Get.put(FileCachingService());
-  Get.put(CustomFileService());
-  Get.put(FirebaseStorageService());
-  Get.put(NetworkService());
-  Get.put(WebSocketService());
-  Get.put(PasswordService());
-  Get.put(CryptoJSService());
-  Get.put(DigestService());
 
   // ImagePicker
   Get.put(ImagePicker());
