@@ -159,6 +159,9 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
 
         yield* updateConversationGroupsLoadedState(updatedConversationGroupList: conversationGroupList);
         functionCallback(event, conversationPageableResponse);
+      } else {
+        yield* updateConversationGroupsLoadedState(updatedConversationGroupList: []);
+
       }
     } catch (e) {
       GetConversationGroupsRequest getConversationGroupsRequest = event.getConversationGroupsRequest;

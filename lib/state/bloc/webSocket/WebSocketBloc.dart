@@ -87,6 +87,7 @@ class WebSocketBloc extends Bloc<WebSocketBlocEvent, WebSocketState> {
   }
 
   Stream<WebSocketState> _processWebSocketMessageEvent(ProcessWebSocketMessageEvent event) async* {
+    print('WebSocketBloc.dart ProcessWebSocketMessageEvent');
     conversationGroupBloc =
         BlocProvider.of<ConversationGroupBloc>(event.context); // New Conversation Group event, Live Update conversation group event
     chatMessageBloc = BlocProvider.of<ChatMessageBloc>(event.context); // Live Update Chat Message event

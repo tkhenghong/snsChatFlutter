@@ -84,8 +84,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     googleInfoBloc = BlocProvider.of<GoogleInfoBloc>(context);
 
     if (firstRun) {
-      initialize();
-      firstRun = false;
+      authenticationBloc.add(InitializeAuthenticationsEvent(callback: (bool done) {}));
     }
 
     return multiBlocListener();
@@ -123,9 +122,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   Widget userBlocListener() {
     return BlocListener<UserBloc, UserState>(
       listener: (context, userState) {
-        if (userState is UserLoaded) {
-          webSocketBloc.add(InitializeWebSocketEvent(callback: (bool done) {}));
-        }
       },
     );
   }
@@ -158,6 +154,10 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         }
 
         if (authenticationState is AuthenticationsLoaded) {
+          if(firstRun) {
+            initialize();
+            firstRun = false;
+          }
           return conversationGroupBlocBuilder();
         }
 
@@ -293,13 +293,13 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   initialize() {
-    authenticationBloc.add(InitializeAuthenticationsEvent(callback: (bool done) {}));
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     userBloc.add(InitializeUserEvent(callback: (bool done) {}));
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     multimediaProgressBloc.add(InitializeMultimediaProgressEvent(callback: (bool done) {}));
     multimediaBloc.add(InitializeMultimediaEvent(callback: (bool done) {}));
     userBloc.add(GetOwnUserEvent(callback: (User user) {}));
+    webSocketBloc.add(InitializeWebSocketEvent(callback: (bool done) {}));
     loadConversationGroups();
   }
 
