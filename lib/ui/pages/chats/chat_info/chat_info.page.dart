@@ -296,8 +296,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
           tag: currentConversationGroup.id,
           child: FlatButton(
               onPressed: () async {
-                CustomDialogs customDialog = new CustomDialogs(title: 'Edit Group Name', description: 'Edit the group name below. Press OK to save.', value: currentConversationGroup.name);
-                String groupName = await customDialog.showConfirmationDialog();
+                String groupName = showConfirmationDialog(title: 'Edit Group Name', description: 'Edit the group name below. Press OK to save.', value: currentConversationGroup.name);
                 if (currentConversationGroup.name != groupName) {
                   currentConversationGroup.name = groupName;
                   conversationGroupBloc.add(EditConversationGroupEvent(editConversationGroupRequest: EditConversationGroupRequest(name: groupName), callback: (ConversationGroup conversationGroup) {}));
@@ -324,8 +323,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
       height: Get.height * 0.1,
       child: InkWell(
         onTap: () async {
-          CustomDialogs customDialog = new CustomDialogs(title: 'Edit Group Description', description: 'Edit the group description below. Press OK to save.', value: currentConversationGroup.description);
-          String groupDescription = await customDialog.showConfirmationDialog();
+          String groupDescription = showConfirmationDialog(title: 'Edit Group Description', description: 'Edit the group description below. Press OK to save.', value: currentConversationGroup.description);
           if (currentConversationGroup.description != groupDescription) {
             currentConversationGroup.description = groupDescription;
             conversationGroupBloc.add(EditConversationGroupEvent(editConversationGroupRequest: EditConversationGroupRequest(description: groupDescription), callback: (ConversationGroup conversationGroup) {}));

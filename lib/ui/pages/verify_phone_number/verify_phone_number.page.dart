@@ -24,7 +24,6 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
   AuthenticationBloc authenticationBloc;
 
   TextEditingController textEditingController;
-  PinDecoration pinDecoration;
 
   int pinFieldLength = 6;
 
