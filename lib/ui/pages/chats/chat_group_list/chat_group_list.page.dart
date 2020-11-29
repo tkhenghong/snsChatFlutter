@@ -50,6 +50,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   UserBloc userBloc;
   WebSocketBloc webSocketBloc;
   GoogleInfoBloc googleInfoBloc;
+  PermissionBloc permissionBloc;
 
   bool firstRun = true;
 
@@ -82,6 +83,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     userBloc = BlocProvider.of<UserBloc>(context);
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
     googleInfoBloc = BlocProvider.of<GoogleInfoBloc>(context);
+    permissionBloc = BlocProvider.of<PermissionBloc>(context);
 
     if (firstRun) {
       authenticationBloc.add(InitializeAuthenticationsEvent(callback: (bool done) {}));
@@ -300,6 +302,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     multimediaBloc.add(InitializeMultimediaEvent(callback: (bool done) {}));
     userBloc.add(GetOwnUserEvent(callback: (User user) {}));
     webSocketBloc.add(InitializeWebSocketEvent(callback: (bool done) {}));
+    permissionBloc.add(LoadPermissionsEvent(callback: (bool done) {}));
     loadConversationGroups();
   }
 

@@ -215,6 +215,9 @@ Widget initializeBlocProviders() {
     BlocProvider<NetworkBloc>(
       create: (context) => NetworkBloc(),
     ),
+    BlocProvider<PermissionBloc>(
+      create: (context) => PermissionBloc(),
+    ),
   ], child: MyApp());
 }
 
