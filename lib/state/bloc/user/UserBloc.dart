@@ -152,9 +152,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     functionCallback(event, true);
   }
 
-  // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!isObjectEmpty(event)) {
+    if (!isObjectEmpty(event) && !isObjectEmpty(event.callback)) {
       event.callback(value);
     }
   }

@@ -244,7 +244,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
       listener: (context, webSocketState) {
         if (webSocketState is WebSocketNotLoaded) {
           showToast('Connection broken. Reconnecting WebSocket...', Toast.LENGTH_SHORT);
-          webSocketBloc.add(InitializeWebSocketEvent(callback: (bool done) {}));
+          webSocketBloc.add(ConnectOfficialWebSocketEvent(callback: (bool done) {}));
         }
       },
     );
@@ -325,11 +325,11 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     return BlocBuilder<WebSocketBloc, WebSocketState>(
       builder: (context, webSocketState) {
         if (webSocketState is WebSocketNotLoaded) {
-          webSocketBloc.add(ReconnectWebSocketEvent(callback: (bool done) {}));
+          webSocketBloc.add(ConnectOfficialWebSocketEvent(callback: (bool done) {}));
           isWebSocketConnected = false;
         }
 
-        if (webSocketState is WebSocketLoaded) {
+        if (webSocketState is OfficialWebSocketLoaded) {
           isWebSocketConnected = true;
         }
 
@@ -1163,7 +1163,8 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
               showToast('ChatMessage not sent. Please try again.', Toast.LENGTH_SHORT);
             } else {
               WebSocketMessage webSocketMessage = WebSocketMessage(message: message);
-              webSocketBloc.add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
+              // TODO: Acknowledge the message.
+              // webSocketBloc.add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
             }
           }));
     }

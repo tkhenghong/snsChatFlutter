@@ -1,83 +1,110 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
+import 'package:stomp_dart_client/stomp_frame.dart';
 
 abstract class WebSocketBlocEvent extends Equatable {
   @override
-  // TODO: implement props
   List<Object> get props => [];
 
   const WebSocketBlocEvent();
 }
-
-class InitializeWebSocketEvent extends WebSocketBlocEvent {
+/********************************************************wWebSocket Official Events******************************************************************/
+class ConnectOfficialWebSocketEvent extends WebSocketBlocEvent {
   final Function callback;
 
-  const InitializeWebSocketEvent({this.callback});
+  const ConnectOfficialWebSocketEvent({this.callback});
 
   @override
-  String toString() => 'InitializeWebSocketEvent';
+  String toString() => 'ConnectOfficialWebSocketEvent';
 }
 
-class DisconnectWebSocketEvent extends WebSocketBlocEvent {
+class DisconnectOfficialWebSocketEvent extends WebSocketBlocEvent {
   final Function callback;
 
-  DisconnectWebSocketEvent({this.callback});
+  DisconnectOfficialWebSocketEvent({this.callback});
 
   @override
   List<Object> get props => [];
 
   @override
-  String toString() => 'DisconnectWebSocketEvent';
+  String toString() => 'DisconnectOfficialWebSocketEvent';
 }
 
-class ReconnectWebSocketEvent extends WebSocketBlocEvent {
+class GetOfficialWebSocketStreamEvent extends WebSocketBlocEvent {
   final Function callback;
 
-  ReconnectWebSocketEvent({this.callback});
+  GetOfficialWebSocketStreamEvent({this.callback});
 
   @override
   List<Object> get props => [];
 
   @override
-  String toString() => 'ReconnectWebSocketEvent';
+  String toString() => 'GetOfficialWebSocketStreamEvent';
 }
 
-class GetOwnWebSocketEvent extends WebSocketBlocEvent {
-  final Function callback;
-
-  GetOwnWebSocketEvent({this.callback});
-
-  @override
-  List<Object> get props => [];
-
-  @override
-  String toString() => 'GetOwnWebSocketEvent';
-}
-
-class ProcessWebSocketMessageEvent extends WebSocketBlocEvent {
-  final WebSocketMessage webSocketMessage;
-  final BuildContext context; // Need to bring this in order to trigger other Blocs
-  final Function callback;
-
-  ProcessWebSocketMessageEvent({this.webSocketMessage, this.context, this.callback});
-
-  @override
-  List<Object> get props => [webSocketMessage, context];
-
-  @override
-  String toString() => 'ProcessWebSocketMessageEvent';
-}
-
-class SendWebSocketMessageEvent extends WebSocketBlocEvent {
+class ProcessOfficialWebSocketMessageEvent extends WebSocketBlocEvent {
   final WebSocketMessage webSocketMessage;
   final Function callback;
 
-  const SendWebSocketMessageEvent({this.webSocketMessage, this.callback});
+  ProcessOfficialWebSocketMessageEvent({this.webSocketMessage, this.callback});
 
   @override
   List<Object> get props => [webSocketMessage];
 
   @override
-  String toString() => 'SendWebSocketMessageEvent {webSocketMessage: $webSocketMessage}';
+  String toString() => 'ProcessOfficialWebSocketMessageEvent';
 }
+
+/********************************************************wWebSocket Official Events END******************************************************************/
+
+/********************************************************wWebSocket STOMP Events START******************************************************************/
+
+class ConnectWebSocketWithSTOMPEvent extends WebSocketBlocEvent {
+  final Function onWebSocketDone;
+  final Function callback;
+
+  const ConnectWebSocketWithSTOMPEvent({this.onWebSocketDone, this.callback});
+
+  @override
+  String toString() => 'ConnectWebSocketWithSTOMPEvent';
+}
+
+class DisconnectWebSocketWithSTOMPEvent extends WebSocketBlocEvent {
+  final Function callback;
+
+  const DisconnectWebSocketWithSTOMPEvent({this.callback});
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'DisconnectWebSocketWithSTOMPEvent';
+}
+
+class GetWebSocketSTOMPClientEvent extends WebSocketBlocEvent {
+  final Function callback;
+
+  const GetWebSocketSTOMPClientEvent({this.callback});
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'GetWebSocketSTOMPClientEvent';
+}
+
+class SubscribeWebSocketSTOMPTopicEvent extends WebSocketBlocEvent {
+  final String userId;
+  final Function(StompFrame) onMessage;
+  final Function callback;
+
+  const SubscribeWebSocketSTOMPTopicEvent({this.userId, this.onMessage, this.callback});
+
+  @override
+  List<Object> get props => [userId];
+
+  @override
+  String toString() => 'SubscribeWebSocketSTOMPTopicEvent {userId: $userId, onMessage: $onMessage}';
+}
+/********************************************************wWebSocket STOMP Events END******************************************************************/

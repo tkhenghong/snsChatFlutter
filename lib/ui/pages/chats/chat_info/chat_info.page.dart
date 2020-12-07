@@ -70,7 +70,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
       listener: (context, webSocketState) {
         if (webSocketState is WebSocketNotLoaded) {
           showToast('Connection broken. Reconnecting WebSocket...', Toast.LENGTH_SHORT);
-          webSocketBloc.add(InitializeWebSocketEvent(callback: (bool done) {}));
+          webSocketBloc.add(ConnectOfficialWebSocketEvent(callback: (bool done) {}));
         }
       },
     );

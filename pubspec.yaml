@@ -120,8 +120,8 @@ dependencies:
   # HTTP Client Interceptor/ File Downloader
   dio: ^3.0.10
 
-  # WebSocket/STOMP client TODO: Research & Test it
-  stomp_dart_client: ^0.3.7
+  # WebSocket/STOMP client
+  stomp_dart_client: ^0.3.8
 
   # Network
   connectivity: ^2.0.1

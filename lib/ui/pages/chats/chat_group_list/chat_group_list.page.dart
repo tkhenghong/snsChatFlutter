@@ -51,8 +51,12 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   WebSocketBloc webSocketBloc;
   GoogleInfoBloc googleInfoBloc;
   PermissionBloc permissionBloc;
+  NetworkBloc networkBloc;
 
   bool firstRun = true;
+  bool loggingOut = false;
+  bool webSocketDisconnected = true;
+
 
   Color whiteColor = Colors.white;
   TextStyle buttonTextStyle = TextStyle(color: Colors.white);
@@ -84,6 +88,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
     googleInfoBloc = BlocProvider.of<GoogleInfoBloc>(context);
     permissionBloc = BlocProvider.of<PermissionBloc>(context);
+    networkBloc = BlocProvider.of<NetworkBloc>(context);
 
     if (firstRun) {
       authenticationBloc.add(InitializeAuthenticationsEvent(callback: (bool done) {}));
@@ -103,7 +108,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     return BlocListener<AuthenticationBloc, AuthenticationState>(
       listener: (context, authenticationState) {
         if (authenticationState is AuthenticationsNotLoaded) {
-          goToLoginPage();
+          logout();
         }
 
         if (authenticationState is AuthenticationsLoaded) {
@@ -130,13 +135,38 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   Widget webSocketBlocListener() {
     return BlocListener<WebSocketBloc, WebSocketState>(
-      listener: (context, websocketState) {
-        if (websocketState is WebSocketLoaded) {
-          webSocketBloc.add(GetOwnWebSocketEvent(callback: (Stream<dynamic> webSocketStream) {
-            if (!webSocketStream.isNull) {
-              processWebSocketMessage(webSocketStream);
-            }
-          }));
+      listener: (context, webSocketState) {
+        if (webSocketState is WebSocketLoading) {
+          if (webSocketDisconnected) {
+            showWebSocketLoadingSnackbar();
+          }
+        }
+
+        if (webSocketState is ReconnectingWebSocket) {
+          webSocketDisconnected = true;
+          if(!loggingOut) {
+            showWebSocketReconnectingSnackbar();
+          }
+        }
+
+        if (webSocketState is OfficialWebSocketLoaded) {
+          if (!webSocketDisconnected) {
+            showConnectWebSocketSuccessfulSnackbar();
+          }
+          webSocketDisconnected = false;
+
+          Stream<dynamic> webSocketStream = webSocketState.webSocketStream;
+          if (!webSocketStream.isNull) {
+            processWebSocketMessage(webSocketStream);
+          }
+        }
+
+        if (webSocketState is WebSocketNotLoaded) {
+          webSocketDisconnected = true;
+          if (!loggingOut) {
+            showWebSocketNotLoadedSnackbar();
+            checkNetworkConditions();
+          }
         }
       },
     );
@@ -160,6 +190,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
             initialize();
             firstRun = false;
           }
+          connectWebSocket();
           return conversationGroupBlocBuilder();
         }
 
@@ -289,6 +320,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   onRefresh() async {
     loadConversationGroups();
+    connectWebSocket();
     setState(() {
       _refreshController.refreshCompleted();
     });
@@ -301,7 +333,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     multimediaProgressBloc.add(InitializeMultimediaProgressEvent(callback: (bool done) {}));
     multimediaBloc.add(InitializeMultimediaEvent(callback: (bool done) {}));
     userBloc.add(GetOwnUserEvent(callback: (User user) {}));
-    webSocketBloc.add(InitializeWebSocketEvent(callback: (bool done) {}));
+    webSocketBloc.add(ConnectOfficialWebSocketEvent(callback: (bool done) {}));
     permissionBloc.add(LoadPermissionsEvent(callback: (bool done) {}));
     loadConversationGroups();
   }
@@ -354,21 +386,79 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   /// As long as this page is not removed during logged in state, it will receive and process the messages correctly
   /// If user perform sudden logout or system logout, it will be disconnected immediately even if there's a message processing here. It's excepted.
   processWebSocketMessage(Stream<dynamic> webSocketStream) {
-    UserState userState = userBloc.state;
     webSocketStream.listen((data) {
       showToast('Message confirmed received!', Toast.LENGTH_LONG);
       WebSocketMessage receivedWebSocketMessage = WebSocketMessage.fromJson(json.decode(data));
-      webSocketBloc.add(ProcessWebSocketMessageEvent(webSocketMessage: receivedWebSocketMessage, context: context, callback: (bool done) {}));
+      testProcessingWebSocketMessage(receivedWebSocketMessage);
     }, onError: (onError) {
-      if (userState is UserLoaded) {
-        webSocketBloc.add(ReconnectWebSocketEvent(callback: (bool done) {}));
-      }
+      checkNetworkConditions();
     }, onDone: () {
-      // TODO: Show reconnect message
-      if (userState is UserLoaded) {
-        webSocketBloc.add(ReconnectWebSocketEvent(callback: (bool done) {}));
-      }
+      checkNetworkConditions();
     }, cancelOnError: false);
+  }
+
+  checkNetworkConditions() {
+    networkBloc.add(CheckNetworkEvent(callback: (bool hasInternetConnection) {
+      if(!hasInternetConnection) {
+        // Only shows messenger not connected, handled by NetworkBlocListener, so do nothing here.
+      } else {
+        logout();
+      }
+    }));
+  }
+
+  connectWebSocket() {
+    webSocketBloc.add(ConnectOfficialWebSocketEvent(callback: (bool done) {}));
+  }
+
+  disconnectWebSocket() {
+    webSocketBloc.add(DisconnectOfficialWebSocketEvent(callback: (bool done) {}));
+  }
+
+  testProcessingWebSocketMessage(WebSocketMessage webSocketMessage) {
+    try {
+      if (!isObjectEmpty(webSocketMessage)) {
+        if (!isObjectEmpty(webSocketMessage.conversationGroup)) {
+          processConversationGroup(webSocketMessage.conversationGroup);
+        }
+
+        if (!isObjectEmpty(webSocketMessage.message)) {
+          processChatMessage(webSocketMessage.message);
+        }
+
+        if (!isObjectEmpty(webSocketMessage.multimedia)) {}
+
+        if (!isObjectEmpty(webSocketMessage.unreadMessage)) {}
+
+        if (!isObjectEmpty(webSocketMessage.settings)) {}
+
+        if (!isObjectEmpty(webSocketMessage.user)) {}
+
+        if (!isObjectEmpty(webSocketMessage.userContact)) {}
+      } else {
+        showToast('Unsupported message detected. Ignoring!', Toast.LENGTH_LONG);
+      }
+    } catch (e) {
+      showToast('Error in processing WebSocket messages. Please try again later.', Toast.LENGTH_LONG);
+      // TODO: Not acknowledging this message.
+    }
+  }
+
+  processConversationGroup(ConversationGroup conversationGroup) {
+    /// TODO: Add ConversationGroup object to state and DB.
+  }
+
+  processChatMessage(ChatMessage chatMessage) {
+    UserState userState = userBloc.state;
+    if (userState is UserLoaded) {
+      if (userState.user.id != chatMessage.senderId) {
+        /// TODO: Add chat message to state and DB.
+        /// TODO: Retrieve Chat message's Multimedia object, save it to the localDB and state.
+      } else {
+        // Mark your own message as sent, received status will changed by recipient
+        /// TODO: UpdateChatMessageEvent (Different than EditChatMessageEvent)
+      }
+    }
   }
 
   Widget showLoading(String module) {
@@ -387,13 +477,42 @@ class ChatGroupListState extends State<ChatGroupListPage> {
             'An error has occurred in $module. Please try again later.',
             textAlign: TextAlign.center,
           ),
-          RaisedButton(child: Text('Restart App'), onPressed: goToLoginPage)
+          RaisedButton(child: Text('Restart App'), onPressed: logout)
         ],
       ),
     );
   }
 
-  goToLoginPage() {
+  showWebSocketLoadingSnackbar() {
+    Get.snackbar('Loading....', 'Connecting to WebSocket...', snackPosition: SnackPosition.TOP, isDismissible: false);
+  }
+
+  showWebSocketReconnectingSnackbar() {
+    Get.snackbar('Reconnecting....', 'Reconnecting to WebSocket...', snackPosition: SnackPosition.TOP, isDismissible: false);
+  }
+
+  showConnectWebSocketSuccessfulSnackbar() {
+    Get.snackbar('Connection Successful.', 'WebSocket is connected.', snackPosition: SnackPosition.TOP, isDismissible: true);
+  }
+
+  showWebSocketNotLoadedSnackbar() {
+    FlatButton retryButton = FlatButton(
+      child: Text('Retry'),
+      onPressed: () {
+        connectWebSocket();
+      },
+    );
+    Get.snackbar('Connection Failed.', 'WebSocket is not connected. Please try again later.', snackPosition: SnackPosition.TOP, isDismissible: false, mainButton: retryButton);
+  }
+
+  logout() {
+    disconnectWebSocket();
+    clearAllData();
+    showToast('Logged out.', Toast.LENGTH_LONG);
+    goToLoginPage();
+  }
+
+  clearAllData() {
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     googleInfoBloc.add(RemoveGoogleInfoEvent(callback: (bool done) {}));
     conversationGroupBloc.add(RemoveConversationGroupsEvent(callback: (bool done) {}));
@@ -405,7 +524,9 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     userBloc.add(RemoveAllUsersEvent(callback: (bool done) {}));
     userContactBloc.add(RemoveAllUserContactsEvent(callback: (bool done) {}));
     authenticationBloc.add(RemoveAllAuthenticationsEvent(callback: (bool done) {}));
+  }
 
+  goToLoginPage() {
     Navigator.of(context).pushNamedAndRemoveUntil('login_page', (Route<dynamic> route) => false);
   }
 

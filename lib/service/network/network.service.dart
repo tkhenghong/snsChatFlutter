@@ -84,21 +84,6 @@ class NetworkService {
 
   tryGetWifiName() async {
     try {
-      // var wifiBSSID = await WifiInfo().getWifiBSSID();
-      // var wifiIP = await WifiInfo().getWifiIP();
-      // var wifiName = await WifiInfo().getWifiName();
-      // bool allowed = await permissionService.requestLocationWhenInUsePermission();
-
-      // if (Platform.isIOS) {
-      //   LocationAuthorizationStatus status = await _connectivity.getLocationServiceAuthorization();
-      //   if (status == LocationAuthorizationStatus.notDetermined) {
-      //     status = await _connectivity.requestLocationServiceAuthorization();
-      //   }
-      //   if (status == LocationAuthorizationStatus.authorizedAlways || status == LocationAuthorizationStatus.authorizedWhenInUse) {
-      //     hasLocationEnabled.value = true;
-      //   }
-      // }
-
       wifiFullName = await WifiInfo().getWifiName();
       wifiName.value = wifiFullName;
     } on PlatformException catch (e) {
@@ -110,22 +95,6 @@ class NetworkService {
 
   tryGetWifiSSID() async {
     try {
-      // bool allowed = await permissionService.requestLocationWhenInUsePermission();
-
-      // if (Platform.isIOS) {
-      //   LocationAuthorizationStatus status = await _connectivity.getLocationServiceAuthorization();
-      //   if (status == LocationAuthorizationStatus.notDetermined) {
-      //     status = await _connectivity.requestLocationServiceAuthorization();
-      //   }
-      //   if (status == LocationAuthorizationStatus.authorizedAlways || status == LocationAuthorizationStatus.authorizedWhenInUse) {
-      //     wifiBSSID = await _connectivity.getWifiBSSID();
-      //   } else {
-      //     wifiBSSID = await _connectivity.getWifiBSSID();
-      //   }
-      // } else {
-      //   wifiBSSID = await _connectivity.getWifiBSSID();
-      // }
-
       wifiSSID.value = await WifiInfo().getWifiBSSID();
     } on PlatformException catch (e) {
       print(e.toString());

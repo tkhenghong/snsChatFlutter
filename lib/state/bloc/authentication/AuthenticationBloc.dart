@@ -20,7 +20,6 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
 
   @override
   Stream<AuthenticationState> mapEventToState(AuthenticationEvent event) async* {
-    // TODO: implement mapEventToState
     if (event is InitializeAuthenticationsEvent) {
       yield* _mapInitializeAuthentication(event);
     } else if (event is RemoveAllAuthenticationsEvent) {
@@ -147,9 +146,8 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     functionCallback(event, true);
   }
 
-  // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!isObjectEmpty(event)) {
+    if (!isObjectEmpty(event) && !isObjectEmpty(event.callback)) {
       event.callback(value);
     }
   }

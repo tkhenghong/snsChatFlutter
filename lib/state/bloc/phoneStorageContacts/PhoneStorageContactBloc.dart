@@ -108,10 +108,9 @@ class PhoneStorageContactBloc extends Bloc<PhoneStorageContactEvent, PhoneStorag
     functionCallback(event, true);
   }
 
-  // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!isObjectEmpty(event)) {
-      event?.callback(value);
+    if (!isObjectEmpty(event) && !isObjectEmpty(event.callback)) {
+      event.callback(value);
     }
   }
 }

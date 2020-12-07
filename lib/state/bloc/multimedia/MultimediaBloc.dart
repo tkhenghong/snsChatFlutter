@@ -174,10 +174,9 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     }
   }
 
-  // To send response to those dispatched Actions
   void functionCallback(event, value) {
-    if (!isObjectEmpty(event)) {
-      event?.callback(value);
+    if (!isObjectEmpty(event) && !isObjectEmpty(event.callback)) {
+      event.callback(value);
     }
   }
 }
