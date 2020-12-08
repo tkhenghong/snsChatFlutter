@@ -99,8 +99,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   Widget multiBlocListener() => MultiBlocListener(listeners: [
         userAuthenticationBlocListener(),
-        userContactBlocListener(),
-        userBlocListener(),
         conversationGroupBlocListener(),
       ], child: userAuthenticationBlocBuilder());
 
@@ -114,21 +112,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         if (authenticationState is AuthenticationsLoaded) {
           loadConversationGroups();
         }
-      },
-    );
-  }
-
-  Widget userContactBlocListener() {
-    return BlocListener<UserContactBloc, UserContactState>(
-      listener: (context, userContactState) {
-        if (userContactState is UserContactsLoaded) {}
-      },
-    );
-  }
-
-  Widget userBlocListener() {
-    return BlocListener<UserBloc, UserState>(
-      listener: (context, userState) {
       },
     );
   }
