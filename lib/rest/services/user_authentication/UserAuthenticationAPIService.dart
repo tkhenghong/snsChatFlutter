@@ -12,7 +12,7 @@ class UserAuthenticationAPIService {
   CustomHttpClient httpClient = Get.find();
 
   Future<bool> checkIsAuthenticated() async {
-    return await httpClient.getRequest('$REST_URL/$authenticationAPI');
+    return await httpClient.getRequest('$REST_URL/$authenticationAPI', showSnackBar: false, showDialog: false, timeoutSeconds: 3);
   }
   
   // Register Step 1

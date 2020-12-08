@@ -37,25 +37,31 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
 
   Stream<AuthenticationState> _mapInitializeAuthentication(InitializeAuthenticationsEvent event) async* {
     if (state is AuthenticationsLoading || state is AuthenticationsNotLoaded) {
-      try {
-        SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-        String jwtToken = await storage.read(key: "jwtToken");
-        String username = sharedPreferences.getString("username");
-        DateTime otpExpirationTime = DateTime.parse(sharedPreferences.getString("otpExpirationTime"));
+      bool isAuthenticated = await authenticationAPIService.checkIsAuthenticated();
+      if(isAuthenticated) {
+        try {
+          SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+          String jwtToken = await storage.read(key: "jwtToken");
+          String username = sharedPreferences.getString("username");
+          DateTime otpExpirationTime = DateTime.parse(sharedPreferences.getString("otpExpirationTime"));
 
-        bool jwtExpired = otpExpirationTime.isBefore(DateTime.now());
+          bool jwtExpired = otpExpirationTime.isBefore(DateTime.now());
 
-        if (!jwtToken.isNullOrBlank && !username.isNullOrBlank && !otpExpirationTime.isNull && !jwtExpired) {
-          yield AuthenticationsLoaded(jwtToken, username, otpExpirationTime);
-          functionCallback(event, true);
-        } else {
-          storage.delete(key: 'jwtToken');
-          storage.delete(key: 'username');
-          sharedPreferences.remove('otpExpirationTime');
+          if (!jwtToken.isNullOrBlank && !username.isNullOrBlank && !otpExpirationTime.isNull && !jwtExpired) {
+            yield AuthenticationsLoaded(jwtToken, username, otpExpirationTime);
+            functionCallback(event, true);
+          } else {
+            storage.delete(key: 'jwtToken');
+            storage.delete(key: 'username');
+            sharedPreferences.remove('otpExpirationTime');
+            yield AuthenticationsNotLoaded();
+            functionCallback(event, false);
+          }
+        } catch (e) {
           yield AuthenticationsNotLoaded();
           functionCallback(event, false);
         }
-      } catch (e) {
+      } else {
         yield AuthenticationsNotLoaded();
         functionCallback(event, false);
       }
