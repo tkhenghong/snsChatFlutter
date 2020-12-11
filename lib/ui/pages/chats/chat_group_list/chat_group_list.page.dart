@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,6 +37,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   RefreshController _refreshController;
 
+  FirebaseMessaging _firebaseMessaging = Get.find();
   CustomFileService customFileService = Get.find();
 
   IPGeoLocationBloc ipGeoLocationBloc;
@@ -92,9 +94,29 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
     if (firstRun) {
       authenticationBloc.add(InitializeAuthenticationsEvent(callback: (bool done) {}));
+      testFirebaseNotification();
     }
 
     return multiBlocListener();
+  }
+
+  testFirebaseNotification() {
+    _firebaseMessaging.configure(
+      onMessage: (dynamic message) async {
+        String messageTitle = message["notification"]["title"];
+        String notificationAlert = "New Notification Alert";
+        print('_firebaseMessaging onMessage: ');
+        print('notificationAlert: $notificationAlert');
+        print('messageTitle: $messageTitle');
+      },
+      onResume: (dynamic message) async {
+        String messageTitle = message["data"]["title"];
+        String notificationAlert = "Application opened from Notification";
+        print('_firebaseMessaging onResume: ');
+        print('notificationAlert: $notificationAlert');
+        print('messageTitle: $messageTitle');
+      }
+    );
   }
 
   Widget multiBlocListener() => MultiBlocListener(listeners: [

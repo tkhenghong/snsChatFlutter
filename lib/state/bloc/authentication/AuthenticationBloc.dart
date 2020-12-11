@@ -37,8 +37,17 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
 
   Stream<AuthenticationState> _mapInitializeAuthentication(InitializeAuthenticationsEvent event) async* {
     if (state is AuthenticationsLoading || state is AuthenticationsNotLoaded) {
-      bool isAuthenticated = await authenticationAPIService.checkIsAuthenticated();
-      if(isAuthenticated) {
+      bool backendHasError = false;
+      bool isAuthenticated = false;
+      try {
+        isAuthenticated = await authenticationAPIService.checkIsAuthenticated();
+      } catch (e) {
+        // Unable to rely on backend connection.
+        backendHasError = true;
+      }
+      // Scenario 1: backend has response and it response is true.
+      // Scenario 2: backend has no response/error && isAuthenticated is false.
+      if((!backendHasError && isAuthenticated) || (backendHasError && !isAuthenticated)) {
         try {
           SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
           String jwtToken = await storage.read(key: "jwtToken");

@@ -77,6 +77,9 @@ dependencies:
   # Firebase Storage
   firebase_storage: ^5.0.1
 
+  # Firebase Messaging
+  firebase_messaging: ^7.0.3
+
   # Image rotation fix
   # flutter_exif_rotation: ^0.2.7
 
@@ -161,6 +164,10 @@ dependencies:
   tuple: ^1.0.3
   encrypt: ^4.0.3
   crypto: ^2.1.5 # Hash password with SHA1 for Login
+
+  # Make the texts that are too long to auto slide itself like HTML <marquee>
+  # Example HTML website: https://www.html.am/html-codes/marquees/html-scrolling-text.cfm
+  marquee: ^1.6.1
 
   flutter:
     sdk: flutter
