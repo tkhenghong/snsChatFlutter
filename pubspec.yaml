@@ -169,6 +169,9 @@ dependencies:
   # Example HTML website: https://www.html.am/html-codes/marquees/html-scrolling-text.cfm
   marquee: ^1.6.1
 
+  # Loading skeleton for UX experience
+  skeleton_loader: ^1.0.2+2
+
   flutter:
     sdk: flutter
 

@@ -963,6 +963,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.3"
+  shimmer:
+    dependency: transitive
+    description:
+      name: shimmer
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.2"
+  skeleton_loader:
+    dependency: "direct main"
+    description:
+      name: skeleton_loader
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.2+2"
   sky_engine:
     dependency: transitive
     description: flutter

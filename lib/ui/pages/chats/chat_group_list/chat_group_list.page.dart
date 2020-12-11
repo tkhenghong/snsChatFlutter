@@ -59,7 +59,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   bool loggingOut = false;
   bool webSocketDisconnected = true;
 
-
   Color whiteColor = Colors.white;
   TextStyle buttonTextStyle = TextStyle(color: Colors.white);
 
@@ -94,29 +93,57 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
     if (firstRun) {
       authenticationBloc.add(InitializeAuthenticationsEvent(callback: (bool done) {}));
-      testFirebaseNotification();
+      initializeFirebaseNotificationListener();
     }
 
     return multiBlocListener();
   }
 
-  testFirebaseNotification() {
+  /// Allow the developer to retrieve the metadata of the notification message sent be Firebase, analyze it's details and show the message notification detail.
+  /// Main reference: https://www.freecodecamp.org/news/how-to-add-push-notifications-to-flutter-app/
+  initializeFirebaseNotificationListener() {
     _firebaseMessaging.configure(
-      onMessage: (dynamic message) async {
-        String messageTitle = message["notification"]["title"];
-        String notificationAlert = "New Notification Alert";
-        print('_firebaseMessaging onMessage: ');
-        print('notificationAlert: $notificationAlert');
-        print('messageTitle: $messageTitle');
-      },
-      onResume: (dynamic message) async {
-        String messageTitle = message["data"]["title"];
-        String notificationAlert = "Application opened from Notification";
-        print('_firebaseMessaging onResume: ');
-        print('notificationAlert: $notificationAlert');
-        print('messageTitle: $messageTitle');
-      }
-    );
+        onMessage: (Map<String, dynamic> message) async {
+          /// If the user is using this app currently, the Firebase Messaging is auto configured to execute this onMessage: (){...} function to allow the developer handle the message directly.
+          String messageTitle = message["notification"]["title"];
+          String notificationAlert = "New Notification Alert";
+          print('_firebaseMessaging onMessage: ');
+          print('notificationAlert: $notificationAlert');
+          print('messageTitle: $messageTitle');
+        },
+        onBackgroundMessage: myBackgroundMessageHandler,
+        onLaunch: (Map<String, dynamic> message) async {
+          /// For example, Maybank2u app has promotion notifications. When the user clicked the message
+          String messageTitle = message["data"]["title"];
+          String notificationAlert = "Application opened from Notification";
+          print('_firebaseMessaging onResume: ');
+          print('notificationAlert: $notificationAlert');
+          print('messageTitle: $messageTitle');
+        },
+        onResume: (Map<String, dynamic> message) async {
+          /// This function is triggered when open this app's notification from the device.
+          /// The app can be running in background or not running at all.
+          String messageTitle = message["data"]["title"];
+          String notificationAlert = "Application opened from Notification";
+          print('_firebaseMessaging onResume: ');
+          print('notificationAlert: $notificationAlert');
+          print('messageTitle: $messageTitle');
+        });
+  }
+
+  /// This happens when your app is in background(exited/stopped), when a notification comes, it can
+  Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) async {
+    if (message.containsKey('data')) {
+      // Handle data message
+      final dynamic data = message['data'];
+    }
+
+    if (message.containsKey('notification')) {
+      // Handle notification message
+      final dynamic notification = message['notification'];
+    }
+
+    // Or do other work.
   }
 
   Widget multiBlocListener() => MultiBlocListener(listeners: [
@@ -149,7 +176,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
         if (webSocketState is ReconnectingWebSocket) {
           webSocketDisconnected = true;
-          if(!loggingOut) {
+          if (!loggingOut) {
             showWebSocketReconnectingSnackbar();
           }
         }
@@ -191,7 +218,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         }
 
         if (authenticationState is AuthenticationsLoaded) {
-          if(firstRun) {
+          if (firstRun) {
             initialize();
             firstRun = false;
           }
@@ -404,7 +431,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   checkNetworkConditions() {
     networkBloc.add(CheckNetworkEvent(callback: (bool hasInternetConnection) {
-      if(!hasInternetConnection) {
+      if (!hasInternetConnection) {
         // Only shows messenger not connected, handled by NetworkBlocListener, so do nothing here.
       } else {
         logout();
