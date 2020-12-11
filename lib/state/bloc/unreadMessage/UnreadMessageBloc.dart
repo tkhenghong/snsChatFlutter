@@ -128,11 +128,9 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
   }
 
   Stream<UnreadMessageState> yieldUnreadMessageLoadedState({List<UnreadMessage> updatedUnreadMessageList}) async* {
-    List<UnreadMessage> existingUnreadMessageList;
-
     if (state is UnreadMessagesLoaded) {
       UnreadMessagesLoaded currentState = state as UnreadMessagesLoaded;
-      existingUnreadMessageList = currentState.unreadMessageList;
+      List<UnreadMessage> existingUnreadMessageList = currentState.unreadMessageList;
 
       if (!isObjectEmpty(updatedUnreadMessageList)) {
         updatedUnreadMessageList.forEach((element) {
@@ -145,6 +143,10 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
       yield UnreadMessageLoading();
       yield UnreadMessagesLoaded(existingUnreadMessageList);
     } else {
+      List<UnreadMessage> existingUnreadMessageList = [];
+      if (!isObjectEmpty(updatedUnreadMessageList)) {
+        existingUnreadMessageList.addAll(updatedUnreadMessageList);
+      }
       yield UnreadMessagesLoaded(updatedUnreadMessageList);
     }
   }

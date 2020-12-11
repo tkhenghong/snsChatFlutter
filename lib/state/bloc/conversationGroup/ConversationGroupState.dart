@@ -13,14 +13,15 @@ class ConversationGroupsLoading extends ConversationGroupState {}
 
 class ConversationGroupsLoaded extends ConversationGroupState {
   final List<ConversationGroup> conversationGroupList;
+  final int totalConversationGroups;
 
-  const ConversationGroupsLoaded([this.conversationGroupList = const []]);
-
-  @override
-  List<Object> get props => [conversationGroupList];
+  const ConversationGroupsLoaded([this.conversationGroupList = const [], this.totalConversationGroups]);
 
   @override
-  String toString() => 'ConversationGroupsLoaded {conversationGroupList: $conversationGroupList}';
+  List<Object> get props => [conversationGroupList, totalConversationGroups];
+
+  @override
+  String toString() => 'ConversationGroupsLoaded {conversationGroupList: $conversationGroupList, totalConversationGroups: $totalConversationGroups}';
 }
 
 class ConversationGroupsNotLoaded extends ConversationGroupState {}

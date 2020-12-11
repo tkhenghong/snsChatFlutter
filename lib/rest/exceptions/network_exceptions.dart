@@ -141,7 +141,7 @@ class NetworkTimeoutException {
   }
 
   showSnackbar(String messageTitle, String messageContent) {
-    Get.snackbar(messageTitle, messageContent, snackPosition: SnackPosition.BOTTOM, isDismissible: true, mainButton: okButton());
+    Get.snackbar(messageTitle, messageContent, snackPosition: SnackPosition.TOP, isDismissible: true, mainButton: okButton());
   }
 
   Widget okButton() {

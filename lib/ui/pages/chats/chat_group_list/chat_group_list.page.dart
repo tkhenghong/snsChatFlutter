@@ -112,6 +112,9 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         }
 
         if (authenticationState is AuthenticationsLoaded) {
+          if (webSocketDisconnected) {
+            connectWebSocket();
+          }
           loadConversationGroups();
         }
       },
@@ -139,10 +142,9 @@ class ChatGroupListState extends State<ChatGroupListPage> {
             showConnectWebSocketSuccessfulSnackbar();
           }
           webSocketDisconnected = false;
-
           Stream<dynamic> webSocketStream = webSocketState.webSocketStream;
           if (!webSocketStream.isNull) {
-            processWebSocketMessage(webSocketStream);
+            processWebSocketStream(webSocketStream);
           }
         }
 
@@ -239,7 +241,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     if ((isObjectEmpty(conversationGroups) || conversationGroups.isEmpty)) {
       return SmartRefresher(
         controller: _refreshController,
-        onRefresh: onRefresh,
+        onRefresh: () => onRefresh(true),
         enablePullDown: true,
         physics: BouncingScrollPhysics(),
         header: ClassicHeader(),
@@ -249,9 +251,10 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
     return SmartRefresher(
       controller: _refreshController,
-      onLoading: onRefresh,
+      onLoading: () => onRefresh(false),
+      onRefresh: () => onRefresh(true),
       enablePullUp: true,
-      enablePullDown: false,
+      enablePullDown: true,
       physics: BouncingScrollPhysics(),
       header: ClassicHeader(),
       child: ListView.builder(
@@ -303,12 +306,20 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         onTap: () => goToChatRoomPage(conversationGroup.id));
   }
 
-  onRefresh() async {
-    loadConversationGroups();
+  onRefresh(bool reset) {
+    // TODO: Refresh user details.
     connectWebSocket();
-    setState(() {
-      _refreshController.refreshCompleted();
-    });
+    if (reset) {
+      clearAndResetList();
+    }
+    loadConversationGroups();
+  }
+
+  clearAndResetList() {
+    page = 0;
+    conversationGroups.clear();
+    unreadMessages.clear();
+    multimediaList.clear();
   }
 
   Widget showLoading(String module) {
@@ -342,12 +353,12 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     userBloc.add(GetOwnUserEvent(callback: (User user) {}));
     webSocketBloc.add(ConnectOfficialWebSocketEvent(callback: (bool done) {}));
     permissionBloc.add(LoadPermissionsEvent(callback: (bool done) {}));
+    // unreadMessageBloc.add(LoadUnreadMessagesEvent(callback: (bool done) {}));
     loadConversationGroups();
   }
 
   /// Run conversation groups with pagination.
   loadConversationGroups() {
-    unreadMessageBloc.add(LoadUnreadMessagesEvent(callback: (bool done) {}));
     GetConversationGroupsRequest getConversationGroupsRequest = GetConversationGroupsRequest(pageable: Pageable(sort: Sort(orders: [Order(direction: Direction.DESC, property: 'lastModifiedDate')]), page: page, size: size));
     conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(
         getConversationGroupsRequest: getConversationGroupsRequest,
@@ -357,24 +368,11 @@ class ChatGroupListState extends State<ChatGroupListPage> {
             checkPagination(conversationPageableResponse);
 
             List<UnreadMessage> unreadMessageList = conversationPageableResponse.unreadMessageResponses.content.map((e) => UnreadMessage.fromJson(e)).toList();
-            unreadMessageBloc.add(UpdateUnreadMessagesEvent(unreadMessages: unreadMessageList, callback: (bool done) {}));
-          }
-
-          if (_refreshController.isRefresh) {
-            if (!isObjectEmpty(conversationPageableResponse)) {
-              _refreshController.refreshCompleted();
-            } else {
-              _refreshController.refreshFailed();
-            }
-          }
-
-          if (_refreshController.isLoading) {
-            // NOTE: Use onLoading when scrolling down, NOT onRefresh().
-            if (!isObjectEmpty(conversationPageableResponse)) {
-              _refreshController.loadComplete();
-            } else {
-              _refreshController.loadFailed();
-            }
+            unreadMessageBloc.add(UpdateUnreadMessagesEvent(
+                unreadMessages: unreadMessageList,
+                callback: (bool done) {
+                  endRefreshController(done);
+                }));
           }
         }));
   }
@@ -385,21 +383,44 @@ class ChatGroupListState extends State<ChatGroupListPage> {
       // Prepare to go to next page.
       page++;
     } else {
+      endRefreshController(true);
       showToast('End of conversation groups.', Toast.LENGTH_SHORT);
+    }
+  }
+
+  /// To stop loading or refreshing when loading/refreshing is completed.
+  endRefreshController(bool success) {
+    if (_refreshController.isRefresh) {
+      if (success) {
+        _refreshController.refreshCompleted();
+      } else {
+        _refreshController.refreshFailed();
+      }
+    }
+
+    if (_refreshController.isLoading) {
+      // NOTE: Use onLoading when scrolling down, NOT onRefresh().
+      if (success) {
+        _refreshController.loadComplete();
+      } else {
+        _refreshController.loadFailed();
+      }
     }
   }
 
   /// Need this method to listen WebSocket messages
   /// As long as this page is not removed during logged in state, it will receive and process the messages correctly
   /// If user perform sudden logout or system logout, it will be disconnected immediately even if there's a message processing here. It's excepted.
-  processWebSocketMessage(Stream<dynamic> webSocketStream) {
+  processWebSocketStream(Stream<dynamic> webSocketStream) {
     webSocketStream.listen((data) {
       showToast('Message confirmed received!', Toast.LENGTH_LONG);
       WebSocketMessage receivedWebSocketMessage = WebSocketMessage.fromJson(json.decode(data));
-      testProcessingWebSocketMessage(receivedWebSocketMessage);
+      processWebSocketMessage(receivedWebSocketMessage);
     }, onError: (onError) {
       checkNetworkConditions();
     }, onDone: () {
+      // Kicked by the server/Sudden network down.
+      webSocketDisconnected = true;
       checkNetworkConditions();
     }, cancelOnError: false);
   }
@@ -422,7 +443,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     webSocketBloc.add(DisconnectOfficialWebSocketEvent(callback: (bool done) {}));
   }
 
-  testProcessingWebSocketMessage(WebSocketMessage webSocketMessage) {
+  processWebSocketMessage(WebSocketMessage webSocketMessage) {
     try {
       if (!isObjectEmpty(webSocketMessage)) {
         if (!isObjectEmpty(webSocketMessage.conversationGroup)) {
@@ -468,10 +489,9 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     }
   }
 
-
   /// Allow the developer to retrieve the metadata of the notification message sent be Firebase, analyze it's details and show the message notification detail.
   /// Main reference: https://www.freecodecamp.org/news/how-to-add-push-notifications-to-flutter-app/
-  initializeFirebaseNotificationListener() {
+  initializeFirebaseNotificationListener() async {
     _firebaseMessaging.configure(
         onMessage: (Map<String, dynamic> message) async {
           /// If the user is using this app currently, the Firebase Messaging is auto configured to execute this onMessage: (){...} function to allow the developer handle the message directly.
@@ -499,21 +519,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           print('notificationAlert: $notificationAlert');
           print('messageTitle: $messageTitle');
         });
-  }
-
-  /// This happens when your app is in background(exited/stopped), when a notification comes, it can
-  Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) async {
-    if (message.containsKey('data')) {
-      // Handle data message
-      final dynamic data = message['data'];
-    }
-
-    if (message.containsKey('notification')) {
-      // Handle notification message
-      final dynamic notification = message['notification'];
-    }
-
-    // Or do other work.
   }
 
   showWebSocketLoadingSnackbar() {

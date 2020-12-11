@@ -132,10 +132,11 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
 
           if (deleted) {
             List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
+            int totalConversationGroups = (state as ConversationGroupsLoaded).totalConversationGroups;
 
             existingConversationGroupList.removeWhere((ConversationGroup existingConversationGroup) => existingConversationGroup.id == event.conversationGroup.id);
 
-            yield ConversationGroupsLoaded(existingConversationGroupList);
+            yield ConversationGroupsLoaded(existingConversationGroupList, totalConversationGroups);
             functionCallback(event, true);
           }
         }
@@ -157,11 +158,10 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
 
         conversationGroupDBService.addConversationGroups(conversationGroupList);
 
-        yield* updateConversationGroupsLoadedState(updatedConversationGroupList: conversationGroupList);
+        yield* updateConversationGroupsLoadedState(conversationPageableResponse: conversationPageableResponse);
         functionCallback(event, conversationPageableResponse);
       } else {
         yield* updateConversationGroupsLoadedState(updatedConversationGroupList: []);
-
       }
     } catch (e) {
       GetConversationGroupsRequest getConversationGroupsRequest = event.getConversationGroupsRequest;
@@ -266,9 +266,21 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
   }
 
   /// Add single ConversationGroup object or List of ConversationGroup.
-  Stream<ConversationGroupState> updateConversationGroupsLoadedState({List<ConversationGroup> updatedConversationGroupList, ConversationGroup conversationGroup}) async* {
+  Stream<ConversationGroupState> updateConversationGroupsLoadedState({ConversationPageableResponse conversationPageableResponse, List<ConversationGroup> updatedConversationGroupList, ConversationGroup conversationGroup}) async* {
     if (state is ConversationGroupsLoaded) {
-      List<ConversationGroup> existingConversationGroupList = (state as ConversationGroupsLoaded).conversationGroupList;
+      ConversationGroupsLoaded currentState = (state as ConversationGroupsLoaded);
+      List<ConversationGroup> existingConversationGroupList = currentState.conversationGroupList;
+      int totalConversationGroups = currentState.totalConversationGroups;
+
+      if (!isObjectEmpty(conversationPageableResponse)) {
+        if (!isObjectEmpty(conversationPageableResponse.conversationGroupResponses)) {
+          updatedConversationGroupList = conversationPageableResponse.conversationGroupResponses.content.map((e) => ConversationGroup.fromJson(e)).toList();
+          existingConversationGroupList.addAll(updatedConversationGroupList);
+        }
+
+        // Update total conversation groups from backend.
+        totalConversationGroups = conversationPageableResponse.conversationGroupResponses.totalElements;
+      }
 
       if (!isObjectEmpty(conversationGroup)) {
         existingConversationGroupList.removeWhere((existingConversationGroup) => existingConversationGroup.id == conversationGroup.id);
@@ -285,9 +297,19 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       }
 
       yield ConversationGroupsLoading();
-      yield ConversationGroupsLoaded(existingConversationGroupList);
+      yield ConversationGroupsLoaded(existingConversationGroupList, totalConversationGroups);
     } else {
-      yield ConversationGroupsLoaded(updatedConversationGroupList);
+      List<ConversationGroup> existingConversationGroupList = [];
+      int totalConversationGroups = 0;
+      if (!isObjectEmpty(conversationPageableResponse)) {
+        if (!isObjectEmpty(conversationPageableResponse.conversationGroupResponses)) {
+          updatedConversationGroupList = conversationPageableResponse.conversationGroupResponses.content.map((e) => ConversationGroup.fromJson(e)).toList();
+          existingConversationGroupList.addAll(updatedConversationGroupList);
+        }
+      }
+      totalConversationGroups = conversationPageableResponse.conversationGroupResponses.totalElements;
+
+      yield ConversationGroupsLoaded(updatedConversationGroupList, totalConversationGroups);
     }
   }
 

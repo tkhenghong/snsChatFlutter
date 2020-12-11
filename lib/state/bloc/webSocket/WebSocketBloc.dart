@@ -46,6 +46,7 @@ class WebSocketBloc extends Bloc<WebSocketBlocEvent, WebSocketState> {
 
       Stream<dynamic> onDataStream = await webSocketService.connectWebSocketOfficial();
 
+
       if (!isObjectEmpty(onDataStream)) {
         yield OfficialWebSocketLoaded(onDataStream);
         functionCallback(event, true);
