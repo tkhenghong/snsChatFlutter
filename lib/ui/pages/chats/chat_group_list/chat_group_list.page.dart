@@ -99,53 +99,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     return multiBlocListener();
   }
 
-  /// Allow the developer to retrieve the metadata of the notification message sent be Firebase, analyze it's details and show the message notification detail.
-  /// Main reference: https://www.freecodecamp.org/news/how-to-add-push-notifications-to-flutter-app/
-  initializeFirebaseNotificationListener() {
-    _firebaseMessaging.configure(
-        onMessage: (Map<String, dynamic> message) async {
-          /// If the user is using this app currently, the Firebase Messaging is auto configured to execute this onMessage: (){...} function to allow the developer handle the message directly.
-          String messageTitle = message["notification"]["title"];
-          String notificationAlert = "New Notification Alert";
-          print('_firebaseMessaging onMessage: ');
-          print('notificationAlert: $notificationAlert');
-          print('messageTitle: $messageTitle');
-        },
-        onBackgroundMessage: myBackgroundMessageHandler,
-        onLaunch: (Map<String, dynamic> message) async {
-          /// For example, Maybank2u app has promotion notifications. When the user clicked the message
-          String messageTitle = message["data"]["title"];
-          String notificationAlert = "Application opened from Notification";
-          print('_firebaseMessaging onResume: ');
-          print('notificationAlert: $notificationAlert');
-          print('messageTitle: $messageTitle');
-        },
-        onResume: (Map<String, dynamic> message) async {
-          /// This function is triggered when open this app's notification from the device.
-          /// The app can be running in background or not running at all.
-          String messageTitle = message["data"]["title"];
-          String notificationAlert = "Application opened from Notification";
-          print('_firebaseMessaging onResume: ');
-          print('notificationAlert: $notificationAlert');
-          print('messageTitle: $messageTitle');
-        });
-  }
-
-  /// This happens when your app is in background(exited/stopped), when a notification comes, it can
-  Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) async {
-    if (message.containsKey('data')) {
-      // Handle data message
-      final dynamic data = message['data'];
-    }
-
-    if (message.containsKey('notification')) {
-      // Handle notification message
-      final dynamic notification = message['notification'];
-    }
-
-    // Or do other work.
-  }
-
   Widget multiBlocListener() => MultiBlocListener(listeners: [
         userAuthenticationBlocListener(),
         conversationGroupBlocListener(),
@@ -358,6 +311,28 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     });
   }
 
+  Widget showLoading(String module) {
+    return Center(
+      child: Text('Loading $module...'),
+    );
+  }
+
+  Widget showError(String module) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: Get.width * 0.05),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            'An error has occurred in $module. Please try again later.',
+            textAlign: TextAlign.center,
+          ),
+          RaisedButton(child: Text('Restart App'), onPressed: logout)
+        ],
+      ),
+    );
+  }
+
   initialize() {
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     userBloc.add(InitializeUserEvent(callback: (bool done) {}));
@@ -493,26 +468,52 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     }
   }
 
-  Widget showLoading(String module) {
-    return Center(
-      child: Text('Loading $module...'),
-    );
+
+  /// Allow the developer to retrieve the metadata of the notification message sent be Firebase, analyze it's details and show the message notification detail.
+  /// Main reference: https://www.freecodecamp.org/news/how-to-add-push-notifications-to-flutter-app/
+  initializeFirebaseNotificationListener() {
+    _firebaseMessaging.configure(
+        onMessage: (Map<String, dynamic> message) async {
+          /// If the user is using this app currently, the Firebase Messaging is auto configured to execute this onMessage: (){...} function to allow the developer handle the message directly.
+          String messageTitle = message["notification"]["title"];
+          String notificationAlert = "New Notification Alert";
+          print('_firebaseMessaging onMessage: ');
+          print('notificationAlert: $notificationAlert');
+          print('messageTitle: $messageTitle');
+        },
+        onBackgroundMessage: myBackgroundMessageHandler,
+        onLaunch: (Map<String, dynamic> message) async {
+          /// For example, Maybank2u app has promotion notifications. When the user clicked the message
+          String messageTitle = message["data"]["title"];
+          String notificationAlert = "Application opened from Notification";
+          print('_firebaseMessaging onResume: ');
+          print('notificationAlert: $notificationAlert');
+          print('messageTitle: $messageTitle');
+        },
+        onResume: (Map<String, dynamic> message) async {
+          /// This function is triggered when open this app's notification from the device.
+          /// The app can be running in background or not running at all.
+          String messageTitle = message["data"]["title"];
+          String notificationAlert = "Application opened from Notification";
+          print('_firebaseMessaging onResume: ');
+          print('notificationAlert: $notificationAlert');
+          print('messageTitle: $messageTitle');
+        });
   }
 
-  Widget showError(String module) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: Get.width * 0.05),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            'An error has occurred in $module. Please try again later.',
-            textAlign: TextAlign.center,
-          ),
-          RaisedButton(child: Text('Restart App'), onPressed: logout)
-        ],
-      ),
-    );
+  /// This happens when your app is in background(exited/stopped), when a notification comes, it can
+  Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) async {
+    if (message.containsKey('data')) {
+      // Handle data message
+      final dynamic data = message['data'];
+    }
+
+    if (message.containsKey('notification')) {
+      // Handle notification message
+      final dynamic notification = message['notification'];
+    }
+
+    // Or do other work.
   }
 
   showWebSocketLoadingSnackbar() {
