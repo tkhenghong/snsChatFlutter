@@ -26,6 +26,8 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
       yield* _initializeMultimediaToState(event);
     } else if (event is UpdateMultimediaEvent) {
       yield* _updateMultimedia(event);
+    } else if (event is UpdateMultimediaListEvent) {
+      yield* _updateMultimediaList(event);
     } else if (event is GetUserOwnProfilePictureMultimediaEvent) {
       yield* _getUserOwnProfilePictureMultimediaEvent(event);
     } else if (event is GetUserContactsMultimediaEvent) {
@@ -51,8 +53,22 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
     }
   }
 
-  /// Add multimedia list into multimedia state and local DB.
+  /// Add multimedia into multimedia state and local DB.
   Stream<MultimediaState> _updateMultimedia(UpdateMultimediaEvent event) async* {
+    try {
+      if (state is MultimediaLoaded) {
+        multimediaDBService.editMultimedia(event.multimedia);
+
+        yield* updateMultimediaLoadedState(multimedia: event.multimedia);
+        functionCallback(event, true);
+      }
+    } catch (e) {
+      functionCallback(event, false);
+    }
+  }
+
+  /// Add multimedia list into multimedia state and local DB.
+  Stream<MultimediaState> _updateMultimediaList(UpdateMultimediaListEvent event) async* {
     try {
       if (state is MultimediaLoaded) {
         multimediaDBService.addMultimediaList(event.multimediaList);

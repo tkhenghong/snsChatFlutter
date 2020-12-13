@@ -24,6 +24,8 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       yield* _addConversationGroup(event);
     } else if (event is EditConversationGroupEvent) {
       yield* _editConversationGroup(event);
+    } else if (event is UpdateConversationGroupEvent) {
+      yield* _updateConversationGroup(event);
     } else if (event is DeleteConversationGroupEvent) {
       yield* _deleteConversationGroup(event);
     } else if (event is GetUserOwnConversationGroupsEvent) {
@@ -78,6 +80,18 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     if (conversationGroupFromServer.isNull || !added) {
       showToast('Unable to add conversation group. Please try again later.', Toast.LENGTH_LONG);
       functionCallback(event, null);
+    }
+  }
+
+  /// Add ConversationGroup object to state and DB.
+  Stream<ConversationGroupState> _updateConversationGroup(UpdateConversationGroupEvent event) async* {
+    try {
+      conversationGroupDBService.addConversationGroup(event.conversationGroup);
+      yield* updateConversationGroupsLoadedState(conversationGroup: event.conversationGroup);
+      functionCallback(event, true);
+    } catch (e) {
+      showToast('Unable to add conversation group into the database. Please try again.', Toast.LENGTH_SHORT, toastGravity: ToastGravity.CENTER);
+      functionCallback(event, false);
     }
   }
 
@@ -162,6 +176,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
         functionCallback(event, conversationPageableResponse);
       } else {
         yield* updateConversationGroupsLoadedState(updatedConversationGroupList: []);
+        functionCallback(event, null);
       }
     } catch (e) {
       GetConversationGroupsRequest getConversationGroupsRequest = event.getConversationGroupsRequest;
@@ -303,13 +318,25 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       int totalConversationGroups = 0;
       if (!isObjectEmpty(conversationPageableResponse)) {
         if (!isObjectEmpty(conversationPageableResponse.conversationGroupResponses)) {
-          updatedConversationGroupList = conversationPageableResponse.conversationGroupResponses.content.map((e) => ConversationGroup.fromJson(e)).toList();
-          existingConversationGroupList.addAll(updatedConversationGroupList);
+          existingConversationGroupList = conversationPageableResponse.conversationGroupResponses.content.map((e) => ConversationGroup.fromJson(e)).toList();
         }
-      }
-      totalConversationGroups = conversationPageableResponse.conversationGroupResponses.totalElements;
 
-      yield ConversationGroupsLoaded(updatedConversationGroupList, totalConversationGroups);
+        totalConversationGroups = conversationPageableResponse.conversationGroupResponses.totalElements;
+      }
+
+      if (!isObjectEmpty(updatedConversationGroupList)) {
+        updatedConversationGroupList.forEach((updatedConversationGroup) {
+          existingConversationGroupList.removeWhere((existingConversationGroup) => existingConversationGroup.id == updatedConversationGroup.id);
+        });
+        existingConversationGroupList.addAll(updatedConversationGroupList);
+      }
+
+      if (!isObjectEmpty(conversationGroup)) {
+        existingConversationGroupList.removeWhere((existingConversationGroup) => existingConversationGroup.id == conversationGroup.id);
+        existingConversationGroupList.add(conversationGroup);
+      }
+
+      yield ConversationGroupsLoaded(existingConversationGroupList, totalConversationGroups);
     }
   }
 

@@ -22,6 +22,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       yield* _initializeSettingsToState(event);
     } else if (event is EditSettingsEvent) {
       yield* _editSettings(event);
+    } else if (event is UpdateSettingsEvent) {
+      yield* _updateSettings(event);
     } else if (event is DeleteSettingsEvent) {
       yield* _deleteSettings(event);
     } else if (event is GetUserOwnSettingsEvent) {
@@ -71,6 +73,17 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         yield SettingsLoaded(settings);
         functionCallback(event, true);
       }
+    } catch (e) {
+      functionCallback(event, false);
+    }
+  }
+
+  Stream<SettingsState> _updateSettings(UpdateSettingsEvent event) async* {
+    try {
+      await settingsDBService.editSettings(event.settings);
+
+      yield SettingsLoaded(event.settings);
+      functionCallback(event, true);
     } catch (e) {
       functionCallback(event, false);
     }

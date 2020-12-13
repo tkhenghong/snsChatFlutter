@@ -64,6 +64,19 @@ class EditConversationGroupEvent extends ConversationGroupEvent {
   String toString() => 'EditConversationGroupEvent {editConversationGroupRequest: $editConversationGroupRequest}';
 }
 
+class UpdateConversationGroupEvent extends ConversationGroupEvent {
+  final ConversationGroup conversationGroup;
+  final Function callback;
+
+  const UpdateConversationGroupEvent({this.conversationGroup, this.callback});
+
+  @override
+  List<Object> get props => [conversationGroup];
+
+  @override
+  String toString() => 'UpdateConversationGroupEvent {conversationGroup: $conversationGroup}';
+}
+
 class DeleteConversationGroupEvent extends ConversationGroupEvent {
   final ConversationGroup conversationGroup;
   final Function callback;

@@ -46,6 +46,19 @@ class EditUserEvent extends UserEvent {
   String toString() => 'EditUserEvent {user: $user}';
 }
 
+class UpdateUserEvent extends UserEvent {
+  final User user;
+  final Function callback;
+
+  UpdateUserEvent({this.user, this.callback});
+
+  @override
+  List<Object> get props => [user];
+
+  @override
+  String toString() => 'UpdateUserEvent {user: $user}';
+}
+
 class DeleteUserEvent extends UserEvent {
   final User user;
   final Function callback;

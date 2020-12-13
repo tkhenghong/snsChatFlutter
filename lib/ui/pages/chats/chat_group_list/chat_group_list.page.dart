@@ -177,7 +177,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         }
 
         if (authenticationState is AuthenticationsLoaded) {
-          if(webSocketDisconnected) {
+          if (webSocketDisconnected) {
             connectWebSocket();
           }
           return userBlocBuilder();
@@ -490,15 +490,25 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           processChatMessage(webSocketMessage.message);
         }
 
-        if (!isObjectEmpty(webSocketMessage.multimedia)) {}
+        if (!isObjectEmpty(webSocketMessage.multimedia)) {
+          processMultimedia(webSocketMessage.multimedia);
+        }
 
-        if (!isObjectEmpty(webSocketMessage.unreadMessage)) {}
+        if (!isObjectEmpty(webSocketMessage.unreadMessage)) {
+          processUnreadMessage(webSocketMessage.unreadMessage);
+        }
 
-        if (!isObjectEmpty(webSocketMessage.settings)) {}
+        if (!isObjectEmpty(webSocketMessage.settings)) {
+          processSettings(webSocketMessage.settings);
+        }
 
-        if (!isObjectEmpty(webSocketMessage.user)) {}
+        if (!isObjectEmpty(webSocketMessage.user)) {
+          processUser(webSocketMessage.user);
+        }
 
-        if (!isObjectEmpty(webSocketMessage.userContact)) {}
+        if (!isObjectEmpty(webSocketMessage.userContact)) {
+          processUserContact(webSocketMessage.userContact);
+        }
       } else {
         showToast('Unsupported message detected. Ignoring!', Toast.LENGTH_LONG);
       }
@@ -509,17 +519,60 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   processConversationGroup(ConversationGroup conversationGroup) {
-    /// TODO: Add ConversationGroup object to state and DB.
+    conversationGroupBloc.add(UpdateConversationGroupEvent(
+        conversationGroup: conversationGroup,
+        callback: (bool done) {
+          /// TODO: Acknowledge the WebSocketMessage to the server.
+        }));
   }
 
   processChatMessage(ChatMessage chatMessage) {
-    if (currentUser.id != chatMessage.senderId) {
-      /// TODO: Add chat message to state and DB.
-      /// TODO: Retrieve Chat message's Multimedia object, save it to the localDB and state.
-    } else {
-      // Mark your own message as sent, received status will changed by recipient
-      /// TODO: UpdateChatMessageEvent (Different than EditChatMessageEvent)
-    }
+    chatMessage.status = ChatMessageStatus.Received;
+    chatMessageBloc.add(UpdateChatMessageEvent(
+        chatMessage: chatMessage,
+        callback: (bool done) {
+          /// TODO: Acknowledge the WebSocketMessage to the server.
+        }));
+  }
+
+  processMultimedia(Multimedia multimedia) {
+    multimediaBloc.add(UpdateMultimediaEvent(
+        multimedia: multimedia,
+        callback: (bool done) {
+          /// TODO: Acknowledge the WebSocketMessage to the server.
+        }));
+  }
+
+  processUnreadMessage(UnreadMessage unreadMessage) {
+    unreadMessageBloc.add(UpdateUnreadMessageEvent(
+        unreadMessage: unreadMessage,
+        callback: (bool done) {
+          /// TODO: Acknowledge the WebSocketMessage to the server.
+        }));
+  }
+
+  processSettings(Settings settings) {
+    settingsBloc.add(UpdateSettingsEvent(
+        settings: settings,
+        callback: (bool done) {
+          /// TODO: Acknowledge the WebSocketMessage to the server.
+        }));
+  }
+
+  processUser(User user) {
+    userBloc.add(UpdateUserEvent(
+        user: user,
+        callback: (bool done) {
+          /// TODO: Acknowledge the WebSocketMessage to the server.
+        }));
+  }
+
+  processUserContact(UserContact userContact) {
+    userContactBloc.add(UpdateUserContactEvent(
+        userContact: userContact,
+        callback: (bool done) {
+          /// TODO: Acknowledge the WebSocketMessage to the server.
+        }));
   }
 
   /// Allow the developer to retrieve the metadata of the notification message sent be Firebase, analyze it's details and show the message notification detail.

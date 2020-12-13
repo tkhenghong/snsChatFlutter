@@ -21,6 +21,8 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       yield* _editOwnUserContact(event);
     } else if (event is GetUserContactEvent) {
       yield* _getUserContact(event);
+    } else if (event is UpdateUserContactEvent) {
+      yield* _updateUserContact(event);
     } else if (event is GetUserContactByUserIdEvent) {
       yield* _getUserContactByUserId(event);
     } else if (event is GetUserOwnUserContactEvent) {
@@ -93,6 +95,17 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
     } catch (e) {
       showToast('Failed to get User Contact. Please try again later.', Toast.LENGTH_LONG);
       functionCallback(event, null);
+    }
+  }
+
+  Stream<UserContactState> _updateUserContact(UpdateUserContactEvent event) async* {
+    try {
+      await userContactDBService.editUserContact(event.userContact);
+
+      yield* yieldUserContactState(userContact: event.userContact);
+      functionCallback(event, true);
+    } catch (e) {
+      functionCallback(event, false);
     }
   }
 

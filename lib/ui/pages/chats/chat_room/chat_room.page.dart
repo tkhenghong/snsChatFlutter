@@ -204,25 +204,31 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
             List<ChatMessage> chatMessageListFromServer = chatMessagePageableResponse.content.map((chatMessageRaw) => ChatMessage.fromJson(chatMessageRaw)).toList();
             multimediaBloc.add(GetMessagesMultimediaEvent(chatMessageList: chatMessageListFromServer, callback: (bool done) {})); // multimediaIds
-          }
-
-          if (_refreshController.isRefresh) {
-            if (!isObjectEmpty(chatMessagePageableResponse)) {
-              _refreshController.refreshCompleted();
-            } else {
-              _refreshController.refreshFailed();
-            }
-          }
-
-          if (_refreshController.isLoading) {
-            // NOTE: Use onLoading when scrolling down, NOT onRefresh().
-            if (!isObjectEmpty(chatMessagePageableResponse)) {
-              _refreshController.loadComplete();
-            } else {
-              _refreshController.loadFailed();
-            }
+            endRefreshController(true);
+          } else {
+            showToast('Something\'s wrong when loading the messages. Please try again later. ', Toast.LENGTH_LONG, toastGravity: ToastGravity.CENTER);
+            endRefreshController(false);
           }
         }));
+  }
+
+  endRefreshController(bool success) {
+    if (_refreshController.isRefresh) {
+      if (success) {
+        _refreshController.refreshCompleted();
+      } else {
+        _refreshController.refreshFailed();
+      }
+    }
+
+    if (_refreshController.isLoading) {
+      // NOTE: Use onLoading when scrolling down, NOT onRefresh().
+      if (success) {
+        _refreshController.loadComplete();
+      } else {
+        _refreshController.loadFailed();
+      }
+    }
   }
 
   checkPagination(PageInfo chatMessagePageableResponse) {
@@ -1028,6 +1034,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     );
   }
 
+  /// Sample for generate 3 x 3 rows of GIFs widgets.
   List<Widget> gifRows() {
     List<String> gifCode = ['mimi1', 'mimi2', 'mimi3', 'mimi4', 'mimi5', 'mimi6', 'mimi7', 'mimi8', 'mimi9'];
     List<String> gifUrl = [

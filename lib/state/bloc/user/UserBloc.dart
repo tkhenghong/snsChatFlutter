@@ -24,6 +24,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       yield* _initializeUser(event);
     } else if (event is EditUserEvent) {
       yield* _editUserToState(event);
+    } else if (event is UpdateUserEvent) {
+      yield* _updateUser(event);
     } else if (event is GetOwnUserEvent) {
       yield* _getOwnUser(event);
     } else if (event is CheckUserSignedUpEvent) {
@@ -74,6 +76,17 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
     if (!updatedInREST || !userSaved) {
       functionCallback(event, null);
+    }
+  }
+
+  Stream<UserState> _updateUser(UpdateUserEvent event) async* {
+    try {
+      await userDBService.editUser(event.user);
+
+      yield UserLoaded(event.user);
+      functionCallback(event, true);
+    } catch (e) {
+      functionCallback(event, false);
     }
   }
 

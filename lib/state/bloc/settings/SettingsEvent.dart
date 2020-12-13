@@ -30,7 +30,20 @@ class EditSettingsEvent extends SettingsEvent {
   List<Object> get props => [updateSettingsRequest];
 
   @override
-  String toString() => 'EditSettingsEvent {settings: $updateSettingsRequest}';
+  String toString() => 'EditSettingsEvent {updateSettingsRequest: $updateSettingsRequest}';
+}
+
+class UpdateSettingsEvent extends SettingsEvent {
+  final Settings settings;
+  final Function callback;
+
+  const UpdateSettingsEvent({this.settings, this.callback});
+
+  @override
+  List<Object> get props => [settings];
+
+  @override
+  String toString() => 'UpdateSettingsEvent {settings: $settings}';
 }
 
 class DeleteSettingsEvent extends SettingsEvent {

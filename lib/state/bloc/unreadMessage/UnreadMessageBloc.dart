@@ -48,9 +48,7 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
       await unreadMessageDBService.editUnreadMessage(event.unreadMessage);
 
       if (state is UnreadMessagesLoaded) {
-        List<UnreadMessage> updatedUnreadMessages = addUnreadMessageIntoState(event.unreadMessage);
-
-        yield* yieldUnreadMessageLoadedState(updatedUnreadMessageList: updatedUnreadMessages);
+        yield* yieldUnreadMessageLoadedState(updatedUnreadMessage: event.unreadMessage);
         functionCallback(event, true);
       }
     } catch (e) {
@@ -90,9 +88,7 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
         unreadMessageDBService.addUnreadMessage(unreadMessage);
       }
 
-      List<UnreadMessage> updatedUnreadMessageList = addUnreadMessageIntoState(unreadMessage);
-
-      yield* yieldUnreadMessageLoadedState(updatedUnreadMessageList: updatedUnreadMessageList);
+      yield* yieldUnreadMessageLoadedState(updatedUnreadMessage: unreadMessage);
       functionCallback(event, unreadMessage);
     } catch (e) {
       functionCallback(event, null);
@@ -117,17 +113,7 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
     functionCallback(event, true);
   }
 
-  List<UnreadMessage> addUnreadMessageIntoState(UnreadMessage unreadMessage) {
-    List<UnreadMessage> existingUnreadMessageList = (state as UnreadMessagesLoaded).unreadMessageList;
-
-    existingUnreadMessageList.removeWhere((UnreadMessage existingUnreadMessage) => existingUnreadMessage.id == unreadMessage.id);
-
-    existingUnreadMessageList.add(unreadMessage);
-
-    return existingUnreadMessageList;
-  }
-
-  Stream<UnreadMessageState> yieldUnreadMessageLoadedState({List<UnreadMessage> updatedUnreadMessageList}) async* {
+  Stream<UnreadMessageState> yieldUnreadMessageLoadedState({List<UnreadMessage> updatedUnreadMessageList, UnreadMessage updatedUnreadMessage}) async* {
     if (state is UnreadMessagesLoaded) {
       UnreadMessagesLoaded currentState = state as UnreadMessagesLoaded;
       List<UnreadMessage> existingUnreadMessageList = currentState.unreadMessageList;
@@ -140,6 +126,11 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
         existingUnreadMessageList.addAll(updatedUnreadMessageList);
       }
 
+      if (!isObjectEmpty(updatedUnreadMessage)) {
+        existingUnreadMessageList.removeWhere((element) => element.id == updatedUnreadMessage.id);
+        existingUnreadMessageList.add(updatedUnreadMessage);
+      }
+
       yield UnreadMessageLoading();
       yield UnreadMessagesLoaded(existingUnreadMessageList);
     } else {
@@ -147,7 +138,12 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
       if (!isObjectEmpty(updatedUnreadMessageList)) {
         existingUnreadMessageList.addAll(updatedUnreadMessageList);
       }
-      yield UnreadMessagesLoaded(updatedUnreadMessageList);
+
+      if (!isObjectEmpty(updatedUnreadMessage)) {
+        existingUnreadMessageList.removeWhere((element) => element.id == updatedUnreadMessage.id);
+        existingUnreadMessageList.add(updatedUnreadMessage);
+      }
+      yield UnreadMessagesLoaded(existingUnreadMessageList);
     }
   }
 

@@ -1,6 +1,8 @@
 import 'package:bloc/bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
+import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/rest/index.dart';
@@ -19,6 +21,8 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
       yield* _loadConversationGroupChatMessages(event);
     } else if (event is AddChatMessageEvent) {
       yield* _addChatMessage(event);
+    } else if (event is UpdateChatMessageEvent) {
+      yield* _updateChatMessage(event);
     } else if (event is DeleteChatMessageEvent) {
       yield* _deleteChatMessage(event);
     } else if (event is RemoveAllChatMessagesEvent) {
@@ -46,26 +50,39 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
   Stream<ChatMessageState> _addChatMessage(AddChatMessageEvent event) async* {
     ChatMessage chatMessageFromServer;
     bool savedIntoDB = false;
-    if (state is ChatMessagesLoaded) {
-      chatMessageFromServer = await chatMessageAPIService.addChatMessage(event.createChatMessageRequest);
+    try {
+      if (state is ChatMessagesLoaded) {
+        chatMessageFromServer = await chatMessageAPIService.addChatMessage(event.createChatMessageRequest);
 
-      if (!chatMessageFromServer.isNull) {
-        savedIntoDB = await chatMessageDBService.addChatMessage(chatMessageFromServer);
+        if (!chatMessageFromServer.isNull) {
+          savedIntoDB = await chatMessageDBService.addChatMessage(chatMessageFromServer);
 
-        if (savedIntoDB) {
-          List<ChatMessage> existingMessageList = (state as ChatMessagesLoaded).chatMessageList;
-
-          existingMessageList.add(chatMessageFromServer);
-
-          // Very funny. But must change to another state first and switch it back immediately to trigger changes.
-          yield ChatMessageLoading();
-          yield ChatMessagesLoaded(existingMessageList);
-          functionCallback(event, chatMessageFromServer);
+          if (savedIntoDB) {
+            yield* updateChatMessageLoadedState(updateChatMessage: chatMessageFromServer);
+            functionCallback(event, chatMessageFromServer);
+          }
         }
-      }
-      if (chatMessageFromServer.isNull || !savedIntoDB) {
+        if (chatMessageFromServer.isNull || !savedIntoDB) {
+          functionCallback(event, null);
+        }
+      } else {
         functionCallback(event, null);
       }
+    } catch (e) {
+      showToast('Failed to send a message. Please try again later.', Toast.LENGTH_LONG, toastGravity: ToastGravity.CENTER);
+      functionCallback(event, null);
+    }
+  }
+
+  /// Update ChatMessage object into DB and state.
+  Stream<ChatMessageState> _updateChatMessage(UpdateChatMessageEvent event) async* {
+    try {
+      chatMessageDBService.addChatMessage(event.chatMessage);
+      yield* updateChatMessageLoadedState(updateChatMessage: event.chatMessage);
+      functionCallback(event, true);
+    } catch (e) {
+      showToast('Unable to add chat message into the database. Please try again.', Toast.LENGTH_SHORT, toastGravity: ToastGravity.CENTER);
+      functionCallback(event, false);
     }
   }
 
@@ -73,16 +90,11 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     bool deletedInREST = false;
     bool deleted = false;
     if (state is ChatMessagesLoaded) {
-      deletedInREST = await chatMessageAPIService.deleteChatMessage(event.chatMessageId);
+      deletedInREST = await chatMessageAPIService.deleteChatMessage(event.chatMessage.id);
       if (deletedInREST) {
-        deleted = await chatMessageDBService.deleteChatMessage(event.chatMessageId);
+        deleted = await chatMessageDBService.deleteChatMessage(event.chatMessage.id);
         if (deleted) {
-          List<ChatMessage> existingMessageList = (state as ChatMessagesLoaded).chatMessageList;
-
-          existingMessageList.removeWhere((ChatMessage existingMessage) => existingMessage.id == event.chatMessageId);
-
-          yield ChatMessageLoading();
-          yield ChatMessagesLoaded(existingMessageList);
+          yield* updateChatMessageLoadedState(deletingChatMessage: event.chatMessage);
           functionCallback(event, true);
         }
       }
@@ -93,7 +105,7 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     }
   }
 
-  Stream<ChatMessageState> updateChatMessageLoadedState({List<ChatMessage> updatedChatMessageList, ChatMessage updateChatMessage}) async* {
+  Stream<ChatMessageState> updateChatMessageLoadedState({List<ChatMessage> updatedChatMessageList, ChatMessage updateChatMessage, ChatMessage deletingChatMessage}) async* {
     if (state is ChatMessagesLoaded) {
       List<ChatMessage> existingChatMessageList = (state as ChatMessagesLoaded).chatMessageList;
 
@@ -105,15 +117,34 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
         existingChatMessageList.addAll(updatedChatMessageList);
       }
 
-      if (isObjectEmpty(updateChatMessage)) {
+      if (!isObjectEmpty(updateChatMessage)) {
         existingChatMessageList.removeWhere((existingChatMessage) => existingChatMessage.id == updateChatMessage.id);
         existingChatMessageList.add(updateChatMessage);
+      }
+
+      if (!isObjectEmpty(deletingChatMessage)) {
+        existingChatMessageList.removeWhere((existingChatMessage) => existingChatMessage.id == deletingChatMessage.id);
       }
 
       yield ChatMessageLoading();
       yield ChatMessagesLoaded(existingChatMessageList);
     } else {
-      yield ChatMessagesLoaded(updatedChatMessageList);
+      List<ChatMessage> existingChatMessageList = [];
+
+      if (!isObjectEmpty(updatedChatMessageList)) {
+        existingChatMessageList.addAll(updatedChatMessageList);
+      }
+
+      if (!isObjectEmpty(updateChatMessage)) {
+        existingChatMessageList.removeWhere((existingChatMessage) => existingChatMessage.id == updateChatMessage.id);
+        existingChatMessageList.add(updateChatMessage);
+      }
+
+      if (!isObjectEmpty(deletingChatMessage)) {
+        existingChatMessageList.removeWhere((existingChatMessage) => existingChatMessage.id == deletingChatMessage.id);
+      }
+
+      yield ChatMessagesLoaded(existingChatMessageList);
     }
   }
 

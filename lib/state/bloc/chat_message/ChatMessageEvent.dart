@@ -37,17 +37,31 @@ class AddChatMessageEvent extends ChatMessageEvent {
   String toString() => 'AddChatMessageEvent {createChatMessageRequest: $createChatMessageRequest}';
 }
 
-class DeleteChatMessageEvent extends ChatMessageEvent {
-  final String chatMessageId;
+class UpdateChatMessageEvent extends ChatMessageEvent {
+  final ChatMessage chatMessage;
   final Function callback;
 
-  DeleteChatMessageEvent({this.chatMessageId, this.callback});
+  UpdateChatMessageEvent({this.chatMessage, this.callback});
 
   @override
-  List<Object> get props => [chatMessageId];
+  List<Object> get props => [chatMessage];
 
   @override
-  String toString() => 'DeleteChatMessageEvent {chatMessageId: $chatMessageId}';
+  String toString() => 'UpdateChatMessageEvent {chatMesage: $chatMessage}';
+}
+
+
+class DeleteChatMessageEvent extends ChatMessageEvent {
+  final ChatMessage chatMessage;
+  final Function callback;
+
+  DeleteChatMessageEvent({this.chatMessage, this.callback});
+
+  @override
+  List<Object> get props => [chatMessage];
+
+  @override
+  String toString() => 'DeleteChatMessageEvent {chatMessage: $chatMessage}';
 }
 
 class GetUserOwnChatMessagesEvent extends ChatMessageEvent {
