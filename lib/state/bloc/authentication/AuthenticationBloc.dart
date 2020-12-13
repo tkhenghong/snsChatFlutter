@@ -22,6 +22,8 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
   Stream<AuthenticationState> mapEventToState(AuthenticationEvent event) async* {
     if (event is InitializeAuthenticationsEvent) {
       yield* _mapInitializeAuthentication(event);
+    }else if (event is CheckIsAuthenticatedEvent) {
+      yield* _checkIsAuthenticated(event);
     } else if (event is RemoveAllAuthenticationsEvent) {
       yield* _removeAllAuthenticationsEvent(event);
     } else if (event is RequestAuthenticationUsingEmailAddressEvent) {
@@ -75,6 +77,16 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
         functionCallback(event, false);
       }
     }
+  }
+
+  Stream<AuthenticationState> _checkIsAuthenticated(CheckIsAuthenticatedEvent event) async* {
+    bool isAuthenticated = true;
+    try {
+      isAuthenticated = await authenticationAPIService.checkIsAuthenticated();
+    } catch (e) {
+      isAuthenticated = false;
+    }
+    functionCallback(event, isAuthenticated);
   }
 
   // Only used when changing mobile number

@@ -17,6 +17,15 @@ class InitializeAuthenticationsEvent extends AuthenticationEvent {
   String toString() => 'InitializeAuthenticationsEvent';
 }
 
+class CheckIsAuthenticatedEvent extends AuthenticationEvent {
+  final Function callback;
+
+  const CheckIsAuthenticatedEvent({this.callback});
+
+  @override
+  String toString() => 'CheckIsAuthenticatedEvent';
+}
+
 class RegisterUsingMobileNoEvent extends AuthenticationEvent {
   final String mobileNo;
   final String countryCode;

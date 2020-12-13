@@ -96,7 +96,7 @@ class LoginPageState extends State<LoginPage> {
   Widget userAuthenticationBlocBuilder() {
     return BlocBuilder<AuthenticationBloc, AuthenticationState>(
       buildWhen: (previousAuthenticationState, nextAuthenticationState) {
-        return !(nextAuthenticationState is Authenticating);
+        return !(nextAuthenticationState is Authenticating || nextAuthenticationState is AuthenticationsLoaded);
       },
       builder: (context, authenticationState) {
         if (authenticationState is AuthenticationsLoading) {

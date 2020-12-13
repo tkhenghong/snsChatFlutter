@@ -31,6 +31,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   int totalRecords = 0;
   bool last = false;
 
+  User currentUser;
   List<ConversationGroup> conversationGroups = [];
   List<UnreadMessage> unreadMessages = [];
   List<Multimedia> multimediaList = [];
@@ -94,6 +95,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     if (firstRun) {
       authenticationBloc.add(InitializeAuthenticationsEvent(callback: (bool done) {}));
       initializeFirebaseNotificationListener();
+      initialize();
+      firstRun = false;
     }
 
     return multiBlocListener();
@@ -102,6 +105,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   Widget multiBlocListener() => MultiBlocListener(listeners: [
         userAuthenticationBlocListener(),
         conversationGroupBlocListener(),
+        webSocketBlocListener(),
       ], child: userAuthenticationBlocBuilder());
 
   Widget userAuthenticationBlocListener() {
@@ -173,15 +177,30 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         }
 
         if (authenticationState is AuthenticationsLoaded) {
-          if (firstRun) {
-            initialize();
-            firstRun = false;
+          if(webSocketDisconnected) {
+            connectWebSocket();
           }
-          connectWebSocket();
-          return conversationGroupBlocBuilder();
+          return userBlocBuilder();
         }
 
         return showError('authentications');
+      },
+    );
+  }
+
+  Widget userBlocBuilder() {
+    return BlocBuilder<UserBloc, UserState>(
+      builder: (context, userState) {
+        if (userState is UserLoading) {
+          showLoading('user');
+        }
+
+        if (userState is UserLoaded) {
+          currentUser = userState.user;
+          return conversationGroupBlocBuilder();
+        }
+
+        return showError('user');
       },
     );
   }
@@ -353,7 +372,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     userBloc.add(GetOwnUserEvent(callback: (User user) {}));
     webSocketBloc.add(ConnectOfficialWebSocketEvent(callback: (bool done) {}));
     permissionBloc.add(LoadPermissionsEvent(callback: (bool done) {}));
-    // unreadMessageBloc.add(LoadUnreadMessagesEvent(callback: (bool done) {}));
     loadConversationGroups();
   }
 
@@ -412,13 +430,22 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   /// As long as this page is not removed during logged in state, it will receive and process the messages correctly
   /// If user perform sudden logout or system logout, it will be disconnected immediately even if there's a message processing here. It's excepted.
   processWebSocketStream(Stream<dynamic> webSocketStream) {
+    print('chat_group_list.page.dart processWebSocketStream()');
     webSocketStream.listen((data) {
+      print('chat_group_list.page.dart data: $data');
       showToast('Message confirmed received!', Toast.LENGTH_LONG);
-      WebSocketMessage receivedWebSocketMessage = WebSocketMessage.fromJson(json.decode(data));
-      processWebSocketMessage(receivedWebSocketMessage);
+      try {
+        WebSocketMessage receivedWebSocketMessage = WebSocketMessage.fromJson(json.decode(data));
+        processWebSocketMessage(receivedWebSocketMessage);
+      } catch (e) {
+        print('message: $data');
+        showToast('Error parsing the message. Message: $data', Toast.LENGTH_LONG);
+      }
     }, onError: (onError) {
+      print('chat_group_list.page.dart onError()) $onError');
       checkNetworkConditions();
     }, onDone: () {
+      print('chat_group_list.page.dart onDone()');
       // Kicked by the server/Sudden network down.
       webSocketDisconnected = true;
       checkNetworkConditions();
@@ -430,13 +457,22 @@ class ChatGroupListState extends State<ChatGroupListPage> {
       if (!hasInternetConnection) {
         // Only shows messenger not connected, handled by NetworkBlocListener, so do nothing here.
       } else {
-        logout();
+        authenticationBloc.add(CheckIsAuthenticatedEvent(callback: (bool isAuthenticated) {
+          print('isAuthenticated: $isAuthenticated');
+          if (!isAuthenticated) {
+            logout();
+          }
+        }));
       }
     }));
   }
 
   connectWebSocket() {
-    webSocketBloc.add(ConnectOfficialWebSocketEvent(callback: (bool done) {}));
+    webSocketBloc.add(ConnectOfficialWebSocketEvent(callback: (bool done) {
+      if (done) {
+        webSocketDisconnected = false;
+      }
+    }));
   }
 
   disconnectWebSocket() {
@@ -477,15 +513,12 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   processChatMessage(ChatMessage chatMessage) {
-    UserState userState = userBloc.state;
-    if (userState is UserLoaded) {
-      if (userState.user.id != chatMessage.senderId) {
-        /// TODO: Add chat message to state and DB.
-        /// TODO: Retrieve Chat message's Multimedia object, save it to the localDB and state.
-      } else {
-        // Mark your own message as sent, received status will changed by recipient
-        /// TODO: UpdateChatMessageEvent (Different than EditChatMessageEvent)
-      }
+    if (currentUser.id != chatMessage.senderId) {
+      /// TODO: Add chat message to state and DB.
+      /// TODO: Retrieve Chat message's Multimedia object, save it to the localDB and state.
+    } else {
+      // Mark your own message as sent, received status will changed by recipient
+      /// TODO: UpdateChatMessageEvent (Different than EditChatMessageEvent)
     }
   }
 

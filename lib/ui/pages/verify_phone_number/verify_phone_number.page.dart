@@ -234,7 +234,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
   }
 
   goToLoginPage() {
-    Navigator.popUntil(context, ModalRoute.withName('/login_page'));
+    Navigator.popUntil(context, ModalRoute.withName('login_page'));
   }
 
   Future<bool> goBack() async {
