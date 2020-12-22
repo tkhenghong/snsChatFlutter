@@ -1,5 +1,5 @@
 library snsChatFlutter.globals;
-String REST_URL_HOST_IP = '192.168.0.195';
+String REST_URL_HOST_IP = '192.168.68.109';
 String REST_URL_HOST_PORT = '8888';
 
 String REST_URL = "https://$REST_URL_HOST_IP:$REST_URL_HOST_PORT";

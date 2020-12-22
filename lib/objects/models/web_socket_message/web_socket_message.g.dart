@@ -91,6 +91,15 @@ const _$WebSocketEventEnumMap = {
   WebSocketEvent.AddGroupMember: 'AddGroupMember',
   WebSocketEvent.RemoveGroupMember: 'RemoveGroupMember',
   WebSocketEvent.ChangedPhoneNumber: 'ChangedPhoneNumber',
+  WebSocketEvent.AddedChatMessage: 'AddedChatMessage',
+  WebSocketEvent.UpdatedChatMessage: 'UpdatedChatMessage',
+  WebSocketEvent.UpdatedChatMessageMultimedia: 'UpdatedChatMessageMultimedia',
+  WebSocketEvent.DeletedChatMessage: 'DeletedChatMessage',
+  WebSocketEvent.DeletedChatMessageMultimedia: 'DeletedChatMessageMultimedia',
+  WebSocketEvent.UpdatedUnreadMessage: 'UpdatedUnreadMessage',
+  WebSocketEvent.DeletedUnreadMessage: 'DeletedUnreadMessage',
+  WebSocketEvent.UpdatedUser: 'UpdatedUser',
+  WebSocketEvent.UpdatedSettings: 'UpdatedSettings',
   WebSocketEvent.ExistingContactJoined: 'ExistingContactJoined',
 };
 
