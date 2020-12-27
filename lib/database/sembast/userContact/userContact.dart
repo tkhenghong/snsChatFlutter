@@ -7,7 +7,7 @@ import '../SembastDB.dart';
 class UserContactDBService {
   static const String USER_CONTACT_STORE_NAME = "userContact";
 
-  final _userContactStore = intMapStoreFactory.store(USER_CONTACT_STORE_NAME);
+  final StoreRef _userContactStore = intMapStoreFactory.store(USER_CONTACT_STORE_NAME);
 
   Future<Database> get _db async => await SembastDB.instance.database;
 
@@ -20,7 +20,7 @@ class UserContactDBService {
     UserContact existingUserContact = await getSingleUserContact(userContact.id);
     if (isObjectEmpty(existingUserContact)) {
       int key = await _userContactStore.add(await _db, userContact.toJson());
-      return key != null && key != 0 && key.toString().isNotEmpty;
+      return !isObjectEmpty(key) && key != 0 && !isStringEmpty(key.toString());
     } else {
       return await editUserContact(userContact);
     }

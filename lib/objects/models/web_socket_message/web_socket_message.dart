@@ -14,8 +14,8 @@ class WebSocketMessage {
   @JsonKey(name: 'conversationGroup')
   ConversationGroup conversationGroup;
 
-  @JsonKey(name: 'message')
-  ChatMessage message;
+  @JsonKey(name: 'chatMessage')
+  ChatMessage chatMessage;
 
   @JsonKey(name: 'multimedia')
   Multimedia multimedia;
@@ -32,7 +32,7 @@ class WebSocketMessage {
   @JsonKey(name: 'userContact')
   UserContact userContact;
 
-  WebSocketMessage({this.webSocketEvent, this.conversationGroup, this.message, this.multimedia, this.settings, this.unreadMessage, this.user, this.userContact});
+  WebSocketMessage({this.webSocketEvent, this.conversationGroup, this.chatMessage, this.multimedia, this.settings, this.unreadMessage, this.user, this.userContact});
 
   factory WebSocketMessage.fromJson(Map<String, dynamic> json) => _$WebSocketMessageFromJson(json);
 

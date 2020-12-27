@@ -1,7 +1,3 @@
 class ErrorHandlingService {
-  ErrorHandlingService() {
-
-  }
-
-
+  ErrorHandlingService();
 }

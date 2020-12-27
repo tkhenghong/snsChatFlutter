@@ -23,8 +23,8 @@ class ChatMessage extends Auditable {
   @JsonKey(name: 'senderMobileNo')
   String senderMobileNo;
 
-  @JsonKey(name: 'status')
-  ChatMessageStatus status;
+  @JsonKey(name: 'chatMessageStatus')
+  ChatMessageStatus chatMessageStatus;
 
   @JsonKey(name: 'messageContent')
   String messageContent;
@@ -38,7 +38,7 @@ class ChatMessage extends Auditable {
       this.senderId,
       this.senderName,
       this.senderMobileNo,
-      this.status,
+      this.chatMessageStatus,
       this.messageContent,
       this.multimediaId});
 

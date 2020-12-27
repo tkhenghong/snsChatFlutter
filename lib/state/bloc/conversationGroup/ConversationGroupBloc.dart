@@ -58,9 +58,9 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     bool added = false;
     try {
       if (state is ConversationGroupsLoaded) {
-        if (!event.createConversationGroupRequest.isNull) {
+        if (!isObjectEmpty(event.createConversationGroupRequest)) {
           conversationGroupFromServer = await conversationGroupAPIService.addConversationGroup(event.createConversationGroupRequest);
-          if (!conversationGroupFromServer.isNull) {
+          if (!isObjectEmpty(conversationGroupFromServer)) {
             added = await conversationGroupDBService.addConversationGroup(conversationGroupFromServer);
 
             if (added) {
@@ -77,7 +77,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       functionCallback(event, null);
     }
 
-    if (conversationGroupFromServer.isNull || !added) {
+    if (isObjectEmpty(conversationGroupFromServer) || !added) {
       showToast('Unable to add conversation group. Please try again later.', Toast.LENGTH_LONG);
       functionCallback(event, null);
     }
@@ -102,7 +102,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       if (state is ConversationGroupsLoaded) {
         updatedConversationGroup = await conversationGroupAPIService.editConversationGroup(event.editConversationGroupRequest);
 
-        if (!updatedConversationGroup.isNull) {
+        if (!isObjectEmpty(updatedConversationGroup)) {
           saved = await conversationGroupDBService.editConversationGroup(updatedConversationGroup);
           if (saved) {
             yield* updateConversationGroupsLoadedState(conversationGroup: updatedConversationGroup);
@@ -167,7 +167,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
   Stream<ConversationGroupState> _getUserOwnConversationGroups(GetUserOwnConversationGroupsEvent event) async* {
     try {
       ConversationPageableResponse conversationPageableResponse = await conversationGroupAPIService.getUserOwnConversationGroups(event.getConversationGroupsRequest);
-      if (!isObjectEmpty(conversationPageableResponse) && !conversationPageableResponse.conversationGroupResponses.content.isNull && conversationPageableResponse.conversationGroupResponses.content.isNotEmpty) {
+      if (!isObjectEmpty(conversationPageableResponse) && !isObjectEmpty(conversationPageableResponse.conversationGroupResponses.content) && conversationPageableResponse.conversationGroupResponses.content.isNotEmpty) {
         List<ConversationGroup> conversationGroupList = conversationPageableResponse.conversationGroupResponses.content.map((e) => ConversationGroup.fromJson(e)).toList();
 
         conversationGroupDBService.addConversationGroups(conversationGroupList);
@@ -236,7 +236,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
       if (isObjectEmpty(conversationGroup)) {
         conversationGroup = await conversationGroupAPIService.addConversationGroup(createConversationGroupRequest);
 
-        if (conversationGroup.isNull) {
+        if (isObjectEmpty(conversationGroup)) {
           throw Exception("Failed when creating conversation Group. Please try again.");
         }
 

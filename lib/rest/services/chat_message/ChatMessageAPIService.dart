@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' as HTTPDio;
 import 'package:get/get.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/objects/models/index.dart';
@@ -21,12 +21,12 @@ class ChatMessageAPIService {
   }
 
   Future<MultimediaResponse> uploadChatMessageMultimedia(String chatMessageId, File file, {Function uploadProgress}) async {
-    Response<dynamic> response = await httpFileService.uploadFile("$REST_URL/$messageAPI/$chatMessageId/multimedia", [file], onSendProgress: uploadProgress);
+    HTTPDio.Response<dynamic> response = await httpFileService.uploadFile("$REST_URL/$messageAPI/$chatMessageId/multimedia", [file], onSendProgress: uploadProgress);
     return MultimediaResponse.fromJson(response.data);
   }
 
   Future<dynamic> getChatMessageMultimedia(String multimediaId, String savePath, Function(int, int) downloadProgress) async {
-    Response<dynamic> response = await httpFileService.downloadFile("$REST_URL/$messageAPI/multimedia", savePath, onDownloadProgress: downloadProgress);
+    HTTPDio.Response<dynamic> response = await httpFileService.downloadFile("$REST_URL/$messageAPI/multimedia", savePath, onDownloadProgress: downloadProgress);
     return response.data; // Return file data to allow BLOC architecture to handle the saving path of the file.
   }
 

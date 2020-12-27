@@ -1,4 +1,7 @@
 isObjectEmpty(Object obj) {
-  bool empty = obj == null || obj.toString() == "";
-  return empty;
+  return obj == null;
+}
+
+isStringEmpty(String string) {
+  return string == null || string == "" || string.trim().isEmpty;
 }

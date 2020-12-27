@@ -1,4 +1,5 @@
 import 'package:sembast/sembast.dart';
+import 'package:sembast/sembast_io.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 
@@ -9,7 +10,7 @@ class ConversationDBService {
   static const String CONVERSATION_GROUP_STORE_NAME = "conversation_group";
 
   // Create a instance to perform DB operations
-  final _conversationGroupStore = intMapStoreFactory.store(CONVERSATION_GROUP_STORE_NAME);
+  final StoreRef _conversationGroupStore = intMapStoreFactory.store(CONVERSATION_GROUP_STORE_NAME);
 
   Future<Database> get _db async => await SembastDB.instance.database;
 
@@ -22,7 +23,8 @@ class ConversationDBService {
     ConversationGroup existingConversationGroup = await getSingleConversationGroup(conversationGroup.id);
     if (isObjectEmpty(existingConversationGroup)) {
       int key = await _conversationGroupStore.add(await _db, conversationGroup.toJson());
-      return key != null && key != 0 && key.toString().isNotEmpty;
+      print('SembastDB Conversation Group addConversationGroup() END');
+      return !isObjectEmpty(key) && key != 0 && !isStringEmpty(key.toString());
     } else {
       return await editConversationGroup(conversationGroup);
     }
@@ -42,8 +44,10 @@ class ConversationDBService {
           isObjectEmpty(existingConversationGroup) ? await _conversationGroupStore.add(database, conversationGroups[i].toJson()) : editConversationGroup(conversationGroups[i]);
         }
       });
+      print('SembastDB Conversation Group addConversationGroups() END');
       return true;
     } catch (e) {
+      print('SembastDB Conversation Group addConversationGroups() Error: $e');
       // Error happened in database transaction.
       return false;
     }

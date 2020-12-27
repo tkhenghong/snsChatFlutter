@@ -183,7 +183,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         }
 
         if (userState is UserLoaded) {
-          if (!userState.user.isNull) {
+          if (!isObjectEmpty(userState.user)) {
             ownUser = userState.user;
             return userContactBlocBuilder();
           }
@@ -202,7 +202,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
         }
 
         if (userContactState is UserContactsLoaded) {
-          if (!userContactState.ownUserContact.isNull) {
+          if (!isObjectEmpty(userContactState.ownUserContact)) {
             ownUserContact = userContactState.ownUserContact;
             userContacts = userContactState.userContactList;
             return phoneStorageContactBlocBuilder();
@@ -403,7 +403,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   showSelectPhoneNumberDialog(Contact contact, {bool checked}) {
     List<String> phoneNumberList = getContactMobileNumber(contact);
 
-    if (widget.chatGroupType == ConversationGroupType.Group && !checked.isNull && !checked) {
+    if (widget.chatGroupType == ConversationGroupType.Group && !isObjectEmpty(checked) && !checked) {
       removeGroupUserContact(contact, phoneNumberList, checked);
     } else {
       if (phoneNumberList.length > 1) {
@@ -473,7 +473,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
     userContactBloc.add(GetUserContactByMobileNoEvent(
         mobileNo: mobileNumber,
         callback: (UserContact userContact) {
-          if (!userContact.isNull) {
+          if (!isObjectEmpty(userContact)) {
             conversationGroupBloc.add(CreateConversationGroupEvent(
                 createConversationGroupRequest: CreateConversationGroupRequest(
                   name: contact.displayName,
@@ -483,7 +483,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
                   adminMemberIds: [ownUserContact.id, userContact.id],
                 ),
                 callback: (ConversationGroup conversationGroup) {
-                  if (!conversationGroup.isNull) {
+                  if (!isObjectEmpty(conversationGroup)) {
                     Get.back(); // Close select phone number pop up.
                     Get.back(); // Close loading indicator.
                     goToChatRoomPage(conversationGroup);
@@ -499,7 +499,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       userContactBloc.add(GetUserContactByMobileNoEvent(
           mobileNo: mobileNumber,
           callback: (UserContact userContact) {
-            if (!userContact.isNull) {
+            if (!isObjectEmpty(userContact)) {
               selectedContacts.add(contact);
               selectedUserContacts.add(userContact);
               setState(() {
@@ -579,7 +579,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
 
   List<String> getContactMobileNumber(Contact contact) {
     List<String> primaryNo = [];
-    if (!contact.phones.isNull && contact.phones.isNotEmpty) {
+    if (!isObjectEmpty(contact.phones) && contact.phones.isNotEmpty) {
       contact.phones.forEach((phoneNo) {
         primaryNo.add(phoneNo.value);
       });
@@ -590,7 +590,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       primaryNo.add(mobileNo);
     }
 
-    if (primaryNo.isEmpty) {
+    if (isObjectEmpty(primaryNo) || primaryNo.isEmpty) {
       Get.snackbar('Unable to get the User\'s phone number.', 'Please edit your phone number to proper phone number format and try again.');
     }
 

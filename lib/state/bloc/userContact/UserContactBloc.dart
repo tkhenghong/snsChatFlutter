@@ -111,7 +111,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
 
   // Not used until multiple user login happens.
   Stream<UserContactState> _getUserContactByUserId(GetUserContactByUserIdEvent event) async* {
-    if (!event.user.isNull) {
+    if (!isObjectEmpty(event.user)) {
       UserContact userContactFromDB = await userContactDBService.getUserContactByUserId(event.user.id);
 
       functionCallback(event, userContactFromDB);
@@ -167,7 +167,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
 
       UserContact updatedUserContact;
 
-      if (!existingStateUserContact.isNull) {
+      if (!isObjectEmpty(existingStateUserContact)) {
         // Local UserContact found, update the UserContact.
         updatedUserContact = await userContactAPIService.getUserContact(existingStateUserContact.id);
       } else {
@@ -175,7 +175,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
         updatedUserContact = await userContactAPIService.getUserContactByMobileNo(event.mobileNo);
       }
 
-      if (!updatedUserContact.isNull) {
+      if (!isObjectEmpty(updatedUserContact)) {
         userContactDBService.addUserContact(updatedUserContact);
 
         yield* yieldUserContactState(userContact: updatedUserContact);
@@ -216,7 +216,7 @@ class UserContactBloc extends Bloc<UserContactEvent, UserContactState> {
       existingOwnUserContact = (state as UserContactsLoaded).ownUserContact;
       existingUserContactList = (state as UserContactsLoaded).userContactList;
 
-      if (!updatedOwnUserContact.isNull) {
+      if (!isObjectEmpty(updatedOwnUserContact)) {
         existingOwnUserContact = updatedOwnUserContact;
 
         existingUserContactList.removeWhere((UserContact existingUserContact) => existingUserContact.id == updatedOwnUserContact.id);

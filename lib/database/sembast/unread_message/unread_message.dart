@@ -7,7 +7,7 @@ import '../SembastDB.dart';
 class UnreadMessageDBService {
   static const String UNREADMESSAGE_STORE_NAME = "unreadMessage";
 
-  final _unreadMessageStore = intMapStoreFactory.store(UNREADMESSAGE_STORE_NAME);
+  final StoreRef _unreadMessageStore = intMapStoreFactory.store(UNREADMESSAGE_STORE_NAME);
 
   Future<Database> get _db async => await SembastDB.instance.database;
 
@@ -20,7 +20,7 @@ class UnreadMessageDBService {
     UnreadMessage existingUnreadMessage = await getSingleUnreadMessage(unreadMessage.id);
     if (isObjectEmpty(existingUnreadMessage)) {
       int key = await _unreadMessageStore.add(await _db, unreadMessage.toJson());
-      return key != null && key != 0 && key.toString().isNotEmpty;
+      return !isObjectEmpty(key) && key != 0 && !isStringEmpty(key.toString());
     } else {
       return await editUnreadMessage(unreadMessage);
     }
@@ -40,8 +40,10 @@ class UnreadMessageDBService {
           isObjectEmpty(existingUnreadMessage) ? await _unreadMessageStore.add(database, unreadMessages[i].toJson()) : editUnreadMessage(unreadMessages[i]);
         }
       });
+      print('SembastDB Unread Message addUnreadMessages() END');
       return true;
     } catch (e) {
+      print('SembastDB Unread Message addUnreadMessages() Error: $e');
       // Error happened in database transaction.
       return false;
     }

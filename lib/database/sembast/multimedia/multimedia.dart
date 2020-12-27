@@ -7,7 +7,7 @@ import '../SembastDB.dart';
 class MultimediaDBService {
   static const String MULTIMEDIA_STORE_NAME = "multimedia";
 
-  final _multimediaStore = intMapStoreFactory.store(MULTIMEDIA_STORE_NAME);
+  final StoreRef _multimediaStore = intMapStoreFactory.store(MULTIMEDIA_STORE_NAME);
 
   Future<Database> get _db async => await SembastDB.instance.database;
 
@@ -21,7 +21,7 @@ class MultimediaDBService {
 
     if (isObjectEmpty(existingMultimedia)) {
       int key = await _multimediaStore.add(await _db, multimedia.toJson());
-      return key != null && key != 0 && key.toString().isNotEmpty;
+      return !isObjectEmpty(key) && key != 0 && !isStringEmpty(key.toString());
     } else {
       return await editMultimedia(multimedia);
     }

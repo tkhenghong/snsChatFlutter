@@ -4,6 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snschat_flutter/general/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/rest/index.dart';
 
@@ -17,12 +18,13 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
 
   // NOTE: Do not use Get.find() for SharedPreferences. It will cause problem in Production mode.
   FlutterSecureStorage storage = Get.find();
+  UserAPIService userAPIService = Get.find();
 
   @override
   Stream<AuthenticationState> mapEventToState(AuthenticationEvent event) async* {
     if (event is InitializeAuthenticationsEvent) {
       yield* _mapInitializeAuthentication(event);
-    }else if (event is CheckIsAuthenticatedEvent) {
+    } else if (event is CheckIsAuthenticatedEvent) {
       yield* _checkIsAuthenticated(event);
     } else if (event is RemoveAllAuthenticationsEvent) {
       yield* _removeAllAuthenticationsEvent(event);
@@ -49,7 +51,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
       }
       // Scenario 1: backend has response and it response is true.
       // Scenario 2: backend has no response/error && isAuthenticated is false.
-      if((!backendHasError && isAuthenticated) || (backendHasError && !isAuthenticated)) {
+      if ((!backendHasError && isAuthenticated) || (backendHasError && !isAuthenticated)) {
         try {
           SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
           String jwtToken = await storage.read(key: "jwtToken");
@@ -58,7 +60,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
 
           bool jwtExpired = otpExpirationTime.isBefore(DateTime.now());
 
-          if (!jwtToken.isNullOrBlank && !username.isNullOrBlank && !otpExpirationTime.isNull && !jwtExpired) {
+          if (!isStringEmpty(jwtToken) && !isStringEmpty(username) && !isObjectEmpty(otpExpirationTime) && !jwtExpired) {
             yield AuthenticationsLoaded(jwtToken, username, otpExpirationTime);
             functionCallback(event, true);
           } else {
@@ -92,7 +94,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
   // Only used when changing mobile number
   Stream<AuthenticationState> _requestAuthenticationUsingEmail(RequestAuthenticationUsingEmailAddressEvent event) async* {
     OTPResponse otpResponse = await authenticationAPIService.requestToAuthenticateWithEmailAddress(new EmailAddressUserAuthenticationRequest(emailAddress: event.emailAddress));
-    if (!otpResponse.isNull) {
+    if (!isObjectEmpty(otpResponse)) {
       String toastContent = 'Verification code has been sent to email address: ${event.emailAddress} successfully! Please check your email.';
       showToast(toastContent, Toast.LENGTH_SHORT);
       yield Authenticating(null, event.emailAddress, null, null, event.emailAddress, null, otpResponse.otpExpirationDateTime, VerificationMode.ChangeEmailAddress);
@@ -104,7 +106,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
   // Register Step 1
   Stream<AuthenticationState> _registerUsingMobileNo(RegisterUsingMobileNoEvent event) async* {
     PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse = await authenticationAPIService.registerMobileNumber(new RegisterUsingMobileNumberRequest(mobileNo: event.mobileNo, countryCode: event.countryCode));
-    if (!preVerifyMobileNumberOTPResponse.isNull) {
+    if (!isObjectEmpty(preVerifyMobileNumberOTPResponse)) {
       String toastContent = 'A verification code has been sent to your mobile no.: ${event.mobileNo}.';
       showToast(toastContent, Toast.LENGTH_SHORT);
       yield Authenticating(event.mobileNo, event.countryCode, null, preVerifyMobileNumberOTPResponse.maskedMobileNumber, preVerifyMobileNumberOTPResponse.maskedEmailAddress, preVerifyMobileNumberOTPResponse.secureKeyword,
@@ -120,7 +122,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
   // Login Step 1
   Stream<AuthenticationState> _loginUsingMobileNumber(LoginUsingMobileNumberEvent event) async* {
     PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse = await authenticationAPIService.loginMobileNumber(new PreVerifyMobileNumberOTPRequest(mobileNumber: event.mobileNo));
-    if (!preVerifyMobileNumberOTPResponse.isNull) {
+    if (!isObjectEmpty(preVerifyMobileNumberOTPResponse)) {
       String toastContent = 'A verification code has been sent to your mobile no.: ${event.mobileNo}.';
       showToast(toastContent, Toast.LENGTH_SHORT);
       yield Authenticating(event.mobileNo, event.countryCode, null, preVerifyMobileNumberOTPResponse.maskedMobileNumber, preVerifyMobileNumberOTPResponse.maskedEmailAddress, preVerifyMobileNumberOTPResponse.secureKeyword,
@@ -148,9 +150,13 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
         case VerificationMode.SignUp:
           userAuthenticationResponse = await authenticationAPIService.registerMobileNumberOTPVerification(verifyMobileNumberOTPRequest);
           break;
+        case VerificationMode.ChangeEmailAddress:
+        case VerificationMode.ChangeMobileNumber:
+        default:
+          break;
       }
 
-      if (!userAuthenticationResponse.isNull) {
+      if (!isObjectEmpty(userAuthenticationResponse)) {
         SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
         await storage.write(key: "jwtToken", value: userAuthenticationResponse.jwt);
         sharedPreferences.setString("username", userAuthenticationResponse.username);
@@ -163,11 +169,11 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
   }
 
   Stream<AuthenticationState> _removeAllAuthenticationsEvent(RemoveAllAuthenticationsEvent event) async* {
-    storage.deleteAll();
-
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.remove('username');
-    sharedPreferences.remove('otpExpirationTime');
+
+    // Wipe all.
+    storage.deleteAll();
+    sharedPreferences.clear();
 
     yield AuthenticationsNotLoaded();
     functionCallback(event, true);

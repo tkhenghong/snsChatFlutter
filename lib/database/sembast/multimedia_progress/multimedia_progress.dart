@@ -7,7 +7,7 @@ import '../SembastDB.dart';
 class MultimediaProgressDBService {
   static const String MULTIMEDIA_STORE_NAME = "multimediaProgress";
 
-  final _multimediaProgressStore = intMapStoreFactory.store(MULTIMEDIA_STORE_NAME);
+  final StoreRef _multimediaProgressStore = intMapStoreFactory.store(MULTIMEDIA_STORE_NAME);
 
   Future<Database> get _db async => await SembastDB.instance.database;
 
@@ -20,7 +20,7 @@ class MultimediaProgressDBService {
     MultimediaProgress existingMultimediaProgress = await getSingleMultimediaProgress(multimediaProgress.taskId);
     int key = isObjectEmpty(existingMultimediaProgress) ? await _multimediaProgressStore.add(await _db, multimediaProgress.toJson()) : editMultimediaProgress(multimediaProgress);
 
-    return key != null && key != 0 && key.toString().isNotEmpty;
+    return !isObjectEmpty(key) && key != 0 && !isStringEmpty(key.toString());
   }
 
   Future<bool> editMultimediaProgress(MultimediaProgress multimediaProgress) async {

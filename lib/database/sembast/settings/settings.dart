@@ -7,7 +7,7 @@ import '../SembastDB.dart';
 class SettingsDBService {
   static const String SETTINGS_STORE_NAME = "settings";
 
-  final _settingsStore = intMapStoreFactory.store(SETTINGS_STORE_NAME);
+  final StoreRef _settingsStore = intMapStoreFactory.store(SETTINGS_STORE_NAME);
 
   Future<Database> get _db async => await SembastDB.instance.database;
 
@@ -20,7 +20,7 @@ class SettingsDBService {
     Settings existingSettings = await getSingleSettings(settings.id);
     if (isObjectEmpty(existingSettings)) {
       int key = await _settingsStore.add(await _db, settings.toJson());
-      return key != null && key != 0 && key.toString().isNotEmpty;
+      return !isObjectEmpty(key) && key != 0 && !isStringEmpty(key.toString());
     } else {
       return await editSettings(settings);
     }

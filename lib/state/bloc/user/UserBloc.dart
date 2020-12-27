@@ -36,25 +36,38 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   Stream<UserState> _initializeUser(InitializeUserEvent event) async* {
-    if (state is UserLoading || state is UserNotLoaded) {
+    try {
+      final FlutterSecureStorage storage = Get.find();
+      String userId = await storage.read(key: 'userId');
+
+      User user;
+
       try {
-        final FlutterSecureStorage storage = Get.find();
-        String userId = await storage.read(key: 'userId');
-
-        User userFromDB = await userDBService.getSingleUser(userId);
-
-        if (userId.isNotEmpty && !userFromDB.isNull) {
-          yield UserLoaded(userFromDB);
-          functionCallback(event, true);
-        } else {
-          yield UserNotLoaded();
-          functionCallback(event, false);
-        }
+        user = await userAPIService.getOwnUser();
+        userDBService.addUser(user);
       } catch (e) {
+        if (!isStringEmpty(userId)) {
+          user = await userDBService.getSingleUser(userId);
+        }
+      }
+
+      if (!isObjectEmpty(user)) {
+        yield UserLoaded(user);
+        functionCallback(event, true);
+      } else {
         yield UserNotLoaded();
         functionCallback(event, false);
       }
+    } catch (e) {
+      print('Error in InitializeUserEvent,  e: $e');
+      yield UserNotLoaded();
+      functionCallback(event, false);
     }
+  }
+
+  refreshUser() async {
+    User user = await userAPIService.getOwnUser();
+    userDBService.addUser(user);
   }
 
   // Change User information in API, DB, and State
@@ -93,7 +106,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   Stream<UserState> _getOwnUser(GetOwnUserEvent event) async* {
     User user = await userAPIService.getOwnUser();
 
-    if (!user.isNull) {
+    if (!isObjectEmpty(user)) {
       userDBService.addUser(user);
       final FlutterSecureStorage storage = Get.find();
       storage.write(key: 'userId', value: user.id);
@@ -113,12 +126,12 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 //      existingUserUsingMobileNo = await userAPIService.getUserByUsingMobileNo(event.mobileNo);
     }
 
-    if (!event.googleSignIn.isNull && event.googleSignIn.currentUser.id.isNotEmpty) {
+    if (!isObjectEmpty(event.googleSignIn) && event.googleSignIn.currentUser.id.isNotEmpty) {
 //      existingUserUsingGoogleAccount = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
     }
 
     // Must have both not empty then only considered it as sign up
-    isSignedUp = !existingUserUsingMobileNo.isNull && !existingUserUsingGoogleAccount.isNull;
+    isSignedUp = !isObjectEmpty(existingUserUsingMobileNo) && !isObjectEmpty(existingUserUsingGoogleAccount);
 
     if (ENVIRONMENT != 'PRODUCTION') {
       isSignedUp = true;
@@ -132,12 +145,12 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     bool isSignedIn = false;
     User userFromServer;
     bool saved = false;
-    if (!event.googleSignIn.isNull) {
+    if (!isObjectEmpty(event.googleSignIn)) {
       isSignedIn = await event.googleSignIn.isSignedIn();
       if (isSignedIn) {
 //        userFromServer = await userAPIService.getUserByUsingGoogleAccountId(event.googleSignIn.currentUser.id);
 
-        if (!userFromServer.isNull) {
+        if (!isObjectEmpty(userFromServer)) {
           // Check mobile no match with it's googleAccount ID or not.
           if (userFromServer.mobileNo == event.mobileNo) {
             saved = await userDBService.addUser(userFromServer);
@@ -154,16 +167,17 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       }
     }
 
-    if (!isSignedIn || userFromServer.isNull || !saved) {
+    if (!isSignedIn || isObjectEmpty(userFromServer) || !saved) {
       yield UserNotLoaded();
       functionCallback(event, null);
     }
   }
 
-  Stream<UserState> _removeAllUsersEvent(RemoveAllUsersEvent event) async* {
-    yield UserNotLoaded();
-    functionCallback(event, true);
-  }
+  // To be used for remove local DB users table (implemented when allow multiple users login)
+  // Stream<UserState> _removeAllUsersEvent(RemoveAllUsersEvent event) async* {
+  //   yield UserNotLoaded();
+  //   functionCallback(event, true);
+  // }
 
   void functionCallback(event, value) {
     if (!isObjectEmpty(event) && !isObjectEmpty(event.callback)) {

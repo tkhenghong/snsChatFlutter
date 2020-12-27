@@ -14,9 +14,9 @@ WebSocketMessage _$WebSocketMessageFromJson(Map<String, dynamic> json) {
         ? null
         : ConversationGroup.fromJson(
             json['conversationGroup'] as Map<String, dynamic>),
-    message: json['message'] == null
+    chatMessage: json['chatMessage'] == null
         ? null
-        : ChatMessage.fromJson(json['message'] as Map<String, dynamic>),
+        : ChatMessage.fromJson(json['chatMessage'] as Map<String, dynamic>),
     multimedia: json['multimedia'] == null
         ? null
         : Multimedia.fromJson(json['multimedia'] as Map<String, dynamic>),
@@ -39,7 +39,7 @@ Map<String, dynamic> _$WebSocketMessageToJson(WebSocketMessage instance) =>
     <String, dynamic>{
       'webSocketEvent': _$WebSocketEventEnumMap[instance.webSocketEvent],
       'conversationGroup': instance.conversationGroup,
-      'message': instance.message,
+      'chatMessage': instance.chatMessage,
       'multimedia': instance.multimedia,
       'settings': instance.settings,
       'unreadMessage': instance.unreadMessage,
@@ -80,27 +80,32 @@ T _$enumDecodeNullable<T>(
 }
 
 const _$WebSocketEventEnumMap = {
-  WebSocketEvent.JoinedConversationGroup: 'JoinedConversationGroup',
-  WebSocketEvent.LeftConversationGroup: 'LeftConversationGroup',
-  WebSocketEvent.UploadedGroupPhoto: 'UploadedGroupPhoto',
-  WebSocketEvent.ChangedGroupPhoto: 'ChangedGroupPhoto',
-  WebSocketEvent.DeletedGroupPhoto: 'DeletedGroupPhoto',
+  WebSocketEvent.NEW_CONVERSATION_GROUP: 'NEW_CONVERSATION_GROUP',
+  WebSocketEvent.JOINED_CONVERSATION_GROUP: 'JOINED_CONVERSATION_GROUP',
+  WebSocketEvent.LEFT_CONVERSATION_GROUP: 'LEFT_CONVERSATION_GROUP',
+  WebSocketEvent.UPLOADED_GROUP_PHOTO: 'UPLOADED_GROUP_PHOTO',
+  WebSocketEvent.CHANGED_GROUP_PHOTO: 'CHANGED_GROUP_PHOTO',
+  WebSocketEvent.DELETED_GROUP_PHOTO: 'DELETED_GROUP_PHOTO',
+  WebSocketEvent.CHANGED_GROUP_NAME: 'CHANGED_GROUP_NAME',
   WebSocketEvent.ChangedGroupDescription: 'ChangedGroupDescription',
-  WebSocketEvent.PromoteGroupAdmin: 'PromoteGroupAdmin',
-  WebSocketEvent.DemoteGroupAdmin: 'DemoteGroupAdmin',
-  WebSocketEvent.AddGroupMember: 'AddGroupMember',
-  WebSocketEvent.RemoveGroupMember: 'RemoveGroupMember',
-  WebSocketEvent.ChangedPhoneNumber: 'ChangedPhoneNumber',
-  WebSocketEvent.AddedChatMessage: 'AddedChatMessage',
-  WebSocketEvent.UpdatedChatMessage: 'UpdatedChatMessage',
-  WebSocketEvent.UpdatedChatMessageMultimedia: 'UpdatedChatMessageMultimedia',
-  WebSocketEvent.DeletedChatMessage: 'DeletedChatMessage',
-  WebSocketEvent.DeletedChatMessageMultimedia: 'DeletedChatMessageMultimedia',
-  WebSocketEvent.UpdatedUnreadMessage: 'UpdatedUnreadMessage',
-  WebSocketEvent.DeletedUnreadMessage: 'DeletedUnreadMessage',
-  WebSocketEvent.UpdatedUser: 'UpdatedUser',
-  WebSocketEvent.UpdatedSettings: 'UpdatedSettings',
-  WebSocketEvent.ExistingContactJoined: 'ExistingContactJoined',
+  WebSocketEvent.PROMOTE_GROUP_ADMIN: 'PROMOTE_GROUP_ADMIN',
+  WebSocketEvent.DEMOTE_GROUP_ADMIN: 'DEMOTE_GROUP_ADMIN',
+  WebSocketEvent.ADD_GROUP_MEMBER: 'ADD_GROUP_MEMBER',
+  WebSocketEvent.REMOVE_GROUP_MEMBER: 'REMOVE_GROUP_MEMBER',
+  WebSocketEvent.CHANGED_PHONE_NUMBER: 'CHANGED_PHONE_NUMBER',
+  WebSocketEvent.ADDED_CHAT_MESSAGE: 'ADDED_CHAT_MESSAGE',
+  WebSocketEvent.UPDATED_CHAT_MESSAGE: 'UPDATED_CHAT_MESSAGE',
+  WebSocketEvent.UPLOADED_CHAT_MESSAGE_MULTIMEDIA:
+      'UPLOADED_CHAT_MESSAGE_MULTIMEDIA',
+  WebSocketEvent.DELETED_CHAT_MESSAGE: 'DELETED_CHAT_MESSAGE',
+  WebSocketEvent.DELETED_CHAT_MESSAGE_MULTIMEDIA:
+      'DELETED_CHAT_MESSAGE_MULTIMEDIA',
+  WebSocketEvent.NEW_UNREAD_MESSAGE: 'NEW_UNREAD_MESSAGE',
+  WebSocketEvent.UPDATED_UNREAD_MESSAGE: 'UPDATED_UNREAD_MESSAGE',
+  WebSocketEvent.DELETED_UNREAD_MESSAGE: 'DELETED_UNREAD_MESSAGE',
+  WebSocketEvent.UPDATED_USER: 'UPDATED_USER',
+  WebSocketEvent.UPDATED_SETTINGS: 'UPDATED_SETTINGS',
+  WebSocketEvent.EXISTING_CONTACT_JOINED: 'EXISTING_CONTACT_JOINED',
 };
 
 // **************************************************************************
@@ -111,7 +116,7 @@ abstract class _$WebSocketMessageLombok {
   /// Field
   WebSocketEvent webSocketEvent;
   ConversationGroup conversationGroup;
-  ChatMessage message;
+  ChatMessage chatMessage;
   Multimedia multimedia;
   Settings settings;
   UnreadMessage unreadMessage;
@@ -128,8 +133,8 @@ abstract class _$WebSocketMessageLombok {
     this.conversationGroup = conversationGroup;
   }
 
-  void setMessage(ChatMessage message) {
-    this.message = message;
+  void setChatMessage(ChatMessage chatMessage) {
+    this.chatMessage = chatMessage;
   }
 
   void setMultimedia(Multimedia multimedia) {
@@ -161,8 +166,8 @@ abstract class _$WebSocketMessageLombok {
     return conversationGroup;
   }
 
-  ChatMessage getMessage() {
-    return message;
+  ChatMessage getChatMessage() {
+    return chatMessage;
   }
 
   Multimedia getMultimedia() {

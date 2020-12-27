@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' as HTTPDio;
 import 'package:get/get.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/objects/models/index.dart';
@@ -22,17 +22,17 @@ class UserContactAPIService {
   }
 
   Future<MultimediaResponse> uploadOwnUserContactProfilePhoto(String userContactId, File file, {Function uploadProgress}) async {
-    Response<dynamic> response = await httpFileService.uploadFile("$REST_URL/$userContactAPI/$userContactId/profilePhoto", [file], onSendProgress: uploadProgress);
+    HTTPDio.Response<dynamic> response = await httpFileService.uploadFile("$REST_URL/$userContactAPI/$userContactId/profilePhoto", [file], onSendProgress: uploadProgress);
     return MultimediaResponse.fromJson(response.data);
   }
 
   Future<dynamic> getOwnUserContactProfilePhoto(String savePath, Function(int, int) downloadProgress) async {
-    Response<dynamic> response = await httpFileService.downloadFile("$REST_URL/$userContactAPI/profilePhoto", savePath, onDownloadProgress: downloadProgress);
+    HTTPDio.Response<dynamic> response = await httpFileService.downloadFile("$REST_URL/$userContactAPI/profilePhoto", savePath, onDownloadProgress: downloadProgress);
     return response.data; // Return file data to allow BLOC architecture to handle the saving path of the file.
   }
 
   Future<dynamic> getUserContactProfilePhoto(String userContactId, String savePath, Function(int, int) downloadProgress) async {
-    Response<dynamic> response = await httpFileService.downloadFile("$REST_URL/$userContactAPI/$userContactId/profilePhoto", savePath, onDownloadProgress: downloadProgress);
+    HTTPDio.Response<dynamic> response = await httpFileService.downloadFile("$REST_URL/$userContactAPI/$userContactId/profilePhoto", savePath, onDownloadProgress: downloadProgress);
     return response.data; // Return file data to allow BLOC architecture to handle the saving path of the file.
   }
 

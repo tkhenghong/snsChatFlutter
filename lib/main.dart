@@ -13,6 +13,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/bloc.dart';
@@ -324,7 +325,7 @@ class MyAppState extends State<MyApp> {
 
       bool enableFullFPS = sharedPreferences.get('enableFullFPS');
 
-      if (!enableFullFPS.isNull && enableFullFPS) {
+      if (!isObjectEmpty(enableFullFPS) && enableFullFPS) {
         await FlutterDisplayMode.setMode(displayModeList[selectedId]);
       } else {
         await FlutterDisplayMode.setMode(currentDisplayMode); // Use back user set default mode.

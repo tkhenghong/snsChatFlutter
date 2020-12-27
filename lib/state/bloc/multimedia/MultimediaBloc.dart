@@ -89,7 +89,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
         // Loads the file into the local directory.
         customFileService.retrieveMultimediaFile(multimediaFromServer, '$REST_URL/userContact/profilePhoto');
 
-        if (!multimediaFromServer.isNull) {
+        if (!isObjectEmpty(multimediaFromServer)) {
           multimediaDBService.addMultimedia(multimediaFromServer);
 
           yield* updateMultimediaLoadedState(multimedia: multimediaFromServer);
@@ -106,12 +106,12 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
       if (state is MultimediaLoaded) {
         List<Multimedia> multimediaList = (state as MultimediaLoaded).multimediaList;
 
-        if (!event.userContactList.isNullOrBlank && event.userContactList.isNotEmpty) {
+        if (!isObjectEmpty(event.userContactList) && event.userContactList.isNotEmpty) {
           List<String> multimediaIDList = event.userContactList.map((e) => e.profilePicture).toList();
           List<Multimedia> multimediaListFromServer = await multimediaAPIService.getMultimediaList(GetMultimediaListRequest(multimediaList: multimediaIDList));
 
           await multimediaDBService.addMultimediaList(multimediaListFromServer);
-          if (!multimediaListFromServer.isNullOrBlank && multimediaListFromServer.isNotEmpty) {
+          if (!isObjectEmpty(multimediaListFromServer) && multimediaListFromServer.isNotEmpty) {
             for (int i = 0; i < multimediaListFromServer.length; i++) {
               multimediaList.removeWhere((Multimedia existingMultimedia) => existingMultimedia.id == multimediaListFromServer[i].id);
             }
@@ -135,15 +135,15 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
         List<String> wantedMultimediaIds = event.chatMessageList.map((chatMessage) => chatMessage.multimediaId).toList();
 
         // Trim empty Strings.
-        wantedMultimediaIds.removeWhere((multimediaId) => isObjectEmpty(multimediaId) || multimediaId.isNullOrBlank);
+        wantedMultimediaIds.removeWhere((multimediaId) => isObjectEmpty(multimediaId) || isStringEmpty(multimediaId));
 
-        if (!event.chatMessageList.isNullOrBlank && event.chatMessageList.isNotEmpty) {
+        if (!isObjectEmpty(event.chatMessageList) && event.chatMessageList.isNotEmpty) {
           List<Multimedia> existingMultimediaList = await multimediaDBService.getMultimediaList(wantedMultimediaIds);
 
           // Find any leftover multimedia list that does not exist in local DB yet.
           wantedMultimediaIds.removeWhere((multimediaId) => existingMultimediaList.any((existingMultimedia) => existingMultimedia.id == multimediaId));
 
-          if(wantedMultimediaIds.length > 0) {
+          if (wantedMultimediaIds.isNotEmpty) {
             List<Multimedia> multimediaListFromServer = await multimediaAPIService.getMultimediaList(GetMultimediaListRequest(multimediaList: wantedMultimediaIds));
 
             // Combine both local and backend list together.

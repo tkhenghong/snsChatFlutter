@@ -17,15 +17,20 @@ abstract class ApiException implements Exception {
       Get.back();
     }
 
-    String messageTitle = !errorResponse.isNull && !errorResponse.exceptionName.isNullOrBlank ? errorResponse.exceptionName : this.runtimeType.toString();
-    String messageContent = !errorResponse.isNull && !errorResponse.message.isNullOrBlank ? errorResponse.message : '-';
-    String trace = !errorResponse.isNull && !errorResponse.trace.isNullOrBlank ? errorResponse.trace : null;
+    bool errorResponseIsNull = isObjectEmpty(errorResponse);
+    bool errorResponseExceptionNameIsBlank = isStringEmpty(errorResponse.exceptionName);
+    bool errorResponseMessageIsBlank = isStringEmpty(errorResponse.message);
+    bool errorResponseTraceIsBlank = isStringEmpty(errorResponse.trace);
 
-    if (!showDialog.isNull && showDialog) {
+    String messageTitle = !errorResponseIsNull && !errorResponseExceptionNameIsBlank ? errorResponse.exceptionName : this.runtimeType.toString();
+    String messageContent = !errorResponseIsNull && !errorResponseMessageIsBlank ? errorResponse.message : '-';
+    String trace = !errorResponseIsNull && !errorResponseTraceIsBlank ? errorResponse.trace : null;
+
+    if (!isObjectEmpty(showDialog) && showDialog) {
       showMessageDialog(messageTitle, messageContent, errorCode, trace);
     }
 
-    if (!showSnackBar.isNull && showSnackBar) {
+    if (!isObjectEmpty(showSnackBar) && showSnackBar) {
       showSnackbar(messageTitle, messageContent);
     }
   }
@@ -59,6 +64,10 @@ abstract class ApiException implements Exception {
   }
 
   Widget wordSection(String errorCode, String messageContent, String trace) {
+    bool messageContentIsBlank = isStringEmpty(messageContent);
+    bool tracetIsBlank = isStringEmpty(trace);
+
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,10 +76,10 @@ abstract class ApiException implements Exception {
           children: <Widget>[Text('Error code: ', style: TextStyle(fontWeight: FontWeight.bold)), Text(errorCode)],
         ),
         minorSpacing(),
-        messageContent.isNullOrBlank ? Text('Description: ', style: TextStyle(fontWeight: FontWeight.bold)) : Container(),
-        messageContent.isNullOrBlank ? Text(messageContent, softWrap: true) : Container(),
+        messageContentIsBlank ? Text('Description: ', style: TextStyle(fontWeight: FontWeight.bold)) : Container(),
+        messageContentIsBlank ? Text(messageContent, softWrap: true) : Container(),
         minorSpacing(),
-        !trace.isNullOrBlank
+        !tracetIsBlank
             ? ExpandablePanel(
                 header: Text('Details: '),
                 collapsed: Text(
@@ -79,7 +88,7 @@ abstract class ApiException implements Exception {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontStyle: FontStyle.italic),
                 ),
-                expanded: !trace.isNullOrBlank ? Text(trace, softWrap: true, style: TextStyle(fontStyle: FontStyle.italic)) : Container(),
+                expanded: !tracetIsBlank ? Text(trace, softWrap: true, style: TextStyle(fontStyle: FontStyle.italic)) : Container(),
               )
             : Container(),
       ],
@@ -112,27 +121,27 @@ abstract class ApiException implements Exception {
 
 class EmptyResultException extends ApiException {
   EmptyResultException(ErrorResponse errorResponse, [String errorCode, bool showSnackBar, bool showDialog])
-      : super(errorResponse, errorCode: errorCode, showDialog: isObjectEmpty(showDialog) ? false : showDialog, showSnackBar: isObjectEmpty(showSnackBar) ? true : showSnackBar) {}
+      : super(errorResponse, errorCode: errorCode, showDialog: isObjectEmpty(showDialog) ? false : showDialog, showSnackBar: isObjectEmpty(showSnackBar) ? true : showSnackBar);
 }
 
 class ConnectionException extends ApiException {
   ConnectionException(ErrorResponse errorResponse, [String errorCode, bool showSnackBar, bool showDialog])
-      : super(errorResponse, errorCode: errorCode, showDialog: isObjectEmpty(showDialog) ? true : showDialog, showSnackBar: isObjectEmpty(showSnackBar) ? false : showSnackBar) {}
+      : super(errorResponse, errorCode: errorCode, showDialog: isObjectEmpty(showDialog) ? true : showDialog, showSnackBar: isObjectEmpty(showSnackBar) ? false : showSnackBar);
 }
 
 class ServerErrorException extends ApiException {
   ServerErrorException(ErrorResponse errorResponse, [String errorCode, bool showSnackBar, bool showDialog])
-      : super(errorResponse, errorCode: errorCode, showDialog: isObjectEmpty(showDialog) ? true : showDialog, showSnackBar: isObjectEmpty(showSnackBar) ? false : showSnackBar) {}
+      : super(errorResponse, errorCode: errorCode, showDialog: isObjectEmpty(showDialog) ? true : showDialog, showSnackBar: isObjectEmpty(showSnackBar) ? false : showSnackBar);
 }
 
 class ClientErrorException extends ApiException {
   ClientErrorException(ErrorResponse errorResponse, [String errorCode, bool showSnackBar, bool showDialog])
-      : super(errorResponse, errorCode: errorCode, showDialog: isObjectEmpty(showDialog) ? true : showDialog, showSnackBar: isObjectEmpty(showSnackBar) ? false : showSnackBar) {}
+      : super(errorResponse, errorCode: errorCode, showDialog: isObjectEmpty(showDialog) ? true : showDialog, showSnackBar: isObjectEmpty(showSnackBar) ? false : showSnackBar);
 }
 
 class UnknownException extends ApiException {
   UnknownException(ErrorResponse errorResponse, [String errorCode, bool showSnackBar, bool showDialog])
-      : super(errorResponse, errorCode: errorCode, showDialog: isObjectEmpty(showDialog) ? true : showDialog, showSnackBar: isObjectEmpty(showSnackBar) ? false : showSnackBar) {}
+      : super(errorResponse, errorCode: errorCode, showDialog: isObjectEmpty(showDialog) ? true : showDialog, showSnackBar: isObjectEmpty(showSnackBar) ? false : showSnackBar);
 }
 
 class NetworkTimeoutException {

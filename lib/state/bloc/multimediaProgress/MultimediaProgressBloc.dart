@@ -54,7 +54,7 @@ class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaPro
 
     if (state is MultimediaProgressLoaded) {
       multimediaProgressList = (state as MultimediaProgressLoaded).multimediaProgressList;
-      if (!newMultimediaProgress.isNull) {
+      if (!isObjectEmpty(newMultimediaProgress)) {
         multimediaProgressSaved = await multimediaProgressDBService.addMultimediaProgress(newMultimediaProgress);
 
         if (multimediaProgressSaved) {
@@ -68,7 +68,7 @@ class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaPro
       }
     }
 
-    if (newMultimediaProgress.isNull || !multimediaProgressSaved) {
+    if (isObjectEmpty(newMultimediaProgress) || !multimediaProgressSaved) {
       yield MultimediaProgressNotLoaded();
       functionCallback(event, null);
     }
@@ -81,7 +81,7 @@ class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaPro
 
     if (state is MultimediaProgressLoaded) {
       multimediaProgressList = (state as MultimediaProgressLoaded).multimediaProgressList;
-      if (!newMultimediaProgress.isNull) {
+      if (!isObjectEmpty(newMultimediaProgress)) {
         multimediaProgressSaved = await multimediaProgressDBService.addMultimediaProgress(newMultimediaProgress);
 
         if (multimediaProgressSaved) {
@@ -96,7 +96,7 @@ class MultimediaProgressBloc extends Bloc<MultimediaProgressEvent, MultimediaPro
       }
     }
 
-    if (newMultimediaProgress.isNull || !multimediaProgressSaved) {
+    if (isObjectEmpty(newMultimediaProgress) || !multimediaProgressSaved) {
       yield MultimediaProgressNotLoaded();
       functionCallback(event, null);
     }

@@ -2,11 +2,12 @@ import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path/path.dart' as path;
 import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' as HTTPDio;
 import 'package:dio/src/options.dart' as DioOptions;
 import 'package:get/get.dart';
 
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
-import 'package:snschat_flutter/general/index.dart';
+import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/rest/rest_request.utils.dart';
 
 // https://pub.dev/packages/dio
@@ -17,20 +18,20 @@ class HTTPFileService {
   Dio dio = Get.find();
   FlutterSecureStorage flutterSecureStorage = Get.find();
 
-  Future<Response<dynamic>> uploadFile(String url, List<File> files,
+  Future<HTTPDio.Response<dynamic>> uploadFile(String url, List<File> files,
       {Map<String, String> additionalHeaders,
       int sendTimeoutSeconds,
       int receiveTimeoutSeconds,
       Map<String, dynamic> data,
       Function onSendProgress}) async {
     Map<String, String> headers = await handleHTTPHeaders(additionalHeaders);
-    List<MultipartFile> multipartFileList = [];
+    List<HTTPDio.MultipartFile> multipartFileList = [];
 
     for (int i = 0; i < files.length; i++) {
-      multipartFileList.add(await MultipartFile.fromFile(files[i].path, filename: path.basename(files[i].path)));
+      multipartFileList.add(await HTTPDio.MultipartFile.fromFile(files[i].path, filename: path.basename(files[i].path)));
     }
 
-    FormData formData = FormData.fromMap({'files': multipartFileList});
+    HTTPDio.FormData formData = HTTPDio.FormData.fromMap({'files': multipartFileList});
 
     return await dio.post(url,
         data: formData,
@@ -42,7 +43,7 @@ class HTTPFileService {
 
   /// Download a file using Dio
   /// Example of download a file: https://stackoverflow.com/questions/59616610
-  Future<Response<dynamic>> downloadFile(String url, String savePath, {Function(int, int) onDownloadProgress}) async {
+  Future<HTTPDio.Response<dynamic>> downloadFile(String url, String savePath, {Function(int, int) onDownloadProgress}) async {
     return await dio.download("$REST_URL/$url", savePath, onReceiveProgress: onDownloadProgress);
   }
 
@@ -51,11 +52,11 @@ class HTTPFileService {
 
     String jwt = await _readJWT();
 
-    if (!jwt.isNullOrBlank) {
+    if (!isObjectEmpty(jwt)) {
       headers.putIfAbsent('Authorization', () => 'Bearer $jwt');
     }
 
-    if (!additionalHeaders.isNullOrBlank && additionalHeaders.isNotEmpty) {
+    if (!additionalHeaders.isBlank && additionalHeaders.isNotEmpty) {
       headers.addAll(additionalHeaders);
     }
     return headers;

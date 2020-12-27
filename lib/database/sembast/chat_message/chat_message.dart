@@ -1,4 +1,5 @@
 import 'package:sembast/sembast.dart';
+import 'package:sembast/sembast_io.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 
@@ -7,22 +8,42 @@ import '../SembastDB.dart';
 class ChatMessageDBService {
   static const String MESSAGE_STORE_NAME = "chatMessage";
 
-  final _chatMessageStore = intMapStoreFactory.store(MESSAGE_STORE_NAME);
+  final StoreRef _chatMessageStore = intMapStoreFactory.store(MESSAGE_STORE_NAME);
 
   Future<Database> get _db async => await SembastDB.instance.database;
 
   /// Add single chat message.
   Future<bool> addChatMessage(ChatMessage chatMessage) async {
-    if (isObjectEmpty(await _db)) {
+    print('SembastDB chat_message.dart addChatMessage()');
+    print('SembastDB chat_message.dart chatMessage.id: ${chatMessage.id}');
+    print('SembastDB chat_message.dart chatMessage.messageContent: ${chatMessage.messageContent}');
+
+    // DatabaseFactory dbFactory = databaseFactoryIo;
+    // Database db = await dbFactory.openDatabase('/storage/emulated/0/Android/data/flutter.snschat.com.snschatflutter/files/pocketChat.db');
+    // StoreRef _chatMessageStore = intMapStoreFactory.store(MESSAGE_STORE_NAME);
+
+    Database db = await _db;
+    if (isObjectEmpty(db)) {
+      print('SembastDB chat_message.dart if (isObjectEmpty(await _db))');
       return false;
+    } else {
+      print('SembastDB chat_message.dart if (!isObjectEmpty(await _db))');
     }
 
+    print('SembastDB chat_message.dart CHECKPOINT 4');
     ChatMessage existingChatMessage = await getSingleChatMessage(chatMessage.id);
+    print('SembastDB chat_message.dart CHECKPOINT 5');
 
     if (isObjectEmpty(existingChatMessage)) {
-      int key = await _chatMessageStore.add(await _db, chatMessage.toJson());
-      return key != null && key != 0 && key.toString().isNotEmpty;
+      print('SembastDB chat_message.dart if (isObjectEmpty(existingChatMessage))');
+      Map<String, dynamic> chatMessageMap = chatMessage.toJson();
+      print('SembastDB chat_message.dart CHECKPOINT 6 chatMessageMap: $chatMessageMap');
+
+      int key = await _chatMessageStore.add(db, chatMessageMap);
+      print('SembastDB chat_message.dart CHECKPOINT 7, key: $key');
+      return !isObjectEmpty(key) && key != 0 && !isStringEmpty(key.toString());
     } else {
+      print('SembastDB chat_message.dart if (!isObjectEmpty(existingChatMessage))');
       return await editChatMessage(chatMessage);
     }
   }
@@ -40,8 +61,10 @@ class ChatMessageDBService {
           isObjectEmpty(existingChatMessage) ? await _chatMessageStore.add(database, chatMessages[i].toJson()) : editChatMessage(chatMessages[i]);
         }
       });
+      print('SembastDB Chat Message addConversationGroup() END');
       return true;
     } catch (e) {
+      print('SembastDB Chat Message addChatMessages() Error: $e');
       // Error happened in database transaction.
       return false;
     }
@@ -90,7 +113,7 @@ class ChatMessageDBService {
     if (isObjectEmpty(await _db)) {
       return null;
     }
-    final finder = Finder(filter: Filter.equals("conversationGroupId", conversationGroupId));
+    final finder = Finder(filter: Filter.equals("conversationId", conversationGroupId));
     final recordSnapshots = await _chatMessageStore.find(await _db, finder: finder);
     if (!isObjectEmpty(recordSnapshots)) {
       List<ChatMessage> chatMessageList = [];
@@ -124,10 +147,10 @@ class ChatMessageDBService {
 
   Future<List<ChatMessage>> getAllChatMessagesWithPagination(String conversationGroupId, int page, int size) async {
     if (isObjectEmpty(await _db)) {
-      return null;
+      return [];
     }
     // Auto sort by lastModifiedDate, but when showing in chat page, sort these conversations using last unread message's date
-    final finder = Finder(sortOrders: [SortOrder('lastModifiedDate', false)], filter: Filter.equals('conversationGroupId', conversationGroupId), offset: page * size, limit: size);
+    final finder = Finder(sortOrders: [SortOrder('lastModifiedDate', false)], filter: Filter.equals('conversationId', conversationGroupId), offset: page * size, limit: size);
     // Find all Conversation Groups
     final recordSnapshots = await _chatMessageStore.find(await _db, finder: finder);
     if (!isObjectEmpty(recordSnapshots)) {

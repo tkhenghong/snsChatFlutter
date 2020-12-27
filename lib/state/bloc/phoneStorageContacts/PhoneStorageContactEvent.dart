@@ -24,7 +24,7 @@ class SearchPhoneStorageContactEvent extends PhoneStorageContactEvent {
   const SearchPhoneStorageContactEvent({this.searchTerm, this.callback});
 
   @override
-  String toString() => 'SearchPhoneStorageContactEvent - searchTerm: ${searchTerm}';
+  String toString() => 'SearchPhoneStorageContactEvent - searchTerm: $searchTerm';
 }
 
 class RemoveAllPhoneStorageContactsEvent extends PhoneStorageContactEvent {

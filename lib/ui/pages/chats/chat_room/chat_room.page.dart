@@ -297,6 +297,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   Widget chatMessageBlocBuilder() {
     return BlocBuilder<ChatMessageBloc, ChatMessageState>(
       builder: (context, chatMessageState) {
+        print('chat_room.page.dart chatMessageState: $chatMessageState');
         if (chatMessageState is ChatMessageLoading) {
           return showLoading();
         }
@@ -614,14 +615,27 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   Widget textSendButton() {
     return IconButton(
       icon: Icon(Icons.send),
-      onPressed: () => sendChatMessage(textEditingController.text, null),
+      onPressed: () {
+        print('chat_room.page.dart textSendButton() onPressed: ${textEditingController.text}');
+        sendChatMessage(textEditingController.text, null);
+      },
     );
   }
 
   validateInput(String text) {
-    setState(() {
-      textFieldHasValue = textEditingController.text.isNotEmpty;
-    });
+    if (text.isNotEmpty) {
+      if (!textFieldHasValue) {
+        setState(() {
+          textFieldHasValue = true;
+        });
+      }
+    } else {
+      if (textFieldHasValue) {
+        setState(() {
+          textFieldHasValue = false;
+        });
+      }
+    }
   }
 
   Widget imageListTab() {
@@ -908,7 +922,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
         ),
       ],
     );
-    ;
   }
 
   Widget chatMessageBubble(ChatMessage chatMessage, bool isSenderMessage, Widget content) {
@@ -995,7 +1008,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   // TODO: Build day tabs with DateFormat and time_formatter plugin.
   String messageTimeDisplay(DateTime timestamp) {
-    return DateFormat('hh:mm').format(timestamp);
+    return DateFormat('hh:mm').format(timestamp.toLocal());
   }
 
   Widget showLoading() {
@@ -1157,6 +1170,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   sendChatMessage(String content, [MultimediaType multimediaType]) {
+    print('chat_room.page.dart sendChatMessage() content: $content');
     if (isObjectEmpty(multimediaType) && content.trim() != '') {
       textEditingController.clear();
       setState(() {
@@ -1166,10 +1180,11 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
       chatMessageBloc.add(AddChatMessageEvent(
           createChatMessageRequest: CreateChatMessageRequest(conversationId: currentConversationGroup.id, messageContent: content),
           callback: (ChatMessage message) {
-            if (message.isNull) {
+            print('chat_room.page.dart AddChatMessageEvent callback: $message');
+            if (isObjectEmpty(message)) {
               showToast('ChatMessage not sent. Please try again.', Toast.LENGTH_SHORT);
             } else {
-              WebSocketMessage webSocketMessage = WebSocketMessage(message: message);
+              // WebSocketMessage webSocketMessage = WebSocketMessage(chatMessage: message);
               // TODO: Acknowledge the message.
               // webSocketBloc.add(SendWebSocketMessageEvent(webSocketMessage: webSocketMessage, callback: (bool done) {}));
             }
@@ -1227,7 +1242,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   Future getFiles() async {
     FilePickerResult filePickerResult = await FilePicker.platform.pickFiles(type: FileType.any);
 
-    if (!filePickerResult.isNullOrBlank && filePickerResult.files.isNotEmpty) {
+    if (!isObjectEmpty(filePickerResult) && filePickerResult.files.isNotEmpty) {
       setState(() {
         documentFileList.addAll(filePickerResult.files.map((PlatformFile file) {
           return File(file.path);

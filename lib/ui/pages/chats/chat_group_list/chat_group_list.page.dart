@@ -94,9 +94,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
     if (firstRun) {
       authenticationBloc.add(InitializeAuthenticationsEvent(callback: (bool done) {}));
-      initializeFirebaseNotificationListener();
-      initialize();
-      firstRun = false;
     }
 
     return multiBlocListener();
@@ -119,7 +116,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           if (webSocketDisconnected) {
             connectWebSocket();
           }
-          loadConversationGroups();
         }
       },
     );
@@ -147,7 +143,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           }
           webSocketDisconnected = false;
           Stream<dynamic> webSocketStream = webSocketState.webSocketStream;
-          if (!webSocketStream.isNull) {
+          if (!isObjectEmpty(webSocketStream)) {
             processWebSocketStream(webSocketStream);
           }
         }
@@ -179,6 +175,12 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         if (authenticationState is AuthenticationsLoaded) {
           if (webSocketDisconnected) {
             connectWebSocket();
+          }
+
+          if (firstRun) {
+            initializeFirebaseNotificationListener();
+            initialize();
+            firstRun = false;
           }
           return userBlocBuilder();
         }
@@ -369,7 +371,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
     multimediaProgressBloc.add(InitializeMultimediaProgressEvent(callback: (bool done) {}));
     multimediaBloc.add(InitializeMultimediaEvent(callback: (bool done) {}));
-    userBloc.add(GetOwnUserEvent(callback: (User user) {}));
+    // userBloc.add(GetOwnUserEvent(callback: (User user) {}));
     webSocketBloc.add(ConnectOfficialWebSocketEvent(callback: (bool done) {}));
     permissionBloc.add(LoadPermissionsEvent(callback: (bool done) {}));
     loadConversationGroups();
@@ -438,14 +440,15 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         WebSocketMessage receivedWebSocketMessage = WebSocketMessage.fromJson(json.decode(data));
         processWebSocketMessage(receivedWebSocketMessage);
       } catch (e) {
-        print('message: $data');
+        print('chat_group_list.page.dart JSON Exception e: $e');
+        print('chat_group_list.page.dart data: Error parsing message: $data');
         showToast('Error parsing the message. Message: $data', Toast.LENGTH_LONG);
       }
     }, onError: (onError) {
       print('chat_group_list.page.dart onError()) $onError');
       checkNetworkConditions();
     }, onDone: () {
-      print('chat_group_list.page.dart onDone()');
+      print('chat_group_list.page.dart processWebSocketStream() onDone()');
       // Kicked by the server/Sudden network down.
       webSocketDisconnected = true;
       checkNetworkConditions();
@@ -469,6 +472,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   connectWebSocket() {
     webSocketBloc.add(ConnectOfficialWebSocketEvent(callback: (bool done) {
+      print('ConnectOfficialWebSocketEvent done: $done');
       if (done) {
         webSocketDisconnected = false;
       }
@@ -486,8 +490,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
           processConversationGroup(webSocketMessage.conversationGroup);
         }
 
-        if (!isObjectEmpty(webSocketMessage.message)) {
-          processChatMessage(webSocketMessage.message);
+        if (!isObjectEmpty(webSocketMessage.chatMessage)) {
+          processChatMessage(webSocketMessage.chatMessage);
         }
 
         if (!isObjectEmpty(webSocketMessage.multimedia)) {
@@ -527,10 +531,13 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   processChatMessage(ChatMessage chatMessage) {
-    chatMessage.status = ChatMessageStatus.Received;
+    print('chat_group_list.page.dart processChatMessage()');
+    chatMessage.chatMessageStatus = ChatMessageStatus.Received;
     chatMessageBloc.add(UpdateChatMessageEvent(
         chatMessage: chatMessage,
         callback: (bool done) {
+          print('chat_group_list.page.dart UpdateChatMessageEvent callback done: $done');
+
           /// TODO: Acknowledge the WebSocketMessage to the server.
         }));
   }
@@ -630,10 +637,13 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   logout() {
-    disconnectWebSocket();
-    clearAllData();
-    showToast('Logged out.', Toast.LENGTH_LONG);
-    goToLoginPage();
+    if (!loggingOut) {
+      disconnectWebSocket();
+      clearAllData();
+      showToast('Logged out.', Toast.LENGTH_LONG);
+      goToLoginPage();
+      loggingOut = true;
+    }
   }
 
   clearAllData() {
@@ -651,7 +661,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   goToLoginPage() {
-    Navigator.of(context).pushNamedAndRemoveUntil('login_page', (Route<dynamic> route) => false);
+    Navigator.of(context).pushNamed('login_page');
   }
 
   goToChatRoomPage(String conversationGroupId) {

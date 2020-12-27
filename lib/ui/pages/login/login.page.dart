@@ -274,8 +274,8 @@ class LoginPageState extends State<LoginPage> {
   getPhoneNumber() {
     String phoneNoInitials = '';
 
-    if (countryCode.isNull) {
-      if (!ipGeoLocation.isNull) {
+    if (isObjectEmpty(countryCode)) {
+      if (!isObjectEmpty(ipGeoLocation)) {
         phoneNoInitials = ipGeoLocation.calling_code;
       }
     } else {
@@ -320,6 +320,7 @@ class LoginPageState extends State<LoginPage> {
 
     getPhoneNumber();
 
-    authenticationBloc.add(LoginUsingMobileNumberEvent(mobileNo: mobileNumber, countryCode: !countryCode.isNull ? countryCode.code : countryCodeString, callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
+    authenticationBloc
+        .add(LoginUsingMobileNumberEvent(mobileNo: mobileNumber, countryCode: !isObjectEmpty(countryCode) ? countryCode.code : countryCodeString, callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
   }
 }

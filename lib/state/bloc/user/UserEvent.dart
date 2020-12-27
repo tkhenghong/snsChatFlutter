@@ -16,7 +16,7 @@ class InitializeUserEvent extends UserEvent {
   const InitializeUserEvent({this.callback});
 
   @override
-  String toString() => 'InitializeUsersEvent';
+  String toString() => 'InitializeUserEvent';
 }
 
 class AddUserEvent extends UserEvent {

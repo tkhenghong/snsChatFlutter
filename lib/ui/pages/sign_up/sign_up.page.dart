@@ -67,7 +67,7 @@ class SignUpPageState extends State<SignUpPage> {
     return BlocListener<IPGeoLocationBloc, IPGeoLocationState>(
       listener: (context, ipGeoLocationState) {
         if (ipGeoLocationState is IPGeoLocationLoaded) {
-          countryCodeString = ipGeoLocationState.ipGeoLocation.isNull ? defaultCountryCode : ipGeoLocationState.ipGeoLocation.country_code2;
+          countryCodeString =  isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? defaultCountryCode : ipGeoLocationState.ipGeoLocation.country_code2;
           ipGeoLocation = ipGeoLocationState.ipGeoLocation;
         }
       },
@@ -93,7 +93,7 @@ class SignUpPageState extends State<SignUpPage> {
         }
 
         if (ipGeoLocationState is IPGeoLocationLoaded) {
-          countryCodeString = ipGeoLocationState.ipGeoLocation.isNull ? defaultCountryCode : ipGeoLocationState.ipGeoLocation.country_code2;
+          countryCodeString =  isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? defaultCountryCode : ipGeoLocationState.ipGeoLocation.country_code2;
           ipGeoLocation = ipGeoLocationState.ipGeoLocation;
           return authenticationBlocBuilder();
         }
@@ -203,7 +203,7 @@ class SignUpPageState extends State<SignUpPage> {
   }
 
   String validateSignUpForm(value) {
-    if (value.isEmpty) {
+    if (isStringEmpty(value)) {
       return 'Mobile number is empty.';
     }
 
@@ -237,10 +237,8 @@ class SignUpPageState extends State<SignUpPage> {
   getPhoneNumber() {
     String phoneNoInitials = '';
 
-    if (countryCode.isNull) {
-      if (!ipGeoLocation.isNull) {
-        phoneNoInitials = ipGeoLocation.calling_code;
-      }
+    if (isObjectEmpty(countryCode) && !isObjectEmpty(ipGeoLocation)) {
+      phoneNoInitials = ipGeoLocation.calling_code;
     } else {
       phoneNoInitials = countryCode.dialCode;
     }
@@ -259,7 +257,8 @@ class SignUpPageState extends State<SignUpPage> {
 
     getPhoneNumber();
     showCenterLoadingIndicator();
-    authenticationBloc.add(RegisterUsingMobileNoEvent(mobileNo: mobileNumber, countryCode: !countryCode.isNull ? countryCode.code : countryCodeString, callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
+    authenticationBloc
+        .add(RegisterUsingMobileNoEvent(mobileNo: mobileNumber, countryCode: !isObjectEmpty(countryCode) ? countryCode.code : countryCodeString, callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
   }
 
   goToVerifyPhoneNumber() {

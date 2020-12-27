@@ -30,7 +30,7 @@ class IPGeoLocationBloc extends Bloc<IPGeoLocationEvent, IPGeoLocationState> {
       throw NetworkTimeoutException('Get IP Location', 'Unable to get your location in time.');
     }
 
-    if (!ipGeoLocation.isNull) {
+    if (!isObjectEmpty(ipGeoLocation)) {
       yield IPGeoLocationLoaded(ipGeoLocation);
       functionCallback(event, true);
     } else {

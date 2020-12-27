@@ -13,7 +13,8 @@ ChatMessage _$ChatMessageFromJson(Map<String, dynamic> json) {
     senderId: json['senderId'] as String,
     senderName: json['senderName'] as String,
     senderMobileNo: json['senderMobileNo'] as String,
-    status: _$enumDecodeNullable(_$ChatMessageStatusEnumMap, json['status']),
+    chatMessageStatus: _$enumDecodeNullable(
+        _$ChatMessageStatusEnumMap, json['chatMessageStatus']),
     messageContent: json['messageContent'] as String,
     multimediaId: json['multimediaId'] as String,
   )
@@ -40,7 +41,8 @@ Map<String, dynamic> _$ChatMessageToJson(ChatMessage instance) =>
       'senderId': instance.senderId,
       'senderName': instance.senderName,
       'senderMobileNo': instance.senderMobileNo,
-      'status': _$ChatMessageStatusEnumMap[instance.status],
+      'chatMessageStatus':
+          _$ChatMessageStatusEnumMap[instance.chatMessageStatus],
       'messageContent': instance.messageContent,
       'multimediaId': instance.multimediaId,
     };
@@ -95,7 +97,7 @@ abstract class _$ChatMessageLombok {
   String senderId;
   String senderName;
   String senderMobileNo;
-  ChatMessageStatus status;
+  ChatMessageStatus chatMessageStatus;
   String messageContent;
   String multimediaId;
 
@@ -121,8 +123,8 @@ abstract class _$ChatMessageLombok {
     this.senderMobileNo = senderMobileNo;
   }
 
-  void setStatus(ChatMessageStatus status) {
-    this.status = status;
+  void setChatMessageStatus(ChatMessageStatus chatMessageStatus) {
+    this.chatMessageStatus = chatMessageStatus;
   }
 
   void setMessageContent(String messageContent) {
@@ -154,8 +156,8 @@ abstract class _$ChatMessageLombok {
     return senderMobileNo;
   }
 
-  ChatMessageStatus getStatus() {
-    return status;
+  ChatMessageStatus getChatMessageStatus() {
+    return chatMessageStatus;
   }
 
   String getMessageContent() {

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:connectivity/connectivity.dart';
+import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:wifi_info_flutter/wifi_info_flutter.dart';
 import 'package:flutter/services.dart';
@@ -35,7 +36,7 @@ class NetworkService {
   Future<void> initConnectivity() async {
     ConnectivityResult result;
 
-    if (_connectivitySubscription.isNull) {
+    if (isObjectEmpty(_connectivitySubscription)) {
       _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     }
 

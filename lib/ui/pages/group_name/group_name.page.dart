@@ -58,7 +58,6 @@ class GroupNamePageState extends State<GroupNamePage> {
   UnreadMessageBloc unreadMessageBloc;
 
   CustomFileService fileService = Get.find();
-  FirebaseStorageService firebaseStorageService = Get.find();
   ImagePicker imagePicker = Get.find();
 
   @override
@@ -115,7 +114,7 @@ class GroupNamePageState extends State<GroupNamePage> {
         }
 
         if (userContactState is UserContactsLoaded) {
-          if (!userContactState.ownUserContact.isNull) {
+          if (!isObjectEmpty(userContactState.ownUserContact)) {
             ownUserContact = userContactState.ownUserContact;
             return WillPopScope(
               child: Stack(
@@ -377,10 +376,10 @@ class GroupNamePageState extends State<GroupNamePage> {
           adminMemberIds: [ownUserContact.id],
         ),
         callback: (ConversationGroup conversationGroup) {
-          if (!conversationGroup.isNull) {
+          if (!isObjectEmpty(conversationGroup)) {
             Get.back(); // Close select phone number pop up.
             Get.back(); // Close loading indicator.
-            if (!conversationGroup.isNull) {
+            if (!isObjectEmpty(conversationGroup)) {
               unreadMessageBloc.add(GetUnreadMessageByConversationGroupIdEvent(conversationGroupId: conversationGroup.id));
               goToChatRoomPage(conversationGroup);
             }
@@ -400,7 +399,7 @@ class GroupNamePageState extends State<GroupNamePage> {
   Future getImage() async {
     pickedFile = await imagePicker.getImage(source: ImageSource.camera, imageQuality: imageThumbnailWidthSize);
 
-    if (!pickedFile.isNullOrBlank) {
+    if (!isObjectEmpty(pickedFile)) {
       setState(() {
         imageFile = File(pickedFile.path);
         imageExists = true;

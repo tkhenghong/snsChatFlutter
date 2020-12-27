@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/rest/exceptions/network_exceptions.dart';
@@ -27,9 +28,9 @@ class CustomHttpClient {
     Map<String, String> headers = await handleHTTPHeaders(additionalHeaders);
     try {
       await checkNetwork();
-      Response response;
+      http.Response response;
 
-      if (!timeoutSeconds.isNull) {
+      if (!isObjectEmpty(timeoutSeconds)) {
         response = await get(path, headers: headers).timeout(Duration(seconds: timeoutSeconds));
       } else {
         response = await get(path, headers: headers);
@@ -45,11 +46,11 @@ class CustomHttpClient {
     Map<String, String> headers = await handleHTTPHeaders(additionalHeaders);
     try {
       await checkNetwork();
-      Response response;
+      http.Response response;
 
       String body = !isObjectEmpty(requestBody) ? json.encode(requestBody.toJson()) : null;
 
-      if (!timeoutSeconds.isNull) {
+      if (!isObjectEmpty(timeoutSeconds)) {
         response = await post(path, body: body, headers: headers).timeout(Duration(seconds: timeoutSeconds));
       } else {
         response = await post(path, body: body, headers: headers);
@@ -64,11 +65,11 @@ class CustomHttpClient {
     Map<String, String> headers = await handleHTTPHeaders(additionalHeaders);
     try {
       await checkNetwork();
-      Response response;
+      http.Response response;
 
       String body = !isObjectEmpty(requestBody) ? json.encode(requestBody.toJson()) : null;
 
-      if (!timeoutSeconds.isNull) {
+      if (!isObjectEmpty(timeoutSeconds)) {
         response = await put(path, body: body, headers: headers).timeout(Duration(seconds: timeoutSeconds));
       } else {
         response = await put(path, body: body, headers: headers);
@@ -84,9 +85,9 @@ class CustomHttpClient {
     Map<String, String> headers = await handleHTTPHeaders(additionalHeaders);
     try {
       await checkNetwork();
-      Response response;
+      http.Response response;
 
-      if (!timeoutSeconds.isNull) {
+      if (!isObjectEmpty(timeoutSeconds)) {
         response = await delete(path, headers: headers).timeout(Duration(seconds: timeoutSeconds));
       } else {
         response = await delete(path, headers: headers);
@@ -103,8 +104,13 @@ class CustomHttpClient {
 
     String jwt = await _readJWT();
 
-    if (!jwt.isNullOrBlank) {
+    print('custom_http_client.dart jwt : $jwt');
+
+    if (!isStringEmpty(jwt)) {
+      print('if (!jwt.isEmpty)');
       headers.putIfAbsent('Authorization', () => 'Bearer $jwt');
+    } else {
+      print('if (jwt.isEmpty)');
     }
 
     if (!isObjectEmpty(additionalHeaders)) {
@@ -129,17 +135,17 @@ class CustomHttpClient {
     }
   }
 
-  dynamic handleResponse(Response response, {bool showDialog, bool showSnackBar}) {
+  dynamic handleResponse(http.Response response, {bool showDialog, bool showSnackBar}) {
     final statusCode = response.statusCode;
 
     if (statusCode >= 200 && statusCode < 299) {
       if (response.body.isEmpty) {
         return null;
       } else {
-        return jsonDecode(response.body);
+        return json.decode(response.body);
       }
     } else {
-      final ErrorResponse errorResponse = ErrorResponse.fromJson(jsonDecode(response.body));
+      final ErrorResponse errorResponse = ErrorResponse.fromJson(json.decode(response.body));
       if (statusCode >= 400 && statusCode < 500) {
         print('custom_http_client.dart if (statusCode >= 400 && statusCode < 500)');
         print('custom_http_client.dart errorResponse.toString(): ' + errorResponse.toString());

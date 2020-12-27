@@ -1,7 +1,6 @@
 import 'package:snschat_flutter/rest/index.dart';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:snschat_flutter/objects/models/index.dart';
 
 // NOTE: I have made
 void main() {

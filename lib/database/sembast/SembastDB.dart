@@ -28,12 +28,12 @@ class SembastDB {
   // Get the
   Future<Database> get database async {
     // if _dbOpenCompleter is not null, it will not create a new instance of database object from Sembast
-    if (_dbOpenCompleter.isNull) {
+    if (isObjectEmpty(_dbOpenCompleter)) {
       _dbOpenCompleter = Completer();
       _startSembastDatabase();
     }
 
-    // Otherwize, return the value of the function again straight back to the caller.
+    // Otherwise, return the value of the function again straight back to the caller.
     return _dbOpenCompleter.future; // Returns the last value emitted from the function that linked to this completer instance.
   }
 
@@ -59,6 +59,7 @@ class SembastDB {
         } else {
           // build the database path
           dbPath = join(path, 'pocketChat.db'); // join method comes from path.dart
+          print('SembastDB.dart dbPath: $dbPath');
           storageAccessGranted = true;
         }
         break;
@@ -66,7 +67,8 @@ class SembastDB {
 
     if (storageAccessGranted) {
       // open the database
-      var db = await databaseFactoryIo.openDatabase(dbPath);
+      DatabaseFactory dbFactory = databaseFactoryIo;
+      Database db = await dbFactory.openDatabase(dbPath);
       _dbOpenCompleter.complete(db);
     } else {
       showToast('Please enable Storage permission first.', Toast.LENGTH_SHORT);
