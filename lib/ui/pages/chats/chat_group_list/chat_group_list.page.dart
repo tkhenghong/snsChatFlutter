@@ -432,9 +432,8 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   /// As long as this page is not removed during logged in state, it will receive and process the messages correctly
   /// If user perform sudden logout or system logout, it will be disconnected immediately even if there's a message processing here. It's excepted.
   processWebSocketStream(Stream<dynamic> webSocketStream) {
-    print('chat_group_list.page.dart processWebSocketStream()');
     webSocketStream.listen((data) {
-      print('chat_group_list.page.dart data: $data');
+      // print('chat_group_list.page.dart data: $data');
       showToast('Message confirmed received!', Toast.LENGTH_LONG);
       try {
         WebSocketMessage receivedWebSocketMessage = WebSocketMessage.fromJson(json.decode(data));
@@ -461,7 +460,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         // Only shows messenger not connected, handled by NetworkBlocListener, so do nothing here.
       } else {
         authenticationBloc.add(CheckIsAuthenticatedEvent(callback: (bool isAuthenticated) {
-          print('isAuthenticated: $isAuthenticated');
           if (!isAuthenticated) {
             logout();
           }
@@ -472,7 +470,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   connectWebSocket() {
     webSocketBloc.add(ConnectOfficialWebSocketEvent(callback: (bool done) {
-      print('ConnectOfficialWebSocketEvent done: $done');
       if (done) {
         webSocketDisconnected = false;
       }
@@ -531,13 +528,10 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   processChatMessage(ChatMessage chatMessage) {
-    print('chat_group_list.page.dart processChatMessage()');
     chatMessage.chatMessageStatus = ChatMessageStatus.Received;
     chatMessageBloc.add(UpdateChatMessageEvent(
         chatMessage: chatMessage,
         callback: (bool done) {
-          print('chat_group_list.page.dart UpdateChatMessageEvent callback done: $done');
-
           /// TODO: Acknowledge the WebSocketMessage to the server.
         }));
   }
@@ -661,7 +655,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   }
 
   goToLoginPage() {
-    Navigator.of(context).pushNamed('login_page');
+    Navigator.of(context).pushReplacementNamed('login_page');
   }
 
   goToChatRoomPage(String conversationGroupId) {

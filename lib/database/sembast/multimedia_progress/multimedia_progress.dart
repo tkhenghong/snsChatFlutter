@@ -17,21 +17,33 @@ class MultimediaProgressDBService {
       return false;
     }
 
-    MultimediaProgress existingMultimediaProgress = await getSingleMultimediaProgress(multimediaProgress.taskId);
-    int key = isObjectEmpty(existingMultimediaProgress) ? await _multimediaProgressStore.add(await _db, multimediaProgress.toJson()) : editMultimediaProgress(multimediaProgress);
+    int key = await getSingleMultimediaProgressKey(multimediaProgress.taskId);
+    if(isObjectEmpty(key)) {
+      int key = await _multimediaProgressStore.add(await _db, multimediaProgress.toJson());
+      return !isObjectEmpty(key) && key != 0 && !isStringEmpty(key.toString());
+    } else {
+      return await editMultimediaProgress(multimediaProgress, key: key);
+    }
 
     return !isObjectEmpty(key) && key != 0 && !isStringEmpty(key.toString());
   }
 
-  Future<bool> editMultimediaProgress(MultimediaProgress multimediaProgress) async {
+  Future<bool> editMultimediaProgress(MultimediaProgress multimediaProgress, {int key}) async {
     if (isObjectEmpty(await _db)) {
       return false;
     }
-    final finder = Finder(filter: Filter.equals("id", multimediaProgress.taskId));
 
-    var noOfUpdated = await _multimediaProgressStore.update(await _db, multimediaProgress.toJson(), finder: finder);
+    if(isObjectEmpty(key)) {
+      key = await getSingleMultimediaProgressKey(multimediaProgress.taskId);
+    }
 
-    return noOfUpdated == 1;
+    if(isObjectEmpty(key)) {
+      return false;
+    }
+
+    Map<String, dynamic> updated = await _multimediaProgressStore.record(key).update(await _db, multimediaProgress.toJson());
+
+    return !isObjectEmpty(updated);
   }
 
   Future<bool> deleteMultimediaProgress(String multimediaProgressId) async {
@@ -52,13 +64,22 @@ class MultimediaProgressDBService {
     _multimediaProgressStore.delete(await _db);
   }
 
-  Future<MultimediaProgress> getSingleMultimediaProgress(String multimediaProgressId) async {
+  Future<MultimediaProgress> getSingleMultimediaProgress(String multimediaProgressTaskId) async {
     if (isObjectEmpty(await _db)) {
       return null;
     }
-    final finder = Finder(filter: Filter.equals("id", multimediaProgressId));
+    final finder = Finder(filter: Filter.equals("taskId", multimediaProgressTaskId));
     final recordSnapshot = await _multimediaProgressStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? MultimediaProgress.fromJson(recordSnapshot.value) : null;
+  }
+
+  Future<int> getSingleMultimediaProgressKey(String multimediaProgressTaskId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
+    final finder = Finder(filter: Filter.equals("taskId", multimediaProgressTaskId));
+    final recordSnapshot = await _multimediaProgressStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? recordSnapshot.key : null;
   }
 
   Future<List<MultimediaProgress>> getMultimediaProgressOfAConversationGroup(String conversationGroupId) async {

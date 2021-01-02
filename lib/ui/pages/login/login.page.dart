@@ -316,7 +316,7 @@ class LoginPageState extends State<LoginPage> {
       return;
     }
 
-    showCenterLoadingIndicator();
+    showCenterLoadingIndicatorDialog();
 
     getPhoneNumber();
 

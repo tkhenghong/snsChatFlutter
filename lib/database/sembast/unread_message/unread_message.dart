@@ -17,12 +17,12 @@ class UnreadMessageDBService {
       return false;
     }
 
-    UnreadMessage existingUnreadMessage = await getSingleUnreadMessage(unreadMessage.id);
-    if (isObjectEmpty(existingUnreadMessage)) {
+    int existingUnreadMessageKey = await getSingleUnreadMessageKey(unreadMessage.id);
+    if (isObjectEmpty(existingUnreadMessageKey)) {
       int key = await _unreadMessageStore.add(await _db, unreadMessage.toJson());
       return !isObjectEmpty(key) && key != 0 && !isStringEmpty(key.toString());
     } else {
-      return await editUnreadMessage(unreadMessage);
+      return await editUnreadMessage(unreadMessage, key: existingUnreadMessageKey);
     }
   }
 
@@ -36,11 +36,10 @@ class UnreadMessageDBService {
     try {
       await database.transaction((transaction) async {
         for (int i = 0; i < unreadMessages.length; i++) {
-          UnreadMessage existingUnreadMessage = await getSingleUnreadMessage(unreadMessages[i].id);
-          isObjectEmpty(existingUnreadMessage) ? await _unreadMessageStore.add(database, unreadMessages[i].toJson()) : editUnreadMessage(unreadMessages[i]);
+          int existingUnreadMessageKey = await getSingleUnreadMessageKey(unreadMessages[i].id);
+          isObjectEmpty(existingUnreadMessageKey) ? await _unreadMessageStore.add(database, unreadMessages[i].toJson()) : editUnreadMessage(unreadMessages[i], key: existingUnreadMessageKey);
         }
       });
-      print('SembastDB Unread Message addUnreadMessages() END');
       return true;
     } catch (e) {
       print('SembastDB Unread Message addUnreadMessages() Error: $e');
@@ -49,15 +48,22 @@ class UnreadMessageDBService {
     }
   }
 
-  Future<bool> editUnreadMessage(UnreadMessage unreadMessage) async {
+  Future<bool> editUnreadMessage(UnreadMessage unreadMessage, {int key}) async {
     if (isObjectEmpty(await _db)) {
       return false;
     }
-    final finder = Finder(filter: Filter.equals("id", unreadMessage.id));
 
-    var noOfUpdated = await _unreadMessageStore.update(await _db, unreadMessage.toJson(), finder: finder);
+    if (isObjectEmpty(key)) {
+      key = await getSingleUnreadMessageKey(unreadMessage.id);
+    }
 
-    return noOfUpdated == 1;
+    if (isObjectEmpty(key)) {
+      return false;
+    }
+
+    Map<String, dynamic> updated = await _unreadMessageStore.record(key).update(await _db, unreadMessage.toJson());
+
+    return !isObjectEmpty(updated);
   }
 
   Future<bool> deleteUnreadMessage(String unreadMessageId) async {
@@ -86,6 +92,15 @@ class UnreadMessageDBService {
     final finder = Finder(filter: Filter.equals("id", unreadMessageId));
     final recordSnapshot = await _unreadMessageStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? UnreadMessage.fromJson(recordSnapshot.value) : null;
+  }
+
+  Future<int> getSingleUnreadMessageKey(String unreadMessageId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
+    final finder = Finder(filter: Filter.equals('id', unreadMessageId));
+    final recordSnapshot = await _unreadMessageStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? recordSnapshot.key : null;
   }
 
   /// Find multiple UnreadMessage objects using a list of unreadMessageIds.

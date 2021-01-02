@@ -6,7 +6,7 @@ import 'package:snschat_flutter/objects/models/index.dart';
 import '../SembastDB.dart';
 
 class ChatMessageDBService {
-  static const String MESSAGE_STORE_NAME = "chatMessage";
+  static const String MESSAGE_STORE_NAME = 'chatMessage';
 
   final StoreRef _chatMessageStore = intMapStoreFactory.store(MESSAGE_STORE_NAME);
 
@@ -14,37 +14,19 @@ class ChatMessageDBService {
 
   /// Add single chat message.
   Future<bool> addChatMessage(ChatMessage chatMessage) async {
-    print('SembastDB chat_message.dart addChatMessage()');
-    print('SembastDB chat_message.dart chatMessage.id: ${chatMessage.id}');
-    print('SembastDB chat_message.dart chatMessage.messageContent: ${chatMessage.messageContent}');
-
-    // DatabaseFactory dbFactory = databaseFactoryIo;
-    // Database db = await dbFactory.openDatabase('/storage/emulated/0/Android/data/flutter.snschat.com.snschatflutter/files/pocketChat.db');
-    // StoreRef _chatMessageStore = intMapStoreFactory.store(MESSAGE_STORE_NAME);
-
-    Database db = await _db;
-    if (isObjectEmpty(db)) {
-      print('SembastDB chat_message.dart if (isObjectEmpty(await _db))');
+    if (isObjectEmpty(await _db)) {
       return false;
-    } else {
-      print('SembastDB chat_message.dart if (!isObjectEmpty(await _db))');
     }
 
-    print('SembastDB chat_message.dart CHECKPOINT 4');
-    ChatMessage existingChatMessage = await getSingleChatMessage(chatMessage.id);
-    print('SembastDB chat_message.dart CHECKPOINT 5');
+    int existingChatMessageKey = await getSingleChatMessageKey(chatMessage.id);
 
-    if (isObjectEmpty(existingChatMessage)) {
-      print('SembastDB chat_message.dart if (isObjectEmpty(existingChatMessage))');
+    if (isObjectEmpty(existingChatMessageKey)) {
       Map<String, dynamic> chatMessageMap = chatMessage.toJson();
-      print('SembastDB chat_message.dart CHECKPOINT 6 chatMessageMap: $chatMessageMap');
 
-      int key = await _chatMessageStore.add(db, chatMessageMap);
-      print('SembastDB chat_message.dart CHECKPOINT 7, key: $key');
+      int key = await _chatMessageStore.add(await _db, chatMessageMap);
       return !isObjectEmpty(key) && key != 0 && !isStringEmpty(key.toString());
     } else {
-      print('SembastDB chat_message.dart if (!isObjectEmpty(existingChatMessage))');
-      return await editChatMessage(chatMessage);
+      return await editChatMessage(chatMessage, key: existingChatMessageKey);
     }
   }
 
@@ -57,11 +39,11 @@ class ChatMessageDBService {
     try {
       await database.transaction((transaction) async {
         for (int i = 0; i < chatMessages.length; i++) {
-          ChatMessage existingChatMessage = await getSingleChatMessage(chatMessages[i].id);
-          isObjectEmpty(existingChatMessage) ? await _chatMessageStore.add(database, chatMessages[i].toJson()) : editChatMessage(chatMessages[i]);
+          int existingChatMessageKey = await getSingleChatMessageKey(chatMessages[i].id);
+          isObjectEmpty(existingChatMessageKey) ? await _chatMessageStore.add(database, chatMessages[i].toJson()) : editChatMessage(chatMessages[i], key: existingChatMessageKey);
         }
       });
-      print('SembastDB Chat Message addConversationGroup() END');
+
       return true;
     } catch (e) {
       print('SembastDB Chat Message addChatMessages() Error: $e');
@@ -70,22 +52,29 @@ class ChatMessageDBService {
     }
   }
 
-  Future<bool> editChatMessage(ChatMessage chatMessage) async {
+  Future<bool> editChatMessage(ChatMessage chatMessage, {int key}) async {
     if (isObjectEmpty(await _db)) {
       return false;
     }
-    final finder = Finder(filter: Filter.equals("id", chatMessage.id));
 
-    var noOfUpdated = await _chatMessageStore.update(await _db, chatMessage.toJson(), finder: finder);
+    if(isObjectEmpty(key)) {
+      key = await getSingleChatMessageKey(chatMessage.id);
+    }
 
-    return noOfUpdated == 1;
+    if(isObjectEmpty(key)) {
+      return false;
+    }
+
+    Map<String, dynamic> updated = await _chatMessageStore.record(key).update(await _db, chatMessage.toJson());
+
+    return !isObjectEmpty(updated);
   }
 
   Future<bool> deleteChatMessage(String chatMessageId) async {
     if (isObjectEmpty(await _db)) {
       return false;
     }
-    final finder = Finder(filter: Filter.equals("id", chatMessageId));
+    final finder = Finder(filter: Filter.equals('id', chatMessageId));
 
     var noOfDeleted = await _chatMessageStore.delete(await _db, finder: finder);
 
@@ -104,16 +93,25 @@ class ChatMessageDBService {
     if (isObjectEmpty(await _db)) {
       return null;
     }
-    final finder = Finder(filter: Filter.equals("id", chatMessageId));
+    final finder = Finder(filter: Filter.equals('id', chatMessageId));
     final recordSnapshot = await _chatMessageStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? ChatMessage.fromJson(recordSnapshot.value) : null;
+  }
+
+  Future<int> getSingleChatMessageKey(String chatMessageId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
+    final finder = Finder(filter: Filter.equals('id', chatMessageId));
+    final recordSnapshot = await _chatMessageStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? recordSnapshot.key : null;
   }
 
   Future<List<ChatMessage>> getChatMessagesOfAConversationGroup(String conversationGroupId) async {
     if (isObjectEmpty(await _db)) {
       return null;
     }
-    final finder = Finder(filter: Filter.equals("conversationId", conversationGroupId));
+    final finder = Finder(filter: Filter.equals('conversationId', conversationGroupId));
     final recordSnapshots = await _chatMessageStore.find(await _db, finder: finder);
     if (!isObjectEmpty(recordSnapshots)) {
       List<ChatMessage> chatMessageList = [];

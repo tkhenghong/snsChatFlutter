@@ -1,7 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-void showLoading(String message) {
+/// A general loading full screen widget to show loading.
+Widget showLoading() {
+  return Center(
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        CircularProgressIndicator(),
+        SizedBox(
+          width: Get.width * 0.05,
+        ),
+        Text('Loading...'),
+      ],
+    ),
+  );
+}
+
+/// A dialog using GetX to show dialog of loading with a text message.
+void showLoadingDialog(String message) {
   if(Get.isDialogOpen) {
     Get.back();
   }
@@ -21,7 +38,8 @@ void showLoading(String message) {
       barrierDismissible: false);
 }
 
-void showCenterLoadingIndicator() {
+/// A dialog using GetX to show dialog of loading with a CircularProgressIndicator.
+void showCenterLoadingIndicatorDialog() {
   Get.dialog(
       Center(
         child: CircularProgressIndicator(),

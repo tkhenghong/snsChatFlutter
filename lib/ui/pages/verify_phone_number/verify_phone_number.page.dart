@@ -198,7 +198,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
   }
 
   verifyPin(pin) {
-    showLoading("Verifying PIN...");
+    showLoadingDialog("Verifying PIN...");
     verifyMobileNumber(pin);
   }
 
@@ -217,7 +217,7 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
   }
 
   verifyMobileNumber(String pin) {
-    showLoading("Verifying PIN...");
+    showLoadingDialog("Verifying PIN...");
     authenticationBloc.add(VerifyMobileNoEvent(mobileNo: mobileNumber, secureKeyword: secureKeyword, otpNumber: pin, callback: (UserAuthenticationResponse userAuthenticationResponse) {}));
   }
 

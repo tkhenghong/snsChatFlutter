@@ -17,25 +17,32 @@ class UserDBService {
       return false;
     }
 
-    User existingUser = await getSingleUser(user.id);
+    int existingUserKey = await getSingleUserKey(user.id);
 
-    if (isObjectEmpty(existingUser)) {
+    if (isObjectEmpty(existingUserKey)) {
       int key = await _userStore.add(await _db, user.toJson());
       return !isObjectEmpty(key) && key != 0 && !isStringEmpty(key.toString());
     } else {
-      return await editUser(user);
+      return await editUser(user, key: existingUserKey);
     }
   }
 
-  Future<bool> editUser(User user) async {
+  Future<bool> editUser(User user, {int key}) async {
     if (isObjectEmpty(await _db)) {
       return false;
     }
-    final finder = Finder(filter: Filter.equals("id", user.id));
 
-    var noOfUpdated = await _userStore.update(await _db, user.toJson(), finder: finder);
+    if (isObjectEmpty(key)) {
+      key = await getSingleUserKey(user.id);
+    }
 
-    return noOfUpdated == 1;
+    if (isObjectEmpty(key)) {
+      return false;
+    }
+
+    Map<String, dynamic> updated = await _userStore.record(key).update(await _db, user.toJson());
+
+    return !isObjectEmpty(updated);
   }
 
   Future<bool> deleteUser(String userId) async {
@@ -64,6 +71,15 @@ class UserDBService {
     final finder = Finder(filter: Filter.equals("id", userId));
     final recordSnapshot = await _userStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? User.fromJson(recordSnapshot.value) : null;
+  }
+
+  Future<int> getSingleUserKey(String userId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
+    final finder = Finder(filter: Filter.equals('id', userId));
+    final recordSnapshot = await _userStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? recordSnapshot.key : null;
   }
 
   // Verify user is in the local DB or not when login

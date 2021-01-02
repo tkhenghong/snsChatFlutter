@@ -1011,12 +1011,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
     return DateFormat('hh:mm').format(timestamp.toLocal());
   }
 
-  Widget showLoading() {
-    return Center(
-      child: Text('Loading...'),
-    );
-  }
-
   Widget showError(String module) {
     return Material(
       // color: Colors.white,

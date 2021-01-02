@@ -51,21 +51,23 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     ChatMessage chatMessageFromServer;
     bool savedIntoDB = false;
     try {
-      if (state is ChatMessagesLoaded) {
-        chatMessageFromServer = await chatMessageAPIService.addChatMessage(event.createChatMessageRequest);
+      chatMessageFromServer = await chatMessageAPIService.addChatMessage(event.createChatMessageRequest);
 
-        if (!chatMessageFromServer.isNull) {
-          savedIntoDB = await chatMessageDBService.addChatMessage(chatMessageFromServer);
+      if (!isObjectEmpty(chatMessageFromServer)) {
+        savedIntoDB = await chatMessageDBService.addChatMessage(chatMessageFromServer);
 
-          if (savedIntoDB) {
-            yield* updateChatMessageLoadedState(updateChatMessage: chatMessageFromServer);
-            functionCallback(event, chatMessageFromServer);
-          }
-        }
-        if (chatMessageFromServer.isNull || !savedIntoDB) {
+        if (savedIntoDB) {
+          yield* updateChatMessageLoadedState(updateChatMessage: chatMessageFromServer);
+          functionCallback(event, chatMessageFromServer);
+        } else {
+          showToast('Unable to save message into database. Please try again later.', Toast.LENGTH_SHORT);
           functionCallback(event, null);
         }
       } else {
+        showToast('Unable to send message. Please try again later.', Toast.LENGTH_SHORT);
+        functionCallback(event, null);
+      }
+      if (isObjectEmpty(chatMessageFromServer) || !savedIntoDB) {
         functionCallback(event, null);
       }
     } catch (e) {
@@ -77,8 +79,11 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
   /// Update ChatMessage object into DB and state.
   Stream<ChatMessageState> _updateChatMessage(UpdateChatMessageEvent event) async* {
     try {
-      chatMessageDBService.addChatMessage(event.chatMessage);
+      print('ChatMessageBloc.dart UpdateChatMessageEvent IN STATE');
+      await chatMessageDBService.addChatMessage(event.chatMessage);
+      print('ChatMessageBloc.dart CHECKPOINT 9');
       yield* updateChatMessageLoadedState(updateChatMessage: event.chatMessage);
+      print('ChatMessageBloc.dart CHECKPOINT 10');
       functionCallback(event, true);
     } catch (e) {
       showToast('Unable to add chat message into the database. Please try again.', Toast.LENGTH_SHORT, toastGravity: ToastGravity.CENTER);

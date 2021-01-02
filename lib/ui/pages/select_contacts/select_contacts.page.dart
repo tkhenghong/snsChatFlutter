@@ -469,7 +469,7 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   }
 
   createPersonalConversationGroup(Contact contact, String mobileNumber) {
-    showLoading('Loading personal conversation....');
+    showLoadingDialog('Loading personal conversation....');
     userContactBloc.add(GetUserContactByMobileNoEvent(
         mobileNo: mobileNumber,
         callback: (UserContact userContact) {

@@ -256,7 +256,7 @@ class SignUpPageState extends State<SignUpPage> {
     }
 
     getPhoneNumber();
-    showCenterLoadingIndicator();
+    showCenterLoadingIndicatorDialog();
     authenticationBloc
         .add(RegisterUsingMobileNoEvent(mobileNo: mobileNumber, countryCode: !isObjectEmpty(countryCode) ? countryCode.code : countryCodeString, callback: (PreVerifyMobileNumberOTPResponse preVerifyMobileNumberOTPResponse) {}));
   }

@@ -17,12 +17,12 @@ class UserContactDBService {
       return false;
     }
 
-    UserContact existingUserContact = await getSingleUserContact(userContact.id);
-    if (isObjectEmpty(existingUserContact)) {
+    int existingUserContactKey = await getSingleUserContactKey(userContact.id);
+    if (isObjectEmpty(existingUserContactKey)) {
       int key = await _userContactStore.add(await _db, userContact.toJson());
       return !isObjectEmpty(key) && key != 0 && !isStringEmpty(key.toString());
     } else {
-      return await editUserContact(userContact);
+      return await editUserContact(userContact, key: existingUserContactKey);
     }
   }
 
@@ -36,26 +36,34 @@ class UserContactDBService {
     try {
       await database.transaction((transaction) async {
         for (int i = 0; i < userContacts.length; i++) {
-          UserContact existingUserContact = await getSingleUserContact(userContacts[i].id);
-          isObjectEmpty(existingUserContact) ? await _userContactStore.add(database, userContacts[i].toJson()) : editUserContact(userContacts[i]);
+          int existingUserContactKey = await getSingleUserContactKey(userContacts[i].id);
+          isObjectEmpty(existingUserContactKey) ? await _userContactStore.add(database, userContacts[i].toJson()) : editUserContact(userContacts[i], key: existingUserContactKey);
         }
       });
       return true;
     } catch (e) {
+      print('SembastDB User Contact addUserContacts() Error: $e');
       // Error happened in database transaction.
       return false;
     }
   }
 
-  Future<bool> editUserContact(UserContact userContact) async {
+  Future<bool> editUserContact(UserContact userContact, {int key}) async {
     if (isObjectEmpty(await _db)) {
       return false;
     }
-    final finder = Finder(filter: Filter.equals("id", userContact.id));
 
-    var noOfUpdated = await _userContactStore.update(await _db, userContact.toJson(), finder: finder);
+    if (isObjectEmpty(key)) {
+      key = await getSingleUserContactKey(userContact.id);
+    }
 
-    return noOfUpdated == 1;
+    if (isObjectEmpty(key)) {
+      return false;
+    }
+
+    Map<String, dynamic> updated = await _userContactStore.record(key).update(await _db, userContact.toJson());
+
+    return !isObjectEmpty(updated);
   }
 
   Future<bool> deleteUserContact(String userContactId) async {
@@ -84,6 +92,15 @@ class UserContactDBService {
     final finder = Finder(filter: Filter.equals("id", userContactId));
     final recordSnapshot = await _userContactStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? UserContact.fromJson(recordSnapshot.value) : null;
+  }
+
+  Future<int> getSingleUserContactKey(String userContactId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
+    final finder = Finder(filter: Filter.equals('id', userContactId));
+    final recordSnapshot = await _userContactStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? recordSnapshot.key : null;
   }
 
   Future<UserContact> getUserContactByUserId(String userId) async {

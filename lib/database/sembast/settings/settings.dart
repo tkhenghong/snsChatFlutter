@@ -5,7 +5,7 @@ import 'package:snschat_flutter/objects/models/index.dart';
 import '../SembastDB.dart';
 
 class SettingsDBService {
-  static const String SETTINGS_STORE_NAME = "settings";
+  static const String SETTINGS_STORE_NAME = 'settings';
 
   final StoreRef _settingsStore = intMapStoreFactory.store(SETTINGS_STORE_NAME);
 
@@ -17,31 +17,38 @@ class SettingsDBService {
       return false;
     }
 
-    Settings existingSettings = await getSingleSettings(settings.id);
-    if (isObjectEmpty(existingSettings)) {
+    int existingSettingsKey = await getSingleSettingsKey(settings.id);
+    if (isObjectEmpty(existingSettingsKey)) {
       int key = await _settingsStore.add(await _db, settings.toJson());
       return !isObjectEmpty(key) && key != 0 && !isStringEmpty(key.toString());
     } else {
-      return await editSettings(settings);
+      return await editSettings(settings, key: existingSettingsKey);
     }
   }
 
-  Future<bool> editSettings(Settings settings) async {
+  Future<bool> editSettings(Settings settings, {int key}) async {
     if (isObjectEmpty(await _db)) {
       return false;
     }
-    final finder = Finder(filter: Filter.equals("id", settings.id));
 
-    var noOfUpdated = await _settingsStore.update(await _db, settings.toJson(), finder: finder);
+    if (isObjectEmpty(key)) {
+      key = await getSingleSettingsKey(settings.id);
+    }
 
-    return noOfUpdated == 1;
+    if (isObjectEmpty(key)) {
+      return false;
+    }
+
+    Map<String, dynamic> updated = await _settingsStore.record(key).update(await _db, settings.toJson());
+
+    return !isObjectEmpty(updated);
   }
 
   Future<bool> deleteSettings(String settingsId) async {
     if (isObjectEmpty(await _db)) {
       return false;
     }
-    final finder = Finder(filter: Filter.equals("id", settingsId));
+    final finder = Finder(filter: Filter.equals('id', settingsId));
 
     var noOfDeleted = await _settingsStore.delete(await _db, finder: finder);
 
@@ -60,16 +67,25 @@ class SettingsDBService {
     if (isObjectEmpty(await _db)) {
       return null;
     }
-    final finder = Finder(filter: Filter.equals("id", settingsId));
+    final finder = Finder(filter: Filter.equals('id', settingsId));
     final recordSnapshot = await _settingsStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? Settings.fromJson(recordSnapshot.value) : null;
+  }
+
+  Future<int> getSingleSettingsKey(String settingsId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
+    final finder = Finder(filter: Filter.equals('id', settingsId));
+    final recordSnapshot = await _settingsStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? recordSnapshot.key : null;
   }
 
   Future<Settings> getSettingsOfAUser(String userId) async {
     if (isObjectEmpty(await _db)) {
       return null;
     }
-    final finder = Finder(filter: Filter.equals("userId", userId));
+    final finder = Finder(filter: Filter.equals('userId', userId));
     final recordSnapshot = await _settingsStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? Settings.fromJson(recordSnapshot.value) : null;
   }

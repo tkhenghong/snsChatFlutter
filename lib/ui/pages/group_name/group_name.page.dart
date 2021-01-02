@@ -363,7 +363,7 @@ class GroupNamePageState extends State<GroupNamePage> {
     if (!_formKey.currentState.validate()) {
       return;
     }
-    showLoading('Loading group conversation....');
+    showLoadingDialog('Loading group conversation....');
     List<String> memberUserContactIds = widget.selectedUserContacts.map((e) => e.id).toList();
     memberUserContactIds.add(ownUserContact.id); // Add yourself.
 

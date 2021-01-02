@@ -45,7 +45,7 @@ class UnreadMessageBloc extends Bloc<UnreadMessageEvent, UnreadMessageState> {
   /// Update single UnreadMessage object in localDB and State.
   Stream<UnreadMessageState> _updateUnreadMessageEvent(UpdateUnreadMessageEvent event) async* {
     try {
-      await unreadMessageDBService.editUnreadMessage(event.unreadMessage);
+      await unreadMessageDBService.addUnreadMessage(event.unreadMessage);
 
       if (state is UnreadMessagesLoaded) {
         yield* yieldUnreadMessageLoadedState(updatedUnreadMessage: event.unreadMessage);

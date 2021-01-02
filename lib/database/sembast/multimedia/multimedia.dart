@@ -5,7 +5,7 @@ import 'package:snschat_flutter/objects/models/index.dart';
 import '../SembastDB.dart';
 
 class MultimediaDBService {
-  static const String MULTIMEDIA_STORE_NAME = "multimedia";
+  static const String MULTIMEDIA_STORE_NAME = 'multimedia';
 
   final StoreRef _multimediaStore = intMapStoreFactory.store(MULTIMEDIA_STORE_NAME);
 
@@ -17,13 +17,13 @@ class MultimediaDBService {
       return false;
     }
 
-    Multimedia existingMultimedia = await getSingleMultimedia(multimedia.id);
+    int key = await getSingleMultimediaKey(multimedia.id);
 
-    if (isObjectEmpty(existingMultimedia)) {
+    if (isObjectEmpty(key)) {
       int key = await _multimediaStore.add(await _db, multimedia.toJson());
       return !isObjectEmpty(key) && key != 0 && !isStringEmpty(key.toString());
     } else {
-      return await editMultimedia(multimedia);
+      return await editMultimedia(multimedia, key: key);
     }
   }
 
@@ -37,33 +37,41 @@ class MultimediaDBService {
     try {
       await database.transaction((transaction) async {
         for (int i = 0; i < multimediaList.length; i++) {
-          Multimedia existingMultimedia = await getSingleMultimedia(multimediaList[i].id);
-          isObjectEmpty(existingMultimedia) ? await _multimediaStore.add(database, multimediaList[i].toJson()) : editMultimedia(multimediaList[i]);
+          int existingMultimediaKey = await getSingleMultimediaKey(multimediaList[i].id);
+          isObjectEmpty(existingMultimediaKey) ? await _multimediaStore.add(database, multimediaList[i].toJson()) : editMultimedia(multimediaList[i], key: existingMultimediaKey);
         }
       });
 
       return true;
     } catch (e) {
+      print('SembastDB Multimedia addMultimediaList Error: $e');
       return false;
     }
   }
 
-  Future<bool> editMultimedia(Multimedia multimedia) async {
+  Future<bool> editMultimedia(Multimedia multimedia, {int key}) async {
     if (isObjectEmpty(await _db)) {
       return false;
     }
-    final finder = Finder(filter: Filter.equals("id", multimedia.id));
 
-    var noOfUpdated = await _multimediaStore.update(await _db, multimedia.toJson(), finder: finder);
+    if(isObjectEmpty(key)) {
+      key = await getSingleMultimediaKey(multimedia.id);
+    }
 
-    return noOfUpdated == 1;
+    if(isObjectEmpty(key)) {
+      return false;
+    }
+
+    Map<String, dynamic> updated = await _multimediaStore.record(key).update(await _db, multimedia.toJson());
+
+    return !isObjectEmpty(updated);
   }
 
   Future<bool> deleteMultimedia(String multimediaId) async {
     if (isObjectEmpty(await _db)) {
       return false;
     }
-    final finder = Finder(filter: Filter.equals("id", multimediaId));
+    final finder = Finder(filter: Filter.equals('id', multimediaId));
 
     var noOfDeleted = await _multimediaStore.delete(await _db, finder: finder);
 
@@ -82,16 +90,25 @@ class MultimediaDBService {
     if (isObjectEmpty(await _db)) {
       return null;
     }
-    final finder = Finder(filter: Filter.equals("id", multimediaId));
+    final finder = Finder(filter: Filter.equals('id', multimediaId));
     final recordSnapshot = await _multimediaStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? Multimedia.fromJson(recordSnapshot.value) : null;
+  }
+
+  Future<int> getSingleMultimediaKey(String multimediaId) async {
+    if (isObjectEmpty(await _db)) {
+      return null;
+    }
+    final finder = Finder(filter: Filter.equals('id', multimediaId));
+    final recordSnapshot = await _multimediaStore.findFirst(await _db, finder: finder);
+    return !isObjectEmpty(recordSnapshot) ? recordSnapshot.key : null;
   }
 
   Future<List<Multimedia>> getMultimediaOfAConversationGroup(String conversationGroupId) async {
     if (isObjectEmpty(await _db)) {
       return null;
     }
-    final finder = Finder(filter: Filter.equals("conversationGroupId", conversationGroupId));
+    final finder = Finder(filter: Filter.equals('conversationGroupId', conversationGroupId));
     final recordSnapshots = await _multimediaStore.find(await _db, finder: finder);
     if (!isObjectEmpty(recordSnapshots)) {
       List<Multimedia> multimediaList = [];

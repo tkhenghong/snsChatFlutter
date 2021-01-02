@@ -550,12 +550,6 @@ class ChatInfoPageState extends State<ChatInfoPage> {
     // TODO: Share with link.
   }
 
-  Widget showLoading() {
-    return Center(
-      child: Text('Loading...'),
-    );
-  }
-
   Widget showError() {
     return Center(
       child: Column(
