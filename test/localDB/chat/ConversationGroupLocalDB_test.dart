@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
 import 'package:snschat_flutter/general/index.dart';
@@ -37,6 +36,7 @@ void main() {
     await wipeAllConversationGroups();
     ConversationGroup conversationGroup = createTestObject();
 
+    // Add
     bool added = await conversationGroupDBService.addConversationGroup(conversationGroup);
     ConversationGroup conversationGroupFromLocalDB = await conversationGroupDBService.getSingleConversationGroup(conversationGroup.id);
 
@@ -53,13 +53,18 @@ void main() {
     await wipeAllConversationGroups();
     ConversationGroup conversationGroup = createTestObject();
 
-    await conversationGroupDBService.addConversationGroup(conversationGroup);
+    // Add
+    conversationGroupDBService.addConversationGroup(conversationGroup);
 
+    // Edit
     conversationGroup.name = uuid.v4();
 
-    await conversationGroupDBService.addConversationGroup(conversationGroup);
+    // Add
+    conversationGroupDBService.addConversationGroup(conversationGroup);
 
+    // Get
     ConversationGroup conversationGroupFromLocalDB = await conversationGroupDBService.getSingleConversationGroup(conversationGroup.id);
+
     // Validations
     expect(conversationGroupFromLocalDB, isNull);
   });
@@ -77,6 +82,7 @@ void main() {
       added = false;
     }
 
+    // Get
     ConversationGroup conversationGroupFromLocalDB = await conversationGroupDBService.getSingleConversationGroup(conversationGroup.id);
 
     // Edit
@@ -99,15 +105,6 @@ void main() {
     expect(editedConversationGroup.description, isNotNull);
   });
 
-  test('Little Test', () async {
-    List<String> lista = ['1', '2', '3', '4', '5'];
-    List<String> listb = ['1', '2', '3', '4', '5'];
-
-    bool value = listEquals(lista, listb);
-
-    expect(value, isTrue);
-  });
-
   /// This is to check Personal Conversation Group duplication prevention is working properly or not.
   test('Test Duplicate Personal Conversation Group', () async {
     await wipeAllConversationGroups();
@@ -122,6 +119,7 @@ void main() {
       added = false;
     }
 
+    // Get
     ConversationGroup conversationGroupFromLocalDB2 = await conversationGroupDBService.getConversationGroupWithTypeAndMembers(conversationGroup.conversationGroupType, conversationGroup.memberIds);
 
     // Validations
@@ -155,6 +153,7 @@ void main() {
       }
     }
 
+    // Get
     List<ConversationGroup> conversationGroups = await conversationGroupDBService.getAllConversationGroups();
 
     expect(added, isTrue);
@@ -181,6 +180,7 @@ void main() {
   test('Test Wipe All Conversation Groups', () async {
     await wipeAllConversationGroups();
 
+    // Add
     List<ConversationGroup> conversationGroups = await conversationGroupDBService.getAllConversationGroups();
 
     expect(conversationGroups, equals([]));
@@ -192,19 +192,21 @@ void main() {
   test('Test Conversation Groups with Pagination', () async {
     await wipeAllConversationGroups();
 
+    // Set up
     List<ConversationGroup> allConversationGroups = [];
 
-    int noOfSaves = 50;
+    int noOfRecords = 50;
 
     int numberOfPages = 5;
 
     int paginationSize = 10;
 
-    expect(numberOfPages * paginationSize, equals(noOfSaves));
+    expect(numberOfPages * paginationSize, equals(noOfRecords));
 
     bool allSavedSuccess = true;
 
-    for (int i = 0; i < noOfSaves; i++) {
+    // Add
+    for (int i = 0; i < noOfRecords; i++) {
       ConversationGroup conversationGroup = createTestObject();
 
       allConversationGroups.add(conversationGroup);
@@ -225,7 +227,7 @@ void main() {
     int index = 0;
     // Load every page, check it's first element and the last element of the list to prove the pagination is loaded correctly.
     // Accessing first and last element of the list pattern: 0-9, 10-19, 20-29, 30-39.....
-    for(int i = 0; i < numberOfPages; i++) {
+    for (int i = 0; i < numberOfPages; i++) {
       List<ConversationGroup> firstPageConversationGroups = await conversationGroupDBService.getAllConversationGroupsWithPagination(i, paginationSize);
 
       ConversationGroup firstElementInList = firstPageConversationGroups.first;
