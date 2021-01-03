@@ -229,6 +229,7 @@ class ConversationGroupBloc extends Bloc<ConversationGroupEvent, ConversationGro
     ConversationGroup conversationGroup;
 
     try {
+      // Check Personal conversation group duplication.
       if (event.createConversationGroupRequest.conversationGroupType == ConversationGroupType.Personal) {
         conversationGroup = await conversationGroupDBService.getConversationGroupWithTypeAndMembers(event.createConversationGroupRequest.conversationGroupType, event.createConversationGroupRequest.memberIds);
       }

@@ -1,5 +1,5 @@
+import 'package:flutter/foundation.dart';
 import 'package:sembast/sembast.dart';
-import 'package:sembast/sembast_io.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 
@@ -58,11 +58,11 @@ class ConversationDBService {
       return false;
     }
 
-    if(isObjectEmpty(key)) {
+    if (isObjectEmpty(key)) {
       key = await getSingleConversationGroupKey(conversationGroup.id);
     }
 
-    if(isObjectEmpty(key)) {
+    if (isObjectEmpty(key)) {
       return false;
     }
 
@@ -107,18 +107,37 @@ class ConversationDBService {
     return !isObjectEmpty(recordSnapshot) ? recordSnapshot.key : null;
   }
 
-  Future<ConversationGroup> getConversationGroupWithTypeAndMembers(ConversationGroupType conversationGroupType, List<String> groupMemberIds) async {
+  /// Filter.inList is not working as intended. Official Documentation and online forums doesn't show example of using this.
+  /// Did tried other solutions (like using Filter.matches(...) and Filter.equals(...)) also doesn't work.
+  Future<ConversationGroup> getConversationGroupWithTypeAndMembers(ConversationGroupType conversationGroupType, List<String> memberIds) async {
     if (isObjectEmpty(await _db)) {
       return null;
     }
 
     final conversationGroupTypeFilter = Filter.equals('conversationGroupType', conversationGroupType.name);
-    final memberIdsFilter = Filter.inList('memberIds', groupMemberIds);
-    final combinedFilters = Filter.and([conversationGroupTypeFilter, memberIdsFilter]);
+    // final memberIdsFilter = Filter.inList('memberIds', memberIds);
+    final combinedFilters = Filter.and([conversationGroupTypeFilter]);
     final finder = Finder(filter: combinedFilters);
 
-    final recordSnapshot = await _conversationGroupStore.findFirst(await _db, finder: finder);
-    return !isObjectEmpty(recordSnapshot) ? ConversationGroup.fromJson(recordSnapshot.value) : null;
+    final recordSnapshots = await _conversationGroupStore.find(await _db, finder: finder);
+
+    int conversationGroupIndex = -1;
+
+    // Convert conversation groups and check conversationGroup.memberIds matches memberIds.
+    if (!isObjectEmpty(recordSnapshots)) {
+      List<ConversationGroup> conversationGroupList = [];
+      recordSnapshots.forEach((snapshot) {
+        final conversationGroup = ConversationGroup.fromJson(snapshot.value);
+        conversationGroupList.add(conversationGroup);
+      });
+
+      // listEquals(...). https://stackoverflow.com/a/55974120/8680413
+      conversationGroupIndex = conversationGroupList.indexWhere((conversationGroup) => listEquals(conversationGroup.memberIds, memberIds));
+
+      return conversationGroupIndex != -1 ? conversationGroupList[conversationGroupIndex] : null;
+    }
+
+    return null;
   }
 
   Future<List<ConversationGroup>> getAllConversationGroups() async {
