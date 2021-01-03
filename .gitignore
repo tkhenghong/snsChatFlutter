@@ -45,3 +45,5 @@ Thumbs.db
 UserInterfaceState.xcuserstate
 
 .flutter-plugins-dependencies
+
+*.reflectable.dart
