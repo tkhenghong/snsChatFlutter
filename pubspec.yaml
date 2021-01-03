@@ -183,6 +183,9 @@ dev_dependencies:
   # Generate app icons for Android & iOS
   flutter_launcher_icons: ^0.8.0
 
+  # UUID for random values in tests
+  uuid: ^2.2.2
+
   flutter_test:
     sdk: flutter
 
