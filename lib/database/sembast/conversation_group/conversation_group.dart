@@ -86,7 +86,7 @@ class ConversationDBService {
       return;
     }
 
-    _conversationGroupStore.delete(await _db);
+    await _conversationGroupStore.delete(await _db);
   }
 
   Future<ConversationGroup> getSingleConversationGroup(String conversationGroupId) async {

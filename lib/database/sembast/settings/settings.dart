@@ -60,7 +60,7 @@ class SettingsDBService {
       return;
     }
 
-    _settingsStore.delete(await _db);
+    await _settingsStore.delete(await _db);
   }
 
   Future<Settings> getSingleSettings(String settingsId) async {

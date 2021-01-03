@@ -82,7 +82,7 @@ class UnreadMessageDBService {
       return;
     }
 
-    _unreadMessageStore.delete(await _db);
+    await _unreadMessageStore.delete(await _db);
   }
 
   Future<UnreadMessage> getSingleUnreadMessage(String unreadMessageId) async {

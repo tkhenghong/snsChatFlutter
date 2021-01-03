@@ -82,7 +82,7 @@ class UserContactDBService {
       return;
     }
 
-    _userContactStore.delete(await _db);
+    await _userContactStore.delete(await _db);
   }
 
   Future<UserContact> getSingleUserContact(String userContactId) async {

@@ -61,7 +61,7 @@ class UserDBService {
       return;
     }
 
-    _userStore.delete(await _db);
+    await _userStore.delete(await _db);
   }
 
   Future<User> getSingleUser(String userId) async {

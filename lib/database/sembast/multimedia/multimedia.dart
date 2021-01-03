@@ -83,7 +83,7 @@ class MultimediaDBService {
       return;
     }
 
-    _multimediaStore.delete(await _db);
+    await _multimediaStore.delete(await _db);
   }
 
   Future<Multimedia> getSingleMultimedia(String multimediaId) async {
@@ -102,24 +102,6 @@ class MultimediaDBService {
     final finder = Finder(filter: Filter.equals('id', multimediaId));
     final recordSnapshot = await _multimediaStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? recordSnapshot.key : null;
-  }
-
-  Future<List<Multimedia>> getMultimediaOfAConversationGroup(String conversationGroupId) async {
-    if (isObjectEmpty(await _db)) {
-      return null;
-    }
-    final finder = Finder(filter: Filter.equals('conversationGroupId', conversationGroupId));
-    final recordSnapshots = await _multimediaStore.find(await _db, finder: finder);
-    if (!isObjectEmpty(recordSnapshots)) {
-      List<Multimedia> multimediaList = [];
-      recordSnapshots.forEach((snapshot) {
-        final multimedia = Multimedia.fromJson(snapshot.value);
-        multimediaList.add(multimedia);
-      });
-
-      return multimediaList;
-    }
-    return null;
   }
 
   Future<List<Multimedia>> getAllMultimedia() async {

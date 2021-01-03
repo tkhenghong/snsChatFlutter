@@ -86,7 +86,7 @@ class ChatMessageDBService {
       return;
     }
 
-    _chatMessageStore.delete(await _db);
+    await _chatMessageStore.delete(await _db);
   }
 
   Future<ChatMessage> getSingleChatMessage(String chatMessageId) async {

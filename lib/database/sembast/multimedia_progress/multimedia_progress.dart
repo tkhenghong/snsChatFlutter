@@ -61,7 +61,8 @@ class MultimediaProgressDBService {
     if (isObjectEmpty(await _db)) {
       return;
     }
-    _multimediaProgressStore.delete(await _db);
+
+    await _multimediaProgressStore.delete(await _db);
   }
 
   Future<MultimediaProgress> getSingleMultimediaProgress(String multimediaProgressTaskId) async {
