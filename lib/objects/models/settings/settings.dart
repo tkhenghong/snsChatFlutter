@@ -1,11 +1,12 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:lombok/lombok.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 
 part 'settings.g.dart';
 
 @data
 @JsonSerializable()
-class Settings {
+class Settings extends Auditable {
   @JsonKey(name: 'id')
   String id;
 
