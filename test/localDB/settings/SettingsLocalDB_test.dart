@@ -95,6 +95,7 @@ void main() {
     expect(editedSettings.id, isNotNull);
     expect(editedSettings.id, equals(settingsFromLocalDB.id));
     expect(editedSettings.allowNotifications, isNotNull);
+    expect(editedSettings.allowNotifications, equals(settings.allowNotifications));
   });
 
   test('Test Save Settings Multiple Times', () async {
@@ -153,9 +154,7 @@ void main() {
     expect(settings.length, equals(0));
   });
 
-  /// A test of loading conversation groups with pagination to test offline capability of the app when network is not available.
-  /// A sample of noOfSaves of records will be save into Database. Then load first page of records and check the first element of the result.
-  test('Test Settings with Pagination', () async {
+  test('Test Get Settings of the User', () async {
     await wipeAllSettings();
 
     // Set up
@@ -174,6 +173,7 @@ void main() {
     bool allSavedSuccess = true;
 
     // Add
+    // NOTE: This is saved multiple times to stress test multiple user logins with Settings object. Only one Settings object with correct randomUserId.
     for (int i = 0; i < noOfSaves; i++) {
       Settings settings = createTestObject();
 

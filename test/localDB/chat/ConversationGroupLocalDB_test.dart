@@ -101,8 +101,10 @@ void main() {
     expect(editedConversationGroup.id, isNotNull);
     expect(editedConversationGroup.id, equals(conversationGroupFromLocalDB.id));
     expect(editedConversationGroup.name, isNotNull);
+    expect(editedConversationGroup.name, equals(conversationGroup.name));
     expect(editedConversationGroup.conversationGroupType, isNotNull);
-    expect(editedConversationGroup.description, isNotNull);
+    expect(editedConversationGroup.conversationGroupType, equals(conversationGroup.conversationGroupType));
+    expect(editedConversationGroup.description, equals(conversationGroup.description));
   });
 
   /// This is to check Personal Conversation Group duplication prevention is working properly or not.

@@ -105,7 +105,9 @@ void main() {
     expect(editedMultimedia.id, isNotNull);
     expect(editedMultimedia.id, equals(multimediaFromLocalDB.id));
     expect(editedMultimedia.fileName, isNotNull);
+    expect(editedMultimedia.fileName, equals(multimedia.fileName));
     expect(editedMultimedia.multimediaType, isNotNull);
+    expect(editedMultimedia.multimediaType, equals(multimedia.multimediaType));
   });
 
   test('Test Save Multimedia Multiple Times', () async {

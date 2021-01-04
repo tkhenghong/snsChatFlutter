@@ -100,7 +100,9 @@ void main() {
     expect(editedChatMessage.id, isNotNull);
     expect(editedChatMessage.id, equals(chatMessageFromLocalDB.id));
     expect(editedChatMessage.messageContent, isNotNull);
+    expect(editedChatMessage.messageContent, equals(chatMessage.messageContent));
     expect(editedChatMessage.chatMessageStatus, isNotNull);
+    expect(editedChatMessage.chatMessageStatus, equals(chatMessage.chatMessageStatus));
   });
 
   test('Test Save Chat Message Multiple Times', () async {

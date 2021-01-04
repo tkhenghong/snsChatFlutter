@@ -127,7 +127,7 @@ class UnreadMessageDBService {
     if (isObjectEmpty(await _db)) {
       return null;
     }
-    final finder = Finder(filter: Filter.equals("conversationGroupId", conversationGroupId));
+    final finder = Finder(filter: Filter.equals("conversationId", conversationGroupId));
     final recordSnapshot = await _unreadMessageStore.findFirst(await _db, finder: finder);
     return !isObjectEmpty(recordSnapshot) ? UnreadMessage.fromJson(recordSnapshot.value) : null;
   }
