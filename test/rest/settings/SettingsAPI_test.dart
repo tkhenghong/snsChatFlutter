@@ -4,7 +4,7 @@ import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 
 void main() {
-  SettingsAPIService settingsAPIService = SettingsAPIService();
+  // SettingsAPIService settingsAPIService = SettingsAPIService();
 
   Settings createTestObject() {
     return new Settings(

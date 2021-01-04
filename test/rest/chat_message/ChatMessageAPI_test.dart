@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:snschat_flutter/rest/index.dart';
 
 void main() {
-  ChatMessageAPIService chatMessageAPIService = ChatMessageAPIService();
+  // ChatMessageAPIService chatMessageAPIService = ChatMessageAPIService();
 
   // ChatMessage createTestObject() {
   //   return new ChatMessage(

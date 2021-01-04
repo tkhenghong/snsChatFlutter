@@ -4,7 +4,7 @@ import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 
 void main() {
-  MultimediaAPIService multimediaAPIService = MultimediaAPIService();
+  // MultimediaAPIService multimediaAPIService = MultimediaAPIService();
 
   // Multimedia createTestObject() {
   //   return new Multimedia(

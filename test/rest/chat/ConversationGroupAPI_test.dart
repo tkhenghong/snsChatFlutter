@@ -5,7 +5,7 @@ import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 
 void main() {
-  ConversationGroupAPIService conversationGroupAPIService = ConversationGroupAPIService();
+  // ConversationGroupAPIService conversationGroupAPIService = ConversationGroupAPIService();
 
   // ConversationGroup createTestObject() {
   //   return new ConversationGroup(

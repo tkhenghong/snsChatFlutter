@@ -3,7 +3,7 @@ import 'package:snschat_flutter/rest/index.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  UnreadMessageAPIService unreadMessageAPIService = UnreadMessageAPIService();
+  // UnreadMessageAPIService unreadMessageAPIService = UnreadMessageAPIService();
 
   // UnreadMessage createTestObject() {
   //   return new UnreadMessage(

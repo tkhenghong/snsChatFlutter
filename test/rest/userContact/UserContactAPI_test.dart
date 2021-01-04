@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 // NOTE: I have made
 void main() {
-  UserContactAPIService userContactAPIService = UserContactAPIService();
+  // UserContactAPIService userContactAPIService = UserContactAPIService();
 
 //   UserContact createTestObject() {
 //     return new UserContact(
