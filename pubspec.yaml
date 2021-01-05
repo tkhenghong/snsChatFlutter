@@ -127,7 +127,7 @@ dependencies:
   stomp_dart_client: ^0.3.8
 
   # Network
-  connectivity: ^2.0.1
+  connectivity: ^2.0.2
   wifi_info_flutter: ^1.0.1
 
   # Fonts
