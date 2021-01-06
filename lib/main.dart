@@ -21,6 +21,7 @@ import 'package:snschat_flutter/state/bloc/network/bloc.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
 
 import 'database/sembast/index.dart';
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 
 // Sets a platform override for desktop to avoid exceptions. See
 // https://flutter.dev/desktop#target-platform-override for more info.
@@ -157,7 +158,7 @@ void main() async {
   generateRoutes();
   generateGetPageList();
   WidgetsFlutterBinding.ensureInitialized();
-  ByteData byteData = await rootBundle.load('lib/keystore/keystore.p12');
+  ByteData byteData = await rootBundle.load(globals.sslCertificateLocation);
   HttpOverrides.global = new CustomHttpOverrides(byteData);
   _enablePlatformOverrideForDesktop();
   initializeServices();
