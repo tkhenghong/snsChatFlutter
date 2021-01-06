@@ -122,3 +122,9 @@ flutter run --flavor integration --release (Use integration app icon in release 
 flutter run --flavor production (Use production app icon in debug mode)
 flutter run --flavor production --profile (Use production app icon in profile mode)
 flutter run --flavor production --release (Use production app icon in release mode)
+
+Build APK/App Bundle for Android, with splitting different architecture for different types of Android:
+
+flutter build apk --target-platform android-arm,android-arm64,android-x64 --split-per-abi --flavor production --release
+
+flutter build appbundle --target-platform android-arm,android-arm64,android-x64 --flavor production --release
