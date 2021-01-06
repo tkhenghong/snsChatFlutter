@@ -1,0 +1,41 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+# Own fastlane Integration Code
+
+default_platform(:android)
+platform :android do
+  desc "Build a Flutter apk"
+  lane :build do
+    Dir.chdir("../..") do
+      sh "flutter packages get"
+      sh "flutter clean"
+      sh "flutter build apk --target-platform android-arm,android-arm64,android-x64 --split-per-abi --flavor production --release"
+    end
+  end
+  desc "Submit a new Alpha Build to Microsoft AppCenter"
+  lane :deploy do
+  if File.exist?(File.dirname(__FILE__) + "./../build/app/outputs/flutter-apk/app-arm64-v8a-production-release.apk")
+    appcenter_upload(
+      api_token: "API_SECRET_KEY", # Your secret api token from app center
+      owner_name: "USERNAME", # Your username on AppCenter
+      app_name: "APP_NAME", # Your AppCenter name
+      apk: "APK_FILE_LOCATION",
+    )
+    else
+      UI.message('Unable to find apk')
+    end
+  end
+end
