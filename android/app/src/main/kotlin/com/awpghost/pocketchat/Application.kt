@@ -1,4 +1,4 @@
-package flutter.snschat.com.snschatflutter
+package com.awpghost.pocketchat
 
 import io.flutter.app.FlutterApplication
 import io.flutter.plugin.common.PluginRegistry

@@ -1,4 +1,4 @@
-package flutter.snschat.com.snschatflutter
+package com.awpghost.pocketchat
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

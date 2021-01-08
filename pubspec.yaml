@@ -80,6 +80,9 @@ dependencies:
   # Firebase Messaging
   firebase_messaging: ^7.0.3
 
+  # Firebase Analytics
+  firebase_analytics: ^6.3.0
+
   # Image rotation fix
   # flutter_exif_rotation: ^0.2.7
 
