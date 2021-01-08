@@ -33,8 +33,14 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Used to demonstrate image picker and barcode scanner plugin</string>
 	<key>NSContactsUsageDescription</key>
 	<string>This app requires contacts access to function properly.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Used to determine network condition to prevent error occurs when using the app</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Used to determine network condition to prevent error occurs when using the app</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This is used to get audio file in image picker or to record your speech audio recorder plugin.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -64,12 +70,6 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>io.flutter.embedded_views_preview</key>
-    <true/>
-    <key>NSCameraUsageDescription</key>
-    <string>Used to demonstrate image picker and barcode scanner plugin</string>
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>Used to determine network condition to prevent error occurs when using the app</string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Used to determine network condition to prevent error occurs when using the app</string>
+	<true/>
 </dict>
 </plist>
