@@ -8,12 +8,20 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:352395986856:android:d386fdfe75ebc8a4",
+        "mobilesdk_app_id": "1:352395986856:android:c7307be1be391836d2bf9d",
         "android_client_info": {
-          "package_name": "flutter.snschat.com.snschatflutter"
+          "package_name": "com.awpghost.pocketchat"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "352395986856-d1cfk36abbdvdfd2ofh6o91qju7poo16.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.awpghost.pocketchat",
+            "certificate_hash": "a94ae792dda5aff0b6b2a3529b65c155de60f524"
+          }
+        },
         {
           "client_id": "352395986856-kn8u8j42ur53drr6937fai2od6i6rnmd.apps.googleusercontent.com",
           "client_type": 3
@@ -28,14 +36,14 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "352395986856-mr5vreouklkvlg0l0frcddhp4ajp16lv.apps.googleusercontent.com",
+              "client_id": "352395986856-kn8u8j42ur53drr6937fai2od6i6rnmd.apps.googleusercontent.com",
               "client_type": 3
             },
             {
               "client_id": "352395986856-mjg2vnrare86akr2phflufbt7dt582b3.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "flutter.snschat.com.snschatflutter"
+                "bundle_id": "com.awpghost.pocketchat"
               }
             }
           ]

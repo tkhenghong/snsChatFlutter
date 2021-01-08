@@ -63,7 +63,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "flutter.snschat.com.snschatflutter"
+        applicationId "com.awpghost.pocketchat"
         minSdkVersion 21 // Android 5 Lollipop (to Support TLS 1.2)
         targetSdkVersion 29 // Android 10 Q
         versionCode flutterVersionCode.toInteger()
@@ -81,7 +81,7 @@ android {
         development {
             dimension "default"
             // Allow during development environment, add .dev at the back of your app ID.
-            // This is important if you have your app ID bind to some Google services(Firebase), it may fail due to you didn't create flutter.snschat.com.snschatflutter.int in Firebase.
+            // This is important if you have your app ID bind to some Google services(Firebase), it may fail due to you didn't create com.awpghost.pocketchat.int in Firebase.
             // applicationIdSuffix ".dev"
             applicationIdSuffix ""
             manifestPlaceholders = [appName: "PocketChat (Dev)"]
@@ -89,7 +89,7 @@ android {
         integration {
             dimension "default"
             // Allow during development environment, add .dev at the back of your app ID.
-            // This is important if you have your app ID bind to some Google services(Firebase), it may fail due to you didn't create flutter.snschat.com.snschatflutter.int in Firebase.
+            // This is important if you have your app ID bind to some Google services(Firebase), it may fail due to you didn't create com.awpghost.pocketchat.int in Firebase.
             // applicationIdSuffix ".int"
             applicationIdSuffix ""
             manifestPlaceholders = [appName: "PocketChat (UAT)"]
@@ -155,6 +155,8 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation platform('com.google.firebase:firebase-bom:26.2.0')
+    implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-messaging:21.0.0'
     implementation 'com.google.firebase:firebase-storage:19.2.0'
     implementation 'com.google.android.gms:play-services-basement:17.5.0'
