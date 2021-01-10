@@ -40,7 +40,95 @@
               "client_type": 3
             },
             {
-              "client_id": "352395986856-mjg2vnrare86akr2phflufbt7dt582b3.apps.googleusercontent.com",
+              "client_id": "352395986856-2u2u0sheqhnsvihf94h13bbeporo48f8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.awpghost.pocketchat"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:352395986856:android:ae79dcd788c1018dd2bf9d",
+        "android_client_info": {
+          "package_name": "com.awpghost.pocketchat.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "352395986856-1c9amm30gn9ps87noib2k0dsnvejo72l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.awpghost.pocketchat.dev",
+            "certificate_hash": "a94ae792dda5aff0b6b2a3529b65c155de60f524"
+          }
+        },
+        {
+          "client_id": "352395986856-kn8u8j42ur53drr6937fai2od6i6rnmd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbV80V1U5X9EmnH0ZM1Mgdqr2wF1QSJE4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "352395986856-kn8u8j42ur53drr6937fai2od6i6rnmd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "352395986856-2u2u0sheqhnsvihf94h13bbeporo48f8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.awpghost.pocketchat"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:352395986856:android:905953c3c2113a2fd2bf9d",
+        "android_client_info": {
+          "package_name": "com.awpghost.pocketchat.uat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "352395986856-4rpp4ro4fqfiim92uvpv8m2nm8331lu9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.awpghost.pocketchat.uat",
+            "certificate_hash": "a94ae792dda5aff0b6b2a3529b65c155de60f524"
+          }
+        },
+        {
+          "client_id": "352395986856-kn8u8j42ur53drr6937fai2od6i6rnmd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbV80V1U5X9EmnH0ZM1Mgdqr2wF1QSJE4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "352395986856-kn8u8j42ur53drr6937fai2od6i6rnmd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "352395986856-2u2u0sheqhnsvihf94h13bbeporo48f8.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.awpghost.pocketchat"
