@@ -1,0 +1,7 @@
+Testing Release Notes in Development
+
+1. Testing Release note 1
+2. Testing Release note 2
+3. Testing Release note 3
+
+Testing release notes support email@gmail.com, thanks.

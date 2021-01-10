@@ -82,16 +82,16 @@ android {
             dimension "default"
             // Allow during development environment, add .dev at the back of your app ID.
             // This is important if you have your app ID bind to some Google services(Firebase), it may fail due to you didn't create com.awpghost.pocketchat.int in Firebase.
-            // applicationIdSuffix ".dev"
-            applicationIdSuffix ""
+            applicationIdSuffix ".dev"
+//            applicationIdSuffix ""
             manifestPlaceholders = [appName: "PocketChat (Dev)"]
         }
         integration {
             dimension "default"
             // Allow during development environment, add .dev at the back of your app ID.
             // This is important if you have your app ID bind to some Google services(Firebase), it may fail due to you didn't create com.awpghost.pocketchat.int in Firebase.
-            // applicationIdSuffix ".int"
-            applicationIdSuffix ""
+            applicationIdSuffix ".uat"
+//            applicationIdSuffix ""
             manifestPlaceholders = [appName: "PocketChat (UAT)"]
         }
     }

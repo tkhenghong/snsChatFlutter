@@ -17,16 +17,83 @@
 
 default_platform(:android)
 platform :android do
-  desc "Build a Flutter apk"
-  lane :build do
+
+  desc "Clean the project, Get dependencies, and Test"
+  lane :build_project do
     Dir.chdir("../..") do
-      sh "flutter packages get"
       sh "flutter clean"
+      sh "flutter packages get"
+      sh "flutter test"
+    end
+  end
+
+  desc "Build Flutter Development Release APK"
+  lane :build_development_release_apk do
+    build_project
+    Dir.chdir("../..") do
+      sh "flutter build apk --target-platform android-arm,android-arm64,android-x64 --split-per-abi --flavor development --release"
+    end
+  end
+
+  desc "Build Flutter Integration Release APK"
+  lane :build_integration_release_apk do
+    build_project
+    Dir.chdir("../..") do
+      sh "flutter build apk --target-platform android-arm,android-arm64,android-x64 --split-per-abi --flavor integration --release"
+    end
+  end
+
+  desc "Build Flutter Production Release APK"
+  lane :build_production_release_apk do
+    build_project
+    Dir.chdir("../..") do
       sh "flutter build apk --target-platform android-arm,android-arm64,android-x64 --split-per-abi --flavor production --release"
     end
   end
+
+  desc "Distribute Production Release Android app to Development Team/Tester Through Firebase App Distribution"
+  lane :distribute_production_release_to_dev do
+      build_development_release_apk # build the Android app. (Previous command)
+      add_badge(shield: "Version-Dev-orange")
+      firebase_app_distribution(
+          app: "FIREBASE_APP_ID",
+          firebase_cli_token: "FIREBASE_CLI_TOKEN",
+          service_credentials_file: "SERVICE_CREDENTIAL_FILE_LOCATION", # You may use the same file as the file specified in Appfile.
+          apk_path: "APK_FILE_PATH",
+          testers_file: "TESTER_FILE_PATH",
+          release_notes_file: "RELEASE_NOTES_FILE_PATH"
+      )
+  end
+
+  desc "Distribute Production Release Android app to UAT Team/Testers Through Firebase App Distribution"
+  lane :distribute_production_release_to_uat do
+      build_integration_release_apk # build the Android app. (Previous command)
+      add_badge(shield: "Version-UAT-orange")
+      firebase_app_distribution(
+          app: "FIREBASE_APP_ID",
+          firebase_cli_token: "FIREBASE_CLI_TOKEN",
+          service_credentials_file: "SERVICE_CREDENTIAL_FILE_LOCATION", # You may use the same file as the file specified in Appfile.
+          apk_path: "APK_FILE_PATH",
+          testers_file: "TESTER_FILE_PATH",
+          release_notes_file: "RELEASE_NOTES_FILE_PATH"
+      )
+  end
+
+  desc "Distribute Production Release Android app Production Team/Testers Through Firebase App Distribution"
+  lane :distribute_production_release_to_prod do
+      build_production_release_apk # build the Android app. (Previous command)
+      firebase_app_distribution(
+          app: "FIREBASE_APP_ID",
+          firebase_cli_token: "FIREBASE_CLI_TOKEN",
+          service_credentials_file: "SERVICE_CREDENTIAL_FILE_LOCATION", # You may use the same file as the file specified in Appfile.
+          apk_path: "APK_FILE_PATH",
+          testers_file: "TESTER_FILE_PATH",
+          release_notes_file: "RELEASE_NOTES_FILE_PATH"
+      )
+  end
+
   desc "Submit a new Alpha Build to Microsoft AppCenter"
-  lane :deploy do
+  lane :deploy_to_app_center do
   if File.exist?(File.dirname(__FILE__) + "./../build/app/outputs/flutter-apk/app-arm64-v8a-production-release.apk")
     appcenter_upload(
       api_token: "API_SECRET_KEY", # Your secret api token from app center
