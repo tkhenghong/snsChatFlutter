@@ -45,7 +45,7 @@ void main() {
     expect(conversationGroupFromLocalDB, isNotNull);
     expect(conversationGroupFromLocalDB.id, isNotNull);
     expect(conversationGroupFromLocalDB.id, equals(conversationGroup.id)); // Only comparing IDs due to no equatable package
-  });
+  }, retry: 3);
 
   // NOTE: Asynchronous saving the same thing into DB
   // Answer: You will not even getting the database even after delayed for 5 seconds after you have saved the same conversation group twice into DB.
@@ -67,7 +67,7 @@ void main() {
 
     // Validations
     expect(conversationGroupFromLocalDB, isNull);
-  });
+  }, retry: 3);
 
   test('Create and Edit Conversation Group', () async {
     await wipeAllConversationGroups();
@@ -105,7 +105,7 @@ void main() {
     expect(editedConversationGroup.conversationGroupType, isNotNull);
     expect(editedConversationGroup.conversationGroupType, equals(conversationGroup.conversationGroupType));
     expect(editedConversationGroup.description, equals(conversationGroup.description));
-  });
+  }, retry: 3);
 
   /// This is to check Personal Conversation Group duplication prevention is working properly or not.
   test('Test Duplicate Personal Conversation Group', () async {
@@ -132,7 +132,7 @@ void main() {
     expect(conversationGroup.id, equals(conversationGroupFromLocalDB2.id));
     expect(conversationGroup.memberIds, equals(conversationGroupFromLocalDB2.memberIds));
     expect(conversationGroup.adminMemberIds, equals(conversationGroupFromLocalDB2.adminMemberIds));
-  });
+  }, retry: 3);
 
   test('Test Save Conversation Group Multiple Times', () async {
     await wipeAllConversationGroups();
@@ -160,7 +160,7 @@ void main() {
 
     expect(added, isTrue);
     expect(conversationGroups.length, equals(1));
-  });
+  }, retry: 3);
 
   test('Test Delete Single Conversation Group', () async {
     await wipeAllConversationGroups();
@@ -177,7 +177,7 @@ void main() {
     expect(added, isTrue);
     expect(deleted, isTrue);
     expect(conversationGroupFromLocalDB, null);
-  });
+  }, retry: 3);
 
   test('Test Wipe All Conversation Groups', () async {
     await wipeAllConversationGroups();
@@ -187,7 +187,7 @@ void main() {
 
     expect(conversationGroups, equals([]));
     expect(conversationGroups.length, equals(0));
-  });
+  }, retry: 3);
 
   /// A test of loading conversation groups with pagination to test offline capability of the app when network is not available.
   /// A sample of noOfSaves of records will be save into Database. Then load first page of records and check the first element of the result.
@@ -246,5 +246,5 @@ void main() {
       expect(lastElementInList.id, allConversationGroups[index].id);
       index++; // 10 // Move index to next page first element of the list.
     }
-  });
+  }, retry: 3);
 }

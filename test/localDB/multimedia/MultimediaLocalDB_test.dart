@@ -52,7 +52,7 @@ void main() {
     expect(multimediaFromLocalDB, isNotNull);
     expect(multimediaFromLocalDB.id, isNotNull);
     expect(multimediaFromLocalDB.id, equals(multimedia.id)); // Only comparing IDs due to no equatable package
-  });
+  }, retry: 3);
 
   // NOTE: Asynchronous saving the same thing into DB
   // Answer: You will not even getting the database even after delayed for 5 seconds after you have saved the same conversation group twice into DB.
@@ -73,7 +73,7 @@ void main() {
 
     // Validations
     expect(multimediaFromLocalDB, isNull);
-  });
+  }, retry: 3);
 
   test('Create and Edit Multimedia', () async {
     await wipeAllMultimedia();
@@ -108,7 +108,7 @@ void main() {
     expect(editedMultimedia.fileName, equals(multimedia.fileName));
     expect(editedMultimedia.multimediaType, isNotNull);
     expect(editedMultimedia.multimediaType, equals(multimedia.multimediaType));
-  });
+  }, retry: 3);
 
   test('Test Save Multimedia Multiple Times', () async {
     await wipeAllMultimedia();
@@ -137,7 +137,7 @@ void main() {
 
     expect(added, isTrue);
     expect(multimediaList.length, equals(1));
-  });
+  }, retry: 3);
 
   test('Test Delete Single Multimedia', () async {
     await wipeAllMultimedia();
@@ -154,7 +154,7 @@ void main() {
     expect(added, isTrue);
     expect(deleted, isTrue);
     expect(multimediaFromLocalDB, null);
-  });
+  }, retry: 3);
 
   test('Test Wipe All MultimediaList', () async {
     await wipeAllMultimedia();
@@ -164,7 +164,7 @@ void main() {
 
     expect(multimediaList, equals([]));
     expect(multimediaList.length, equals(0));
-  });
+  }, retry: 3);
 
   test('Test Get Multimedia List with Multimedia IDs', () async {
     await wipeAllMultimedia();
@@ -220,5 +220,5 @@ void main() {
 
     expect(multimediaIDsFromLocalDB.length, equals(multimediaIDs.length));
     expect(listEquals(multimediaIDsFromLocalDB, multimediaIDs), isTrue);
-  });
+  }, retry: 3);
 }

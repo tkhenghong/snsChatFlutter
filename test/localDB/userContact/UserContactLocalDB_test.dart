@@ -48,7 +48,7 @@ void main() {
     expect(userContactFromLocalDB, isNotNull);
     expect(userContactFromLocalDB.id, isNotNull);
     expect(userContactFromLocalDB.id, equals(userContact.id)); // Only comparing IDs due to no equatable package
-  });
+  }, retry: 3);
 
   // NOTE: Asynchronous saving the same thing into DB
   // Answer: You will not even getting the database even after delayed for 5 seconds after you have saved the same conversation group twice into DB.
@@ -76,7 +76,7 @@ void main() {
 
     // Validations
     expect(userContactFromLocalDB, isNull);
-  });
+  }, retry: 3);
 
   test('Create and Edit User Contact', () async {
     await wipeAllUserContacts();
@@ -127,7 +127,7 @@ void main() {
     expect(editedUserContact.block, equals(userContact.block));
     expect(editedUserContact.profilePicture, isNotNull);
     expect(editedUserContact.profilePicture, equals(userContact.profilePicture));
-  });
+  }, retry: 3);
 
   test('Test Save User Contact Multiple Times', () async {
     await wipeAllUserContacts();
@@ -155,7 +155,7 @@ void main() {
 
     expect(added, isTrue);
     expect(userContacts.length, equals(1));
-  });
+  }, retry: 3);
 
   test('Test Delete Single User Contact', () async {
     await wipeAllUserContacts();
@@ -172,7 +172,7 @@ void main() {
     expect(added, isTrue);
     expect(deleted, isTrue);
     expect(userContactFromLocalDB, null);
-  });
+  }, retry: 3);
 
   test('Test Wipe All User Contacts', () async {
     await wipeAllUserContacts();
@@ -182,7 +182,7 @@ void main() {
 
     expect(userContacts, equals([]));
     expect(userContacts.length, equals(0));
-  });
+  }, retry: 3);
 
   /// A test of loading conversation groups with pagination to test offline capability of the app when network is not available.
   /// A sample of noOfSaves of records will be save into Database. Then load first page of records and check the first element of the result.
@@ -241,5 +241,5 @@ void main() {
       expect(lastElementInList.id, allUserContacts[index].id);
       index++; // 10 // Move index to next page first element of the list.
     }
-  });
+  }, retry: 3);
 }

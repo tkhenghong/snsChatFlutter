@@ -46,7 +46,7 @@ void main() {
     expect(userFromLocalDB, isNotNull);
     expect(userFromLocalDB.id, isNotNull);
     expect(userFromLocalDB.id, equals(user.id)); // Only comparing IDs due to no equatable package
-  });
+  }, retry: 3);
 
   // NOTE: Asynchronous saving the same thing into DB
   // Answer: You will not even getting the database even after delayed for 5 seconds after you have saved the same conversation group twice into DB.
@@ -71,7 +71,7 @@ void main() {
 
     // Validations
     expect(userFromLocalDB, isNull);
-  });
+  }, retry: 3);
 
   test('Create and Edit User', () async {
     await wipeAllUser();
@@ -117,7 +117,7 @@ void main() {
     expect(editedUser.mobileNo, equals(user.mobileNo));
     expect(editedUser.countryCode, isNotNull);
     expect(editedUser.countryCode, equals(user.countryCode));
-  });
+  }, retry: 3);
 
   test('Test Save User Multiple Times', () async {
     await wipeAllUser();
@@ -145,7 +145,7 @@ void main() {
 
     expect(added, isTrue);
     expect(userList.length, equals(1));
-  });
+  }, retry: 3);
 
   test('Test Delete Single User', () async {
     await wipeAllUser();
@@ -163,7 +163,7 @@ void main() {
     expect(added, isTrue);
     expect(deleted, isTrue);
     expect(userFromLocalDB, null);
-  });
+  }, retry: 3);
 
   test('Test Wipe All User', () async {
     await wipeAllUser();
@@ -173,7 +173,7 @@ void main() {
 
     expect(user, equals([]));
     expect(user.length, equals(0));
-  });
+  }, retry: 3);
 
   test('Test User with Pagination', () async {
     await wipeAllUser();
@@ -220,5 +220,5 @@ void main() {
     expect(randomUserIdUser, isNotNull);
     expect(randomUserIdUser.id, equals(randomUserId));
     expect(randomUserIdUser.mobileNo, equals(randomMobileNo));
-  });
+  }, retry: 3);
 }

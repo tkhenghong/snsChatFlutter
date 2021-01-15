@@ -41,7 +41,7 @@ void main() {
     expect(settingsFromLocalDB, isNotNull);
     expect(settingsFromLocalDB.id, isNotNull);
     expect(settingsFromLocalDB.id, equals(settings.id)); // Only comparing IDs due to no equatable package
-  });
+  }, retry: 3);
 
   // NOTE: Asynchronous saving the same thing into DB
   // Answer: You will not even getting the database even after delayed for 5 seconds after you have saved the same conversation group twice into DB.
@@ -62,7 +62,7 @@ void main() {
 
     // Validations
     expect(settingsFromLocalDB, isNull);
-  });
+  }, retry: 3);
 
   test('Create and Edit Settings', () async {
     await wipeAllSettings();
@@ -96,7 +96,7 @@ void main() {
     expect(editedSettings.id, equals(settingsFromLocalDB.id));
     expect(editedSettings.allowNotifications, isNotNull);
     expect(editedSettings.allowNotifications, equals(settings.allowNotifications));
-  });
+  }, retry: 3);
 
   test('Test Save Settings Multiple Times', () async {
     await wipeAllSettings();
@@ -124,7 +124,7 @@ void main() {
 
     expect(added, isTrue);
     expect(settingsList.length, equals(1));
-  });
+  }, retry: 3);
 
   test('Test Delete Single Settings', () async {
     await wipeAllSettings();
@@ -142,7 +142,7 @@ void main() {
     expect(added, isTrue);
     expect(deleted, isTrue);
     expect(settingsFromLocalDB, null);
-  });
+  }, retry: 3);
 
   test('Test Wipe All Settings', () async {
     await wipeAllSettings();
@@ -152,7 +152,7 @@ void main() {
 
     expect(settings, equals([]));
     expect(settings.length, equals(0));
-  });
+  }, retry: 3);
 
   test('Test Get Settings of the User', () async {
     await wipeAllSettings();
@@ -197,5 +197,5 @@ void main() {
 
     expect(randomUserIdSettings, isNotNull);
     expect(randomUserIdSettings.userId, equals(randomUserId));
-  });
+  }, retry: 3);
 }

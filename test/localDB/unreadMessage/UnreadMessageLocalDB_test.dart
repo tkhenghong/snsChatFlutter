@@ -47,7 +47,7 @@ void main() {
     expect(unreadMessageFromLocalDB, isNotNull);
     expect(unreadMessageFromLocalDB.id, isNotNull);
     expect(unreadMessageFromLocalDB.id, equals(unreadMessage.id)); // Only comparing IDs due to no equatable package
-  });
+  }, retry: 3);
 
   // NOTE: Asynchronous saving the same thing into DB
   // Answer: You will not even getting the database even after delayed for 5 seconds after you have saved the same conversation group twice into DB.
@@ -68,7 +68,7 @@ void main() {
 
     // Validations
     expect(unreadMessageFromLocalDB, isNull);
-  });
+  }, retry: 3);
 
   test('Create and Edit UnreadMessage', () async {
     await wipeAllUnreadMessage();
@@ -102,7 +102,7 @@ void main() {
     expect(editedUnreadMessage.id, equals(unreadMessageFromLocalDB.id));
     expect(editedUnreadMessage.lastMessage, isNotNull);
     expect(editedUnreadMessage.lastMessage, equals(unreadMessage.lastMessage));
-  });
+  }, retry: 3);
 
   test('Test Save UnreadMessage Multiple Times', () async {
     await wipeAllUnreadMessage();
@@ -130,7 +130,7 @@ void main() {
 
     expect(added, isTrue);
     expect(unreadMessageList.length, equals(1));
-  });
+  }, retry: 3);
 
   test('Test Delete Single UnreadMessage', () async {
     await wipeAllUnreadMessage();
@@ -148,7 +148,7 @@ void main() {
     expect(added, isTrue);
     expect(deleted, isTrue);
     expect(unreadMessageFromLocalDB, null);
-  });
+  }, retry: 3);
 
   test('Test Wipe All UnreadMessage', () async {
     await wipeAllUnreadMessage();
@@ -158,7 +158,7 @@ void main() {
 
     expect(unreadMessage, equals([]));
     expect(unreadMessage.length, equals(0));
-  });
+  }, retry: 3);
 
   test('Test UnreadMessage with Pagination', () async {
     await wipeAllUnreadMessage();
@@ -202,5 +202,5 @@ void main() {
 
     expect(randomUserIdUnreadMessage, isNotNull);
     expect(randomUserIdUnreadMessage.conversationId, equals(randomConversationGroupId));
-  });
+  }, retry: 3);
 }

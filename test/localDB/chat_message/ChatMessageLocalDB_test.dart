@@ -47,7 +47,7 @@ void main() {
     expect(chatMessageFromLocalDB, isNotNull);
     expect(chatMessageFromLocalDB.id, isNotNull);
     expect(chatMessageFromLocalDB.id, equals(chatMessage.id)); // Only comparing IDs due to no equatable package
-  });
+  }, retry: 3);
 
   // NOTE: Asynchronous saving the same thing into DB
   // Answer: You will not even getting the database even after delayed for 5 seconds after you have saved the same conversation group twice into DB.
@@ -68,7 +68,7 @@ void main() {
 
     // Validations
     expect(chatMessageFromLocalDB, isNull);
-  });
+  }, retry: 3);
 
   test('Create and Edit Chat Message', () async {
     await wipeAllChatMessages();
@@ -103,7 +103,7 @@ void main() {
     expect(editedChatMessage.messageContent, equals(chatMessage.messageContent));
     expect(editedChatMessage.chatMessageStatus, isNotNull);
     expect(editedChatMessage.chatMessageStatus, equals(chatMessage.chatMessageStatus));
-  });
+  }, retry: 3);
 
   test('Test Save Chat Message Multiple Times', () async {
     await wipeAllChatMessages();
@@ -133,7 +133,7 @@ void main() {
 
     expect(added, isTrue);
     expect(chatMessages.length, equals(1));
-  });
+  }, retry: 3);
 
   test('Test Delete Single Chat Message', () async {
     await wipeAllChatMessages();
@@ -151,7 +151,7 @@ void main() {
     expect(added, isTrue);
     expect(deleted, isTrue);
     expect(chatMessageFromLocalDB, null);
-  });
+  }, retry: 3);
 
   test('Test Wipe All Chat Messages', () async {
     await wipeAllChatMessages();
@@ -161,7 +161,7 @@ void main() {
 
     expect(chatMessages, equals([]));
     expect(chatMessages.length, equals(0));
-  });
+  }, retry: 3);
 
   /// A test of loading conversation groups with pagination to test offline capability of the app when network is not available.
   /// A sample of noOfSaves of records will be save into Database. Then load first page of records and check the first element of the result.
@@ -226,5 +226,5 @@ void main() {
       expect(lastElementInList.id, allChatMessages[index].id);
       index++; // 10 // Move index to next page first element of the list.
     }
-  });
+  }, retry: 3);
 }
