@@ -6,3 +6,5 @@ export 'settings/settings.dart';
 export 'unread_message/unread_message.dart';
 export 'user/user.dart';
 export 'userContact/userContact.dart';
+
+export 'init.dart';

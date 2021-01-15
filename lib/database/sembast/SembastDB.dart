@@ -21,7 +21,6 @@ import 'package:snschat_flutter/service/index.dart';
 /// There may be many same records in the file, but when running the app and DB file is loaded into memory, it will be shown as ONE record only.***
 /// Explanation reference: https://github.com/tekartik/sembast.dart/blob/master/sembast/doc/storage_format.md
 
-
 /// Compared with Hive(another NoSQL solution).
 /// 1. Hive has good reads and writes(much faster than SQLite), and have some benchmarks to prove in typically situations.
 /// 2. It is key-value based DB solution. Simple to set up. Easy to write CRUD of the domain objects.
@@ -67,12 +66,13 @@ class SembastDB {
     // https://github.com/tekartik/sembast.dart/blob/master/sembast/doc/open.md
 
     var dbPath = "";
+    String dbName = 'pocketChat.db';
 
     bool storageAccessGranted = false;
 
     switch (ENVIRONMENT) {
       case "LOCAL_COMPUTER":
-        dbPath = 'pocketChat.db';
+        dbPath = dbName;
         storageAccessGranted = true;
         break;
       case "DEVELOPMENT":
@@ -84,7 +84,7 @@ class SembastDB {
           storageAccessGranted = false;
         } else {
           // build the database path
-          dbPath = join(path, 'pocketChat.db'); // join method comes from path.dart
+          dbPath = join(path, dbName); // join method comes from path.dart
           print('SembastDB.dart dbPath: $dbPath');
           storageAccessGranted = true;
         }

@@ -18,36 +18,69 @@
 default_platform(:android)
 platform :android do
 
+version_number = '1.0.0'
+
   desc "Clean the project, Get dependencies, and Test"
   lane :build_project do
     Dir.chdir("../..") do
       sh "flutter clean"
       sh "flutter packages get"
       sh "flutter test"
+      sh "flutter pub run flutter_launcher_icons:main -f flutter_launcher_icons-production.yaml"
     end
+  end
+
+  desc "Build App Badge Icon for Development"
+  lane :build_app_badge_icon_for_development do
+    add_badge(
+      dark: false,
+      no_badge: true,
+      shield_no_resize: false,
+      shield: "Development-#{version_number}-orange",
+      glob: "./android/app/src/development/res/mipmap-*/ic_launcher.png",
+    )
+  end
+
+  desc "Build App Badge Icon for Integration(UAT)"
+  lane :build_app_badge_icon_for_integration do
+    add_badge(
+      dark: false,
+      no_badge: true,
+      shield_no_resize: false,
+      shield: "UAT-#{version_number}-orange",
+      glob: "./android/app/src/integration/res/mipmap-*/ic_launcher.png",
+    )
+  end
+
+  desc "Build App Badge Icon for Production"
+  lane :build_app_badge_icon_for_production do
+    # Do nothing
   end
 
   desc "Build Flutter Development Release APK"
   lane :build_development_release_apk do
     build_project
+    build_app_badge_icon_for_development
     Dir.chdir("../..") do
-      sh "flutter build apk --target-platform android-arm,android-arm64,android-x64 --split-per-abi --flavor development --release"
+      sh "flutter build apk --target-platform android-arm,android-arm64,android-x64 --split-per-abi --flavor development --dart-define=app.flavor=development --release"
     end
   end
 
   desc "Build Flutter Integration Release APK"
   lane :build_integration_release_apk do
     build_project
+    build_app_badge_icon_for_integration
     Dir.chdir("../..") do
-      sh "flutter build apk --target-platform android-arm,android-arm64,android-x64 --split-per-abi --flavor integration --release"
+      sh "flutter build apk --target-platform android-arm,android-arm64,android-x64 --split-per-abi --flavor integration  --dart-define=app.flavor=integration --release"
     end
   end
 
   desc "Build Flutter Production Release APK"
   lane :build_production_release_apk do
     build_project
+    build_app_badge_icon_for_production
     Dir.chdir("../..") do
-      sh "flutter build apk --target-platform android-arm,android-arm64,android-x64 --split-per-abi --flavor production --release"
+      sh "flutter build apk --target-platform android-arm,android-arm64,android-x64 --split-per-abi --flavor production  --dart-define=app.flavor=production --release"
     end
   end
 

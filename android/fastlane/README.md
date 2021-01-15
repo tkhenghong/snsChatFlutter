@@ -21,6 +21,21 @@ or alternatively using `brew install fastlane`
 fastlane android build_project
 ```
 Clean the project, Get dependencies, and Test
+### android build_app_badge_icon_for_development
+```
+fastlane android build_app_badge_icon_for_development
+```
+Build App Badge Icon for Development
+### android build_app_badge_icon_for_integration
+```
+fastlane android build_app_badge_icon_for_integration
+```
+Build App Badge Icon for Integration(UAT)
+### android build_app_badge_icon_for_production
+```
+fastlane android build_app_badge_icon_for_production
+```
+Build App Badge Icon for Production
 ### android build_development_release_apk
 ```
 fastlane android build_development_release_apk
