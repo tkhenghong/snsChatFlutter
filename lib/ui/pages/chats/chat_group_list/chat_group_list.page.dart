@@ -13,7 +13,7 @@ import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/service/index.dart';
-import 'package:snschat_flutter/state/bloc/bloc.dart';
+import 'package:snschat_flutter/state/bloc/index.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
 import 'package:time_formatter/time_formatter.dart';
 

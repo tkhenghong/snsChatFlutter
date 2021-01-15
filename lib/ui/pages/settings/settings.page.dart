@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
-import 'package:snschat_flutter/state/bloc/bloc.dart';
+import 'package:snschat_flutter/state/bloc/index.dart';
 
 class SettingsPage extends StatefulWidget {
   @override

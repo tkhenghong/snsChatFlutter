@@ -9,7 +9,7 @@ import 'package:snschat_flutter/general/enums/verification_mode.enum.dart';
 import 'package:snschat_flutter/general/functions/toast/show_toast.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
-import 'package:snschat_flutter/state/bloc/bloc.dart';
+import 'package:snschat_flutter/state/bloc/index.dart';
 
 class VerifyPhoneNumberPage extends StatefulWidget {
   @override

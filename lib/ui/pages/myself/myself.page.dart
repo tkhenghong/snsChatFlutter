@@ -7,7 +7,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
-import 'package:snschat_flutter/state/bloc/bloc.dart';
+import 'package:snschat_flutter/state/bloc/index.dart';
 
 class MyselfPage extends StatefulWidget {
   @override

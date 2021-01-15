@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:snschat_flutter/state/bloc/bloc.dart';
+import 'package:snschat_flutter/state/bloc/index.dart';
 
 // Resource: https://medium.com/flutterpub/implementing-search-in-flutter-17dc5aa72018
 // TODO: Require Bloc to implement search on the list.

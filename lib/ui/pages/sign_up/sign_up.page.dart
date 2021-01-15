@@ -7,7 +7,7 @@ import 'package:snschat_flutter/environments/development/variables.dart' as glob
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
-import 'package:snschat_flutter/state/bloc/bloc.dart';
+import 'package:snschat_flutter/state/bloc/index.dart';
 
 class SignUpPage extends StatefulWidget {
   String mobileNo;

@@ -14,3 +14,5 @@ export 'user/bloc.dart';
 export 'userContact/bloc.dart';
 export 'webSocket/bloc.dart';
 export 'permission/bloc.dart';
+
+export 'init.dart';

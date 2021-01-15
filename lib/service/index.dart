@@ -8,3 +8,5 @@ export 'websocket/websocket.service.dart';
 export 'cryptojs/cryptojs.service.dart';
 export 'digest/digest.service.dart';
 export 'file_caching/file_caching.service.dart';
+
+export 'init.dart';

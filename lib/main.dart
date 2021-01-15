@@ -1,27 +1,25 @@
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
-import 'package:dio/dio.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/service/index.dart';
-import 'package:snschat_flutter/state/bloc/bloc.dart';
-import 'package:snschat_flutter/state/bloc/network/bloc.dart';
+import 'package:snschat_flutter/state/bloc/index.dart';
+import 'package:snschat_flutter/theme/index.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
 
 import 'database/sembast/index.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
+import 'init.dart';
+import 'navigation/index.dart';
 
 // Sets a platform override for desktop to avoid exceptions. See
 // https://flutter.dev/desktop#target-platform-override for more info.
@@ -31,129 +29,6 @@ void _enablePlatformOverrideForDesktop() {
   }
 }
 
-List<NavigationPage> navigationPageList = [
-  NavigationPage(routeName: 'login_page', routePage: LoginPage()),
-  NavigationPage(routeName: 'privacy_notice_page', routePage: PrivacyNoticePage()),
-  NavigationPage(routeName: 'sign_up_page', routePage: SignUpPage()),
-  NavigationPage(routeName: 'terms_and_conditions_page', routePage: TermsAndConditionsPage()),
-  NavigationPage(routeName: 'verify_phone_number_page', routePage: VerifyPhoneNumberPage()),
-  NavigationPage(routeName: 'tabs_page', routePage: TabsPage()),
-  NavigationPage(routeName: 'chat_group_list_page', routePage: ChatGroupListPage()),
-  NavigationPage(routeName: 'scan_qr_code_page', routePage: ScanQrCodePage()),
-  NavigationPage(routeName: 'settings_page', routePage: SettingsPage()),
-  NavigationPage(routeName: 'myself_page', routePage: MyselfPage()),
-  NavigationPage(routeName: 'chat_room_page', routePage: ChatRoomPage()),
-  NavigationPage(routeName: 'chat_info_page', routePage: ChatInfoPage()),
-  NavigationPage(routeName: 'contacts_page', routePage: SelectContactsPage()),
-  NavigationPage(routeName: 'photo_view_page', routePage: PhotoViewPage()),
-  NavigationPage(routeName: 'video_player_page', routePage: VideoPlayerPage()),
-];
-
-final List<GetPage> getPageList = [];
-final Map<String, WidgetBuilder> routeList = new Map();
-
-/// Generate a list of page routes for GetX state management.
-List<GetPage> generateGetPageList() {
-  navigationPageList.forEach((element) {
-    getPageList.add(GetPage(name: element.routeName, page: () => element.routePage));
-  });
-
-  return getPageList;
-}
-
-/// Generate a list of page routes for main Flutter navigation.
-Map<String, WidgetBuilder> generateRoutes() {
-  if (routeList.isEmpty) {
-    navigationPageList.forEach((element) {
-      routeList.putIfAbsent(element.routeName, () => (_) => element.routePage);
-    });
-  }
-
-  return routeList;
-}
-
-// Default theme details in the app
-Brightness primaryBrightness = Brightness.light;
-
-// https://material.io/design/color/the-color-system.html#tools-for-picking-colors
-// Flutter Theme Color Palette Resource: https://material.io/resources/color/#!/
-
-int primaryColorValue = 0xFF000000;
-int primaryLightColorValue = 0xFF2C2C2C;
-int primaryDarkColorValue = 0xFF000000;
-int secondaryColorValue = 0xFFFFFFFF;
-int secondaryLightColorValue = 0xFFFFFFFF;
-int secondaryDarkColorValue = 0xFFCCCCCC;
-int primaryTextColorValue = 0xFFFFFFFF;
-int secondaryTextColorValue = 0xFF000000;
-
-// Black theme. Black is not MaterialColor, which has a list of colors within it
-// https://github.com/flutter/flutter/issues/15658
-MaterialColor primaryColor = MaterialColor(
-  primaryColorValue,
-  <int, Color>{
-    50: Color(0xFFF5F5F5),
-    100: Color(0xFFE9E9E9),
-    200: Color(0xFFD9D9D9),
-    300: Color(0xFFC4C4C4),
-    400: Color(0xFF9D9D9D),
-    500: Color(0xFF7B7B7B),
-    600: Color(0xFF555555),
-    700: Color(0xFF434343),
-    800: Color(0xFF262626),
-    900: Color(primaryColorValue),
-  },
-);
-
-MaterialColor secondaryColor = MaterialColor(
-  secondaryColorValue,
-  <int, Color>{
-    50: Color(0xFFFFFFFF), // #FFFFFF
-    100: Color(0xFFFAFAFA), // #FAFAFA
-    200: Color(0xFFF5F5F5), // #F5F5F5
-    300: Color(0xFFF0F0F0), // #F0F0F0
-    400: Color(0xFFDEDEDE), // #DEDEDE
-    500: Color(0xFFC2C2C2), // #C2C2C2
-    600: Color(0xFF979797), // #979797
-    700: Color(0xFF818181), // #818181
-    800: Color(0xFF606060), // #606060
-    900: Color(secondaryColorValue), // #3C3C3C
-  },
-);
-
-ThemeData themeData = ThemeData(
-  fontFamily: 'Roboto',
-  brightness: primaryBrightness,
-  primarySwatch: primaryColor,
-  primaryColor: primaryColor,
-  accentColor: primaryColor,
-  cursorColor: primaryColor,
-  scaffoldBackgroundColor: secondaryColor,
-  backgroundColor: secondaryColor,
-  bottomNavigationBarTheme: BottomNavigationBarThemeData(
-    backgroundColor: secondaryColor,
-    selectedItemColor: primaryColor,
-    unselectedItemColor: primaryColor[500],
-    selectedIconTheme: IconThemeData(color: primaryColor),
-    selectedLabelStyle: TextStyle(color: primaryColor),
-    unselectedIconTheme: IconThemeData(color: primaryColor[500]),
-    unselectedLabelStyle: TextStyle(color: primaryColor[500]),
-  ),
-  highlightColor: primaryColor[500],
-  textSelectionColor: primaryColor[400],
-  textSelectionHandleColor: primaryColor,
-  indicatorColor: secondaryColor,
-  buttonColor: primaryColor,
-  buttonTheme: ButtonThemeData(buttonColor: primaryColor, textTheme: ButtonTextTheme.primary),
-  errorColor: primaryColor,
-  bottomAppBarColor: primaryColor,
-  bottomAppBarTheme: BottomAppBarTheme(
-    color: primaryColor,
-  ),
-  // Invert color
-  // appBarTheme: AppBarTheme(color: secondaryColor, textTheme: TextTheme(headline6: TextStyle(color: primaryColor))),
-);
-
 void main() async {
   generateRoutes();
   generateGetPageList();
@@ -161,7 +36,10 @@ void main() async {
   ByteData byteData = await rootBundle.load(globals.sslCertificateLocation);
   HttpOverrides.global = new CustomHttpOverrides(byteData);
   _enablePlatformOverrideForDesktop();
+  init3rdPartyServices();
   initializeServices();
+  initAPIServices();
+  initDBServices();
 
   Bloc.observer = SimpleBlocObserver();
 
@@ -172,106 +50,6 @@ void main() async {
       theme: themeData,
     ),
   ));
-}
-
-Widget initializeBlocProviders() {
-  return MultiBlocProvider(providers: [
-    BlocProvider<ConversationGroupBloc>(
-      create: (context) => ConversationGroupBloc(),
-    ),
-    BlocProvider<GoogleInfoBloc>(
-      create: (context) => GoogleInfoBloc(),
-    ),
-    BlocProvider<IPGeoLocationBloc>(
-      create: (context) => IPGeoLocationBloc(),
-    ),
-    BlocProvider<ChatMessageBloc>(
-      create: (context) => ChatMessageBloc(),
-    ),
-    BlocProvider<MultimediaBloc>(
-      create: (context) => MultimediaBloc(),
-    ),
-    BlocProvider<SettingsBloc>(
-      create: (context) => SettingsBloc(),
-    ),
-    BlocProvider<UnreadMessageBloc>(
-      create: (context) => UnreadMessageBloc(),
-    ),
-    BlocProvider<UserBloc>(
-      create: (context) => UserBloc(),
-    ),
-    BlocProvider<UserContactBloc>(
-      create: (context) => UserContactBloc(),
-    ),
-    BlocProvider<WebSocketBloc>(
-      create: (context) => WebSocketBloc(),
-    ),
-    BlocProvider<PhoneStorageContactBloc>(
-      create: (context) => PhoneStorageContactBloc(),
-    ),
-    BlocProvider<MultimediaProgressBloc>(
-      create: (context) => MultimediaProgressBloc(),
-    ),
-    BlocProvider<AuthenticationBloc>(
-      create: (context) => AuthenticationBloc(),
-    ),
-    BlocProvider<NetworkBloc>(
-      create: (context) => NetworkBloc(),
-    ),
-    BlocProvider<PermissionBloc>(
-      create: (context) => PermissionBloc(),
-    ),
-  ], child: MyApp());
-}
-
-initializeServices() {
-  // Secure Storage
-  Get.put(new FlutterSecureStorage());
-
-  // Dio
-  Get.put(new Dio());
-
-  // Firebase Notification
-  Get.put(FirebaseMessaging());
-
-  // Services
-  Get.put(PermissionService());
-  Get.put(AudioService());
-  Get.put(FileCachingService());
-  Get.put(CustomFileService());
-  Get.put(FirebaseStorageService());
-  Get.put(NetworkService());
-  Get.put(WebSocketService());
-  Get.put(PasswordService());
-  Get.put(CryptoJSService());
-  Get.put(DigestService());
-
-  // API Services
-  Get.put(CustomHttpClient());
-  Get.put(HTTPFileService());
-  Get.put(ConversationGroupAPIService());
-  Get.put(IPLocationAPIService());
-  Get.put(ChatMessageAPIService());
-  Get.put(MultimediaAPIService());
-  Get.put(SettingsAPIService());
-  Get.put(UnreadMessageAPIService());
-  Get.put(UserAPIService());
-  Get.put(UserAuthenticationAPIService());
-  Get.put(UserContactAPIService());
-
-  // DB Services
-  Get.put(ConversationDBService());
-  Get.put(ChatMessageDBService());
-  Get.put(MultimediaDBService());
-  Get.put(MultimediaDBService());
-  Get.put(MultimediaProgressDBService());
-  Get.put(SettingsDBService());
-  Get.put(UnreadMessageDBService());
-  Get.put(UserDBService());
-  Get.put(UserContactDBService());
-
-  // ImagePicker
-  Get.put(ImagePicker());
 }
 
 class MyApp extends StatefulWidget {
@@ -285,7 +63,7 @@ class MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    if(Platform.isAndroid) {
+    if (Platform.isAndroid) {
       setDisplayMode();
     }
   }
@@ -339,11 +117,4 @@ class MyAppState extends State<MyApp> {
       print('e.details: ' + e.details.toString());
     }
   }
-}
-
-class NavigationPage {
-  String routeName;
-  Widget routePage;
-
-  NavigationPage({this.routeName, this.routePage});
 }

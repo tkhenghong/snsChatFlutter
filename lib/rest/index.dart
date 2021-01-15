@@ -18,3 +18,5 @@ export 'dio/http_file/http_file.service.dart';
 
 // Exceptions
 export 'exceptions/network_exceptions.dart';
+
+export 'init.dart';
