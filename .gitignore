@@ -27,6 +27,7 @@ ios/Runner/Assets.xcassets/AppIcon-integration.appiconset/
 ios/Runner/Assets.xcassets/AppIcon-production.appiconset/
 pocketChat.keystore.old
 pocketChat.keystore
+pocketChat.db
 
 out
 *.iws

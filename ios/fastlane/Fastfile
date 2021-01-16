@@ -1,0 +1,33 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+platform :ios do
+  desc "Clean, Test, Build, Sign iOS in Release mode"
+  lane :build_project do
+    Dir.chdir("../..") do
+        sh "flutter clean"
+        sh "flutter packages get"
+        sh "flutter build ios" # No need --release
+     end
+  end
+
+  desc "Build an ipa"
+  lane :build_ios_ipa do
+    build_project
+    sh "pod install"
+    build_app(scheme: "Runner")
+  end
+end

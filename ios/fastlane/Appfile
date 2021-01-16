@@ -1,0 +1,6 @@
+app_identifier("[[com.awpghost.pocketchat.testing]]") # The bundle identifier of your app
+apple_id("[[bill.hong@icloud.com]]") # Your Apple email address
+
+
+# For more information about the Appfile, see:
+#     https://docs.fastlane.tools/advanced/#appfile
