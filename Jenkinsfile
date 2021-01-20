@@ -12,7 +12,6 @@ pipeline {
     stages {
         stage('Build') {
                     steps {
-                        echo "Database engine is ${DB_ENGINE}"
                         echo "FIREBASE_APP_ID_DEVELOPMENT is ${FIREBASE_APP_ID_DEVELOPMENT}"
                         sh 'printenv'
                     }
