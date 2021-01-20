@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage('Build') {
                     steps {
-                        echo "FIREBASE_APP_ID_DEVELOPMENT is ${FIREBASE_APP_ID_DEVELOPMENT}"
+                        echo "FIREBASE_APP_ID_DEVELOPMENT is ${credentials('FIREBASE_APP_ID_DEVELOPMENT')}"
                         sh 'printenv'
                     }
                 }
