@@ -10,14 +10,13 @@ pipeline {
     FIREBASE_APP_ID_DEVELOPMENT = credentials('FIREBASE_APP_ID_DEVELOPMENT')
     }
     stages {
-        stage('Build') {
-                    steps {
-                        echo "FIREBASE_APP_ID_DEVELOPMENT is ${FIREBASE_APP_ID_DEVELOPMENT}"
-                        sh 'printenv'
-                        sh "flutter pub get"
-                        echo "DONE_JENKINS"
-                    }
+        stage('Test build a Flutter Android APK') {
+            steps {
+                sh "pwd"
+                dir("android") {
+                    sh "bundle exec fastlane build_development_release_apk"
                 }
-
+            }
+        }
     }
 }
