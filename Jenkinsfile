@@ -8,15 +8,19 @@ pipeline {
     //PATH = "/Users/jenkins/.rbenv/shims:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin:/Users/jenkins/Documents/flutter/bin:/usr/local/Caskroom/android-sdk/4333796//tools:/usr/local/Caskroom/android-sdk/4333796
     //platform-tools:/Applications/Xcode.app/Contents/Developer"
     FIREBASE_APP_ID_DEVELOPMENT = credentials('FIREBASE_APP_ID_DEVELOPMENT')
+    VERSION_NUMBER = "1.0.0"
     }
     stages {
         stage('Test build a Flutter Android APK') {
             steps {
                 sh "pwd"
-                dir("android") {
-                    sh "bundle install"
-                    sh "bundle exec fastlane build_development_release_apk"
-                }
+                #sh "flutter clean"
+                #sh "flutter packages get"
+                # sh "flutter test" # Commented out due to unable to rebuild DB file in the system. (Not yet solved)
+                #sh "flutter pub run flutter_launcher_icons:main -f flutter_launcher_icons-production.yaml"
+                # badge --shield "Development-1.0.0-orange" --no_badge --glob "/android/app/src/development/res/mipmap-*/ic_launcher.png"
+                #sh "badge --shield \"Development-${VERSION_NUMBER}-orange\" --no_badge --glob \"/android/app/src/development/res/mipmap-*/ic_launcher.png\""
+                #sh "flutter build apk --target-platform android-arm,android-arm64,android-x64 --split-per-abi --flavor development --dart-define=app.flavor=development --release"
             }
         }
     }
