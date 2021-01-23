@@ -22,9 +22,9 @@ platform :android do
 version_number = '1.0.0'
 
 # APK Locations
-development_apk_location = '../build/app/outputs/flutter-apk/app-arm64-v8a-development-release.apk'
-uat_apk_location = '../build/app/outputs/flutter-apk/app-arm64-v8a-integration-release.apk'
-production_apk_location = '../build/app/outputs/flutter-apk/app-arm64-v8a-production-release.apk'
+development_apk_location = './../build/app/outputs/flutter-apk/app-arm64-v8a-development-release.apk'
+uat_apk_location = './../build/app/outputs/flutter-apk/app-arm64-v8a-integration-release.apk'
+production_apk_location = './../build/app/outputs/flutter-apk/app-arm64-v8a-production-release.apk'
 
 # Testers
 development_testers = '../android/fastlane/testers/testers_development.txt'
@@ -51,8 +51,9 @@ mac_api_token_uat = ''
 mac_api_token_production = ''
 mac_owner_name = 'tkhenghong'
 
-mac_app_name_development = 'PocketChat (Development)'
-mac_app_name_uat = 'PocketChat (UAT)'
+# NOTE: App name based on the URL given in browser URL. Eg: https://appcenter.ms/users/tkhenghong/apps/PocketChat-UAT
+mac_app_name_development = 'PocketChat-Development'
+mac_app_name_uat = 'PocketChat-UAT'
 mac_app_name_production = 'PocketChat'
 ################################################## END OF VARIABLES ##################################################
 
@@ -166,7 +167,7 @@ mac_app_name_production = 'PocketChat'
     appcenter_upload(
       api_token: mac_api_token_development,
       owner_name: mac_owner_name,
-      app_name: mac_app_name,
+      app_name: mac_app_name_development,
       apk: development_apk_location,
     )
     else
@@ -181,7 +182,7 @@ mac_app_name_production = 'PocketChat'
     appcenter_upload(
       api_token: mac_api_token_uat,
       owner_name: mac_owner_name,
-      app_name: mac_app_name,
+      app_name: mac_app_name_uat,
       apk: uat_apk_location,
     )
     else
@@ -194,9 +195,9 @@ mac_app_name_production = 'PocketChat'
   build_production_release_apk
   if File.exist?(File.dirname(__FILE__) + production_apk_location)
     appcenter_upload(
-      api_token: mac_api_token_development,
+      api_token: mac_api_token_production,
       owner_name: mac_owner_name,
-      app_name: mac_app_name,
+      app_name: mac_app_name_production,
       apk: production_apk_location,
     )
     else
