@@ -66,11 +66,21 @@ Distribute Production Release Android app to UAT Team/Testers Through Firebase A
 fastlane android distribute_production_release_to_prod
 ```
 Distribute Production Release Android app Production Team/Testers Through Firebase App Distribution
-### android deploy_to_app_center
+### android deploy_to_app_center_development
 ```
-fastlane android deploy_to_app_center
+fastlane android deploy_to_app_center_development
 ```
-Submit a new Alpha Build to Microsoft AppCenter
+Submit a new Development(Alpha) Release Build to Microsoft AppCenter
+### android deploy_to_app_center_uat
+```
+fastlane android deploy_to_app_center_uat
+```
+Submit a new UAT(Beta) Release Build to Microsoft AppCenter
+### android deploy_to_app_center_production
+```
+fastlane android deploy_to_app_center_production
+```
+Submit a new Production(Production) Release Build to Microsoft AppCenter
 
 ----
 
