@@ -13,21 +13,195 @@
 # Uncomment the line if you want fastlane to automatically update itself
 # update_fastlane
 
+################################################## VARIABLES ##################################################
+version_number = '1.0.0'
+
+# IPA Locations
+development_ipa_location = './Runner.ipa'
+uat_ipa_location = './Runner.ipa'
+production_ipa_location = './Runner.ipa'
+
+# Testers
+development_testers = '../ios/fastlane/testers/testers_development.txt'
+uat_testers = '../ios/fastlane/testers/testers_uat.txt'
+production_testers = '../ios/fastlane/testers/testers_production.txt'
+
+# Release Notes
+release_notes_development = '../ios/fastlane/release_notes/release_notes_development.txt'
+release_notes_uat = '../ios/fastlane/release_notes/release_notes_uat.txt'
+release_notes_production = '../ios/fastlane/release_notes/release_notes_production.txt'
+
+# Firebase App Distribution
+fad_development_app_id = ''
+fad_uat_app_id = ''
+fad_production_app_id = ''
+
+fad_cli_token = ''
+
+fad_service_credentials_file_location = ''
+
+# Microsoft AppCenter (MAC)
+mac_api_token_development = ''
+mac_api_token_uat = ''
+mac_api_token_production = ''
+mac_owner_name = 'tkhenghong'
+
+mac_app_name_development = 'PocketChat-iOS-Development'
+mac_app_name_uat = 'PocketChat-iOS-UAT'
+mac_app_name_production = 'PocketChat-1'
+mac_destinations = 'Collaborators' # 'Collaborators' or '*' for all distribution groups.
+mac_notify_testers = true
+################################################## END OF VARIABLES ##################################################
+
 default_platform(:ios)
 platform :ios do
-  desc "Clean, Test, Build, Sign iOS in Release mode"
+  desc "Clean the project, Get dependencies, and Test"
   lane :build_project do
     Dir.chdir("../..") do
         sh "flutter clean"
         sh "flutter packages get"
+        sh "flutter pub run flutter_launcher_icons:main -f flutter_launcher_icons-production.yaml"
         sh "flutter build ios" # No need --release
      end
   end
 
-  desc "Build an ipa"
-  lane :build_ios_ipa do
+  desc "Build App Badge Icon for Development"
+  lane :build_app_badge_icon_for_development do
+    add_badge(
+      dark: false,
+      no_badge: true,
+      shield_no_resize: false,
+      shield: "Development-#{version_number}-orange",
+    )
+  end
+
+  desc "Build App Badge Icon for Integration(UAT)"
+  lane :build_app_badge_icon_for_integration do
+    add_badge(
+      dark: false,
+      no_badge: true,
+      shield_no_resize: false,
+      shield: "UAT-#{version_number}-orange",
+    )
+  end
+
+  desc "Build App Badge Icon for Production"
+  lane :build_app_badge_icon_for_production do
+    # Do nothing
+  end
+
+  desc "Build Flutter Development Release IPA"
+  lane :build_development_release_ipa do
     build_project
+    build_app_badge_icon_for_development
     sh "pod install"
     build_app(scheme: "Runner")
   end
+
+  desc "Build Flutter Integration Release IPA"
+  lane :build_integration_release_ipa do
+    build_project
+    build_app_badge_icon_for_integration
+    sh "pod install"
+    build_app(scheme: "Runner")
+  end
+
+  desc "Build Flutter Production Release IPA"
+  lane :build_production_release_ipa do
+    build_project
+    build_app_badge_icon_for_production
+    sh "pod install"
+    build_app(scheme: "Runner")
+  end
+
+  desc "Distribute Production Release Android app to Development Team/Tester Through Firebase App Distribution"
+  lane :distribute_production_release_to_dev do
+      build_development_release_ipa # build the Android app. (Previous command)
+      firebase_app_distribution(
+          app: fad_development_app_id,
+          firebase_cli_token: fad_cli_token,
+          service_credentials_file: fad_service_credentials_file_location, # You may use the same file as the file specified in Appfile.
+          testers_file: development_testers,
+          release_notes_file: release_notes_development
+      )
+  end
+
+  desc "Distribute Production Release Android app to UAT Team/Testers Through Firebase App Distribution"
+  lane :distribute_production_release_to_uat do
+      build_integration_release_ipa # build the Android app. (Previous command)
+      firebase_app_distribution(
+          app: fad_uat_app_id,
+          firebase_cli_token: fad_cli_token,
+          service_credentials_file: fad_service_credentials_file_location, # You may use the same file as the file specified in Appfile.
+          testers_file: uat_testers,
+          release_notes_file: release_notes_uat
+      )
+  end
+
+  desc "Distribute Production Release Android app Production Team/Testers Through Firebase App Distribution"
+  lane :distribute_production_release_to_prod do
+      build_production_release_ipa # build the Android app. (Previous command)
+      firebase_app_distribution(
+          app: fad_production_app_id,
+          firebase_cli_token: fad_cli_token,
+          service_credentials_file: fad_service_credentials_file_location, # You may use the same file as the file specified in Appfile.
+          testers_file: production_testers,
+          release_notes_file: release_notes_production
+      )
+  end
+
+  desc "Submit a new Development(Alpha) Release Build to Microsoft AppCenter"
+  lane :deploy_to_app_center_development do
+  build_development_release_ipa
+  if File.exist?(File.dirname(__FILE__) + development_ipa_location)
+    appcenter_upload(
+      api_token: mac_api_token_development,
+      owner_name: mac_owner_name,
+      app_name: mac_app_name_development,
+      ipa: development_ipa_location,
+      destinations: mac_destinations,
+      destination_type: "group",
+      notify_testers: mac_notify_testers
+    )
+    else
+      UI.message('Unable to find ipa')
+    end
+  end
+
+  desc "Submit a new UAT(Beta) Release Build to Microsoft AppCenter"
+  lane :deploy_to_app_center_uat do
+  build_integration_release_ipa
+  if File.exist?(File.dirname(__FILE__) + uat_ipa_location)
+    appcenter_upload(
+      api_token: mac_api_token_uat,
+      owner_name: mac_owner_name,
+      app_name: mac_app_name_uat,
+      ipa: uat_ipa_location,
+      destinations: mac_destinations,
+      destination_type: "group",
+      notify_testers: mac_notify_testers
+    )
+    else
+      UI.message('Unable to find ipa')
+    end
+  end
+
+  desc "Submit a new Production(Production) Release Build to Microsoft AppCenter"
+  lane :deploy_to_app_center_production do
+  build_production_release_ipa
+  if File.exist?(File.dirname(__FILE__) + production_ipa_location)
+    appcenter_upload(
+      api_token: mac_api_token_production,
+      owner_name: mac_owner_name,
+      app_name: mac_app_name_production,
+      ipa: production_ipa_location,
+      destinations: mac_destinations,
+      destination_type: "store",
+      notify_testers: mac_notify_testers
+    )
+    else
+      UI.message('Unable to find ipa')
+    end
+  end
+
 end
