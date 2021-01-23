@@ -104,12 +104,7 @@ dependencies:
 
   # Barcode/QR scanner
   qr_flutter: ^3.2.0
-  #  qr_code_scanner: ^0.0.13
-  # QR code scanner minSDK still needs 24 (Nougat and above), using Github version temporarily
-  # https://github.com/juliuscanute/qr_code_scanner/issues/123
-  qr_code_scanner:
-    git:
-      url: git://github.com/juliuscanute/qr_code_scanner.git
+  qr_code_scanner: ^0.1.0
 
   # Vibrate
   vibration: ^1.7.2
@@ -160,8 +155,7 @@ dependencies:
   # Flutter Display Mode (To enable >60fps on OnePlus 7 Pro and other supported devices)
   flutter_displaymode: ^0.1.1
 
-  # Recaptcha (TODO: Research on Recaptcha implementation)
-  flutter_recaptcha_v2: ^0.1.0
+  # NOTE: Recaptcha V2 (flutter_recaptcha_v2) is removed due to it's not maintained/updated to use better version of webview.
 
   # Encryption
   tuple: ^1.0.3
@@ -171,6 +165,9 @@ dependencies:
   # Make the texts that are too long to auto slide itself like HTML <marquee>
   # Example HTML website: https://www.html.am/html-codes/marquees/html-scrolling-text.cfm
   marquee: ^1.6.1
+
+  # Webview of Flutter. View webpages from application itself.
+  webview_flutter: ^1.0.7
 
   # Loading skeleton for UX experience
   skeleton_loader: ^1.0.2+2
