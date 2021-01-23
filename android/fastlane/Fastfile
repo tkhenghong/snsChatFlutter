@@ -18,7 +18,43 @@
 default_platform(:android)
 platform :android do
 
+################################################## VARIABLES ##################################################
 version_number = '1.0.0'
+
+# APK Locations
+development_apk_location = '../build/app/outputs/flutter-apk/app-arm64-v8a-development-release.apk'
+uat_apk_location = '../build/app/outputs/flutter-apk/app-arm64-v8a-integration-release.apk'
+production_apk_location = '../build/app/outputs/flutter-apk/app-arm64-v8a-production-release.apk'
+
+# Testers
+development_testers = '../android/fastlane/testers/testers_development.txt'
+uat_testers = '../android/fastlane/testers/testers_uat.txt'
+production_testers = '../android/fastlane/testers/testers_production.txt'
+
+# Release Notes
+release_notes_development = '../android/fastlane/release_notes/release_notes_development.txt'
+release_notes_uat = '../android/fastlane/release_notes/release_notes_uat.txt'
+release_notes_production = '../android/fastlane/release_notes/release_notes_production.txt'
+
+# Firebase App Distribution
+fad_development_app_id = ''
+fad_uat_app_id = ''
+fad_production_app_id = ''
+
+fad_cli_token = ''
+
+fad_service_credentials_file_location = ''
+
+# Microsoft AppCenter (MAC)
+mac_api_token_development = ''
+mac_api_token_uat = ''
+mac_api_token_production = ''
+mac_owner_name = 'tkhenghong'
+
+mac_app_name_development = 'PocketChat (Development)'
+mac_app_name_uat = 'PocketChat (UAT)'
+mac_app_name_production = 'PocketChat'
+################################################## END OF VARIABLES ##################################################
 
   desc "Clean the project, Get dependencies, and Test"
   lane :build_project do
@@ -87,28 +123,26 @@ version_number = '1.0.0'
   desc "Distribute Production Release Android app to Development Team/Tester Through Firebase App Distribution"
   lane :distribute_production_release_to_dev do
       build_development_release_apk # build the Android app. (Previous command)
-      add_badge(shield: "Version-Dev-orange")
       firebase_app_distribution(
-          app: "FIREBASE_APP_ID",
-          firebase_cli_token: "FIREBASE_CLI_TOKEN",
-          service_credentials_file: "SERVICE_CREDENTIAL_FILE_LOCATION", # You may use the same file as the file specified in Appfile.
-          apk_path: "APK_FILE_PATH",
-          testers_file: "TESTER_FILE_PATH",
-          release_notes_file: "RELEASE_NOTES_FILE_PATH"
+          app: fad_development_app_id,
+          firebase_cli_token: fad_cli_token,
+          service_credentials_file: fad_service_credentials_file_location, # You may use the same file as the file specified in Appfile.
+          apk_path: development_apk_location,
+          testers_file: development_testers,
+          release_notes_file: release_notes_development
       )
   end
 
   desc "Distribute Production Release Android app to UAT Team/Testers Through Firebase App Distribution"
   lane :distribute_production_release_to_uat do
       build_integration_release_apk # build the Android app. (Previous command)
-      add_badge(shield: "Version-UAT-orange")
       firebase_app_distribution(
-          app: "FIREBASE_APP_ID",
-          firebase_cli_token: "FIREBASE_CLI_TOKEN",
-          service_credentials_file: "SERVICE_CREDENTIAL_FILE_LOCATION", # You may use the same file as the file specified in Appfile.
-          apk_path: "APK_FILE_PATH",
-          testers_file: "TESTER_FILE_PATH",
-          release_notes_file: "RELEASE_NOTES_FILE_PATH"
+          app: fad_uat_app_id,
+          firebase_cli_token: fad_cli_token,
+          service_credentials_file: fad_service_credentials_file_location, # You may use the same file as the file specified in Appfile.
+          apk_path: uat_apk_location,
+          testers_file: uat_testers,
+          release_notes_file: release_notes_uat
       )
   end
 
@@ -116,23 +150,54 @@ version_number = '1.0.0'
   lane :distribute_production_release_to_prod do
       build_production_release_apk # build the Android app. (Previous command)
       firebase_app_distribution(
-          app: "FIREBASE_APP_ID",
-          firebase_cli_token: "FIREBASE_CLI_TOKEN",
-          service_credentials_file: "SERVICE_CREDENTIAL_FILE_LOCATION", # You may use the same file as the file specified in Appfile.
-          apk_path: "APK_FILE_PATH",
-          testers_file: "TESTER_FILE_PATH",
-          release_notes_file: "RELEASE_NOTES_FILE_PATH"
+          app: fad_production_app_id,
+          firebase_cli_token: fad_cli_token,
+          service_credentials_file: fad_service_credentials_file_location, # You may use the same file as the file specified in Appfile.
+          apk_path: production_apk_location,
+          testers_file: production_testers,
+          release_notes_file: release_notes_production
       )
   end
 
-  desc "Submit a new Alpha Build to Microsoft AppCenter"
-  lane :deploy_to_app_center do
-  if File.exist?(File.dirname(__FILE__) + "./../build/app/outputs/flutter-apk/app-arm64-v8a-production-release.apk")
+  desc "Submit a new Development(Alpha) Release Build to Microsoft AppCenter"
+  lane :deploy_to_app_center_development do
+  build_development_release_apk
+  if File.exist?(File.dirname(__FILE__) + development_apk_location)
     appcenter_upload(
-      api_token: "API_SECRET_KEY", # Your secret api token from app center
-      owner_name: "USERNAME", # Your username on AppCenter
-      app_name: "APP_NAME", # Your AppCenter name
-      apk: "APK_FILE_LOCATION",
+      api_token: mac_api_token_development,
+      owner_name: mac_owner_name,
+      app_name: mac_app_name,
+      apk: development_apk_location,
+    )
+    else
+      UI.message('Unable to find apk')
+    end
+  end
+
+  desc "Submit a new UAT(Beta) Release Build to Microsoft AppCenter"
+  lane :deploy_to_app_center_uat do
+  build_integration_release_apk
+  if File.exist?(File.dirname(__FILE__) + uat_apk_location)
+    appcenter_upload(
+      api_token: mac_api_token_uat,
+      owner_name: mac_owner_name,
+      app_name: mac_app_name,
+      apk: uat_apk_location,
+    )
+    else
+      UI.message('Unable to find apk')
+    end
+  end
+
+  desc "Submit a new Production(Production) Release Build to Microsoft AppCenter"
+  lane :deploy_to_app_center_production do
+  build_production_release_apk
+  if File.exist?(File.dirname(__FILE__) + production_apk_location)
+    appcenter_upload(
+      api_token: mac_api_token_development,
+      owner_name: mac_owner_name,
+      app_name: mac_app_name,
+      apk: production_apk_location,
     )
     else
       UI.message('Unable to find apk')
