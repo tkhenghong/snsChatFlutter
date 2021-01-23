@@ -55,6 +55,8 @@ mac_owner_name = 'tkhenghong'
 mac_app_name_development = 'PocketChat-Development'
 mac_app_name_uat = 'PocketChat-UAT'
 mac_app_name_production = 'PocketChat'
+mac_destinations = 'Collaborators' # 'Collaborators' or '*' for all distribution groups.
+mac_notify_testers = true
 ################################################## END OF VARIABLES ##################################################
 
   desc "Clean the project, Get dependencies, and Test"
@@ -169,6 +171,9 @@ mac_app_name_production = 'PocketChat'
       owner_name: mac_owner_name,
       app_name: mac_app_name_development,
       apk: development_apk_location,
+      destinations: mac_destinations,
+      destination_type: "group",
+      notify_testers: mac_notify_testers
     )
     else
       UI.message('Unable to find apk')
@@ -184,6 +189,9 @@ mac_app_name_production = 'PocketChat'
       owner_name: mac_owner_name,
       app_name: mac_app_name_uat,
       apk: uat_apk_location,
+      destinations: mac_destinations,
+      destination_type: "group",
+      notify_testers: mac_notify_testers
     )
     else
       UI.message('Unable to find apk')
@@ -199,6 +207,9 @@ mac_app_name_production = 'PocketChat'
       owner_name: mac_owner_name,
       app_name: mac_app_name_production,
       apk: production_apk_location,
+      destinations: mac_destinations,
+      destination_type: "group", # TODO: Will change to "store" if configured properly
+      notify_testers: mac_notify_testers
     )
     else
       UI.message('Unable to find apk')
