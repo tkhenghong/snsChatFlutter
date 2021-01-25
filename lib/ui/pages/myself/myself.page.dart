@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/state/bloc/index.dart';
@@ -17,7 +16,7 @@ class MyselfPage extends StatefulWidget {
 }
 
 class MyselfPageState extends State<MyselfPage> {
-  String REST_URL = globals.REST_URL;
+  EnvironmentGlobalVariables env = Get.find();
 
   RefreshController _refreshController;
 
@@ -182,7 +181,7 @@ class MyselfPageState extends State<MyselfPage> {
       leading: Hero(
         tag: ownUser.id + "1",
         child: CachedNetworkImage(
-          imageUrl: '$REST_URL/userContact/profilePicture',
+          imageUrl: '${env.REST_URL}/userContact/profilePicture',
           // Get own profile Picture
           useOldImageOnUrlChange: true,
           placeholder: (context, url) => defaultImage,

@@ -9,8 +9,8 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/functions/index.dart';
+import 'package:snschat_flutter/objects/models/environment_global_variables/environment_global_variables.dart';
 import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/index.dart';
@@ -30,10 +30,13 @@ void _enablePlatformOverrideForDesktop() {
 }
 
 void main() async {
+  initEnvironment();
+  EnvironmentGlobalVariables env = Get.find();
+
   generateRoutes();
   generateGetPageList();
   WidgetsFlutterBinding.ensureInitialized();
-  ByteData byteData = await rootBundle.load(globals.sslCertificateLocation);
+  ByteData byteData = await rootBundle.load(env.sslCertificateLocation);
   HttpOverrides.global = new CustomHttpOverrides(byteData);
   _enablePlatformOverrideForDesktop();
   init3rdPartyServices();

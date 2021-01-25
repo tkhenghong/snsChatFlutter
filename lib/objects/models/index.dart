@@ -21,3 +21,4 @@ export 'auditable/auditable.dart';
 export 'conversation_group_block/conversation_group_block.dart';
 export 'conversation_group_invite/conversation_group_invite.dart';
 export 'conversation_group_mute_notification/conversation_group_mute_notification.dart';
+export 'environment_global_variables/environment_global_variables.dart';

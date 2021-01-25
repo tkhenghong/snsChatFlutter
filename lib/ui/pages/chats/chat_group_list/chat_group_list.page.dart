@@ -8,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
@@ -25,9 +24,8 @@ class ChatGroupListPage extends StatefulWidget {
 }
 
 class ChatGroupListState extends State<ChatGroupListPage> {
-  String REST_URL = globals.REST_URL;
+  EnvironmentGlobalVariables env = Get.find();
   int page = 0;
-  int size = globals.numberOfRecords;
   int totalRecords = 0;
   bool last = false;
 
@@ -304,7 +302,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
         leading: Hero(
           tag: conversationGroup.id + '1',
           child: CachedNetworkImage(
-            imageUrl: '$REST_URL/conversationGroup/${conversationGroup.id}/groupPhoto',
+            imageUrl: '${env.REST_URL}/conversationGroup/${conversationGroup.id}/groupPhoto',
             useOldImageOnUrlChange: true,
             placeholder: (context, url) => CircleAvatar(backgroundImage: defaultImage),
             errorWidget: (context, url, error) => CircleAvatar(backgroundImage: defaultImage),
@@ -379,7 +377,7 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   /// Run conversation groups with pagination.
   loadConversationGroups() {
-    GetConversationGroupsRequest getConversationGroupsRequest = GetConversationGroupsRequest(pageable: Pageable(sort: Sort(orders: [Order(direction: Direction.DESC, property: 'lastModifiedDate')]), page: page, size: size));
+    GetConversationGroupsRequest getConversationGroupsRequest = GetConversationGroupsRequest(pageable: Pageable(sort: Sort(orders: [Order(direction: Direction.DESC, property: 'lastModifiedDate')]), page: page, size: env.numberOfRecords));
     conversationGroupBloc.add(GetUserOwnConversationGroupsEvent(
         getConversationGroupsRequest: getConversationGroupsRequest,
         callback: (ConversationPageableResponse conversationPageableResponse) {

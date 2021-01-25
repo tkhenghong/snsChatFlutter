@@ -1,5 +1,4 @@
 import 'package:sembast/sembast.dart';
-import 'package:sembast/sembast_io.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 
@@ -57,11 +56,11 @@ class ChatMessageDBService {
       return false;
     }
 
-    if(isObjectEmpty(key)) {
+    if (isObjectEmpty(key)) {
       key = await getSingleChatMessageKey(chatMessage.id);
     }
 
-    if(isObjectEmpty(key)) {
+    if (isObjectEmpty(key)) {
       return false;
     }
 

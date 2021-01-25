@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/services.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
+import 'package:get/get.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 
 class CustomHttpOverrides extends HttpOverrides {
-  String ENVIRONMENT = globals.ENVIRONMENT;
-  List<String> allowedHost = globals.allowedHosts;
+  EnvironmentGlobalVariables env = Get.find();
 
   ByteData byteData;
 
@@ -19,7 +19,7 @@ class CustomHttpOverrides extends HttpOverrides {
     context.setTrustedCertificatesBytes(this.byteData.buffer.asUint8List(), password: 'password'); // If your cert has password (Eg. .p12 files), you may type password as optional parameter.
     return super.createHttpClient(context)
       ..badCertificateCallback = (X509Certificate cert, String host, int port) {
-        if (allowedHost.contains(host)) {
+        if (env.allowedHosts.contains(host)) {
           return true;
         }
         return false;

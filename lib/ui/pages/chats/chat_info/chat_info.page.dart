@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
@@ -22,7 +21,7 @@ class ChatInfoPage extends StatefulWidget {
 }
 
 class ChatInfoPageState extends State<ChatInfoPage> {
-  String REST_URL = globals.REST_URL;
+  EnvironmentGlobalVariables env = Get.find();
 
   WebSocketBloc webSocketBloc;
   ConversationGroupBloc conversationGroupBloc;
@@ -439,7 +438,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
     return Hero(
         tag: currentConversationGroup.id + '1',
         child: CachedNetworkImage(
-          imageUrl: '$REST_URL/conversationGroup/${widget.conversationGroupId}/groupPhoto',
+          imageUrl: '${env.REST_URL}/conversationGroup/${widget.conversationGroupId}/groupPhoto',
           useOldImageOnUrlChange: true,
           placeholder: (context, url) => defaultImage,
           errorWidget: (context, url, error) => defaultImage,
@@ -511,7 +510,7 @@ class ChatInfoPageState extends State<ChatInfoPage> {
                         ),
                         onTap: () {},
                         leading: CachedNetworkImage(
-                          imageUrl: '$REST_URL/userContact/${userContact.id}/profilePhoto',
+                          imageUrl: '${env.REST_URL}/userContact/${userContact.id}/profilePhoto',
                           useOldImageOnUrlChange: true,
                           placeholder: (context, url) => defaultImage,
                           errorWidget: (context, url, error) => defaultImage,

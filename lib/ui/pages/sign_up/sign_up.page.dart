@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
@@ -22,7 +21,7 @@ class SignUpPage extends StatefulWidget {
 }
 
 class SignUpPageState extends State<SignUpPage> {
-  String defaultCountryCode = globals.DEFAULT_COUNTRY_CODE;
+  EnvironmentGlobalVariables env = Get.find();
 
   IPGeoLocationBloc ipGeoLocationBloc;
   AuthenticationBloc authenticationBloc;
@@ -67,7 +66,7 @@ class SignUpPageState extends State<SignUpPage> {
     return BlocListener<IPGeoLocationBloc, IPGeoLocationState>(
       listener: (context, ipGeoLocationState) {
         if (ipGeoLocationState is IPGeoLocationLoaded) {
-          countryCodeString =  isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? defaultCountryCode : ipGeoLocationState.ipGeoLocation.country_code2;
+          countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? env.DEFAULT_COUNTRY_CODE : ipGeoLocationState.ipGeoLocation.country_code2;
           ipGeoLocation = ipGeoLocationState.ipGeoLocation;
         }
       },
@@ -93,7 +92,7 @@ class SignUpPageState extends State<SignUpPage> {
         }
 
         if (ipGeoLocationState is IPGeoLocationLoaded) {
-          countryCodeString =  isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? defaultCountryCode : ipGeoLocationState.ipGeoLocation.country_code2;
+          countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? env.DEFAULT_COUNTRY_CODE : ipGeoLocationState.ipGeoLocation.country_code2;
           ipGeoLocation = ipGeoLocationState.ipGeoLocation;
           return authenticationBlocBuilder();
         }

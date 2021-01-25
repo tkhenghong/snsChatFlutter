@@ -1,7 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:get/get.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
@@ -13,7 +12,7 @@ import 'bloc.dart';
 class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
   MultimediaBloc() : super(MultimediaLoading());
 
-  String REST_URL = globals.REST_URL;
+  EnvironmentGlobalVariables env = Get.find();
 
   MultimediaAPIService multimediaAPIService = Get.find();
   UserContactAPIService userContactAPIService = Get.find();
@@ -87,7 +86,7 @@ class MultimediaBloc extends Bloc<MultimediaEvent, MultimediaState> {
         Multimedia multimediaFromServer = await multimediaAPIService.getSingleMultimedia(event.ownUserContactMultimediaId);
 
         // Loads the file into the local directory.
-        customFileService.retrieveMultimediaFile(multimediaFromServer, '$REST_URL/userContact/profilePhoto');
+        customFileService.retrieveMultimediaFile(multimediaFromServer, '${env.REST_URL}/userContact/profilePhoto');
 
         if (!isObjectEmpty(multimediaFromServer)) {
           multimediaDBService.addMultimedia(multimediaFromServer);

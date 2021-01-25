@@ -1,11 +1,8 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
-
-String supportEmail = globals.supportEmail;
 
 abstract class ApiException implements Exception {
   ErrorResponse errorResponse;

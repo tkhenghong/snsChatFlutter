@@ -6,14 +6,14 @@ import 'package:dio/dio.dart' as HTTPDio;
 import 'package:dio/src/options.dart' as DioOptions;
 import 'package:get/get.dart';
 
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/functions/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/rest/rest_request.utils.dart';
 
 // https://pub.dev/packages/dio
 // Get file name: https://medium.com/@codinghive.dev/get-file-name-in-flutter-73acd9bea9b3
 class HTTPFileService {
-  String REST_URL = globals.REST_URL;
+  EnvironmentGlobalVariables env = Get.find();
 
   Dio dio = Get.find();
   FlutterSecureStorage flutterSecureStorage = Get.find();
@@ -44,7 +44,7 @@ class HTTPFileService {
   /// Download a file using Dio
   /// Example of download a file: https://stackoverflow.com/questions/59616610
   Future<HTTPDio.Response<dynamic>> downloadFile(String url, String savePath, {Function(int, int) onDownloadProgress}) async {
-    return await dio.download("$REST_URL/$url", savePath, onReceiveProgress: onDownloadProgress);
+    return await dio.download("${env.REST_URL}/$url", savePath, onReceiveProgress: onDownloadProgress);
   }
 
   Future<Map<String, String>> handleHTTPHeaders(Map<String, String> additionalHeaders) async {

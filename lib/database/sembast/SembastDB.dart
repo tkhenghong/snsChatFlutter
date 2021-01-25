@@ -5,8 +5,8 @@ import 'package:get/get.dart';
 import 'package:path/path.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 
 /// Sembast Plugin: https://pub.dev/packages/sembast
@@ -39,7 +39,8 @@ import 'package:snschat_flutter/service/index.dart';
 class SembastDB {
   // Singleton instance: Declare this class is singleton
   static final SembastDB _singleton = SembastDB._();
-  String ENVIRONMENT = globals.ENVIRONMENT;
+
+  EnvironmentGlobalVariables env = Get.find();
 
   // Create private constructor
   SembastDB._();
@@ -70,7 +71,7 @@ class SembastDB {
 
     bool storageAccessGranted = false;
 
-    switch (ENVIRONMENT) {
+    switch (env.ENVIRONMENT) {
       case "LOCAL_COMPUTER":
         dbPath = dbName;
         storageAccessGranted = true;

@@ -4,7 +4,6 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:snschat_flutter/database/sembast/index.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/functions/validation_functions.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/rest/index.dart';
@@ -16,7 +15,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   UserAPIService userAPIService = Get.find();
   UserDBService userDBService = Get.find();
 
-  String ENVIRONMENT = globals.ENVIRONMENT;
+  EnvironmentGlobalVariables env = Get.find();
 
   @override
   Stream<UserState> mapEventToState(UserEvent event) async* {
@@ -133,7 +132,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     // Must have both not empty then only considered it as sign up
     isSignedUp = !isObjectEmpty(existingUserUsingMobileNo) && !isObjectEmpty(existingUserUsingGoogleAccount);
 
-    if (ENVIRONMENT != 'PRODUCTION') {
+    if (env.ENVIRONMENT != 'PRODUCTION') {
       isSignedUp = true;
     }
 

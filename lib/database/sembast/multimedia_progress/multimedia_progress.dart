@@ -18,14 +18,12 @@ class MultimediaProgressDBService {
     }
 
     int key = await getSingleMultimediaProgressKey(multimediaProgress.taskId);
-    if(isObjectEmpty(key)) {
+    if (isObjectEmpty(key)) {
       int key = await _multimediaProgressStore.add(await _db, multimediaProgress.toJson());
       return !isObjectEmpty(key) && key != 0 && !isStringEmpty(key.toString());
     } else {
       return await editMultimediaProgress(multimediaProgress, key: key);
     }
-
-    return !isObjectEmpty(key) && key != 0 && !isStringEmpty(key.toString());
   }
 
   Future<bool> editMultimediaProgress(MultimediaProgress multimediaProgress, {int key}) async {
@@ -33,11 +31,11 @@ class MultimediaProgressDBService {
       return false;
     }
 
-    if(isObjectEmpty(key)) {
+    if (isObjectEmpty(key)) {
       key = await getSingleMultimediaProgressKey(multimediaProgress.taskId);
     }
 
-    if(isObjectEmpty(key)) {
+    if (isObjectEmpty(key)) {
       return false;
     }
 

@@ -11,7 +11,6 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/functions/index.dart';
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
@@ -32,7 +31,7 @@ class ChatRoomPage extends StatefulWidget {
 }
 
 class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  String REST_URL = globals.REST_URL;
+  EnvironmentGlobalVariables env = Get.find();
 
   GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
 
@@ -65,7 +64,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   // Pagination
   int page = 0;
-  int size = globals.numberOfRecords;
   int totalRecords = 0;
   bool last = false;
 
@@ -107,11 +105,6 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   List<File> documentFileList = [];
 
   Map<String, File> loadedMultimediaFiles = new Map();
-
-  String webSocketUrl = globals.WEBSOCKET_URL;
-  int minimumRecordingLength = globals.minimumRecordingLength;
-
-  int imagePickerQuality = globals.imagePickerQuality;
 
   TextEditingController textEditingController;
   ScrollController listScrollController;
@@ -194,7 +187,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   loadChatMessages() {
-    Pageable pageable = Pageable(sort: Sort(orders: [Order(direction: Direction.DESC, property: 'lastModifiedDate')]), page: page, size: size);
+    Pageable pageable = Pageable(sort: Sort(orders: [Order(direction: Direction.DESC, property: 'lastModifiedDate')]), page: page, size: env.numberOfRecords);
     chatMessageBloc.add(LoadConversationGroupChatMessagesEvent(
         conversationGroupId: widget.conversationGroupId,
         pageable: pageable,
@@ -507,7 +500,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
             Hero(
               tag: currentConversationGroup.id + '1',
               child: CachedNetworkImage(
-                imageUrl: '$REST_URL/conversationGroup/${currentConversationGroup.id}/groupPhoto',
+                imageUrl: '${env.REST_URL}/conversationGroup/${currentConversationGroup.id}/groupPhoto',
                 useOldImageOnUrlChange: true,
                 placeholder: (context, url) => defaultImage,
                 errorWidget: (context, url, error) => defaultImage,
@@ -899,7 +892,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16.0),
                         child: CachedNetworkImage(
-                          imageUrl: '$REST_URL/chatMessage/${chatMessage.id}/multimedia',
+                          imageUrl: '${env.REST_URL}/chatMessage/${chatMessage.id}/multimedia',
                           useOldImageOnUrlChange: true,
                           placeholder: (context, url) => defaultImage,
                           errorWidget: (context, url, error) => defaultImage,
@@ -1157,9 +1150,9 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   Future<bool> recordingIsTooShort() async {
     // int recordDuration = this.audioService.durationsInMilliseconds;
-    print('chat_room.page_info.dart minimumRecordingLength: ' + minimumRecordingLength.toString());
+    print('chat_room.page_info.dart env.minimumRecordingLength: ' + env.minimumRecordingLength.toString());
     // print('chat_room.page_info.dart recordDuration: ' + recordDuration.toString());
-    // return recordDuration < minimumRecordingLength;
+    // return recordDuration < env.minimumRecordingLength;
     return false;
   }
 
@@ -1189,7 +1182,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   Future getImage() async {
-    PickedFile pickedFile = await imagePicker.getImage(source: ImageSource.gallery, imageQuality: imagePickerQuality);
+    PickedFile pickedFile = await imagePicker.getImage(source: ImageSource.gallery, imageQuality: env.imagePickerQuality);
 
     if (!isObjectEmpty(pickedFile) && !isObjectEmpty(pickedFile.path)) {
       File imageFile = File(pickedFile.path);
@@ -1206,7 +1199,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
   }
 
   Future openCamera() async {
-    PickedFile pickedFile = await imagePicker.getImage(source: ImageSource.camera, imageQuality: imagePickerQuality);
+    PickedFile pickedFile = await imagePicker.getImage(source: ImageSource.camera, imageQuality: env.imagePickerQuality);
     if (!isObjectEmpty(pickedFile) && !isObjectEmpty(pickedFile.path)) {
       File imageFile = File(pickedFile.path);
       if (!(await imageFile.exists())) {
@@ -1248,7 +1241,7 @@ class ChatRoomPageState extends State<ChatRoomPage> with TickerProviderStateMixi
 
   downloadFile(Multimedia multimedia, ChatMessage message) async {
     showToast('Your download has started.', Toast.LENGTH_SHORT);
-    File file = await customFileService.retrieveMultimediaFile(multimedia, '$REST_URL/chatMessages/${message.id}/multimedia');
+    File file = await customFileService.retrieveMultimediaFile(multimedia, '${env.REST_URL}/chatMessages/${message.id}/multimedia');
     setState(() {
       loadedMultimediaFiles.putIfAbsent(multimedia.fileName, () => file);
     });

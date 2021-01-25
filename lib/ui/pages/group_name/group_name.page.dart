@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
@@ -30,21 +29,9 @@ class GroupNamePage extends StatefulWidget {
 }
 
 class GroupNamePageState extends State<GroupNamePage> {
+  EnvironmentGlobalVariables env = Get.find();
   bool imageExists = false;
   bool showEmojis = false;
-  int imageThumbnailWidthSize = globals.imagePickerQuality;
-
-  double header1 = globals.header1;
-  double header2 = globals.header2;
-  double header3 = globals.header3;
-  double header4 = globals.header4;
-  double header5 = globals.header5;
-
-  int emojiRows = globals.emojiRows;
-  int emojiColumns = globals.emojiColumns;
-  int recommendedEmojis = globals.recommendedEmojis;
-
-  double inkWellDefaultPadding = globals.inkWellDefaultPadding;
 
   PickedFile pickedFile;
   File imageFile;
@@ -174,11 +161,11 @@ class GroupNamePageState extends State<GroupNamePage> {
             children: <Widget>[
               Text(
                 'New Group',
-                style: TextStyle(fontSize: header1),
+                style: TextStyle(fontSize: env.header1),
               ),
               Text(
                 'Add group name below',
-                style: TextStyle(fontSize: header2, fontWeight: FontWeight.w300),
+                style: TextStyle(fontSize: env.header2, fontWeight: FontWeight.w300),
               )
             ],
           ),
@@ -188,7 +175,7 @@ class GroupNamePageState extends State<GroupNamePage> {
           child: InkWell(
             borderRadius: BorderRadius.circular(Get.width * 0.25),
             child: Padding(
-              padding: EdgeInsets.all(inkWellDefaultPadding),
+              padding: EdgeInsets.all(env.inkWellDefaultPadding),
               child: Icon(Icons.check),
             ),
             onTap: () {
@@ -255,14 +242,14 @@ class GroupNamePageState extends State<GroupNamePage> {
                 maxLength: 25,
                 decoration: InputDecoration(
                   hintText: "Type group subject here...",
-                  hintStyle: TextStyle(fontSize: header3),
+                  hintStyle: TextStyle(fontSize: env.header3),
                   contentPadding: EdgeInsets.only(bottom: Get.height * 0.01),
                   isDense: true,
                 ),
               ),
               Text(
                 "Provide a group subject and optional group icon.",
-                style: TextStyle(color: Colors.grey, fontSize: header5),
+                style: TextStyle(color: Colors.grey, fontSize: env.header5),
               )
             ],
           ),
@@ -284,7 +271,7 @@ class GroupNamePageState extends State<GroupNamePage> {
           // child: Icon(Icons.tag_faces),
           borderRadius: BorderRadius.circular(Get.width * 0.25),
           child: Padding(
-            padding: EdgeInsets.all(inkWellDefaultPadding),
+            padding: EdgeInsets.all(env.inkWellDefaultPadding),
             child: Icon(Icons.tag_faces),
           ),
           onTap: () {
@@ -300,10 +287,10 @@ class GroupNamePageState extends State<GroupNamePage> {
 
   Widget showStickerKeyboard() {
     return EmojiPicker(
-      rows: emojiRows,
-      columns: emojiColumns,
+      rows: env.emojiRows,
+      columns: env.emojiColumns,
       buttonMode: determinePlatform() ? ButtonMode.MATERIAL : ButtonMode.CUPERTINO,
-      numRecommended: recommendedEmojis,
+      numRecommended: env.recommendedEmojis,
       onEmojiSelected: (emoji, category) {
         print('emoji: ' + emoji.emoji);
         textEditingController.text = textEditingController.text + emoji.emoji;
@@ -316,7 +303,7 @@ class GroupNamePageState extends State<GroupNamePage> {
       padding: EdgeInsets.only(top: Get.height * 0.05, left: Get.width * 0.03, bottom: Get.height * 0.05),
       child: Text(
         "Group Members: " + widget.selectedUserContacts.length.toString(),
-        style: TextStyle(color: Colors.grey, fontSize: header2),
+        style: TextStyle(color: Colors.grey, fontSize: env.header2),
         textAlign: TextAlign.left,
       ),
     );
@@ -397,7 +384,7 @@ class GroupNamePageState extends State<GroupNamePage> {
 
   /// Get image from Image Picker.
   Future getImage() async {
-    pickedFile = await imagePicker.getImage(source: ImageSource.camera, imageQuality: imageThumbnailWidthSize);
+    pickedFile = await imagePicker.getImage(source: ImageSource.camera, imageQuality: env.imagePickerQuality);
 
     if (!isObjectEmpty(pickedFile)) {
       setState(() {

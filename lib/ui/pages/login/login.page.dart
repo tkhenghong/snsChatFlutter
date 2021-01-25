@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:get/get.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
@@ -23,7 +22,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  String DEFAULT_COUNTRY_CODE = globals.DEFAULT_COUNTRY_CODE;
+  EnvironmentGlobalVariables env = Get.find();
 
   IPGeoLocation ipGeoLocation;
   CountryCode countryCode;
@@ -77,13 +76,13 @@ class LoginPageState extends State<LoginPage> {
         }
 
         if (ipGeoLocationState is IPGeoLocationNotLoaded) {
-          countryCodeString = DEFAULT_COUNTRY_CODE;
+          countryCodeString = env.DEFAULT_COUNTRY_CODE;
 
           return userAuthenticationBlocBuilder();
         }
 
         if (ipGeoLocationState is IPGeoLocationLoaded) {
-          countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? DEFAULT_COUNTRY_CODE : ipGeoLocationState.ipGeoLocation.country_code2;
+          countryCodeString = isObjectEmpty(ipGeoLocationState.ipGeoLocation) ? env.DEFAULT_COUNTRY_CODE : ipGeoLocationState.ipGeoLocation.country_code2;
           ipGeoLocation = ipGeoLocationState.ipGeoLocation;
           return userAuthenticationBlocBuilder();
         }

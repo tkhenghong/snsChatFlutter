@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
@@ -27,6 +26,8 @@ class SelectContactsPage extends StatefulWidget {
 // TODO: Make Alphabet scroll
 // WhatsApp closes the search function when multi select
 class SelectContactsPageState extends State<SelectContactsPage> {
+  EnvironmentGlobalVariables env = Get.find();
+
   bool firstTime = true;
   bool isLoading = true;
   List<UserContact> userContacts = [];
@@ -35,13 +36,6 @@ class SelectContactsPageState extends State<SelectContactsPage> {
   // contactLoaded is true
   bool contactLoaded = false;
   bool checkboxesLoaded = false;
-
-  double header1 = globals.header1;
-  double header2 = globals.header2;
-  double header3 = globals.header3;
-  double header4 = globals.header4;
-  double header5 = globals.header5;
-  double header6 = globals.header6;
 
   String title = "";
   String subtitle = "";
@@ -119,11 +113,11 @@ class SelectContactsPageState extends State<SelectContactsPage> {
             children: <Widget>[
               Text(
                 title,
-                style: TextStyle(fontSize: header1),
+                style: TextStyle(fontSize: env.header1),
               ),
               Text(
                 subtitle,
-                style: TextStyle(fontSize: header2, fontWeight: FontWeight.w300),
+                style: TextStyle(fontSize: env.header2, fontWeight: FontWeight.w300),
               )
             ],
           ),
@@ -311,12 +305,12 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       title: Text(
         contact.displayName,
         softWrap: true,
-        style: TextStyle(fontSize: header3),
+        style: TextStyle(fontSize: env.header3),
       ),
       subtitle: Text(
         'Hey There! I am using PocketChat.',
         softWrap: true,
-        style: TextStyle(fontSize: header4),
+        style: TextStyle(fontSize: env.header4),
       ),
       value: contactCheckBoxes[contact.displayName],
       onChanged: (bool value) {
@@ -333,12 +327,12 @@ class SelectContactsPageState extends State<SelectContactsPage> {
       title: Text(
         contact.displayName,
         softWrap: true,
-        style: TextStyle(fontSize: header3),
+        style: TextStyle(fontSize: env.header3),
       ),
       subtitle: Text(
         'Hey There! I am using PocketChat.',
         softWrap: true,
-        style: TextStyle(fontSize: header4),
+        style: TextStyle(fontSize: env.header4),
       ),
       onTap: () {
         if (widget.chatGroupType == ConversationGroupType.Personal) {

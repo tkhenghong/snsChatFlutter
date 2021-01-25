@@ -1,8 +1,8 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/functions/index.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/rest/rest_request.utils.dart';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
@@ -12,7 +12,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 /// Using STOMP client plugin(https://pub.dev/packages/stomp_dart_client), and official IOWebSocketChannel(https://flutter.dev/docs/cookbook/networking/web-sockets).
 class WebSocketService {
-  String webSocketUrl = globals.WEBSOCKET_URL;
+  EnvironmentGlobalVariables env = Get.find();
 
   WebSocketChannel webSocketChannel;
 
@@ -26,7 +26,7 @@ class WebSocketService {
   Future<Stream<dynamic>> connectWebSocketOfficial() async {
     Map<String, String> headers = await handleHTTPHeaders();
 
-    webSocketChannel = IOWebSocketChannel.connect(webSocketUrl, headers: headers);
+    webSocketChannel = IOWebSocketChannel.connect(env.WEBSOCKET_URL, headers: headers);
     webSocketStream = webSocketChannel.stream.asBroadcastStream();
 
     return webSocketStream;
@@ -65,7 +65,7 @@ class WebSocketService {
               useSockJS: false,
               reconnectDelay: 3000,
               connectionTimeout: Duration(seconds: 5),
-              url: webSocketUrl,
+              url: env.WEBSOCKET_URL,
               onWebSocketError: onWebSocketError,
               onStompError: onStompError,
               onDebugMessage: onDebugMessage,

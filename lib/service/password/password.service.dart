@@ -1,12 +1,8 @@
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
+import 'package:get/get.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 
 class PasswordService {
-  String DEFAULT_COUNTRY_CODE = globals.DEFAULT_COUNTRY_CODE;
+  EnvironmentGlobalVariables env = Get.find();
 
-  String encryptPassword(String plainPassword) {
-
-  }
-
-
-
+  String encryptPassword(String plainPassword) {}
 }

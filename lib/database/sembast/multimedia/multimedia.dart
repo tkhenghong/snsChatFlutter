@@ -54,11 +54,11 @@ class MultimediaDBService {
       return false;
     }
 
-    if(isObjectEmpty(key)) {
+    if (isObjectEmpty(key)) {
       key = await getSingleMultimediaKey(multimedia.id);
     }
 
-    if(isObjectEmpty(key)) {
+    if (isObjectEmpty(key)) {
       return false;
     }
 

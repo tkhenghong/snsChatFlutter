@@ -3,11 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:pin_input_text_field/pin_input_text_field.dart';
-import 'package:snschat_flutter/environments/development/variables.dart' as globals;
 import 'package:snschat_flutter/general/enums/index.dart';
 import 'package:snschat_flutter/general/enums/verification_mode.enum.dart';
 import 'package:snschat_flutter/general/functions/toast/show_toast.dart';
 import 'package:snschat_flutter/general/ui-component/loading.dart';
+import 'package:snschat_flutter/objects/models/index.dart';
 import 'package:snschat_flutter/objects/rest/index.dart';
 import 'package:snschat_flutter/state/bloc/index.dart';
 
@@ -19,7 +19,7 @@ class VerifyPhoneNumberPage extends StatefulWidget {
 }
 
 class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
-  String DEFAULT_COUNTRY_CODE = globals.DEFAULT_COUNTRY_CODE;
+  EnvironmentGlobalVariables env = Get.find();
 
   AuthenticationBloc authenticationBloc;
 
@@ -50,8 +50,6 @@ class VerifyPhoneNumberState extends State<VerifyPhoneNumberPage> {
   @override
   Widget build(BuildContext context) {
     authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
-
-    countryCode = DEFAULT_COUNTRY_CODE;
 
     return SafeArea(
         child: WillPopScope(
