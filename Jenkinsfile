@@ -14,6 +14,7 @@ pipeline {
         stage('Test build a Flutter Android APK') {
             steps {
                 sh "pwd"
+                sh "ls -lrt"
                 dir("android") {
                     sh "bundle install"
                     sh "bundle exec fastlane build_development_release_apk"
