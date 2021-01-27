@@ -17,7 +17,7 @@ pipeline {
                 sh "ls -lrt"
                 dir("android") {
                     sh "bundle install"
-                    sh "bundle exec fastlane build_development_release_apk"
+                    sh "fastlane build_development_release_apk"
                 }
             }
         }
