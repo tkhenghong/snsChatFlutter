@@ -5,34 +5,52 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000339">
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000321">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="1: Switch to ios build_project lane" time="0.000207">
+      <testcase classname="fastlane.lanes" name="1: Switch to ios build_project lane" time="0.001034">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="2: flutter clean" time="6.143313">
+      <testcase classname="fastlane.lanes" name="2: flutter clean" time="5.908815">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="3: flutter packages get" time="3.206264">
+      <testcase classname="fastlane.lanes" name="3: flutter packages get" time="2.458583">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="4: flutter pub run flutter_launcher_icons:main -f flutter_launcher_icons-production.yaml" time="10.276046">
+      <testcase classname="fastlane.lanes" name="4: flutter pub run flutter_launcher_icons:main -f flutter_launcher_icons-production.yaml" time="7.253987">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="5: flutter build ios" time="161.494141">
+      <testcase classname="fastlane.lanes" name="5: flutter build ios" time="150.842159">
         
-          <failure message="/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane/lib/fastlane/actions/actions_helper.rb:67:in `execute_action'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane/lib/fastlane/fast_file.rb:218:in `sh'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane/lib/fastlane/fast_file.rb:212:in `sh'&#10;Fastfile:64:in `block (3 levels) in parsing_binding'&#10;Fastfile:60:in `chdir'&#10;Fastfile:60:in `block (2 levels) in parsing_binding'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane/lib/fastlane/lane.rb:33:in `call'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane/lib/fastlane/runner.rb:204:in `try_switch_to_lane'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane/lib/fastlane/runner.rb:146:in `trigger_action_by_name'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane/lib/fastlane/fast_file.rb:159:in `method_missing'&#10;Fastfile:95:in `block (2 levels) in parsing_binding'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane/lib/fastlane/lane.rb:33:in `call'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane/lib/fastlane/runner.rb:49:in `block in execute'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane/lib/fastlane/runner.rb:45:in `chdir'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane/lib/fastlane/runner.rb:45:in `execute'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane/lib/fastlane/lane_manager.rb:47:in `cruise_lane'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane/lib/fastlane/command_line_handler.rb:36:in `handle'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane/lib/fastlane/commands_generator.rb:108:in `block (2 levels) in run'&#10;/Library/Ruby/Gems/2.6.0/gems/commander-fastlane-4.4.6/lib/commander/command.rb:178:in `call'&#10;/Library/Ruby/Gems/2.6.0/gems/commander-fastlane-4.4.6/lib/commander/command.rb:153:in `run'&#10;/Library/Ruby/Gems/2.6.0/gems/commander-fastlane-4.4.6/lib/commander/runner.rb:476:in `run_active_command'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane_core/lib/fastlane_core/ui/fastlane_runner.rb:76:in `run!'&#10;/Library/Ruby/Gems/2.6.0/gems/commander-fastlane-4.4.6/lib/commander/delegates.rb:15:in `run!'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane/lib/fastlane/commands_generator.rb:352:in `run'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane/lib/fastlane/commands_generator.rb:41:in `start'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/fastlane/lib/fastlane/cli_tools_distributor.rb:122:in `take_off'&#10;/Library/Ruby/Gems/2.6.0/gems/fastlane-2.172.0/bin/fastlane:23:in `&lt;top (required)&gt;'&#10;/usr/local/bin/fastlane:23:in `load'&#10;/usr/local/bin/fastlane:23:in `&lt;top (required)&gt;'&#10;/Library/Ruby/Gems/2.6.0/gems/bundler-2.2.4/lib/bundler/cli/exec.rb:63:in `load'&#10;/Library/Ruby/Gems/2.6.0/gems/bundler-2.2.4/lib/bundler/cli/exec.rb:63:in `kernel_load'&#10;/Library/Ruby/Gems/2.6.0/gems/bundler-2.2.4/lib/bundler/cli/exec.rb:28:in `run'&#10;/Library/Ruby/Gems/2.6.0/gems/bundler-2.2.4/lib/bundler/cli.rb:494:in `exec'&#10;/Library/Ruby/Gems/2.6.0/gems/bundler-2.2.4/lib/bundler/vendor/thor/lib/thor/command.rb:27:in `run'&#10;/Library/Ruby/Gems/2.6.0/gems/bundler-2.2.4/lib/bundler/vendor/thor/lib/thor/invocation.rb:127:in `invoke_command'&#10;/Library/Ruby/Gems/2.6.0/gems/bundler-2.2.4/lib/bundler/vendor/thor/lib/thor.rb:392:in `dispatch'&#10;/Library/Ruby/Gems/2.6.0/gems/bundler-2.2.4/lib/bundler/cli.rb:30:in `dispatch'&#10;/Library/Ruby/Gems/2.6.0/gems/bundler-2.2.4/lib/bundler/vendor/thor/lib/thor/base.rb:485:in `start'&#10;/Library/Ruby/Gems/2.6.0/gems/bundler-2.2.4/lib/bundler/cli.rb:24:in `start'&#10;/Library/Ruby/Gems/2.6.0/gems/bundler-2.2.4/exe/bundle:49:in `block in &lt;top (required)&gt;'&#10;/Library/Ruby/Gems/2.6.0/gems/bundler-2.2.4/lib/bundler/friendly_errors.rb:130:in `with_friendly_errors'&#10;/Library/Ruby/Gems/2.6.0/gems/bundler-2.2.4/exe/bundle:37:in `&lt;top (required)&gt;'&#10;/usr/local/bin/bundle:23:in `load'&#10;/usr/local/bin/bundle:23:in `&lt;main&gt;'&#10;&#10;Exit status of command 'flutter build ios' was 1 instead of 0.&#10;Building com.awpghost.pocketchat.testing for device (ios-release)...&#10;Automatically signing iOS for device deployment using specified development team in Xcode project: BRC2T2SS6Y&#10;Running pod install...                                             11.4s&#10;Running Xcode build...                                          &#10;Xcode build done.                                           131.4s&#10;Failed to build iOS app&#10;Error output from Xcode build:&#10;↳&#10;    ** BUILD FAILED **&#10;&#10;&#10;Xcode's output:&#10;↳&#10;    /Users/tkhenghong/Desktop/AndroidStudioProjects/snsChatFlutter/ios/Runner/GeneratedPluginRegistrant.m:10:9: fatal error: module 'connectivity' not found&#10;    @import connectivity;&#10;     ~~~~~~~^~~~~~~~~~~~&#10;    1 error generated.&#10;    note: Using new build system&#10;    note: Building targets in parallel&#10;    note: Planning build&#10;    note: Constructing build description&#10;&#10;Encountered error while building for device.&#10;" />
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="6: Switch to ios build_app_badge_icon_for_development lane" time="0.000399">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="7: add_badge" time="41.18578">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="8: pod install" time="6.876394">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="9: build_app" time="127.435236">
         
       </testcase>
     

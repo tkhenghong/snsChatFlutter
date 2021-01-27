@@ -95,7 +95,7 @@ platform :ios do
     build_project
     build_app_badge_icon_for_development
     sh "pod install"
-    build_app(scheme: "Runner")
+    build_app(scheme: "Runner", export_method: "development")
   end
 
   desc "Build Flutter Integration Release IPA"
@@ -103,7 +103,7 @@ platform :ios do
     build_project
     build_app_badge_icon_for_integration
     sh "pod install"
-    build_app(scheme: "Runner")
+    build_app(scheme: "Runner", export_method: "development")
   end
 
   desc "Build Flutter Production Release IPA"
@@ -111,7 +111,7 @@ platform :ios do
     build_project
     build_app_badge_icon_for_production
     sh "pod install"
-    build_app(scheme: "Runner")
+    build_app(scheme: "Runner", export_method: "development") # TODO: Change to app_store when configured correctly.
   end
 
   desc "Distribute Production Release Android app to Development Team/Tester Through Firebase App Distribution"
