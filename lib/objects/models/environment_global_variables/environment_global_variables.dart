@@ -26,7 +26,7 @@ class EnvironmentGlobalVariables {
   List<String> allowedHosts;
 
   @JsonKey(name: 'ENVIRONMENT')
-  String ENVIRONMENT = 'LOCAL_COMPUTER';
+  String ENVIRONMENT;
 
   @JsonKey(name: 'sslCertificateLocation')
   String sslCertificateLocation;
@@ -90,7 +90,7 @@ class EnvironmentGlobalVariables {
   int emojiColumns;
 
   @JsonKey(name: 'recommendedEmojis')
-  int recommendedEmojis; // = 10;
+  int recommendedEmojis;
 
   // Recaptcha
   @JsonKey(name: 'recaptchaDisabledKeyword')

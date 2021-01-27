@@ -39,6 +39,9 @@ class EnvironmentConfig {
     // Allowed user roles to be logged into the app.
     allowedLoginUserRoles: ['ROLE_MER_ADMIN', 'ROLE_MER_VP', 'ROLE_MER_SUP', 'ROLE_MPOSCASHIER'],
 
+    // Support
+    supportEmail: 'tkhenghong@gmail.com',
+
     // Copyright & Powered by
     copyrightYear: '2021 - 2022',
     copyrightCompanyName: 'PocketChat',
@@ -56,7 +59,6 @@ class EnvironmentConfig {
         environmentGlobalVariables.REST_URL_HOST_PORT = '8888';
         environmentGlobalVariables.ENVIRONMENT = 'DEVELOPMENT';
         environmentGlobalVariables.sslCertificateLocation = 'lib/keystore/keystore.p12';
-        environmentGlobalVariables.supportEmail = 'tkhenghong@gmail.com';
 
         environmentGlobalVariables.recaptchaDisabledKeyword = 'DISABLED';
         environmentGlobalVariables.recaptchaSecretKey = '6LcJCksUAAAAAC8lDh-Y9C0SfHQM5pA0TmkACCJy'; // Recaptcha Key from development server.
@@ -68,26 +70,22 @@ class EnvironmentConfig {
         environmentGlobalVariables.REST_URL_HOST_PORT = '8888';
         environmentGlobalVariables.ENVIRONMENT = 'DEVELOPMENT';
         environmentGlobalVariables.sslCertificateLocation = 'lib/keystore/keystore.p12';
-        environmentGlobalVariables.supportEmail = 'tkhenghong@gmail.com';
 
         environmentGlobalVariables.recaptchaDisabledKeyword = 'DISABLED';
         environmentGlobalVariables.recaptchaSecretKey = '6LcJCksUAAAAAC8lDh-Y9C0SfHQM5pA0TmkACCJy'; // Recaptcha Key from development server.
         environmentGlobalVariables.recaptchaSkipKey = '2dd1c2ad-5314-4fa4-8144-7ec27a7b3429-reCaptcha'; // Used as signal to tell backend to skip recaptcha.
         environmentGlobalVariables.skipRecaptcha = true;
-
         break;
       case 'production':
         environmentGlobalVariables.REST_URL_HOST_IP = '192.168.68.106';
         environmentGlobalVariables.REST_URL_HOST_PORT = '8888';
         environmentGlobalVariables.ENVIRONMENT = 'PRODUCTION';
         environmentGlobalVariables.sslCertificateLocation = 'lib/keystore/keystore.p12';
-        environmentGlobalVariables.supportEmail = 'tkhenghong@gmail.com';
 
         environmentGlobalVariables.recaptchaDisabledKeyword = 'DISABLED';
         environmentGlobalVariables.recaptchaSecretKey = '6LcJCksUAAAAAC8lDh-Y9C0SfHQM5pA0TmkACCJy'; // Recaptcha Key from development server.
         environmentGlobalVariables.recaptchaSkipKey = '2dd1c2ad-5314-4fa4-8144-7ec27a7b3429-reCaptcha'; // Used as signal to tell backend to skip recaptcha.
         environmentGlobalVariables.skipRecaptcha = true;
-
         break;
       default:
         return;
