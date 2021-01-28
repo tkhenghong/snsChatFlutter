@@ -22,9 +22,9 @@ platform :android do
 version_number = '1.0.0'
 
 # APK Locations
-development_apk_location = './../build/app/outputs/flutter-apk/app-arm64-v8a-development-release.apk'
-uat_apk_location = './../build/app/outputs/flutter-apk/app-arm64-v8a-integration-release.apk'
-production_apk_location = './../build/app/outputs/flutter-apk/app-arm64-v8a-production-release.apk'
+development_apk_location = ENV["DEVELOPMENT_APK_LOCATION"]
+uat_apk_location = ENV["UAT_APK_LOCATION"]
+production_apk_location = ENV["PRODUCTION_APK_LOCATION"]
 
 # Testers
 development_testers = '../android/fastlane/testers/testers_development.txt'
@@ -37,27 +37,33 @@ release_notes_uat = '../android/fastlane/release_notes/release_notes_uat.txt'
 release_notes_production = '../android/fastlane/release_notes/release_notes_production.txt'
 
 # Firebase App Distribution
-fad_development_app_id = ''
-fad_uat_app_id = ''
-fad_production_app_id = ''
+fad_development_app_id = ENV["FAD_DEVELOPMENT_APP_ID"]
+fad_uat_app_id = ENV["FAD_UAT_APP_ID"]
+fad_production_app_id = ENV["FAD_PRODUCTION_APP_ID"]
 
-fad_cli_token = ''
+fad_cli_token = ENV["FAD_CLI_TOKEN"]
 
-fad_service_credentials_file_location = ''
+fad_service_credentials_file_location = ENV["FAD_SERVICE_CREDENTIALS_FILE_LOCATION"]
 
 # Microsoft AppCenter (MAC)
-mac_api_token_development = ''
-mac_api_token_uat = ''
-mac_api_token_production = ''
-mac_owner_name = 'tkhenghong'
+mac_api_token_development = ENV["MAC_API_TOKEN_DEVELOPMENT"]
+mac_api_token_uat = ENV["MAC_API_TOKEN_UAT"]
+mac_api_token_production = ENV["MAC_API_TOKEN_PRODUCTION"]
+mac_owner_name = ENV["MAC_OWNER_NAME"]
 
 # NOTE: App name based on the URL given in browser URL. Eg: https://appcenter.ms/users/tkhenghong/apps/PocketChat-UAT
-mac_app_name_development = 'PocketChat-Development'
-mac_app_name_uat = 'PocketChat-UAT'
-mac_app_name_production = 'PocketChat'
-mac_destinations = 'Collaborators' # 'Collaborators' or '*' for all distribution groups.
-mac_notify_testers = true
+mac_app_name_development = ENV['MAC_APP_NAME_DEVELOPMENT']
+mac_app_name_uat = ENV['MAC_APP_NAME_UAT']
+mac_app_name_production = ENV['MAC_APP_NAME_PRODUCTION']
+mac_destinations = ENV['MAC_DESTINATIONS']
+mac_notify_testers = ENV['MAC_NOTIFY_TESTERS']
 ################################################## END OF VARIABLES ##################################################
+
+fastlane_require 'dotenv'
+
+before_all do
+  Dotenv.overload '.env.secret'
+end
 
   desc "Clean the project, Get dependencies, and Test"
   lane :build_project do

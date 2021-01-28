@@ -17,6 +17,7 @@ android/gradle/wrapper/gradle-wrapper.jar
 android/gradlew
 android/gradlew.bat
 android/local.properties
+android/fastlane/env.default
 
 build/
 ios/Flutter/Generated.xcconfig
@@ -25,6 +26,8 @@ ios/Runner/GeneratedPluginRegistrant.m
 ios/Runner/Assets.xcassets/AppIcon-development.appiconset/
 ios/Runner/Assets.xcassets/AppIcon-integration.appiconset/
 ios/Runner/Assets.xcassets/AppIcon-production.appiconset/
+ios/fastlane/.env.default
+
 pocketChat.keystore.old
 pocketChat.keystore
 pocketChat.db
