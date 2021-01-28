@@ -10,23 +10,50 @@ pipeline {
     stages {
         stage('Place Secrets Files') {
             steps {
-                withCredentials([file(credentialsId: 'PocketChat_Android_Secret_Environment_File', variable: 'PocketChat_Android_Secret_Environment_File')]) {
-                    sh "pwd"
-                    sh "ls -lrt"
+                // Environment Secret Variables
+                withCredentials([file(credentialsId: 'PocketChat_Android_Secret_Environment_File', variable: 'PocketChat_Android_Secret_Environment_File'),
+
+                // Release Notes
+                file(credentialsId: 'PocketChat_Android_Development_Release_Notes_File', variable: 'PocketChat_Android_Development_Release_Notes_File')
+                file(credentialsId: 'PocketChat_Android_UAT_Release_Notes_File', variable: 'PocketChat_Android_UAT_Release_Notes_File')
+                file(credentialsId: 'PocketChat_Android_Production_Release_Notes_File', variable: 'PocketChat_Android_Production_Release_Notes_File')
+
+                // Testers
+                file(credentialsId: 'PocketChat_Android_Development_Testers_File', variable: 'PocketChat_Android_Development_Testers_File')
+                file(credentialsId: 'PocketChat_Android_UAT_Testers_File', variable: 'PocketChat_Android_UAT_Testers_File')
+                file(credentialsId: 'PocketChat_Android_Production_Testers_File', variable: 'PocketChat_Android_Production_Testers_File')
+                file(credentialsId: 'PocketChat-Google-Play-Console-GCP-Service-Account-JSON-File', variable: 'PocketChat-Google-Play-Console-GCP-Service-Account-JSON-File')
+                ]) {
+                    // Environment Secret Variables
                     sh "cp \$PocketChat_Android_Secret_Environment_File android/fastlane/.env.default"
+
+                    // Release Notes
+                    sh "cp \$PocketChat_Android_Development_Release_Notes_File android/fastlane/release_notes/release_notes_development.txt"
+                    sh "cp \$PocketChat_Android_UAT_Release_Notes_File android/fastlane/release_notes/release_notes_uat.txt"
+                    sh "cp \$PocketChat_Android_Production_Release_Notes_File android/fastlane/release_notes/release_notes_production.txt"
+
+                    // Testers
+                    sh "cp \$PocketChat_Android_Development_Testers_File android/fastlane/testers/testers_development.txt"
+                    sh "cp \$PocketChat_Android_UAT_Testers_File android/fastlane/testers/testers_uat.txt"
+                    sh "cp \$PocketChat_Android_Production_Testers_File android/fastlane/testers/testers_production.txt"
+
+                    // Google Service Account Credential File
+                    sh "cp \$PocketChat-Google-Play-Console-GCP-Service-Account-JSON-File android/fastlane/service_account/pocketchat-b3e0f-5339c659d2b2.json"
                 }
             }
         }
-        stage('Test build a Flutter Android APK') {
+        stage('Build and Distribute Flutter Android APK') {
             steps {
-                sh "pwd"
-                sh "ls -lrt"
-                dir("android/fastlane") {
-                    sh "pwd"
-                    sh "ls -lrt"
-                }
                 dir("android") {
-                    sh "bundle exec fastlane build_development_release_apk"
+                    // Firebase App Distribution
+                    sh "bundle exec fastlane distribute_production_release_to_dev"
+                    sh "bundle exec fastlane distribute_production_release_to_uat"
+                    sh "bundle exec fastlane distribute_production_release_to_prod"
+
+                    // Microsoft AppCenter (MAC)
+                    sh "bundle exec fastlane deploy_to_app_center_development"
+                    sh "bundle exec fastlane deploy_to_app_center_uat"
+                    sh "bundle exec fastlane deploy_to_app_center_production"
                 }
             }
         }

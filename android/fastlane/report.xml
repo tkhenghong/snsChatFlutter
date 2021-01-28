@@ -5,47 +5,52 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.00045">
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000659">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="1: Switch to android build_production_release_apk lane" time="0.000262">
+      <testcase classname="fastlane.lanes" name="1: Switch to android build_development_release_apk lane" time="0.000391">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="2: Switch to android build_project lane" time="0.000231">
+      <testcase classname="fastlane.lanes" name="2: Switch to android build_project lane" time="0.000336">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="3: flutter clean" time="8.51015">
+      <testcase classname="fastlane.lanes" name="3: flutter clean" time="11.539603">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="4: flutter packages get" time="3.464459">
+      <testcase classname="fastlane.lanes" name="4: flutter packages get" time="5.460043">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="5: flutter pub run flutter_launcher_icons:main -f flutter_launcher_icons-production.yaml" time="10.079332">
+      <testcase classname="fastlane.lanes" name="5: flutter pub run flutter_launcher_icons:main -f flutter_launcher_icons-production.yaml" time="13.498719">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="6: Switch to android build_app_badge_icon_for_production lane" time="0.000338">
+      <testcase classname="fastlane.lanes" name="6: Switch to android build_app_badge_icon_for_development lane" time="0.000384">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="7: flutter build apk --target-platform android-arm,android-arm64,android-x64 --split-per-abi --flavor production  --dart-define=app.flavor=production --release" time="145.65797">
+      <testcase classname="fastlane.lanes" name="7: add_badge" time="5.112796">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="8: appcenter_upload" time="33.796764">
+      <testcase classname="fastlane.lanes" name="8: flutter build apk --target-platform android-arm,android-arm64,android-x64 --split-per-abi --flavor development --dart-define=app.flavor=development --release" time="191.907418">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="9: firebase_app_distribution" time="15.83633">
         
       </testcase>
     
