@@ -3,9 +3,9 @@ def xcarchive = "${appname}.xcarchive"
 
 pipeline {
     agent { label 'macos' } // Change this to whatever your flutter jenkins nodes are labeled. ('master', 'macos', 'windows')
-    environment {
+    // environment {
         // Nothing.
-    }
+    // }
     stages {
         stage('Place Secrets Files') {
             steps {
