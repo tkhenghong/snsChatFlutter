@@ -18,7 +18,7 @@ android/gradlew
 android/gradlew.bat
 android/local.properties
 android/fastlane/.env.default
-android/fastlane/service_account/pocketchat-b3e0f-5339c659d2b2.json
+android/fastlane/service_account/
 
 build/
 ios/Flutter/Generated.xcconfig
