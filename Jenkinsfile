@@ -65,6 +65,8 @@ pipeline {
         stage('Build and Distribute Flutter Android APK') {
             steps {
                 dir("android") {
+                    sh "pwd"
+                    sh "ls -lrt"
                     // Firebase App Distribution
                     sh "bundle exec fastlane distribute_production_release_to_dev"
                     sh "bundle exec fastlane distribute_production_release_to_uat"
