@@ -22,7 +22,7 @@ pipeline {
                 file(credentialsId: 'PocketChat_Android_Development_Testers_File', variable: 'PocketChat_Android_Development_Testers_File'),
                 file(credentialsId: 'PocketChat_Android_UAT_Testers_File', variable: 'PocketChat_Android_UAT_Testers_File'),
                 file(credentialsId: 'PocketChat_Android_Production_Testers_File', variable: 'PocketChat_Android_Production_Testers_File'),
-                file(credentialsId: 'PocketChat-Google-Play-Console-GCP-Service-Account-JSON-File', variable: 'PocketChat-Google-Play-Console-GCP-Service-Account-JSON-File')
+                file(credentialsId: 'PocketChat_Google_Play_Console_GCP_Service_Account_JSON_File', variable: 'PocketChat_Google_Play_Console_GCP_Service_Account_JSON_File')
                 ]) {
                     // Environment Secret Variables
                     sh "cp \$PocketChat_Android_Secret_Environment_File android/fastlane/.env.default"
@@ -38,7 +38,7 @@ pipeline {
                     sh "cp \$PocketChat_Android_Production_Testers_File android/fastlane/testers/testers_production.txt"
 
                     // Google Service Account Credential File
-                    sh "cp \$PocketChat-Google-Play-Console-GCP-Service-Account-JSON-File android/fastlane/service_account/pocketchat-b3e0f-5339c659d2b2.json"
+                    sh "cp \$PocketChat_Google_Play_Console_GCP_Service_Account_JSON_File android/fastlane/service_account/pocketchat-b3e0f-5339c659d2b2.json"
                 }
             }
         }
