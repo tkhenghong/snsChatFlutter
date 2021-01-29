@@ -51,9 +51,9 @@ pipeline {
                     sh "cp \$PocketChat_Google_Play_Console_GCP_Service_Account_JSON_File android/fastlane/service_account/pocketchat-b3e0f-5339c659d2b2.json"
 
                     // Android Keystore
-                    sh "cp \$PocketChat_Android_Keystore_Development android/keystores/development/pocketchat_development.keystore"
-                    sh "cp \$PocketChat_Android_Keystore_UAT android/keystores/uat/pocketchat_uat.keystore"
-                    sh "cp \$PocketChat_Android_Keystore_Production android/keystores/production/pocketchat_production.keystore"
+                    sh "cp \$PocketChat_Android_Keystore_Development android/app/keystores/development/pocketchat_development.keystore"
+                    sh "cp \$PocketChat_Android_Keystore_UAT android/app/keystores/uat/pocketchat_uat.keystore"
+                    sh "cp \$PocketChat_Android_Keystore_Production android/app/keystores/production/pocketchat_production.keystore"
 
                     // Android Keystore Properties Files
                     sh "cp \$PocketChat_Android_Keystore_Development_Properties android/key.properties"
