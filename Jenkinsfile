@@ -57,8 +57,8 @@ pipeline {
 
                     // Android Keystore Properties Files
                     sh "cp \$PocketChat_Android_Keystore_Development_Properties android/key.properties"
-                    sh "cp \#PocketChat_Android_Keystore_UAT_Properties android/key.profile.properties"
-                    sh "cp \PocketChat_Android_Keystore_Production_Properties android/key.production.properties"
+                    sh "cp \$PocketChat_Android_Keystore_UAT_Properties android/key.profile.properties"
+                    sh "cp \$PocketChat_Android_Keystore_Production_Properties android/key.production.properties"
                 }
             }
         }
