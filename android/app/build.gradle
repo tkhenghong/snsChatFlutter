@@ -77,7 +77,6 @@ android {
         production {
             dimension "default"
             applicationIdSuffix ""
-            manifestPlaceholders = [appName: "PocketChat"]
         }
         development {
             dimension "default"
@@ -99,12 +98,12 @@ android {
     signingConfigs {
         // Sign with the provided sign key in debug mode
         // TODO: If you need custom signing key for debug, uncomment the code below.
-        // debug {
-        //     keyAlias keystoreProperties['keyAlias']
-        //     keyPassword keystoreProperties['keyPassword']
-        //     storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-        //     storePassword keystoreProperties['storePassword']
-        // }
+         debug {
+             keyAlias keystoreProperties['keyAlias']
+             keyPassword keystoreProperties['keyPassword']
+             storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+             storePassword keystoreProperties['storePassword']
+         }
 
         // Sign with the provided sign key in profile mode
         profile {
@@ -133,15 +132,13 @@ android {
         profile {
             // flutter run --profile
             // TODO: Uncomment the code below if you have signing key located in the correctly in the directory.
-            // signingConfig signingConfigs.profile
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.profile
         }
 
         release {
             // flutter run --release
             // TODO: Uncomment the code below if you have signing key located in the correctly in the directory.
-//             signingConfig signingConfigs.release
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
     }
 }
