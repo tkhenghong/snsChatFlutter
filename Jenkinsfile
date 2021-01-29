@@ -10,17 +10,18 @@ pipeline {
         stage('Place Secrets Files') {
             steps {
                 // Environment Secret Variables
-                withCredentials([file(credentialsId: 'PocketChat_Android_Secret_Environment_File', variable: 'PocketChat_Android_Secret_Environment_File'),
+                withCredentials([
+                file(credentialsId: 'PocketChat_Android_Secret_Environment_File', variable: 'PocketChat_Android_Secret_Environment_File'),
 
                 // Release Notes
-                file(credentialsId: 'PocketChat_Android_Development_Release_Notes_File', variable: 'PocketChat_Android_Development_Release_Notes_File')
-                file(credentialsId: 'PocketChat_Android_UAT_Release_Notes_File', variable: 'PocketChat_Android_UAT_Release_Notes_File')
-                file(credentialsId: 'PocketChat_Android_Production_Release_Notes_File', variable: 'PocketChat_Android_Production_Release_Notes_File')
+                file(credentialsId: 'PocketChat_Android_Development_Release_Notes_File', variable: 'PocketChat_Android_Development_Release_Notes_File'),
+                file(credentialsId: 'PocketChat_Android_UAT_Release_Notes_File', variable: 'PocketChat_Android_UAT_Release_Notes_File'),
+                file(credentialsId: 'PocketChat_Android_Production_Release_Notes_File', variable: 'PocketChat_Android_Production_Release_Notes_File'),
 
                 // Testers
-                file(credentialsId: 'PocketChat_Android_Development_Testers_File', variable: 'PocketChat_Android_Development_Testers_File')
-                file(credentialsId: 'PocketChat_Android_UAT_Testers_File', variable: 'PocketChat_Android_UAT_Testers_File')
-                file(credentialsId: 'PocketChat_Android_Production_Testers_File', variable: 'PocketChat_Android_Production_Testers_File')
+                file(credentialsId: 'PocketChat_Android_Development_Testers_File', variable: 'PocketChat_Android_Development_Testers_File'),
+                file(credentialsId: 'PocketChat_Android_UAT_Testers_File', variable: 'PocketChat_Android_UAT_Testers_File'),
+                file(credentialsId: 'PocketChat_Android_Production_Testers_File', variable: 'PocketChat_Android_Production_Testers_File'),
                 file(credentialsId: 'PocketChat-Google-Play-Console-GCP-Service-Account-JSON-File', variable: 'PocketChat-Google-Play-Console-GCP-Service-Account-JSON-File')
                 ]) {
                     // Environment Secret Variables
