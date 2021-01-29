@@ -67,6 +67,9 @@ pipeline {
                 dir("android") {
                     sh "pwd"
                     sh "ls -lrt"
+                    sh "cat key.properties"
+                    sh "cat key.profile.properties"
+                    sh "cat key.production.properties"
                     // Firebase App Distribution
                     sh "bundle exec fastlane distribute_production_release_to_dev"
                     sh "bundle exec fastlane distribute_production_release_to_uat"
