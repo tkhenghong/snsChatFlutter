@@ -55,9 +55,8 @@ pipeline {
         }
 
         // Android Keystore Properties Files
-        stage('Configure KeyStore Properties') {
-            // Android Keystore Properties Files
-            // In release mode, sign with different keystores when in different branch.
+        stage('Configure KeyStore Properties in develop branch') {
+            // In release mode, sign with different keystore when in different branch.
             when { branch 'develop'}
             steps {
                 withCredentials([file(credentialsId: 'PocketChat_Android_Keystore_Development_Properties', variable: 'PocketChat_Android_Keystore_Development_Properties')]) {
@@ -65,7 +64,10 @@ pipeline {
                     sh "cp \$PocketChat_Android_Keystore_Development_Properties android/key.production.properties"
                 }
             }
+        }
 
+        stage('Configure KeyStore Properties in UAT branch') {
+            // In release mode, sign with different keystore when in different branch.
             when { branch 'uat'}
             steps {
                 withCredentials([file(credentialsId: 'PocketChat_Android_Keystore_UAT_Properties', variable: 'PocketChat_Android_Keystore_UAT_Properties')]) {
@@ -73,7 +75,9 @@ pipeline {
                     sh "cp \$PocketChat_Android_Keystore_UAT_Properties android/key.production.properties"
                 }
             }
+        }
 
+        stage('Configure KeyStore Properties in Production branch') {
             when { branch 'production'}
             steps {
                 withCredentials([file(credentialsId: 'PocketChat_Android_Keystore_UAT_Properties', variable: 'PocketChat_Android_Keystore_UAT_Properties')]) {
@@ -83,7 +87,7 @@ pipeline {
             }
         }
 
-        stage('Build and Distribute Flutter Android APK') {
+        stage('Build and Distribute Flutter Android APK to Development Environment') {
             when { branch 'develop'}
             steps {
                 dir("android") {
@@ -96,7 +100,9 @@ pipeline {
                     sh "bundle exec fastlane deploy_to_app_center_development"
                 }
             }
+        }
 
+        stage('Build and Distribute Flutter Android APK to UAT Environment') {
             when { branch 'uat'}
             steps {
                 dir("android") {
@@ -110,6 +116,9 @@ pipeline {
                 }
             }
 
+        }
+
+        stage('Build and Distribute Flutter Android APK to Production Environment') {
             when { branch 'production'}
             steps {
                 dir("android") {
