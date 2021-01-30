@@ -56,31 +56,31 @@ pipeline {
 
         // Android Keystore Properties Files
         stage('Configure KeyStore Properties') {
-                    // Android Keystore Properties Files
-                    // In release mode, sign with different keystores when in different branch.
-                    when { branch 'develop'}
-                    steps {
-                        withCredentials([file(credentialsId: 'PocketChat_Android_Keystore_Development_Properties', variable: 'PocketChat_Android_Keystore_Development_Properties')]) {
-                            echo 'Using Development Keystore to sign Android app.'
-                            sh "cp \$PocketChat_Android_Keystore_Development_Properties android/key.production.properties"
-                        }
-                    }
+            // Android Keystore Properties Files
+            // In release mode, sign with different keystores when in different branch.
+            when { branch 'develop'}
+            steps {
+                withCredentials([file(credentialsId: 'PocketChat_Android_Keystore_Development_Properties', variable: 'PocketChat_Android_Keystore_Development_Properties')]) {
+                    echo 'Using Development Keystore to sign Android app.'
+                    sh "cp \$PocketChat_Android_Keystore_Development_Properties android/key.production.properties"
+                }
+            }
 
-                    when { branch 'uat'}
-                    steps {
-                        withCredentials([file(credentialsId: 'PocketChat_Android_Keystore_UAT_Properties', variable: 'PocketChat_Android_Keystore_UAT_Properties')]) {
-                            echo 'Using UAT Keystore to sign Android app.'
-                            sh "cp \$PocketChat_Android_Keystore_UAT_Properties android/key.production.properties"
-                        }
-                    }
+            when { branch 'uat'}
+            steps {
+                withCredentials([file(credentialsId: 'PocketChat_Android_Keystore_UAT_Properties', variable: 'PocketChat_Android_Keystore_UAT_Properties')]) {
+                    echo 'Using UAT Keystore to sign Android app.'
+                    sh "cp \$PocketChat_Android_Keystore_UAT_Properties android/key.production.properties"
+                }
+            }
 
-                    when { branch 'production'}
-                    steps {
-                        withCredentials([file(credentialsId: 'PocketChat_Android_Keystore_UAT_Properties', variable: 'PocketChat_Android_Keystore_UAT_Properties')]) {
-                            echo 'Using Production Keystore to sign Android app.'
-                            sh "cp \$PocketChat_Android_Keystore_Production_Properties android/key.production.properties"
-                        }
-                    }
+            when { branch 'production'}
+            steps {
+                withCredentials([file(credentialsId: 'PocketChat_Android_Keystore_UAT_Properties', variable: 'PocketChat_Android_Keystore_UAT_Properties')]) {
+                    echo 'Using Production Keystore to sign Android app.'
+                    sh "cp \$PocketChat_Android_Keystore_Production_Properties android/key.production.properties"
+                }
+            }
         }
 
         stage('Build and Distribute Flutter Android APK') {
@@ -121,6 +121,24 @@ pipeline {
                     echo 'Deploy the app to Production in Microsoft AppCenter.'
                     sh "bundle exec fastlane deploy_to_app_center_production"
                 }
+            }
+        }
+    }
+}
+pipeline {
+    agent any
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                branch 'production'
+            }
+            steps {
+                echo 'Deploying'
             }
         }
     }
