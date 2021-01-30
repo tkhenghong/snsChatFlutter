@@ -58,7 +58,7 @@ class EnvironmentConfig {
         environmentGlobalVariables.REST_URL_HOST_IP = '192.168.68.106';
         environmentGlobalVariables.REST_URL_HOST_PORT = '8888';
         environmentGlobalVariables.ENVIRONMENT = 'DEVELOPMENT';
-        environmentGlobalVariables.sslCertificateLocation = 'lib/keystore/keystore.p12';
+        environmentGlobalVariables.sslCertificateLocation = 'lib/certificates/keystore.p12';
 
         environmentGlobalVariables.recaptchaDisabledKeyword = 'DISABLED';
         environmentGlobalVariables.recaptchaSecretKey = '6LcJCksUAAAAAC8lDh-Y9C0SfHQM5pA0TmkACCJy'; // Recaptcha Key from development server.
@@ -69,7 +69,7 @@ class EnvironmentConfig {
         environmentGlobalVariables.REST_URL_HOST_IP = '192.168.68.106';
         environmentGlobalVariables.REST_URL_HOST_PORT = '8888';
         environmentGlobalVariables.ENVIRONMENT = 'DEVELOPMENT';
-        environmentGlobalVariables.sslCertificateLocation = 'lib/keystore/keystore.p12';
+        environmentGlobalVariables.sslCertificateLocation = 'lib/certificates/keystore.p12';
 
         environmentGlobalVariables.recaptchaDisabledKeyword = 'DISABLED';
         environmentGlobalVariables.recaptchaSecretKey = '6LcJCksUAAAAAC8lDh-Y9C0SfHQM5pA0TmkACCJy'; // Recaptcha Key from development server.
@@ -80,7 +80,7 @@ class EnvironmentConfig {
         environmentGlobalVariables.REST_URL_HOST_IP = '192.168.68.106';
         environmentGlobalVariables.REST_URL_HOST_PORT = '8888';
         environmentGlobalVariables.ENVIRONMENT = 'PRODUCTION';
-        environmentGlobalVariables.sslCertificateLocation = 'lib/keystore/keystore.p12';
+        environmentGlobalVariables.sslCertificateLocation = 'lib/certificates/keystore.p12';
 
         environmentGlobalVariables.recaptchaDisabledKeyword = 'DISABLED';
         environmentGlobalVariables.recaptchaSecretKey = '6LcJCksUAAAAAC8lDh-Y9C0SfHQM5pA0TmkACCJy'; // Recaptcha Key from development server.

@@ -126,18 +126,19 @@ android {
     buildTypes {
         debug {
             // Signing with the debug keys, so `flutter run` works.
+            // TODO: Uncomment/comment the code below if you have/don't have signing key located in the correctly in the directory.
             signingConfig signingConfigs.debug
         }
 
         profile {
             // flutter run --profile
-            // TODO: Uncomment the code below if you have signing key located in the correctly in the directory.
+            // TODO: Uncomment/comment the code below if you have/don't have signing key located in the correctly in the directory.
             signingConfig signingConfigs.profile
         }
 
         release {
             // flutter run --release
-            // TODO: Uncomment the code below if you have signing key located in the correctly in the directory.
+            // TODO: Uncomment/comment the code below if you have/don't have signing key located in the correctly in the directory.
             signingConfig signingConfigs.release
         }
     }

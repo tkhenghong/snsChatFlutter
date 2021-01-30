@@ -198,7 +198,7 @@ flutter:
   assets:
     - lib/ui/images/
     - lib/ui/icons/
-    - lib/keystore/
+    - lib/certificates/
 
   #- family: Roboto & Raleway
   fonts:
