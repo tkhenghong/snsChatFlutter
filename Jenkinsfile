@@ -2,7 +2,7 @@ def appname = "Runner" // DON'T CHANGE THIS. This refers to the flutter 'Runner'
 def xcarchive = "${appname}.xcarchive"
 
 pipeline {
-    agent { label 'macos' } // Change this to whatever your flutter jenkins nodes are labeled. ('master', 'macos', 'windows')
+    agent { label 'windows' } // Change this to whatever your flutter jenkins nodes are labeled. ('master', 'macos', 'windows')
     // environment {
         // Nothing.
     // }
