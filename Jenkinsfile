@@ -56,9 +56,24 @@ pipeline {
                     sh "cp \$PocketChat_Android_Keystore_Production android/keystores/production/pocketchat_production.keystore"
 
                     // Android Keystore Properties Files
-                    sh "cp \$PocketChat_Android_Keystore_Development_Properties android/key.properties"
-                    sh "cp \$PocketChat_Android_Keystore_UAT_Properties android/key.profile.properties"
-                    sh "cp \$PocketChat_Android_Keystore_Production_Properties android/key.production.properties"
+                    // In release mode, sign with different keystores when in different branch.
+                    when { branch 'develop'}
+                    steps {
+                        echo 'Using Development Keystore to sign Android app.'
+                        sh "cp \$PocketChat_Android_Keystore_Development_Properties android/key.production.properties"
+                    }
+
+                    when { branch 'uat'}
+                    steps {
+                        echo 'Using UAT Keystore to sign Android app.'
+                        sh "cp \$PocketChat_Android_Keystore_UAT_Properties android/key.production.properties"
+                    }
+
+                    when { branch 'production'}
+                    steps {
+                        echo 'Using Production Keystore to sign Android app.'
+                        sh "cp \$PocketChat_Android_Keystore_Production_Properties android/key.production.properties"
+                    }
                 }
             }
         }
@@ -71,14 +86,42 @@ pipeline {
                     sh "cat key.profile.properties"
                     sh "cat key.production.properties"
                     // Firebase App Distribution
-                    sh "bundle exec fastlane distribute_production_release_to_dev"
-                    sh "bundle exec fastlane distribute_production_release_to_uat"
-                    sh "bundle exec fastlane distribute_production_release_to_prod"
+                    when { branch 'develop'}
+                    steps {
+                        echo 'Deploy the app to Development in Firebase App Distribution.'
+                        sh "bundle exec fastlane distribute_production_release_to_dev"
+                    }
+
+                    when { branch 'uat'}
+                    steps {
+                        echo 'Deploy the app to UAT in Firebase App Distribution.'
+                        sh "bundle exec fastlane distribute_production_release_to_uat"
+                    }
+
+                    when { branch 'production'}
+                    steps {
+                        echo 'Deploy the app to Production in Firebase App Distribution.'
+                        sh "bundle exec fastlane distribute_production_release_to_prod"
+                    }
 
                     // Microsoft AppCenter (MAC)
-                    sh "bundle exec fastlane deploy_to_app_center_development"
-                    sh "bundle exec fastlane deploy_to_app_center_uat"
-                    sh "bundle exec fastlane deploy_to_app_center_production"
+                    when { branch 'develop'}
+                    steps {
+                        echo 'Deploy the app to Development in Microsoft AppCenter.'
+                        sh "bundle exec fastlane deploy_to_app_center_development"
+                    }
+
+                    when { branch 'uat'}
+                    steps {
+                        echo 'Deploy the app to UAT in Microsoft AppCenter.'
+                        sh "bundle exec fastlane deploy_to_app_center_uat"
+                    }
+
+                    when { branch 'production'}
+                    steps {
+                        echo 'Deploy the app to Production in Microsoft AppCenter.'
+                        sh "bundle exec fastlane deploy_to_app_center_production"
+                    }
                 }
             }
         }
