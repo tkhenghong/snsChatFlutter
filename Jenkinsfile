@@ -61,7 +61,7 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'PocketChat_Android_Keystore_Development_Properties', variable: 'PocketChat_Android_Keystore_Development_Properties')]) {
                     echo 'Using Development Keystore to sign Android app.'
-                    sh "cp \$PocketChat_Android_Keystore_Development_Properties android/key.production.properties"
+                    sh "cp \$PocketChat_Android_Keystore_Development_Properties android/key.release.properties"
                 }
             }
         }
@@ -72,7 +72,7 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'PocketChat_Android_Keystore_UAT_Properties', variable: 'PocketChat_Android_Keystore_UAT_Properties')]) {
                     echo 'Using UAT Keystore to sign Android app.'
-                    sh "cp \$PocketChat_Android_Keystore_UAT_Properties android/key.production.properties"
+                    sh "cp \$PocketChat_Android_Keystore_UAT_Properties android/key.release.properties"
                 }
             }
         }
@@ -82,7 +82,7 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'PocketChat_Android_Keystore_UAT_Properties', variable: 'PocketChat_Android_Keystore_UAT_Properties')]) {
                     echo 'Using Production Keystore to sign Android app.'
-                    sh "cp \$PocketChat_Android_Keystore_Production_Properties android/key.production.properties"
+                    sh "cp \$PocketChat_Android_Keystore_Production_Properties android/key.release.properties"
                 }
             }
         }
