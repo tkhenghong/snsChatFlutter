@@ -49,7 +49,6 @@ pipeline {
                     sh "cp \$PocketChat_Android_Keystore_Development android/keystores/development/pocketchat_development.keystore"
                     sh "cp \$PocketChat_Android_Keystore_UAT android/keystores/uat/pocketchat_uat.keystore"
                     sh "cp \$PocketChat_Android_Keystore_Production android/keystores/production/pocketchat_production.keystore"
-
                 }
             }
         }
