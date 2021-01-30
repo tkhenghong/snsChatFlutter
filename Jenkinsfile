@@ -87,6 +87,14 @@ pipeline {
             }
         }
 
+        stage('Install Ruby Dependencies with Bundler') {
+            steps {
+                dir("android") {
+                    sh "bundle install"
+                }
+            }
+        }
+
         stage('Build and Distribute Flutter Android APK to Development Environment') {
             when { branch 'develop'}
             steps {
