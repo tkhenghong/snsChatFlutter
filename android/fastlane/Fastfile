@@ -19,7 +19,7 @@ default_platform(:android)
 platform :android do
 
 ################################################## VARIABLES ##################################################
-version_number = '1.0.0'
+version_number = ENV["APP_VERSION"]
 
 # APK Locations
 development_apk_location = ENV["DEVELOPMENT_APK_LOCATION"]
