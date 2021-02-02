@@ -9,6 +9,7 @@ part of 'environment_global_variables.dart';
 EnvironmentGlobalVariables _$EnvironmentGlobalVariablesFromJson(
     Map<String, dynamic> json) {
   return EnvironmentGlobalVariables(
+    locales: (json['locales'] as List)?.map((e) => e as String)?.toList(),
     REST_URL_HOST_IP: json['REST_URL_HOST_IP'] as String,
     REST_URL_HOST_PORT: json['REST_URL_HOST_PORT'] as String,
     REST_URL: json['REST_URL'] as String,
@@ -60,6 +61,7 @@ EnvironmentGlobalVariables _$EnvironmentGlobalVariablesFromJson(
 Map<String, dynamic> _$EnvironmentGlobalVariablesToJson(
         EnvironmentGlobalVariables instance) =>
     <String, dynamic>{
+      'locales': instance.locales,
       'REST_URL_HOST_IP': instance.REST_URL_HOST_IP,
       'REST_URL_HOST_PORT': instance.REST_URL_HOST_PORT,
       'REST_URL': instance.REST_URL,
@@ -109,6 +111,7 @@ Map<String, dynamic> _$EnvironmentGlobalVariablesToJson(
 
 abstract class _$EnvironmentGlobalVariablesLombok {
   /// Field
+  List<String> locales;
   String REST_URL_HOST_IP;
   String REST_URL_HOST_PORT;
   String REST_URL;
@@ -151,6 +154,10 @@ abstract class _$EnvironmentGlobalVariablesLombok {
   String versionNumber;
 
   /// Setter
+
+  void setLocales(List<String> locales) {
+    this.locales = locales;
+  }
 
   void setREST_URL_HOST_IP(String REST_URL_HOST_IP) {
     this.REST_URL_HOST_IP = REST_URL_HOST_IP;
@@ -314,6 +321,10 @@ abstract class _$EnvironmentGlobalVariablesLombok {
   }
 
   /// Getter
+  List<String> getLocales() {
+    return locales;
+  }
+
   String getREST_URL_HOST_IP() {
     return REST_URL_HOST_IP;
   }

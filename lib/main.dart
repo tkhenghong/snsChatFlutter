@@ -6,14 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snschat_flutter/general/functions/index.dart';
+import 'package:snschat_flutter/i18n/app_locale/app_locale.dart';
 import 'package:snschat_flutter/objects/models/environment_global_variables/environment_global_variables.dart';
 import 'package:snschat_flutter/rest/index.dart';
 import 'package:snschat_flutter/service/index.dart';
 import 'package:snschat_flutter/state/bloc/index.dart';
+import 'package:snschat_flutter/state/provider/index.dart';
 import 'package:snschat_flutter/theme/index.dart';
 import 'package:snschat_flutter/ui/pages/index.dart';
 
@@ -36,6 +40,9 @@ void main() async {
   generateRoutes();
   generateGetPageList();
   WidgetsFlutterBinding.ensureInitialized();
+
+  initProviders();
+
   ByteData byteData = await rootBundle.load(env.sslCertificateLocation);
   HttpOverrides.global = new CustomHttpOverrides(byteData);
   _enablePlatformOverrideForDesktop();
@@ -63,6 +70,9 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
+  EnvironmentGlobalVariables environmentGlobalVariables = Get.find();
+  LanguageProvider languageProvider = Get.find();
+
   @override
   void initState() {
     super.initState();
@@ -73,12 +83,33 @@ class MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'PocketChat',
-      theme: themeData,
-      home: TabsPage(),
-      routes: routeList,
-    );
+    return appLanguageProvider();
+  }
+
+  appLanguageProvider() {
+    print('environmentGlobalVariables.locales: ${environmentGlobalVariables.locales}');
+    List<Locale> locales = environmentGlobalVariables.locales.map((e) => Locale(e)).toList();
+
+    return ChangeNotifierProvider<LanguageProvider>(
+        create: (context) => languageProvider,
+        child: Consumer<LanguageProvider>(
+          builder: (context, language, child) {
+            return MaterialApp(
+              title: 'PocketChat',
+              locale: language.appLocale,
+              supportedLocales: locales,
+              localizationsDelegates: [
+                AppLocale.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+              ],
+              theme: themeData,
+              home: TabsPage(),
+              routes: routeList,
+            );
+          },
+        ));
   }
 
   /// Set display mode of the app to allow maximum fps in the app.

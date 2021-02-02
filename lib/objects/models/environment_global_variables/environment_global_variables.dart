@@ -7,6 +7,10 @@ part 'environment_global_variables.g.dart';
 @data
 @JsonSerializable()
 class EnvironmentGlobalVariables {
+  // Follows ISO 3166-1 alpha-2.
+  @JsonKey(name: 'locales')
+  List<String> locales;
+
   @JsonKey(name: 'REST_URL_HOST_IP')
   String REST_URL_HOST_IP;
 
@@ -132,6 +136,7 @@ class EnvironmentGlobalVariables {
   String versionNumber;
 
   EnvironmentGlobalVariables({
+    this.locales,
     this.REST_URL_HOST_IP,
     this.REST_URL_HOST_PORT,
     this.REST_URL,

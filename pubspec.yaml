@@ -23,7 +23,7 @@ dependencies:
   flutter_secure_storage: ^3.3.5
 
   # State
-  #  provider: ^4.0.5
+  provider: ^4.3.3
   bloc: ^6.1.0
   flutter_bloc: ^6.1.1
 
@@ -174,6 +174,8 @@ dependencies:
 
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -199,6 +201,7 @@ flutter:
     - lib/ui/images/
     - lib/ui/icons/
     - lib/certificates/
+    - lib/i18n/languages/
 
   #- family: Roboto & Raleway
   fonts:
