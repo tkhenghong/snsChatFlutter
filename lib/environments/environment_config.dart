@@ -5,6 +5,7 @@ class EnvironmentConfig {
   static const ENVIRONMENT = String.fromEnvironment('app.flavor', defaultValue: 'LOCAL_COMPUTER');
 
   final EnvironmentGlobalVariables environmentGlobalVariables = EnvironmentGlobalVariables(
+    locales: ['en', 'ar', 'cn'],
     IP_GEO_LOCATION_HOST_ADDRESS: 'api.ipgeolocation.io',
     DEFAULT_COUNTRY_CODE: 'US',
     // Get Location of the device using IP address. https://ipgeolocation.io/
