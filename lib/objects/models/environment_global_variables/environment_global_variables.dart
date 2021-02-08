@@ -38,6 +38,9 @@ class EnvironmentGlobalVariables {
   @JsonKey(name: 'DEFAULT_COUNTRY_CODE')
   String DEFAULT_COUNTRY_CODE;
 
+  @JsonKey(name: 'DEFAULT_COUNTRY_DIAL_CODE')
+  String DEFAULT_COUNTRY_DIAL_CODE;
+
   @JsonKey(name: 'IP_GEOLOCATION_API_KEY')
   String IP_GEOLOCATION_API_KEY;
 
@@ -146,6 +149,7 @@ class EnvironmentGlobalVariables {
     this.ENVIRONMENT,
     this.sslCertificateLocation,
     this.DEFAULT_COUNTRY_CODE,
+    this.DEFAULT_COUNTRY_DIAL_CODE,
     this.IP_GEOLOCATION_API_KEY,
     this.imagePickerQuality,
     this.imageThumbnailWidthSize,

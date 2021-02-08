@@ -21,6 +21,7 @@ EnvironmentGlobalVariables _$EnvironmentGlobalVariablesFromJson(
     ENVIRONMENT: json['ENVIRONMENT'] as String,
     sslCertificateLocation: json['sslCertificateLocation'] as String,
     DEFAULT_COUNTRY_CODE: json['DEFAULT_COUNTRY_CODE'] as String,
+    DEFAULT_COUNTRY_DIAL_CODE: json['DEFAULT_COUNTRY_DIAL_CODE'] as String,
     IP_GEOLOCATION_API_KEY: json['IP_GEOLOCATION_API_KEY'] as String,
     imagePickerQuality: json['imagePickerQuality'] as int,
     imageThumbnailWidthSize: json['imageThumbnailWidthSize'] as int,
@@ -71,6 +72,7 @@ Map<String, dynamic> _$EnvironmentGlobalVariablesToJson(
       'ENVIRONMENT': instance.ENVIRONMENT,
       'sslCertificateLocation': instance.sslCertificateLocation,
       'DEFAULT_COUNTRY_CODE': instance.DEFAULT_COUNTRY_CODE,
+      'DEFAULT_COUNTRY_DIAL_CODE': instance.DEFAULT_COUNTRY_DIAL_CODE,
       'IP_GEOLOCATION_API_KEY': instance.IP_GEOLOCATION_API_KEY,
       'imagePickerQuality': instance.imagePickerQuality,
       'imageThumbnailWidthSize': instance.imageThumbnailWidthSize,
@@ -121,6 +123,7 @@ abstract class _$EnvironmentGlobalVariablesLombok {
   String ENVIRONMENT;
   String sslCertificateLocation;
   String DEFAULT_COUNTRY_CODE;
+  String DEFAULT_COUNTRY_DIAL_CODE;
   String IP_GEOLOCATION_API_KEY;
   int imagePickerQuality;
   int imageThumbnailWidthSize;
@@ -193,6 +196,10 @@ abstract class _$EnvironmentGlobalVariablesLombok {
 
   void setDEFAULT_COUNTRY_CODE(String DEFAULT_COUNTRY_CODE) {
     this.DEFAULT_COUNTRY_CODE = DEFAULT_COUNTRY_CODE;
+  }
+
+  void setDEFAULT_COUNTRY_DIAL_CODE(String DEFAULT_COUNTRY_DIAL_CODE) {
+    this.DEFAULT_COUNTRY_DIAL_CODE = DEFAULT_COUNTRY_DIAL_CODE;
   }
 
   void setIP_GEOLOCATION_API_KEY(String IP_GEOLOCATION_API_KEY) {
@@ -359,6 +366,10 @@ abstract class _$EnvironmentGlobalVariablesLombok {
 
   String getDEFAULT_COUNTRY_CODE() {
     return DEFAULT_COUNTRY_CODE;
+  }
+
+  String getDEFAULT_COUNTRY_DIAL_CODE() {
+    return DEFAULT_COUNTRY_DIAL_CODE;
   }
 
   String getIP_GEOLOCATION_API_KEY() {

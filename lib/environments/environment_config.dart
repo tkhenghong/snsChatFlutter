@@ -8,6 +8,7 @@ class EnvironmentConfig {
     locales: ['en', 'ar', 'cn'],
     IP_GEO_LOCATION_HOST_ADDRESS: 'api.ipgeolocation.io',
     DEFAULT_COUNTRY_CODE: 'US',
+    DEFAULT_COUNTRY_DIAL_CODE: '+1',
     // Get Location of the device using IP address. https://ipgeolocation.io/
     IP_GEOLOCATION_API_KEY: '219609b60fdd4898a14c3f23a097aeea',
     imagePickerQuality: 50,
