@@ -46,6 +46,7 @@ dependencies:
   # Format date/time
   time_formatter: ^1.0.0+5
   date_format: ^1.0.9
+  jiffy: ^3.0.1
 
   # Internationalization and Localization (i18n)
   intl: ^0.16.1
@@ -171,6 +172,10 @@ dependencies:
 
   # Loading skeleton for UX experience
   skeleton_loader: ^1.0.2+2
+  # shimmer: ^1.1.2
+
+  # Animated page indicators when swiping through PageViews
+  smooth_page_indicator: ^0.2.0
 
   flutter:
     sdk: flutter

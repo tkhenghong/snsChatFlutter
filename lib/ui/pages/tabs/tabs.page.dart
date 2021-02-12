@@ -31,7 +31,7 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
   bool isActionButtonDisabled = false;
 
   int _bottomNavBarIndex = 0;
-  String tabTitle = ''; // Have to put default tab name or compiler will say null error
+  String tabTitle = '';
 
   PageController pageViewController = PageController(initialPage: 0, keepPage: true);
   List<Widget> tabPages;
@@ -60,6 +60,7 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
     _animationController.dispose();
     _animationController2.dispose();
     WidgetsBinding.instance.removeObserver(this);
+    pageViewController.dispose();
     super.dispose();
   }
 
@@ -179,7 +180,6 @@ class TabsPageState extends State<TabsPage> with TickerProviderStateMixin, Autom
     );
   }
 
-  /// The reason of this implementation is due to compiler will give error if
   List<BottomNavigationBarItem> initializeTabs() {
     int i = 0;
     return tabIcons.map((e) {
