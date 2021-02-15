@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="PocketChatProfile" type="FlutterRunConfigurationType" factoryName="Flutter">
-    <option name="additionalArgs" value="--profile" />
+    <option name="additionalArgs" value="--profile --dart-define=app.flavor=integration" />
     <option name="buildFlavor" value="integration" />
     <option name="filePath" value="$PROJECT_DIR$/lib/main.dart" />
     <method v="2" />
