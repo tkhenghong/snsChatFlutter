@@ -1,8 +1,9 @@
+import 'package:snschat_flutter/general/index.dart';
 import 'package:snschat_flutter/objects/models/index.dart';
 
 /// This file is used for global variables, but also setting up different environments.
 class EnvironmentConfig {
-  static const ENVIRONMENT = String.fromEnvironment('app.flavor', defaultValue: 'LOCAL_COMPUTER');
+  static const ENVIRONMENT = String.fromEnvironment('app.flavor', defaultValue: 'development');
 
   final EnvironmentGlobalVariables environmentGlobalVariables = EnvironmentGlobalVariables(
     locales: ['en', 'ar', 'cn'],
