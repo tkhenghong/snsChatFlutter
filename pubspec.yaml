@@ -53,7 +53,6 @@ dependencies:
 
   # Sign In
   google_sign_in: ^4.5.6
-  firebase_auth: ^0.18.3
 
   # Password Text Field
   pin_input_text_field: ^3.1.1
@@ -71,12 +70,6 @@ dependencies:
   image_picker: ^0.6.7+14
   cached_network_image: ^2.3.3
   photo_view: ^0.10.2
-
-  # Firebase Core
-  firebase_core: ^0.5.2
-
-  # Firebase Storage
-  firebase_storage: ^5.0.1
 
   # Firebase Messaging
   firebase_messaging: ^7.0.3

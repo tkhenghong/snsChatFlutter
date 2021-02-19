@@ -50,7 +50,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
   SettingsBloc settingsBloc;
   UserBloc userBloc;
   WebSocketBloc webSocketBloc;
-  GoogleInfoBloc googleInfoBloc;
   PermissionBloc permissionBloc;
   NetworkBloc networkBloc;
 
@@ -86,7 +85,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
     settingsBloc = BlocProvider.of<SettingsBloc>(context);
     userBloc = BlocProvider.of<UserBloc>(context);
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
-    googleInfoBloc = BlocProvider.of<GoogleInfoBloc>(context);
     permissionBloc = BlocProvider.of<PermissionBloc>(context);
     networkBloc = BlocProvider.of<NetworkBloc>(context);
 
@@ -640,7 +638,6 @@ class ChatGroupListState extends State<ChatGroupListPage> {
 
   clearAllData() {
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
-    googleInfoBloc.add(RemoveGoogleInfoEvent(callback: (bool done) {}));
     conversationGroupBloc.add(RemoveConversationGroupsEvent(callback: (bool done) {}));
     chatMessageBloc.add(RemoveAllChatMessagesEvent(callback: (bool done) {}));
     multimediaBloc.add(RemoveAllMultimediaEvent(callback: (bool done) {}));

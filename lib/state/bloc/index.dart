@@ -2,7 +2,6 @@ export 'bloc_observer/simple_bloc_observer.dart';
 export 'authentication/bloc.dart';
 export 'chat_message/bloc.dart';
 export 'conversationGroup/bloc.dart';
-export 'google/bloc.dart';
 export 'ipGeoLocation/bloc.dart';
 export 'multimedia/bloc.dart';
 export 'multimediaProgress/bloc.dart';

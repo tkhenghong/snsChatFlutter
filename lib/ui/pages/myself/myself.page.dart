@@ -31,7 +31,6 @@ class MyselfPageState extends State<MyselfPage> {
   static SettingsBloc settingsBloc;
   static UserBloc userBloc;
   static WebSocketBloc webSocketBloc;
-  static GoogleInfoBloc googleInfoBloc;
 
   User ownUser = User(mobileNo: '', realName: '', displayName: '', countryCode: '');
   UserContact ownUserContact;
@@ -105,7 +104,6 @@ class MyselfPageState extends State<MyselfPage> {
     settingsBloc = BlocProvider.of<SettingsBloc>(context);
     userBloc = BlocProvider.of<UserBloc>(context);
     webSocketBloc = BlocProvider.of<WebSocketBloc>(context);
-    googleInfoBloc = BlocProvider.of<GoogleInfoBloc>(context);
 
     if (firstTime) {
       initialize();
@@ -241,7 +239,6 @@ class MyselfPageState extends State<MyselfPage> {
 
   logOut() {
     ipGeoLocationBloc.add(InitializeIPGeoLocationEvent(callback: (bool done) {}));
-    googleInfoBloc.add(RemoveGoogleInfoEvent(callback: (bool done) {}));
     conversationGroupBloc.add(RemoveConversationGroupsEvent(callback: (bool done) {}));
     messageBloc.add(RemoveAllChatMessagesEvent(callback: (bool done) {}));
     multimediaBloc.add(RemoveAllMultimediaEvent(callback: (bool done) {}));

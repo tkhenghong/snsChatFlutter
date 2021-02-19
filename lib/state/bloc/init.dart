@@ -10,9 +10,6 @@ Widget initializeBlocProviders() {
     BlocProvider<ConversationGroupBloc>(
       create: (context) => ConversationGroupBloc(),
     ),
-    BlocProvider<GoogleInfoBloc>(
-      create: (context) => GoogleInfoBloc(),
-    ),
     BlocProvider<IPGeoLocationBloc>(
       create: (context) => IPGeoLocationBloc(),
     ),
