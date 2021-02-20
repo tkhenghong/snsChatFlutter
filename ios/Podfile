@@ -47,3 +47,5 @@ end
 pod 'Firebase/Analytics'
 
 pod 'Firebase/Messaging'
+
+pod 'GoogleMaps'

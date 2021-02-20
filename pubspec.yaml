@@ -77,6 +77,9 @@ dependencies:
   # Firebase Analytics
   firebase_analytics: ^6.3.0
 
+  # Google Maps
+  google_maps_flutter: ^1.2.0
+
   # Image rotation fix
   # flutter_exif_rotation: ^0.2.7
 

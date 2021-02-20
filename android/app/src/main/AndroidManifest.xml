@@ -23,6 +23,11 @@
         android:name=".Application"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name">
+
+        <!--Google Map API Key-->
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value=""/>
+
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
